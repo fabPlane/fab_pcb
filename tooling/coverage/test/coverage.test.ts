@@ -54,14 +54,36 @@ describe.skipIf(!haveKicad)("coverage against the pinned KiCad checkout (git HEA
     expect(renderJson(r)).toBe(await readFile(join(TOOL_DIR, "commands.json"), "utf8"));
     expect(renderMarkdown(r)).toBe(await readFile(join(REPO_DIR, "docs", "api-coverage.md"), "utf8"));
     const s = summarize(r.commands);
-    // The fork keeps adding commands; the invariants are: every command is either headless or
-    // one of the 16 known GUI-only ones, nothing is partial or unregistered, and the totals agree
-    // with the committed commands.json (checked byte-for-byte above).
+    // The fork keeps adding commands, so pin the shape rather than the count: every command is
+    // either headless or one of the GUI-only ones below, and nothing is partial or unregistered.
+    // The GUI-only set is deliberate — it is editor state a web page owns itself — so a change to
+    // it should be a conscious edit here, not a silently drifting number.
     expect(s.total).toBeGreaterThanOrEqual(115);
     expect(s.ok + s["gui-only"]).toBe(s.total);
-    expect(s["gui-only"]).toBe(16);
     expect(s.partial).toBe(0);
     expect(s.unregistered).toBe(0);
+    expect(
+      r.commands
+        .filter((c) => c.headless === "gui-only")
+        .map((c) => c.command)
+        .sort(),
+    ).toEqual([
+      "AddToSelection",
+      "ClearSelection",
+      "GetActiveLayer",
+      "GetBoardEditorAppearanceSettings",
+      "GetSelection",
+      "GetVisibleLayers",
+      "HighlightNets",
+      "InteractiveMoveItems",
+      "RemoveFromSelection",
+      "RevertDocument",
+      "SaveSelectionToString",
+      "SetActiveLayer",
+      "SetBoardEditorAppearanceSettings",
+      "SetVisibleLayers",
+      "SyncSelection",
+    ]);
     expect(r.commands.find((c) => c.command === "GetSupportedCommands")).toMatchObject({
       group: "common/base",
       requestType: "kiapi.common.commands.GetSupportedCommands",
