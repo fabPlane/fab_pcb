@@ -25,6 +25,7 @@ same WebSocket. Cheap interim: `GetDocumentRevision` (monotonic counter bumped i
 `pushCurrentCommit`) so the UI can poll one small message.
 
 ### G1a · Event follow-ups (found by the bridge relay)
+**Status:** open (batch 4).
 Footprint `UpdateItems` is recorded as remove+add so `DocumentChanged` lists the KIID
 under both `created` and `deleted`; no event for UpdateBoardStackup, embedded files,
 appearance settings, InjectDrcError, title block, page settings, variants, or project-level
@@ -32,6 +33,7 @@ netclass/text-variable changes (needs a `ProjectChanged` event); `JobProgress` h
 publisher yet (pairs with G17).
 
 ### G3 · `RunAction` headless
+**Status:** done for the board (cb3f20808c): `GetActions` (602 board / 436 schematic actions with `headless_capable`), on-demand tool registration, zone fill/unfill and track/graphics cleanup run headless. Schematic allow-list still empty (all eeschema tools are frame-bound).
 **Today:** gated by `checkForHeadless`; the headless `TOOL_MANAGER` in
 `HEADLESS_PCB_CONTEXT` has no tools registered.
 **Fix:** register the non-interactive tools on demand (the `ZONE_FILLER_TOOL`
@@ -74,6 +76,7 @@ registered handler tables in `KICAD_API_SERVER`. Trivial and makes every client
 future-proof.
 
 ### G16 · Large documents
+**Status:** done (c6bd1db405): `GetItems.page`, `since_revision` with a 256-step change log, `GetItemCounts`.
 **Today:** `GetItems` returns everything in one nng message; no paging, no
 "changed since". Large boards may exceed message limits and stall the UI.
 **Fix:** `GetItems.page{offset, limit}` + `GetItems.since_revision` (pairs with G1),
@@ -131,6 +134,7 @@ WebSocket with nng's built-in `ws` transport. Also add a `--token` option so the
 `kicad_token` is known before connecting.
 
 ### G17 · Job ergonomics
+**Status:** done (5c34c5b2ac): `RunJobSettings.async/return_inline`, `GetJobStatus`, worker thread, `JobProgress` events. DRC stays synchronous.
 Jobs block the socket until finished and return only a status. Add
 `RunJob*.async=true → job id`, `GetJobStatus`, progress via G1, and let outputs be
 returned inline (`bytes`) for small files (SVG, netlist, BOM) so the bridge does not

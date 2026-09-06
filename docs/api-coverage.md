@@ -1,20 +1,21 @@
-# IPC API coverage matrix (KiCad 10.99, commit 1ca7f148a5)
+# IPC API coverage matrix (KiCad 10.99, commit 022e45f6d2)
 
 Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the KiCad sources. "Handlers" names the C++ handler class that serves the command: server = API_HANDLER_SERVER (inside the API server, always loaded), common = API_HANDLER_COMMON (always loaded), editor = API_HANDLER_EDITOR, board = API_HANDLER_BOARD, pcb = API_HANDLER_PCB, footprint = API_HANDLER_FOOTPRINT, sch = API_HANDLER_SCH.
 
 | Status | Count | Meaning |
 |---|---:|---|
-| OK | 113 | works in `kicad-cli api-server` |
-| GUI-ONLY | 16 | handler returns "not available in headless mode" |
+| OK | 117 | works in `kicad-cli api-server` |
+| GUI-ONLY | 15 | handler returns "not available in headless mode" |
 | PARTIAL | 0 | headless in some handlers only |
 | UNREGISTERED | 0 | defined in .proto, no handler anywhere |
-| **Total** | **129** | request messages defined in the command protos |
+| **Total** | **132** | request messages defined in the command protos |
 
 
 ## common/base
 
 | Command | Handlers | Headless | Notes |
 |---|---|---|---|
+| `GetJobStatus` | common | yes |  |
 | `GetKiCadBinaryPath` | common | yes |  |
 | `GetPaths` | common | yes |  |
 | `GetPluginSettingsPath` | common | yes |  |
@@ -52,24 +53,26 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `CreateItems` | editor | yes |  |
 | `DeleteItems` | editor | yes |  |
 | `EndCommit` | editor | yes |  |
+| `GetActions` | editor | yes |  |
 | `GetBoundingBox` | board | yes |  |
 | `GetDocumentRevision` | editor | yes |  |
+| `GetItemCounts` | editor | yes |  |
 | `GetItems` | pcb, footprint, sch | yes |  |
 | `GetItemsById` | board, sch | yes |  |
-| `GetOpenDocuments` | pcb, footprint, sch | yes |  |
+| `GetOpenDocuments` | server, pcb, footprint, sch | yes |  |
 | `GetPageSettings` | pcb, sch | yes |  |
 | `GetSelection` | board, sch | no | gated by checkForHeadless in board, sch |
 | `GetTitleBlockInfo` | editor | yes |  |
 | `HitTest` | editor | yes |  |
 | `OpenLibraryItem` | footprint | yes |  |
-| `ParseAndCreateItemsFromString` | board | yes |  |
+| `ParseAndCreateItemsFromString` | board, sch | yes |  |
 | `RefreshEditor` | editor | yes |  |
 | `RemoveFromSelection` | board, sch | no | gated by checkForHeadless in board, sch |
 | `RevertDocument` | pcb, footprint, sch | no | gated by checkForHeadless in pcb, footprint, sch |
-| `RunAction` | board | no | gated by checkForHeadless in board |
+| `RunAction` | editor | yes |  |
 | `SaveCopyOfDocument` | pcb, footprint, sch | yes |  |
-| `SaveDocumentToString` | board | yes |  |
-| `SaveItemsToString` | board | yes |  |
+| `SaveDocumentToString` | board, sch | yes |  |
+| `SaveItemsToString` | board, sch | yes |  |
 | `SaveSelectionToString` | board | no | gated by checkForHeadless in board |
 | `SetPageSettings` | pcb, sch | yes |  |
 | `SetTitleBlockInfo` | editor | yes |  |

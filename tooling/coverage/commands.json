@@ -1,5 +1,15 @@
 [
   {
+    "command": "GetJobStatus",
+    "group": "common/base",
+    "requestType": "kiapi.common.commands.GetJobStatus",
+    "responseType": "kiapi.common.commands.GetJobStatusResponse",
+    "handlers": [
+      "common"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "GetKiCadBinaryPath",
     "group": "common/base",
     "requestType": "kiapi.common.commands.GetKiCadBinaryPath",
@@ -276,6 +286,16 @@
     "headless": "ok"
   },
   {
+    "command": "GetActions",
+    "group": "common/editor",
+    "requestType": "kiapi.common.commands.GetActions",
+    "responseType": "kiapi.common.commands.GetActionsResponse",
+    "handlers": [
+      "editor"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "GetBoundingBox",
     "group": "common/editor",
     "requestType": "kiapi.common.commands.GetBoundingBox",
@@ -290,6 +310,16 @@
     "group": "common/editor",
     "requestType": "kiapi.common.commands.GetDocumentRevision",
     "responseType": "kiapi.common.commands.DocumentRevisionResponse",
+    "handlers": [
+      "editor"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "GetItemCounts",
+    "group": "common/editor",
+    "requestType": "kiapi.common.commands.GetItemCounts",
+    "responseType": "kiapi.common.commands.GetItemCountsResponse",
     "handlers": [
       "editor"
     ],
@@ -324,6 +354,7 @@
     "requestType": "kiapi.common.commands.GetOpenDocuments",
     "responseType": "kiapi.common.commands.GetOpenDocumentsResponse",
     "handlers": [
+      "server",
       "pcb",
       "footprint",
       "sch"
@@ -388,7 +419,8 @@
     "requestType": "kiapi.common.commands.ParseAndCreateItemsFromString",
     "responseType": "kiapi.common.commands.CreateItemsResponse",
     "handlers": [
-      "board"
+      "board",
+      "sch"
     ],
     "headless": "ok"
   },
@@ -431,9 +463,9 @@
     "requestType": "kiapi.common.commands.RunAction",
     "responseType": "kiapi.common.commands.RunActionResponse",
     "handlers": [
-      "board"
+      "editor"
     ],
-    "headless": "gui-only"
+    "headless": "ok"
   },
   {
     "command": "SaveCopyOfDocument",
@@ -453,7 +485,8 @@
     "requestType": "kiapi.common.commands.SaveDocumentToString",
     "responseType": "kiapi.common.commands.SavedDocumentResponse",
     "handlers": [
-      "board"
+      "board",
+      "sch"
     ],
     "headless": "ok"
   },
@@ -463,7 +496,8 @@
     "requestType": "kiapi.common.commands.SaveItemsToString",
     "responseType": "kiapi.common.commands.SavedSelectionResponse",
     "handlers": [
-      "board"
+      "board",
+      "sch"
     ],
     "headless": "ok"
   },

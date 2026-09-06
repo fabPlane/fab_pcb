@@ -30,7 +30,54 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file common/types/jobs.proto.
  */
 export const file_common_types_jobs: GenFile = /*@__PURE__*/
-  fileDesc("Chdjb21tb24vdHlwZXMvam9icy5wcm90bxISa2lhcGkuY29tbW9uLnR5cGVzImUKDlJ1bkpvYlJlc3BvbnNlEi0KBnN0YXR1cxgBIAEoDjIdLmtpYXBpLmNvbW1vbi50eXBlcy5Kb2JTdGF0dXMSEwoLb3V0cHV0X3BhdGgYAiADKAkSDwoHbWVzc2FnZRgDIAEoCSJeCg5SdW5Kb2JTZXR0aW5ncxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchITCgtvdXRwdXRfcGF0aBgCIAEoCSpNCglKb2JTdGF0dXMSEgoOSlNfVU5TUEVDSUZJRUQQABIOCgpKU19TVUNDRVNTEAESDgoKSlNfV0FSTklORxACEgwKCEpTX0VSUk9SEANiBnByb3RvMw", [file_common_types_base_types]);
+  fileDesc("Chdjb21tb24vdHlwZXMvam9icy5wcm90bxISa2lhcGkuY29tbW9uLnR5cGVzIisKDUpvYk91dHB1dERhdGESDAoEcGF0aBgBIAEoCRIMCgRkYXRhGAIgASgMIrABCg5SdW5Kb2JSZXNwb25zZRItCgZzdGF0dXMYASABKA4yHS5raWFwaS5jb21tb24udHlwZXMuSm9iU3RhdHVzEhMKC291dHB1dF9wYXRoGAIgAygJEg8KB21lc3NhZ2UYAyABKAkSDgoGam9iX2lkGAQgASgJEjkKDmlubGluZV9vdXRwdXRzGAUgAygLMiEua2lhcGkuY29tbW9uLnR5cGVzLkpvYk91dHB1dERhdGEihAEKDlJ1bkpvYlNldHRpbmdzEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEhMKC291dHB1dF9wYXRoGAIgASgJEg0KBWFzeW5jGAMgASgIEhUKDXJldHVybl9pbmxpbmUYBCABKAgqXQoJSm9iU3RhdHVzEhIKDkpTX1VOU1BFQ0lGSUVEEAASDgoKSlNfU1VDQ0VTUxABEg4KCkpTX1dBUk5JTkcQAhIMCghKU19FUlJPUhADEg4KCkpTX1JVTk5JTkcQBGIGcHJvdG8z", [file_common_types_base_types]);
+
+/**
+ * A job output returned inline; see RunJobSettings.return_inline
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.types.JobOutputData
+ */
+export type JobOutputData = Message<"kiapi.common.types.JobOutputData"> & {
+  /**
+   * The output's path, as also listed in RunJobResponse.output_path
+   *
+   * @generated from field: string path = 1;
+   */
+  path: string;
+
+  /**
+   * @generated from field: bytes data = 2;
+   */
+  data: Uint8Array;
+};
+
+/**
+ * A job output returned inline; see RunJobSettings.return_inline
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.types.JobOutputData
+ */
+export type JobOutputDataJson = {
+  /**
+   * The output's path, as also listed in RunJobResponse.output_path
+   *
+   * @generated from field: string path = 1;
+   */
+  path?: string;
+
+  /**
+   * @generated from field: bytes data = 2;
+   */
+  data?: string;
+};
+
+/**
+ * Describes the message kiapi.common.types.JobOutputData.
+ * Use `create(JobOutputDataSchema)` to create a new message.
+ */
+export const JobOutputDataSchema: GenMessage<JobOutputData, {jsonType: JobOutputDataJson}> = /*@__PURE__*/
+  messageDesc(file_common_types_jobs, 0);
 
 /**
  * @generated from message kiapi.common.types.RunJobResponse
@@ -55,6 +102,22 @@ export type RunJobResponse = Message<"kiapi.common.types.RunJobResponse"> & {
    * @generated from field: string message = 3;
    */
   message: string;
+
+  /**
+   * Identifier of the job, for GetJobStatus and JobProgress events
+   * Since: 11.0
+   *
+   * @generated from field: string job_id = 4;
+   */
+  jobId: string;
+
+  /**
+   * The outputs' contents, when RunJobSettings.return_inline was set and the job finished
+   * Since: 11.0
+   *
+   * @generated from field: repeated kiapi.common.types.JobOutputData inline_outputs = 5;
+   */
+  inlineOutputs: JobOutputData[];
 };
 
 /**
@@ -80,6 +143,22 @@ export type RunJobResponseJson = {
    * @generated from field: string message = 3;
    */
   message?: string;
+
+  /**
+   * Identifier of the job, for GetJobStatus and JobProgress events
+   * Since: 11.0
+   *
+   * @generated from field: string job_id = 4;
+   */
+  jobId?: string;
+
+  /**
+   * The outputs' contents, when RunJobSettings.return_inline was set and the job finished
+   * Since: 11.0
+   *
+   * @generated from field: repeated kiapi.common.types.JobOutputData inline_outputs = 5;
+   */
+  inlineOutputs?: JobOutputDataJson[];
 };
 
 /**
@@ -87,7 +166,7 @@ export type RunJobResponseJson = {
  * Use `create(RunJobResponseSchema)` to create a new message.
  */
 export const RunJobResponseSchema: GenMessage<RunJobResponse, {jsonType: RunJobResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_types_jobs, 0);
+  messageDesc(file_common_types_jobs, 1);
 
 /**
  * @generated from message kiapi.common.types.RunJobSettings
@@ -107,6 +186,25 @@ export type RunJobSettings = Message<"kiapi.common.types.RunJobSettings"> & {
    * @generated from field: string output_path = 2;
    */
   outputPath: string;
+
+  /**
+   * Return as soon as the job is queued, with status JS_RUNNING and job_id set.  Progress is
+   * published as JobProgress events and the result is available from GetJobStatus.  Honored by
+   * kicad-cli api-server; an editor window runs the job synchronously regardless.
+   * Since: 11.0
+   *
+   * @generated from field: bool async = 3;
+   */
+  async: boolean;
+
+  /**
+   * Also return the output files' contents in RunJobResponse.inline_outputs (files up to
+   * 16 MiB each; directory outputs contribute the files directly inside them)
+   * Since: 11.0
+   *
+   * @generated from field: bool return_inline = 4;
+   */
+  returnInline: boolean;
 };
 
 /**
@@ -127,6 +225,25 @@ export type RunJobSettingsJson = {
    * @generated from field: string output_path = 2;
    */
   outputPath?: string;
+
+  /**
+   * Return as soon as the job is queued, with status JS_RUNNING and job_id set.  Progress is
+   * published as JobProgress events and the result is available from GetJobStatus.  Honored by
+   * kicad-cli api-server; an editor window runs the job synchronously regardless.
+   * Since: 11.0
+   *
+   * @generated from field: bool async = 3;
+   */
+  async?: boolean;
+
+  /**
+   * Also return the output files' contents in RunJobResponse.inline_outputs (files up to
+   * 16 MiB each; directory outputs contribute the files directly inside them)
+   * Since: 11.0
+   *
+   * @generated from field: bool return_inline = 4;
+   */
+  returnInline?: boolean;
 };
 
 /**
@@ -134,7 +251,7 @@ export type RunJobSettingsJson = {
  * Use `create(RunJobSettingsSchema)` to create a new message.
  */
 export const RunJobSettingsSchema: GenMessage<RunJobSettings, {jsonType: RunJobSettingsJson}> = /*@__PURE__*/
-  messageDesc(file_common_types_jobs, 1);
+  messageDesc(file_common_types_jobs, 2);
 
 /**
  * @generated from enum kiapi.common.types.JobStatus
@@ -159,12 +276,20 @@ export enum JobStatus {
    * @generated from enum value: JS_ERROR = 3;
    */
   JS_ERROR = 3,
+
+  /**
+   * The job was started asynchronously and has not finished; poll GetJobStatus with job_id
+   * Since: 11.0
+   *
+   * @generated from enum value: JS_RUNNING = 4;
+   */
+  JS_RUNNING = 4,
 }
 
 /**
  * @generated from enum kiapi.common.types.JobStatus
  */
-export type JobStatusJson = "JS_UNSPECIFIED" | "JS_SUCCESS" | "JS_WARNING" | "JS_ERROR";
+export type JobStatusJson = "JS_UNSPECIFIED" | "JS_SUCCESS" | "JS_WARNING" | "JS_ERROR" | "JS_RUNNING";
 
 /**
  * Describes the enum kiapi.common.types.JobStatus.

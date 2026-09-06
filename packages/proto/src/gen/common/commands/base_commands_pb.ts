@@ -20,19 +20,21 @@
 // @generated from file common/commands/base_commands.proto (package kiapi.common.commands, syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
-import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
+import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
+import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import type { CompoundShape, CompoundShapeJson, KiCadVersion, KiCadVersionJson, Text, TextBox, TextBoxJson, TextJson } from "../types/base_types_pb.js";
 import { file_common_types_base_types } from "../types/base_types_pb.js";
 import type { PathType, PathTypeJson } from "../types/enums_pb.js";
 import { file_common_types_enums } from "../types/enums_pb.js";
+import type { RunJobResponse, RunJobResponseJson } from "../types/jobs_pb.js";
+import { file_common_types_jobs } from "../types/jobs_pb.js";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file common/commands/base_commands.proto.
  */
 export const file_common_commands_base_commands: GenFile = /*@__PURE__*/
-  fileDesc("CiNjb21tb24vY29tbWFuZHMvYmFzZV9jb21tYW5kcy5wcm90bxIVa2lhcGkuY29tbW9uLmNvbW1hbmRzIgwKCkdldFZlcnNpb24iRwoSR2V0VmVyc2lvblJlc3BvbnNlEjEKB3ZlcnNpb24YASABKAsyIC5raWFwaS5jb21tb24udHlwZXMuS2lDYWRWZXJzaW9uIgYKBFBpbmciKQoSR2V0S2lDYWRCaW5hcnlQYXRoEhMKC2JpbmFyeV9uYW1lGAEgASgJIhwKDFBhdGhSZXNwb25zZRIMCgRwYXRoGAEgASgJIjgKDkdldFRleHRFeHRlbnRzEiYKBHRleHQYASABKAsyGC5raWFwaS5jb21tb24udHlwZXMuVGV4dCJyCg1UZXh0T3JUZXh0Qm94EigKBHRleHQYASABKAsyGC5raWFwaS5jb21tb24udHlwZXMuVGV4dEgAEi4KB3RleHRib3gYAiABKAsyGy5raWFwaS5jb21tb24udHlwZXMuVGV4dEJveEgAQgcKBWlubmVyIkUKD0dldFRleHRBc1NoYXBlcxIyCgR0ZXh0GAEgAygLMiQua2lhcGkuY29tbW9uLmNvbW1hbmRzLlRleHRPclRleHRCb3gidwoOVGV4dFdpdGhTaGFwZXMSMgoEdGV4dBgBIAEoCzIkLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5UZXh0T3JUZXh0Qm94EjEKBnNoYXBlcxgCIAEoCzIhLmtpYXBpLmNvbW1vbi50eXBlcy5Db21wb3VuZFNoYXBlIloKF0dldFRleHRBc1NoYXBlc1Jlc3BvbnNlEj8KEHRleHRfd2l0aF9zaGFwZXMYASADKAsyJS5raWFwaS5jb21tb24uY29tbWFuZHMuVGV4dFdpdGhTaGFwZXMiKwoVR2V0UGx1Z2luU2V0dGluZ3NQYXRoEhIKCmlkZW50aWZpZXIYASABKAkiIgoOU3RyaW5nUmVzcG9uc2USEAoIcmVzcG9uc2UYASABKAkiCgoIR2V0UGF0aHMiRQoJUGF0aEVudHJ5EioKBHR5cGUYASABKA4yHC5raWFwaS5jb21tb24udHlwZXMuUGF0aFR5cGUSDAoEcGF0aBgCIAEoCSJDChBHZXRQYXRoc1Jlc3BvbnNlEi8KBXBhdGhzGAEgAygLMiAua2lhcGkuY29tbW9uLmNvbW1hbmRzLlBhdGhFbnRyeSJRChBTdXBwb3J0ZWRDb21tYW5kEhAKCHR5cGVfdXJsGAEgASgJEhkKEXJlc3BvbnNlX3R5cGVfdXJsGAIgASgJEhAKCGhlYWRsZXNzGAMgASgIIhYKFEdldFN1cHBvcnRlZENvbW1hbmRzIlkKHEdldFN1cHBvcnRlZENvbW1hbmRzUmVzcG9uc2USOQoIY29tbWFuZHMYASADKAsyJy5raWFwaS5jb21tb24uY29tbWFuZHMuU3VwcG9ydGVkQ29tbWFuZCIPCg1HZXRTZXJ2ZXJJbmZvIlsKFUdldFNlcnZlckluZm9SZXNwb25zZRISCgpzb2NrZXRfdXJsGAEgASgJEhkKEWV2ZW50c19zb2NrZXRfdXJsGAIgASgJEhMKC2tpY2FkX3Rva2VuGAMgASgJYgZwcm90bzM", [file_common_types_base_types, file_common_types_enums]);
+  fileDesc("CiNjb21tb24vY29tbWFuZHMvYmFzZV9jb21tYW5kcy5wcm90bxIVa2lhcGkuY29tbW9uLmNvbW1hbmRzIgwKCkdldFZlcnNpb24iRwoSR2V0VmVyc2lvblJlc3BvbnNlEjEKB3ZlcnNpb24YASABKAsyIC5raWFwaS5jb21tb24udHlwZXMuS2lDYWRWZXJzaW9uIgYKBFBpbmciKQoSR2V0S2lDYWRCaW5hcnlQYXRoEhMKC2JpbmFyeV9uYW1lGAEgASgJIhwKDFBhdGhSZXNwb25zZRIMCgRwYXRoGAEgASgJIjgKDkdldFRleHRFeHRlbnRzEiYKBHRleHQYASABKAsyGC5raWFwaS5jb21tb24udHlwZXMuVGV4dCJyCg1UZXh0T3JUZXh0Qm94EigKBHRleHQYASABKAsyGC5raWFwaS5jb21tb24udHlwZXMuVGV4dEgAEi4KB3RleHRib3gYAiABKAsyGy5raWFwaS5jb21tb24udHlwZXMuVGV4dEJveEgAQgcKBWlubmVyIkUKD0dldFRleHRBc1NoYXBlcxIyCgR0ZXh0GAEgAygLMiQua2lhcGkuY29tbW9uLmNvbW1hbmRzLlRleHRPclRleHRCb3gidwoOVGV4dFdpdGhTaGFwZXMSMgoEdGV4dBgBIAEoCzIkLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5UZXh0T3JUZXh0Qm94EjEKBnNoYXBlcxgCIAEoCzIhLmtpYXBpLmNvbW1vbi50eXBlcy5Db21wb3VuZFNoYXBlIloKF0dldFRleHRBc1NoYXBlc1Jlc3BvbnNlEj8KEHRleHRfd2l0aF9zaGFwZXMYASADKAsyJS5raWFwaS5jb21tb24uY29tbWFuZHMuVGV4dFdpdGhTaGFwZXMiKwoVR2V0UGx1Z2luU2V0dGluZ3NQYXRoEhIKCmlkZW50aWZpZXIYASABKAkiIgoOU3RyaW5nUmVzcG9uc2USEAoIcmVzcG9uc2UYASABKAkiCgoIR2V0UGF0aHMiRQoJUGF0aEVudHJ5EioKBHR5cGUYASABKA4yHC5raWFwaS5jb21tb24udHlwZXMuUGF0aFR5cGUSDAoEcGF0aBgCIAEoCSJDChBHZXRQYXRoc1Jlc3BvbnNlEi8KBXBhdGhzGAEgAygLMiAua2lhcGkuY29tbW9uLmNvbW1hbmRzLlBhdGhFbnRyeSJRChBTdXBwb3J0ZWRDb21tYW5kEhAKCHR5cGVfdXJsGAEgASgJEhkKEXJlc3BvbnNlX3R5cGVfdXJsGAIgASgJEhAKCGhlYWRsZXNzGAMgASgIIhYKFEdldFN1cHBvcnRlZENvbW1hbmRzIlkKHEdldFN1cHBvcnRlZENvbW1hbmRzUmVzcG9uc2USOQoIY29tbWFuZHMYASADKAsyJy5raWFwaS5jb21tb24uY29tbWFuZHMuU3VwcG9ydGVkQ29tbWFuZCIPCg1HZXRTZXJ2ZXJJbmZvIlsKFUdldFNlcnZlckluZm9SZXNwb25zZRISCgpzb2NrZXRfdXJsGAEgASgJEhkKEWV2ZW50c19zb2NrZXRfdXJsGAIgASgJEhMKC2tpY2FkX3Rva2VuGAMgASgJIh4KDEdldEpvYlN0YXR1cxIOCgZqb2JfaWQYASABKAkisAEKFEdldEpvYlN0YXR1c1Jlc3BvbnNlEg4KBmpvYl9pZBgBIAEoCRIuCgVzdGF0ZRgCIAEoDjIfLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5Kb2JTdGF0ZRIPCgdwZXJjZW50GAMgASgNEhMKC2Rlc2NyaXB0aW9uGAQgASgJEjIKBnJlc3VsdBgFIAEoCzIiLmtpYXBpLmNvbW1vbi50eXBlcy5SdW5Kb2JSZXNwb25zZSpQCghKb2JTdGF0ZRIVChFKT0JfU1RBVEVfVU5LTk9XThAAEhUKEUpPQl9TVEFURV9SVU5OSU5HEAESFgoSSk9CX1NUQVRFX0ZJTklTSEVEEAJiBnByb3RvMw", [file_common_types_base_types, file_common_types_enums, file_common_types_jobs]);
 
 /**
  * @generated from message kiapi.common.commands.GetVersion
@@ -744,4 +746,157 @@ export type GetServerInfoResponseJson = {
  */
 export const GetServerInfoResponseSchema: GenMessage<GetServerInfoResponse, {jsonType: GetServerInfoResponseJson}> = /*@__PURE__*/
   messageDesc(file_common_commands_base_commands, 19);
+
+/**
+ * Query a job started with RunJobSettings.async (or any job run through the API recently).
+ * Returns GetJobStatusResponse; an unknown job_id is AS_BAD_REQUEST.
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.GetJobStatus
+ */
+export type GetJobStatus = Message<"kiapi.common.commands.GetJobStatus"> & {
+  /**
+   * @generated from field: string job_id = 1;
+   */
+  jobId: string;
+};
+
+/**
+ * Query a job started with RunJobSettings.async (or any job run through the API recently).
+ * Returns GetJobStatusResponse; an unknown job_id is AS_BAD_REQUEST.
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.GetJobStatus
+ */
+export type GetJobStatusJson = {
+  /**
+   * @generated from field: string job_id = 1;
+   */
+  jobId?: string;
+};
+
+/**
+ * Describes the message kiapi.common.commands.GetJobStatus.
+ * Use `create(GetJobStatusSchema)` to create a new message.
+ */
+export const GetJobStatusSchema: GenMessage<GetJobStatus, {jsonType: GetJobStatusJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_base_commands, 20);
+
+/**
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.GetJobStatusResponse
+ */
+export type GetJobStatusResponse = Message<"kiapi.common.commands.GetJobStatusResponse"> & {
+  /**
+   * @generated from field: string job_id = 1;
+   */
+  jobId: string;
+
+  /**
+   * @generated from field: kiapi.common.commands.JobState state = 2;
+   */
+  state: JobState;
+
+  /**
+   * 0 to 100
+   *
+   * @generated from field: uint32 percent = 3;
+   */
+  percent: number;
+
+  /**
+   * Human-readable description of the current phase
+   *
+   * @generated from field: string description = 4;
+   */
+  description: string;
+
+  /**
+   * The job's result, once state is JOB_STATE_FINISHED
+   *
+   * @generated from field: kiapi.common.types.RunJobResponse result = 5;
+   */
+  result?: RunJobResponse | undefined;
+};
+
+/**
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.GetJobStatusResponse
+ */
+export type GetJobStatusResponseJson = {
+  /**
+   * @generated from field: string job_id = 1;
+   */
+  jobId?: string;
+
+  /**
+   * @generated from field: kiapi.common.commands.JobState state = 2;
+   */
+  state?: JobStateJson;
+
+  /**
+   * 0 to 100
+   *
+   * @generated from field: uint32 percent = 3;
+   */
+  percent?: number;
+
+  /**
+   * Human-readable description of the current phase
+   *
+   * @generated from field: string description = 4;
+   */
+  description?: string;
+
+  /**
+   * The job's result, once state is JOB_STATE_FINISHED
+   *
+   * @generated from field: kiapi.common.types.RunJobResponse result = 5;
+   */
+  result?: RunJobResponseJson;
+};
+
+/**
+ * Describes the message kiapi.common.commands.GetJobStatusResponse.
+ * Use `create(GetJobStatusResponseSchema)` to create a new message.
+ */
+export const GetJobStatusResponseSchema: GenMessage<GetJobStatusResponse, {jsonType: GetJobStatusResponseJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_base_commands, 21);
+
+/**
+ * Since: 11.0
+ *
+ * @generated from enum kiapi.common.commands.JobState
+ */
+export enum JobState {
+  /**
+   * @generated from enum value: JOB_STATE_UNKNOWN = 0;
+   */
+  UNKNOWN = 0,
+
+  /**
+   * @generated from enum value: JOB_STATE_RUNNING = 1;
+   */
+  RUNNING = 1,
+
+  /**
+   * @generated from enum value: JOB_STATE_FINISHED = 2;
+   */
+  FINISHED = 2,
+}
+
+/**
+ * Since: 11.0
+ *
+ * @generated from enum kiapi.common.commands.JobState
+ */
+export type JobStateJson = "JOB_STATE_UNKNOWN" | "JOB_STATE_RUNNING" | "JOB_STATE_FINISHED";
+
+/**
+ * Describes the enum kiapi.common.commands.JobState.
+ */
+export const JobStateSchema: GenEnum<JobState, JobStateJson> = /*@__PURE__*/
+  enumDesc(file_common_commands_base_commands, 0);
 
