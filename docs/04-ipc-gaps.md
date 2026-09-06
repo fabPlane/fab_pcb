@@ -85,6 +85,7 @@ and `GetItemCounts`.
 ## Priority 1 — full editing parity
 
 ### G7 · Library access
+**Status:** done (b4e01726d7): library tables, entry listing, get/save/delete items, create library, table rows, C++ footprint wizards.
 **Today:** only `OpenDocument(DOCTYPE_FOOTPRINT, lib_id)` and the GUI-only
 `OpenLibraryItem`. No listing, no symbol lookup, no writing.
 **Fix:** `GetLibraryTables{type}`, `ListLibraryEntries{type, nickname}` (with
@@ -95,6 +96,7 @@ open already uses the former). Footprint wizards: `wizards.proto` types exist;
 add `ListWizards` / `RunWizard` (Python-free wizards only).
 
 ### G8 · Schematic operations
+**Status:** done (c590f977e0): annotate/clear, sync to board, back-annotate, schematic settings, symbol fields table, assign footprints, sheet file creation.
 `Annotate{scope, options}`, `ClearAnnotation`, `SyncSchematicToBoard{options}`
 (server-side: schematic netlist → `BOARD_NETLIST_UPDATER`; today the client must
 `GetSchematicNetlist`, write a file, `ImportNetlist`), `BackAnnotate`,
@@ -103,6 +105,7 @@ file management (`CreateItems` accepts `SCH_SHEET_T` but new sheet files are not
 created on disk — verify and fix), `AssignFootprints` (cvpcb equivalent).
 
 ### G9 · Board operations that live in tools today
+**Status:** done (1882aefba6): ratsnest, unrouted count, net lengths, update footprints from library, teardrops, autoplace, global deletion. Push-and-shove routing remains a separate spike.
 `GetRatsnest / GetUnroutedConnections` (from `CONNECTIVITY_DATA`; the UI needs this
 to draw the ratsnest), `GetNetLengths` (net inspector), `CleanupTracks`,
 `GlobalDeletion`, `UpdateFootprintsFromLibrary`, `SetTeardrops`, `AutoplaceFootprints`.
@@ -111,6 +114,7 @@ plan it as its own spike after everything else, with `RouteTrack{start, end, net
 layer, width}` as the API.
 
 ### G10 · Undo / redo
+**Status:** done (27aa7e67fa): `Undo`, `Redo`, `GetUndoStack` on the headless contexts.
 Undo stacks live on frames. Add an `UNDO_REDO_CONTAINER` to the headless contexts
 and `Undo`, `Redo`, `GetUndoStack`. Until then the client keeps history (see 01).
 

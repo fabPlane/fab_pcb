@@ -394,6 +394,16 @@
     "headless": "ok"
   },
   {
+    "command": "GetUndoStack",
+    "group": "common/editor",
+    "requestType": "kiapi.common.commands.GetUndoStack",
+    "responseType": "kiapi.common.commands.UndoStackResponse",
+    "handlers": [
+      "editor"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "HitTest",
     "group": "common/editor",
     "requestType": "kiapi.common.commands.HitTest",
@@ -421,6 +431,16 @@
     "handlers": [
       "board",
       "sch"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "Redo",
+    "group": "common/editor",
+    "requestType": "kiapi.common.commands.Redo",
+    "responseType": "kiapi.common.commands.UndoRedoResponse",
+    "handlers": [
+      "editor"
     ],
     "headless": "ok"
   },
@@ -527,6 +547,16 @@
     "group": "common/editor",
     "requestType": "kiapi.common.commands.SetTitleBlockInfo",
     "responseType": "google.protobuf.Empty",
+    "handlers": [
+      "editor"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "Undo",
+    "group": "common/editor",
+    "requestType": "kiapi.common.commands.Undo",
+    "responseType": "kiapi.common.commands.UndoRedoResponse",
     "handlers": [
       "editor"
     ],
@@ -678,6 +708,16 @@
     "group": "board/commands",
     "requestType": "kiapi.board.commands.AddEmbeddedFiles",
     "responseType": "google.protobuf.Empty",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "AutoplaceFootprints",
+    "group": "board/commands",
+    "requestType": "kiapi.board.commands.AutoplaceFootprints",
+    "responseType": "kiapi.board.commands.AutoplaceFootprintsResponse",
     "handlers": [
       "pcb"
     ],
@@ -884,6 +924,16 @@
     "headless": "ok"
   },
   {
+    "command": "GetNetLengths",
+    "group": "board/commands",
+    "requestType": "kiapi.board.commands.GetNetLengths",
+    "responseType": "kiapi.board.commands.NetLengthsResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "GetNets",
     "group": "board/commands",
     "requestType": "kiapi.board.commands.GetNets",
@@ -904,6 +954,26 @@
     "headless": "ok"
   },
   {
+    "command": "GetRatsnest",
+    "group": "board/commands",
+    "requestType": "kiapi.board.commands.GetRatsnest",
+    "responseType": "kiapi.board.commands.RatsnestResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "GetUnroutedCount",
+    "group": "board/commands",
+    "requestType": "kiapi.board.commands.GetUnroutedCount",
+    "responseType": "kiapi.board.commands.UnroutedCountResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "GetVisibleLayers",
     "group": "board/commands",
     "requestType": "kiapi.board.commands.GetVisibleLayers",
@@ -912,6 +982,16 @@
       "board"
     ],
     "headless": "gui-only"
+  },
+  {
+    "command": "GlobalDeletion",
+    "group": "board/commands",
+    "requestType": "kiapi.board.commands.GlobalDeletion",
+    "responseType": "kiapi.board.commands.GlobalDeletionResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
   },
   {
     "command": "ImportNetlist",
@@ -948,6 +1028,16 @@
     "group": "board/commands",
     "requestType": "kiapi.board.commands.RefillZones",
     "responseType": "google.protobuf.Empty",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "RemoveTeardrops",
+    "group": "board/commands",
+    "requestType": "kiapi.board.commands.RemoveTeardrops",
+    "responseType": "kiapi.board.commands.SetTeardropsResponse",
     "handlers": [
       "pcb"
     ],
@@ -1064,6 +1154,16 @@
     "headless": "ok"
   },
   {
+    "command": "SetTeardrops",
+    "group": "board/commands",
+    "requestType": "kiapi.board.commands.SetTeardrops",
+    "responseType": "kiapi.board.commands.SetTeardropsResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "SetVisibleLayers",
     "group": "board/commands",
     "requestType": "kiapi.board.commands.SetVisibleLayers",
@@ -1078,6 +1178,16 @@
     "group": "board/commands",
     "requestType": "kiapi.board.commands.UpdateBoardStackup",
     "responseType": "kiapi.board.commands.BoardStackupResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "UpdateFootprintsFromLibrary",
+    "group": "board/commands",
+    "requestType": "kiapi.board.commands.UpdateFootprintsFromLibrary",
+    "responseType": "kiapi.board.commands.UpdateFootprintsFromLibraryResponse",
     "handlers": [
       "pcb"
     ],
@@ -1224,6 +1334,36 @@
     "headless": "ok"
   },
   {
+    "command": "Annotate",
+    "group": "sch/commands",
+    "requestType": "kiapi.schematic.commands.Annotate",
+    "responseType": "kiapi.schematic.commands.AnnotateResponse",
+    "handlers": [
+      "sch"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "AssignFootprints",
+    "group": "sch/commands",
+    "requestType": "kiapi.schematic.commands.AssignFootprints",
+    "responseType": "kiapi.schematic.commands.AssignFootprintsResponse",
+    "handlers": [
+      "sch"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "ClearAnnotation",
+    "group": "sch/commands",
+    "requestType": "kiapi.schematic.commands.ClearAnnotation",
+    "responseType": "kiapi.schematic.commands.AnnotateResponse",
+    "handlers": [
+      "sch"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "GetErcMarkers",
     "group": "sch/commands",
     "requestType": "kiapi.schematic.commands.GetErcMarkers",
@@ -1264,6 +1404,26 @@
     "headless": "ok"
   },
   {
+    "command": "GetSchematicSettings",
+    "group": "sch/commands",
+    "requestType": "kiapi.schematic.commands.GetSchematicSettings",
+    "responseType": "kiapi.schematic.commands.SchematicSettings",
+    "handlers": [
+      "sch"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "GetSymbolFieldsTable",
+    "group": "sch/commands",
+    "requestType": "kiapi.schematic.commands.GetSymbolFieldsTable",
+    "responseType": "kiapi.schematic.commands.SymbolFieldsTableResponse",
+    "handlers": [
+      "sch"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "RunSchematicJobErc",
     "group": "sch/commands",
     "requestType": "kiapi.schematic.commands.RunSchematicJobErc",
@@ -1288,6 +1448,36 @@
     "group": "sch/commands",
     "requestType": "kiapi.schematic.commands.SetErcSeverities",
     "responseType": "kiapi.schematic.commands.ErcSeveritiesResponse",
+    "handlers": [
+      "sch"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "SetSchematicSettings",
+    "group": "sch/commands",
+    "requestType": "kiapi.schematic.commands.SetSchematicSettings",
+    "responseType": "kiapi.schematic.commands.SchematicSettings",
+    "handlers": [
+      "sch"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "SetSymbolFields",
+    "group": "sch/commands",
+    "requestType": "kiapi.schematic.commands.SetSymbolFields",
+    "responseType": "kiapi.schematic.commands.SetSymbolFieldsResponse",
+    "handlers": [
+      "sch"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "SyncSchematicToBoard",
+    "group": "sch/commands",
+    "requestType": "kiapi.schematic.commands.SyncSchematicToBoard",
+    "responseType": "kiapi.schematic.commands.SyncSchematicToBoardResponse",
     "handlers": [
       "sch"
     ],

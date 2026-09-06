@@ -11,6 +11,7 @@ export type { NetCode, NetCodeJson, Net, NetJson, Track, TrackJson, Arc, ArcJson
 export * from "./common/commands/base_commands_pb.js";
 export * from "./common/commands/cross_probe_commands_pb.js";
 export * from "./common/commands/editor_commands_pb.js";
+export * from "./common/commands/library_commands_pb.js";
 export * from "./common/commands/project_commands_pb.js";
 export * from "./common/commands/variant_commands_pb.js";
 export * from "./common/envelope_pb.js";
@@ -37,6 +38,7 @@ export * as board_types from "./board/board_types_pb.js";
 export * as base_commands from "./common/commands/base_commands_pb.js";
 export * as cross_probe_commands from "./common/commands/cross_probe_commands_pb.js";
 export * as editor_commands from "./common/commands/editor_commands_pb.js";
+export * as library_commands from "./common/commands/library_commands_pb.js";
 export * as project_commands from "./common/commands/project_commands_pb.js";
 export * as variant_commands from "./common/commands/variant_commands_pb.js";
 export * as envelope from "./common/envelope_pb.js";
@@ -62,6 +64,7 @@ import { file_board_board_types } from "./board/board_types_pb.js";
 import { file_common_commands_base_commands } from "./common/commands/base_commands_pb.js";
 import { file_common_commands_cross_probe_commands } from "./common/commands/cross_probe_commands_pb.js";
 import { file_common_commands_editor_commands } from "./common/commands/editor_commands_pb.js";
+import { file_common_commands_library_commands } from "./common/commands/library_commands_pb.js";
 import { file_common_commands_project_commands } from "./common/commands/project_commands_pb.js";
 import { file_common_commands_variant_commands } from "./common/commands/variant_commands_pb.js";
 import { file_common_envelope } from "./common/envelope_pb.js";
@@ -88,6 +91,7 @@ export const kiapiFiles: readonly GenFile[] = [
   file_common_commands_base_commands,
   file_common_commands_cross_probe_commands,
   file_common_commands_editor_commands,
+  file_common_commands_library_commands,
   file_common_commands_project_commands,
   file_common_commands_variant_commands,
   file_common_envelope,

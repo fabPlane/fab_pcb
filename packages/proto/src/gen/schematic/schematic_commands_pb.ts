@@ -20,12 +20,14 @@
 // @generated from file schematic/schematic_commands.proto (package kiapi.schematic.commands, syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
-import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
-import type { DocumentSpecifier, DocumentSpecifierJson, KIID, KIIDJson } from "../common/types/base_types_pb.js";
+import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
+import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
+import type { Distance, DistanceJson, DocumentSpecifier, DocumentSpecifierJson, KIID, KIIDJson, LibraryIdentifier, LibraryIdentifierJson, SheetPath, SheetPathJson } from "../common/types/base_types_pb.js";
 import { file_common_types_base_types } from "../common/types/base_types_pb.js";
 import type { KiCadObjectType, KiCadObjectTypeJson } from "../common/types/enums_pb.js";
 import { file_common_types_enums } from "../common/types/enums_pb.js";
+import type { ImportNetlistResponse, ImportNetlistResponseJson, NetlistMatchMode, NetlistMatchModeJson } from "../board/board_commands_pb.js";
+import { file_board_board_commands } from "../board/board_commands_pb.js";
 import type { ErcMarker, ErcMarkerJson, ErcSeveritySetting, ErcSeveritySettingJson } from "./schematic_rules_pb.js";
 import { file_schematic_schematic_rules } from "./schematic_rules_pb.js";
 import type { SchematicNet, SchematicNetJson, SheetInstance, SheetInstanceJson } from "./schematic_types_pb.js";
@@ -36,7 +38,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file schematic/schematic_commands.proto.
  */
 export const file_schematic_schematic_commands: GenFile = /*@__PURE__*/
-  fileDesc("CiJzY2hlbWF0aWMvc2NoZW1hdGljX2NvbW1hbmRzLnByb3RvEhhraWFwaS5zY2hlbWF0aWMuY29tbWFuZHMiUAoVR2V0U2NoZW1hdGljSGllcmFyY2h5EjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIpUBChpTY2hlbWF0aWNIaWVyYXJjaHlSZXNwb25zZRI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchI+ChB0b3BfbGV2ZWxfc2hlZXRzGAIgAygLMiQua2lhcGkuc2NoZW1hdGljLnR5cGVzLlNoZWV0SW5zdGFuY2UiggEKE0dldFNjaGVtYXRpY05ldGxpc3QSNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISMgoFdHlwZXMYAiADKA4yIy5raWFwaS5jb21tb24udHlwZXMuS2lDYWRPYmplY3RUeXBlIoYBChhTY2hlbWF0aWNOZXRsaXN0UmVzcG9uc2USNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISMQoEbmV0cxgCIAMoCzIjLmtpYXBpLnNjaGVtYXRpYy50eXBlcy5TY2hlbWF0aWNOZXQiTgoSUnVuU2NoZW1hdGljSm9iRXJjEjgKCXNjaGVtYXRpYxgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciKGAQoSRXJjUmVzdWx0c1Jlc3BvbnNlEisKB21hcmtlcnMYASADKAsyGi5raWFwaS5zY2hlbWF0aWMuRXJjTWFya2VyEhMKC2Vycm9yX2NvdW50GAIgASgNEhUKDXdhcm5pbmdfY291bnQYAyABKA0SFwoPZXhjbHVzaW9uX2NvdW50GAQgASgNIkkKDUdldEVyY01hcmtlcnMSOAoJc2NoZW1hdGljGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIp4BChRTZXRFcmNNYXJrZXJFeGNsdWRlZBI4CglzY2hlbWF0aWMYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISKQoHbWFya2VycxgCIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEhAKCGV4Y2x1ZGVkGAMgASgIEg8KB2NvbW1lbnQYBCABKAkiTAoQR2V0RXJjU2V2ZXJpdGllcxI4CglzY2hlbWF0aWMYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIiUAoVRXJjU2V2ZXJpdGllc1Jlc3BvbnNlEjcKCnNldmVyaXRpZXMYASADKAsyIy5raWFwaS5zY2hlbWF0aWMuRXJjU2V2ZXJpdHlTZXR0aW5nIoUBChBTZXRFcmNTZXZlcml0aWVzEjgKCXNjaGVtYXRpYxgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchI3CgpzZXZlcml0aWVzGAIgAygLMiMua2lhcGkuc2NoZW1hdGljLkVyY1NldmVyaXR5U2V0dGluZ2IGcHJvdG8z", [file_common_types_base_types, file_common_types_enums, file_schematic_schematic_rules, file_schematic_schematic_types]);
+  fileDesc("CiJzY2hlbWF0aWMvc2NoZW1hdGljX2NvbW1hbmRzLnByb3RvEhhraWFwaS5zY2hlbWF0aWMuY29tbWFuZHMiUAoVR2V0U2NoZW1hdGljSGllcmFyY2h5EjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIpUBChpTY2hlbWF0aWNIaWVyYXJjaHlSZXNwb25zZRI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchI+ChB0b3BfbGV2ZWxfc2hlZXRzGAIgAygLMiQua2lhcGkuc2NoZW1hdGljLnR5cGVzLlNoZWV0SW5zdGFuY2UiggEKE0dldFNjaGVtYXRpY05ldGxpc3QSNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISMgoFdHlwZXMYAiADKA4yIy5raWFwaS5jb21tb24udHlwZXMuS2lDYWRPYmplY3RUeXBlIoYBChhTY2hlbWF0aWNOZXRsaXN0UmVzcG9uc2USNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISMQoEbmV0cxgCIAMoCzIjLmtpYXBpLnNjaGVtYXRpYy50eXBlcy5TY2hlbWF0aWNOZXQiTgoSUnVuU2NoZW1hdGljSm9iRXJjEjgKCXNjaGVtYXRpYxgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciKGAQoSRXJjUmVzdWx0c1Jlc3BvbnNlEisKB21hcmtlcnMYASADKAsyGi5raWFwaS5zY2hlbWF0aWMuRXJjTWFya2VyEhMKC2Vycm9yX2NvdW50GAIgASgNEhUKDXdhcm5pbmdfY291bnQYAyABKA0SFwoPZXhjbHVzaW9uX2NvdW50GAQgASgNIkkKDUdldEVyY01hcmtlcnMSOAoJc2NoZW1hdGljGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIp4BChRTZXRFcmNNYXJrZXJFeGNsdWRlZBI4CglzY2hlbWF0aWMYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISKQoHbWFya2VycxgCIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEhAKCGV4Y2x1ZGVkGAMgASgIEg8KB2NvbW1lbnQYBCABKAkiTAoQR2V0RXJjU2V2ZXJpdGllcxI4CglzY2hlbWF0aWMYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIiUAoVRXJjU2V2ZXJpdGllc1Jlc3BvbnNlEjcKCnNldmVyaXRpZXMYASADKAsyIy5raWFwaS5zY2hlbWF0aWMuRXJjU2V2ZXJpdHlTZXR0aW5nIoUBChBTZXRFcmNTZXZlcml0aWVzEjgKCXNjaGVtYXRpYxgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchI3CgpzZXZlcml0aWVzGAIgAygLMiMua2lhcGkuc2NoZW1hdGljLkVyY1NldmVyaXR5U2V0dGluZyLqAQoPQW5ub3RhdGVPcHRpb25zEj8KCnNvcnRfb3JkZXIYASABKA4yKy5raWFwaS5zY2hlbWF0aWMuY29tbWFuZHMuQW5ub3RhdGVTb3J0T3JkZXISPgoJbnVtYmVyaW5nGAIgASgOMisua2lhcGkuc2NoZW1hdGljLmNvbW1hbmRzLkFubm90YXRlTnVtYmVyaW5nEhQKDHN0YXJ0X251bWJlchgDIAEoDRIWCg5yZXNldF9leGlzdGluZxgEIAEoCBIRCglyZWN1cnNpdmUYBSABKAgSFQoNcmVncm91cF91bml0cxgGIAEoCCLhAQoIQW5ub3RhdGUSOAoJc2NoZW1hdGljGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEjYKBXNjb3BlGAIgASgOMicua2lhcGkuc2NoZW1hdGljLmNvbW1hbmRzLkFubm90YXRlU2NvcGUSJwoFaXRlbXMYAyADKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRBI6CgdvcHRpb25zGAQgASgLMikua2lhcGkuc2NoZW1hdGljLmNvbW1hbmRzLkFubm90YXRlT3B0aW9ucyJoChBBbm5vdGF0ZVJlc3BvbnNlEhcKD2Fubm90YXRlZF9jb3VudBgBIAEoDRIUCgxzeW1ib2xfY291bnQYAiABKA0SEwoLZXJyb3JfY291bnQYAyABKA0SEAoIbWVzc2FnZXMYBCADKAkivwEKD0NsZWFyQW5ub3RhdGlvbhI4CglzY2hlbWF0aWMYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISNgoFc2NvcGUYAiABKA4yJy5raWFwaS5zY2hlbWF0aWMuY29tbWFuZHMuQW5ub3RhdGVTY29wZRInCgVpdGVtcxgDIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEhEKCXJlY3Vyc2l2ZRgEIAEoCCKLAwoUU3luY1NjaGVtYXRpY1RvQm9hcmQSOAoJc2NoZW1hdGljGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEjQKBWJvYXJkGAIgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEg8KB2RyeV9ydW4YAyABKAgSOgoKbWF0Y2hfbW9kZRgEIAEoDjImLmtpYXBpLmJvYXJkLmNvbW1hbmRzLk5ldGxpc3RNYXRjaE1vZGUSHwoXZGVsZXRlX2V4dHJhX2Zvb3RwcmludHMYBSABKAgSGQoRdXBkYXRlX2Zvb3RwcmludHMYBiABKAgSGgoNdXBkYXRlX2ZpZWxkcxgHIAEoCEgAiAEBEhsKE3JlbW92ZV9leHRyYV9maWVsZHMYCCABKAgSFwoPdHJhbnNmZXJfZ3JvdXBzGAkgASgIEhYKDm92ZXJyaWRlX2xvY2tzGAogASgIQhAKDl91cGRhdGVfZmllbGRzInEKHFN5bmNTY2hlbWF0aWNUb0JvYXJkUmVzcG9uc2USOwoGcmVzdWx0GAEgASgLMisua2lhcGkuYm9hcmQuY29tbWFuZHMuSW1wb3J0TmV0bGlzdFJlc3BvbnNlEhQKDG5ldGxpc3RfcGF0aBgCIAEoCSKzDAoRU2NoZW1hdGljU2V0dGluZ3MSPQoSZGVmYXVsdF9saW5lX3dpZHRoGAEgASgLMhwua2lhcGkuY29tbW9uLnR5cGVzLkRpc3RhbmNlSACIAQESPAoRZGVmYXVsdF90ZXh0X3NpemUYAiABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2VIAYgBARIdChBsYWJlbF9zaXplX3JhdGlvGAMgASgBSAKIAQESHgoRdGV4dF9vZmZzZXRfcmF0aW8YBCABKAFIA4gBARI6Cg9waW5fc3ltYm9sX3NpemUYBSABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2VIBIgBARIhChRqdW5jdGlvbl9zaXplX2Nob2ljZRgGIAEoDUgFiAEBEiEKFGhvcF9vdmVyX3NpemVfY2hvaWNlGAcgASgNSAaIAQESHQoQc2hvd19kbnBfbWFya2VycxgIIAEoCEgHiAEBEj8KFGNvbm5lY3Rpb25fZ3JpZF9zaXplGAkgASgLMhwua2lhcGkuY29tbW9uLnR5cGVzLkRpc3RhbmNlSAiIAQESIgoVYW5ub3RhdGVfc3RhcnRfbnVtYmVyGAogASgNSAmIAQESTQoTYW5ub3RhdGVfc29ydF9vcmRlchgLIAEoDjIrLmtpYXBpLnNjaGVtYXRpYy5jb21tYW5kcy5Bbm5vdGF0ZVNvcnRPcmRlckgKiAEBEkwKEmFubm90YXRlX251bWJlcmluZxgMIAEoDjIrLmtpYXBpLnNjaGVtYXRpYy5jb21tYW5kcy5Bbm5vdGF0ZU51bWJlcmluZ0gLiAEBEiEKFGludGVyc2hlZXRfcmVmc19zaG93GA0gASgISAyIAQESKgodaW50ZXJzaGVldF9yZWZzX2xpc3Rfb3duX3BhZ2UYDiABKAhIDYgBARIpChxpbnRlcnNoZWV0X3JlZnNfZm9ybWF0X3Nob3J0GA8gASgISA6IAQESIwoWaW50ZXJzaGVldF9yZWZzX3ByZWZpeBgQIAEoCUgPiAEBEiMKFmludGVyc2hlZXRfcmVmc19zdWZmaXgYESABKAlIEIgBARIjChZkYXNoZWRfbGluZV9kYXNoX3JhdGlvGBIgASgBSBGIAQESIgoVZGFzaGVkX2xpbmVfZ2FwX3JhdGlvGBMgASgBSBKIAQESHwoSZHJhd2luZ19zaGVldF9maWxlGBQgASgJSBOIAQESGwoOcGxvdF9kaXJlY3RvcnkYFSABKAlIFIgBARIhChRzdWJwYXJ0X2lkX3NlcGFyYXRvchgWIAEoCUgViAEBEh0KEHN1YnBhcnRfZmlyc3RfaWQYFyABKAlIFogBAUIVChNfZGVmYXVsdF9saW5lX3dpZHRoQhQKEl9kZWZhdWx0X3RleHRfc2l6ZUITChFfbGFiZWxfc2l6ZV9yYXRpb0IUChJfdGV4dF9vZmZzZXRfcmF0aW9CEgoQX3Bpbl9zeW1ib2xfc2l6ZUIXChVfanVuY3Rpb25fc2l6ZV9jaG9pY2VCFwoVX2hvcF9vdmVyX3NpemVfY2hvaWNlQhMKEV9zaG93X2RucF9tYXJrZXJzQhcKFV9jb25uZWN0aW9uX2dyaWRfc2l6ZUIYChZfYW5ub3RhdGVfc3RhcnRfbnVtYmVyQhYKFF9hbm5vdGF0ZV9zb3J0X29yZGVyQhUKE19hbm5vdGF0ZV9udW1iZXJpbmdCFwoVX2ludGVyc2hlZXRfcmVmc19zaG93QiAKHl9pbnRlcnNoZWV0X3JlZnNfbGlzdF9vd25fcGFnZUIfCh1faW50ZXJzaGVldF9yZWZzX2Zvcm1hdF9zaG9ydEIZChdfaW50ZXJzaGVldF9yZWZzX3ByZWZpeEIZChdfaW50ZXJzaGVldF9yZWZzX3N1ZmZpeEIZChdfZGFzaGVkX2xpbmVfZGFzaF9yYXRpb0IYChZfZGFzaGVkX2xpbmVfZ2FwX3JhdGlvQhUKE19kcmF3aW5nX3NoZWV0X2ZpbGVCEQoPX3Bsb3RfZGlyZWN0b3J5QhcKFV9zdWJwYXJ0X2lkX3NlcGFyYXRvckITChFfc3VicGFydF9maXJzdF9pZCJQChRHZXRTY2hlbWF0aWNTZXR0aW5ncxI4CglzY2hlbWF0aWMYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIijwEKFFNldFNjaGVtYXRpY1NldHRpbmdzEjgKCXNjaGVtYXRpYxgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchI9CghzZXR0aW5ncxgCIAEoCzIrLmtpYXBpLnNjaGVtYXRpYy5jb21tYW5kcy5TY2hlbWF0aWNTZXR0aW5ncyLSAgoPU3ltYm9sRmllbGRzUm93EiQKAmlkGAEgASgLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSMQoKc2hlZXRfcGF0aBgCIAEoCzIdLmtpYXBpLmNvbW1vbi50eXBlcy5TaGVldFBhdGgSEQoJcmVmZXJlbmNlGAMgASgJEgwKBHVuaXQYBCABKA0SRQoGZmllbGRzGAUgAygLMjUua2lhcGkuc2NoZW1hdGljLmNvbW1hbmRzLlN5bWJvbEZpZWxkc1Jvdy5GaWVsZHNFbnRyeRIZChFleGNsdWRlZF9mcm9tX2JvbRgGIAEoCBIbChNleGNsdWRlZF9mcm9tX2JvYXJkGAcgASgIEhcKD2RvX25vdF9wb3B1bGF0ZRgIIAEoCBotCgtGaWVsZHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIn8KFEdldFN5bWJvbEZpZWxkc1RhYmxlEjgKCXNjaGVtYXRpYxgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchIOCgZmaWVsZHMYAiADKAkSHQoVaW5jbHVkZV9wb3dlcl9zeW1ib2xzGAMgASgIIlQKGVN5bWJvbEZpZWxkc1RhYmxlUmVzcG9uc2USNwoEcm93cxgBIAMoCzIpLmtpYXBpLnNjaGVtYXRpYy5jb21tYW5kcy5TeW1ib2xGaWVsZHNSb3cimgEKEVN5bWJvbEZpZWxkVXBkYXRlEiQKAmlkGAEgASgLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSMQoKc2hlZXRfcGF0aBgCIAEoCzIdLmtpYXBpLmNvbW1vbi50eXBlcy5TaGVldFBhdGgSDQoFZmllbGQYAyABKAkSDQoFdmFsdWUYBCABKAkSDgoGcmVtb3ZlGAUgASgIIokBCg9TZXRTeW1ib2xGaWVsZHMSOAoJc2NoZW1hdGljGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEjwKB3VwZGF0ZXMYAiADKAsyKy5raWFwaS5zY2hlbWF0aWMuY29tbWFuZHMuU3ltYm9sRmllbGRVcGRhdGUiQAoXU2V0U3ltYm9sRmllbGRzUmVzcG9uc2USFQoNdXBkYXRlZF9jb3VudBgBIAEoDRIOCgZlcnJvcnMYAiADKAkiYgoTRm9vdHByaW50QXNzaWdubWVudBIRCglyZWZlcmVuY2UYASABKAkSOAoJZm9vdHByaW50GAIgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkxpYnJhcnlJZGVudGlmaWVyIpABChBBc3NpZ25Gb290cHJpbnRzEjgKCXNjaGVtYXRpYxgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchJCCgthc3NpZ25tZW50cxgCIAMoCzItLmtpYXBpLnNjaGVtYXRpYy5jb21tYW5kcy5Gb290cHJpbnRBc3NpZ25tZW50IlAKGEFzc2lnbkZvb3RwcmludHNSZXNwb25zZRIWCg5hc3NpZ25lZF9jb3VudBgBIAEoDRIcChR1bm1hdGNoZWRfcmVmZXJlbmNlcxgCIAMoCSpPCg1Bbm5vdGF0ZVNjb3BlEg8KC0FOU19VTktOT1dOEAASCwoHQU5TX0FMTBABEg0KCUFOU19TSEVFVBACEhEKDUFOU19TRUxFQ1RJT04QAypeChFBbm5vdGF0ZVNvcnRPcmRlchIPCgtBU09fVU5LTk9XThAAEhIKDkFTT19YX1BPU0lUSU9OEAESEgoOQVNPX1lfUE9TSVRJT04QAhIQCgxBU09fVU5TT1JURUQQAypwChFBbm5vdGF0ZU51bWJlcmluZxIPCgtBTk1fVU5LTk9XThAAEhMKD0FOTV9JTkNSRU1FTlRBTBABEhkKFUFOTV9TSEVFVF9OVU1CRVJfWDEwMBACEhoKFkFOTV9TSEVFVF9OVU1CRVJfWDEwMDAQA2IGcHJvdG8z", [file_common_types_base_types, file_common_types_enums, file_board_board_commands, file_schematic_schematic_rules, file_schematic_schematic_types]);
 
 /**
  * @generated from message kiapi.schematic.commands.GetSchematicHierarchy
@@ -516,4 +518,1499 @@ export type SetErcSeveritiesJson = {
  */
 export const SetErcSeveritiesSchema: GenMessage<SetErcSeverities, {jsonType: SetErcSeveritiesJson}> = /*@__PURE__*/
   messageDesc(file_schematic_schematic_commands, 10);
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.AnnotateOptions
+ */
+export type AnnotateOptions = Message<"kiapi.schematic.commands.AnnotateOptions"> & {
+  /**
+   * Defaults (ASO_UNKNOWN / ANM_UNKNOWN / 0) take the values from the schematic settings
+   *
+   * @generated from field: kiapi.schematic.commands.AnnotateSortOrder sort_order = 1;
+   */
+  sortOrder: AnnotateSortOrder;
+
+  /**
+   * @generated from field: kiapi.schematic.commands.AnnotateNumbering numbering = 2;
+   */
+  numbering: AnnotateNumbering;
+
+  /**
+   * @generated from field: uint32 start_number = 3;
+   */
+  startNumber: number;
+
+  /**
+   * Clear existing references first; otherwise only unannotated symbols get numbers
+   *
+   * @generated from field: bool reset_existing = 4;
+   */
+  resetExisting: boolean;
+
+  /**
+   * Include sub-sheets of the sheet (ANS_SHEET) or of the selected sheets (ANS_SELECTION)
+   *
+   * @generated from field: bool recursive = 5;
+   */
+  recursive: boolean;
+
+  /**
+   * Let units of multi-unit symbols be regrouped freely instead of keeping their current sets
+   *
+   * @generated from field: bool regroup_units = 6;
+   */
+  regroupUnits: boolean;
+};
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.AnnotateOptions
+ */
+export type AnnotateOptionsJson = {
+  /**
+   * Defaults (ASO_UNKNOWN / ANM_UNKNOWN / 0) take the values from the schematic settings
+   *
+   * @generated from field: kiapi.schematic.commands.AnnotateSortOrder sort_order = 1;
+   */
+  sortOrder?: AnnotateSortOrderJson;
+
+  /**
+   * @generated from field: kiapi.schematic.commands.AnnotateNumbering numbering = 2;
+   */
+  numbering?: AnnotateNumberingJson;
+
+  /**
+   * @generated from field: uint32 start_number = 3;
+   */
+  startNumber?: number;
+
+  /**
+   * Clear existing references first; otherwise only unannotated symbols get numbers
+   *
+   * @generated from field: bool reset_existing = 4;
+   */
+  resetExisting?: boolean;
+
+  /**
+   * Include sub-sheets of the sheet (ANS_SHEET) or of the selected sheets (ANS_SELECTION)
+   *
+   * @generated from field: bool recursive = 5;
+   */
+  recursive?: boolean;
+
+  /**
+   * Let units of multi-unit symbols be regrouped freely instead of keeping their current sets
+   *
+   * @generated from field: bool regroup_units = 6;
+   */
+  regroupUnits?: boolean;
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.AnnotateOptions.
+ * Use `create(AnnotateOptionsSchema)` to create a new message.
+ */
+export const AnnotateOptionsSchema: GenMessage<AnnotateOptions, {jsonType: AnnotateOptionsJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 11);
+
+/**
+ * Annotates symbols the way the annotation dialog does.  Symbols keep their references unless
+ * options.reset_existing is set.  The change is recorded as an API commit.
+ * Returns AnnotateResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.Annotate
+ */
+export type Annotate = Message<"kiapi.schematic.commands.Annotate"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifier | undefined;
+
+  /**
+   * @generated from field: kiapi.schematic.commands.AnnotateScope scope = 2;
+   */
+  scope: AnnotateScope;
+
+  /**
+   * Symbols and sheets for ANS_SELECTION
+   *
+   * @generated from field: repeated kiapi.common.types.KIID items = 3;
+   */
+  items: KIID[];
+
+  /**
+   * @generated from field: kiapi.schematic.commands.AnnotateOptions options = 4;
+   */
+  options?: AnnotateOptions | undefined;
+};
+
+/**
+ * Annotates symbols the way the annotation dialog does.  Symbols keep their references unless
+ * options.reset_existing is set.  The change is recorded as an API commit.
+ * Returns AnnotateResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.Annotate
+ */
+export type AnnotateJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifierJson;
+
+  /**
+   * @generated from field: kiapi.schematic.commands.AnnotateScope scope = 2;
+   */
+  scope?: AnnotateScopeJson;
+
+  /**
+   * Symbols and sheets for ANS_SELECTION
+   *
+   * @generated from field: repeated kiapi.common.types.KIID items = 3;
+   */
+  items?: KIIDJson[];
+
+  /**
+   * @generated from field: kiapi.schematic.commands.AnnotateOptions options = 4;
+   */
+  options?: AnnotateOptionsJson;
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.Annotate.
+ * Use `create(AnnotateSchema)` to create a new message.
+ */
+export const AnnotateSchema: GenMessage<Annotate, {jsonType: AnnotateJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 12);
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.AnnotateResponse
+ */
+export type AnnotateResponse = Message<"kiapi.schematic.commands.AnnotateResponse"> & {
+  /**
+   * Symbols whose reference was assigned or changed by this call
+   *
+   * @generated from field: uint32 annotated_count = 1;
+   */
+  annotatedCount: number;
+
+  /**
+   * Symbols considered (annotated or already correct)
+   *
+   * @generated from field: uint32 symbol_count = 2;
+   */
+  symbolCount: number;
+
+  /**
+   * Problems reported by the annotation check afterwards (duplicates, missing numbers)
+   *
+   * @generated from field: uint32 error_count = 3;
+   */
+  errorCount: number;
+
+  /**
+   * Human-readable report lines
+   *
+   * @generated from field: repeated string messages = 4;
+   */
+  messages: string[];
+};
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.AnnotateResponse
+ */
+export type AnnotateResponseJson = {
+  /**
+   * Symbols whose reference was assigned or changed by this call
+   *
+   * @generated from field: uint32 annotated_count = 1;
+   */
+  annotatedCount?: number;
+
+  /**
+   * Symbols considered (annotated or already correct)
+   *
+   * @generated from field: uint32 symbol_count = 2;
+   */
+  symbolCount?: number;
+
+  /**
+   * Problems reported by the annotation check afterwards (duplicates, missing numbers)
+   *
+   * @generated from field: uint32 error_count = 3;
+   */
+  errorCount?: number;
+
+  /**
+   * Human-readable report lines
+   *
+   * @generated from field: repeated string messages = 4;
+   */
+  messages?: string[];
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.AnnotateResponse.
+ * Use `create(AnnotateResponseSchema)` to create a new message.
+ */
+export const AnnotateResponseSchema: GenMessage<AnnotateResponse, {jsonType: AnnotateResponseJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 13);
+
+/**
+ * Clears the references of the symbols in scope (they become "R?").
+ * Returns AnnotateResponse (annotated_count is the number of symbols cleared)
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.ClearAnnotation
+ */
+export type ClearAnnotation = Message<"kiapi.schematic.commands.ClearAnnotation"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifier | undefined;
+
+  /**
+   * @generated from field: kiapi.schematic.commands.AnnotateScope scope = 2;
+   */
+  scope: AnnotateScope;
+
+  /**
+   * @generated from field: repeated kiapi.common.types.KIID items = 3;
+   */
+  items: KIID[];
+
+  /**
+   * @generated from field: bool recursive = 4;
+   */
+  recursive: boolean;
+};
+
+/**
+ * Clears the references of the symbols in scope (they become "R?").
+ * Returns AnnotateResponse (annotated_count is the number of symbols cleared)
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.ClearAnnotation
+ */
+export type ClearAnnotationJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifierJson;
+
+  /**
+   * @generated from field: kiapi.schematic.commands.AnnotateScope scope = 2;
+   */
+  scope?: AnnotateScopeJson;
+
+  /**
+   * @generated from field: repeated kiapi.common.types.KIID items = 3;
+   */
+  items?: KIIDJson[];
+
+  /**
+   * @generated from field: bool recursive = 4;
+   */
+  recursive?: boolean;
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.ClearAnnotation.
+ * Use `create(ClearAnnotationSchema)` to create a new message.
+ */
+export const ClearAnnotationSchema: GenMessage<ClearAnnotation, {jsonType: ClearAnnotationJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 14);
+
+/**
+ * Updates an open board from the open schematic in one step ("Update PCB from Schematic"): the
+ * schematic netlist is exported and applied to the board with BOARD_NETLIST_UPDATER.  Both
+ * documents must be open in this KiCad instance.
+ * Returns SyncSchematicToBoardResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SyncSchematicToBoard
+ */
+export type SyncSchematicToBoard = Message<"kiapi.schematic.commands.SyncSchematicToBoard"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifier | undefined;
+
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier board = 2;
+   */
+  board?: DocumentSpecifier | undefined;
+
+  /**
+   * Report planned changes without modifying the board
+   *
+   * @generated from field: bool dry_run = 3;
+   */
+  dryRun: boolean;
+
+  /**
+   * @generated from field: kiapi.board.commands.NetlistMatchMode match_mode = 4;
+   */
+  matchMode: NetlistMatchMode;
+
+  /**
+   * @generated from field: bool delete_extra_footprints = 5;
+   */
+  deleteExtraFootprints: boolean;
+
+  /**
+   * Replace footprints whose library id changed in the schematic
+   *
+   * @generated from field: bool update_footprints = 6;
+   */
+  updateFootprints: boolean;
+
+  /**
+   * Copy symbol field values to the footprints (default true; set to false to keep the
+   * footprints' fields)
+   *
+   * @generated from field: optional bool update_fields = 7;
+   */
+  updateFields?: boolean | undefined;
+
+  /**
+   * Remove footprint fields that the symbol does not have (only with update_fields)
+   *
+   * @generated from field: bool remove_extra_fields = 8;
+   */
+  removeExtraFields: boolean;
+
+  /**
+   * @generated from field: bool transfer_groups = 9;
+   */
+  transferGroups: boolean;
+
+  /**
+   * @generated from field: bool override_locks = 10;
+   */
+  overrideLocks: boolean;
+};
+
+/**
+ * Updates an open board from the open schematic in one step ("Update PCB from Schematic"): the
+ * schematic netlist is exported and applied to the board with BOARD_NETLIST_UPDATER.  Both
+ * documents must be open in this KiCad instance.
+ * Returns SyncSchematicToBoardResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SyncSchematicToBoard
+ */
+export type SyncSchematicToBoardJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifierJson;
+
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier board = 2;
+   */
+  board?: DocumentSpecifierJson;
+
+  /**
+   * Report planned changes without modifying the board
+   *
+   * @generated from field: bool dry_run = 3;
+   */
+  dryRun?: boolean;
+
+  /**
+   * @generated from field: kiapi.board.commands.NetlistMatchMode match_mode = 4;
+   */
+  matchMode?: NetlistMatchModeJson;
+
+  /**
+   * @generated from field: bool delete_extra_footprints = 5;
+   */
+  deleteExtraFootprints?: boolean;
+
+  /**
+   * Replace footprints whose library id changed in the schematic
+   *
+   * @generated from field: bool update_footprints = 6;
+   */
+  updateFootprints?: boolean;
+
+  /**
+   * Copy symbol field values to the footprints (default true; set to false to keep the
+   * footprints' fields)
+   *
+   * @generated from field: optional bool update_fields = 7;
+   */
+  updateFields?: boolean;
+
+  /**
+   * Remove footprint fields that the symbol does not have (only with update_fields)
+   *
+   * @generated from field: bool remove_extra_fields = 8;
+   */
+  removeExtraFields?: boolean;
+
+  /**
+   * @generated from field: bool transfer_groups = 9;
+   */
+  transferGroups?: boolean;
+
+  /**
+   * @generated from field: bool override_locks = 10;
+   */
+  overrideLocks?: boolean;
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.SyncSchematicToBoard.
+ * Use `create(SyncSchematicToBoardSchema)` to create a new message.
+ */
+export const SyncSchematicToBoardSchema: GenMessage<SyncSchematicToBoard, {jsonType: SyncSchematicToBoardJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 15);
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SyncSchematicToBoardResponse
+ */
+export type SyncSchematicToBoardResponse = Message<"kiapi.schematic.commands.SyncSchematicToBoardResponse"> & {
+  /**
+   * @generated from field: kiapi.board.commands.ImportNetlistResponse result = 1;
+   */
+  result?: ImportNetlistResponse | undefined;
+
+  /**
+   * The netlist file that was applied; a temporary file the server removes afterwards, so
+   * this is informational only
+   *
+   * @generated from field: string netlist_path = 2;
+   */
+  netlistPath: string;
+};
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SyncSchematicToBoardResponse
+ */
+export type SyncSchematicToBoardResponseJson = {
+  /**
+   * @generated from field: kiapi.board.commands.ImportNetlistResponse result = 1;
+   */
+  result?: ImportNetlistResponseJson;
+
+  /**
+   * The netlist file that was applied; a temporary file the server removes afterwards, so
+   * this is informational only
+   *
+   * @generated from field: string netlist_path = 2;
+   */
+  netlistPath?: string;
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.SyncSchematicToBoardResponse.
+ * Use `create(SyncSchematicToBoardResponseSchema)` to create a new message.
+ */
+export const SyncSchematicToBoardResponseSchema: GenMessage<SyncSchematicToBoardResponse, {jsonType: SyncSchematicToBoardResponseJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 16);
+
+/**
+ * The subset of the project's schematic settings the API exposes.  Every field is optional so
+ * that SetSchematicSettings changes only what is sent.
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SchematicSettings
+ */
+export type SchematicSettings = Message<"kiapi.schematic.commands.SchematicSettings"> & {
+  /**
+   * @generated from field: optional kiapi.common.types.Distance default_line_width = 1;
+   */
+  defaultLineWidth?: Distance | undefined;
+
+  /**
+   * @generated from field: optional kiapi.common.types.Distance default_text_size = 2;
+   */
+  defaultTextSize?: Distance | undefined;
+
+  /**
+   * Label size as a ratio of the default text size
+   *
+   * @generated from field: optional double label_size_ratio = 3;
+   */
+  labelSizeRatio?: number | undefined;
+
+  /**
+   * @generated from field: optional double text_offset_ratio = 4;
+   */
+  textOffsetRatio?: number | undefined;
+
+  /**
+   * @generated from field: optional kiapi.common.types.Distance pin_symbol_size = 5;
+   */
+  pinSymbolSize?: Distance | undefined;
+
+  /**
+   * 0 = none, 1 = smallest, 2 = small, 3 = default, 4 = large, 5 = largest
+   *
+   * @generated from field: optional uint32 junction_size_choice = 6;
+   */
+  junctionSizeChoice?: number | undefined;
+
+  /**
+   * @generated from field: optional uint32 hop_over_size_choice = 7;
+   */
+  hopOverSizeChoice?: number | undefined;
+
+  /**
+   * @generated from field: optional bool show_dnp_markers = 8;
+   */
+  showDnpMarkers?: boolean | undefined;
+
+  /**
+   * @generated from field: optional kiapi.common.types.Distance connection_grid_size = 9;
+   */
+  connectionGridSize?: Distance | undefined;
+
+  /**
+   * @generated from field: optional uint32 annotate_start_number = 10;
+   */
+  annotateStartNumber?: number | undefined;
+
+  /**
+   * @generated from field: optional kiapi.schematic.commands.AnnotateSortOrder annotate_sort_order = 11;
+   */
+  annotateSortOrder?: AnnotateSortOrder | undefined;
+
+  /**
+   * @generated from field: optional kiapi.schematic.commands.AnnotateNumbering annotate_numbering = 12;
+   */
+  annotateNumbering?: AnnotateNumbering | undefined;
+
+  /**
+   * @generated from field: optional bool intersheet_refs_show = 13;
+   */
+  intersheetRefsShow?: boolean | undefined;
+
+  /**
+   * @generated from field: optional bool intersheet_refs_list_own_page = 14;
+   */
+  intersheetRefsListOwnPage?: boolean | undefined;
+
+  /**
+   * @generated from field: optional bool intersheet_refs_format_short = 15;
+   */
+  intersheetRefsFormatShort?: boolean | undefined;
+
+  /**
+   * @generated from field: optional string intersheet_refs_prefix = 16;
+   */
+  intersheetRefsPrefix?: string | undefined;
+
+  /**
+   * @generated from field: optional string intersheet_refs_suffix = 17;
+   */
+  intersheetRefsSuffix?: string | undefined;
+
+  /**
+   * @generated from field: optional double dashed_line_dash_ratio = 18;
+   */
+  dashedLineDashRatio?: number | undefined;
+
+  /**
+   * @generated from field: optional double dashed_line_gap_ratio = 19;
+   */
+  dashedLineGapRatio?: number | undefined;
+
+  /**
+   * @generated from field: optional string drawing_sheet_file = 20;
+   */
+  drawingSheetFile?: string | undefined;
+
+  /**
+   * @generated from field: optional string plot_directory = 21;
+   */
+  plotDirectory?: string | undefined;
+
+  /**
+   * Multi-unit reference suffix: separator character (empty for none) and first id ('A' or '1')
+   *
+   * @generated from field: optional string subpart_id_separator = 22;
+   */
+  subpartIdSeparator?: string | undefined;
+
+  /**
+   * @generated from field: optional string subpart_first_id = 23;
+   */
+  subpartFirstId?: string | undefined;
+};
+
+/**
+ * The subset of the project's schematic settings the API exposes.  Every field is optional so
+ * that SetSchematicSettings changes only what is sent.
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SchematicSettings
+ */
+export type SchematicSettingsJson = {
+  /**
+   * @generated from field: optional kiapi.common.types.Distance default_line_width = 1;
+   */
+  defaultLineWidth?: DistanceJson;
+
+  /**
+   * @generated from field: optional kiapi.common.types.Distance default_text_size = 2;
+   */
+  defaultTextSize?: DistanceJson;
+
+  /**
+   * Label size as a ratio of the default text size
+   *
+   * @generated from field: optional double label_size_ratio = 3;
+   */
+  labelSizeRatio?: number | "NaN" | "Infinity" | "-Infinity";
+
+  /**
+   * @generated from field: optional double text_offset_ratio = 4;
+   */
+  textOffsetRatio?: number | "NaN" | "Infinity" | "-Infinity";
+
+  /**
+   * @generated from field: optional kiapi.common.types.Distance pin_symbol_size = 5;
+   */
+  pinSymbolSize?: DistanceJson;
+
+  /**
+   * 0 = none, 1 = smallest, 2 = small, 3 = default, 4 = large, 5 = largest
+   *
+   * @generated from field: optional uint32 junction_size_choice = 6;
+   */
+  junctionSizeChoice?: number;
+
+  /**
+   * @generated from field: optional uint32 hop_over_size_choice = 7;
+   */
+  hopOverSizeChoice?: number;
+
+  /**
+   * @generated from field: optional bool show_dnp_markers = 8;
+   */
+  showDnpMarkers?: boolean;
+
+  /**
+   * @generated from field: optional kiapi.common.types.Distance connection_grid_size = 9;
+   */
+  connectionGridSize?: DistanceJson;
+
+  /**
+   * @generated from field: optional uint32 annotate_start_number = 10;
+   */
+  annotateStartNumber?: number;
+
+  /**
+   * @generated from field: optional kiapi.schematic.commands.AnnotateSortOrder annotate_sort_order = 11;
+   */
+  annotateSortOrder?: AnnotateSortOrderJson;
+
+  /**
+   * @generated from field: optional kiapi.schematic.commands.AnnotateNumbering annotate_numbering = 12;
+   */
+  annotateNumbering?: AnnotateNumberingJson;
+
+  /**
+   * @generated from field: optional bool intersheet_refs_show = 13;
+   */
+  intersheetRefsShow?: boolean;
+
+  /**
+   * @generated from field: optional bool intersheet_refs_list_own_page = 14;
+   */
+  intersheetRefsListOwnPage?: boolean;
+
+  /**
+   * @generated from field: optional bool intersheet_refs_format_short = 15;
+   */
+  intersheetRefsFormatShort?: boolean;
+
+  /**
+   * @generated from field: optional string intersheet_refs_prefix = 16;
+   */
+  intersheetRefsPrefix?: string;
+
+  /**
+   * @generated from field: optional string intersheet_refs_suffix = 17;
+   */
+  intersheetRefsSuffix?: string;
+
+  /**
+   * @generated from field: optional double dashed_line_dash_ratio = 18;
+   */
+  dashedLineDashRatio?: number | "NaN" | "Infinity" | "-Infinity";
+
+  /**
+   * @generated from field: optional double dashed_line_gap_ratio = 19;
+   */
+  dashedLineGapRatio?: number | "NaN" | "Infinity" | "-Infinity";
+
+  /**
+   * @generated from field: optional string drawing_sheet_file = 20;
+   */
+  drawingSheetFile?: string;
+
+  /**
+   * @generated from field: optional string plot_directory = 21;
+   */
+  plotDirectory?: string;
+
+  /**
+   * Multi-unit reference suffix: separator character (empty for none) and first id ('A' or '1')
+   *
+   * @generated from field: optional string subpart_id_separator = 22;
+   */
+  subpartIdSeparator?: string;
+
+  /**
+   * @generated from field: optional string subpart_first_id = 23;
+   */
+  subpartFirstId?: string;
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.SchematicSettings.
+ * Use `create(SchematicSettingsSchema)` to create a new message.
+ */
+export const SchematicSettingsSchema: GenMessage<SchematicSettings, {jsonType: SchematicSettingsJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 17);
+
+/**
+ * Returns SchematicSettings
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.GetSchematicSettings
+ */
+export type GetSchematicSettings = Message<"kiapi.schematic.commands.GetSchematicSettings"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifier | undefined;
+};
+
+/**
+ * Returns SchematicSettings
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.GetSchematicSettings
+ */
+export type GetSchematicSettingsJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifierJson;
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.GetSchematicSettings.
+ * Use `create(GetSchematicSettingsSchema)` to create a new message.
+ */
+export const GetSchematicSettingsSchema: GenMessage<GetSchematicSettings, {jsonType: GetSchematicSettingsJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 18);
+
+/**
+ * Applies the fields present in settings; they are persisted with the project on the next
+ * SaveDocument.  Returns the resulting SchematicSettings.
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SetSchematicSettings
+ */
+export type SetSchematicSettings = Message<"kiapi.schematic.commands.SetSchematicSettings"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifier | undefined;
+
+  /**
+   * @generated from field: kiapi.schematic.commands.SchematicSettings settings = 2;
+   */
+  settings?: SchematicSettings | undefined;
+};
+
+/**
+ * Applies the fields present in settings; they are persisted with the project on the next
+ * SaveDocument.  Returns the resulting SchematicSettings.
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SetSchematicSettings
+ */
+export type SetSchematicSettingsJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifierJson;
+
+  /**
+   * @generated from field: kiapi.schematic.commands.SchematicSettings settings = 2;
+   */
+  settings?: SchematicSettingsJson;
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.SetSchematicSettings.
+ * Use `create(SetSchematicSettingsSchema)` to create a new message.
+ */
+export const SetSchematicSettingsSchema: GenMessage<SetSchematicSettings, {jsonType: SetSchematicSettingsJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 19);
+
+/**
+ * One symbol placement, as a row of the symbol fields table
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SymbolFieldsRow
+ */
+export type SymbolFieldsRow = Message<"kiapi.schematic.commands.SymbolFieldsRow"> & {
+  /**
+   * @generated from field: kiapi.common.types.KIID id = 1;
+   */
+  id?: KIID | undefined;
+
+  /**
+   * The sheet the placement is on
+   *
+   * @generated from field: kiapi.common.types.SheetPath sheet_path = 2;
+   */
+  sheetPath?: SheetPath | undefined;
+
+  /**
+   * @generated from field: string reference = 3;
+   */
+  reference: string;
+
+  /**
+   * @generated from field: uint32 unit = 4;
+   */
+  unit: number;
+
+  /**
+   * Every field by name, including Reference, Value, Footprint, Datasheet, Description
+   *
+   * @generated from field: map<string, string> fields = 5;
+   */
+  fields: { [key: string]: string };
+
+  /**
+   * @generated from field: bool excluded_from_bom = 6;
+   */
+  excludedFromBom: boolean;
+
+  /**
+   * @generated from field: bool excluded_from_board = 7;
+   */
+  excludedFromBoard: boolean;
+
+  /**
+   * @generated from field: bool do_not_populate = 8;
+   */
+  doNotPopulate: boolean;
+};
+
+/**
+ * One symbol placement, as a row of the symbol fields table
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SymbolFieldsRow
+ */
+export type SymbolFieldsRowJson = {
+  /**
+   * @generated from field: kiapi.common.types.KIID id = 1;
+   */
+  id?: KIIDJson;
+
+  /**
+   * The sheet the placement is on
+   *
+   * @generated from field: kiapi.common.types.SheetPath sheet_path = 2;
+   */
+  sheetPath?: SheetPathJson;
+
+  /**
+   * @generated from field: string reference = 3;
+   */
+  reference?: string;
+
+  /**
+   * @generated from field: uint32 unit = 4;
+   */
+  unit?: number;
+
+  /**
+   * Every field by name, including Reference, Value, Footprint, Datasheet, Description
+   *
+   * @generated from field: map<string, string> fields = 5;
+   */
+  fields?: { [key: string]: string };
+
+  /**
+   * @generated from field: bool excluded_from_bom = 6;
+   */
+  excludedFromBom?: boolean;
+
+  /**
+   * @generated from field: bool excluded_from_board = 7;
+   */
+  excludedFromBoard?: boolean;
+
+  /**
+   * @generated from field: bool do_not_populate = 8;
+   */
+  doNotPopulate?: boolean;
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.SymbolFieldsRow.
+ * Use `create(SymbolFieldsRowSchema)` to create a new message.
+ */
+export const SymbolFieldsRowSchema: GenMessage<SymbolFieldsRow, {jsonType: SymbolFieldsRowJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 20);
+
+/**
+ * Lists every symbol placement with its field values, as the symbol fields table shows them.
+ * Returns SymbolFieldsTableResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.GetSymbolFieldsTable
+ */
+export type GetSymbolFieldsTable = Message<"kiapi.schematic.commands.GetSymbolFieldsTable"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifier | undefined;
+
+  /**
+   * Restrict the fields map to these names; empty returns every field
+   *
+   * @generated from field: repeated string fields = 2;
+   */
+  fields: string[];
+
+  /**
+   * Include power symbols (excluded by default, as the table does)
+   *
+   * @generated from field: bool include_power_symbols = 3;
+   */
+  includePowerSymbols: boolean;
+};
+
+/**
+ * Lists every symbol placement with its field values, as the symbol fields table shows them.
+ * Returns SymbolFieldsTableResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.GetSymbolFieldsTable
+ */
+export type GetSymbolFieldsTableJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifierJson;
+
+  /**
+   * Restrict the fields map to these names; empty returns every field
+   *
+   * @generated from field: repeated string fields = 2;
+   */
+  fields?: string[];
+
+  /**
+   * Include power symbols (excluded by default, as the table does)
+   *
+   * @generated from field: bool include_power_symbols = 3;
+   */
+  includePowerSymbols?: boolean;
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.GetSymbolFieldsTable.
+ * Use `create(GetSymbolFieldsTableSchema)` to create a new message.
+ */
+export const GetSymbolFieldsTableSchema: GenMessage<GetSymbolFieldsTable, {jsonType: GetSymbolFieldsTableJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 21);
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SymbolFieldsTableResponse
+ */
+export type SymbolFieldsTableResponse = Message<"kiapi.schematic.commands.SymbolFieldsTableResponse"> & {
+  /**
+   * @generated from field: repeated kiapi.schematic.commands.SymbolFieldsRow rows = 1;
+   */
+  rows: SymbolFieldsRow[];
+};
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SymbolFieldsTableResponse
+ */
+export type SymbolFieldsTableResponseJson = {
+  /**
+   * @generated from field: repeated kiapi.schematic.commands.SymbolFieldsRow rows = 1;
+   */
+  rows?: SymbolFieldsRowJson[];
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.SymbolFieldsTableResponse.
+ * Use `create(SymbolFieldsTableResponseSchema)` to create a new message.
+ */
+export const SymbolFieldsTableResponseSchema: GenMessage<SymbolFieldsTableResponse, {jsonType: SymbolFieldsTableResponseJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 22);
+
+/**
+ * One field value to set on one placement.  Reference, Value and Footprint are set per
+ * placement (sheet instance); other fields are shared by every placement of the symbol.
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SymbolFieldUpdate
+ */
+export type SymbolFieldUpdate = Message<"kiapi.schematic.commands.SymbolFieldUpdate"> & {
+  /**
+   * @generated from field: kiapi.common.types.KIID id = 1;
+   */
+  id?: KIID | undefined;
+
+  /**
+   * Required for Reference/Value/Footprint on symbols that are placed more than once
+   *
+   * @generated from field: kiapi.common.types.SheetPath sheet_path = 2;
+   */
+  sheetPath?: SheetPath | undefined;
+
+  /**
+   * @generated from field: string field = 3;
+   */
+  field: string;
+
+  /**
+   * @generated from field: string value = 4;
+   */
+  value: string;
+
+  /**
+   * Remove the (user) field instead of setting it
+   *
+   * @generated from field: bool remove = 5;
+   */
+  remove: boolean;
+};
+
+/**
+ * One field value to set on one placement.  Reference, Value and Footprint are set per
+ * placement (sheet instance); other fields are shared by every placement of the symbol.
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SymbolFieldUpdate
+ */
+export type SymbolFieldUpdateJson = {
+  /**
+   * @generated from field: kiapi.common.types.KIID id = 1;
+   */
+  id?: KIIDJson;
+
+  /**
+   * Required for Reference/Value/Footprint on symbols that are placed more than once
+   *
+   * @generated from field: kiapi.common.types.SheetPath sheet_path = 2;
+   */
+  sheetPath?: SheetPathJson;
+
+  /**
+   * @generated from field: string field = 3;
+   */
+  field?: string;
+
+  /**
+   * @generated from field: string value = 4;
+   */
+  value?: string;
+
+  /**
+   * Remove the (user) field instead of setting it
+   *
+   * @generated from field: bool remove = 5;
+   */
+  remove?: boolean;
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.SymbolFieldUpdate.
+ * Use `create(SymbolFieldUpdateSchema)` to create a new message.
+ */
+export const SymbolFieldUpdateSchema: GenMessage<SymbolFieldUpdate, {jsonType: SymbolFieldUpdateJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 23);
+
+/**
+ * Sets field values in bulk, as one API commit.
+ * Returns SetSymbolFieldsResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SetSymbolFields
+ */
+export type SetSymbolFields = Message<"kiapi.schematic.commands.SetSymbolFields"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifier | undefined;
+
+  /**
+   * @generated from field: repeated kiapi.schematic.commands.SymbolFieldUpdate updates = 2;
+   */
+  updates: SymbolFieldUpdate[];
+};
+
+/**
+ * Sets field values in bulk, as one API commit.
+ * Returns SetSymbolFieldsResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SetSymbolFields
+ */
+export type SetSymbolFieldsJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifierJson;
+
+  /**
+   * @generated from field: repeated kiapi.schematic.commands.SymbolFieldUpdate updates = 2;
+   */
+  updates?: SymbolFieldUpdateJson[];
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.SetSymbolFields.
+ * Use `create(SetSymbolFieldsSchema)` to create a new message.
+ */
+export const SetSymbolFieldsSchema: GenMessage<SetSymbolFields, {jsonType: SetSymbolFieldsJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 24);
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SetSymbolFieldsResponse
+ */
+export type SetSymbolFieldsResponse = Message<"kiapi.schematic.commands.SetSymbolFieldsResponse"> & {
+  /**
+   * @generated from field: uint32 updated_count = 1;
+   */
+  updatedCount: number;
+
+  /**
+   * Updates that could not be applied (unknown symbol, mandatory field removal, ...)
+   *
+   * @generated from field: repeated string errors = 2;
+   */
+  errors: string[];
+};
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SetSymbolFieldsResponse
+ */
+export type SetSymbolFieldsResponseJson = {
+  /**
+   * @generated from field: uint32 updated_count = 1;
+   */
+  updatedCount?: number;
+
+  /**
+   * Updates that could not be applied (unknown symbol, mandatory field removal, ...)
+   *
+   * @generated from field: repeated string errors = 2;
+   */
+  errors?: string[];
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.SetSymbolFieldsResponse.
+ * Use `create(SetSymbolFieldsResponseSchema)` to create a new message.
+ */
+export const SetSymbolFieldsResponseSchema: GenMessage<SetSymbolFieldsResponse, {jsonType: SetSymbolFieldsResponseJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 25);
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.FootprintAssignment
+ */
+export type FootprintAssignment = Message<"kiapi.schematic.commands.FootprintAssignment"> & {
+  /**
+   * Reference designator (without unit suffix) of the symbol
+   *
+   * @generated from field: string reference = 1;
+   */
+  reference: string;
+
+  /**
+   * @generated from field: kiapi.common.types.LibraryIdentifier footprint = 2;
+   */
+  footprint?: LibraryIdentifier | undefined;
+};
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.FootprintAssignment
+ */
+export type FootprintAssignmentJson = {
+  /**
+   * Reference designator (without unit suffix) of the symbol
+   *
+   * @generated from field: string reference = 1;
+   */
+  reference?: string;
+
+  /**
+   * @generated from field: kiapi.common.types.LibraryIdentifier footprint = 2;
+   */
+  footprint?: LibraryIdentifierJson;
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.FootprintAssignment.
+ * Use `create(FootprintAssignmentSchema)` to create a new message.
+ */
+export const FootprintAssignmentSchema: GenMessage<FootprintAssignment, {jsonType: FootprintAssignmentJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 26);
+
+/**
+ * Assigns footprints to symbols by reference, as CvPcb does, in one API commit.
+ * Returns AssignFootprintsResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.AssignFootprints
+ */
+export type AssignFootprints = Message<"kiapi.schematic.commands.AssignFootprints"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifier | undefined;
+
+  /**
+   * @generated from field: repeated kiapi.schematic.commands.FootprintAssignment assignments = 2;
+   */
+  assignments: FootprintAssignment[];
+};
+
+/**
+ * Assigns footprints to symbols by reference, as CvPcb does, in one API commit.
+ * Returns AssignFootprintsResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.AssignFootprints
+ */
+export type AssignFootprintsJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifierJson;
+
+  /**
+   * @generated from field: repeated kiapi.schematic.commands.FootprintAssignment assignments = 2;
+   */
+  assignments?: FootprintAssignmentJson[];
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.AssignFootprints.
+ * Use `create(AssignFootprintsSchema)` to create a new message.
+ */
+export const AssignFootprintsSchema: GenMessage<AssignFootprints, {jsonType: AssignFootprintsJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 27);
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.AssignFootprintsResponse
+ */
+export type AssignFootprintsResponse = Message<"kiapi.schematic.commands.AssignFootprintsResponse"> & {
+  /**
+   * @generated from field: uint32 assigned_count = 1;
+   */
+  assignedCount: number;
+
+  /**
+   * References that matched no symbol
+   *
+   * @generated from field: repeated string unmatched_references = 2;
+   */
+  unmatchedReferences: string[];
+};
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.AssignFootprintsResponse
+ */
+export type AssignFootprintsResponseJson = {
+  /**
+   * @generated from field: uint32 assigned_count = 1;
+   */
+  assignedCount?: number;
+
+  /**
+   * References that matched no symbol
+   *
+   * @generated from field: repeated string unmatched_references = 2;
+   */
+  unmatchedReferences?: string[];
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.AssignFootprintsResponse.
+ * Use `create(AssignFootprintsResponseSchema)` to create a new message.
+ */
+export const AssignFootprintsResponseSchema: GenMessage<AssignFootprintsResponse, {jsonType: AssignFootprintsResponseJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 28);
+
+/**
+ * Since 11.0
+ *
+ * @generated from enum kiapi.schematic.commands.AnnotateScope
+ */
+export enum AnnotateScope {
+  /**
+   * @generated from enum value: ANS_UNKNOWN = 0;
+   */
+  ANS_UNKNOWN = 0,
+
+  /**
+   * Every sheet of the schematic
+   *
+   * @generated from enum value: ANS_ALL = 1;
+   */
+  ANS_ALL = 1,
+
+  /**
+   * The sheet named by the document's sheet_path (the root sheet if none), plus its sub-sheets
+   * when AnnotateOptions.recursive is set
+   *
+   * @generated from enum value: ANS_SHEET = 2;
+   */
+  ANS_SHEET = 2,
+
+  /**
+   * The symbols (and sheets, when recursive) listed in Annotate.items, on the document's sheet
+   *
+   * @generated from enum value: ANS_SELECTION = 3;
+   */
+  ANS_SELECTION = 3,
+}
+
+/**
+ * Since 11.0
+ *
+ * @generated from enum kiapi.schematic.commands.AnnotateScope
+ */
+export type AnnotateScopeJson = "ANS_UNKNOWN" | "ANS_ALL" | "ANS_SHEET" | "ANS_SELECTION";
+
+/**
+ * Describes the enum kiapi.schematic.commands.AnnotateScope.
+ */
+export const AnnotateScopeSchema: GenEnum<AnnotateScope, AnnotateScopeJson> = /*@__PURE__*/
+  enumDesc(file_schematic_schematic_commands, 0);
+
+/**
+ * Since 11.0
+ *
+ * @generated from enum kiapi.schematic.commands.AnnotateSortOrder
+ */
+export enum AnnotateSortOrder {
+  /**
+   * @generated from enum value: ASO_UNKNOWN = 0;
+   */
+  ASO_UNKNOWN = 0,
+
+  /**
+   * @generated from enum value: ASO_X_POSITION = 1;
+   */
+  ASO_X_POSITION = 1,
+
+  /**
+   * @generated from enum value: ASO_Y_POSITION = 2;
+   */
+  ASO_Y_POSITION = 2,
+
+  /**
+   * @generated from enum value: ASO_UNSORTED = 3;
+   */
+  ASO_UNSORTED = 3,
+}
+
+/**
+ * Since 11.0
+ *
+ * @generated from enum kiapi.schematic.commands.AnnotateSortOrder
+ */
+export type AnnotateSortOrderJson = "ASO_UNKNOWN" | "ASO_X_POSITION" | "ASO_Y_POSITION" | "ASO_UNSORTED";
+
+/**
+ * Describes the enum kiapi.schematic.commands.AnnotateSortOrder.
+ */
+export const AnnotateSortOrderSchema: GenEnum<AnnotateSortOrder, AnnotateSortOrderJson> = /*@__PURE__*/
+  enumDesc(file_schematic_schematic_commands, 1);
+
+/**
+ * Since 11.0
+ *
+ * @generated from enum kiapi.schematic.commands.AnnotateNumbering
+ */
+export enum AnnotateNumbering {
+  /**
+   * @generated from enum value: ANM_UNKNOWN = 0;
+   */
+  ANM_UNKNOWN = 0,
+
+  /**
+   * First free number
+   *
+   * @generated from enum value: ANM_INCREMENTAL = 1;
+   */
+  ANM_INCREMENTAL = 1,
+
+  /**
+   * First free number starting at sheet number * 100
+   *
+   * @generated from enum value: ANM_SHEET_NUMBER_X100 = 2;
+   */
+  ANM_SHEET_NUMBER_X100 = 2,
+
+  /**
+   * First free number starting at sheet number * 1000
+   *
+   * @generated from enum value: ANM_SHEET_NUMBER_X1000 = 3;
+   */
+  ANM_SHEET_NUMBER_X1000 = 3,
+}
+
+/**
+ * Since 11.0
+ *
+ * @generated from enum kiapi.schematic.commands.AnnotateNumbering
+ */
+export type AnnotateNumberingJson = "ANM_UNKNOWN" | "ANM_INCREMENTAL" | "ANM_SHEET_NUMBER_X100" | "ANM_SHEET_NUMBER_X1000";
+
+/**
+ * Describes the enum kiapi.schematic.commands.AnnotateNumbering.
+ */
+export const AnnotateNumberingSchema: GenEnum<AnnotateNumbering, AnnotateNumberingJson> = /*@__PURE__*/
+  enumDesc(file_schematic_schematic_commands, 2);
 

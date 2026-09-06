@@ -31,9 +31,9 @@
 // @generated from file common/events.proto (package kiapi.common.events, syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
-import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
-import type { DocumentSpecifier, DocumentSpecifierJson, KIID, KIIDJson } from "./types/base_types_pb.js";
+import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
+import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
+import type { DocumentSpecifier, DocumentSpecifierJson, KIID, KIIDJson, ProjectSpecifier, ProjectSpecifierJson } from "./types/base_types_pb.js";
 import { file_common_types_base_types } from "./types/base_types_pb.js";
 import type { Message } from "@bufbuild/protobuf";
 
@@ -41,7 +41,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file common/events.proto.
  */
 export const file_common_events: GenFile = /*@__PURE__*/
-  fileDesc("ChNjb21tb24vZXZlbnRzLnByb3RvEhNraWFwaS5jb21tb24uZXZlbnRzIrACCg9Eb2N1bWVudENoYW5nZWQSNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISEAoIcmV2aXNpb24YAiABKAQSKwoJY29tbWl0X2lkGAMgASgLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSDwoHbWVzc2FnZRgEIAEoCRIpCgdjcmVhdGVkGAUgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSKQoHdXBkYXRlZBgGIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEikKB2RlbGV0ZWQYByADKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRBITCgtjbGllbnRfbmFtZRgIIAEoCSJJCg5Eb2N1bWVudE9wZW5lZBI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciJJCg5Eb2N1bWVudENsb3NlZBI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciJoCg1Eb2N1bWVudFNhdmVkEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEgwKBHBhdGgYAiABKAkSEAoIcmV2aXNpb24YAyABKAQiVQoLSm9iUHJvZ3Jlc3MSDgoGam9iX2lkGAEgASgJEhMKC2Rlc2NyaXB0aW9uGAIgASgJEg8KB3BlcmNlbnQYAyABKA0SEAoIZmluaXNoZWQYBCABKAgiEAoOU2VydmVyU2h1dGRvd24imwMKBUV2ZW50EhAKCHNlcXVlbmNlGAEgASgEEkAKEGRvY3VtZW50X2NoYW5nZWQYAiABKAsyJC5raWFwaS5jb21tb24uZXZlbnRzLkRvY3VtZW50Q2hhbmdlZEgAEj4KD2RvY3VtZW50X29wZW5lZBgDIAEoCzIjLmtpYXBpLmNvbW1vbi5ldmVudHMuRG9jdW1lbnRPcGVuZWRIABI+Cg9kb2N1bWVudF9jbG9zZWQYBCABKAsyIy5raWFwaS5jb21tb24uZXZlbnRzLkRvY3VtZW50Q2xvc2VkSAASPAoOZG9jdW1lbnRfc2F2ZWQYBSABKAsyIi5raWFwaS5jb21tb24uZXZlbnRzLkRvY3VtZW50U2F2ZWRIABI4Cgxqb2JfcHJvZ3Jlc3MYBiABKAsyIC5raWFwaS5jb21tb24uZXZlbnRzLkpvYlByb2dyZXNzSAASPgoPc2VydmVyX3NodXRkb3duGAcgASgLMiMua2lhcGkuY29tbW9uLmV2ZW50cy5TZXJ2ZXJTaHV0ZG93bkgAQgYKBGtpbmRiBnByb3RvMw", [file_common_types_base_types]);
+  fileDesc("ChNjb21tb24vZXZlbnRzLnByb3RvEhNraWFwaS5jb21tb24uZXZlbnRzIrACCg9Eb2N1bWVudENoYW5nZWQSNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISEAoIcmV2aXNpb24YAiABKAQSKwoJY29tbWl0X2lkGAMgASgLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSDwoHbWVzc2FnZRgEIAEoCRIpCgdjcmVhdGVkGAUgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSKQoHdXBkYXRlZBgGIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEikKB2RlbGV0ZWQYByADKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRBITCgtjbGllbnRfbmFtZRgIIAEoCSJJCg5Eb2N1bWVudE9wZW5lZBI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciJJCg5Eb2N1bWVudENsb3NlZBI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciJoCg1Eb2N1bWVudFNhdmVkEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEgwKBHBhdGgYAiABKAkSEAoIcmV2aXNpb24YAyABKAQiVQoLSm9iUHJvZ3Jlc3MSDgoGam9iX2lkGAEgASgJEhMKC2Rlc2NyaXB0aW9uGAIgASgJEg8KB3BlcmNlbnQYAyABKA0SEAoIZmluaXNoZWQYBCABKAgiEAoOU2VydmVyU2h1dGRvd24ikgEKDlByb2plY3RDaGFuZ2VkEjUKB3Byb2plY3QYASABKAsyJC5raWFwaS5jb21tb24udHlwZXMuUHJvamVjdFNwZWNpZmllchI0CgRraW5kGAIgASgOMiYua2lhcGkuY29tbW9uLmV2ZW50cy5Qcm9qZWN0Q2hhbmdlS2luZBITCgtjbGllbnRfbmFtZRgDIAEoCSLbAwoFRXZlbnQSEAoIc2VxdWVuY2UYASABKAQSQAoQZG9jdW1lbnRfY2hhbmdlZBgCIAEoCzIkLmtpYXBpLmNvbW1vbi5ldmVudHMuRG9jdW1lbnRDaGFuZ2VkSAASPgoPZG9jdW1lbnRfb3BlbmVkGAMgASgLMiMua2lhcGkuY29tbW9uLmV2ZW50cy5Eb2N1bWVudE9wZW5lZEgAEj4KD2RvY3VtZW50X2Nsb3NlZBgEIAEoCzIjLmtpYXBpLmNvbW1vbi5ldmVudHMuRG9jdW1lbnRDbG9zZWRIABI8Cg5kb2N1bWVudF9zYXZlZBgFIAEoCzIiLmtpYXBpLmNvbW1vbi5ldmVudHMuRG9jdW1lbnRTYXZlZEgAEjgKDGpvYl9wcm9ncmVzcxgGIAEoCzIgLmtpYXBpLmNvbW1vbi5ldmVudHMuSm9iUHJvZ3Jlc3NIABI+Cg9zZXJ2ZXJfc2h1dGRvd24YByABKAsyIy5raWFwaS5jb21tb24uZXZlbnRzLlNlcnZlclNodXRkb3duSAASPgoPcHJvamVjdF9jaGFuZ2VkGAggASgLMiMua2lhcGkuY29tbW9uLmV2ZW50cy5Qcm9qZWN0Q2hhbmdlZEgAQgYKBGtpbmQqjQEKEVByb2plY3RDaGFuZ2VLaW5kEg8KC1BDS19VTktOT1dOEAASEwoPUENLX05FVF9DTEFTU0VTEAESFgoSUENLX1RFWFRfVkFSSUFCTEVTEAISEAoMUENLX1ZBUklBTlRTEAMSEAoMUENLX1NFVFRJTkdTEAQSFgoSUENLX0xJQlJBUllfVEFCTEVTEAViBnByb3RvMw", [file_common_types_base_types]);
 
 /**
  * The document was changed (through an API commit, an API command that edits the document
@@ -392,6 +392,65 @@ export const ServerShutdownSchema: GenMessage<ServerShutdown, {jsonType: ServerS
   messageDesc(file_common_events, 5);
 
 /**
+ * Project-level state (not tied to one document) was changed through the API: net classes,
+ * text variables, variants, project settings, or the library tables.
+ * Since 11.0
+ *
+ * @generated from message kiapi.common.events.ProjectChanged
+ */
+export type ProjectChanged = Message<"kiapi.common.events.ProjectChanged"> & {
+  /**
+   * @generated from field: kiapi.common.types.ProjectSpecifier project = 1;
+   */
+  project?: ProjectSpecifier | undefined;
+
+  /**
+   * @generated from field: kiapi.common.events.ProjectChangeKind kind = 2;
+   */
+  kind: ProjectChangeKind;
+
+  /**
+   * The client_name of the API client that made the change, if it came from an API request
+   *
+   * @generated from field: string client_name = 3;
+   */
+  clientName: string;
+};
+
+/**
+ * Project-level state (not tied to one document) was changed through the API: net classes,
+ * text variables, variants, project settings, or the library tables.
+ * Since 11.0
+ *
+ * @generated from message kiapi.common.events.ProjectChanged
+ */
+export type ProjectChangedJson = {
+  /**
+   * @generated from field: kiapi.common.types.ProjectSpecifier project = 1;
+   */
+  project?: ProjectSpecifierJson;
+
+  /**
+   * @generated from field: kiapi.common.events.ProjectChangeKind kind = 2;
+   */
+  kind?: ProjectChangeKindJson;
+
+  /**
+   * The client_name of the API client that made the change, if it came from an API request
+   *
+   * @generated from field: string client_name = 3;
+   */
+  clientName?: string;
+};
+
+/**
+ * Describes the message kiapi.common.events.ProjectChanged.
+ * Use `create(ProjectChangedSchema)` to create a new message.
+ */
+export const ProjectChangedSchema: GenMessage<ProjectChanged, {jsonType: ProjectChangedJson}> = /*@__PURE__*/
+  messageDesc(file_common_events, 6);
+
+/**
  * @generated from message kiapi.common.events.Event
  */
 export type Event = Message<"kiapi.common.events.Event"> & {
@@ -441,6 +500,14 @@ export type Event = Message<"kiapi.common.events.Event"> & {
      */
     value: ServerShutdown;
     case: "serverShutdown";
+  } | {
+    /**
+     * Since 11.0
+     *
+     * @generated from field: kiapi.common.events.ProjectChanged project_changed = 8;
+     */
+    value: ProjectChanged;
+    case: "projectChanged";
   } | { case: undefined; value?: undefined };
 };
 
@@ -484,6 +551,13 @@ export type EventJson = {
    * @generated from field: kiapi.common.events.ServerShutdown server_shutdown = 7;
    */
   serverShutdown?: ServerShutdownJson;
+
+  /**
+   * Since 11.0
+   *
+   * @generated from field: kiapi.common.events.ProjectChanged project_changed = 8;
+   */
+  projectChanged?: ProjectChangedJson;
 };
 
 /**
@@ -491,5 +565,57 @@ export type EventJson = {
  * Use `create(EventSchema)` to create a new message.
  */
 export const EventSchema: GenMessage<Event, {jsonType: EventJson}> = /*@__PURE__*/
-  messageDesc(file_common_events, 6);
+  messageDesc(file_common_events, 7);
+
+/**
+ * What part of a project changed; see ProjectChanged
+ * Since 11.0
+ *
+ * @generated from enum kiapi.common.events.ProjectChangeKind
+ */
+export enum ProjectChangeKind {
+  /**
+   * @generated from enum value: PCK_UNKNOWN = 0;
+   */
+  PCK_UNKNOWN = 0,
+
+  /**
+   * @generated from enum value: PCK_NET_CLASSES = 1;
+   */
+  PCK_NET_CLASSES = 1,
+
+  /**
+   * @generated from enum value: PCK_TEXT_VARIABLES = 2;
+   */
+  PCK_TEXT_VARIABLES = 2,
+
+  /**
+   * @generated from enum value: PCK_VARIANTS = 3;
+   */
+  PCK_VARIANTS = 3,
+
+  /**
+   * @generated from enum value: PCK_SETTINGS = 4;
+   */
+  PCK_SETTINGS = 4,
+
+  /**
+   * @generated from enum value: PCK_LIBRARY_TABLES = 5;
+   */
+  PCK_LIBRARY_TABLES = 5,
+}
+
+/**
+ * What part of a project changed; see ProjectChanged
+ * Since 11.0
+ *
+ * @generated from enum kiapi.common.events.ProjectChangeKind
+ */
+export type ProjectChangeKindJson = "PCK_UNKNOWN" | "PCK_NET_CLASSES" | "PCK_TEXT_VARIABLES" | "PCK_VARIANTS" | "PCK_SETTINGS" | "PCK_LIBRARY_TABLES";
+
+/**
+ * Describes the enum kiapi.common.events.ProjectChangeKind.
+ */
+export const ProjectChangeKindSchema: GenEnum<ProjectChangeKind, ProjectChangeKindJson> = /*@__PURE__*/
+  enumDesc(file_common_events, 0);
 
