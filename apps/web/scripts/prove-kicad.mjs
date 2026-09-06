@@ -9,8 +9,10 @@
 // and Device.kicad_sym), so nothing under qa/data is modified and the footprint editor's save can
 // be verified on disk. The copy is removed at the end.
 //
-// Steps (default all): board, edit, route, draw, footprint, align, clipboard, setup, page, 3d,
-// jobs, fpeditor, schematic, crossprobe, erc.
+// Steps (default all): board, edit, route, draw, footprint, align, clipboard, markers, nets,
+// serverundo, settings, boardtools, setup, page, 3d, jobs, fpeditor, schematic, annotate, fields,
+// updatepcb, crossprobe, erc. The DRC-driven steps run before `jobs` on purpose: once the async
+// export jobs have run, RunBoardJobDrc stops answering on this server.
 import { chromium } from '../../../e2e/node_modules/@playwright/test/index.mjs';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -96,6 +98,23 @@ async function answerPrompt(values) {
   }
   await page.locator('[data-testid="prompt-ok"]').click();
   await page.waitForTimeout(150);
+}
+/** Answers the library browser: type the id in the fallback field and confirm. */
+async function pickLibrary(libId) {
+  await page.waitForSelector('[data-testid="library-confirm"]', { timeout: 60000 });
+  await page.locator('[data-testid="library-libid"]').fill(libId);
+  await page.locator('[data-testid="library-confirm"]').click();
+  await page.waitForTimeout(200);
+}
+/** Picks a library entry by clicking its row (exercises the tables + entry list + preview). */
+async function pickLibraryByRow(nickname, name) {
+  await page.waitForSelector('.library-browser', { timeout: 60000 });
+  await page.locator('.lib-col.libs .lib-row', { hasText: nickname }).first().click();
+  await page.waitForSelector(`.lib-col.entries .lib-row[data-libid="${nickname}:${name}"]`, { timeout: 60000 });
+  await page.locator(`.lib-col.entries .lib-row[data-libid="${nickname}:${name}"]`).click();
+  // the preview renders in the library session, which is spawned on first use (a few seconds)
+  await page.waitForSelector('.lib-preview canvas', { timeout: 90000 });
+  await page.waitForTimeout(1500);
 }
 const waitRev = async (after, timeout = 20000) => page.waitForFunction((r) => window.__kicadWeb.services.documents.boardDoc.revision().then((v) => Number(v) > r), after, { timeout });
 const toolHint = () => page.locator('[data-testid="tool-hint"]').innerText().catch(() => '');
@@ -263,8 +282,14 @@ try {
     await focusCanvas();
     const fps0 = await count('board', 'KOT_PCB_FOOTPRINT');
     await page.keyboard.press('a');
+    // the library browser replaced the type-a-LIB_ID prompt: pick the row, then the reference dialog
+    await pickLibraryByRow('Resistor_SMD', 'R_0603_1608Metric');
+    const previewCanvas = await page.locator('.lib-preview canvas').count();
+    await page.screenshot({ path: `${shots}/library-browser.png` });
+    await page.locator('[data-testid="library-confirm"]').click();
+    await page.waitForSelector('[data-testid="prompt-ok"]', { timeout: 20000 });
     const ref = await page.locator('[data-prompt="reference"]').inputValue();
-    await answerPrompt({ libId: 'Resistor_SMD:R_0603_1608Metric', value: '4k7' });
+    await answerPrompt({ value: '4k7' });
     await page.waitForFunction(() => /Footprint: click/.test(document.querySelector('[data-testid="tool-hint"]')?.textContent ?? ''), null, { timeout: 30000 });
     await moveWorld('board canvas', 'board', mm(140), mm(100));
     await page.screenshot({ path: `${shots}/board-footprint-preview.png` });
@@ -278,6 +303,7 @@ try {
     log(`footprint: ${fps0} -> ${fps1}; ${ref} = ${JSON.stringify(placed)}; file pads ${pads}; sessions on bridge: ${(await (await fetch(`${bridge}/sessions`)).json()).sessions.length} (library session spawned)`);
     await page.screenshot({ path: `${shots}/board-footprint.png` });
     record('footprint', fps1 === fps0 + 1 && placed?.items >= 2 && pads.includes('1@-0.825,0'), `${ref} ${placed?.lib} at ${placed?.at} with ${placed?.items} definition items; pads in file: ${pads}`);
+    record('library-place', previewCanvas === 1, `library browser: entry picked from the fp-lib-table listing, ${previewCanvas} preview canvas, placed as ${ref}`);
   }
 
   if (want('align')) {
@@ -358,6 +384,186 @@ try {
     const n3 = await count('board', 'KOT_PCB_TRACE');
     log(`KiCad text paste: SaveItemsToString ${sexpr.length} chars (${sexpr.slice(0, 40).replace(/\s+/g, ' ')}…) -> ParseAndCreateItemsFromString: tracks ${n1} -> ${n2}; undo -> ${n3}`);
     record('clipboard', n1 === n0 + 2 && n2 === n1 + 1 && n3 === n1, 'duplicate (Mod+D), copy/paste (Mod+C / Mod+V at cursor) through CreateItems, and SaveItemsToString → ParseAndCreateItemsFromString paste + undo');
+  }
+
+  // ------------------------------------------------------------- markers on the canvas
+  if (want('markers')) {
+    await run('window.board');
+    await page.waitForSelector('canvas[aria-label="board canvas"]', { timeout: 20000 });
+    await page.getByRole('tab', { name: 'DRC' }).click();
+    await page.locator('.filter-bar button', { hasText: 'Run DRC' }).click();
+    await page.waitForFunction(() => document.querySelector('[role=alert]') || document.querySelector('.marker-row'), null, { timeout: 180000 });
+    const rows = await page.locator('.marker-row').count();
+    if (rows > 0) {
+      // the panel feeds host.setMarkers; the row click focuses the marker and selects its items
+      const overlay = await kw(() => { const h = window.__kicadWeb.host('board'); return typeof h.setMarkers === 'function' && typeof h.focusMarker === 'function'; });
+      await page.locator('.marker-row').first().click();
+      await page.waitForTimeout(900);
+      const sel = await kw(() => window.__kicadWeb.stores.editor.getState().docs.board?.selection?.length ?? 0);
+      await page.screenshot({ path: `${shots}/board-drc-markers.png` });
+      // exclude the first violation with a comment, then show it through the excluded filter
+      const before = await kw(() => window.__kicadWeb.services.markers.markers('drc').filter((m) => m.excluded).length);
+      await page.locator('.marker-row').first().locator('button.btn.ghost.sm').click();
+      await answerPrompt({ value: 'accepted by the kicad-web proof' });
+      await page.waitForTimeout(900);
+      await page.locator('[data-testid="filter-excluded"]').click();
+      await page.waitForTimeout(400);
+      const after = await kw(() => window.__kicadWeb.services.markers.markers('drc').filter((m) => m.excluded).map((m) => m.comment));
+      await page.screenshot({ path: `${shots}/board-drc-excluded.png` });
+      log(`DRC: ${rows} markers, overlay API ${overlay}, selection after focus ${sel}, excluded ${before} -> ${after.length} (${JSON.stringify(after[0])})`);
+      record('markers', overlay && after.length === before + 1, `${rows} markers fed to host.setMarkers, focusMarker + selection on click, exclusion comment "${after[0]}" round-tripped through SetDrcMarkerExcluded`);
+    } else record('markers', false, 'DRC produced no markers');
+
+    // severities editor
+    await page.locator('[data-testid="open-severities"]').click();
+    await page.waitForSelector('[data-testid="severities-apply"]', { timeout: 30000 });
+    await page.waitForTimeout(1200);
+    const ruleCount = await page.locator('select[data-rule]').count();
+    const rule = await page.locator('select[data-rule]').first().getAttribute('data-rule');
+    const was = await page.locator('select[data-rule]').first().inputValue();
+    const want2 = was === 'ignore' ? 'warning' : 'ignore';
+    await page.locator('select[data-rule]').first().selectOption(want2);
+    await page.screenshot({ path: `${shots}/board-drc-severities.png` });
+    await page.locator('[data-testid="severities-apply"]').click();
+    await page.waitForTimeout(1500);
+    const now = await kw(async ({ rule }) => (await window.__kicadWeb.services.board.severities('drc')).find((r) => r.rule === rule)?.severity, { rule });
+    await page.locator('.dialog .btn', { hasText: 'Close' }).click();
+    log(`severities: ${ruleCount} rules; ${rule} ${was} -> ${want2}, server now reports ${now}`);
+    record('severities', now === want2, `${ruleCount} DRC rules from GetDrcSeverities; ${rule} set to ${want2} and read back`);
+  }
+
+  // ------------------------------------------------------------ ratsnest + net tools
+  if (want('nets')) {
+    await run('window.board');
+    await page.waitForSelector('canvas[aria-label="board canvas"]', { timeout: 20000 });
+    const unrouted = await kw(() => window.__kicadWeb.services.board.unrouted());
+    const statusText = await page.locator('[data-testid="unrouted-count"]').innerText().catch(() => '');
+    await run('view.toggleRatsnest');
+    await page.waitForTimeout(400);
+    const off = await kw(() => window.__kicadWeb.stores.ui.getState().showRatsnest);
+    await run('view.toggleRatsnest');
+    await page.waitForTimeout(400);
+    const on = await kw(() => window.__kicadWeb.stores.ui.getState().showRatsnest);
+    // net inspector: highlight a net, read GetNetLengths
+    await page.locator('.left-rail button, .panel-tabs button', { hasText: 'Nets' }).first().click().catch(() => {});
+    await kw(() => window.__kicadWeb.stores.ui.getState().setLeftTab('nets'));
+    await page.waitForSelector('[data-testid="net-lengths"]', { timeout: 30000 });
+    await page.waitForTimeout(2500);
+    const lengthRows = await page.locator('[data-length-net]').count();
+    const top = await page.locator('[data-length-net]').first().getAttribute('data-length-net');
+    // sort by pads, then back by length
+    await page.locator('th[data-sort="padCount"]').click();
+    await page.waitForTimeout(300);
+    const byPads = await page.locator('[data-length-net]').first().getAttribute('data-length-net');
+    await page.locator('th[data-sort="totalNm"]').click();
+    await page.waitForTimeout(300);
+    await page.screenshot({ path: `${shots}/board-net-inspector.png` });
+    log(`nets: unrouted ${JSON.stringify(unrouted)}, status bar "${statusText.replace(/\s+/g, ' ')}", ratsnest toggle ${on}/${off}, ${lengthRows} length rows (top by length ${top}, by pads ${byPads})`);
+    await kw(() => window.__kicadWeb.host('board').zoomToFit());
+    await page.waitForTimeout(400);
+    record('nets', lengthRows > 0 && off === false && on === true && /unrouted/.test(statusText), `GetNetLengths ${lengthRows} rows with sortable columns, GetUnroutedCount ${unrouted.unroutedCount} in the status bar, ratsnest toggle works`);
+  }
+
+
+  // ------------------------------------------------------------------ server undo
+  if (want('serverundo')) {
+    await run('window.board');
+    await page.waitForSelector('canvas[aria-label="board canvas"]', { timeout: 20000 });
+    await page.getByRole('tab', { name: 'History' }).click();
+    await page.waitForSelector('[data-testid="undo-mode"]', { timeout: 20000 });
+    await page.waitForTimeout(2500);
+    const mode = (await page.locator('[data-testid="undo-mode"]').innerText()).trim();
+    // make an edit KiCad records, then undo it through the panel
+    const vias0 = await count('board', 'KOT_PCB_VIA');
+    const r0 = await rev();
+    await focusCanvas();
+    await run('board.placeVia');
+    await page.waitForFunction(() => /Via/.test(document.querySelector('[data-testid="tool-hint"]')?.textContent ?? ''), null, { timeout: 20000 });
+    await clickWorld('board canvas', 'board', mm(150), mm(95));
+    await waitRev(r0);
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(1200);
+    const vias1 = await count('board', 'KOT_PCB_VIA');
+    const stack = await kw(() => window.__kicadWeb.services.undo.stacks());
+    await page.screenshot({ path: `${shots}/board-server-undo.png` });
+    const r1 = await rev();
+    await page.locator('[data-testid="history-undo"]').click();
+    await page.waitForTimeout(3000);
+    const vias2 = await count('board', 'KOT_PCB_VIA');
+    const after = await kw(() => window.__kicadWeb.services.undo.stacks());
+    log(`server undo: mode "${mode}", vias ${vias0} -> ${vias1} -> ${vias2}; KiCad stack ${JSON.stringify(stack.undo.map((e) => e.description))} -> ${JSON.stringify(after.undo.map((e) => e.description))}, revision ${r0} -> ${r1}`);
+    record('serverundo', /server undo/.test(mode) && vias1 === vias0 + 1 && vias2 === vias0 && stack.undo.length > after.undo.length, `history panel in ${mode}; GetUndoStack showed ${stack.undo.length} entries, Undo removed the via and popped one`);
+  }
+
+  // ------------------------------------------------------------ settings from KiCad
+  if (want('settings')) {
+    await run('tools.settings');
+    await page.waitForSelector('[data-testid="canvas-theme"]', { timeout: 20000 });
+    await page.waitForTimeout(2500);
+    const themes = await page.locator('[data-testid="canvas-theme"] optgroup option').allInnerTexts();
+    const defaults = (await page.locator('[data-testid="kicad-defaults"]').innerText().catch(() => '')).replace(/\s+/g, ' ');
+    if (themes.length) {
+      await page.locator('[data-testid="canvas-theme"]').selectOption(`server:${themes[0].replace(' (built in)', '')}`);
+      await page.waitForTimeout(1500);
+    }
+    const applied = await kw(() => window.__kicadWeb.stores.ui.getState().canvasTheme);
+    await page.screenshot({ path: `${shots}/settings-kicad-themes.png` });
+    await page.locator('.dialog .btn', { hasText: 'Close' }).click();
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: `${shots}/board-kicad-theme.png` });
+    await kw(() => window.__kicadWeb.host('board')?.zoomToFit());
+    log(`settings: ListColorThemes ${JSON.stringify(themes)}, canvasTheme now "${applied}", GetAppSettings "${defaults}"`);
+    record('settings', themes.length > 0 && applied.startsWith('server:') && /Units/.test(defaults), `${themes.length} KiCad themes offered, canvas pinned to ${applied}; GetAppSettings defaults shown (${defaults.slice(0, 90)})`);
+  }
+
+  // ------------------------------------------------------------- board bulk tools
+  if (want('boardtools')) {
+    await run('window.board');
+    await page.waitForSelector('canvas[aria-label="board canvas"]', { timeout: 20000 });
+    await focusCanvas();
+    const zones0 = await count('board', 'KOT_PCB_ZONE');
+    await run('board.teardrops');
+    await answerPrompt({ vias: true, pthPads: true, smdPads: false, trackToTrack: false, roundShapesOnly: false });
+    await page.waitForTimeout(4000);
+    const zones1 = await count('board', 'KOT_PCB_ZONE');
+    await page.screenshot({ path: `${shots}/board-teardrops.png` });
+    await run('board.removeTeardrops');
+    await page.waitForTimeout(4000);
+    const zones2 = await count('board', 'KOT_PCB_ZONE');
+    // update footprints from library
+    await run('board.updateFootprints');
+    await answerPrompt({ references: '', onlyChanged: true });
+    await page.waitForTimeout(4000);
+    // autoplace (the kitchen sink has no outline: the command reports that instead of failing)
+    await run('board.autoplace');
+    await answerPrompt({ scope: 'all', includeOffboard: true });
+    await page.waitForTimeout(4000);
+    // global deletion of the board texts
+    const texts0 = await count('board', 'KOT_PCB_TEXT');
+    await run('board.globalDeletion');
+    await answerPrompt({ KOT_PCB_TEXT: true, layer: '', locked: 'unlocked', boardEdges: false, teardrops: false });
+    await page.waitForTimeout(4000);
+    const texts1 = await count('board', 'KOT_PCB_TEXT');
+    await page.screenshot({ path: `${shots}/board-global-deletion.png` });
+    // toasts expire; the app log keeps every command's own report line
+    const lines = await kw(() => (window.__kicadWeb.stores.log.getState().lines ?? []).map((e) => e.text));
+    const said = (re) => lines.filter((l) => re.test(l)).pop() ?? '';
+    const teardrops = said(/^SetTeardrops:/);
+    const removed = said(/^RemoveTeardrops:/);
+    const update = said(/^UpdateFootprintsFromLibrary:/);
+    const auto = said(/^AutoplaceFootprints:/);
+    const del = said(/^GlobalDeletion:/);
+    log(`board tools: zones ${zones0} -> ${zones1} -> ${zones2}; texts ${texts0} -> ${texts1}`);
+    for (const l of [teardrops, removed, update, auto, del]) log('  app log:', l);
+    // KiCad reuses / merges teardrop zones, so the zone count is not a reliable delta — the
+    // command's own count is. Zone counts are reported for context only.
+    const made = Number(/(\d+) teardrops? created/.exec(teardrops)?.[1] ?? 0);
+    const gone = Number(/(\d+) teardrops? removed/.exec(removed)?.[1] ?? 0);
+    record(
+      'boardtools',
+      made > 0 && gone > 0 && /updated/.test(update) && /placed|outline/.test(auto) && texts1 < texts0,
+      `SetTeardrops made ${made} and RemoveTeardrops removed ${gone} (zones ${zones0}/${zones1}/${zones2}), "${update}", "${auto}", GlobalDeletion removed ${texts0 - texts1} texts`,
+    );
   }
 
   if (want('setup')) {
@@ -453,6 +659,9 @@ try {
     await page.locator('.jobs-layout .row', { hasText: 'IPC-2581' }).click();
     await page.waitForTimeout(300);
     await page.screenshot({ path: `${shots}/board-jobs.png` });
+    // Measured: after the async export jobs have run, RunBoardJobDrc never answers on this
+    // server, so the DRC-driven steps run before `jobs` above.
+    record('drc-after-jobs', true, 'RunBoardJobDrc stops answering once the async export jobs have run — the markers step therefore runs before `jobs`', { knownGap: true });
     record('jobs', outcomes.every((o) => o.includes('done')), `${outcomes.length} exports (${asyncRuns} async)`);
   }
 
@@ -562,7 +771,8 @@ try {
     step('schematic: text placed, symbol');
     // symbol from the library: Device:R as R1 so cross-probing to the board's R1 works
     await page.keyboard.press('a');
-    await answerPrompt({ libId: 'Device:R', reference: 'R1', value: '10k', footprint: 'Resistor_SMD:R_0603_1608Metric' });
+    await pickLibrary('Device:R');
+    await answerPrompt({ reference: 'R1', value: '10k', footprint: 'Resistor_SMD:R_0603_1608Metric' });
     await page.waitForFunction(() => /Symbol: click/.test(document.querySelector('[data-testid="tool-hint"]')?.textContent ?? ''), null, { timeout: 30000 });
     const rSym = await schRev();
     await clickWorld('schematic canvas', rootKey, mm(88.9), mm(139.7));
@@ -621,6 +831,64 @@ try {
       await page.screenshot({ path: `${shots}/schematic-crossprobe.png` });
       record('crossprobe', boardRef.includes('R1') && schSel.includes(symId) && active === 'board', 'footprint ↔ symbol by reference, both directions, jump switches editor');
     } else record('crossprobe', false, 'no R1 symbol on the root sheet (schematic step skipped?)');
+  }
+
+
+  // ------------------------------------------------------------- schematic workflow
+  if (want('annotate')) {
+    await run('window.schematic');
+    await page.waitForSelector('canvas[aria-label="schematic canvas"]', { timeout: 30000 });
+    await page.waitForTimeout(800);
+    await run('schematic.annotate');
+    await page.waitForSelector('[data-testid="annotate-run"]', { timeout: 30000 });
+    await page.locator('[data-testid="annotate-scope"]').selectOption('all');
+    await page.locator('[data-testid="annotate-start"]').fill('1');
+    await page.locator('[data-testid="annotate-reset"]').setChecked(true);
+    await page.locator('[data-testid="annotate-run"]').click();
+    await page.waitForSelector('[data-testid="annotate-report"]', { timeout: 60000 });
+    const report = (await page.locator('[data-testid="annotate-report"]').innerText()).replace(/\s+/g, ' ');
+    await page.screenshot({ path: `${shots}/schematic-annotate.png` });
+    await page.locator('.dialog .btn', { hasText: 'Close' }).click();
+    await page.waitForTimeout(400);
+    const refs = await kw((key) => [...window.__kicadWeb.services.documents.sheet(key).byType('KOT_SCH_SYMBOL')].map((s) => s.proto.referenceField?.text?.text).filter(Boolean).sort(), sheetPath);
+    log('annotate report:', report, '| references now', JSON.stringify(refs));
+    record('annotate', /symbols annotated/.test(report), `${report}; references ${refs.join(' ')}`);
+  }
+
+  if (want('fields')) {
+    await run('window.schematic');
+    await page.waitForSelector('canvas[aria-label="schematic canvas"]', { timeout: 30000 });
+    await run('schematic.fieldsTable');
+    await page.waitForSelector('[data-testid="fields-apply"]', { timeout: 60000 });
+    await page.waitForTimeout(2000);
+    const rows = await page.locator('.fields-table tbody tr[data-ref]').count();
+    const firstRef = await page.locator('.fields-table tbody tr[data-ref]').first().getAttribute('data-ref');
+    const cell = page.locator(`[data-cell="${firstRef}:Value"]`);
+    const oldValue = await cell.inputValue();
+    await cell.fill('PROOF_VALUE');
+    await page.waitForTimeout(200);
+    await page.screenshot({ path: `${shots}/schematic-fields-table.png` });
+    await page.locator('[data-testid="fields-apply"]').click();
+    await page.waitForTimeout(3000);
+    const readBack = await kw(async () => (await window.__kicadWeb.services.schematic.fieldsTable()).rows.map((r) => [r.reference, r.fields.Value]));
+    await page.locator('.dialog .btn', { hasText: 'Close' }).click();
+    const hit = readBack.find(([, v]) => v === 'PROOF_VALUE');
+    log(`fields table: ${rows} rows; ${firstRef}.Value "${oldValue}" -> PROOF_VALUE; server reports ${JSON.stringify(readBack)}`);
+    record('fields', !!hit, `${rows} placements from GetSymbolFieldsTable; one edit committed through SetSymbolFields and read back on ${hit?.[0]}`);
+  }
+
+  if (want('updatepcb')) {
+    await run('window.schematic');
+    await page.waitForSelector('canvas[aria-label="schematic canvas"]', { timeout: 30000 });
+    await run('schematic.updatePcb');
+    await page.waitForSelector('[data-testid="sync-preview"]', { timeout: 30000 });
+    await page.locator('[data-testid="sync-preview"]').click();
+    await page.waitForSelector('[data-testid="sync-report"]', { timeout: 90000 });
+    const text = (await page.locator('[data-testid="sync-report"]').innerText()).replace(/\s+/g, ' ').slice(0, 300);
+    await page.screenshot({ path: `${shots}/schematic-update-pcb.png` });
+    await page.locator('.dialog .btn', { hasText: 'Close' }).click();
+    log('update PCB (dry run):', text);
+    record('updatepcb', /Preview:/.test(text), `SyncSchematicToBoard dry run reported: ${text.slice(0, 160)}`);
   }
 
   if (want('erc')) {

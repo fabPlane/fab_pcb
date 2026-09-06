@@ -54,8 +54,29 @@ export const CANVAS_THEMES: readonly { id: CanvasThemeId; label: string; descrip
 ];
 
 /**
+ * Themes read from KiCad (`GetColorTheme`). `themeFor` is synchronous — the canvases call it on
+ * every repaint — so a server theme is registered once it has been fetched and looked up here;
+ * an unregistered `server:<name>` falls back to the UI theme until the fetch lands.
+ */
+const serverThemes = new Map<string, Theme>();
+
+/** Makes a theme fetched from KiCad available to `themeFor('...', 'server:<name>')`. */
+export function registerServerTheme(name: string, theme: Theme): void {
+  serverThemes.set(name, theme);
+}
+
+export function serverThemeId(name: string): CanvasThemeId {
+  return `server:${name}`;
+}
+
+/** The theme name behind a `server:<name>` id, or undefined for the built-ins. */
+export function serverThemeName(id: CanvasThemeId): string | undefined {
+  return id.startsWith('server:') ? id.slice('server:'.length) : undefined;
+}
+
+/**
  * Canvas theme for the resolved UI theme. `canvas` defaults to the persisted choice; 'auto'
- * follows the UI theme, the others pin one of the renderer's built-in themes.
+ * follows the UI theme, the others pin a built-in or a theme read from KiCad.
  */
 export function themeFor(mode: 'light' | 'dark', canvas: CanvasThemeId = useUiStore.getState().canvasTheme): Theme {
   switch (canvas) {
@@ -63,8 +84,12 @@ export function themeFor(mode: 'light' | 'dark', canvas: CanvasThemeId = useUiSt
       return KICAD_DEFAULT_THEME;
     case 'kicad-classic':
       return KICAD_CLASSIC_THEME;
-    default:
+    default: {
+      const name = serverThemeName(canvas);
+      const server = name !== undefined ? serverThemes.get(name) : undefined;
+      if (server) return server;
       return mode === 'dark' ? DARK_THEME : LIGHT_THEME;
+    }
   }
 }
 

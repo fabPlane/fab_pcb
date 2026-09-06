@@ -16,14 +16,23 @@ const MENUS: { label: string; items: MenuEntry[] }[] = [
   },
   {
     label: 'View',
-    items: ['view.zoomIn', 'view.zoomOut', 'view.zoomFit', 'view.zoomSelection', '-', 'view.toggleGrid', 'view.nextGrid', 'view.cycleUnits', '-', { label: 'Layers' }, 'view.layerFront', 'view.layerBack', 'view.layerIn1', 'view.layerIn2', 'view.layerFlipSide', '-', 'view.toggleLeftPanel', 'view.toggleRightPanel', 'view.toggleBottomPanel', 'view.resetLayout', '-', 'view.toggleTheme', 'view.themeSystem'],
+    items: ['view.zoomIn', 'view.zoomOut', 'view.zoomFit', 'view.zoomSelection', '-', 'view.toggleGrid', 'view.toggleRatsnest', 'view.nextGrid', 'view.cycleUnits', '-', { label: 'Layers' }, 'view.layerFront', 'view.layerBack', 'view.layerIn1', 'view.layerIn2', 'view.layerFlipSide', '-', 'view.toggleLeftPanel', 'view.toggleRightPanel', 'view.toggleBottomPanel', 'view.resetLayout', '-', 'view.toggleTheme', 'view.themeSystem'],
   },
   {
     label: 'Place',
-    items: ['board.placeFootprint', 'board.route', 'board.placeVia', 'board.drawZone', '-', 'board.drawLine', 'board.drawRect', 'board.drawCircle', 'board.drawArc', 'board.drawPolygon', 'board.placeText', '-', 'schematic.placeSymbol', 'schematic.wire', 'schematic.bus', 'schematic.junction', 'schematic.noConnect', 'schematic.label', 'schematic.globalLabel', 'schematic.hierLabel', 'schematic.text', 'schematic.sheet'],
+    items: ['board.placeFootprint', 'tools.libraryBrowser', 'board.route', 'board.placeVia', 'board.drawZone', '-', 'board.drawLine', 'board.drawRect', 'board.drawCircle', 'board.drawArc', 'board.drawPolygon', 'board.placeText', '-', 'schematic.placeSymbol', 'schematic.wire', 'schematic.bus', 'schematic.junction', 'schematic.noConnect', 'schematic.label', 'schematic.globalLabel', 'schematic.hierLabel', 'schematic.text', 'schematic.sheet'],
   },
-  { label: 'Inspect', items: ['inspect.runDrc', 'inspect.runErc', '-', 'inspect.highlightNet', 'inspect.clearHighlight', 'inspect.nets', '-', 'inspect.crossProbe'] },
-  { label: 'Tools', items: ['tools.boardSetup', 'tools.pageSettings', 'tools.netclasses', 'tools.textVariables', 'tools.variants', '-', 'board.refillZones', 'board.unfillZones', 'board.updateFromSchematic', 'schematic.annotate', 'schematic.updatePcb', '-', 'board.openFootprintEditor', '-', 'tools.commandPalette', 'tools.keymap', '-', 'tools.settings'] },
+  { label: 'Inspect', items: ['inspect.runDrc', 'inspect.runErc', 'board.severities', 'schematic.ercSeverities', '-', 'inspect.highlightNet', 'inspect.clearHighlight', 'inspect.nets', '-', 'inspect.crossProbe'] },
+  {
+    label: 'Tools',
+    items: [
+      'tools.boardSetup', 'tools.pageSettings', 'tools.netclasses', 'tools.textVariables', 'tools.variants',
+      '-', { label: 'Board' }, 'board.refillZones', 'board.unfillZones', 'board.teardrops', 'board.removeTeardrops', 'board.autoplace', 'board.updateFootprints', 'board.globalDeletion',
+      '-', { label: 'Schematic' }, 'schematic.annotate', 'schematic.fieldsTable', 'schematic.assignFootprints', 'schematic.updatePcb', 'board.updateFromSchematic',
+      '-', 'tools.libraryBrowser', 'board.openFootprintEditor',
+      '-', 'tools.commandPalette', 'tools.keymap', '-', 'tools.settings',
+    ],
+  },
   { label: 'Window', items: ['window.project', 'window.board', 'window.schematic', 'window.view3d'] },
   { label: 'Help', items: ['help.shortcuts', 'help.about'] },
 ];

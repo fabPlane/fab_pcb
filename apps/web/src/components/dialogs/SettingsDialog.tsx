@@ -1,7 +1,10 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { colorToCss, layerColor, themeColor, type Theme } from '@kicad-web/renderer';
 import { getCanvasHost } from '@/canvas/CanvasSlot';
-import { CANVAS_THEMES, themeFor } from '@/canvas/theme';
+import { CANVAS_THEMES, registerServerTheme, serverThemeName, themeFor } from '@/canvas/theme';
+import { useServices } from '@/services';
+import type { AppDefaults, ColorThemeInfo } from '@/services/types';
+import { log } from '@/state/logStore';
 import { formatDistance, UNIT_ORDER, type Unit } from '@/lib/units';
 import { useEditorStore } from '@/state/editorStore';
 import { useKeymapStore } from '@/state/keymapStore';
@@ -127,6 +130,7 @@ function retintCanvases(mode: ThemeMode, canvas: CanvasThemeId): void {
 }
 
 function AppearanceTab() {
+  const { settings } = useServices();
   const theme = useUiStore((s) => s.theme);
   const canvasTheme = useUiStore((s) => s.canvasTheme);
   const setCanvasTheme = useUiStore((s) => s.setCanvasTheme);
@@ -137,12 +141,66 @@ function AppearanceTab() {
   const showGrid = useUiStore((s) => s.showGrid);
   const toggleGrid = useUiStore((s) => s.toggleGrid);
   const resolved = resolveTheme(theme);
+  const [serverThemes, setServerThemes] = useState<ColorThemeInfo[]>([]);
+  const [defaults, setDefaults] = useState<AppDefaults | null>(null);
+  const [themeError, setThemeError] = useState<string | null>(null);
+
+  // KiCad's own themes and editor defaults; both are cached by the service.
+  useEffect(() => {
+    if (!settings) return;
+    let live = true;
+    settings
+      .colorThemes()
+      .then((t) => live && setServerThemes(t))
+      .catch((e: unknown) => live && setThemeError(e instanceof Error ? e.message : String(e)));
+    settings
+      .appSettings('board')
+      .then((d) => live && setDefaults(d))
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [settings]);
+
+  // A persisted `server:<name>` needs its colours fetched before `themeFor` can resolve it.
+  useEffect(() => {
+    const name = serverThemeName(canvasTheme);
+    if (!settings || !name) return;
+    void settings
+      .colorTheme(name)
+      .then((t) => {
+        if (!t) return;
+        registerServerTheme(name, t);
+        retintCanvases(theme, canvasTheme);
+      })
+      .catch(() => undefined);
+  }, [settings, canvasTheme, theme]);
+
   const canvas = themeFor(resolved, canvasTheme);
-  const pickCanvas = (id: CanvasThemeId) => {
+  const pickCanvas = async (id: CanvasThemeId) => {
+    const name = serverThemeName(id);
+    if (name && settings) {
+      try {
+        const t = await settings.colorTheme(name);
+        if (t) registerServerTheme(name, t);
+        else setThemeError(`KiCad returned no colours for "${name}"`);
+      } catch (e) {
+        setThemeError(e instanceof Error ? e.message : String(e));
+        return;
+      }
+    }
     setCanvasTheme(id);
     retintCanvases(theme, id);
+    log(`canvas theme: ${id}`);
   };
-  const gridChoices = GRID_CHOICES_NM.includes(gridNm) ? GRID_CHOICES_NM : [...GRID_CHOICES_NM, gridNm].sort((a, b) => b - a);
+  const applyServerDefaults = () => {
+    if (!defaults) return;
+    if (defaults.units) setUnits(defaults.units);
+    if (defaults.currentGridNm) setGrid(defaults.currentGridNm);
+    log(`Applied KiCad defaults: ${defaults.units ?? '?'} units, grid ${defaults.currentGridNm ?? '?'} nm`);
+  };
+  const serverGrids = defaults?.gridsNm ?? [];
+  const gridChoices = [...new Set([...GRID_CHOICES_NM, ...serverGrids, gridNm])].sort((a, b) => b - a);
   return (
     <>
       <h3 className="section">Theme</h3>
@@ -152,14 +210,27 @@ function AppearanceTab() {
       <h3 className="section">Canvas colours</h3>
       <div className="form-grid">
         <label htmlFor="settings-canvas-theme">Colour theme</label>
-        <select id="settings-canvas-theme" className="select" value={canvasTheme} onChange={(e) => pickCanvas(e.target.value as CanvasThemeId)}>
+        <select id="settings-canvas-theme" data-testid="canvas-theme" className="select" value={canvasTheme} onChange={(e) => void pickCanvas(e.target.value as CanvasThemeId)}>
           {CANVAS_THEMES.map((t) => (
             <option key={t.id} value={t.id}>
               {t.label}
             </option>
           ))}
+          {serverThemes.length > 0 && (
+            <optgroup label="From KiCad (ListColorThemes)">
+              {serverThemes.map((t) => (
+                <option key={t.name} value={`server:${t.name}`}>
+                  {t.name}
+                  {t.readOnly ? ' (built in)' : ''}
+                </option>
+              ))}
+            </optgroup>
+          )}
         </select>
-        <span className="help">{CANVAS_THEMES.find((t) => t.id === canvasTheme)?.description}</span>
+        <span className="help">
+          {CANVAS_THEMES.find((t) => t.id === canvasTheme)?.description ?? `Colours read from KiCad itself (${serverThemeName(canvasTheme)}).`}
+          {themeError ? ` — ${themeError}` : ''}
+        </span>
         <label>Preview</label>
         <div>
           <span className="muted" style={{ fontSize: 'var(--fs-sm)' }}>
@@ -192,6 +263,31 @@ function AppearanceTab() {
           <input id="settings-show-grid" type="checkbox" className="checkbox" checked={showGrid} onChange={toggleGrid} />
         </span>
       </div>
+
+      {defaults && (
+        <>
+          <h3 className="section">KiCad defaults</h3>
+          <p className="note">What the PCB editor itself is configured to use (`GetAppSettings`). The app keeps its own preferences; this applies KiCad's.</p>
+          <div className="form-grid" data-testid="kicad-defaults">
+            <label>Units</label>
+            <div className="muted">{defaults.units ?? 'unknown'}</div>
+            <label>Grid</label>
+            <div className="muted">
+              {defaults.currentGridNm ? `${formatDistance(defaults.currentGridNm, defaults.units ?? units)} ${defaults.units ?? units}` : 'unknown'} · {defaults.gridsNm.length} square grid(s) offered
+            </div>
+            <label>Colour theme</label>
+            <div className="muted mono">{defaults.colorTheme}</div>
+            <label>Grid visible</label>
+            <div className="muted">{defaults.gridVisible ? 'yes' : 'no'}</div>
+            <label />
+            <div>
+              <button className="btn sm" data-testid="apply-kicad-defaults" onClick={applyServerDefaults}>
+                Use KiCad's defaults
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

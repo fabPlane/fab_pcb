@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useState } from 'react';
 import { useEditorDoc } from '@/state/editorStore';
 import { useAppStore } from '@/state/appStore';
 import { useUiStore, GRID_CHOICES_NM } from '@/state/uiStore';
@@ -5,6 +6,39 @@ import { formatDistance, NM_PER_MM } from '@/lib/units';
 import { typeLabel } from './properties/schema';
 import type { ItemStore } from '@/contracts';
 import { layerDisplayName } from '@/lib/enums';
+import { useServices, useServiceVersion } from '@/services';
+
+/** Unrouted connections on the board (`GetUnroutedCount`), refreshed when the store changes. */
+function UnroutedCell({ store }: { store: ItemStore | null }) {
+  const { board, documents } = useServices();
+  const sub = useCallback((cb: () => void) => documents.onChange(cb), [documents]);
+  const version = useServiceVersion(sub);
+  const [info, setInfo] = useState<{ unroutedCount: number; unroutedNetCount: number } | null>(null);
+  const revision = store?.revision ?? 0;
+
+  useEffect(() => {
+    if (!board) return;
+    let live = true;
+    const t = setTimeout(() => {
+      board
+        .unrouted()
+        .then((r) => live && setInfo(r))
+        .catch(() => live && setInfo(null));
+    }, 250);
+    return () => {
+      live = false;
+      clearTimeout(t);
+    };
+  }, [board, revision, version]);
+
+  if (!board || !info) return null;
+  return (
+    <div className={`cell${info.unroutedCount ? ' warn' : ''}`} data-testid="unrouted-count" title={`${info.unroutedCount} unrouted connection(s) across ${info.unroutedNetCount} net(s) — GetUnroutedCount`}>
+      <span className="faint">unrouted</span> {info.unroutedCount}
+      {info.unroutedNetCount ? ` / ${info.unroutedNetCount} nets` : ''}
+    </div>
+  );
+}
 
 export function StatusBar({ storeKey, store }: { storeKey: string | null; store: ItemStore | null }) {
   const doc = useEditorDoc(storeKey ?? '__none__');
@@ -15,6 +49,7 @@ export function StatusBar({ storeKey, store }: { storeKey: string | null; store:
   const showGrid = useUiStore((s) => s.showGrid);
   const toggleGrid = useUiStore((s) => s.toggleGrid);
   const session = useAppStore((s) => s.session);
+  const activeEditor = useAppStore((s) => s.activeEditor);
   const cursor = doc.cursor;
   const hover = doc.hover && store ? store.get(doc.hover) : undefined;
   const pxPerMm = doc.camera.zoom * NM_PER_MM;
@@ -46,6 +81,7 @@ export function StatusBar({ storeKey, store }: { storeKey: string | null; store:
           <span className="faint">layer</span> {doc.activeLayer.startsWith('SLT_') ? doc.activeLayer.replace('SLT_', '').toLowerCase() : layerDisplayName(doc.activeLayer)}
         </div>
       )}
+      {activeEditor === 'board' && <UnroutedCell store={store} />}
       <div className="cell msg">
         {doc.selection.length > 0 ? `${doc.selection.length} selected` : hover ? `${typeLabel(hover.type)}${hover.net ? ` · ${hover.net}` : ''}${hover.layer ? ` · ${layerDisplayName(hover.layer)}` : ''}` : ''}
       </div>

@@ -3,8 +3,12 @@ import { persist } from 'zustand/middleware';
 import type { Unit } from '@/lib/units';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
-/** Canvas colour theme: follow the UI theme, or one of the renderer's built-in KiCad themes (canvas/theme.ts). */
-export type CanvasThemeId = 'auto' | 'kicad-default' | 'kicad-classic';
+/**
+ * Canvas colour theme: 'auto' follows the UI theme, 'kicad-default' / 'kicad-classic' pin one of
+ * the renderer's built-in themes, and `server:<name>` uses a theme read from KiCad itself
+ * (`GetColorTheme`, resolved through the registry in canvas/theme.ts).
+ */
+export type CanvasThemeId = 'auto' | 'kicad-default' | 'kicad-classic' | `server:${string}`;
 export type PanelSide = 'left' | 'right' | 'bottom';
 
 export interface PanelLayout {
@@ -12,7 +16,21 @@ export interface PanelLayout {
   collapsed: boolean;
 }
 
-export type DialogId = 'board-setup' | 'netclasses' | 'text-variables' | 'variants' | 'keymap' | 'settings' | 'new-project' | 'about' | 'page-settings' | null;
+export type DialogId =
+  | 'board-setup'
+  | 'netclasses'
+  | 'text-variables'
+  | 'variants'
+  | 'keymap'
+  | 'settings'
+  | 'new-project'
+  | 'about'
+  | 'page-settings'
+  | 'annotate'
+  | 'update-pcb'
+  | 'fields-table'
+  | 'severities'
+  | null;
 
 interface UiState {
   /** UI theme preference. Defaults to dark for new users; a persisted value (any of the three) wins. */
@@ -21,6 +39,8 @@ interface UiState {
   units: Unit;
   gridNm: number;
   showGrid: boolean;
+  /** Board ratsnest overlay (renderer layer `board.ratsnest`). */
+  showRatsnest: boolean;
   panels: Record<PanelSide, PanelLayout>;
   bottomTab: 'markers' | 'jobs' | 'log' | 'history';
   leftTab: 'tree' | 'layers' | 'nets';
@@ -31,6 +51,8 @@ interface UiState {
   setUnits(u: Unit): void;
   setGrid(nm: number): void;
   toggleGrid(): void;
+  toggleRatsnest(): void;
+  setRatsnest(on: boolean): void;
   setPanelSize(side: PanelSide, size: number): void;
   togglePanel(side: PanelSide, collapsed?: boolean): void;
   setBottomTab(tab: UiState['bottomTab']): void;
@@ -61,6 +83,7 @@ export const useUiStore = create<UiState>()(
       units: 'mm',
       gridNm: 1_270_000,
       showGrid: true,
+      showRatsnest: true,
       panels: DEFAULT_PANELS,
       bottomTab: 'markers',
       leftTab: 'tree',
@@ -75,6 +98,8 @@ export const useUiStore = create<UiState>()(
       },
       setGrid: (gridNm) => set({ gridNm }),
       toggleGrid: () => set({ showGrid: !get().showGrid }),
+      toggleRatsnest: () => set({ showRatsnest: !get().showRatsnest }),
+      setRatsnest: (showRatsnest) => set({ showRatsnest }),
       setPanelSize: (side, size) => {
         const { min, max } = PANEL_LIMITS[side];
         set({ panels: { ...get().panels, [side]: { ...get().panels[side], size: Math.max(min, Math.min(max, size)) } } });
@@ -89,7 +114,7 @@ export const useUiStore = create<UiState>()(
     {
       name: 'kicad-web.ui',
       version: 1,
-      partialize: (s) => ({ theme: s.theme, canvasTheme: s.canvasTheme, units: s.units, gridNm: s.gridNm, showGrid: s.showGrid, panels: s.panels, bottomTab: s.bottomTab, leftTab: s.leftTab }),
+      partialize: (s) => ({ theme: s.theme, canvasTheme: s.canvasTheme, units: s.units, gridNm: s.gridNm, showGrid: s.showGrid, showRatsnest: s.showRatsnest, panels: s.panels, bottomTab: s.bottomTab, leftTab: s.leftTab }),
     },
   ),
 );

@@ -63,6 +63,12 @@ export function currentMoveTransaction(storeKey: string): Transaction | null {
   return moveSessions.get(storeKey)?.tx ?? null;
 }
 
+/** Ratsnest visibility: renderer board hosts only, and only they know the overlay layer. */
+function applyRatsnest(host: CanvasHost, show: boolean): void {
+  const h = host as CanvasHost & { setRatsnestVisible?: (v: boolean) => void };
+  h.setRatsnestVisible?.(show);
+}
+
 /** Renderer hosts expose the grid through `overlays.options`; the contract itself has no grid API. */
 function applyGrid(host: CanvasHost, gridNm: number, show: boolean): void {
   const h = host as CanvasHost & { overlays?: { options: Record<string, unknown> }; requestRender?: () => void };
@@ -78,6 +84,7 @@ export function CanvasSlot({ kind, storeKey, store, layers }: CanvasSlotProps) {
   const themeMode = useUiStore((s) => s.theme);
   const gridNm = useUiStore((s) => s.gridNm);
   const showGrid = useUiStore((s) => s.showGrid);
+  const showRatsnest = useUiStore((s) => s.showRatsnest);
   const doc = useEditorStore((s) => s.docs[storeKey]);
   const ensure = useEditorStore((s) => s.ensure);
   const toolSession = useToolStore((s) => s.session);
@@ -100,7 +107,10 @@ export function CanvasSlot({ kind, storeKey, store, layers }: CanvasSlotProps) {
     const d = useEditorStore.getState().docs[storeKey];
     if (d && d.camera.zoom > 0) host.setCamera(d.camera);
     if (host instanceof MockCanvasHost) host.setGrid(useUiStore.getState().gridNm, useUiStore.getState().showGrid);
-    else applyGrid(host, useUiStore.getState().gridNm, useUiStore.getState().showGrid);
+    else {
+      applyGrid(host, useUiStore.getState().gridNm, useUiStore.getState().showGrid);
+      applyRatsnest(host, useUiStore.getState().showRatsnest);
+    }
 
     // What the UI treats as picked: the object KIID (`ref`) when the store holds it (a pad,
     // a track), else the owning store item (footprint / symbol for their children).
@@ -195,6 +205,12 @@ export function CanvasSlot({ kind, storeKey, store, layers }: CanvasSlotProps) {
     if (h instanceof MockCanvasHost) h.setGrid(gridNm, showGrid);
     else if (h) applyGrid(h, gridNm, showGrid);
   }, [gridNm, showGrid]);
+
+  // ratsnest overlay (the edges themselves are fed by KicadCanvas.ts)
+  useEffect(() => {
+    const h = hostRef.current;
+    if (h && !(h instanceof MockCanvasHost)) applyRatsnest(h, showRatsnest);
+  }, [showRatsnest]);
 
   // editor state -> host
   const selection = doc?.selection;

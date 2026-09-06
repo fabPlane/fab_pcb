@@ -289,6 +289,8 @@ export interface Marker {
   position: { x: number; y: number }; // nm
   sheetPath?: string;
   excluded: boolean;
+  /** KiCad's exclusion comment (`DrcMarker.exclusion_comment`), empty when not excluded. */
+  comment?: string;
 }
 
 export interface MarkerService {
@@ -297,7 +299,12 @@ export interface MarkerService {
   run(kind: 'drc' | 'erc'): Promise<Marker[]>;
   setExcluded(id: string, excluded: boolean): void;
   onChange(cb: () => void): () => void;
+  /** Exclusion with KiCad's comment field (`SetDrcMarkerExcluded.comment`); optional on the mock. */
+  setExcludedWithComment?(id: string, excluded: boolean, comment: string): Promise<void>;
 }
+
+export * from './extras';
+import type { BoardToolsService, LibraryService, SchematicToolsService, ServerSettingsService, ServerUndoService } from './extras';
 
 export interface Services {
   session: SessionService;
@@ -305,4 +312,13 @@ export interface Services {
   commands: CommandService;
   jobs: JobsService;
   markers: MarkerService;
+  /**
+   * Batch-3 surfaces, present only on the KiCad service graph (the mock leaves them undefined
+   * and the UI says the feature needs the real services).
+   */
+  library?: LibraryService;
+  board?: BoardToolsService;
+  schematic?: SchematicToolsService;
+  settings?: ServerSettingsService;
+  undo?: ServerUndoService;
 }

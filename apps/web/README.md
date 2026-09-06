@@ -2,8 +2,10 @@
 
 Browser UI for kicad-web: docked editor shell (React + Zustand), the PixiJS board and
 schematic canvases from `@kicad-web/renderer`, interactive placement tools, a schema-driven
-properties panel, client-side undo, jobs with async progress, DRC/ERC, a three.js 3D view and a
-footprint editor. It talks to KiCad through `@kicad-web/client` over the bridge.
+properties panel, undo through KiCad's own stack, jobs with async progress, DRC/ERC with canvas
+markers, a library browser, the schematic workflow (annotate / update PCB / fields table), a
+three.js 3D view and a footprint editor. It talks to KiCad through `@kicad-web/client` over the
+bridge.
 
 ## Running
 
@@ -111,7 +113,40 @@ inside the bridge workspace root). The project screen's file browser is `GET /fi
 - **Markers** (`KicadMarkerService`): `RunBoardJobDrc` / `GetDrcMarkers` /
   `SetDrcMarkerExcluded` and the ERC twins, offered only when `GetSupportedCommands` advertises
   them (the capability table is re-read after documents open, because handlers register per
-  document type); otherwise the panel shows "not supported by this server".
+  document type); otherwise the panel shows "not supported by this server". The panel also owns
+  the canvas overlay: the visible markers go to `host.setMarkers`, a row click runs
+  `host.focusMarker` and selects the offending items, and excluding one asks for KiCad's
+  `exclusion_comment` first. `Get|SetDrcSeverities` (and the ERC twins) back the severities editor
+  (Inspect → DRC severities…, or the "severities…" link in the panel).
+- **Library browser** (`src/components/dialogs/LibraryBrowserDialog.tsx`, `KicadLibraryService`):
+  `GetLibraryTables` → the fp-lib-table / sym-lib-table rows, `ListLibraryEntries` → one library's
+  entries (fetched unfiltered once per library and filtered in memory, because KiCad loads the
+  library on demand and the first listing of a big one is slow), and a preview of the selected
+  entry rendered by the ordinary `BoardCanvasHost` / `SchematicCanvasHost` over a throwaway
+  one-item store (`library.preview()`). It is what `Place footprint…` / `Place symbol…` /
+  `Assign footprints` now open; the "Library id" field in its footer keeps typing a LIB_ID
+  available as the fallback. `Tools → Browse libraries…` (Mod+Shift+A) opens it on its own.
+- **Board tools** (`KicadBoardTools`): `GetRatsnest` / `GetUnroutedCount` (unrouted connections in
+  the status bar, ratsnest toggle on the toolbar and Alt+R), `GetNetLengths` (the net inspector's
+  sortable length table for the highlighted nets), and the bulk operations in the palette with
+  small option dialogs — `SetTeardrops` / `RemoveTeardrops`, `AutoplaceFootprints`,
+  `UpdateFootprintsFromLibrary`, `GlobalDeletion`.
+- **Schematic workflow** (`KicadSchematicTools`): `Annotate` / `ClearAnnotation` (scope, sort
+  order, numbering, start number, reset — with KiCad's report in the dialog),
+  `SyncSchematicToBoard` ("Update PCB from schematic", previewed with a dry run before it is
+  applied), `GetSymbolFieldsTable` / `SetSymbolFields` as an editable grid that commits every
+  pending edit in one call, and `AssignFootprints` driven from the library browser.
+- **Undo** (`KicadUndoService` over the client's `DocumentUndo`): KiCad's own stack (`Undo` /
+  `Redo` / `GetUndoStack`) whenever `GetSupportedCommands` advertises it, which also reverts what
+  never passed through a commit — zone fills, connectivity, `SetBoardOrigin`, the netlist updater;
+  the app's `CommandService` history is the fallback otherwise. The History panel says which mode
+  is live and lists the active stack. Server-side operations re-read the document through
+  `KicadDocumentService.resyncDocument()`: the `DocumentChanged` relay skips them, because it sees
+  our own client name and assumes the commit backend already applied the diff.
+- **Server settings** (`KicadSettingsService`): `ListColorThemes` / `GetColorTheme` put KiCad's own
+  colour themes in Settings → Appearance (they use the same flat theme keys the renderer does, so
+  a server theme drops straight onto the canvas as `server:<name>`), and `GetAppSettings` shows the
+  PCB editor's units / grid / theme defaults with a button that adopts them.
 
 ## Proof against real KiCad
 
@@ -122,19 +157,29 @@ pick R1), `edit` (properties X, undo through `SaveDocumentToString`), `route` (t
 layer switch, undo / redo, via tool), `draw` (line / rect / circle / arc / polygon / text /
 filled zone), `footprint` (place `Resistor_SMD:R_0603_1608Metric`, pads verified in the file),
 `align` (align / distribute / rotate by 45° / set layer / set net), `clipboard` (duplicate,
-copy / paste, `SaveItemsToString` → `ParseAndCreateItemsFromString` + undo), `setup` (design
+copy / paste, `SaveItemsToString` → `ParseAndCreateItemsFromString` + undo), `markers` (DRC,
+canvas overlay, focus + selection, exclusion comment, severities editor), `nets` (unrouted count,
+ratsnest toggle, `GetNetLengths` with sortable columns), `serverundo` (place a via, undo it
+through KiCad's stack), `settings` (KiCad's colour themes and `GetAppSettings` defaults),
+`boardtools` (teardrops, update from library, autoplace, global deletion), `setup` (design
 rules, stackup, custom rules, origin round trip), `page` (title block / page size), `3d` (GLB
 export rendered in three.js), `jobs` (every export incl. async progress), `fpeditor` (edit a
 pad in the footprint editor, `SaveDocument` writes the `.kicad_mod`), `schematic` (wire, bus,
-junction, no-connect, three labels, text, `Device:R`, hierarchical sheet, save), `crossprobe`,
-`erc`. Commands that open a prompt are started without awaiting them (`run()`), then the
-prompt is filled. Screenshots land in `docs/screenshots/`.
+junction, no-connect, three labels, text, `Device:R`, hierarchical sheet, save), `annotate`,
+`fields`, `updatepcb`, `crossprobe`, `erc`. Commands that open a prompt are started without
+awaiting them (`run()`), then the prompt is filled. Screenshots land in `docs/screenshots/`.
+
+The DRC-driven steps deliberately run **before** `jobs`: measured on 10.99.0-3685,
+`RunBoardJobDrc` stops answering once the async export jobs have run (the proof records that as a
+GAP rather than hiding it).
 
 ## Tests
 
 ```sh
 bun test            # unit tests, incl. test/kicad-services.test.ts (fake transport: session
-                    # lifecycle, store population from canned GetItems, commit backend)
+                    # lifecycle, store population from canned GetItems, commit backend) and
+                    # test/batch3-services.test.ts (library caching, board-tool enums, settings
+                    # translation, fields-table batching, the server/client undo picker)
 bunx tsc -b
 bun run --filter @kicad-web/app build
 cd e2e && bun run test          # mock smoke (E2E_PORT=5175 when a dev server holds 5173)

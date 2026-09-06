@@ -50,6 +50,7 @@ function fromDrc(m: DrcMarker): Marker {
     items: m.items.map((k) => k.value),
     position: { x: num(m.position?.xNm), y: num(m.position?.yNm) },
     excluded: m.excluded,
+    comment: m.exclusionComment ?? '',
   };
 }
 
@@ -64,6 +65,7 @@ function fromErc(m: ErcMarker): Marker {
     position: { x: num(m.position?.xNm), y: num(m.position?.yNm) },
     sheetPath: m.sheetSpecificPath ? `/${m.sheetSpecificPath.path.map((k) => k.value).join('/')}` : undefined,
     excluded: m.excluded,
+    comment: m.exclusionComment ?? '',
   };
 }
 
@@ -155,20 +157,36 @@ export class KicadMarkerService implements MarkerService {
   }
 
   setExcluded(id: string, excluded: boolean): void {
+    void this.setExcludedWithComment(id, excluded, '').catch(() => undefined);
+  }
+
+  /**
+   * Exclusion with KiCad's comment field. The comment is stored with the project, so it survives
+   * the run that rebuilt the marker ids; the local copy is updated optimistically.
+   */
+  async setExcludedWithComment(id: string, excluded: boolean, comment: string): Promise<void> {
     const kicad = this.docs.kicad;
+    const pending: Promise<unknown>[] = [];
     for (const kind of ['drc', 'erc'] as const) {
       if (!this.byKind[kind].some((m) => m.id === id)) continue;
-      this.byKind[kind] = this.byKind[kind].map((m) => (m.id === id ? { ...m, excluded } : m));
-      if (kicad) {
-        const p =
-          kind === 'drc' && this.docs.boardDoc
-            ? kicad.client.call(SetDrcMarkerExcludedSchema, { board: this.docs.boardDoc.specifier, markers: [{ value: id }], excluded, comment: '' }, DrcResultsResponseSchema, { command: 'SetDrcMarkerExcluded' })
-            : kind === 'erc' && this.docs.schematicDoc
-              ? kicad.client.call(SetErcMarkerExcludedSchema, { schematic: this.docs.schematicDoc.specifier, markers: [{ value: id }], excluded, comment: '' }, ErcResultsResponseSchema, { command: 'SetErcMarkerExcluded' })
-              : null;
-        p?.catch((e: unknown) => this.log(`SetMarkerExcluded failed: ${e instanceof Error ? e.message : String(e)}`, 'warn'));
+      this.byKind[kind] = this.byKind[kind].map((m) => (m.id === id ? { ...m, excluded, comment: excluded ? comment : '' } : m));
+      if (!kicad) continue;
+      if (kind === 'drc' && this.docs.boardDoc) {
+        pending.push(
+          kicad.client.call(SetDrcMarkerExcludedSchema, { board: this.docs.boardDoc.specifier, markers: [{ value: id }], excluded, comment }, DrcResultsResponseSchema, { command: 'SetDrcMarkerExcluded' }),
+        );
+      } else if (kind === 'erc' && this.docs.schematicDoc) {
+        pending.push(
+          kicad.client.call(SetErcMarkerExcludedSchema, { schematic: this.docs.schematicDoc.specifier, markers: [{ value: id }], excluded, comment }, ErcResultsResponseSchema, { command: 'SetErcMarkerExcluded' }),
+        );
       }
     }
     this.emit();
+    try {
+      await Promise.all(pending);
+    } catch (e) {
+      this.log(`SetMarkerExcluded failed: ${e instanceof Error ? e.message : String(e)}`, 'warn');
+      throw e;
+    }
   }
 }

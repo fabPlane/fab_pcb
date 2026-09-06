@@ -424,6 +424,25 @@ export class KicadDocumentService implements DocumentService {
     };
   }
 
+  /**
+   * Full re-read of a document after a server-side change *we* asked for outside a commit — undo,
+   * teardrops, annotate, global deletion, the netlist updater. The `DocumentChanged` relay skips
+   * those: it sees our own client name and assumes the commit backend already applied the diff,
+   * which is only true for edits that went through `BeginCommit`.
+   */
+  async resyncDocument(kind: 'board' | 'schematic'): Promise<void> {
+    if (kind === 'board' ? !this.boardDoc : !this.schematicDoc) return;
+    const done = this.beginActivity();
+    try {
+      await this.resync(kind, undefined, {}, false);
+    } catch (e) {
+      this.log(`re-sync of the ${kind} failed: ${describe(e)}`, 'warn');
+    } finally {
+      done();
+    }
+    await this.afterCommit(kind);
+  }
+
   /** Records KiCad's revision after one of our own commits so the poll does not re-read the store. */
   async afterCommit(kind: DocumentKind): Promise<void> {
     const doc = kind === 'board' ? this.boardDoc : kind === 'schematic' ? this.schematicDoc : null;

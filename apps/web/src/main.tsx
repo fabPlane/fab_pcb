@@ -7,9 +7,11 @@ import { getCommand } from './commands/registry';
 import { useAppStore } from './state/appStore';
 import { useEditorStore } from './state/editorStore';
 import { usePromptStore } from './state/promptStore';
+import { useLibraryStore } from './state/libraryStore';
 import { useLogStore } from './state/logStore';
 import { useUiStore } from './state/uiStore';
 import { registerEditingCommands } from './commands/editing';
+import { registerToolCommands } from './commands/tools';
 import { activeTool, bindTools, cancelTool, toolFinish, toolKey } from './canvas/tools';
 import { installCrossProbe } from './services/crossProbe';
 import { createMockServices, ServicesProvider, type Services } from './services';
@@ -39,6 +41,7 @@ const services: Services = choice.mode === 'kicad' ? await createKicadServices({
 log(choice.mode === 'kicad' ? `Services: KiCad via bridge ${choice.bridgeUrl || location.origin}` : 'Services: in-memory mock (add ?bridge=http://127.0.0.1:4020 or set VITE_BRIDGE_URL for real KiCad)');
 registerBuiltinCommands(services);
 registerEditingCommands(services, { library: choice.mode === 'kicad' ? (services as unknown as { library: import('./services/kicad/KicadLibraryService').KicadLibraryService }).library : undefined });
+registerToolCommands(services);
 bindTools(services);
 installCrossProbe(services);
 bindHistory(services.commands);
@@ -53,7 +56,7 @@ bindHistory(services.commands);
     /** Runs a registered command in the active editor's context (the proof script / e2e). */
     runCommand: (id: string) => getCommand(id)?.run({ editor: useAppStore.getState().activeEditor }),
     tools: { activeTool, toolFinish, toolKey, cancelTool },
-    stores: { app: useAppStore, editor: useEditorStore, prompt: usePromptStore, ui: useUiStore, log: useLogStore },
+    stores: { app: useAppStore, editor: useEditorStore, prompt: usePromptStore, ui: useUiStore, log: useLogStore, library: useLibraryStore },
   };
 }
 

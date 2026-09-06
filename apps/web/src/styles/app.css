@@ -1757,3 +1757,195 @@ h3.section:first-child {
 .three-view .three-status.error {
   color: var(--danger, #f66);
 }
+
+/* --------------------------------------------------------------- library browser */
+.library-browser {
+  display: grid;
+  grid-template-columns: 210px minmax(240px, 1fr) 300px;
+  min-height: 440px;
+  max-height: calc(84vh - 140px);
+}
+.library-browser .lib-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  border-right: 1px solid var(--border);
+}
+.library-browser .lib-col:last-child {
+  border-right: none;
+}
+.library-browser .lib-list {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+}
+.library-browser .lib-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  width: 100%;
+  padding: 3px 8px;
+  border: none;
+  background: none;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+}
+.library-browser .lib-row:hover {
+  background: var(--bg-hover);
+}
+.library-browser .lib-row.selected {
+  background: var(--accent-soft, var(--bg-hover));
+  color: var(--fg);
+}
+.library-browser .lib-row .name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.library-browser .lib-row .desc {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--fs-xs);
+}
+.library-browser .lib-row .scope {
+  margin-left: auto;
+  font-size: var(--fs-xs);
+  color: var(--fg-faint);
+}
+.library-browser .lib-row .scope.project {
+  color: var(--accent);
+}
+.lib-preview {
+  position: relative;
+  flex: 0 0 300px;
+  min-height: 240px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-canvas, #001023);
+}
+.lib-preview .lib-preview-canvas {
+  position: absolute;
+  inset: 0;
+}
+.lib-preview .empty-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 12px;
+  pointer-events: none;
+}
+.lib-meta {
+  display: grid;
+  grid-template-columns: 78px 1fr;
+  gap: 2px 8px;
+  margin: 0;
+  padding: 8px 10px;
+  font-size: var(--fs-xs);
+  overflow: auto;
+  max-height: 190px;
+}
+.lib-meta dt {
+  color: var(--fg-faint);
+}
+.lib-meta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ------------------------------------------------- fields table / severities grids */
+.fields-table,
+.severities {
+  display: flex;
+  flex-direction: column;
+  min-height: 320px;
+  max-height: calc(84vh - 150px);
+}
+.grid-scroll {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+}
+.table.grid td {
+  padding: 1px 2px;
+}
+.table .cell-edit {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.table input.cell {
+  width: 100%;
+  min-width: 90px;
+  height: 20px;
+  font-size: var(--fs-xs);
+  background: transparent;
+  border-color: transparent;
+}
+.table input.cell:focus {
+  background: var(--bg-input, var(--bg-elevated));
+  border-color: var(--accent);
+}
+.table td.edited input.cell,
+.table tr.edited td {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+.table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.table th.sortable:hover {
+  color: var(--accent);
+}
+
+/* --------------------------------------------------------------- report blocks */
+.report {
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  font-size: var(--fs-sm);
+}
+.report .sev-error {
+  color: var(--danger, #f66);
+}
+.log-lines {
+  margin: 6px 0 0;
+  padding: 6px 8px;
+  max-height: 180px;
+  overflow: auto;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  white-space: pre-wrap;
+}
+
+/* ------------------------------------------------------------------ net lengths */
+.net-lengths {
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
+}
+.net-lengths .section-head {
+  padding: 4px 8px;
+  font-size: var(--fs-xs);
+  color: var(--fg-faint);
+  background: var(--bg-elevated);
+}
+
+/* --------------------------------------------------------------- status / undo */
+.statusbar .cell.warn {
+  color: var(--warning, #e8a33d);
+}
+.chip.undo-mode {
+  cursor: default;
+}

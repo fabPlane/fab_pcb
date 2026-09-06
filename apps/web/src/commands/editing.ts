@@ -16,6 +16,7 @@ import { activeDocument, storeKeyFor } from '@/state/active';
 import { useAppStore } from '@/state/appStore';
 import { useEditorStore } from '@/state/editorStore';
 import { log } from '@/state/logStore';
+import { pickLibraryEntry } from '@/state/libraryStore';
 import { prompt, promptValue } from '@/state/promptStore';
 import { useUiStore } from '@/state/uiStore';
 import { registerCommands, getCommand, type Command, type CommandContext } from './registry';
@@ -114,25 +115,26 @@ export function registerEditingCommands(services: Services, extras: { library?: 
           notify('Footprint libraries need the KiCad services (the mock has no library access)', 'error');
           return;
         }
+        // The browser is the primary picker; the LIB_ID field in its footer is the typing fallback.
+        const libId = (await pickLibraryEntry('footprint', { purpose: 'place', title: 'Place footprint', description: 'Footprint libraries from the project and global fp-lib-table.' }))?.trim();
+        if (!libId) return;
         const r = await prompt({
-          title: 'Place footprint',
-          description: 'Library identifier as nickname:name (resolved through the project and global fp-lib-table).',
+          title: `Place ${libId}`,
           fields: [
-            { key: 'libId', label: 'Footprint', type: 'string', default: 'Resistor_SMD:R_0603_1608Metric', placeholder: 'Library:Footprint' },
             { key: 'reference', label: 'Reference', type: 'string', default: nextReference('R', usedReferences(doc.store, 'KOT_PCB_FOOTPRINT')) },
-            { key: 'value', label: 'Value', type: 'string', default: '' },
+            { key: 'value', label: 'Value', type: 'string', default: libId.split(':').pop() ?? '' },
           ],
         });
         if (!r) return;
         try {
-          const lib = await extras.library.footprint(String(r.libId).trim());
+          const lib = await extras.library.footprint(libId);
           const prefix = /^[A-Za-z]+/.exec(String(r.reference))?.[0] ?? 'REF';
           const reference = String(r.reference).trim() || nextReference(prefix, usedReferences(doc.store, 'KOT_PCB_FOOTPRINT'));
-          begin('footprint', { library: lib, reference, value: String(r.value ?? '') || String(r.libId).split(':').pop() });
+          begin('footprint', { library: lib, reference, value: String(r.value ?? '') || libId.split(':').pop() });
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e);
-          log(`OpenDocument(footprint ${r.libId}) failed: ${msg}`, 'error');
-          notify(`Footprint ${r.libId}: ${msg}`, 'error');
+          log(`OpenDocument(footprint ${libId}) failed: ${msg}`, 'error');
+          notify(`Footprint ${libId}: ${msg}`, 'error');
         }
       },
     },
@@ -148,7 +150,7 @@ export function registerEditingCommands(services: Services, extras: { library?: 
         const p = fp?.proto as { definition?: { id?: { libraryNickname?: string; entryName?: string } } } | undefined;
         let libId = p?.definition?.id ? `${p.definition.id.libraryNickname}:${p.definition.id.entryName}` : '';
         if (!libId) {
-          const v = await promptValue<string>('Open footprint', { label: 'Footprint', type: 'string', default: 'Resistor_SMD:R_0603_1608Metric' });
+          const v = services.library ? await pickLibraryEntry('footprint', { purpose: 'browse', title: 'Open footprint' }) : await promptValue<string>('Open footprint', { label: 'Footprint', type: 'string', default: 'Resistor_SMD:R_0603_1608Metric' });
           if (!v) return;
           libId = v.trim();
         }
@@ -204,11 +206,11 @@ export function registerEditingCommands(services: Services, extras: { library?: 
           notify('Symbol libraries need the KiCad services (the mock has no library access)', 'error');
           return;
         }
+        const libId = (await pickLibraryEntry('symbol', { purpose: 'place', title: 'Place symbol', description: 'Symbol libraries from the project and global sym-lib-table.' }))?.trim();
+        if (!libId) return;
         const r = await prompt({
-          title: 'Place symbol',
-          description: 'Library identifier as nickname:name (resolved through the project and global sym-lib-table).',
+          title: `Place ${libId}`,
           fields: [
-            { key: 'libId', label: 'Symbol', type: 'string', default: 'Device:R', placeholder: 'Library:Symbol' },
             { key: 'reference', label: 'Reference', type: 'string', default: '', help: 'Empty = next free number for the symbol prefix' },
             { key: 'value', label: 'Value', type: 'string', default: '' },
             { key: 'footprint', label: 'Footprint', type: 'string', default: '' },
@@ -217,7 +219,7 @@ export function registerEditingCommands(services: Services, extras: { library?: 
         });
         if (!r) return;
         try {
-          const def = await extras.library.symbol(String(r.libId).trim());
+          const def = await extras.library.symbol(libId);
           const prefix = refOf(def.referenceField?.text) || 'U';
           const used: string[] = [];
           for (const sheet of documents.sheets()) {
@@ -231,11 +233,11 @@ export function registerEditingCommands(services: Services, extras: { library?: 
             walk([sheet]);
           }
           const reference = String(r.reference).trim() || nextReference(prefix, used);
-          begin('symbol', { definition: def, reference, value: String(r.value ?? '') || refOf(def.valueField?.text) || String(r.libId).split(':').pop(), footprint: String(r.footprint ?? ''), unit: Number(r.unit) || 1 });
+          begin('symbol', { definition: def, reference, value: String(r.value ?? '') || refOf(def.valueField?.text) || libId.split(':').pop(), footprint: String(r.footprint ?? ''), unit: Number(r.unit) || 1 });
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e);
-          log(`OpenDocument(symbol ${r.libId}) failed: ${msg}`, 'error');
-          notify(`Symbol ${r.libId}: ${msg}`, 'error');
+          log(`OpenDocument(symbol ${libId}) failed: ${msg}`, 'error');
+          notify(`Symbol ${libId}: ${msg}`, 'error');
         }
       },
     },

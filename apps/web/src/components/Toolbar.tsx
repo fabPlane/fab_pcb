@@ -40,6 +40,7 @@ export function Toolbar({ kind, storeKey, layers }: { kind: DocumentKind; storeK
   const undo = useHistoryStore((s) => s.undo.length);
   const redo = useHistoryStore((s) => s.redo.length);
   const showGrid = useUiStore((s) => s.showGrid);
+  const showRatsnest = useUiStore((s) => s.showRatsnest);
   const hasSel = doc.selection.length > 0;
   return (
     <div className="toolbar" role="toolbar">
@@ -57,6 +58,7 @@ export function Toolbar({ kind, storeKey, layers }: { kind: DocumentKind; storeK
       <ToolButton id="view.zoomOut" glyph="−" />
       <ToolButton id="view.zoomFit" glyph="⤢" label="Fit" />
       <ToolButton id="view.toggleGrid" glyph="#" active={showGrid} />
+      {kind === 'board' && <ToolButton id="view.toggleRatsnest" glyph="⋰" label="Ratsnest" active={showRatsnest} />}
       <span className="sep" />
       {kind === 'schematic' ? (
         <>
@@ -72,11 +74,14 @@ export function Toolbar({ kind, storeKey, layers }: { kind: DocumentKind; storeK
           <ToolButton id="schematic.sheet" glyph="S" label="Sheet" active={doc.tool === 'sheet'} />
           <span className="sep" />
           <ToolButton id="inspect.runErc" glyph="✓" label="ERC" />
+          <ToolButton id="schematic.annotate" glyph="#" label="Annotate" />
+          <ToolButton id="schematic.fieldsTable" glyph="▤" label="Fields" />
           <ToolButton id="schematic.updatePcb" glyph="→" label="Update PCB" />
         </>
       ) : (
         <>
           {kind === 'board' && <ToolButton id="board.placeFootprint" glyph="A" label="Footprint" active={doc.tool === 'footprint'} />}
+          {kind === 'board' && <ToolButton id="tools.libraryBrowser" glyph="▦" label="Libraries" />}
           {kind === 'board' && <ToolButton id="board.route" glyph="X" label="Route" active={doc.tool === 'route'} />}
           {kind === 'board' && <ToolButton id="board.placeVia" glyph="◎" label="Via" active={doc.tool === 'via'} />}
           <ToolButton id="board.drawLine" glyph="╱" active={doc.tool === 'line'} />
