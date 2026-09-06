@@ -69,7 +69,7 @@ SetDrcSeverities`, `GetErcSeverities / SetErcSeverities`. Add `unconnected` and
 `footprint mismatch` categories as first-class fields.
 
 ### G5 · Project and document lifecycle
-**Status:** done (e118ed3f81): NewProject, NewDocument, GetProjectInfo, headless DOCTYPE_SYMBOL documents. Drawing sheets still open.
+**Status:** done (e118ed3f81). Drawing sheets are out of scope and now answer with a reason (6033d9ef42): their items implement neither Serialize nor Deserialize, no message types exist for the WSG_* kinds, and DS_DATA_MODEL is a process-wide singleton.
 **Today:** `OpenDocument` only opens existing files; no way to create a project,
 board, or schematic; `DOCTYPE_SYMBOL` and `DOCTYPE_DRAWING_SHEET` are rejected.
 **Fix:** `NewProject{path, template?}`, `NewDocument{project, type}`,
@@ -138,11 +138,13 @@ and `Undo`, `Redo`, `GetUndoStack`. Until then the client keeps history (see 01)
 defaults), `SetGraphicsDefaults`. Read-only first.
 
 ### G12 · 3D and raytrace render headless
+**Status:** settled as planned: the app loads the GLB from `RunBoardJobExport3D` in three.js. No KiCad change.
 `RunBoardJobExportRender` needs a GL context and will fail on a server. Decision: do
 3D in the browser (three.js) from `RunBoardJobExport3D` GLB output; leave the
 raytrace job for machines with a GPU. No KiCad change.
 
 ### G14 · Multi-document / multi-project
+**Status:** not needed. The bridge runs one server per project and the app opens a second session when a document belongs to another project.
 Not needed while the bridge runs one server per project. Revisit if the process
 model becomes a problem.
 
