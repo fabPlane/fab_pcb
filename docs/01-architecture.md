@@ -126,6 +126,7 @@ pins the fork commit it was generated against in `packages/proto/KICAD_COMMIT`.
 | M1 ✅ | Codegen + bridge + client: open the kitchen-sink project from the browser, `GetVersion`, `GetOpenDocuments`, `GetItems(FOOTPRINT)`. | done 2026-09-06 |
 | M2 ✅ | Read-only board viewer and schematic viewer (WebGL), layer panel, pan/zoom, hover/hit-test, net highlight (client-side). | done 2026-09-06: see docs/screenshots/board.png, schematic.png |
 | M3 ✅ | Editing: selection, move/rotate/flip, properties panel, create/delete, commits, client-side undo. | done 2026-09-06: property edit committed, verified via SaveDocumentToString, undone (board-edited.png) |
-| M4 ◐ | Patch series P0 landed in the fork: events, headless RunAction, DRC/ERC, new project/document, capability discovery. DRC/ERC panels live. | events, DRC/ERC, lifecycle, discovery done; DRC panel live (board-drc.png); RunAction in progress |
-| M5 | Libraries, annotate, schematic→board sync, exports/jobs UI, 3D via GLB export + three.js. | full design flow start-to-gerbers without desktop KiCad |
-| M6 | P1 parity, `ws://` direct transport, upstream MRs for every patch. | coverage script reports 0 GUI-only commands the UI needs |
+| M4 ✅ | Patch series P0 landed in the fork: events, headless RunAction, DRC/ERC, new project/document, capability discovery. DRC/ERC panels live. | done 2026-09-06: all P0 gaps closed; markers drawn on the canvas (board-drc-markers.png) |
+| M5 ✅ | Libraries, annotate, schematic→board sync, exports/jobs UI, 3D via GLB export + three.js. | done 2026-09-07: library browser on the real fp-lib-table, annotate, update-PCB, 13 export jobs, three.js 3D (library-browser.png, board-3d.png) |
+| M6 ◐ | P1 parity, `ws://` direct transport, upstream MRs for every patch. | parity and direct ws:// done 2026-09-07 (165 commands, 150 headless, 0 the UI needs); the ten merge requests are described in [upstream.md](upstream.md) but not yet submitted |
+| M7 | Real-board practice and routing: five demo boards built, routed and exported through the web UI; Freerouting and a JavaScript router integrated and compared. | see [06-routing.md](06-routing.md) |

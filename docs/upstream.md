@@ -534,11 +534,10 @@ request path; `--token` and `--no-events` are added to `kicad-cli api-server`.
    tests use `KI_TEST::GetPcbnewTestDataDir()` and the fixtures already in
    `qa/data/pcbnew/`, `qa/data/eeschema/` and `qa/data/libraries/`. Delete the directory
    from history entirely.
-3. **The QA tests have never been compiled or run.** `build-macos.sh` configures with
-   `-DKICAD_BUILD_QA_TESTS=OFF` and builds only `kicad-cli`, `pcbnew_kiface` and
-   `eeschema_kiface`. Every file under `qa/tests/` in this series is syntax-checked
-   against the headers and reviewed by hand, and nothing more. Say this plainly to the
-   maintainer rather than letting CI discover it. At least one defect is already
+3. **The QA tests are now compiled and run** (see the QA status section at the end: 154
+   `qa_api` cases and 1232 `qa_eeschema` cases pass in a `-DKICAD_BUILD_QA_TESTS=ON` build).
+   This item was originally "never compiled"; keep the build-dir caveat in mind when cutting
+   branches: run `qa_api` on each MR branch, not only on the tip. At least one defect is already
    visible by inspection: `test_api_board_ops.cpp:72`, `test_api_settings.cpp:106` and
    `test_api_undo.cpp:71` copy `api_kitchen_sink.kicad_prl` into the temp project and
    `return false` if the copy fails — **that file does not exist** in `qa/data/pcbnew/`,
