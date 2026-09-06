@@ -2833,6 +2833,9 @@ export const SetDrcSeveritiesSchema: GenMessage<SetDrcSeverities, {jsonType: Set
  */
 export type RatsnestEdge = Message<"kiapi.board.commands.RatsnestEdge"> & {
   /**
+   * The net the connection belongs to; name and the board's current net code, as GetNets reports
+   * them
+   *
    * @generated from field: kiapi.board.types.Net net = 1;
    */
   net?: Net | undefined;
@@ -2875,6 +2878,9 @@ export type RatsnestEdge = Message<"kiapi.board.commands.RatsnestEdge"> & {
  */
 export type RatsnestEdgeJson = {
   /**
+   * The net the connection belongs to; name and the board's current net code, as GetNets reports
+   * them
+   *
    * @generated from field: kiapi.board.types.Net net = 1;
    */
   net?: NetJson;
@@ -3760,7 +3766,9 @@ export const SetTeardropsSchema: GenMessage<SetTeardrops, {jsonType: SetTeardrop
  */
 export type SetTeardropsResponse = Message<"kiapi.board.commands.SetTeardropsResponse"> & {
   /**
-   * Pads and vias whose teardrop settings changed
+   * Pads and vias whose teardrop settings the request actually changed.  Items that already had
+   * the requested settings are not counted, so removing teardrops from a board that has none
+   * reports zero.  Track-to-track teardrops are not counted here.
    *
    * @generated from field: uint32 item_count = 1;
    */
@@ -3774,7 +3782,9 @@ export type SetTeardropsResponse = Message<"kiapi.board.commands.SetTeardropsRes
  */
 export type SetTeardropsResponseJson = {
   /**
-   * Pads and vias whose teardrop settings changed
+   * Pads and vias whose teardrop settings the request actually changed.  Items that already had
+   * the requested settings are not counted, so removing teardrops from a board that has none
+   * reports zero.  Track-to-track teardrops are not counted here.
    *
    * @generated from field: uint32 item_count = 1;
    */

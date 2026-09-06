@@ -2409,7 +2409,8 @@ export const ParseAndCreateItemsFromStringSchema: GenMessage<ParseAndCreateItems
 
 /**
  * Undoes the most recent commands of the document (API commits, actions, and in the editor the
- * user's own edits).  Refused while a client has an open commit.  Returns UndoRedoResponse
+ * user's own edits).  Refused with AS_BUSY while any client has a commit open (from BeginCommit
+ * until EndCommit, whether or not anything has been staged in it yet).  Returns UndoRedoResponse
  * Since 11.0
  *
  * @generated from message kiapi.common.commands.Undo
@@ -2430,7 +2431,8 @@ export type Undo = Message<"kiapi.common.commands.Undo"> & {
 
 /**
  * Undoes the most recent commands of the document (API commits, actions, and in the editor the
- * user's own edits).  Refused while a client has an open commit.  Returns UndoRedoResponse
+ * user's own edits).  Refused with AS_BUSY while any client has a commit open (from BeginCommit
+ * until EndCommit, whether or not anything has been staged in it yet).  Returns UndoRedoResponse
  * Since 11.0
  *
  * @generated from message kiapi.common.commands.Undo

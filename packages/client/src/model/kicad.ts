@@ -30,6 +30,7 @@ import { Job } from "./jobs";
 import { Libraries } from "./libraries";
 import { Project } from "./project";
 import { Schematic } from "./schematic";
+import { Settings } from "./settings";
 import { SymbolDocument } from "./symbol-doc";
 
 export interface TextShapes {
@@ -45,8 +46,15 @@ export class KiCad {
    */
   readonly libraries: Libraries;
 
+  /**
+   * The user's colour themes and the editors' application settings
+   * (`settings_commands.proto`, KiCad >= 11.0). Served without a project open.
+   */
+  readonly settings: Settings;
+
   constructor(readonly client: KiCadClient) {
     this.libraries = new Libraries(this);
+    this.settings = new Settings(this);
   }
 
   /** Connects a transport and waits for the server to be ready. */

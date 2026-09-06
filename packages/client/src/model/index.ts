@@ -62,6 +62,16 @@ export {
   type WizardParams,
   type WizardResult,
 } from "./libraries";
+export {
+  Settings,
+  toAppType,
+  toThemeColor,
+  unitSuffix,
+  type AppName,
+  type ColorTheme,
+  type ColorThemeSummary,
+  type ThemeColor,
+} from "./settings";
 export { FootprintDocument } from "./footprint-doc";
 export { SymbolDocument } from "./symbol-doc";
 export { Commit, type CommitOptions, type CommitResult, type DeleteResult, type ItemInput } from "./commit";

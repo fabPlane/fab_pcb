@@ -13,6 +13,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import {
   ApiStatusCode,
+  AppType,
   Board3DFormat,
   BoardLayer,
   BoardOriginType,
@@ -39,6 +40,7 @@ import {
   RunActionStatus,
   SchematicNetlistFormat,
   StatsOutputFormat,
+  UnitSystem,
   WizardGenerationStatus,
   type DrcResultsResponse,
   type ErcResultsResponse,
@@ -1228,6 +1230,135 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     },
     120_000,
   );
+
+  // ---- common/settings (settings_commands.proto, KiCad >= 11.0; no document needed) ----------------------
+  cmdTest("ListColorThemes", async () => {
+    const themes = await k().settings.colorThemes();
+    expect(themes.length).toBeGreaterThanOrEqual(2);
+    const names = themes.map((t) => t.name);
+    // The two built-ins are always there; a user install may add more from ~/.config/kicad/<ver>/colors.
+    expect(names).toContain("KiCad Default");
+    expect(names).toContain("KiCad Classic");
+    for (const t of themes) {
+      expect(t.name.length).toBeGreaterThan(0);
+      // Built-ins live in memory (filename "_builtin_*", suppressed by the handler) and are read-only.
+      if (t.name.startsWith("KiCad ")) {
+        expect(t.readOnly).toBe(true);
+        expect(t.filename).toBe("");
+      }
+      // Every listed theme must be fetchable by name.
+      expect((await k().settings.colorTheme(t.name)).name).toBe(t.name);
+    }
+    return `${themes.length} themes: ${names.join(", ")}`;
+  });
+  cmdTest("GetColorTheme", async () => {
+    const def = await k().settings.colorTheme("KiCad Default");
+    expect(def.name).toBe("KiCad Default");
+    expect(def.readOnly).toBe(true);
+    expect(def.overrideSchItemColors).toBe(false);
+    const keys = Object.keys(def.colors);
+    expect(keys.length).toBeGreaterThan(200);
+    // Flat COLOR_SETTINGS keys ("board.copper.f"), exactly what the renderer's themeFromJson makes.
+    expect([...new Set(keys.map((key) => key.split(".")[0]))].sort()).toEqual(["3d_viewer", "board", "gerbview", "schematic"]);
+    for (const key of ["board.copper.f", "board.background", "schematic.wire", "schematic.background"]) {
+      const col = def.colors[key];
+      expect(col).toBeDefined();
+      for (const ch of [col!.r, col!.g, col!.b]) {
+        expect(Number.isInteger(ch)).toBe(true);
+        expect(ch).toBeGreaterThanOrEqual(0);
+        expect(ch).toBeLessThanOrEqual(255);
+      }
+      expect(col!.a).toBeGreaterThanOrEqual(0);
+      expect(col!.a).toBeLessThanOrEqual(1);
+      expect(def.layers[key]).toBeDefined();
+    }
+    // COLOR4D 0..1 -> 0..255: KiCad's default F.Cu is #C83434 and its wire colour #009600.
+    expect(def.colors["board.copper.f"]).toEqual({ r: 200, g: 52, b: 52, a: 1 });
+    expect(def.colors["schematic.wire"]).toEqual({ r: 0, g: 150, b: 0, a: 1 });
+    // Layer ids are the KiCad enums: F_Cu = 0, LAYER_WIRE = 1102.
+    expect(def.layers["board.copper.f"]).toBe(0);
+    expect(def.layers["schematic.wire"]).toBe(1102);
+    // An empty name means the built-in default; the lookup is case-insensitive on the display name.
+    const empty = await k().settings.colorTheme();
+    expect(empty.name).toBe("KiCad Default");
+    expect(Object.keys(empty.colors).length).toBe(keys.length);
+    expect((await k().settings.colorTheme("kicad default")).name).toBe("KiCad Default");
+    const err = await k()
+      .settings.colorTheme("no-such-theme")
+      .then(
+        () => undefined,
+        (e: unknown) => e,
+      );
+    expect(KiCadApiError.is(err, ApiStatusCode.AS_BAD_REQUEST)).toBe(true);
+    expect((err as KiCadApiError).serverMessage).toContain("see ListColorThemes");
+    const classic = await k().settings.colorTheme("KiCad Classic");
+    expect(classic.name).toBe("KiCad Classic");
+    const classicNote =
+      Object.keys(classic.colors).length === 0
+        ? "KICAD-BUG: KiCad Classic answers 0 colors (CreateBuiltinColorSettings() clears its m_params to disable load/store, so COLOR_SETTINGS::GetColorKeys() -- which the handler enumerates -- is empty)"
+        : `KiCad Classic: ${Object.keys(classic.colors).length} colors`;
+    return `KiCad Default: ${keys.length} colors over ${[...new Set(keys.map((key) => key.split(".")[0]))].sort().join("/")}, board.copper.f=#C83434 @ layer 0; empty name and "kicad default" resolve to it; unknown name AS_BAD_REQUEST; ${classicNote}`;
+  });
+  cmdTest("GetAppSettings", async () => {
+    const notes: string[] = [];
+    const files: Record<string, string> = {
+      pcb: "pcbnew.json",
+      schematic: "eeschema.json",
+      footprint: "fpedit.json",
+      symbol: "symbol_editor.json",
+    };
+    const apps = [
+      ["pcb", AppType.APP_PCB_EDITOR],
+      ["schematic", AppType.APP_SCHEMATIC_EDITOR],
+      ["footprint", AppType.APP_FOOTPRINT_EDITOR],
+      ["symbol", AppType.APP_SYMBOL_EDITOR],
+    ] as const;
+    for (const [name, type] of apps) {
+      const s = await k().settings.appSettings(name);
+      expect(s.app).toBe(type);
+      expect(s.settingsFile).toBe(files[name]!);
+      // The short name and the enum are the same request.
+      expect(await k().settings.appSettings(type)).toEqual(s);
+      expect(s.units).not.toBe(UnitSystem.US_UNKNOWN);
+      // Grids are the user's own strings ("100 mil"), never nm; current_grid indexes into them.
+      expect(s.grids.length).toBeGreaterThan(0);
+      expect(s.currentGrid).toBeLessThan(s.grids.length);
+      for (const g of s.grids) {
+        expect(g.x.length).toBeGreaterThan(0);
+        expect(g.y.length).toBeGreaterThan(0);
+      }
+      const grid = (await k().settings.currentGrid(name))!;
+      expect(grid).toEqual({ name: s.grids[s.currentGrid]!.name, x: s.grids[s.currentGrid]!.x, y: s.grids[s.currentGrid]!.y });
+      expect(s.zoomFactors.length).toBeGreaterThan(0);
+      expect(s.zoomFactors.every((z) => z > 0)).toBe(true);
+      expect(s.gridStyle).toBeLessThanOrEqual(2);
+      expect(s.gridSnap).toBeLessThanOrEqual(2);
+      // The colour theme is named by file name ("_builtin_default"), and must resolve.
+      expect(s.colorTheme.length).toBeGreaterThan(0);
+      const theme = await k().settings.colorTheme(s.colorTheme);
+      expect(theme.name.length).toBeGreaterThan(0);
+      // Only the editors whose item defaults are application-wide report any; the board's live in
+      // the document (GetGraphicsDefaults), so pcb/footprint answer an empty map.
+      const defaults = Object.keys(s.defaults);
+      if (name === "schematic") {
+        expect(defaults).toContain("default_wire_thickness");
+        expect(defaults).toContain("default_text_size");
+      } else if (name === "pcb" || name === "footprint") {
+        expect(defaults).toEqual([]);
+      }
+      notes.push(
+        `${name} ${UnitSystem[s.units]!.replace(/^US_/, "").toLowerCase()} theme "${s.colorTheme}"(${theme.name}) ${s.grids.length} grids @${s.currentGrid}="${grid.x}" ${s.zoomFactors.length} zooms ${defaults.length} defaults ${s.settingsFile}`,
+      );
+    }
+    const err = await k()
+      .settings.appSettings(AppType.APP_UNKNOWN)
+      .then(
+        () => undefined,
+        (e: unknown) => e,
+      );
+    expect(KiCadApiError.is(err, ApiStatusCode.AS_BAD_REQUEST)).toBe(true);
+    return `${notes.join("; ")}; APP_UNKNOWN AS_BAD_REQUEST`;
+  });
 
   // ---- common/variant ----------------------------------------------------------------------------------
   cmdTest("AddVariant", async () => {
