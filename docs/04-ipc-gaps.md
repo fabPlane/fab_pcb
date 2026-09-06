@@ -34,6 +34,12 @@ has staged changes. `RatsnestEdge.net.code` is always 0 (the handler packs only 
 `SetTeardropsResponse.item_count` counts pads and vias processed rather than changed, so
 `RemoveTeardrops` always reports the same number instead of dropping to zero.
 
+### G22 · `RunBoardJobDrc` hangs after the async export jobs have run
+Found by the app's browser proof: once the 13 async export jobs have run in a session, a
+subsequent `RunBoardJobDrc` never answers at all, so a client's timeout is the only way out.
+Same class as the old `RunSchematicJobExportNetlist` wedge. Likely the job worker thread and the
+synchronous DRC path contending for the board.
+
 ### G21 · `GetColorTheme("KiCad Classic")` returns zero colours
 `COLOR_SETTINGS::CreateBuiltinColorSettings()` clears that theme's `m_params`, so `GetColorKeys()`
 is empty and the handler enumerates nothing. Only "KiCad Default" answers usefully.
