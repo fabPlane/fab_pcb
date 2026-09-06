@@ -98,6 +98,18 @@
         "typescript": "^5.6.0",
       },
     },
+    "tooling/bench": {
+      "name": "@kicad-web/bench",
+      "version": "0.0.1",
+      "dependencies": {
+        "@kicad-web/bridge": "workspace:*",
+        "@kicad-web/client": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.2.0",
+        "typescript": "^5.6.0",
+      },
+    },
     "tooling/ci": {
       "name": "@kicad-web/ci",
       "version": "0.0.1",
@@ -248,6 +260,8 @@
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
 
     "@kicad-web/app": ["@kicad-web/app@workspace:apps/web"],
+
+    "@kicad-web/bench": ["@kicad-web/bench@workspace:tooling/bench"],
 
     "@kicad-web/bridge": ["@kicad-web/bridge@workspace:packages/bridge"],
 
