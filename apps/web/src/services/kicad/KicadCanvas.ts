@@ -14,7 +14,7 @@
 // `rebuildItems` them.
 
 import { BoardLayer, unpackAny, type GraphicShape, type PolygonWithHoles, type Text, type TextBox } from '@kicad-web/proto';
-import { BoardCanvasHost, SchematicCanvasHost, type Theme } from '@kicad-web/renderer';
+import { BoardCanvasHost, SchematicCanvasHost, dimensionText, type Theme } from '@kicad-web/renderer';
 import type { CanvasHost, DocumentKind, ItemStore, StoredItem } from '@/contracts';
 import type { KicadDocumentService } from './KicadDocumentService';
 
@@ -64,6 +64,14 @@ function boardTexts(it: StoredItem): TextRef[] {
     case 'KOT_PCB_FIELD':
       push(p.text?.id?.value, p.text?.text);
       break;
+    case 'KOT_PCB_DIMENSION': {
+      // The plotter draws `resolved_text` ("26.5000 mm"), not the bare measurement in `text.text`,
+      // so the glyphs must be laid out for that string or they come out short and off-centre. An
+      // empty string means the dimension plots no text at all, so no request is made.
+      const shown = dimensionText(p);
+      if (shown && p.text) out.push({ key: it.id, text: { ...(p.text as Text), text: shown } });
+      break;
+    }
     case 'KOT_PCB_FOOTPRINT':
       for (const f of [p.referenceField, p.valueField, p.datasheetField, p.descriptionField, ...(p.userFields ?? [])]) push(f?.text?.id?.value, f?.text?.text);
       for (const child of p.definition?.items ?? []) {
