@@ -1,11 +1,26 @@
 {
   "files": [],
   "references": [
-    { "path": "packages/proto" },
-    { "path": "packages/client" },
-    { "path": "packages/bridge" },
-    { "path": "packages/renderer" },
-    { "path": "tooling/coverage" },
-    { "path": "apps/web" }
+    {
+      "path": "packages/proto"
+    },
+    {
+      "path": "packages/client"
+    },
+    {
+      "path": "packages/bridge"
+    },
+    {
+      "path": "packages/renderer"
+    },
+    {
+      "path": "tooling/coverage"
+    },
+    {
+      "path": "tooling/ci"
+    },
+    {
+      "path": "apps/web"
+    }
   ]
 }
