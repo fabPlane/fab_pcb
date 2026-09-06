@@ -34,7 +34,16 @@ has staged changes. `RatsnestEdge.net.code` is always 0 (the handler packs only 
 `SetTeardropsResponse.item_count` counts pads and vias processed rather than changed, so
 `RemoveTeardrops` always reports the same number instead of dropping to zero.
 
+### G24 · What a bridgeless browser client still cannot do
+Found while proving the direct `ws://` path. No API command lists a directory or reads an arbitrary
+file, so a browser holding only a socket cannot show a project browser. A running server is bound to
+its document, so opening a different project still means spawning a process. The ws listener accepts
+any `Origin` and `--token` is the only control, which is fine on loopback and not beyond it. Minor:
+the events publisher fails silently when its port is taken, leaving an empty `events_socket_url`.
+
 ### G23 · Two data gaps the renderer still cannot close
+**Status:** done (5a5f025d47, 163dec0e39): `knockout_shapes` on board text and text boxes, and
+`Dimension.resolved_text`.
 `BoardText.knockout` / `BoardTextBox.knockout` carry the flag but not the geometry. KiCad plots
 box-minus-glyphs as a filled shape, a boolean subtract that `GetTextAsShapes` (which returns glyph
 strokes) cannot express; a read-only `PolySet`, exactly like the new `Barcode.shapes`, would close it.
