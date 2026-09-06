@@ -15,12 +15,19 @@ export {
   encodeReqBody,
   splitReqBody,
   NngFrameParser,
+  spWsSubprotocol,
+  SP_WS_SUBPROTOCOL_REP0,
+  SP_WS_SUBPROTOCOL_PUB0,
 } from "./nng-framing";
 export type { SpHandshake, NngFrameParserOptions } from "./nng-framing";
 export { NngIpcTransport } from "./nng-ipc";
 export type { NngIpcOptions, ReconnectOptions } from "./nng-ipc";
 export { NngIpcSubscriber } from "./nng-ipc-sub";
 export type { NngIpcSubscriberOptions, Subscriber, SubscriberState } from "./nng-ipc-sub";
+export { NngWsTransport, defaultCreateWebSocket, toBytes } from "./nng-ws";
+export type { NngWsOptions, NngWebSocketLike } from "./nng-ws";
+export { NngWsSubscriber } from "./nng-ws-sub";
+export type { NngWsSubscriberOptions } from "./nng-ws-sub";
 export { WebSocketTransport } from "./websocket";
 export type { WebSocketTransportOptions, WebSocketLike } from "./websocket";
 export {

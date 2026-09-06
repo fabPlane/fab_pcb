@@ -192,3 +192,28 @@ export class NngFrameParser {
 function hex(b: Uint8Array): string {
   return Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
 }
+
+/**
+ * nng's WebSocket transport carries no SP handshake bytes: the 8-byte header is replaced by the
+ * WebSocket subprotocol `<peer-protocol-name>.sp.nanomsg.org`, which the dialer offers and the
+ * listener echoes. The name is the *peer's* protocol, so a client speaking REQ0 asks for
+ * `rep.sp.nanomsg.org` and a subscriber asks for `pub.sp.nanomsg.org`.
+ */
+const SP_PROTO_NAMES: Record<number, string> = {
+  [SP_PROTO_REQ0]: "req",
+  [SP_PROTO_REP0]: "rep",
+  [SP_PROTO_PUB0]: "pub",
+  [SP_PROTO_SUB0]: "sub",
+};
+
+/** WebSocket subprotocol that dials an nng peer speaking `peerProto` (e.g. `rep.sp.nanomsg.org`). */
+export function spWsSubprotocol(peerProto: number): string {
+  const name = SP_PROTO_NAMES[peerProto];
+  if (!name) throw new TransportError("protocol", `no SP protocol name for 0x${peerProto.toString(16)}`);
+  return `${name}.sp.nanomsg.org`;
+}
+
+/** `rep.sp.nanomsg.org` — the subprotocol a REQ0 client offers to KiCad's request socket. */
+export const SP_WS_SUBPROTOCOL_REP0 = spWsSubprotocol(SP_PROTO_REP0);
+/** `pub.sp.nanomsg.org` — the subprotocol a SUB0 client offers to KiCad's events socket. */
+export const SP_WS_SUBPROTOCOL_PUB0 = spWsSubprotocol(SP_PROTO_PUB0);

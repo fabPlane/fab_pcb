@@ -116,7 +116,8 @@ export function App() {
     async (path: string) => {
       setBusy(true);
       try {
-        log(`POST /sessions {path: "${path}"}`);
+        // Direct mode dials the running server instead of asking the bridge to spawn one.
+        log((services.session as { direct?: boolean }).direct ? `Connecting directly to KiCad${path ? ` for "${path}"` : ''}` : `POST /sessions {path: "${path}"}`);
         const s = await services.session.connect(path);
         log(`Session ${s.id} open · KiCad ${s.kicadVersion} · token ${s.kicadToken}`);
         services.commands.clearHistory();
@@ -141,9 +142,12 @@ export function App() {
   useEffect(() => {
     const url = new URL(window.location.href);
     const p = url.searchParams.get('project');
-    if (p && !session && !autoOpened.current) {
+    // With no bridge there is no project browser to pick from, so connect straight away and let
+    // the session adopt whatever document the running server already has open.
+    const bridgeless = (services.session as { bridgeless?: boolean }).bridgeless === true;
+    if ((p || bridgeless) && !session && !autoOpened.current) {
       autoOpened.current = true;
-      void openProject(p);
+      void openProject(p ?? '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

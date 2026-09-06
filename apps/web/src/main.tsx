@@ -25,20 +25,42 @@ import './styles/app.css';
 //                                         which the e2e smoke tests rely on);
 //   - `?bridge=<url>` or VITE_BRIDGE_URL -> real KiCad through the bridge at that URL
 //                                         ('' / 'proxy' = same origin, i.e. the Vite proxy);
+//   - `?kicad-ws=<url>` or VITE_KICAD_WS -> real KiCad *directly*, over nng's own WebSocket
+//                                         transport: the page dials `kicad-cli api-server --socket
+//                                         ws://host:port/path` itself, with no bridge in the
+//                                         request path. Add `?bridge=` as well to keep the project
+//                                         browser and the library session (both need a bridge to
+//                                         spawn processes and read files); on its own the app
+//                                         adopts whatever project the running server has open.
 //   - VITE_SERVICES=kicad               -> real services on the same origin.
-function pickServices(): { mode: 'mock' } | { mode: 'kicad'; bridgeUrl: string } {
+function pickServices(): { mode: 'mock' } | { mode: 'kicad'; bridgeUrl: string; directWsUrl?: string; bridgeless: boolean } {
   const params = new URLSearchParams(location.search);
   const env = import.meta.env as Record<string, string | undefined>;
   if (params.get('mock') === '1' || env.VITE_SERVICES === 'mock') return { mode: 'mock' };
+  const direct = params.get('kicad-ws') ?? env.VITE_KICAD_WS;
   const bridge = params.get('bridge') ?? env.VITE_BRIDGE_URL;
-  if (bridge !== undefined && bridge !== null) return { mode: 'kicad', bridgeUrl: bridge === 'proxy' || bridge === '1' ? '' : bridge };
-  if (env.VITE_SERVICES === 'kicad') return { mode: 'kicad', bridgeUrl: '' };
+  const asked = bridge !== undefined && bridge !== null && bridge !== '';
+  const bridgeUrl = !asked ? '' : bridge === 'proxy' || bridge === '1' ? '' : bridge!;
+  // A direct URL on its own means "no bridge anywhere"; asking for one as well keeps the
+  // bridge-only features (file access, spawning) while requests still go straight to KiCad.
+  if (direct) return { mode: 'kicad', bridgeUrl, directWsUrl: direct, bridgeless: !asked };
+  if (bridge !== undefined && bridge !== null) return { mode: 'kicad', bridgeUrl, bridgeless: false };
+  if (env.VITE_SERVICES === 'kicad') return { mode: 'kicad', bridgeUrl: '', bridgeless: false };
   return { mode: 'mock' };
 }
 
 const choice = pickServices();
-const services: Services = choice.mode === 'kicad' ? await createKicadServices({ bridgeUrl: choice.bridgeUrl }) : createMockServices();
-log(choice.mode === 'kicad' ? `Services: KiCad via bridge ${choice.bridgeUrl || location.origin}` : 'Services: in-memory mock (add ?bridge=http://127.0.0.1:4020 or set VITE_BRIDGE_URL for real KiCad)');
+const services: Services =
+  choice.mode === 'kicad'
+    ? await createKicadServices({ bridgeUrl: choice.bridgeUrl, directWsUrl: choice.directWsUrl, bridgeless: choice.bridgeless })
+    : createMockServices();
+log(
+  choice.mode !== 'kicad'
+    ? 'Services: in-memory mock (add ?bridge=http://127.0.0.1:4020 or ?kicad-ws=ws://127.0.0.1:5599/kicad for real KiCad)'
+    : choice.directWsUrl
+      ? `Services: KiCad directly at ${choice.directWsUrl}${choice.bridgeless ? ' (no bridge)' : ` (bridge ${choice.bridgeUrl || location.origin} for files only)`}`
+      : `Services: KiCad via bridge ${choice.bridgeUrl || location.origin}`,
+);
 registerBuiltinCommands(services);
 registerEditingCommands(services, { library: choice.mode === 'kicad' ? (services as unknown as { library: import('./services/kicad/KicadLibraryService').KicadLibraryService }).library : undefined });
 registerToolCommands(services);

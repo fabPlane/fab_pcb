@@ -1,9 +1,14 @@
-// Composition root for the real services: bridge session + KiCad object model + renderer.
+// Composition root for the real services: KiCad session + object model + renderer.
 //
 //   const services = await createKicadServices({ bridgeUrl: 'http://127.0.0.1:4020' });
+//   const services = await createKicadServices({ bridgeUrl: '', directWsUrl: 'ws://127.0.0.1:5599/kicad' });
 //
 // `bridgeUrl` may be '' to use the page origin (Vite proxies /sessions, /files, /health and
 // /ws to the bridge; the bridge can also host the built app itself with STATIC_DIR).
+//
+// `directWsUrl` (VITE_KICAD_WS) points at an already-running `kicad-cli api-server --socket
+// ws://host:port/path`: requests then go straight to KiCad and the bridge, if configured at all,
+// only serves /health, /files/* and the library's second server. See apps/web/README.md.
 
 import { CommandServiceImpl } from '../CommandService';
 import type { Services } from '../types';
@@ -30,6 +35,14 @@ export { toItem } from './KicadCommitBackend';
 
 export interface KicadServicesOptions {
   bridgeUrl: string;
+  /** `ws://host:port/path` of a running api-server; requests bypass the bridge (`VITE_KICAD_WS`). */
+  directWsUrl?: string;
+  /**
+   * Direct mode with no bridge at all, so `/health`, `/files/*` and the library session are not
+   * even attempted. Defaults to "`directWsUrl` set and no bridge was asked for": pass it explicitly
+   * to combine a direct request path with a same-origin bridge (`bridgeUrl: ''`) for file access.
+   */
+  bridgeless?: boolean;
   /** Skip the initial `GET /health` (tests). */
   skipInit?: boolean;
   log?: (message: string, level?: 'info' | 'warn' | 'error') => void;
@@ -57,9 +70,15 @@ export async function createKicadServices(opts: KicadServicesOptions): Promise<K
   let library!: KicadLibraryService;
   const session = new KicadSessionService({
     bridgeUrl: opts.bridgeUrl,
+    directWsUrl: opts.directWsUrl,
+    bridgeless: opts.bridgeless,
     log,
     onConnected: async (kicad, info) => {
-      await documents.open(kicad, info.projectPath, { exists: async (p) => (await session.stat(p))?.kind === 'file', log });
+      // Direct mode owns its event subscriber (KiCad's ws events socket); `null` there means the
+      // server publishes none, so the document service polls GetDocumentRevision. Over the bridge
+      // `undefined` keeps the default (KiCadEvents.fromTransport, i.e. the bridge's relay).
+      const events = session.direct ? session.events : undefined;
+      await documents.open(kicad, info.projectPath, { exists: async (p) => (await session.stat(p))?.kind === 'file', events, log });
     },
     onDisconnected: async () => {
       await library.close().catch((e: unknown) => log(`library session close: ${e instanceof Error ? e.message : String(e)}`, 'warn'));
@@ -88,12 +107,17 @@ export async function createKicadServices(opts: KicadServicesOptions): Promise<K
   if (!opts.mockCanvas) {
     setCanvasHostFactory(createKicadCanvasFactory({ docs: documents, theme: () => themeFor(resolveTheme(useUiStore.getState().theme)), log }));
   }
+  if (opts.directWsUrl) log(`KiCad: direct nng WebSocket to ${opts.directWsUrl} (no bridge in the request path)`);
   if (!opts.skipInit) {
-    try {
-      const h = await session.init();
-      log(`bridge ${opts.bridgeUrl || location.origin}: workspace ${h.workspaceRoot}, kicad-cli ${h.kicadCliExists ? 'found' : 'MISSING'} at ${h.kicadCli}`);
-    } catch (e) {
-      log(`bridge ${opts.bridgeUrl || location.origin} unreachable: ${e instanceof Error ? e.message : String(e)}`, 'error');
+    if (session.bridgeless) {
+      log('no bridge configured: the project browser, project creation and the library session are unavailable');
+    } else {
+      try {
+        const h = await session.init();
+        log(`bridge ${opts.bridgeUrl || location.origin}: workspace ${h.workspaceRoot}, kicad-cli ${h.kicadCliExists ? 'found' : 'MISSING'} at ${h.kicadCli}`);
+      } catch (e) {
+        log(`bridge ${opts.bridgeUrl || location.origin} unreachable: ${e instanceof Error ? e.message : String(e)}`, 'error');
+      }
     }
   }
   return { session, documents, commands, jobs, markers, library, board, schematic, settings, undo };

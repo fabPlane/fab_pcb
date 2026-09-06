@@ -171,6 +171,81 @@ describe('KicadSessionService', () => {
     expect(states).toContain('reconnecting');
     expect(session.kicad?.client.transport).toBe(transports[1]!);
   });
+
+  describe('direct ws mode (VITE_KICAD_WS)', () => {
+    /** Direct + no bridge: `createDirectTransport` stands in for `NngWsTransport.connect`. */
+    function directSession(calls: { method: string; path: string; body?: unknown }[], transport: FakeTransport) {
+      return new KicadSessionService({
+        bridgeUrl: '',
+        directWsUrl: 'ws://127.0.0.1:5599/kicad',
+        fetch: fetchStub(calls),
+        createDirectTransport: async () => transport,
+      });
+    }
+
+    test('connects with no path, adopting the document the running server already has open', async () => {
+      const calls: { method: string; path: string; body?: unknown }[] = [];
+      const transport = boardServer();
+      const session = directSession(calls, transport);
+      expect(session.direct).toBe(true);
+      expect(session.bridgeless).toBe(true);
+
+      // No bridge is contacted for /health: the workspace root comes from the adopted document.
+      const health = await session.init();
+      expect(health.kicadCli).toContain('ws://127.0.0.1:5599/kicad');
+
+      const info = await session.connect('');
+      expect(info.state).toBe('open');
+      // The session id is the URL, not a bridge session id.
+      expect(info.id).toBe('ws://127.0.0.1:5599/kicad');
+      expect(info.projectPath).toBe('/ws/pcbnew/api_kitchen_sink.kicad_pcb');
+      expect(info.projectName).toBe('api_kitchen_sink');
+      expect(info.kicadVersion).toBe('10.99.0-fake');
+      expect(session.workspaceRoot()).toBe('/ws/pcbnew');
+      expect(calls.some((c) => c.path === '/sessions')).toBe(false);
+
+      // Disconnect must not stop a server this tab never started.
+      await session.disconnect();
+      expect(session.session).toBeNull();
+      expect(calls.some((c) => c.method === 'DELETE')).toBe(false);
+    });
+
+    test('the bridge-only features say so instead of calling a bridge that is not there', async () => {
+      const calls: { method: string; path: string; body?: unknown }[] = [];
+      const session = directSession(calls, boardServer());
+      await expect(session.listFiles('/ws')).rejects.toThrow(/project browser needs the bridge/);
+      await expect(session.createProject('/ws', 'new')).rejects.toThrow(/needs the bridge/);
+      await expect(session.openAuxSession(null)).rejects.toThrow(/needs the bridge/);
+      await expect(session.mkdir('/ws/sub')).rejects.toThrow(/needs the bridge/);
+      expect(await session.stat('/ws/anything')).toBeNull();
+      expect(calls).toEqual([]);
+    });
+
+    test('a direct URL alongside a bridge keeps the bridge for files while requests stay direct', async () => {
+      const calls: { method: string; path: string; body?: unknown }[] = [];
+      const transport = boardServer();
+      const session = new KicadSessionService({
+        bridgeUrl: 'http://bridge.test',
+        directWsUrl: 'ws://127.0.0.1:5599/kicad',
+        bridgeless: false,
+        fetch: fetchStub(calls),
+        createDirectTransport: async () => transport,
+        createTransport: async () => {
+          throw new Error('the bridge transport must not be used in direct mode');
+        },
+      });
+      expect(session.direct).toBe(true);
+      expect(session.bridgeless).toBe(false);
+      await session.init();
+      expect(session.workspaceRoot()).toBe('/ws');
+      const info = await session.connect('/ws/pcbnew/api_kitchen_sink.kicad_pro');
+      expect(info.state).toBe('open');
+      expect(session.kicad?.client.transport).toBe(transport);
+      // Requests never created a bridge session, but /files/* still works.
+      expect(calls.some((c) => c.path === '/sessions')).toBe(false);
+      expect((await session.listFiles('/ws/pcbnew')).length).toBe(3);
+    });
+  });
 });
 
 describe('KicadDocumentService', () => {

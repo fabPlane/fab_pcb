@@ -20,6 +20,9 @@
       "path": "tooling/ci"
     },
     {
+      "path": "tooling/bench"
+    },
+    {
       "path": "apps/web"
     }
   ]

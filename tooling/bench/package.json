@@ -1,0 +1,18 @@
+{
+  "name": "@kicad-web/bench",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Latency benchmarks for the KiCad API transports (direct ws, ipc, bridge)",
+  "scripts": {
+    "latency": "bun run transport-latency.ts"
+  },
+  "dependencies": {
+    "@kicad-web/bridge": "workspace:*",
+    "@kicad-web/client": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.0",
+    "typescript": "^5.6.0"
+  }
+}

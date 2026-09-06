@@ -170,3 +170,93 @@ export async function startKicadServer(file: string | null, prefix = "test", cli
     },
   };
 }
+
+export interface KicadWsServer {
+  /** `ws://127.0.0.1:<port>/<path>` — what was passed to `--socket`. */
+  url: string;
+  /** `<url>/events` — KiCad's derived events URL (`KICAD_API_SERVER::EventsUrlFor`). */
+  eventsUrl: string;
+  port: number;
+  token: string;
+  proc: ReturnType<typeof Bun.spawn>;
+  readonly crashed: boolean;
+  stderr(): string;
+  stop(): Promise<void>;
+}
+
+/** A TCP port nothing is listening on right now (racy in principle, fine for tests). */
+export async function freePort(): Promise<number> {
+  const s = Bun.listen({ hostname: "127.0.0.1", port: 0, socket: { data() {} } });
+  const port = s.port;
+  s.stop(true);
+  return port;
+}
+
+/**
+ * Spawn `kicad-cli api-server <file> --socket ws://127.0.0.1:<port>/kicad --token <token>` (KiCad
+ * >= 8eafd9cf01) and wait until the port accepts a TCP connection.
+ */
+export async function startKicadWsServer(
+  file: string | null,
+  opts: { port?: number; path?: string; token?: string; events?: boolean; cli?: string } = {},
+): Promise<KicadWsServer> {
+  const cli = opts.cli ?? KICAD_CLI;
+  const port = opts.port ?? (await freePort());
+  const path = opts.path ?? "kicad";
+  const token = opts.token ?? `web-${process.pid}-${Math.random().toString(36).slice(2, 8)}`;
+  const url = `ws://127.0.0.1:${port}/${path}`;
+  const proc = Bun.spawn(
+    [cli, "api-server", ...(file ? [file] : []), "--socket", url, "--token", token, ...(opts.events === false ? ["--no-events"] : [])],
+    { stdout: "pipe", stderr: "pipe" },
+  );
+  const chunks: string[] = [];
+  for (const stream of [proc.stdout, proc.stderr]) {
+    void (async () => {
+      const reader = (stream as ReadableStream<Uint8Array>).getReader();
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(new TextDecoder().decode(value));
+      }
+    })().catch(() => {});
+  }
+  const deadline = Date.now() + 30_000;
+  for (;;) {
+    if (proc.exitCode !== null) throw new Error(`kicad-cli exited with ${proc.exitCode} before listening:\n${chunks.join("")}`);
+    try {
+      const probe = await Bun.connect({ hostname: "127.0.0.1", port, socket: { data() {} } });
+      probe.end();
+      break;
+    } catch {
+      /* not listening yet */
+    }
+    if (Date.now() > deadline) {
+      proc.kill();
+      throw new Error(`timeout waiting for ${url}\n${chunks.join("")}`);
+    }
+    await Bun.sleep(20);
+  }
+  let stopping = false;
+  return {
+    url,
+    eventsUrl: `${url}/events`,
+    port,
+    token,
+    proc,
+    get crashed() {
+      return !stopping && proc.exitCode !== null;
+    },
+    stderr() {
+      return chunks.join("");
+    },
+    async stop() {
+      stopping = true;
+      if (proc.exitCode === null) {
+        proc.kill("SIGTERM");
+        const t = setTimeout(() => proc.kill("SIGKILL"), 3000);
+        await proc.exited;
+        clearTimeout(t);
+      }
+    },
+  };
+}

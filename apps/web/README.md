@@ -9,12 +9,13 @@ bridge.
 
 ## Running
 
-Two service graphs implement the same `Services` interface (`src/services/types.ts`):
+Three service graphs implement the same `Services` interface (`src/services/types.ts`):
 
 | mode | when | what |
 |---|---|---|
 | **mock** (default) | `bun run dev` with nothing set, or `?mock=1`, or `VITE_SERVICES=mock` | in-memory kitchen-sink board/schematic, Canvas2D mock host; what the e2e smoke tests run against |
-| **kicad** | `VITE_BRIDGE_URL=<bridge origin>` or `?bridge=<origin>` (`proxy` / `1` = same origin), or `VITE_SERVICES=kicad` | real KiCad through the bridge: `KicadSessionService`, `KicadDocumentService`, `KicadCommitBackend`, `KicadJobsService`, `KicadMarkerService` (`src/services/kicad/`) and the real `BoardCanvasHost` / `SchematicCanvasHost` |
+| **kicad via bridge** (the default for real work) | `VITE_BRIDGE_URL=<bridge origin>` or `?bridge=<origin>` (`proxy` / `1` = same origin), or `VITE_SERVICES=kicad` | real KiCad through the bridge: `KicadSessionService`, `KicadDocumentService`, `KicadCommitBackend`, `KicadJobsService`, `KicadMarkerService` (`src/services/kicad/`) and the real `BoardCanvasHost` / `SchematicCanvasHost` |
+| **kicad direct ws** | `VITE_KICAD_WS=ws://host:port/path` or `?kicad-ws=<url>` | the same services, but `NngWsTransport` dials `kicad-cli api-server --socket ws://…` itself: **no bridge in the request path** ([below](#direct-websocket-mode-vite_kicad_ws)) |
 
 Real mode, step by step (macOS paths from this checkout):
 
@@ -35,13 +36,83 @@ VITE_BRIDGE_URL=http://127.0.0.1:4020 bun run --filter @kicad-web/app dev
 `?project=<path>` opens a file straight away (a `.kicad_pro`, `.kicad_pcb` or `.kicad_sch`
 inside the bridge workspace root). The project screen's file browser is `GET /files/list`.
 
+### Direct WebSocket mode (`VITE_KICAD_WS`)
+
+KiCad's `--socket` takes `ws://host:port/path` as well as `ipc://` and `tcp://`, and nng's
+WebSocket transport is something a browser can speak natively. In this mode the page dials the
+api-server itself and the bridge is out of the request path entirely:
+
+```sh
+# 1. the server, listening on a WebSocket instead of a unix socket
+/Users/hyper/projects/tensorfleet/kicad/build/release/kicad/KiCad.app/Contents/MacOS/kicad-cli \
+  api-server /Users/hyper/projects/tensorfleet/kicad/qa/data/pcbnew/api_kitchen_sink.kicad_pcb \
+  --socket ws://127.0.0.1:5599/kicad
+
+# 2. the app, dialling it directly (or open http://localhost:5173/?kicad-ws=ws://127.0.0.1:5599/kicad)
+VITE_KICAD_WS=ws://127.0.0.1:5599/kicad bun run --filter @kicad-web/app dev
+```
+
+With no `--token`, the server mints one and the client picks it up from the first reply; pass
+`--token <t>` to pin it. `--no-events` turns the events socket off, and the document service falls
+back to polling `GetDocumentRevision`.
+
+**What runs over which path.** Requests (`ApiRequest`/`ApiResponse`) go straight to KiCad over
+`NngWsTransport`, and events over `NngWsSubscriber` on `GetServerInfo.events_socket_url`, which for
+a `ws://` request socket is the same host and port with `/events` appended
+(`ws://127.0.0.1:5599/kicad/events`) — one TCP port serves both. The bridge is then only needed for
+the things that are not KiCad API calls at all:
+
+| feature | needs the bridge | why |
+|---|---|---|
+| Ping, GetVersion, GetItems, commits, undo, DRC/ERC, jobs, canvas geometry | no | plain API requests on the direct socket |
+| document events (`DocumentChanged`, `JobProgress`, …) | no | `ws://…/events`, subscribed by the page |
+| project browser, `?project=` outside the server's own document, job output files | **yes** | `/files/*` — reading the filesystem is not part of the KiCad API |
+| opening a *different* project, creating one | **yes** | `POST /sessions` spawns a `kicad-cli` for it; a running server is bound to what it has open |
+| library browser and footprint editor | **yes** | they need a *second* `kicad-cli` process, which only the bridge can spawn |
+| stopping the server when the tab closes | n/a | the server was not spawned by the tab, so it is left running |
+
+So there are two useful shapes:
+
+- **`?kicad-ws=…` on its own** (`bridgeless`): no bridge at all. The app connects on load and adopts
+  whatever document the server already has open (`GetOpenDocuments`), so no project has to be named.
+  The project browser, project creation and the library session report that they need a bridge.
+  Right for pointing the UI at an api-server someone else is already running — a remote or
+  containerised KiCad, a debugging session, a demo — and for measuring the API without a proxy in
+  the way.
+- **`?kicad-ws=…&bridge=…`**: requests still bypass the bridge, but `/files/*` and session spawning
+  are available, so the project browser and the library editor keep working.
+
+**When the bridge path is still the right default.** It spawns and supervises `kicad-cli` per
+session, cleans up on `pagehide`, serves the workspace files the project browser needs, can host the
+built app itself (`STATIC_DIR`), and needs only one open port. Direct mode requires someone to have
+started an api-server with a `ws://` socket already, and gives the browser a socket to KiCad with no
+policy in front of it — fine on a loopback address, something to think about anywhere else, since
+KiCad's ws listener does no origin checking and its `--token` is the only access control.
+
+Latency is not the reason to choose either one. Measured on this machine with
+`bun tooling/bench/transport-latency.ts` (500 sequential Pings on the kitchen-sink board, after 50
+warm-up requests), the three paths are within a tenth of a millisecond of each other:
+
+| path | mean | median | p95 |
+|---|---|---|---|
+| ipc (unix socket, Bun) | 0.035 ms | 0.034 ms | 0.043 ms |
+| bridge (ws → bridge → ipc) | 0.081 ms | 0.078 ms | 0.111 ms |
+| direct ws (`NngWsTransport`) | 0.091 ms | 0.090 ms | 0.122 ms |
+
+The bridge's extra ipc hop is cheaper than the difference between nng's WebSocket implementation and
+Bun's, so on one machine the bridge is not the bottleneck; direct mode's win is architectural (no
+second process to run and supervise), not a speed-up.
+
 ## How the real mode is wired
 
 - **Session** (`KicadSessionService`): `POST /sessions {path}` → `WebSocketTransport` on
   `/ws?session=<id>` → `KiCad.connect`. Bridge `server-state` frames and transport closes
   become `SessionInfo.state`; a dropped socket is re-dialled (backoff) while the bridge still
   lists the session; `pagehide` deletes the session so closed tabs do not leak `kicad-cli`
-  processes. `/files/*` backs the browser and job outputs.
+  processes. `/files/*` backs the browser and job outputs. In direct mode (`directWsUrl`) there is
+  no session to create: `NngWsTransport` dials KiCad's own `ws://` listener, the session id *is*
+  that URL, reconnect redials it without asking the bridge whether it still exists, and neither
+  `pagehide` nor `disconnect()` stops a server the tab never started.
 - **Documents** (`KicadDocumentService`): the bridge preloads the file it was given
   (`kicad-cli api-server <path>`), so `GetOpenDocuments` is consulted first and `OpenDocument`
   only fills in the board / root schematic next to a `.kicad_pro`. Stores are the client's
@@ -172,6 +243,11 @@ awaiting them (`run()`), then the prompt is filled. Screenshots land in `docs/sc
 The DRC-driven steps deliberately run **before** `jobs`: measured on 10.99.0-3685,
 `RunBoardJobDrc` stops answering once the async export jobs have run (the proof records that as a
 GAP rather than hiding it).
+
+`docs/screenshots/direct-ws.png` is the same app with no bridge running at all
+(`VITE_KICAD_WS=ws://127.0.0.1:5599/kicad`, KiCad 10.99.0-3708-g163dec0e39): the board renders,
+the status bar reports the session open, and every request in the page went straight to KiCad over
+`NngWsTransport`.
 
 ## Tests
 
