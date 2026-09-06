@@ -28,14 +28,28 @@ describe("scanHandlerSource", () => {
 const kicad = process.env.KICAD_SRC ?? join(REPO_DIR, "..", "kicad");
 const haveKicad = existsSync(join(kicad, "api", "proto", "common", "envelope.proto"));
 
+/** HEAD of the KiCad checkout; the pinned bindings only know the commands of KICAD_COMMIT. */
+function kicadHead(): string {
+  const r = Bun.spawnSync(["git", "-C", kicad, "rev-parse", "HEAD"]);
+  return r.exitCode === 0 ? r.stdout.toString().trim() : "";
+}
+async function pinnedCommit(): Promise<string> {
+  return (await readFile(join(REPO_DIR, "packages", "proto", "KICAD_COMMIT"), "utf8")).trim();
+}
+async function drifted(): Promise<boolean> {
+  const pinned = await pinnedCommit();
+  const head = kicadHead();
+  if (head !== pinned || process.env.KICAD_WORKTREE === "1") {
+    console.warn(`KiCad checkout is at ${head.slice(0, 10)}, KICAD_COMMIT pins ${pinned.slice(0, 10)}; skipping (regenerate with bun run gen && bun run coverage)`);
+    return true;
+  }
+  return false;
+}
+
 describe.skipIf(!haveKicad)("coverage against the pinned KiCad checkout (git HEAD)", () => {
   test("matches commands.json and docs/api-coverage.md on disk", async () => {
-    const pinned = (await readFile(join(REPO_DIR, "packages", "proto", "KICAD_COMMIT"), "utf8")).trim();
+    if (await drifted()) return;
     const r = await analyze(kicad);
-    if (r.kicadCommit !== pinned || process.env.KICAD_WORKTREE === "1") {
-      console.warn(`KiCad checkout is at ${r.kicadCommit.slice(0, 10)}, KICAD_COMMIT pins ${pinned.slice(0, 10)}; skipping snapshot comparison`);
-      return;
-    }
     expect(r.warnings).toEqual([]);
     expect(renderJson(r)).toBe(await readFile(join(TOOL_DIR, "commands.json"), "utf8"));
     expect(renderMarkdown(r)).toBe(await readFile(join(REPO_DIR, "docs", "api-coverage.md"), "utf8"));
@@ -58,6 +72,7 @@ describe.skipIf(!haveKicad)("coverage against the pinned KiCad checkout (git HEA
   });
 
   test("every registered command has a full response type and known handlers", async () => {
+    if (await drifted()) return;
     const r = await analyze(kicad);
     for (const c of r.commands) {
       expect(c.requestType.startsWith("kiapi.")).toBe(true);
