@@ -14,6 +14,7 @@ import {
   type CompoundShape,
   type CrossProbeStatus,
   type DocumentSpecifier,
+  type GetJobStatusResponse,
   type GetServerInfoResponse,
   type KiCadVersion,
   type ProjectInfoResponse,
@@ -25,6 +26,7 @@ import { box2, type Box } from "../units";
 import type { Transport } from "../transport/types";
 import { Board } from "./board";
 import { FootprintDocument } from "./footprint-doc";
+import { Job } from "./jobs";
 import { Project } from "./project";
 import { Schematic } from "./schematic";
 import { SymbolDocument } from "./symbol-doc";
@@ -87,6 +89,16 @@ export class KiCad {
       if (KiCadApiError.is(e) && e.isUnsupported) return undefined;
       throw e;
     }
+  }
+
+  /** Handle for a job by id (`RunJobResponse.job_id` / `JobProgress.job_id`): `status()`, `wait()`. */
+  job(jobId: string): Job {
+    return new Job(this.client, jobId);
+  }
+
+  /** `GetJobStatus` (KiCad >= 11.0); `AS_BAD_REQUEST` for an id KiCad no longer knows. */
+  jobStatus(jobId: string): Promise<GetJobStatusResponse> {
+    return this.job(jobId).status();
   }
 
   // --- documents -------------------------------------------------------------------------------------

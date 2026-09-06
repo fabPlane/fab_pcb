@@ -46,6 +46,7 @@ import {
   type Item,
 } from "./items";
 import { toEmbeddedFile, type EmbeddedFileInput } from "./embedded";
+import { BoardDrc } from "./checks";
 import { BoardJobs } from "./jobs";
 import { DocumentSync } from "../store/document-sync";
 import type { ItemStore } from "../store/item-store";
@@ -73,6 +74,8 @@ export class Board extends Document {
   readonly kind: DocumentKind = "board";
   readonly itemTypes = BOARD_ITEM_TYPES;
   readonly jobs = new BoardJobs(this);
+  /** Design rule checker: `run()`, `markers()`, `exclude()`, `severities()` (KiCad >= 11.0). */
+  readonly drc = new BoardDrc(this);
   private sync: DocumentSync | undefined;
 
   /** File name of the board (`foo.kicad_pcb`). */

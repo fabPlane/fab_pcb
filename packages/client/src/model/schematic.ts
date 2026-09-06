@@ -16,7 +16,8 @@ import * as cmd from "../commands";
 import { DocumentSync } from "../store/document-sync";
 import type { ItemStore } from "../store/item-store";
 import type { Commit, CommitOptions, CommitResult, DeleteResult, ItemInput } from "./commit";
-import { Document, sheetPathKey, type DocumentChange, type DocumentKind, type ItemScope } from "./document";
+import { SchematicErc } from "./checks";
+import { Document, sheetPathKey, type DocumentChange, type DocumentKind, type ItemCounts, type ItemScope, type ItemsSince } from "./document";
 import { SCHEMATIC_ITEM_TYPES, SchematicLine, SchematicSymbol, Sheet, wrapAll, type Item } from "./items";
 import { SchematicJobs } from "./jobs";
 
@@ -44,6 +45,8 @@ export class Schematic extends Document {
   readonly kind: DocumentKind = "schematic";
   readonly itemTypes = SCHEMATIC_ITEM_TYPES;
   readonly jobs = new SchematicJobs(this);
+  /** Electrical rules checker: `run()`, `markers()`, `exclude()`, `severities()` (KiCad >= 11.0). */
+  readonly erc = new SchematicErc(this);
   private readonly handles = new Map<string, SheetHandle>();
 
   /** Top-level sheet instances with their children (`GetSchematicHierarchy`). */
@@ -166,6 +169,19 @@ export class SheetHandle {
 
   getItemsById(ids: readonly string[]): Promise<Item[]> {
     return this.schematic.getItemsById(ids, this.scope);
+  }
+
+  /** What changed on this sheet since `revision` (see `Document.getItemsSince`). */
+  getItemsSince(revision: bigint | undefined, types?: readonly KiCadObjectType[]): Promise<ItemsSince> {
+    return this.schematic.getItemsSince(revision, types, this.scope);
+  }
+
+  itemCounts(): Promise<ItemCounts> {
+    return this.schematic.itemCounts(this.scope);
+  }
+
+  supportsIncrementalSync(): Promise<boolean> {
+    return this.schematic.supportsIncrementalSync();
   }
 
   getSymbols(): Promise<SchematicSymbol[]> {

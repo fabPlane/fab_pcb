@@ -16,8 +16,11 @@ import {
   ItemRequestStatus,
   KiCadObjectType,
   PageSettingsSchema,
+  RunActionStatus,
   TitleBlockInfoSchema,
+  type ActionInfo,
   type DocumentSpecifier,
+  type GetItemsResponse,
   type ItemHeader,
   type PageSettings,
   type ProjectSpecifier,
@@ -26,7 +29,7 @@ import {
 } from "@kicad-web/proto";
 import type { KiCadClient } from "../client";
 import * as cmd from "../commands";
-import { KiCadApiError, KiCadItemError } from "../errors";
+import { ActionError, KiCadApiError, KiCadItemError } from "../errors";
 import { box2, toVector2, type Box, type Vec2 } from "../units";
 import { Commit, type CommitOptions, type CommitResult, type DeleteResult, type ItemInput } from "./commit";
 import { wrapAll, type Item } from "./items";
@@ -53,6 +56,46 @@ export interface DocumentChange {
   ids: string[];
   scope: ItemScope;
   commitId: string;
+}
+
+/** A window into `GetItems` (`GetItems.page`, KiCad >= 11.0). */
+export interface ItemPageOptions {
+  /** Index of the first item to return. Default 0. */
+  offset?: number;
+  /** Maximum number of items; 0 / omitted = no limit. */
+  limit?: number;
+}
+
+export interface ItemsPage {
+  items: Item[];
+  /** Items that matched before paging. */
+  total: number;
+  /** Document revision the items were read at (0 on servers that predate it). */
+  revision: bigint;
+}
+
+/** Result of `Document.getItemsSince`: what changed after a revision. */
+export interface ItemsSince {
+  /** Items created or changed since the revision — or every matching item when `full`. */
+  items: Item[];
+  /** KIIDs deleted since the revision (empty when `full`). */
+  deletedIds: string[];
+  /** The document revision the answer reflects. */
+  revision: bigint;
+  /**
+   * True when `items` is the complete set of matching items rather than a delta: the caller
+   * passed no revision, KiCad's change log did not cover the range, or a change could not be
+   * attributed to items. Replace, do not merge.
+   */
+  full: boolean;
+}
+
+/** `GetItemCounts`: per-type item counts without serialising anything. */
+export interface ItemCounts {
+  counts: Map<KiCadObjectType, number>;
+  /** Sum over every type. */
+  total: number;
+  revision: bigint;
 }
 
 export function sheetPathKey(p: SheetPath | undefined): string {
@@ -119,11 +162,24 @@ export abstract class Document {
 
   // --- items ------------------------------------------------------------------------------------
 
-  async getItemsRaw(types: KiCadObjectType | readonly KiCadObjectType[], scope?: ItemScope): Promise<Any[]> {
+  private async getItemsResponse(
+    types: KiCadObjectType | readonly KiCadObjectType[],
+    scope: ItemScope | undefined,
+    opts: { page?: ItemPageOptions; sinceRevision?: bigint } = {},
+  ): Promise<GetItemsResponse> {
     const list = Array.isArray(types) ? types : [types as KiCadObjectType];
-    const res = await cmd.getItems(this.client, { header: this.header(scope), types: [...list] });
+    const res = await cmd.getItems(this.client, {
+      header: this.header(scope),
+      types: [...list],
+      page: opts.page ? { offset: opts.page.offset ?? 0, limit: opts.page.limit ?? 0 } : undefined,
+      sinceRevision: opts.sinceRevision,
+    });
     checkItemRequestStatus(res.status, "GetItems");
-    return res.items;
+    return res;
+  }
+
+  async getItemsRaw(types: KiCadObjectType | readonly KiCadObjectType[], scope?: ItemScope): Promise<Any[]> {
+    return (await this.getItemsResponse(types, scope)).items;
   }
 
   /** `GetItems` for one or more object types, wrapped. */
@@ -134,6 +190,58 @@ export abstract class Document {
   /** Every item type this document kind serves (see `itemTypes`). */
   async getAllItems(scope?: ItemScope): Promise<Item[]> {
     return this.getItems(this.itemTypes, scope);
+  }
+
+  /** One window of `GetItems` (`page`), with the total match count and the document revision. */
+  async getItemsPage(types: KiCadObjectType | readonly KiCadObjectType[], page: ItemPageOptions, scope?: ItemScope): Promise<ItemsPage> {
+    const res = await this.getItemsResponse(types, scope, { page });
+    return { items: wrapAll(res.items), total: res.total, revision: res.revision };
+  }
+
+  /** `GetItemCounts`: how many items of each type the document (or sheet) holds, and at which revision. */
+  async itemCounts(scope?: ItemScope): Promise<ItemCounts> {
+    const res = await cmd.getItemCounts(this.client, { document: this.specifierFor(scope) });
+    const counts = new Map<KiCadObjectType, number>();
+    let total = 0;
+    for (const c of res.counts) {
+      counts.set(c.type, (counts.get(c.type) ?? 0) + c.count);
+      total += c.count;
+    }
+    return { counts, total, revision: res.revision };
+  }
+
+  /**
+   * True when the server implements `GetItems.since_revision` / `GetItemCounts` (KiCad >= 11.0),
+   * i.e. `getItemsSince()` and `DocumentSync.syncSince()` can re-sync incrementally.
+   */
+  supportsIncrementalSync(): Promise<boolean> {
+    return this.client.supports("GetItemCounts");
+  }
+
+  /**
+   * Items created or changed after `revision` plus the ids deleted since (`GetItems.since_revision`),
+   * for the given types (default: every type of this document kind). A changed footprint yields
+   * its pads too. When KiCad cannot answer incrementally — the revision is too old, a change was
+   * not attributable to items, or `revision` is `undefined` — the result is the complete item
+   * set with `full: true`. Completeness is decided against `GetItemCounts` taken at the same
+   * revision, so a `full: false` result is always a safe delta to merge.
+   */
+  async getItemsSince(revision: bigint | undefined, types: readonly KiCadObjectType[] = this.itemTypes, scope?: ItemScope): Promise<ItemsSince> {
+    const full = async (): Promise<ItemsSince> => {
+      const res = await this.getItemsResponse(types, scope);
+      return { items: wrapAll(res.items), deletedIds: [], revision: res.revision, full: true };
+    };
+    if (revision === undefined) return full();
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const counts = await this.itemCounts(scope);
+      const res = await this.getItemsResponse(types, scope, { sinceRevision: revision });
+      if (res.revision !== counts.revision) continue; // the document moved between the two reads
+      if (res.revision <= revision) return { items: [], deletedIds: [], revision: res.revision, full: false };
+      const expected = types.reduce((n, t) => n + (counts.counts.get(t) ?? 0), 0);
+      const isFull = res.deletedIds.length === 0 && res.total >= expected;
+      return { items: wrapAll(res.items), deletedIds: res.deletedIds.map((k) => k.value), revision: res.revision, full: isFull };
+    }
+    return full();
   }
 
   async getItemsById(ids: readonly string[], scope?: ItemScope): Promise<Item[]> {
@@ -166,23 +274,53 @@ export abstract class Document {
     await cmd.revertDocument(this.client, { document: this.specifier });
   }
 
-  /** The document serialised as KiCad would write it to disk (board only in KiCad today). */
+  /** The document serialised as KiCad would write it to disk (`SaveDocumentToString`; board and schematic). */
   async saveToString(): Promise<string> {
     const res = await cmd.saveDocumentToString(this.client, { document: this.specifier });
     return res.contents;
   }
 
-  /** Clipboard-style s-expression text for the given items (board only in KiCad today). */
+  /** Clipboard-style s-expression text for the given items (`SaveItemsToString`; board and schematic sheets). */
   async saveItemsToString(ids: readonly string[], scope?: ItemScope): Promise<string> {
     const res = await cmd.saveItemsToString(this.client, { header: this.header(scope), items: ids.map((value) => ({ value })) });
     return res.contents;
   }
 
-  /** Parses s-expression text and creates the items (board only; KiCad's handler is a stub today). */
-  async parseAndCreate(contents: string): Promise<Item[]> {
-    const res = await cmd.parseAndCreateItemsFromString(this.client, { document: this.specifier, contents });
+  /**
+   * Parses clipboard-style s-expression text (as from `saveItemsToString`) and creates the items
+   * in the document, like a paste: KiCad assigns fresh KIIDs, so the returned canonical items
+   * carry new ids. Pushes its own commit ("Pasted items via API"); stores following this
+   * document see the creation through `onChange`.
+   */
+  async parseAndCreate(contents: string, scope?: ItemScope): Promise<Item[]> {
+    const res = await cmd.parseAndCreateItemsFromString(this.client, { document: this.specifierFor(scope), contents });
     checkItemRequestStatus(res.status, "ParseAndCreateItemsFromString");
-    return wrapAll(res.createdItems.map((r) => r.item).filter((a): a is Any => !!a));
+    const items = wrapAll(res.createdItems.map((r) => r.item).filter((a): a is Any => !!a));
+    if (items.length) this.emitChange({ kind: "create", phase: "applied", items, ids: items.map((i) => i.id), scope: scope ?? {}, commitId: "" });
+    return items;
+  }
+
+  // --- tool actions ------------------------------------------------------------------------------
+
+  /** Tool actions of the editor serving this document (`GetActions`); the names `runAction` accepts. */
+  async actions(): Promise<ActionInfo[]> {
+    return (await cmd.getActions(this.client, { document: this.specifier })).actions;
+  }
+
+  /** The subset of `actions()` that `RunAction` can run without an editor window (`kicad-cli api-server`). */
+  async headlessActions(): Promise<ActionInfo[]> {
+    return (await this.actions()).filter((a) => a.headlessCapable);
+  }
+
+  /**
+   * `RunAction` by name (e.g. `pcbnew.ZoneFiller.zoneFillAll`, `pcbnew.GlobalEdit.cleanupTracksAndVias`).
+   * Throws `ActionError` unless KiCad answers `RAS_OK`; headless, actions that need a canvas or a
+   * dialog answer `RAS_INVALID` like unknown names do.
+   */
+  async runAction(name: string): Promise<RunActionStatus> {
+    const res = await cmd.runAction(this.client, { action: name });
+    if (res.status !== RunActionStatus.RAS_OK) throw new ActionError(name, res.status);
+    return res.status;
   }
 
   async pageSettings(): Promise<PageSettings> {

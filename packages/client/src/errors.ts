@@ -2,9 +2,9 @@
  * Errors raised above the transport layer. `TransportError` (connection, timeout, framing) stays in
  * `./transport`; everything here is about what KiCad answered.
  */
-import { ApiStatusCode, ItemDeletionStatus, ItemRequestStatus, ItemStatusCode } from "@kicad-web/proto";
+import { ApiStatusCode, ItemDeletionStatus, ItemRequestStatus, ItemStatusCode, RunActionStatus } from "@kicad-web/proto";
 
-export { ApiStatusCode, ItemStatusCode, ItemDeletionStatus, ItemRequestStatus };
+export { ApiStatusCode, ItemStatusCode, ItemDeletionStatus, ItemRequestStatus, RunActionStatus };
 
 /** Human-readable name of an `ApiStatusCode` (e.g. `AS_BUSY`). */
 export function statusName(code: ApiStatusCode | number): string {
@@ -93,14 +93,31 @@ export class CommitDroppedError extends Error {
   }
 }
 
-/** A job (`RunBoardJob*` / `RunSchematicJob*`) reported `JS_ERROR`. */
+/** A job (`RunBoardJob*` / `RunSchematicJob*`) reported `JS_ERROR` (or `JS_WARNING` with `failOnWarning`). */
 export class JobError extends Error {
   override readonly name = "JobError";
   constructor(
     readonly command: string,
     message: string,
     readonly outputPaths: readonly string[],
+    /** Job id when KiCad assigned one (KiCad >= 11.0). */
+    readonly jobId = "",
   ) {
     super(`${command}: ${message || "job failed"}`);
+  }
+}
+
+/** `RunAction` answered something other than `RAS_OK` (unknown name, or GUI-only action headless). */
+export class ActionError extends Error {
+  override readonly name = "ActionError";
+  constructor(
+    readonly action: string,
+    readonly status: RunActionStatus,
+  ) {
+    super(`RunAction ${action}: ${RunActionStatus[status] ?? status}`);
+  }
+
+  get statusName(): string {
+    return RunActionStatus[this.status] ?? String(this.status);
   }
 }

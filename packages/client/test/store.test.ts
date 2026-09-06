@@ -219,6 +219,67 @@ describe("DocumentSync", () => {
     expect(src.loads).toBe(2);
   });
 
+  test("syncSince() merges deltas / replaces on full answers; refresh() prefers it only when the server supports it", async () => {
+    const server = new Map<string, Item>([
+      ["t1", track("t1")],
+      ["t2", track("t2")],
+    ]);
+    let revision = 10n;
+    let supported = true;
+    let full = false;
+    const deleted: string[] = [];
+    const src = {
+      ...source([...server.values()]),
+      sinceCalls: [] as (bigint | undefined)[],
+      supportsIncrementalSync: async () => supported,
+      getItemsSince: async (since: bigint | undefined) => {
+        src.sinceCalls.push(since);
+        if (since === undefined || full) return { items: [...server.values()], deletedIds: [], revision, full: true };
+        if (since >= revision) return { items: [], deletedIds: [], revision, full: false };
+        return { items: [...server.values()].filter((i) => i.id === "t1"), deletedIds: [...deleted], revision, full: false };
+      },
+    };
+    const sync = new DocumentSync(src);
+    await sync.syncSince(); // before load: a full load through getItemsSince(undefined)
+    expect(src.sinceCalls).toEqual([undefined]);
+    expect(src.loads).toBe(0);
+    expect(sync.revision).toBe(10n);
+    expect(sync.store.size).toBe(2);
+
+    // another client moved t1 and deleted t2
+    server.set("t1", track("t1", BoardLayer.BL_B_Cu));
+    server.delete("t2");
+    deleted.push("t2");
+    revision = 11n;
+    const diffs: StoreDiff[] = [];
+    sync.store.subscribe((d) => diffs.push(d));
+    await sync.refresh();
+    expect(src.sinceCalls).toEqual([undefined, 10n]);
+    expect(src.loads).toBe(0);
+    expect(sync.revision).toBe(11n);
+    expect(diffs.length).toBe(1);
+    expect(diffs[0]!.updated.map((i) => i.id)).toEqual(["t1"]);
+    expect(diffs[0]!.removed).toEqual(["t2"]);
+    expect(sync.store.get("t1")!.layer).toBe("BL_B_Cu");
+
+    // a full answer (change log exhausted) replaces: a stale local item goes away
+    sync.store.applyItems({ added: [track("stale")] });
+    full = true;
+    revision = 12n;
+    await sync.syncSince();
+    expect(sync.store.has("stale")).toBe(false);
+    expect(sync.revision).toBe(12n);
+
+    // without server support, refresh() is a full load (getItemsSince(undefined))
+    const src2 = { ...source([track("a")]), getItemsSince: src.getItemsSince, supportsIncrementalSync: async () => false };
+    const sync2 = new DocumentSync(src2);
+    await sync2.load();
+    src.sinceCalls.length = 0;
+    await sync2.refresh();
+    expect(src.sinceCalls).toEqual([undefined]);
+    expect(await sync2.supportsIncrementalSync()).toBe(false);
+  });
+
   test("changes before load() are ignored; dispose() unsubscribes", async () => {
     const src = source([track("t1")]);
     const sync = new DocumentSync(src);

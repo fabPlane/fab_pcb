@@ -92,7 +92,8 @@ Modules (one file each, one owner each — see agents):
 | `schematic-items.ts` | schematic_types | `SchematicSymbol` (with lib definition children), `SchematicLine`, labels, `SheetSymbol`, fields |
 | `footprint-doc.ts` | footprint handler | open by LIB_ID, edit, save |
 | `variants.ts` | variant_commands | list/add/delete/rename/copy/set current |
-| `jobs.ts` | board_jobs, schematic_jobs | gerbers, drill, position, STEP/GLB, SVG/PDF/DXF, IPC-2581, ODB++, netlist, BOM. Each returns `RunJobResponse` and the bridge streams the output file back |
+| `jobs.ts` | board_jobs, schematic_jobs | gerbers, drill, position, STEP/GLB, SVG/PDF/DXF, IPC-2581, ODB++, netlist, BOM. Each returns a `JobResult`; `{ async, returnInline }` gives a `Job` handle whose `wait()` polls `GetJobStatus` (and listens to `JobProgress` events) and returns the outputs inline |
+| `checks.ts` | RunBoardJobDrc / GetDrcMarkers / SetDrcMarkerExcluded / Get\|SetDrcSeverities, ERC equivalents | `board.drc.run() / markers() / exclude() / severities()`, `schematic.erc.*` |
 | `text.ts` | GetTextExtents, GetTextAsShapes | server-side font tessellation for the renderer |
 | `units.ts` | – | `nm`, `mm`, `mil`, `deg`, `Vector2` helpers, `Box2` |
 | `errors.ts` | envelope | `KiCadApiError`, status-code enum re-export |
@@ -113,7 +114,7 @@ renderer subscribes to store diffs, never to the network.
 
 ## Testing
 
-- **Conformance suite** (`e2e/api`): runs against a real `kicad-cli api-server` with
+- **Conformance suite** (`packages/client/test/conformance`): runs against a real `kicad-cli api-server` with
   `qa/data/pcbnew/api_kitchen_sink.kicad_pcb` and
   `qa/data/eeschema/api_kitchen_sink.kicad_sch`; one test per command in the
   coverage matrix. A command is "covered" only when its test passes. This is the

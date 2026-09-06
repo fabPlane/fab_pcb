@@ -9,21 +9,11 @@ import { resolve } from "node:path";
 const KICAD_ROOT = resolve(import.meta.dir, "../../../../kicad");
 export const DEFAULT_KICAD_CLI = `${KICAD_ROOT}/build/release/kicad/KiCad.app/Contents/MacOS/kicad-cli`;
 export const KICAD_CLI = process.env.KICAD_CLI ?? DEFAULT_KICAD_CLI;
-/**
- * A newer (development) build used only for commands the stable binary predates (events socket,
- * NewProject/NewDocument/GetProjectInfo, symbol documents). Tests skip cleanly when it is absent.
- */
-export const DEFAULT_KICAD_CLI_DEV = `${KICAD_ROOT}/build/dev/kicad/KiCad.app/Contents/MacOS/kicad-cli`;
-export const KICAD_CLI_DEV = process.env.KICAD_CLI_DEV ?? DEFAULT_KICAD_CLI_DEV;
 export const KITCHEN_SINK_PCB = `${KICAD_ROOT}/qa/data/pcbnew/api_kitchen_sink.kicad_pcb`;
 export const KITCHEN_SINK_SCH = `${KICAD_ROOT}/qa/data/eeschema/api_kitchen_sink.kicad_sch`;
 
 export function haveKicad(): boolean {
   return existsSync(KICAD_CLI);
-}
-
-export function haveKicadDev(): boolean {
-  return existsSync(KICAD_CLI_DEV);
 }
 
 /** `ApiRequest{ header{client_name:"kicad-web/m0-ping"}, message: Any(kiapi.common.commands.Ping) }` */

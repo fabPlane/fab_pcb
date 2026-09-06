@@ -9,15 +9,17 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { NngIpcTransport } from "../src/transport";
 import { KiCad } from "../src/model";
-import { KICAD_CLI, KICAD_CLI_DEV, KITCHEN_SINK_PCB, KITCHEN_SINK_SCH, haveKicad, haveKicadDev, startKicadServer, type KicadServer } from "./kicad-fixtures";
+import { KICAD_CLI, KITCHEN_SINK_PCB, KITCHEN_SINK_SCH, haveKicad, startKicadServer, type KicadServer } from "./kicad-fixtures";
 
-export { KICAD_CLI, KICAD_CLI_DEV, KITCHEN_SINK_PCB, KITCHEN_SINK_SCH, haveKicad, haveKicadDev };
+export { KICAD_CLI, KITCHEN_SINK_PCB, KITCHEN_SINK_SCH, haveKicad };
 
 export const KICAD_DATA = KITCHEN_SINK_PCB.replace(/\/pcbnew\/api_kitchen_sink\.kicad_pcb$/, "");
 /** A small footprint library shipped with KiCad's QA data (R_0402/R_0603/...). */
 export const QA_RESISTOR_LIB = `${KICAD_DATA}/libraries/Resistor_SMD.pretty`;
 /** A KiCad s-expression netlist from the QA data, for ImportNetlist dry runs. */
 export const QA_NETLIST = `${KICAD_DATA}/eeschema/netlists/prefix_bus_alias/prefix_bus_alias.net`;
+/** KiCad's QA symbol library (Device.kicad_sym), for headless symbol documents. */
+export const QA_DEVICE_LIB = `${KICAD_DATA}/libraries/Device.kicad_sym`;
 
 export interface TempProject {
   dir: string;
