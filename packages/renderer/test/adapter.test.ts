@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'bun:test';
-import { boardItemToRenderItems, graphicShapeToPrims, imageInfo, renderIdToKiid, textFallbackPolygon } from '../src/board/boardAdapter.js';
+import { boardItemToRenderItems, dimensionText, graphicShapeToPrims, imageInfo, renderIdToKiid, textFallbackPolygon } from '../src/board/boardAdapter.js';
 import { BOARD_LAYER_ENUM, boardDrawOrder, boardLayerName, copperLayerList, flipLayer } from '../src/board/boardLayers.js';
 import { boxContains } from '../src/core/model.js';
-import { MM, arc, barcode, circle, dimension, footprint, graphic, rect, seg, syntheticBoard, table, text, textBox, track, via, zone } from './fixtures.js';
+import { MM, arc, barcode, circle, dimension, footprint, graphic, polySet, rect, seg, syntheticBoard, table, text, textBox, track, v, via, zone } from './fixtures.js';
 
 const L = BOARD_LAYER_ENUM;
 
@@ -222,6 +222,112 @@ describe('board adapter', () => {
       expect(Math.abs(cross.b.x - cross.a.x)).toBeCloseTo(10 * MM, 0);
     }
     expect(ri!.prims.some((p) => p.kind === 'polygon')).toBe(true); // text fallback box
+  });
+
+  test('dimension: outward arrow heads trail into the crossbar, inward ones out of it with a tail', () => {
+    // PCB_DIM_ALIGNED::updateGeometry -- outward: drawAnArrow( crossBarStart, EDA_ANGLE( dimension ) ),
+    // so the head at the left end has its legs running right, into the dimension.
+    const legs = (item: ReturnType<typeof dimension>) =>
+      boardItemToRenderItems(item)[0]!
+        .prims.filter((p) => p.kind === 'segment')
+        .slice(3) // crossbar + two extension lines first
+        .map((p) => (p.kind === 'segment' ? p.b.x - p.a.x : 0));
+    // start at x = 0, end at x = 10: outward legs point +x at the start end
+    const outward = legs(dimension('d', 0, 0, 10, 0, -3));
+    expect(outward.length).toBe(4);
+    expect(outward.slice(0, 2).every((dx) => dx > 0)).toBe(true);
+    expect(outward.slice(2).every((dx) => dx < 0)).toBe(true);
+    // inward: the other way round, plus a tail of two arrow lengths on each
+    const inward = legs(dimension('d', 0, 0, 10, 0, -3, undefined, { inward: true }));
+    expect(inward.length).toBe(6);
+    expect(inward.slice(0, 3).every((dx) => dx < 0)).toBe(true);
+    expect(inward.slice(3).every((dx) => dx > 0)).toBe(true);
+    expect(Math.abs(inward[2]!)).toBeCloseTo(2 * 1.27 * MM, 0); // INWARD_ARROW_LENGTH_TO_HEAD_RATIO
+  });
+
+  test('dimension: resolved_text is the plotted string, empty means no text at all', () => {
+    // `text.text` is the bare measurement; field 26 carries what the plotter draws
+    const shapes = [{ attributes: { stroke: { width: { valueNm: 150_000 } } }, segment: { start: { xNm: 4 * MM, yNm: -4 * MM }, end: { xNm: 6 * MM, yNm: -4 * MM } } }];
+    const withGlyphs = (item: ReturnType<typeof dimension>) => boardItemToRenderItems(item, { textShapes: () => shapes as never })[0]!;
+
+    const resolved = dimension('d', 0, 0, 10, 0, -3, undefined, { resolvedText: '10.00 mm' });
+    expect(dimensionText(resolved.proto as Record<string, unknown>)).toBe('10.00 mm');
+    // the server glyphs (laid out for the resolved string) are drawn, not the metrics box
+    const ri = withGlyphs(resolved);
+    expect(ri.prims.filter((p) => p.kind === 'segment').length).toBe(7 + 1);
+    expect(ri.prims.some((p) => p.kind === 'polygon')).toBe(false);
+
+    // no glyphs: the fallback box is sized from the resolved string, not the measurement
+    const long = boardItemToRenderItems(dimension('d', 0, 0, 10, 0, -3, undefined, { resolvedText: '10.00 millimetres' }))[0]!;
+    const short = boardItemToRenderItems(dimension('d', 0, 0, 10, 0, -3, undefined, { resolvedText: '10.00' }))[0]!;
+    const boxW = (r: typeof long) => {
+      const p = r.prims.find((q) => q.kind === 'polygon');
+      return p?.kind === 'polygon' ? Math.max(...p.outline.map((c) => c.x)) - Math.min(...p.outline.map((c) => c.x)) : 0;
+    };
+    expect(boxW(long)).toBeGreaterThan(boxW(short));
+
+    // empty resolved_text: the geometry is drawn, the text is not (a centre dimension)
+    const blank = withGlyphs(dimension('d', 0, 0, 10, 0, -3, undefined, { resolvedText: '' }));
+    expect(dimensionText({ resolvedText: '' })).toBe('');
+    expect(blank.prims.filter((p) => p.kind === 'segment').length).toBe(7);
+    expect(blank.prims.some((p) => p.kind === 'polygon')).toBe(false);
+
+    // older server: no field at all -> the bare measurement, and centre dimensions plot nothing
+    const old = dimension('d', 0, 0, 10, 0, -3);
+    expect('resolvedText' in (old.proto as object)).toBe(false);
+    expect(dimensionText(old.proto as Record<string, unknown>)).toBe('10.00');
+    expect(withGlyphs(old).prims.filter((p) => p.kind === 'segment').length).toBe(7 + 1);
+    const centre = dimension('c', 0, 0, 0, 0, 0, undefined, { style: { case: 'center', value: { center: v(5, 5), end: v(5, 8) } } });
+    expect(dimensionText(centre.proto as Record<string, unknown>)).toBe('');
+    expect(withGlyphs(centre).prims.length).toBe(2); // the two arms of the cross, no text
+
+    // the leader's text border is sized from the resolved string too, and dropped when it is empty
+    const leaderStyle = (case_ = 'leader') => ({ case: case_, value: { start: v(0, 0), end: v(5, 5), borderStyle: 2 } });
+    const leader = boardItemToRenderItems(dimension('l', 0, 0, 5, 5, 0, undefined, { resolvedText: 'Leader', style: leaderStyle() }))[0]!;
+    expect(leader.prims.some((p) => p.kind === 'polygon')).toBe(true);
+    const bare = boardItemToRenderItems(dimension('l', 0, 0, 5, 5, 0, undefined, { resolvedText: '', style: leaderStyle() }))[0]!;
+    expect(bare.prims.some((p) => p.kind === 'polygon')).toBe(false);
+  });
+
+  test('knockout text and text boxes are filled from knockout_shapes, with the old drawing as fallback', () => {
+    // BoardText.knockout_shapes (field 8) / BoardTextBox.knockout_shapes (field 9): the margin
+    // box minus the glyphs, which no amount of GetTextAsShapes glyph strokes can reproduce.
+    const glyph = { attributes: { stroke: { width: { valueNm: 150_000 } } }, segment: { start: { xNm: 11 * MM, yNm: 11 * MM }, end: { xNm: 12 * MM, yNm: 11 * MM } } };
+    const shapes = () => [glyph] as never;
+
+    const ko = text('t', L.BL_F_Cu!, 10, 10, 'Knocked out');
+    (ko.proto as Record<string, unknown>).knockout = true;
+    (ko.proto as Record<string, unknown>).knockoutShapes = polySet([[9, 9, 20, 12]]);
+    const ri = boardItemToRenderItems(ko, { textShapes: shapes })[0]!;
+    // the box-minus-glyphs polygon replaces the glyph strokes entirely
+    expect(ri.prims.length).toBe(1);
+    expect(ri.prims[0]).toMatchObject({ kind: 'polygon', fill: true, width: 0 });
+    expect(ri.bbox).toEqual({ x: 9 * MM, y: 9 * MM, w: 11 * MM, h: 3 * MM });
+    // older server (no field, or an empty PolySet): the glyph strokes, as before
+    delete (ko.proto as Record<string, unknown>).knockoutShapes;
+    expect(boardItemToRenderItems(ko, { textShapes: shapes })[0]!.prims[0]!.kind).toBe('segment');
+    (ko.proto as Record<string, unknown>).knockoutShapes = { polygons: [] };
+    expect(boardItemToRenderItems(ko, { textShapes: shapes })[0]!.prims[0]!.kind).toBe('segment');
+
+    // a text box knocks out the box *and its border*, so the border stroke goes too
+    const kb = textBox('tb', 10, 10, 20, 15, 'Multiline\nknockout\nbox');
+    (kb.proto as Record<string, unknown>).knockout = true;
+    (kb.proto as Record<string, unknown>).knockoutShapes = polySet([[10, 10, 20, 15], [12, 12, 13, 13]]);
+    const box = boardItemToRenderItems(kb, { textShapes: shapes })[0]!;
+    expect(box.prims.length).toBe(2);
+    expect(box.prims.every((p) => p.kind === 'polygon' && p.fill)).toBe(true);
+    delete (kb.proto as Record<string, unknown>).knockoutShapes;
+    const plain = boardItemToRenderItems(kb, { textShapes: shapes })[0]!;
+    expect(plain.prims.some((p) => p.kind === 'polygon' && !p.fill)).toBe(true); // the border
+    expect(plain.prims.some((p) => p.kind === 'segment')).toBe(true); // the glyph strokes
+
+    // and a knocked-out table cell (PCB_TABLECELL is a BoardTextBox) does the same
+    const tbl = table('tbl', 0, 0, 10, 5, ['a', 'b']);
+    const cells = (tbl.proto as { cells: Array<{ textBox: Record<string, unknown> }> }).cells;
+    cells[0]!.textBox.knockout = true;
+    cells[0]!.textBox.knockoutShapes = polySet([[0, 0, 10, 5]]);
+    const cell = boardItemToRenderItems(tbl, { textShapes: shapes })[0]!;
+    expect(cell.prims.filter((p) => p.kind === 'polygon' && p.fill).length).toBe(1);
   });
 
   test('misc items: point, group via itemBBox, image header parsing, unknown types', () => {

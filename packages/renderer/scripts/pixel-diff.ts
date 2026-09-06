@@ -47,6 +47,7 @@ import { chromium } from 'playwright';
 import { KiCad, NngIpcTransport, type Board, type ItemStore, type StoredItem } from '@kicad-web/client';
 import { BoardJobPaginationMode, BoardLayer, SchematicJobPageSize, ZoneType, unpackAny, type Text, type TextBox } from '@kicad-web/proto';
 import type { RunOptions, RunResult } from './pixel-diff/page.js';
+import { dimensionText } from '../src/board/boardAdapter.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const KICAD_ROOT = resolve(here, '..', '..', '..', '..', 'kicad');
@@ -269,6 +270,21 @@ interface TextRef {
   textbox?: TextBox;
 }
 
+/**
+ * The `GetTextAsShapes` request for a dimension. `text.text` is the bare measurement
+ * (`26.5000`) while the plotter draws `Dimension.resolved_text` (`26.5000 mm`, `R 2.1506 mm`,
+ * a leader's override text), so the glyphs have to be laid out for *that* string or they are
+ * short and land off-centre. An empty `resolved_text` means the dimension plots no text at
+ * all (a centre dimension) and no request is made. `dimensionText` also carries the
+ * older-server fallback; apps/web `KicadCanvas.ts` `boardTexts` needs the same two lines.
+ */
+function dimensionRefs(key: string | undefined, p: Record<string, any>): TextRef[] {
+  const text = p.text as Text | undefined;
+  const shown = dimensionText(p);
+  if (!key || !text || !shown) return [];
+  return [{ key, text: { ...text, text: shown } }];
+}
+
 /** Same keys as apps/web KicadCanvas.ts `boardTexts`. */
 function boardTexts(it: StoredItem): TextRef[] {
   const p = it.proto as Record<string, any>;
@@ -284,7 +300,7 @@ function boardTexts(it: StoredItem): TextRef[] {
       push(it.id, p.text);
       break;
     case 'KOT_PCB_DIMENSION':
-      push(it.id, p.text);
+      out.push(...dimensionRefs(it.id, p));
       break;
     case 'KOT_PCB_TEXTBOX':
       pushBox(it.id, p.textbox);
@@ -328,7 +344,7 @@ function schematicTexts(it: StoredItem): TextRef[] {
       push(it.id, p.text);
       break;
     case 'KOT_PCB_DIMENSION':
-      push(it.id, p.text);
+      out.push(...dimensionRefs(it.id, p));
       break;
     case 'KOT_SCH_TEXTBOX':
       pushBox(it.id, p.textbox);

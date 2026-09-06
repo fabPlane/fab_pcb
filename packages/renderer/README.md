@@ -124,7 +124,7 @@ after their children, so clicking a pad yields `[pad, footprint]`.
 |---|---|
 | `copperLayers` | board copper layers front→back (`copperLayerList(n)`); vias without a layer list span their drill range or all copper |
 | `padPolygons(padId, layer)` | `PolygonWithHoles[]` from `GetPadShapeAsPolygon` (or plain `Vec2[][]`); fallback draws circle/rect/oval/trapezoid/roundrect/chamfered/custom padstacks |
-| `textShapes(textId)` | `GraphicShape[]` (`CompoundShape.shapes` from `GetTextAsShapes`) or plain glyph polygons; ids: text KIID, textbox KIID, table-cell textbox KIID, `Field.text.id`, dimension KIID; fallback draws a metrics-estimated box. A `textbox` reply also carries the four box edges as segments — the adapter drops them and draws the border from `BoardTextBox.border_stroke` |
+| `textShapes(textId)` | `GraphicShape[]` (`CompoundShape.shapes` from `GetTextAsShapes`) or plain glyph polygons; ids: text KIID, textbox KIID, table-cell textbox KIID, `Field.text.id`, dimension KIID; fallback draws a metrics-estimated box. A `textbox` reply also carries the four box edges as segments — the adapter drops them and draws the border from `BoardTextBox.border_stroke`. Ask for a dimension's glyphs with `dimensionText(proto)`, not `text.text`; ignored for a knockout item, which is filled from `knockout_shapes` instead |
 | `itemBBox(id)` | bbox lookup for group outlines |
 | `imagePixelNm` | reference image pixel pitch (default 25.4e6 / 300 ppi) |
 | `arcTolerance` | polygon arc approximation, nm |
@@ -366,7 +366,7 @@ bun run pixel-diff -- --snapshot board.snapshot.json --svg board.svg   # two-ste
 1. spawns `kicad-cli api-server` on a unique socket over a temp copy of the project, loads the
    board and the root sheet, fetches the same server shapes the app feeds the hosts
    (`GetPadShapeAsPolygon` per copper layer, `GetTextAsShapes` for texts / fields / labels /
-   dimensions / text boxes / table cells) and runs `RunBoardJobExportSvg` (fit page to board,
+   dimensions at their `resolved_text` / text boxes / table cells) and runs `RunBoardJobExportSvg` (fit page to board,
    scale 1, all layers on one page, no drawing sheet) and `RunSchematicJobExportSvg` (root
    sheet, no drawing sheet);
 2. writes `<out>/<kind>.snapshot.json` + `<kind>.svg` and kills the server;
@@ -389,46 +389,66 @@ every anti-aliased edge counts twice.
 
 | document | size | render items | mismatch (all px) | ink mismatch | tolerant (all px) | tolerant ink |
 |---|---|---|---|---|---|---|
-| board `api_kitchen_sink.kicad_pcb` | 2079 × 1245 | 349 | 0.65 % | 3.28 % | 0.35 % | 1.78 % |
+| board `api_kitchen_sink.kicad_pcb` | 2079 × 1245 | 349 | 0.27 % | 1.35 % | 0.05 % | 0.26 % |
 | schematic `api_kitchen_sink.kicad_sch` | 2376 × 1680 | 156 | 0.51 % | 17.57 % | 0.31 % | 10.70 % |
 
-(previously 7.57 % / 34.88 % / 6.79 % / 31.27 % and 0.55 % / 18.80 % / 0.31 % / 10.45 %, before
-barcodes and text boxes could be drawn from server geometry.)
+(board previously 0.65 % / 3.28 % / 0.35 % / 1.78 %, before `BoardText.knockout_shapes`,
+`BoardTextBox.knockout_shapes` and `Dimension.resolved_text`; and 7.57 % / 34.88 % / 6.79 % /
+31.27 % before barcodes and text boxes could be drawn from server geometry. The schematic is
+unchanged by all three — it has no knockout items and no dimensions.)
 
 ![board pixel diff](../../docs/screenshots/pixel-diff-board.png)
 ![schematic pixel diff](../../docs/screenshots/pixel-diff-schematic.png)
 
 Grey = drawn by both, red = only in KiCad's SVG, cyan = only in our render (strong outside the
-tolerance band). Copper, silkscreen, zones, pads, holes, barcodes, text boxes, tables, wires,
-symbol bodies, pins, labels, sheets and dashed/dotted styles are grey everywhere; the schematic's
-ink-union percentage stays large only because that sheet is mostly thin lines, where a one-pixel
-offset costs two pixels of XOR against a small union.
+tolerance band). Copper, silkscreen, zones, pads, holes, barcodes, knockout texts and text
+boxes, dimension text, tables, wires, symbol bodies, pins, labels, sheets and dashed/dotted
+styles are grey everywhere; the schematic's ink-union percentage stays large only because that
+sheet is mostly thin lines, where a one-pixel offset costs two pixels of XOR against a small
+union.
 
-The tolerance is still **±1 px** — half a hairline at 8 px/mm. On the board it is worth 1.5 ink
-points (3.28 → 1.78); ±2 buys 0.36 more and ±3 another 0.24, so the knee has not moved.
+The tolerance is still **±1 px** — half a hairline at 8 px/mm. On the board it is now worth
+1.1 ink points (1.35 → 0.26); ±2 buys 0.10 more and ±3 another 0.04, so the knee has not moved.
 
-**Known differences.** The board's XOR is 16.7k px; the largest contributors are:
+**Known differences.** The board's XOR is 6.9k px, of which 1.3k is outside the ±1 px band.
+Those 1.3k, largest first:
 
-- **Knockout text boxes and texts** (8.0k px, 48 % of the board XOR — the "Multiline knockout
-  box" on F.Cu). KiCad plots a knockout item as *the box minus the glyph outlines*, filled
-  (`PCB_TEXTBOX::TransformTextToPolySet`); we draw the border and the glyph strokes. The
-  renderer cannot build that shape: `GetTextAsShapes` returns glyph *strokes*, not the
-  knockout polygon, and the render model has no boolean subtraction. See "KiCad-side data
-  gaps" below.
-- **Dimension text** (2.6k px). `Dimension.text.text` is the bare measurement (`26.5000`)
-  while the plotter draws the full shown text (`26.5000 mm`), so the string we hand
-  `GetTextAsShapes` is short and lands off-centre. Data gap, below.
+- **Dimension text boxes** (~430 px). Three shapes are cut against the box KiCad computes
+  around the dimension's text (`GetTextBox( nullptr ).Inflate( GetTextWidth() / 2, … )`,
+  `CollectKnockedOutSegments`): the leader's rectangular border and the knee from the arrow to
+  it (`PCB_DIM_LEADER::updateGeometry`, ~230 px), the aligned / orthogonal crossbar, which
+  KiCad breaks where the text crosses it (~120 px), and the radial dimension's segment from the
+  arrow to its text (~80 px). We size that box from `textFallbackPolygon`'s stroke-font metrics
+  estimate and draw the crossbar straight through. **Renderer gap** — it needs real KiCad font
+  metrics, the same dependency as the text estimates below; the geometry itself is all
+  reproducible from the message.
+- **Footprint fields with `keep_upright`** (~290 px — `P2` and `CONN_2` on the vertical
+  connectors). `Text.attributes.angle` is the *stored* angle (270°), but
+  `PCB_TEXT::GetDrawRotation()` normalises a footprint child's angle into ]−90, 90] when the
+  flag is set, so KiCad plots them at 90° and the strings read the other way round. **Renderer
+  gap, not a data gap**: `keep_upright` is on the message, so the corrected angle just has to
+  go into the `GetTextAsShapes` request (`boardTexts`) as well as the fallback.
+- **Zone borders** (~195 px). We draw the zone outline the way pcbnew does; the plotter emits
+  only `filled_polygons`, so our border shows wherever the fill has pulled back from the
+  outline — the four corners and the notch of the B.Cu zone. Deliberate, same family as rule
+  areas below.
+- **Plated-hole knock-outs** (~190 px). We punch the drill through a PTH pad like pcbnew
+  (`--no-white-holes` turns it off); the SVG plot fills the pad solid. Deliberate.
+- **The centre dimension's vertical arm** (~105 px). A harness artefact, not a difference:
+  KiCad's 0.1 mm `#F2EDA1` arm falls exactly on a pixel boundary at 8 px/mm, so it rasterises
+  as two half-covered pixels 35–40 from white and misses `--ink 40` entirely, while our
+  hairline registers. It is in `board.svg` (`M106.5000 94.2500 L106.5000 87.2500`).
 - **Hatch patterns.** Our hatch pitch / phase for `GFT_HATCH` fills is KiCad's 30 mil nominal
   rather than the exact per-shape phase, so hatched circles and rectangles cross-hatch out of
   step (the blue crosshatch in the schematic diff).
 - **Schematic pin names / numbers and symbol fields.** Pin text is still stretched
   `BitmapText` in a system font (`GetTextAsShapes` is not requested for pins), and fields on
   rotated symbols (R2, R3) are drawn at the angle the API reports rather than the upright
-  angle eeschema draws them at. Together with the hatching this is most of the schematic's
-  remaining ink.
-- **Anti-aliasing and stroke ends.** The rest (~3.9k px on the board) is sub-pixel edges: the
-  ±1 px band takes the board from 3.28 % to 1.78 % of the ink union and the schematic from
-  17.57 % to 10.70 %.
+  angle eeschema draws them at — the schematic's version of the `keep_upright` gap above.
+  Together with the hatching this is most of the schematic's remaining ink.
+- **Anti-aliasing and stroke ends.** The rest — 5.6k of the board's 6.9k XOR — is sub-pixel
+  edges: the ±1 px band takes the board from 1.35 % to 0.26 % of the ink union and the
+  schematic from 17.57 % to 10.70 %.
 - **Not compared:** board reference images (`PCB_REFERENCE_IMAGE_T: // Not plotted at all`,
   `plot_brditems_plotter.cpp`) and rule-area zones (`if( zone->GetIsRuleArea() ) continue;`,
   `plot_board_layers.cpp`). The renderer draws both the way pcbnew does; no plot path emits
@@ -438,21 +458,24 @@ points (3.28 → 1.78); ±2 buys 0.36 more and ±3 another 0.24, so the knee has
 - **Not drawn at all:** symbol alternate pin functions, and line-ending arrows on some bezier
   leaders.
 
-### KiCad-side data gaps
+### KiCad-side data gaps: closed
 
-Two of the remaining board differences are missing API data, not renderer work — both are the
-same shape as the barcode fix (`Barcode.shapes`, since 11.0):
+The two gaps that used to sit here are filled, both the same shape as the barcode fix
+(`Barcode.shapes`) — read-only, populated on serialize, ignored on deserialize:
 
-- **Knockout geometry.** `BoardText.knockout` / `BoardTextBox.knockout` say *that* an item is
-  knocked out but carry nothing a client can draw it from: the shape is
-  `TransformShapeToPolygon( box ) − textShape`, computed with a boolean subtract inside KiCad.
-  A read-only `PolySet` on the message (or a flag on `GetTextAsShapes` returning the knockout
-  polyset instead of the glyph strokes) would close it exactly as `Barcode.shapes` did.
-- **Dimension shown text.** `Dimension.text.text` carries only the measurement. The prefix,
-  suffix, unit and unit format are separate fields, but composing them is KiCad's own
-  `PCB_DIMENSION_BASE::GetText()` logic (unit label, `DIM_UNITS_FORMAT` spacing and
-  parentheses), so a client cannot reproduce the plotted string. `Text.text` for a dimension
-  should be the shown text.
+- **Knockout geometry.** `BoardText.knockout_shapes` (field 8) and
+  `BoardTextBox.knockout_shapes` (field 9), since 11.0, carry the `PolySet` the plotter fills:
+  the margin box (for a text box, the box and its border) minus the glyph outlines, fractured
+  and margined exactly as `BRDITEMS_PLOTTER::PlotText` does it. The adapter fills them
+  directly and skips the border and the glyph strokes; `knockout` without the polygons (an
+  older server) still falls back to the old drawing. This was 8.0k px, 48 % of the board XOR.
+- **Dimension shown text.** `Dimension.resolved_text` (field 26), since 11.0, is what
+  `PCB_DIMENSION_BASE::GetText()` returns — `26.5000 mm`, `R 2.1506 mm`, a leader's override
+  text, and the empty string for a centre dimension, which plots no text at all. `text.text`
+  still holds the bare measurement. `dimensionText()` reads the field (falling back to
+  `text.text`, and to the centre-dimension rule, on an older server) and the string goes into
+  the `GetTextAsShapes` request as well as the fallback box, so the glyphs are laid out for
+  what is actually drawn. This was 2.6k px.
 
 ## Demo
 
@@ -486,13 +509,22 @@ bun run pixel-diff # exit test against KiCad's SVG export (needs a KiCad build; 
   `GetTextAsShapes` results are fed through `textShapes`. Text boxes and table cells use server
   glyphs too (KiCad >= 11.0 lays a `textbox` request out at the box); without them a text box
   falls back to its own outline.
-- Knockout texts and text boxes draw the border and the glyph strokes, not KiCad's box-minus-
-  glyphs fill: the API carries the flag but not the geometry (see "KiCad-side data gaps").
+- Knockout texts, text boxes and table cells are filled from `knockout_shapes` (KiCad >= 11.0),
+  the box-minus-glyphs polygons KiCad plots. Against an older server, which sends only the
+  `knockout` flag, they fall back to the border plus the glyph strokes: the renderer cannot
+  build that shape itself (`GetTextAsShapes` returns glyph *strokes* and the render model has
+  no boolean subtraction).
 - Barcodes are drawn from `Barcode.shapes`, the encoded symbol KiCad packs into the message
   (since 11.0). Against an older server they fall back to a frame and a placeholder module
   pattern: there is no QR / DataMatrix / Code128 encoder in the renderer.
-- Dimension text is whatever `Dimension.text.text` holds, which is the measurement without the
-  unit label KiCad plots.
+- Dimension text is `Dimension.resolved_text` (KiCad >= 11.0), the string KiCad plots; an
+  older server falls back to `text.text`, the measurement without the unit label. What is *not*
+  reproduced is the box KiCad cuts its own geometry against: the leader's border and knee, the
+  radial dimension's text segment and the gap the text leaves in an aligned crossbar all need
+  real font metrics (see "Known differences").
+- Footprint fields with `keep_upright` are drawn at the angle the API reports, not the upright
+  angle `PCB_TEXT::GetDrawRotation()` normalises to; the corrected angle has to reach the
+  `GetTextAsShapes` request, not just the adapter.
 - Schematic: dangling-end markers and symbol alternate pin functions are not drawn; bitmap
   symbols (`SchematicImage` inside a symbol) are ignored.
 - Pad solder mask / paste expansion is not applied (technical layers reuse the copper shape);

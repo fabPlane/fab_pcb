@@ -778,6 +778,23 @@ function textPrims(textId: string, t: TextLike | undefined, ctx: BoardAdapterCon
 }
 
 /**
+ * What KiCad fills for a knockout text or text box: `BoardText.knockout_shapes` (field 8) /
+ * `BoardTextBox.knockout_shapes` (field 9), since 11.0 -- the margin box (for a text box, the
+ * box including its border) with the glyph outlines subtracted, in board coordinates, already
+ * fractured and margined the way `BRDITEMS_PLOTTER::PlotText` fills it. The boolean cannot be
+ * rebuilt from the glyph *strokes* `GetTextAsShapes` returns and the render model has no
+ * subtraction, so when the field is there it replaces the border and the glyphs entirely;
+ * against an older server it is absent and the caller falls back to drawing both. Same shape
+ * as the `Barcode.shapes` precedent: read-only, filled in on serialize, ignored on
+ * deserialize, empty unless `knockout` is set.
+ */
+export function knockoutPrims(p: Record<string, unknown> | undefined, ctx: BoardAdapterContext): Primitive[] {
+  const ps = p?.knockoutShapes as PolySetLike | undefined;
+  if (!ps?.polygons?.length) return [];
+  return polySetToPrims(ps, true, 0, ctx.arcTolerance ?? 5000);
+}
+
+/**
  * The four corners of a text box in drawing order. The box itself stays axis-aligned and the
  * rotation lives in the text angle, so the corners turn about the box centre -- the layout
  * `PCB_TEXTBOX` / `PCB_TABLECELL` use when they draw (and `layOutTextBox` in KiCad's
@@ -982,13 +999,16 @@ function convertShape(p: Record<string, unknown>, id: string, o: ConvertOpts, ct
 function convertText(p: Record<string, unknown>, id: string, o: ConvertOpts, ctx: BoardAdapterContext, textId = id): RenderItem[] {
   const t = p.text as TextLike | undefined;
   if (!t || t.attributes?.visible === false) return [];
+  const knockout = knockoutPrims(p, ctx);
+  if (knockout.length) return [finish(id, boardLayerName(p.layer as number), knockout, o)];
   const { prims, cacheKey } = textPrims(textId, t, ctx, !!p.knockout);
   if (!prims.length) return [];
   return [finish(id, boardLayerName(p.layer as number), prims, o, cacheKey ? { cacheKey, anchor: vec(t.position) } : {})];
 }
 
 function convertTextBox(p: Record<string, unknown>, id: string, o: ConvertOpts, ctx: BoardAdapterContext): RenderItem[] {
-  const prims = textBoxPrims(id, p.textbox as TextBoxLike, ctx, p.borderStroke as StrokeAttributesLike | undefined);
+  const knockout = knockoutPrims(p, ctx);
+  const prims = knockout.length ? knockout : textBoxPrims(id, p.textbox as TextBoxLike, ctx, p.borderStroke as StrokeAttributesLike | undefined);
   if (!prims.length) return [];
   return [finish(id, boardLayerName(p.layer as number), prims, o)];
 }
@@ -1076,15 +1096,46 @@ function convertFootprint(p: Record<string, unknown>, id: string, o: ConvertOpts
   return out;
 }
 
+/** `s_arrowAngle` (pcb_dimension.cpp) */
 const ARROW_ANGLE = 27.5;
+/** `INWARD_ARROW_LENGTH_TO_HEAD_RATIO`: an inward arrow also gets a tail of 2 head lengths. */
+const INWARD_TAIL_RATIO = 2;
 
-function arrow(tip: Vec2, dir: Vec2, len: number, width: number): Primitive[] {
+/**
+ * `PCB_DIMENSION_BASE::drawAnArrow`: two legs of `m_arrowLength` at ±27.5° about `dir` from
+ * `tip`, plus (for inward arrows) a tail of `tail` along `dir`. The legs *trail* along `dir`,
+ * so an arrow that points outward is drawn with `dir` running back into the dimension.
+ */
+function arrow(tip: Vec2, dir: Vec2, len: number, width: number, tail = 0): Primitive[] {
   const l = vDist(dir, { x: 0, y: 0 }) || 1;
-  const d = { x: (dir.x / l) * len, y: (dir.y / l) * len };
-  return [
+  const u = { x: dir.x / l, y: dir.y / l };
+  const d = { x: u.x * len, y: u.y * len };
+  const out: Primitive[] = [
     { kind: 'segment', a: tip, b: vAdd(tip, vRotate(d, ARROW_ANGLE)), width },
     { kind: 'segment', a: tip, b: vAdd(tip, vRotate(d, -ARROW_ANGLE)), width },
   ];
+  if (tail) out.push({ kind: 'segment', a: tip, b: vAdd(tip, { x: u.x * tail, y: u.y * tail }), width });
+  return out;
+}
+
+/**
+ * The string KiCad actually plots for a dimension: `Dimension.resolved_text` (field 26, since
+ * 11.0), which is `PCB_DIMENSION_BASE::GetText()` -- the measurement (or `override_text`) with
+ * the unit label appended per `unit_format`, wrapped in prefix and suffix, text variables
+ * resolved. `text.text` carries the bare measurement only (`26.5000` for `26.5000 mm`) and the
+ * composition rules live inside KiCad, so a client cannot rebuild it. An empty string means
+ * the dimension plots no text at all -- a centre dimension. Older servers do not send the
+ * field: fall back to `text.text`, and to the centre-dimension rule the plotter applies.
+ *
+ * Feed this to `GetTextAsShapes` as well, or the server lays out glyphs for the short string
+ * and the text lands off-centre.
+ */
+export function dimensionText(p: Record<string, unknown>): string {
+  const resolved = p.resolvedText;
+  if (typeof resolved === 'string') return resolved;
+  const style = oneof(p, 'dimensionStyle', ['aligned', 'orthogonal', 'radial', 'leader', 'center']);
+  if (style?.case === 'center') return '';
+  return (p.text as TextLike | undefined)?.text ?? '';
 }
 
 function convertDimension(p: Record<string, unknown>, id: string, o: ConvertOpts, ctx: BoardAdapterContext): RenderItem[] {
@@ -1093,6 +1144,7 @@ function convertDimension(p: Record<string, unknown>, id: string, o: ConvertOpts
   const extOffset = dist(p.extensionOffset as DistanceLike);
   const outward = enumName('DimensionArrowDirection', p.arrowDirection as number) === 'DAD_OUTWARD';
   const style = oneof<Record<string, unknown>>(p, 'dimensionStyle', ['aligned', 'orthogonal', 'radial', 'leader', 'center']);
+  const shown = dimensionText(p);
   const prims: Primitive[] = [];
   const seg = (a: Vec2, b: Vec2): Primitive => ({ kind: 'segment', a, b, width });
   if (style) {
@@ -1125,9 +1177,15 @@ function convertDimension(p: Record<string, unknown>, id: string, o: ConvertOpts
         const e0 = vAdd(start, { x: n.x * extOffset, y: n.y * extOffset });
         const e1 = vAdd(end, { x: n.x * extOffset, y: n.y * extOffset });
         prims.push(seg(e0, vAdd(a, { x: n.x * extH, y: n.y * extH })), seg(e1, vAdd(b, { x: n.x * extH, y: n.y * extH })));
+        // `PCB_DIM_ALIGNED` / `PCB_DIM_ORTHOGONAL::updateGeometry`: an outward arrow at the
+        // crossbar start is drawn along the crossbar (`EDA_ANGLE( dimension )`) and the one at
+        // the end against it, so the heads sit at the ends with their legs trailing inwards;
+        // an inward pair is the other way round and each carries a tail two heads long.
         const dir = vSub(b, a);
-        prims.push(...arrow(a, outward ? { x: -dir.x, y: -dir.y } : dir, arrowLen, width));
-        prims.push(...arrow(b, outward ? dir : { x: -dir.x, y: -dir.y }, arrowLen, width));
+        const rev = { x: -dir.x, y: -dir.y };
+        const tail = outward ? 0 : arrowLen * INWARD_TAIL_RATIO;
+        prims.push(...arrow(a, outward ? dir : rev, arrowLen, width, tail));
+        prims.push(...arrow(b, outward ? rev : dir, arrowLen, width, tail));
         break;
       }
       case 'radial': {
@@ -1148,8 +1206,8 @@ function convertDimension(p: Record<string, unknown>, id: string, o: ConvertOpts
         prims.push(seg(start, end), ...arrow(start, vSub(end, start), arrowLen, width));
         const border = enumName('DimensionTextBorderStyle', v.borderStyle as number);
         const t = p.text as TextLike | undefined;
-        if (t && border !== 'DTBS_NONE' && border !== 'DTBS_UNKNOWN') {
-          const poly = textFallbackPolygon(t);
+        if (t && shown && border !== 'DTBS_NONE' && border !== 'DTBS_UNKNOWN') {
+          const poly = textFallbackPolygon({ ...t, text: shown });
           if (border === 'DTBS_CIRCLE') {
             const b = boxFromPoints(poly);
             prims.push({ kind: 'circle', c: { x: b.x + b.w / 2, y: b.y + b.h / 2 }, r: Math.hypot(b.w, b.h) / 2, width, fill: false });
@@ -1166,8 +1224,10 @@ function convertDimension(p: Record<string, unknown>, id: string, o: ConvertOpts
       }
     }
   }
+  // `shown` is empty for a dimension that plots nothing (a centre dimension), and drives the
+  // fallback metrics box when the server sent no glyphs for the resolved string.
   const t = p.text as TextLike | undefined;
-  if (t && style?.case !== 'center') prims.push(...textPrims(id, t, ctx).prims);
+  if (t && shown) prims.push(...textPrims(id, { ...t, text: shown }, ctx).prims);
   if (!prims.length) return [];
   return [finish(id, boardLayerName(p.layer as number), prims, o)];
 }
@@ -1391,7 +1451,8 @@ function convertTable(p: Record<string, unknown>, id: string, o: ConvertOpts, ct
     const box = tb.textbox as TextBoxLike | undefined;
     corners.push(box ? textBoxCorners(box) : undefined);
     const cid = kiid(tb.id as KiidLike) || `${id}:cell${i}`;
-    prims.push(...textBoxPrims(cid, box, ctx, undefined, false));
+    const knockout = knockoutPrims(tb, ctx);
+    prims.push(...(knockout.length ? knockout : textBoxPrims(cid, box, ctx, undefined, false)));
   });
   prims.push(...tableBorderPrims(p, cells, corners));
   if (!prims.length) return [];

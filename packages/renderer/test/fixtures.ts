@@ -166,23 +166,48 @@ export function text(kiid: string, layer: number, x: number, y: number, str: str
   };
 }
 
-export function dimension(kiid: string, ax: number, ay: number, bx: number, by: number, heightMm: number, layer = L.BL_Dwgs_User!): StoredItemLike {
-  return {
-    id: kiid,
-    type: 'KOT_PCB_DIMENSION',
-    proto: {
-      $typeName: 'kiapi.board.types.Dimension',
-      id: id(kiid),
-      layer,
-      text: { position: v((ax + bx) / 2, (ay + by) / 2 + heightMm - 1), text: '10.00 mm', attributes: { size: v(1, 1), strokeWidth: d(0.15), horizontalAlignment: 2, verticalAlignment: 2 } },
-      dimensionStyle: { case: 'aligned', value: { start: v(ax, ay), end: v(bx, by), height: d(heightMm), extensionHeight: d(0.5) } },
-      lineThickness: d(0.15),
-      arrowLength: d(1.27),
-      extensionOffset: d(0.5),
-      arrowDirection: 2,
-    },
+/**
+ * `kiapi.board.types.Dimension`. `resolvedText` is the string KiCad plots (field 26, since
+ * 11.0): `text.text` holds the bare measurement, and an empty `resolvedText` means the
+ * dimension plots no text at all. Leave it undefined for an older server.
+ */
+export function dimension(
+  kiid: string,
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+  heightMm: number,
+  layer = L.BL_Dwgs_User!,
+  opts: { resolvedText?: string; style?: { case: string; value: Record<string, unknown> }; inward?: boolean } = {},
+): StoredItemLike {
+  const proto: Record<string, unknown> = {
+    $typeName: 'kiapi.board.types.Dimension',
+    id: id(kiid),
+    layer,
+    text: { position: v((ax + bx) / 2, (ay + by) / 2 + heightMm - 1), text: '10.00', attributes: { size: v(1, 1), strokeWidth: d(0.15), horizontalAlignment: 2, verticalAlignment: 2 } },
+    dimensionStyle: opts.style ?? { case: 'aligned', value: { start: v(ax, ay), end: v(bx, by), height: d(heightMm), extensionHeight: d(0.5) } },
+    lineThickness: d(0.15),
+    arrowLength: d(1.27),
+    extensionOffset: d(0.5),
+    arrowDirection: opts.inward ? 1 : 2,
   };
+  if (opts.resolvedText !== undefined) proto.resolvedText = opts.resolvedText;
+  return { id: kiid, type: 'KOT_PCB_DIMENSION', proto };
 }
+
+/** A `PolySet` of axis-aligned mm rectangles, as `knockout_shapes` / `Barcode.shapes` carry. */
+export const polySet = (rects: Array<[number, number, number, number]>) => ({
+  polygons: rects.map(([x0, y0, x1, y1]) => ({
+    outline: polyline([
+      [x0, y0],
+      [x1, y0],
+      [x1, y1],
+      [x0, y1],
+    ]),
+    holes: [],
+  })),
+});
 
 /** A small synthetic board: outline, two footprints, tracks, a via, a zone with a hole, text, a dimension. */
 export function syntheticBoard(): StoredItemLike[] {
