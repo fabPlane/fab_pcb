@@ -279,6 +279,15 @@ Conversion (adapter + Graphics contexts) runs at ≈ 90k render items/s.
 - Draw order follows `pcbnew/pcb_draw_panel_gal.cpp` `GAL_LAYER_ORDER` + `SetTopLayer`.
 - Rendering is on demand (`requestRender`), no ticker when idle; `prefers-reduced-motion`
   disables inertial panning.
+- **Several hosts can be mounted at once** — an editor canvas and a library preview, say — and
+  may be mounted and unmounted independently. Each host owns one Pixi `Application` with its
+  own ticker (`sharedTicker: false`), and `unmount()` destroys only that renderer. In
+  particular it must never pass `true` (or `releaseGlobalResources`) as the renderer destroy
+  options: Pixi's "global resources" are process-wide pools shared by *every* renderer
+  (`BigPool`, `TexturePool`, `CanvasPool` and the batcher's `batchPool`), and releasing them
+  destroys `Batch` objects other live renderers are still drawing with — which surfaced as
+  `Cannot read properties of null (reading 'clear')` from `Batcher.break` on every frame of the
+  surviving host. See `RENDERER_DESTROY_OPTIONS` in `core/host.ts` and `test/multiHost.test.ts`.
 
 Input: wheel = zoom (ctrl/⌘+wheel = pinch zoom, horizontal/shift wheel = pan), middle-drag or
 touch = pan, two-finger pinch, arrows / +/- keys, left-drag = rubber band (`leftDrag: 'pan'`
@@ -435,7 +444,9 @@ area) with a button that switches to the child sheet through `setStore` and back
 
 ```
 bun test          # theme port, camera math, picker/geometry, board + schematic adapter fixtures,
-                  # symbol transforms, ratsnest / marker / label overlays, headless scene
+                  # symbol transforms, ratsnest / marker / label overlays, headless scene,
+                  # two hosts in one document (real WebGL in headless Chromium; skipped when
+                  # Playwright's browser is not installed)
 bunx tsc -b
 bun run pixel-diff # exit test against KiCad's SVG export (needs a KiCad build; see above)
 ```

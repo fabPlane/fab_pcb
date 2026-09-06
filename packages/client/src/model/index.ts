@@ -1,5 +1,6 @@
 /** Layer 3 — the object model: `KiCad` -> `Project` -> `Board` | `Schematic` | `FootprintDocument`. */
 export * from "./items";
+export { toEntries, toRecord, type EntryMapLike } from "./entries";
 export { KiCad, type TextShapes } from "./kicad";
 export { Project } from "./project";
 export {
@@ -38,6 +39,8 @@ export {
   type AnnotateResult,
   type AnnotationScope,
   type AssignFootprintsResult,
+  type FootprintAssignment,
+  type FootprintAssignments,
   type FieldEdit,
   type FieldsTableRow,
   type NewSheetOptions,

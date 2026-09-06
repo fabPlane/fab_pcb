@@ -30,6 +30,7 @@ import {
   type WizardParameter,
 } from "@kicad-web/proto";
 import * as cmd from "../commands";
+import { toEntries, type EntryMapLike } from "./entries";
 import type { KiCadClient } from "../client";
 import type { KiCad } from "./kicad";
 import { LibFootprint, LibSymbol } from "./items";
@@ -76,8 +77,11 @@ export interface WizardResult {
   errorMessage: string;
 }
 
-/** Parameter values for `runWizard`, keyed by `WizardParameter.identifier`. */
-export type WizardParams = Record<string, number | string | boolean>;
+/**
+ * Parameter values for `runWizard`, keyed by `WizardParameter.identifier`. A `Map`, a plain
+ * object or an array of `[identifier, value]` pairs; anything else throws.
+ */
+export type WizardParams = EntryMapLike<number | string | boolean>;
 
 const TYPES: Record<LibraryKind, LibraryType> = {
   symbol: LibraryType.LT_SYMBOL,
@@ -260,7 +264,7 @@ export class Libraries {
   async runWizard(identifier: string, params: WizardParams = {}): Promise<WizardResult> {
     const info = await this.wizard(identifier);
     const parameters: WizardParameter[] = [];
-    for (const [key, value] of Object.entries(params)) {
+    for (const [key, value] of toEntries(params, `runWizard(${identifier}, params)`)) {
       const decl = info?.parameters.find((p) => p.identifier === key);
       if (!decl) throw new Error(`wizard ${identifier} has no parameter "${key}"`);
       parameters.push(withValue(decl, value));

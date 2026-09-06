@@ -38,6 +38,7 @@ import {
 import { SCHEMATIC_ITEM_TYPES, SchematicLine, SchematicSymbol, Sheet, wrapAll, type Item } from "./items";
 import { SchematicJobs } from "./jobs";
 import { toLibraryId, type LibIdLike } from "./libraries";
+import { toEntries, type EntryMapLike } from "./entries";
 import { toVector2, type Vec2 } from "../units";
 import type { Board, NetlistImportResult } from "./board";
 
@@ -153,6 +154,19 @@ export interface AssignFootprintsResult {
   assignedCount: number;
   /** References that matched no symbol. */
   unmatchedReferences: string[];
+}
+
+/** One footprint assignment in the array-of-records form. */
+export interface FootprintAssignment {
+  reference: string;
+  footprint: LibIdLike;
+}
+
+/** Reference designator -> footprint, in any of the shapes `assignFootprints` accepts. */
+export type FootprintAssignments = EntryMapLike<LibIdLike> | readonly FootprintAssignment[];
+
+function isAssignmentRecords(a: FootprintAssignments): a is readonly FootprintAssignment[] {
+  return Array.isArray(a) && a.every((e) => typeof e === "object" && e !== null && !Array.isArray(e) && "reference" in e);
 }
 
 export interface NewSheetOptions {
@@ -366,13 +380,16 @@ export class Schematic extends Document {
     return { updatedCount: res.updatedCount, errors: res.errors };
   }
 
-  /** `AssignFootprints`: CvPcb's assignment by reference designator, as one API commit. */
-  async assignFootprints(
-    assignments: Readonly<Record<string, LibIdLike>> | readonly { reference: string; footprint: LibIdLike }[],
-  ): Promise<AssignFootprintsResult> {
-    const list = Array.isArray(assignments)
-      ? (assignments as readonly { reference: string; footprint: LibIdLike }[])
-      : Object.entries(assignments as Record<string, LibIdLike>).map(([reference, footprint]) => ({ reference, footprint }));
+  /**
+   * `AssignFootprints`: CvPcb's assignment by reference designator, as one API commit.
+   *
+   * Accepts a `Map`, a plain object, an array of `[reference, footprint]` pairs, or an array of
+   * `{ reference, footprint }` records. Anything else throws instead of assigning nothing.
+   */
+  async assignFootprints(assignments: FootprintAssignments): Promise<AssignFootprintsResult> {
+    const list = isAssignmentRecords(assignments)
+      ? assignments.map((a) => ({ reference: a.reference, footprint: a.footprint }))
+      : toEntries<LibIdLike>(assignments, "assignFootprints(assignments)").map(([reference, footprint]) => ({ reference, footprint }));
     const res = await cmd.assignFootprints(this.client, {
       schematic: this.specifier,
       assignments: list.map((a) => ({ reference: a.reference, footprint: toLibraryId(a.footprint) as LibraryIdentifier })),

@@ -83,6 +83,28 @@ export interface BoxSelectEvent {
   touching: boolean;
 }
 
+/**
+ * Renderer destroy options for `Application.destroy(rendererDestroyOptions, ...)`.
+ *
+ * MUST NOT be `true`, and must never set `releaseGlobalResources`: several hosts can be
+ * mounted at once (the editor canvas plus a library preview), and Pixi's "global resources"
+ * are process-wide pools shared by *every* renderer — `BigPool`, `TexturePool`, `CanvasPool`
+ * and the batcher's `batchPool`.
+ *
+ * `AbstractRenderer.destroy(true)` calls `GlobalResourceRegistry.release()`, which clears all
+ * of them. The batcher pool's `clear()` walks the whole `batchPool` array and `destroy()`s
+ * every entry, including the slots above its stack pointer — and those hold `Batch` objects
+ * that other, still-live renderers have checked out and are actively drawing with.
+ * `Batch.destroy()` nulls `textures`, so the surviving host's next frame parks the dead batch
+ * back in the pool (`Batcher.begin`), pulls it out again (`Batcher.break` -> `getBatchFromPool`)
+ * and throws `Cannot read properties of null (reading 'clear')` on `batch.textures.clear()`.
+ *
+ * `{ removeView: true }` gives `ViewSystem.destroy` the same canvas removal that `true` did
+ * (it reads `options.removeView`) without touching the shared pools. Nothing else here owns
+ * those pools, so we simply never release them; they are bounded caches that Pixi reuses.
+ */
+const RENDERER_DESTROY_OPTIONS = { removeView: true } as const;
+
 export interface CanvasHostOptions {
   /** what a left-button drag does; default rubber-band selection */
   leftDrag?: 'rubberband' | 'pan' | 'none';
@@ -189,7 +211,7 @@ export abstract class BaseCanvasHost implements CanvasHost {
       sharedTicker: false,
     });
     if (this.el !== el) {
-      app.destroy(true);
+      app.destroy(RENDERER_DESTROY_OPTIONS);
       return; // unmounted while initialising
     }
     this.app = app;
@@ -253,7 +275,7 @@ export abstract class BaseCanvasHost implements CanvasHost {
     if (this.app) {
       this.app.stage.removeChild(this.scene.root, this.overlays.root);
       this.app.canvas.remove();
-      this.app.destroy(true, { children: false });
+      this.app.destroy(RENDERER_DESTROY_OPTIONS, { children: false });
       this.app = undefined;
     }
     this.scene.clear();

@@ -14,6 +14,7 @@ import * as cmd from "../commands";
 import type { Board } from "./board";
 import type { KiCad } from "./kicad";
 import type { Schematic } from "./schematic";
+import { toRecord, type EntryMapLike } from "./entries";
 
 export class Project {
   constructor(
@@ -96,8 +97,16 @@ export class Project {
     return { ...res.variables };
   }
 
-  async setTextVariables(variables: Record<string, string>, mergeMode: MapMergeMode = MapMergeMode.MMM_MERGE): Promise<void> {
-    await cmd.setTextVariables(this.client, { document: this.specifier, variables: create(TextVariablesSchema, { variables }), mergeMode });
+  /**
+   * `SetTextVariables`. Accepts a `Map`, a plain object or an array of `[name, value]` pairs.
+   *
+   * The shape matters here beyond a silent no-op: protobuf-es stores an unrecognised init value
+   * in the map field as-is and serialises zero pairs, so a `Map` passed with
+   * `MapMergeMode.MMM_REPLACE` used to wipe every text variable in the project.
+   */
+  async setTextVariables(variables: EntryMapLike<string>, mergeMode: MapMergeMode = MapMergeMode.MMM_MERGE): Promise<void> {
+    const map = toRecord(variables, "setTextVariables(variables)");
+    await cmd.setTextVariables(this.client, { document: this.specifier, variables: create(TextVariablesSchema, { variables: map }), mergeMode });
   }
 
   async expandTextVariables(text: readonly string[], expandEnvVars = false): Promise<string[]> {
