@@ -34,6 +34,14 @@ has staged changes. `RatsnestEdge.net.code` is always 0 (the handler packs only 
 `SetTeardropsResponse.item_count` counts pads and vias processed rather than changed, so
 `RemoveTeardrops` always reports the same number instead of dropping to zero.
 
+### G23 · Two data gaps the renderer still cannot close
+`BoardText.knockout` / `BoardTextBox.knockout` carry the flag but not the geometry. KiCad plots
+box-minus-glyphs as a filled shape, a boolean subtract that `GetTextAsShapes` (which returns glyph
+strokes) cannot express; a read-only `PolySet`, exactly like the new `Barcode.shapes`, would close it.
+`Dimension.text.text` carries the bare measurement rather than `PCB_DIMENSION_BASE::GetText()`, so a
+client renders "26.5000" where KiCad plots "26.5000 mm": the prefix, suffix, units and format are
+separate fields but the composition rules live in KiCad.
+
 ### G22 · `RunBoardJobDrc` hangs after the async export jobs have run
 Found by the app's browser proof: once the 13 async export jobs have run in a session, a
 subsequent `RunBoardJobDrc` never answers at all, so a client's timeout is the only way out.

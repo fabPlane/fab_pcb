@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { boardItemToRenderItems, graphicShapeToPrims, imageInfo, renderIdToKiid, textFallbackPolygon } from '../src/board/boardAdapter.js';
 import { BOARD_LAYER_ENUM, boardDrawOrder, boardLayerName, copperLayerList, flipLayer } from '../src/board/boardLayers.js';
 import { boxContains } from '../src/core/model.js';
-import { MM, arc, circle, dimension, footprint, graphic, rect, seg, syntheticBoard, text, track, via, zone } from './fixtures.js';
+import { MM, arc, barcode, circle, dimension, footprint, graphic, rect, seg, syntheticBoard, table, text, textBox, track, via, zone } from './fixtures.js';
 
 const L = BOARD_LAYER_ENUM;
 
@@ -248,6 +248,92 @@ describe('board adapter', () => {
     // type derived from $typeName when the store gives none
     const [tr] = boardItemToRenderItems({ id: 'x', type: '', proto: track('x', 0, 0, 1, 0).proto });
     expect(tr!.prims[0]!.kind).toBe('segment');
+  });
+
+  test('barcode: the server-encoded symbol wins, the placeholder is the fallback', () => {
+    const modules: Array<[number, number, number, number]> = [
+      [10, 10, 11, 11],
+      [12, 10, 13, 11],
+      [10, 12, 11, 13],
+    ];
+    const [ri] = boardItemToRenderItems(barcode('bc', 11.5, 11.5, 4, 4, { modules }));
+    expect(ri!.layer).toBe('BL_F_SilkS');
+    // one filled polygon per dark module, in board coordinates, and nothing else
+    expect(ri!.prims.length).toBe(3);
+    for (const p of ri!.prims) expect(p).toMatchObject({ kind: 'polygon', fill: true, width: 0 });
+    expect((ri!.prims[0] as { outline: Array<{ x: number; y: number }> }).outline[0]).toEqual({ x: 10 * MM, y: 10 * MM });
+    expect(ri!.bbox).toEqual({ x: 10 * MM, y: 10 * MM, w: 3 * MM, h: 3 * MM });
+
+    // older servers send no `shapes`: frame + placeholder bars, as before
+    const [old] = boardItemToRenderItems(barcode('bc', 11.5, 11.5, 4, 4));
+    expect(old!.prims.length).toBe(10);
+    expect(old!.prims[0]).toMatchObject({ kind: 'polygon', fill: false });
+    expect(old!.prims.filter((p) => 'fill' in p && p.fill).length).toBe(9);
+    // an empty PolySet is treated as absent too
+    const empty = barcode('bc', 11.5, 11.5, 4, 4);
+    (empty.proto as Record<string, unknown>).shapes = { polygons: [] };
+    expect(boardItemToRenderItems(empty)[0]!.prims.length).toBe(10);
+  });
+
+  test('text box: server glyphs replace the fallback and the box edges are dropped', () => {
+    const box = textBox('tb', 10, 10, 20, 15, 'Hi');
+    const corners = [
+      { x: 10 * MM, y: 10 * MM },
+      { x: 20 * MM, y: 10 * MM },
+      { x: 20 * MM, y: 15 * MM },
+      { x: 10 * MM, y: 15 * MM },
+    ];
+    const glyph = { attributes: { stroke: { width: { valueNm: 150_000 } } }, segment: { start: { xNm: 11 * MM, yNm: 11 * MM }, end: { xNm: 12 * MM, yNm: 11 * MM } } };
+    // GetTextAsShapes appends the four box edges whatever border_enabled says
+    const edges = corners.map((c, i) => ({ attributes: { stroke: { width: { valueNm: 150_000 } } }, segment: { start: { xNm: c.x, yNm: c.y }, end: { xNm: corners[(i + 1) % 4]!.x, yNm: corners[(i + 1) % 4]!.y } } }));
+    const shapes = [glyph, ...edges];
+
+    // no server shapes: only the border rectangle, which stands in for the text
+    const fallback = boardItemToRenderItems(box)[0]!;
+    expect(fallback.prims.length).toBe(1);
+    expect(fallback.prims.every((p) => !('fill' in p && p.fill))).toBe(true);
+
+    const ri = boardItemToRenderItems(box, { textShapes: () => shapes as never })[0]!;
+    // the glyph survives; the four edges do not (the border comes from border_stroke instead)
+    expect(ri.prims.length).toBe(2);
+    expect(ri.prims.filter((p) => p.kind === 'segment')).toEqual([{ kind: 'segment', a: { x: 11 * MM, y: 11 * MM }, b: { x: 12 * MM, y: 11 * MM }, width: 150_000 }]);
+    expect(ri.prims[0]!.kind).toBe('polygon'); // the border, from the box corners
+
+    // border_enabled false -> nothing but the glyphs once they are real
+    const borderless = textBox('tb2', 10, 10, 20, 15, 'Hi', { border: false });
+    const noBorder = boardItemToRenderItems(borderless, { textShapes: () => shapes as never })[0]!;
+    expect(noBorder.prims.length).toBe(1);
+    expect(noBorder.prims[0]!.kind).toBe('segment');
+    expect(boardItemToRenderItems(borderless)[0]!.prims.length).toBe(1); // the stand-in outline
+  });
+
+  test('text box: a rotated box turns its corners about the box centre', () => {
+    const ri = boardItemToRenderItems(textBox('tb', 10, 10, 20, 16, 'Hi', { angle: 90 }))[0]!;
+    const pts = (ri.prims[0] as { outline: Array<{ x: number; y: number }> }).outline;
+    // 90 deg about (15, 13): (10,10) -> (12,18), (20,10) -> (12,8)
+    expect(pts[0]!.x).toBeCloseTo(12 * MM, -3);
+    expect(pts[0]!.y).toBeCloseTo(18 * MM, -3);
+    expect(pts[1]!.x).toBeCloseTo(12 * MM, -3);
+    expect(pts[1]!.y).toBeCloseTo(8 * MM, -3);
+    // the same corners are what a server reply's border edges are matched against
+    const edges = pts.map((c, i) => ({ segment: { start: { xNm: c.x, yNm: c.y }, end: { xNm: pts[(i + 1) % 4]!.x, yNm: pts[(i + 1) % 4]!.y } } }));
+    // a reply that is nothing but those edges leaves no glyphs, so the stand-in outline is kept
+    const withShapes = boardItemToRenderItems(textBox('tb', 10, 10, 20, 16, 'Hi', { angle: 90, border: false }), { textShapes: () => edges as never })[0]!;
+    expect(withShapes.prims.length).toBe(1);
+    expect((withShapes.prims[0] as { outline: Array<{ x: number; y: number }> }).outline).toEqual(pts);
+  });
+
+  test('table: cells draw text only, the table draws its own borders and separators', () => {
+    const t = table('tbl', 0, 0, 10, 5, ['a', 'b']);
+    const noShapes = boardItemToRenderItems(t)[0]!;
+    // external border (dashed) + one column separator, and no per-cell rectangles
+    expect(noShapes.layer).toBe('BL_Dwgs_User');
+    expect(noShapes.bbox).toMatchObject({ x: -75_000, y: -75_000 });
+    const seg1 = noShapes.prims.filter((p) => p.kind === 'segment');
+    expect(seg1.length).toBeGreaterThan(0);
+    const glyph = [{ segment: { start: { xNm: 1 * MM, yNm: 1 * MM }, end: { xNm: 2 * MM, yNm: 1 * MM } } }];
+    const withShapes = boardItemToRenderItems(t, { textShapes: (key) => (key === 'tbl-c0' ? (glyph as never) : undefined) })[0]!;
+    expect(withShapes.prims.length).toBe(noShapes.prims.length + 1);
   });
 
   test('synthetic board converts without errors and covers many layers', () => {

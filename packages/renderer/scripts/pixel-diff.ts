@@ -45,7 +45,7 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { KiCad, NngIpcTransport, type Board, type ItemStore, type StoredItem } from '@kicad-web/client';
-import { BoardJobPaginationMode, BoardLayer, SchematicJobPageSize, unpackAny, type Text, type TextBox } from '@kicad-web/proto';
+import { BoardJobPaginationMode, BoardLayer, SchematicJobPageSize, ZoneType, unpackAny, type Text, type TextBox } from '@kicad-web/proto';
 import type { RunOptions, RunResult } from './pixel-diff/page.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -257,11 +257,11 @@ function hashText(t: Text): string {
 }
 
 /**
- * `textbox` requests are supported by GetTextAsShapes but are *not* used: for a TextBox the
- * server returns the glyphs around the origin instead of the box position (measured on the
- * kitchen-sink table: cell "Hello" at (25, 24.5) mm comes back at (0.3, 0.6) mm), so they
- * cannot be placed without redoing SCH_TEXTBOX / PCB_TEXTBOX::GetDrawPos here. Text boxes and
- * table cells therefore fall back to the metrics-estimated outline -- see the README.
+ * A `textbox` request lays its glyphs out at the box (KiCad >= 11.0: `layOutTextBox` in
+ * `api_handler_common.cpp` breaks the text to the column width and anchors it by the box's
+ * justification and margins), so board text boxes and table cells ask for server glyphs like
+ * any other text. The reply also carries the four box edges as segments whatever
+ * `border_enabled` says; the adapter drops them and draws the border from `border_stroke`.
  */
 interface TextRef {
   key: string;
@@ -276,12 +276,21 @@ function boardTexts(it: StoredItem): TextRef[] {
   const push = (key: string | undefined, text: Text | undefined) => {
     if (key && text && text.text) out.push({ key, text });
   };
+  const pushBox = (key: string | undefined, textbox: TextBox | undefined) => {
+    if (key && textbox && textbox.text) out.push({ key, textbox });
+  };
   switch (it.type) {
     case 'KOT_PCB_TEXT':
       push(it.id, p.text);
       break;
     case 'KOT_PCB_DIMENSION':
       push(it.id, p.text);
+      break;
+    case 'KOT_PCB_TEXTBOX':
+      pushBox(it.id, p.textbox);
+      break;
+    case 'KOT_PCB_TABLE':
+      for (const cell of p.cells ?? []) pushBox(cell?.textBox?.id?.value, cell?.textBox?.textbox);
       break;
     case 'KOT_PCB_FIELD':
       push(p.text?.id?.value, p.text?.text);
@@ -291,6 +300,7 @@ function boardTexts(it: StoredItem): TextRef[] {
       for (const child of p.definition?.items ?? []) {
         const c = child as Record<string, any>;
         if (c?.$typeName === 'kiapi.board.types.BoardText') push(c.id?.value, c.text);
+        if (c?.$typeName === 'kiapi.board.types.BoardTextBox') pushBox(c.id?.value, c.textbox);
       }
       break;
     default:
@@ -306,6 +316,9 @@ function schematicTexts(it: StoredItem): TextRef[] {
   const push = (key: string | undefined, text: Text | undefined) => {
     if (key && text && text.text && text.attributes?.visible !== false) out.push({ key, text });
   };
+  const pushBox = (key: string | undefined, textbox: TextBox | undefined) => {
+    if (key && textbox && textbox.text) out.push({ key, textbox });
+  };
   switch (it.type) {
     case 'KOT_SCH_TEXT':
     case 'KOT_SCH_LOCAL_LABEL':
@@ -316,6 +329,12 @@ function schematicTexts(it: StoredItem): TextRef[] {
       break;
     case 'KOT_PCB_DIMENSION':
       push(it.id, p.text);
+      break;
+    case 'KOT_SCH_TEXTBOX':
+      pushBox(it.id, p.textbox);
+      break;
+    case 'KOT_SCH_TABLE':
+      for (const cell of p.cells ?? []) pushBox(cell?.textBox?.id?.value, cell?.textBox?.textbox);
       break;
     case 'KOT_SCH_SYMBOL':
       for (const f of [p.referenceField, p.valueField, p.footprintField, p.datasheetField, p.descriptionField, ...(p.userFields ?? [])]) {
@@ -369,6 +388,9 @@ async function exportBoard(kicad: KiCad, board: Board, args: Args, out: string):
     // `PCB_REFERENCE_IMAGE_T: // Not plotted at all` (plot_brditems_plotter.cpp): the renderer
     // draws them, the SVG export never does, so they are left out of the comparison.
     if (it.type === 'KOT_PCB_REFERENCE_IMAGE') continue;
+    // Rule areas are skipped by every plot path (`if( zone->GetIsRuleArea() ) continue;`,
+    // plot_board_layers.cpp), while the renderer draws them like pcbnew does.
+    if (it.type === 'KOT_PCB_ZONE' && proto.type === ZoneType.ZT_RULE_AREA) continue;
     if (it.type === 'KOT_PCB_FOOTPRINT') decodeFootprintChildren(proto);
     if (it.type === 'KOT_PCB_PAD') padIds.add(it.id);
     if (it.type === 'KOT_PCB_FOOTPRINT') for (const c of proto.definition?.items ?? []) if (c?.$typeName === 'kiapi.board.types.Pad' && c.id?.value) padIds.add(c.id.value);

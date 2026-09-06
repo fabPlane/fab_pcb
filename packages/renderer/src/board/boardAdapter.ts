@@ -200,6 +200,7 @@ const ENUMS = {
   HorizontalAlignment: ['HA_UNKNOWN', 'HA_LEFT', 'HA_CENTER', 'HA_RIGHT', 'HA_INDETERMINATE'],
   VerticalAlignment: ['VA_UNKNOWN', 'VA_TOP', 'VA_CENTER', 'VA_BOTTOM', 'VA_INDETERMINATE'],
   AxisAlignment: ['AA_UNKNOWN', 'AA_X_AXIS', 'AA_Y_AXIS'],
+  TableStrokeMode: ['TSM_UNKNOWN', 'TSM_DISABLED', 'TSM_ENABLED'],
   DimensionArrowDirection: ['DAD_UNKNOWN', 'DAD_INWARD', 'DAD_OUTWARD'],
   DimensionTextBorderStyle: ['DTBS_UNKNOWN', 'DTBS_NONE', 'DTBS_RECTANGLE', 'DTBS_CIRCLE', 'DTBS_ROUNDRECT'],
   ViaType: ['VT_UNKNOWN', 'VT_THROUGH', 'VT_BLIND_BURIED', 'VT_MICRO', 'VT_BLIND', 'VT_BURIED'],
@@ -776,16 +777,73 @@ function textPrims(textId: string, t: TextLike | undefined, ctx: BoardAdapterCon
   return { prims: [{ kind: 'polygon', outline: poly, holes: [], fill: knockout, width: 0 }], cacheKey };
 }
 
-function textBoxPrims(id: string, tb: TextBoxLike | undefined, ctx: BoardAdapterContext): Primitive[] {
+/**
+ * The four corners of a text box in drawing order. The box itself stays axis-aligned and the
+ * rotation lives in the text angle, so the corners turn about the box centre -- the layout
+ * `PCB_TEXTBOX` / `PCB_TABLECELL` use when they draw (and `layOutTextBox` in KiCad's
+ * `api_handler_common.cpp`, which places the GetTextAsShapes glyphs against these corners).
+ */
+export function textBoxCorners(tb: TextBoxLike): Vec2[] {
+  const a = vec(tb.topLeft);
+  const b = vec(tb.bottomRight);
+  const left = Math.min(a.x, b.x);
+  const right = Math.max(a.x, b.x);
+  const top = Math.min(a.y, b.y);
+  const bottom = Math.max(a.y, b.y);
+  const pts: Vec2[] = [
+    { x: left, y: top },
+    { x: right, y: top },
+    { x: right, y: bottom },
+    { x: left, y: bottom },
+  ];
+  const angle = deg(tb.attributes?.angle);
+  if (!angle) return pts;
+  const c = { x: (left + right) / 2, y: (top + bottom) / 2 };
+  return pts.map((p) => vRotate(p, angle, c));
+}
+
+/**
+ * GetTextAsShapes appends the box border to a `textbox` request as four segments along the
+ * rotated corners, whatever `border_enabled` says and without the border's line style. Drop
+ * them and let the caller draw the border itself from `border_stroke`.
+ */
+export function stripTextBoxBorder(shapes: TextShapesInput, corners: Vec2[]): TextShapesInput {
+  if (isPolyList(shapes) || shapes.length < corners.length) return shapes;
+  const tail = shapes.slice(shapes.length - corners.length) as GraphicShapeLike[];
+  const near = (u: Vec2, v: Vec2) => Math.abs(u.x - v.x) <= 1000 && Math.abs(u.y - v.y) <= 1000;
+  const isEdge = (s: GraphicShapeLike, i: number) => {
+    const g = oneof<Record<string, unknown>>(s as Record<string, unknown>, 'geometry', ['segment']);
+    const seg = (g?.case === 'segment' ? g.value : s.segment) as NonNullable<GraphicShapeLike['segment']> | undefined;
+    if (!seg) return false;
+    const p = vec(seg.start);
+    const q = vec(seg.end);
+    const a = corners[i]!;
+    const b = corners[(i + 1) % corners.length]!;
+    return (near(p, a) && near(q, b)) || (near(p, b) && near(q, a));
+  };
+  if (!tail.every(isEdge)) return shapes;
+  return shapes.slice(0, shapes.length - corners.length) as GraphicShapeLike[];
+}
+
+/**
+ * A text box: its border (from `BoardTextBox.border_stroke`) and its text. `drawBorder` is
+ * false for table cells, which plot their text only -- `PCB_TABLE` draws every line
+ * (`BRDITEMS_PLOTTER::Plot`, case `PCB_TABLE_T`), and a cell's own `border_enabled` is true.
+ */
+function textBoxPrims(id: string, tb: TextBoxLike | undefined, ctx: BoardAdapterContext, borderStroke?: StrokeAttributesLike, drawBorder = true): Primitive[] {
   if (!tb) return [];
-  const tl = vec(tb.topLeft);
-  const br = vec(tb.bottomRight);
-  const rect: Vec2[] = [tl, { x: br.x, y: tl.y }, br, { x: tl.x, y: br.y }];
-  const prims: Primitive[] = [];
-  const border = dist(tb.attributes?.strokeWidth);
-  prims.push({ kind: 'polygon', outline: rect, holes: [], fill: false, width: tb.borderEnabled ? border : 0 });
+  const corners = textBoxCorners(tb);
   const shapes = ctx.textShapes?.(id);
-  if (shapes && shapes.length) prims.push(...textShapesToPrims(shapes, ctx));
+  const glyphs = shapes?.length ? stripTextBoxBorder(shapes, corners) : undefined;
+  const prims: Primitive[] = [];
+  if (drawBorder && tb.borderEnabled) {
+    const width = dist(borderStroke?.width) || dist(tb.attributes?.strokeWidth);
+    prims.push(...strokedPolyline(corners, width, dashPattern(enumName('StrokeLineStyle', borderStroke?.style), width), true));
+  } else if (drawBorder && !glyphs?.length) {
+    // No server glyphs: the box outline stands in for the text so the item still reads
+    prims.push({ kind: 'polygon', outline: corners, holes: [], fill: false, width: 0 });
+  }
+  if (glyphs?.length) prims.push(...textShapesToPrims(glyphs, ctx));
   return prims;
 }
 
@@ -930,7 +988,7 @@ function convertText(p: Record<string, unknown>, id: string, o: ConvertOpts, ctx
 }
 
 function convertTextBox(p: Record<string, unknown>, id: string, o: ConvertOpts, ctx: BoardAdapterContext): RenderItem[] {
-  const prims = textBoxPrims(id, p.textbox as TextBoxLike, ctx);
+  const prims = textBoxPrims(id, p.textbox as TextBoxLike, ctx, p.borderStroke as StrokeAttributesLike | undefined);
   if (!prims.length) return [];
   return [finish(id, boardLayerName(p.layer as number), prims, o)];
 }
@@ -1190,7 +1248,13 @@ function convertGroup(p: Record<string, unknown>, id: string, o: ConvertOpts, ct
   return [{ id, layer: PSEUDO_LAYERS.auxItems, prims: [], bbox, owner: o.owner }];
 }
 
-function convertBarcode(p: Record<string, unknown>, id: string, o: ConvertOpts): RenderItem[] {
+function convertBarcode(p: Record<string, unknown>, id: string, o: ConvertOpts, ctx: BoardAdapterContext = {}): RenderItem[] {
+  // Since 11.0 the server packs the encoded symbol -- the dark modules, the human-readable text
+  // and the knockout margin -- as filled polygons in board coordinates, already sized and
+  // rotated: the same geometry BRDITEMS_PLOTTER::PlotBarCode draws (PCB_BARCODE::Serialize).
+  const encoded = polySetToPrims(p.shapes as PolySetLike | undefined, true, 0, ctx.arcTolerance ?? 5000);
+  if (encoded.length) return [finish(id, boardLayerName(p.layer as number), encoded, o)];
+  // Older servers send only the payload and the box: draw the frame and a placeholder pattern.
   const pos = vec(p.position as Vector2Like);
   const w = dist(p.width as DistanceLike) || 10_000_000;
   const h = dist(p.height as DistanceLike) || 10_000_000;
@@ -1261,34 +1325,75 @@ function convertGridItem(p: Record<string, unknown>, id: string, o: ConvertOpts)
   return [finish(id, PSEUDO_LAYERS.gridItems, prims, o)];
 }
 
+type TableCellLike = { textBox?: Record<string, unknown>; columnSpan?: number; rowSpan?: number };
+
+const strokeEnabled = (m: number | string | undefined): boolean => enumName('TableStrokeMode', m) === 'TSM_ENABLED';
+
+function strokeSeg(a: Vec2, b: Vec2, s: StrokeAttributesLike | undefined): Primitive[] {
+  const width = dist(s?.width);
+  return strokedPolyline([a, b], width, dashPattern(enumName('StrokeLineStyle', s?.style), width), false);
+}
+
+/** `PCB_TABLE::DrawBorders`: header / column / row separators, then the outer frame. */
+function tableBorderPrims(p: Record<string, unknown>, cells: TableCellLike[], corners: (Vec2[] | undefined)[]): Primitive[] {
+  const cols = Math.max(1, Number(p.columnCount) || 0);
+  const rows = Math.floor(cells.length / cols);
+  if (rows < 1) return [];
+  const border = p.borderStroke as StrokeAttributesLike | undefined;
+  const seps = p.separatorsStroke as StrokeAttributesLike | undefined;
+  const header = strokeEnabled(p.headerSeparator as number | string | undefined);
+  const at = (row: number, col: number) => corners[row * cols + col];
+  const span = (c: TableCellLike | undefined, k: 'columnSpan' | 'rowSpan') => Number(c?.[k] ?? 1);
+  const out: Primitive[] = [];
+  const rowStroke = (row: number, on: boolean) => (row === 0 && header ? border : on ? seps : undefined);
+  for (let col = 0; col < cols - 1; col++) {
+    for (let row = 0; row < rows; row++) {
+      const s = rowStroke(row, strokeEnabled(p.columnSeparators as number | string | undefined));
+      const cell = cells[row * cols + col];
+      const cs = span(cell, 'columnSpan');
+      if (!s || cs === 0 || col + cs === cols) continue;
+      const c = at(row, col);
+      if (c) out.push(...strokeSeg(c[1]!, c[2]!, s));
+    }
+  }
+  for (let row = 0; row < rows - 1; row++) {
+    const s = rowStroke(row, strokeEnabled(p.rowSeparators as number | string | undefined));
+    if (!s) continue;
+    for (let col = 0; col < cols; col++) {
+      const cell = cells[row * cols + col];
+      const rs = span(cell, 'rowSpan');
+      if (rs === 0 || row + rs === rows) continue;
+      const c = at(row, col);
+      if (c) out.push(...strokeSeg(c[2]!, c[3]!, s));
+    }
+  }
+  const tl = at(0, 0);
+  const tr = at(0, cols - 1);
+  const bl = at(rows - 1, 0);
+  const br = at(rows - 1, cols - 1);
+  if (strokeEnabled(p.externalBorder as number | string | undefined) && tl && tr && bl && br) {
+    out.push(...strokeSeg(tl[0]!, tr[1]!, border), ...strokeSeg(tr[1]!, br[2]!, border), ...strokeSeg(br[2]!, bl[3]!, border), ...strokeSeg(bl[3]!, tl[0]!, border));
+  }
+  return out;
+}
+
 function convertTable(p: Record<string, unknown>, id: string, o: ConvertOpts, ctx: BoardAdapterContext): RenderItem[] {
   const layer = boardLayerName(p.layer as number);
-  const cells = (p.cells as Array<{ textBox?: Record<string, unknown> }>) ?? [];
+  const cells = (p.cells as TableCellLike[]) ?? [];
   const prims: Primitive[] = [];
-  let bbox = EMPTY_BOX;
+  const corners: (Vec2[] | undefined)[] = [];
   cells.forEach((cell, i) => {
     const tb = cell.textBox;
-    if (!tb) return;
+    if (!tb) {
+      corners.push(undefined);
+      return;
+    }
+    const box = tb.textbox as TextBoxLike | undefined;
+    corners.push(box ? textBoxCorners(box) : undefined);
     const cid = kiid(tb.id as KiidLike) || `${id}:cell${i}`;
-    const cp = textBoxPrims(cid, tb.textbox as TextBoxLike, ctx);
-    prims.push(...cp);
-    bbox = boxUnion(bbox, boxOfPrimitives(cp));
+    prims.push(...textBoxPrims(cid, box, ctx, undefined, false));
   });
-  const borderW = dist((p.borderStroke as StrokeAttributesLike | undefined)?.width);
-  if (bbox !== EMPTY_BOX) {
-    prims.push({
-      kind: 'polygon',
-      outline: [
-        { x: bbox.x, y: bbox.y },
-        { x: bbox.x + bbox.w, y: bbox.y },
-        { x: bbox.x + bbox.w, y: bbox.y + bbox.h },
-        { x: bbox.x, y: bbox.y + bbox.h },
-      ],
-      holes: [],
-      fill: false,
-      width: borderW,
-    });
-  }
+  prims.push(...tableBorderPrims(p, cells, corners));
   if (!prims.length) return [];
   return [finish(id, layer, prims, o)];
 }
@@ -1322,7 +1427,7 @@ function convert(type: string, proto: Record<string, unknown>, id: string, o: Co
     case 'KOT_PCB_GROUP':
       return convertGroup(proto, id, o, ctx);
     case 'KOT_PCB_BARCODE':
-      return convertBarcode(proto, id, o);
+      return convertBarcode(proto, id, o, ctx);
     case 'KOT_PCB_POINT':
       return convertPoint(proto, id, o);
     case 'KOT_PCB_GRIDITEM':

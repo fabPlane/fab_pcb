@@ -246,3 +246,97 @@ export class MemoryStore {
     for (const cb of this.subs) cb(d);
   }
 }
+
+/** `kiapi.board.types.Barcode`. `shapes` is the encoded symbol KiCad >= 11.0 sends along. */
+export function barcode(
+  kiid: string,
+  x: number,
+  y: number,
+  wMm: number,
+  hMm: number,
+  opts: { angle?: number; modules?: Array<[number, number, number, number]>; layer?: number } = {},
+): StoredItemLike {
+  const proto: Record<string, unknown> = {
+    $typeName: 'kiapi.board.types.Barcode',
+    id: id(kiid),
+    text: 'kicad',
+    kind: 4, // BK_QR_CODE
+    position: v(x, y),
+    orientation: a(opts.angle ?? 0),
+    layer: opts.layer ?? L.BL_F_SilkS!,
+    width: d(wMm),
+    height: d(hMm),
+  };
+  if (opts.modules) {
+    proto.shapes = {
+      polygons: opts.modules.map(([x0, y0, x1, y1]) => ({
+        outline: polyline([
+          [x0, y0],
+          [x1, y0],
+          [x1, y1],
+          [x0, y1],
+        ]),
+        holes: [],
+      })),
+    };
+  }
+  return { id: kiid, type: 'KOT_PCB_BARCODE', proto };
+}
+
+/** `kiapi.board.types.BoardTextBox`. `angle` turns the text (and with it the box corners). */
+export function textBox(
+  kiid: string,
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  str: string,
+  opts: { angle?: number; border?: boolean; strokeMm?: number; style?: number; layer?: number } = {},
+): StoredItemLike {
+  return {
+    id: kiid,
+    type: 'KOT_PCB_TEXTBOX',
+    proto: {
+      $typeName: 'kiapi.board.types.BoardTextBox',
+      id: id(kiid),
+      layer: opts.layer ?? L.BL_F_SilkS!,
+      borderStroke: { width: d(opts.strokeMm ?? 0.15), style: opts.style ?? 2 },
+      textbox: {
+        topLeft: v(x0, y0),
+        bottomRight: v(x1, y1),
+        text: str,
+        borderEnabled: opts.border ?? true,
+        marginLeft: d(0.5),
+        marginTop: d(0.5),
+        marginRight: d(0.5),
+        marginBottom: d(0.5),
+        attributes: { size: v(1, 1), strokeWidth: d(0.15), angle: a(opts.angle ?? 0), horizontalAlignment: 1, verticalAlignment: 1, visible: true },
+      },
+    },
+  };
+}
+
+/** A one-row table of `cells` text boxes, laid out left to right between y0 and y1. */
+export function table(kiid: string, x0: number, y0: number, cellW: number, y1: number, cells: string[]): StoredItemLike {
+  return {
+    id: kiid,
+    type: 'KOT_PCB_TABLE',
+    proto: {
+      $typeName: 'kiapi.board.types.Table',
+      id: id(kiid),
+      layer: L.BL_Dwgs_User!,
+      columnCount: cells.length,
+      externalBorder: 2, // TSM_ENABLED
+      headerSeparator: 1, // TSM_DISABLED
+      rowSeparators: 1,
+      columnSeparators: 2,
+      borderStroke: { width: d(0.15), style: 3 }, // SLS_DASH
+      separatorsStroke: { width: d(0.1), style: 2 }, // SLS_SOLID
+      cells: cells.map((str, i) => ({
+        columnSpan: 1,
+        rowSpan: 1,
+        textBox: (textBox(`${kiid}-c${i}`, x0 + i * cellW, y0, x0 + (i + 1) * cellW, y1, str).proto as Record<string, unknown>),
+      })),
+    },
+  };
+}

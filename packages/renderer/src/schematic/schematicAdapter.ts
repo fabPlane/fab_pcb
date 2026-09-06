@@ -36,7 +36,9 @@ import {
   kiid,
   lineEnding,
   nm,
+  stripTextBoxBorder,
   strokedPolyline,
+  textBoxCorners,
   textShapesToPrims,
   toBase64,
   vec,
@@ -309,10 +311,15 @@ function finish(id: string, layer: string, prims: Primitive[], c: Ctx, extra: Pa
   return { id, layer, prims, bbox: boxOfPrimitives(prims), owner: c.owner, ref: id, ...extra };
 }
 
-/** Text as server shapes (when supplied) or text-glyphs primitives at `pos`. */
-function textPrims(textId: string, text: string, pos: Vec2, a: TextAttrs, c: Ctx): Primitive[] {
+/**
+ * Text as server shapes (when supplied) or text-glyphs primitives at `pos`. `box` is the text
+ * box a `textbox` request was made for: GetTextAsShapes appends its four edges as segments
+ * whatever `border_enabled` says, and the border is drawn from the item's own stroke instead.
+ */
+function textPrims(textId: string, text: string, pos: Vec2, a: TextAttrs, c: Ctx, box?: TextBoxLike): Primitive[] {
   const shapes = c.ctx.textShapes?.(textId);
-  if (shapes && shapes.length) return textShapesToPrims(shapes, { arcTolerance: c.ctx.arcTolerance });
+  const server = shapes?.length ? (box ? stripTextBoxBorder(shapes, textBoxCorners(box)) : shapes) : undefined;
+  if (server?.length) return textShapesToPrims(server, { arcTolerance: c.ctx.arcTolerance });
   const mode = c.ctx.textFallback ?? 'glyphs';
   if (mode === 'none' || !text) return [];
   const glyphs = textGlyphPrims(text, pos, a);
@@ -507,7 +514,7 @@ function textBoxPrims(textId: string, p: Record<string, unknown>, c: Ctx): TextB
     pos.x = a.halign === 'left' ? tl.x + ml : a.halign === 'right' ? br.x - mr : (tl.x + br.x) / 2;
     pos.y = a.valign === 'top' ? tl.y + mt : a.valign === 'bottom' ? br.y - mb : (tl.y + br.y) / 2;
   }
-  out.text = textPrims(textId, tb.text ?? '', pos, a, c);
+  out.text = textPrims(textId, tb.text ?? '', pos, a, c, tb);
   out.textColor = a.color;
   const ga = p.graphicAttributes as { stroke?: SchStrokeLike; fill?: { fillType?: number | string; color?: ColorLike } } | undefined;
   const rect = rectPts(tl, br);

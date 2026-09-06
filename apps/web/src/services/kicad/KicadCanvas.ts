@@ -2,9 +2,9 @@
 // their adapter contexts fed from KiCad:
 //   - `copperLayers` from GetBoardEnabledLayers,
 //   - `padPolygons` from GetPadShapeAsPolygon (one request per copper layer, cached per pad/layer),
-//   - `textShapes` from GetTextAsShapes (all board texts + footprint fields, or all sheet texts,
-//     labels and symbol fields in one batched request; cached by a hash of the text so an edit
-//     only re-tessellates what changed),
+//   - `textShapes` from GetTextAsShapes (all board texts, text boxes, table cells and footprint
+//     fields, or all sheet texts, labels, text boxes and symbol fields in one batched request;
+//     cached by a hash of the text so an edit only re-tessellates what changed),
 //   - `decodeAny` via the proto registry.
 // Board hosts also feed the ratsnest overlay from `GetRatsnest` (`host.setRatsnest`), refreshed
 // after every store diff that touches copper. DRC/ERC markers go through `host.setMarkers` /
@@ -13,7 +13,7 @@
 // once the server shapes arrive; later store diffs only re-fetch the affected texts and
 // `rebuildItems` them.
 
-import { BoardLayer, unpackAny, type GraphicShape, type PolygonWithHoles, type Text } from '@kicad-web/proto';
+import { BoardLayer, unpackAny, type GraphicShape, type PolygonWithHoles, type Text, type TextBox } from '@kicad-web/proto';
 import { BoardCanvasHost, SchematicCanvasHost, type Theme } from '@kicad-web/renderer';
 import type { CanvasHost, DocumentKind, ItemStore, StoredItem } from '@/contracts';
 import type { KicadDocumentService } from './KicadDocumentService';
@@ -23,13 +23,22 @@ const TEXT_BATCH = 200;
 interface TextRef {
   /** adapter key (see renderer README "Render item ids") */
   key: string;
-  text: Text;
+  /** exactly one of the two: a plain text, or a text box / table cell laid out at its box */
+  text?: Text;
+  textbox?: TextBox;
 }
 
-function hashText(t: Text): string {
-  const a = t.attributes;
-  const p = t.position;
-  return [t.text, p?.xNm, p?.yNm, a?.angle?.valueDegrees, a?.size?.xNm, a?.size?.yNm, a?.strokeWidth?.valueNm, a?.horizontalAlignment, a?.verticalAlignment, a?.italic, a?.bold, a?.mirrored, a?.fontName, a?.lineSpacing].join('|');
+function hashAttrs(a: Text['attributes']): string {
+  return [a?.angle?.valueDegrees, a?.size?.xNm, a?.size?.yNm, a?.strokeWidth?.valueNm, a?.horizontalAlignment, a?.verticalAlignment, a?.italic, a?.bold, a?.mirrored, a?.fontName, a?.lineSpacing].join('|');
+}
+
+function hashText(r: TextRef): string {
+  if (r.textbox) {
+    const b = r.textbox;
+    return ['box', b.text, b.topLeft?.xNm, b.topLeft?.yNm, b.bottomRight?.xNm, b.bottomRight?.yNm, b.marginLeft?.valueNm, b.marginTop?.valueNm, b.marginRight?.valueNm, b.marginBottom?.valueNm, hashAttrs(b.attributes)].join('|');
+  }
+  const t = r.text;
+  return [t?.text, t?.position?.xNm, t?.position?.yNm, hashAttrs(t?.attributes)].join('|');
 }
 
 /** Texts a board store item contributes, keyed the way the board adapter looks them up. */
@@ -39,9 +48,18 @@ function boardTexts(it: StoredItem): TextRef[] {
   const push = (key: string | undefined, text: Text | undefined) => {
     if (key && text && text.text) out.push({ key, text });
   };
+  const pushBox = (key: string | undefined, textbox: TextBox | undefined) => {
+    if (key && textbox && textbox.text) out.push({ key, textbox });
+  };
   switch (it.type) {
     case 'KOT_PCB_TEXT':
       push(it.id, p.text);
+      break;
+    case 'KOT_PCB_TEXTBOX':
+      pushBox(it.id, p.textbox);
+      break;
+    case 'KOT_PCB_TABLE':
+      for (const cell of p.cells ?? []) pushBox(cell?.textBox?.id?.value, cell?.textBox?.textbox);
       break;
     case 'KOT_PCB_FIELD':
       push(p.text?.id?.value, p.text?.text);
@@ -51,6 +69,7 @@ function boardTexts(it: StoredItem): TextRef[] {
       for (const child of p.definition?.items ?? []) {
         const c = child as Record<string, any>;
         if (c?.$typeName === 'kiapi.board.types.BoardText') push(c.id?.value, c.text);
+        if (c?.$typeName === 'kiapi.board.types.BoardTextBox') pushBox(c.id?.value, c.textbox);
       }
       break;
     default:
@@ -66,9 +85,18 @@ function schematicTexts(it: StoredItem): TextRef[] {
   const push = (key: string | undefined, text: Text | undefined) => {
     if (key && text && text.text && text.attributes?.visible !== false) out.push({ key, text });
   };
+  const pushBox = (key: string | undefined, textbox: TextBox | undefined) => {
+    if (key && textbox && textbox.text) out.push({ key, textbox });
+  };
   switch (it.type) {
     case 'KOT_SCH_TEXT':
       push(it.id, p.text);
+      break;
+    case 'KOT_SCH_TEXTBOX':
+      pushBox(it.id, p.textbox);
+      break;
+    case 'KOT_SCH_TABLE':
+      for (const cell of p.cells ?? []) pushBox(cell?.textBox?.id?.value, cell?.textBox?.textbox);
       break;
     case 'KOT_SCH_SYMBOL':
       for (const f of [p.referenceField, p.valueField, p.footprintField, p.datasheetField, p.descriptionField, ...(p.userFields ?? [])]) {
@@ -105,7 +133,7 @@ class TextShapeCache {
 
   /** Queues every text of `items` whose hash is unknown or changed. */
   request(items: Iterable<StoredItem>, initial = false): void {
-    for (const it of items) for (const ref of this.collect(it)) if (this.hashes.get(ref.key) !== hashText(ref.text)) this.queued.set(ref.key, ref);
+    for (const it of items) for (const ref of this.collect(it)) if (this.hashes.get(ref.key) !== hashText(ref)) this.queued.set(ref.key, ref);
     void this.flush(initial);
   }
 
@@ -120,11 +148,11 @@ class TextShapeCache {
       for (let i = 0; i < batch.length; i += TEXT_BATCH) {
         const slice = batch.slice(i, i + TEXT_BATCH);
         try {
-          const res = await kicad.textAsShapes(slice.map((r) => ({ text: r.text })));
+          const res = await kicad.textAsShapes(slice.map((r) => (r.textbox ? { textbox: r.textbox } : { text: r.text! })));
           res.forEach((r, j) => {
             const ref = slice[j]!;
             this.shapes.set(ref.key, r.shapes?.shapes ?? []);
-            this.hashes.set(ref.key, hashText(ref.text));
+            this.hashes.set(ref.key, hashText(ref));
             done.push(ref.key);
           });
         } catch (e) {
@@ -337,8 +365,10 @@ function ownersOf(store: ItemStore | undefined, keys: string[]): string[] {
     const owner = k.split(':')[0]!;
     if (store.get(owner)) ids.add(owner);
     else {
-      // field text ids live inside footprints: find the footprint that carries them
-      for (const it of store.byType('KOT_PCB_FOOTPRINT')) if (boardTexts(it).some((t) => t.key === k)) ids.add(it.id);
+      // field / table-cell text ids live inside another item: find the one that carries them
+      for (const type of ['KOT_PCB_FOOTPRINT', 'KOT_PCB_TABLE', 'KOT_SCH_TABLE']) {
+        for (const it of store.byType(type)) if ((it.type.startsWith('KOT_SCH') ? schematicTexts(it) : boardTexts(it)).some((t) => t.key === k)) ids.add(it.id);
+      }
     }
   }
   return [...ids];
