@@ -29,12 +29,14 @@ same WebSocket. Cheap interim: `GetDocumentRevision` (monotonic counter bumped i
 published for project-level commands.
 
 ### G20 · Bugs found by the client conformance suite (batch 3)
+**Status:** done: `Undo` now refuses while any commit is open (ab6ac72d41), the ratsnest edge carries its net code (19435eef53), and `SetTeardropsResponse` counts only changed items (477c6922bb).
 `Undo` is documented as refused while a client has an open commit but only refuses when the commit
 has staged changes. `RatsnestEdge.net.code` is always 0 (the handler packs only the name).
 `SetTeardropsResponse.item_count` counts pads and vias processed rather than changed, so
 `RemoveTeardrops` always reports the same number instead of dropping to zero.
 
 ### G24 · What a bridgeless browser client still cannot do
+**Status:** open, and partly by design. The bridge covers all of it today; these are what KiCad would need for a browser to run with no helper process at all.
 Found while proving the direct `ws://` path. No API command lists a directory or reads an arbitrary
 file, so a browser holding only a socket cannot show a project browser. A running server is bound to
 its document, so opening a different project still means spawning a process. The ws listener accepts
@@ -64,6 +66,7 @@ synchronous DRC path contending for the board.
 is empty and the handler enumerates nothing. Only "KiCad Default" answers usefully.
 
 ### G19 · Bugs found by the renderer's pixel-diff harness
+**Status:** done: text-box glyphs are placed in the document (85d0dfa405) and barcodes carry their encoded geometry (cb80f7e100).
 `GetTextAsShapes` given a `TextBox` returns its glyphs around the origin instead of at the box
 position (the kitchen-sink "Hello" cell at 25, 24.5 mm comes back at 0.3, 0.6 mm), so a client
 cannot use server glyphs for text boxes or table cells. Barcode messages carry only the payload,
