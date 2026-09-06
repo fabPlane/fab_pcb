@@ -13,6 +13,7 @@ API fields with `// Since 11.0` comments, we follow that.
 ## Priority 0 — blocks the web UI
 
 ### G1 · Events / notifications
+**Status:** interim `GetDocumentRevision` landed (web-api 3c7ce604bf); PUB socket in progress.
 **Today:** REQ/REP only; the UI cannot learn that a document changed (another
 client, a job finishing, a save).
 **Fix:** add a PUB0 socket next to the REP socket (`api-events.sock`).
@@ -52,11 +53,13 @@ board, or schematic; `DOCTYPE_SYMBOL` and `DOCTYPE_DRAWING_SHEET` are rejected.
 `OpenDocument(DOCTYPE_SYMBOL, lib_id)` works. Drawing sheet is lower priority.
 
 ### G6 · Register what already exists
+**Status:** done (web-api 8b63c6b83e): `UpdateBoardStackup` implemented (with `BOARD_STACKUP::Deserialize`), `RefreshEditor`/`FocusOnItem` headless no-ops, `SaveItemsToString` added.
 `UpdateBoardStackup` (proto exists, no handler; wire to `BOARD_STACKUP` +
 `BOARD_DESIGN_SETTINGS`), `FocusOnItem` and `RefreshEditor` (no-op success headless
 so clients need no branching).
 
 ### G13 · Capability discovery
+**Status:** done (web-api ef0ed71606): `GetSupportedCommands` served by an internal handler; registrations carry a `HANDLER_MODE` (GUI-only flag).
 **Fix:** `GetSupportedCommands → [{type_url, headless}]` enumerated from the
 registered handler tables in `KICAD_API_SERVER`. Trivial and makes every client
 future-proof.
@@ -125,6 +128,7 @@ returned inline (`bytes`) for small files (SVG, netlist, BOM) so the bridge does
 need filesystem access to the server's output directory.
 
 ### G18 · Request latency in `kicad-cli api-server`
+**Status:** done (web-api 72b2d2afe3): condition-variable wake-up; Ping went from 12.0 ms to 0.05 ms average, 1000 pings in 47 ms.
 **Today:** the server loop is `while(!exit){ ProcessPendingEvents(); wxMilliSleep(10); }`,
 so every request waits up to 10 ms before dispatch (measured ~11 ms for `Ping`).
 **Fix:** wake the loop from `KICAD_API_SERVER::onApiRequest` with a condition variable
