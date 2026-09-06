@@ -4,6 +4,7 @@
 
 import type { Camera, CanvasHost, DocumentKind, ItemStore, PickResult, StoredItem, Theme } from '@/contracts';
 import { BOARD_LAYERS } from '@/lib/enums';
+import { mockPalette, type MockPalette } from './theme';
 
 type Vec = { xNm: number; yNm: number };
 
@@ -29,7 +30,7 @@ export class MockCanvasHost implements CanvasHost {
   private canvas: HTMLCanvasElement | null = null;
   private ctx: CanvasRenderingContext2D | null = null;
   private store: ItemStore | null = null;
-  private theme: Theme | null = null;
+  private theme: MockPalette | null = null;
   private cam: Camera = { x: 0, y: 0, zoom: 0.00002 };
   private hidden = new Set<string>();
   private opacity = new Map<string, number>();
@@ -59,7 +60,7 @@ export class MockCanvasHost implements CanvasHost {
     this.unmount();
     this.el = el;
     this.store = store;
-    this.theme = theme;
+    this.theme = mockPalette(theme, this.kind);
     const canvas = document.createElement('canvas');
     canvas.style.cssText = 'display:block;width:100%;height:100%;touch-action:none;cursor:crosshair;outline:none';
     canvas.tabIndex = -1;
@@ -125,7 +126,7 @@ export class MockCanvasHost implements CanvasHost {
   // ------------------------------------------------------------------- contract
 
   setTheme(theme: Theme): void {
-    this.theme = theme;
+    this.theme = mockPalette(theme, this.kind);
     this.invalidate();
   }
 
@@ -196,10 +197,10 @@ export class MockCanvasHost implements CanvasHost {
       const dx = Math.max(b.x - w.x, 0, w.x - (b.x + b.w));
       const dy = Math.max(b.y - w.y, 0, w.y - (b.y + b.h));
       const dist = Math.hypot(dx, dy);
-      if (dist <= tolNm) hits.push({ id: it.id, distance: dist * this.cam.zoom, area: b.w * b.h });
+      if (dist <= tolNm) hits.push({ id: it.id, distance: dist * this.cam.zoom, area: b.w * b.h, owner: it.parent ?? it.id, ref: it.id, layer: it.layer ?? '', net: it.net });
     }
     hits.sort((a, b) => a.distance - b.distance || a.area - b.area);
-    return hits.map(({ id, distance }) => ({ id, distance }));
+    return hits.map(({ area: _area, ...hit }) => hit);
   }
 
   screenToWorld(x: number, y: number): { x: number; y: number } {
@@ -406,7 +407,7 @@ export class MockCanvasHost implements CanvasHost {
     ctx.restore();
   }
 
-  private drawGrid(ctx: CanvasRenderingContext2D, theme: Theme): void {
+  private drawGrid(ctx: CanvasRenderingContext2D, theme: MockPalette): void {
     let step = this.gridNm;
     const z = this.cam.zoom;
     while (step * z < 8) step *= 2;
@@ -424,9 +425,9 @@ export class MockCanvasHost implements CanvasHost {
     }
   }
 
-  private drawItem(ctx: CanvasRenderingContext2D, it: StoredItem, theme: Theme, z: number): void {
+  private drawItem(ctx: CanvasRenderingContext2D, it: StoredItem, theme: MockPalette, z: number): void {
     const p = it.proto as Record<string, any>;
-    const colour = (layer?: string) => (layer && theme.layers[layer]) || theme.ui.text;
+    const colour = (layer?: string) => (layer ? theme.layers(layer) : theme.ui.text);
     switch (it.type) {
       case 'KOT_PCB_TRACE': {
         ctx.strokeStyle = colour(it.layer);
@@ -626,7 +627,7 @@ export class MockCanvasHost implements CanvasHost {
     }
   }
 
-  private drawSymbol(ctx: CanvasRenderingContext2D, it: StoredItem, p: Record<string, any>, theme: Theme, z: number): void {
+  private drawSymbol(ctx: CanvasRenderingContext2D, it: StoredItem, p: Record<string, any>, theme: MockPalette, z: number): void {
     const b = it.bbox!;
     const pins: any[] = (p.definition?.items ?? []).map((c: any) => c.item).filter((x: any) => x && (x['@type']?.endsWith('SchematicPin') || x.number !== undefined));
     const isPower = p.definition?.type === 'SST_GLOBAL_POWER' || p.definition?.type === 'SST_LOCAL_POWER';

@@ -217,6 +217,8 @@ export interface JobOutput {
   path: string;
   bytes: number;
   mime: string;
+  /** Download URL (the bridge's `/files/read`), when the output is inside the workspace. */
+  url?: string;
 }
 
 export interface JobRun {

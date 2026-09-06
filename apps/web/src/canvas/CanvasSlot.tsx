@@ -7,7 +7,7 @@
 // items through an open transaction, click commits, Esc drops.
 
 import { useEffect, useRef } from 'react';
-import type { CanvasHost, DocumentKind, ItemStore } from '@/contracts';
+import type { CanvasHost, DocumentKind, ItemStore, PickResult } from '@/contracts';
 import { useServices } from '@/services';
 import type { Transaction } from '@/services/types';
 import { useEditorStore } from '@/state/editorStore';
@@ -60,6 +60,14 @@ export function currentMoveTransaction(storeKey: string): Transaction | null {
   return moveSessions.get(storeKey)?.tx ?? null;
 }
 
+/** Renderer hosts expose the grid through `overlays.options`; the contract itself has no grid API. */
+function applyGrid(host: CanvasHost, gridNm: number, show: boolean): void {
+  const h = host as CanvasHost & { overlays?: { options: Record<string, unknown> }; requestRender?: () => void };
+  if (!h.overlays) return;
+  Object.assign(h.overlays.options, { showGrid: show, gridNm, gridSpacing: gridNm });
+  h.requestRender?.();
+}
+
 export function CanvasSlot({ kind, storeKey, store, layers }: CanvasSlotProps) {
   const ref = useRef<HTMLDivElement>(null);
   const hostRef = useRef<CanvasHost | null>(null);
@@ -76,14 +84,22 @@ export function CanvasSlot({ kind, storeKey, store, layers }: CanvasSlotProps) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const host = createCanvasHost(kind);
+    const host = createCanvasHost(kind, storeKey, store);
     hostRef.current = host;
     hosts.set(storeKey, host);
+    // Subscribed before mount so the host's own zoom-to-fit (emitted during / right after
+    // mount) is what the store records; the store is never seeded with the pre-fit default.
+    const offCam = host.onCameraChange((cam) => useEditorStore.getState().setCamera(storeKey, cam));
     host.mount(el, store, themeFor(resolveTheme(useUiStore.getState().theme)));
-    const st = useEditorStore.getState();
-    const d = st.docs[storeKey];
+    // Restore the camera only when this document was viewed before.
+    const d = useEditorStore.getState().docs[storeKey];
     if (d && d.camera.zoom > 0) host.setCamera(d.camera);
-    else st.setCamera(storeKey, host.getCamera());
+    if (host instanceof MockCanvasHost) host.setGrid(useUiStore.getState().gridNm, useUiStore.getState().showGrid);
+    else applyGrid(host, useUiStore.getState().gridNm, useUiStore.getState().showGrid);
+
+    // What the UI treats as picked: the object KIID (`ref`) when the store holds it (a pad,
+    // a track), else the owning store item (footprint / symbol for their children).
+    const pickedId = (hit: PickResult): string => (store.get(hit.ref) ? hit.ref : store.get(hit.owner) ? hit.owner : hit.ref);
 
     const offPick = host.onPick((hits, ev) => {
       const s = useEditorStore.getState();
@@ -96,15 +112,16 @@ export function CanvasSlot({ kind, storeKey, store, layers }: CanvasSlotProps) {
         if (!ev.shiftKey) s.setSelection(storeKey, []);
         return;
       }
-      if (ev.shiftKey) s.toggleSelection(storeKey, top.id);
-      else s.setSelection(storeKey, [top.id]);
+      const id = pickedId(top);
+      if (ev.shiftKey) s.toggleSelection(storeKey, id);
+      else s.setSelection(storeKey, [id]);
     });
     const offHover = host.onHover((hit, ev) => {
       const s = useEditorStore.getState();
       const rect = el.getBoundingClientRect();
       const world = host.screenToWorld(ev.clientX - rect.left, ev.clientY - rect.top);
       s.setCursor(storeKey, world);
-      s.setHover(storeKey, hit?.id ?? null);
+      s.setHover(storeKey, hit ? pickedId(hit) : null);
       const mv = moveSessions.get(storeKey);
       if (mv) {
         const grid = useUiStore.getState().gridNm;
@@ -122,7 +139,6 @@ export function CanvasSlot({ kind, storeKey, store, layers }: CanvasSlotProps) {
         }
       }
     });
-    const offCam = host.onCameraChange((cam) => useEditorStore.getState().setCamera(storeKey, cam));
     return () => {
       offPick();
       offHover();
@@ -147,6 +163,7 @@ export function CanvasSlot({ kind, storeKey, store, layers }: CanvasSlotProps) {
   useEffect(() => {
     const h = hostRef.current;
     if (h instanceof MockCanvasHost) h.setGrid(gridNm, showGrid);
+    else if (h) applyGrid(h, gridNm, showGrid);
   }, [gridNm, showGrid]);
 
   // editor state -> host

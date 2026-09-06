@@ -81,9 +81,15 @@ export function JobsPanel({ document }: { document: DocumentKind }) {
                       {o.name}
                     </span>
                     <span className="faint">{(o.bytes / 1024).toFixed(1)} KiB</span>
-                    <button className="btn ghost sm" title="Downloads stream from the bridge once it hosts job outputs" disabled>
-                      download
-                    </button>
+                    {o.url ? (
+                      <a className="btn ghost sm" href={o.url} download={o.name} target="_blank" rel="noreferrer" title={`${o.path}/${o.name}`}>
+                        download
+                      </a>
+                    ) : (
+                      <button className="btn ghost sm" title="Not inside the bridge workspace root" disabled>
+                        download
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>

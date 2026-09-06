@@ -3,7 +3,7 @@
 // between the board and a sheet keeps each one's state.
 
 import { create } from 'zustand';
-import type { Camera } from '@/contracts';
+import type { Camera, DocumentKind } from '@/contracts';
 
 export interface EditorDocState {
   selection: string[];
@@ -17,10 +17,10 @@ export interface EditorDocState {
   tool: 'select' | 'move' | 'route' | 'wire' | 'label' | 'measure';
 }
 
-const fresh = (kind: 'board' | 'schematic' | 'footprint'): EditorDocState => ({
+const fresh = (kind: DocumentKind): EditorDocState => ({
   selection: [],
   hover: null,
-  activeLayer: kind === 'schematic' ? 'SLT_WIRE' : 'BL_F_Cu',
+  activeLayer: kind === 'schematic' || kind === 'symbol' ? 'SLT_WIRE' : 'BL_F_Cu',
   hiddenLayers: [],
   layerOpacity: {},
   highlightNets: [],
@@ -31,7 +31,7 @@ const fresh = (kind: 'board' | 'schematic' | 'footprint'): EditorDocState => ({
 
 interface EditorState {
   docs: Record<string, EditorDocState>;
-  ensure(key: string, kind: 'board' | 'schematic' | 'footprint'): void;
+  ensure(key: string, kind: DocumentKind): void;
   setSelection(key: string, ids: string[]): void;
   toggleSelection(key: string, id: string): void;
   setHover(key: string, id: string | null): void;

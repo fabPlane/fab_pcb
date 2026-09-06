@@ -12,6 +12,10 @@
     "typecheck": "tsc -b"
   },
   "dependencies": {
+    "@bufbuild/protobuf": "2.14.1",
+    "@kicad-web/client": "workspace:*",
+    "@kicad-web/proto": "workspace:*",
+    "@kicad-web/renderer": "workspace:*",
     "@radix-ui/react-dialog": "1.1.15",
     "@radix-ui/react-dropdown-menu": "2.1.16",
     "@radix-ui/react-menubar": "1.1.16",

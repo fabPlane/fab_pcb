@@ -21,6 +21,7 @@ export function MarkersPanel({ kind, storeKey }: MarkersPanelProps) {
   const [showExcluded, setShowExcluded] = useState(false);
   const [filter, setFilter] = useState<Record<MarkerSeverity, boolean>>({ error: true, warning: true, info: false, exclusion: false });
   const [selected, setSelected] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const list = markers.markers(kind);
   const lastRun = markers.lastRun(kind);
   const counts = useMemo(() => {
@@ -37,8 +38,11 @@ export function MarkersPanel({ kind, storeKey }: MarkersPanelProps) {
 
   const run = async () => {
     setRunning(true);
+    setError(null);
     try {
       await markers.run(kind);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
     } finally {
       setRunning(false);
     }
@@ -73,7 +77,12 @@ export function MarkersPanel({ kind, storeKey }: MarkersPanelProps) {
         </label>
       </div>
       <div className="panel-body">
-        {visible.length === 0 && (
+        {error && (
+          <div className="empty-state" style={{ color: 'var(--danger)' }} role="alert">
+            {error}
+          </div>
+        )}
+        {visible.length === 0 && !error && (
           <div className="empty-state">
             {list.length === 0 ? (kind === 'drc' ? 'Run DRC to check clearances, connectivity and manufacturing constraints.' : 'Run ERC to check pin conflicts, unconnected pins and label mismatches.') : 'Nothing to show with the current filters.'}
           </div>

@@ -67,9 +67,10 @@ export function ProjectScreen({ onOpen, busy }: { onOpen(path: string): void; bu
   const crumbs = dir.split('/').filter(Boolean);
   const rootParts = session.workspaceRoot().split('/').filter(Boolean);
 
+  const openable = (e: FileEntry | null) => !!e && e.kind === 'file' && (e.fileType === 'project' || e.fileType === 'board' || e.fileType === 'schematic');
   const activate = (e: FileEntry) => {
     if (e.kind === 'dir') void load(e.path);
-    else if (e.fileType === 'project') onOpen(e.path);
+    else if (openable(e)) onOpen(e.path);
   };
 
   return (
@@ -150,8 +151,8 @@ export function ProjectScreen({ onOpen, busy }: { onOpen(path: string): void; bu
           <button className="btn" disabled={!selected || selected.kind !== 'dir'} onClick={() => selected && void load(selected.path)}>
             Open folder
           </button>
-          <button className="btn primary" disabled={busy || !selected || selected.fileType !== 'project'} onClick={() => selected && onOpen(selected.path)}>
-            {busy ? 'Connecting…' : 'Open project'}
+          <button className="btn primary" disabled={busy || !openable(selected)} onClick={() => selected && onOpen(selected.path)}>
+            {busy ? 'Connecting…' : selected?.fileType === 'board' ? 'Open board' : selected?.fileType === 'schematic' ? 'Open schematic' : 'Open project'}
           </button>
         </div>
       </div>

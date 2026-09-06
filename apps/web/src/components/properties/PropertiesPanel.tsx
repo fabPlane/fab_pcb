@@ -3,13 +3,23 @@
 // every edit is undoable).
 
 import { Fragment, useMemo } from 'react';
+import type { DescMessage } from '@bufbuild/protobuf';
 import type { Patch, PatchPath } from '@/lib/patch';
 import type { Unit } from '@/lib/units';
 import { AngleField, BoolField, ColorField, DistanceField, EnumField, NumberField, StringField, UnitToggle } from './fields';
-import { schemaFor, typeLabel, type SchemaOverrides } from './schema';
+import { descriptorFor, oneofValueDescriptor, schemaFor, typeLabel, type FieldSchema, type SchemaOverrides } from './schema';
+
+type Nm = number | bigint;
+const num = (v: unknown): number => (typeof v === 'bigint' ? Number(v) : typeof v === 'number' ? v : 0);
+/** Writes a number back in the representation the field already uses (bigint on real protos). */
+const like = (orig: unknown, v: number): Nm => (typeof orig === 'bigint' ? BigInt(Math.round(v)) : v);
+const isOneofValue = (v: unknown): v is { case?: string; value?: unknown } =>
+  !!v && typeof v === 'object' && !Array.isArray(v) && 'case' in (v as object) && (Object.keys(v as object).length === 1 || 'value' in (v as object));
 
 export interface PropertiesPanelProps {
   value: Record<string, unknown>;
+  /** protobuf-es descriptor of `value`; derived from `value.$typeName` when omitted */
+  desc?: DescMessage;
   typeName?: string;
   id?: string;
   units: Unit;
@@ -24,10 +34,11 @@ export interface PropertiesPanelProps {
 
 const DEFAULT_PRIORITY = ['number', 'name', 'text', 'position', 'start', 'mid', 'end', 'orientation', 'layer', 'layers', 'width', 'net', 'locked', 'type', 'shape'];
 
-export function PropertiesPanel({ value, typeName, id, units, onUnitsChange, onPatch, overrides = {}, priority = DEFAULT_PRIORITY, openGroups }: PropertiesPanelProps) {
+export function PropertiesPanel({ value, desc: descProp, typeName, id, units, onUnitsChange, onPatch, overrides = {}, priority = DEFAULT_PRIORITY, openGroups }: PropertiesPanelProps) {
   const cycle = () => onUnitsChange?.(units === 'mm' ? 'mil' : units === 'mil' ? 'in' : 'mm');
+  const desc = descProp ?? descriptorFor(value);
   const entries = useMemo(() => {
-    const keys = Object.keys(value);
+    const keys = Object.keys(value).filter((k) => k !== '$typeName');
     const rank = (k: string) => {
       const i = priority.indexOf(k);
       return i === -1 ? 1000 : i;
@@ -51,11 +62,11 @@ export function PropertiesPanel({ value, typeName, id, units, onUnitsChange, onP
       </div>
       <div className="prop-group" style={{ borderTop: 'none' }}>
         {scalars.map((k) => (
-          <Field key={k} name={k} value={value[k]} path={[k]} units={units} onPatch={onPatch} overrides={overrides} cycleUnit={cycle} depth={0} />
+          <Field key={k} name={k} value={value[k]} path={[k]} units={units} onPatch={onPatch} overrides={overrides} cycleUnit={cycle} depth={0} desc={desc} />
         ))}
       </div>
       {groups.map((k) => (
-        <Group key={k} name={k} value={value[k]} path={[k]} units={units} onPatch={onPatch} overrides={overrides} cycleUnit={cycle} depth={0} defaultOpen={open.has(k)} />
+        <Group key={k} name={k} value={value[k]} path={[k]} units={units} onPatch={onPatch} overrides={overrides} cycleUnit={cycle} depth={0} defaultOpen={open.has(k)} desc={desc} />
       ))}
       <div className="props-footer">
         <span className="faint">Enter commits · Esc reverts · ↑↓ steps</span>
@@ -68,7 +79,7 @@ export function PropertiesPanel({ value, typeName, id, units, onUnitsChange, onP
 function isGroupKind(v: unknown): boolean {
   if (Array.isArray(v)) return true;
   if (!v || typeof v !== 'object') return false;
-  const keys = Object.keys(v as object);
+  const keys = Object.keys(v as object).filter((k) => k !== '$typeName');
   if (keys.length === 1 && (keys[0] === 'valueNm' || keys[0] === 'valueDegrees' || keys[0] === 'value')) return false;
   if (keys.length === 2 && 'xNm' in (v as object) && 'yNm' in (v as object)) return false;
   if (keys.length === 4 && 'r' in (v as object) && 'a' in (v as object)) return false;
@@ -84,10 +95,14 @@ interface FieldProps {
   overrides: SchemaOverrides;
   cycleUnit(): void;
   depth: number;
+  /** descriptor of the message containing this field (undefined for the mock's plain objects) */
+  desc?: DescMessage;
+  /** schema decided by the parent (list elements share the list field's schema) */
+  schemaOverride?: Partial<FieldSchema>;
 }
 
-function Field({ name, value, path, units, onPatch, overrides, cycleUnit, depth }: FieldProps) {
-  const schema = schemaFor(String(name), value, path, overrides);
+function Field({ name, value, path, units, onPatch, overrides, cycleUnit, depth, desc, schemaOverride }: FieldProps) {
+  const schema = { ...schemaFor(String(name), value, path, overrides, desc), ...(schemaOverride ?? {}) };
   if (schema.hidden) return null;
   const dotted = path.join('.');
   const set = (sub: PatchPath, v: unknown) => onPatch({ path: [...path, ...sub], value: v });
@@ -98,44 +113,49 @@ function Field({ name, value, path, units, onPatch, overrides, cycleUnit, depth 
     </span>
   );
   switch (schema.kind) {
-    case 'distance':
+    case 'distance': {
+      const raw = (value as { valueNm: Nm } | undefined)?.valueNm;
+      const nmv = num(raw);
       return (
         <div className="prop-row" style={style}>
           {label}
           <div className="value">
-            <DistanceField path={`${dotted}.valueNm`} valueNm={(value as { valueNm: number }).valueNm} unit={units} onChange={(nm) => set(['valueNm'], nm)} onCycleUnit={cycleUnit} readonly={schema.readonly} showNm={false} />
+            <DistanceField path={`${dotted}.valueNm`} valueNm={nmv} unit={units} onChange={(nm) => set(['valueNm'], like(raw, nm))} onCycleUnit={cycleUnit} readonly={schema.readonly} showNm={false} />
           </div>
-          <span className="sub">{(value as { valueNm: number }).valueNm.toLocaleString('en-US')} nm</span>
+          <span className="sub">{nmv.toLocaleString('en-US')} nm</span>
         </div>
       );
+    }
     case 'angle':
       return (
         <div className="prop-row" style={style}>
           {label}
           <div className="value">
-            <AngleField path={`${dotted}.valueDegrees`} degrees={(value as { valueDegrees: number }).valueDegrees} onChange={(d) => set(['valueDegrees'], d)} readonly={schema.readonly} />
+            <AngleField path={`${dotted}.valueDegrees`} degrees={num((value as { valueDegrees?: number } | undefined)?.valueDegrees)} onChange={(d) => set(['valueDegrees'], d)} readonly={schema.readonly} />
           </div>
         </div>
       );
     case 'vector': {
-      const v = value as { xNm: number; yNm: number };
+      const v = (value ?? {}) as { xNm?: Nm; yNm?: Nm };
+      const x = num(v.xNm);
+      const y = num(v.yNm);
       return (
         <>
           <div className="prop-row" style={style}>
             {label}
             <div className="value">
               <span className="unit" style={{ width: 12 }}>X</span>
-              <DistanceField path={`${dotted}.xNm`} valueNm={v.xNm} unit={units} onChange={(nm) => set(['xNm'], nm)} onCycleUnit={cycleUnit} readonly={schema.readonly} showNm={false} />
+              <DistanceField path={`${dotted}.xNm`} valueNm={x} unit={units} onChange={(nm) => set(['xNm'], like(v.xNm, nm))} onCycleUnit={cycleUnit} readonly={schema.readonly} showNm={false} />
             </div>
-            <span className="sub">{v.xNm.toLocaleString('en-US')} nm</span>
+            <span className="sub">{x.toLocaleString('en-US')} nm</span>
           </div>
           <div className="prop-row" style={style}>
             <span className="label" />
             <div className="value">
               <span className="unit" style={{ width: 12 }}>Y</span>
-              <DistanceField path={`${dotted}.yNm`} valueNm={v.yNm} unit={units} onChange={(nm) => set(['yNm'], nm)} onCycleUnit={cycleUnit} readonly={schema.readonly} showNm={false} />
+              <DistanceField path={`${dotted}.yNm`} valueNm={y} unit={units} onChange={(nm) => set(['yNm'], like(v.yNm, nm))} onCycleUnit={cycleUnit} readonly={schema.readonly} showNm={false} />
             </div>
-            <span className="sub">{v.yNm.toLocaleString('en-US')} nm</span>
+            <span className="sub">{y.toLocaleString('en-US')} nm</span>
           </div>
         </>
       );
@@ -169,15 +189,20 @@ function Field({ name, value, path, units, onPatch, overrides, cycleUnit, depth 
           </div>
         </div>
       );
-    case 'enum':
+    case 'enum': {
+      // real protos store enums as numbers; show the value name and write the number back
+      const numeric = typeof value === 'number' && !!schema.enumValues;
+      const current = numeric ? (schema.options?.find((n) => schema.enumValues![n] === value) ?? String(value)) : String(value ?? '');
+      const onChange = (v: string) => set([], numeric ? (schema.enumValues![v] ?? value) : v);
       return (
         <div className="prop-row" style={style}>
           {label}
           <div className="value">
-            <EnumField path={dotted} value={value as string} options={schema.options} onChange={(v) => set([], v)} readonly={schema.readonly} />
+            <EnumField path={dotted} value={current} options={schema.options} onChange={onChange} readonly={schema.readonly} />
           </div>
         </div>
       );
+    }
     case 'bool':
       return (
         <div className="prop-row" style={style}>
@@ -192,7 +217,7 @@ function Field({ name, value, path, units, onPatch, overrides, cycleUnit, depth 
         <div className="prop-row" style={style}>
           {label}
           <div className="value">
-            <NumberField path={dotted} value={value as number} onChange={(v) => set([], v)} readonly={schema.readonly} />
+            <NumberField path={dotted} value={num(value)} onChange={(v) => set([], like(value, v))} readonly={schema.readonly} integer={typeof value === 'bigint'} />
           </div>
         </div>
       );
@@ -207,7 +232,17 @@ function Field({ name, value, path, units, onPatch, overrides, cycleUnit, depth 
       );
     case 'message':
     case 'repeated':
-      return <Group name={name} value={value} path={path} units={units} onPatch={onPatch} overrides={overrides} cycleUnit={cycleUnit} depth={depth} defaultOpen={false} />;
+      if (value === undefined || value === null) {
+        return (
+          <div className="prop-row" style={style}>
+            {label}
+            <div className="value">
+              <span className="text-ro faint">unset</span>
+            </div>
+          </div>
+        );
+      }
+      return <Group name={name} value={value} path={path} units={units} onPatch={onPatch} overrides={overrides} cycleUnit={cycleUnit} depth={depth} defaultOpen={false} desc={desc} schemaOverride={schemaOverride} />;
     default:
       return (
         <div className="prop-row" style={style}>
@@ -220,13 +255,28 @@ function Field({ name, value, path, units, onPatch, overrides, cycleUnit, depth 
   }
 }
 
-function Group({ name, value, path, units, onPatch, overrides, cycleUnit, depth, defaultOpen }: FieldProps & { defaultOpen: boolean }) {
-  const schema = schemaFor(String(name), value, path, overrides);
+function Group({ name, value, path, units, onPatch, overrides, cycleUnit, depth, defaultOpen, desc, schemaOverride }: FieldProps & { defaultOpen: boolean }) {
+  const schema = { ...schemaFor(String(name), value, path, overrides, desc), ...(schemaOverride ?? {}) };
   if (schema.hidden) return null;
   const isArray = Array.isArray(value);
-  const entries: [string | number, unknown][] = isArray ? (value as unknown[]).map((v, i) => [i, v]) : Object.entries(value as Record<string, unknown>);
+  const oneof = schema.oneof && isOneofValue(value) ? value : null;
+  const entries: [string | number, unknown][] = isArray
+    ? (value as unknown[]).map((v, i) => [i, v])
+    : Object.entries(value as Record<string, unknown>).filter(([k]) => k !== '$typeName');
   const count = entries.length;
   const arr = value as unknown[];
+  // descriptor for the children: list elements / nested message / the selected oneof member
+  const childDesc: DescMessage | undefined = isArray ? schema.childDesc : (schema.childDesc ?? descriptorFor(value));
+  const childSchema: Partial<FieldSchema> | undefined = isArray && schema.options ? { kind: 'enum', options: schema.options, enumValues: schema.enumValues } : undefined;
+  const childDescFor = (k: string | number): DescMessage | undefined => {
+    if (oneof && k === 'value') return oneofValueDescriptor(schema.oneof!, oneof.case);
+    return childDesc;
+  };
+  const childOverrideFor = (k: string | number): Partial<FieldSchema> | undefined => {
+    if (oneof && k === 'case') return { kind: 'string', readonly: true, label: 'Kind' };
+    if (oneof && k === 'value') return { label: humanizeCase(oneof.case) };
+    return childSchema;
+  };
   return (
     <details className="prop-group" open={defaultOpen} style={{ ['--indent' as string]: `${depth * 10}px` }}>
       <summary style={{ paddingLeft: `calc(var(--space-3) + ${depth * 10}px)` }}>
@@ -240,7 +290,7 @@ function Group({ name, value, path, units, onPatch, overrides, cycleUnit, depth,
               title="Duplicate last element"
               onClick={(e) => {
                 e.preventDefault();
-                onPatch({ path: [...path, count], value: JSON.parse(JSON.stringify(arr[count - 1])) });
+                onPatch({ path: [...path, count], value: structuredClone(arr[count - 1]) });
               }}
             >
               +
@@ -253,7 +303,7 @@ function Group({ name, value, path, units, onPatch, overrides, cycleUnit, depth,
         <Fragment key={String(k)}>
           {isArray && !isGroupKind(v) ? (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 22px', alignItems: 'center' }}>
-              <Field name={k} value={v} path={[...path, k]} units={units} onPatch={onPatch} overrides={overrides} cycleUnit={cycleUnit} depth={depth + 1} />
+              <Field name={k} value={v} path={[...path, k]} units={units} onPatch={onPatch} overrides={overrides} cycleUnit={cycleUnit} depth={depth + 1} desc={childDescFor(k)} schemaOverride={childOverrideFor(k)} />
               {!schema.readonly && (
                 <button className="btn ghost sm" title="Remove" onClick={() => onPatch({ path: [...path, k], value: undefined })}>
                   ×
@@ -261,10 +311,16 @@ function Group({ name, value, path, units, onPatch, overrides, cycleUnit, depth,
               )}
             </div>
           ) : (
-            <Field name={k} value={v} path={[...path, k]} units={units} onPatch={onPatch} overrides={overrides} cycleUnit={cycleUnit} depth={depth + 1} />
+            <Field name={k} value={v} path={[...path, k]} units={units} onPatch={onPatch} overrides={overrides} cycleUnit={cycleUnit} depth={depth + 1} desc={childDescFor(k)} schemaOverride={childOverrideFor(k)} />
           )}
         </Fragment>
       ))}
     </details>
   );
+}
+
+function humanizeCase(c: unknown): string {
+  if (typeof c !== 'string' || !c) return 'Value';
+  const words = c.replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase();
+  return words.charAt(0).toUpperCase() + words.slice(1);
 }

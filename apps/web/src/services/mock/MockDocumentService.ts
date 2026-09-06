@@ -22,7 +22,7 @@ export class MockDocumentService implements DocumentService {
   private sheetStores: Map<string, MemoryItemStore>;
   private footprints = new Map<string, MemoryItemStore>();
   private subs = new Set<() => void>();
-  private dirty: Record<DocumentKind, boolean> = { board: false, schematic: false, footprint: false };
+  private dirty: Record<DocumentKind, boolean> = { board: false, schematic: false, footprint: false, symbol: false };
   private setup: BoardSetup;
   private netclassList: NetclassInfo[];
   private textVars: TextVariable[];
@@ -190,6 +190,6 @@ export class MockDocumentService implements DocumentService {
   }
 
   isDirty(kind: DocumentKind): boolean {
-    return this.dirty[kind];
+    return this.dirty[kind] ?? false;
   }
 }

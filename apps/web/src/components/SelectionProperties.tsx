@@ -9,6 +9,7 @@ import { useEditorDoc, useEditorStore } from '@/state/editorStore';
 import { useUiStore } from '@/state/uiStore';
 import type { Patch } from '@/lib/patch';
 import { layerDisplayName } from '@/lib/enums';
+import { translateItem } from '@/lib/geometry';
 import { Panel } from './layout/Panel';
 import { PropertiesPanel } from './properties/PropertiesPanel';
 import { humanize, typeLabel } from './properties/schema';
@@ -76,6 +77,18 @@ export function SelectionProperties({ storeKey, store, kind }: { storeKey: strin
   const item = items[0]!;
   const onPatch = (patch: Patch) => {
     const field = patch.path.map((p) => (typeof p === 'number' ? `[${p}]` : humanize(String(p)).toLowerCase())).join(' › ');
+    // Fields of footprints / symbols carry absolute coordinates in the API, so a bare
+    // `position` edit is turned into a translation of the whole item (fields included).
+    const p = item.proto as { position?: { xNm?: number | bigint; yNm?: number | bigint } };
+    if ((item.type === 'KOT_PCB_FOOTPRINT' || item.type === 'KOT_SCH_SYMBOL') && patch.path[0] === 'position' && patch.path.length === 2 && p.position) {
+      const axis = patch.path[1] === 'xNm' ? 'xNm' : patch.path[1] === 'yNm' ? 'yNm' : null;
+      if (axis) {
+        const delta = Number(patch.value) - Number(p.position[axis] ?? 0);
+        const moved = translateItem(item, axis === 'xNm' ? delta : 0, axis === 'yNm' ? delta : 0);
+        void commands.run(store, `Move ${typeLabel(item.type).toLowerCase()} (${field})`, (tx) => tx.replace(item.id, moved.proto, { bbox: moved.bbox }));
+        return;
+      }
+    }
     void commands.run(store, `Edit ${typeLabel(item.type).toLowerCase()} ${field}`, (tx) => tx.update(item.id, [patch]));
   };
   return (

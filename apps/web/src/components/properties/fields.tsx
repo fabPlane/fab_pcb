@@ -1,4 +1,4 @@
-import { useEffect, useState, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { formatDistance, parseDistance, type Unit, UNIT_ORDER } from '@/lib/units';
 import { enumLabel } from '@/lib/enums';
 
@@ -10,16 +10,23 @@ interface Common {
 /** Text input that commits on Enter/blur and reverts on Escape. */
 function useDraft<T>(external: T, format: (v: T) => string) {
   const [draft, setDraft] = useState(() => format(external));
-  const [dirty, setDirty] = useState(false);
+  const [dirtyState, setDirtyState] = useState(false);
+  // `dirty` is mirrored in a ref so an Enter-commit followed by the blur it causes does not
+  // commit twice (the state update has not flushed when blur fires).
+  const dirtyRef = useRef(false);
+  const setDirty = (d: boolean) => {
+    dirtyRef.current = d;
+    setDirtyState(d);
+  };
   useEffect(() => {
-    if (!dirty) setDraft(format(external));
+    if (!dirtyRef.current) setDraft(format(external));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [external]);
-  return { draft, setDraft, dirty, setDirty };
+  return { draft, setDraft, dirty: dirtyState, dirtyRef, setDirty };
 }
 
 export function DistanceField({ path, valueNm, unit, onChange, onCycleUnit, readonly, showNm = true }: Common & { valueNm: number; unit: Unit; onChange(nm: number): void; onCycleUnit?(): void; showNm?: boolean }) {
-  const { draft, setDraft, dirty, setDirty } = useDraft(valueNm, (v) => formatDistance(v, unit));
+  const { draft, setDraft, dirtyRef, setDirty } = useDraft(valueNm, (v) => formatDistance(v, unit));
   useEffect(() => {
     setDraft(formatDistance(valueNm, unit));
     setDirty(false);
@@ -27,7 +34,7 @@ export function DistanceField({ path, valueNm, unit, onChange, onCycleUnit, read
   }, [unit]);
   const [invalid, setInvalid] = useState(false);
   const commit = () => {
-    if (!dirty) return;
+    if (!dirtyRef.current) return;
     const nm = parseDistance(draft, unit);
     if (nm === null) {
       setInvalid(true);
@@ -80,9 +87,9 @@ export function DistanceField({ path, valueNm, unit, onChange, onCycleUnit, read
 }
 
 export function AngleField({ path, degrees, onChange, readonly }: Common & { degrees: number; onChange(deg: number): void }) {
-  const { draft, setDraft, dirty, setDirty } = useDraft(degrees, (v) => String(Math.round(v * 1000) / 1000));
+  const { draft, setDraft, dirtyRef, setDirty } = useDraft(degrees, (v) => String(Math.round(v * 1000) / 1000));
   const commit = () => {
-    if (!dirty) return;
+    if (!dirtyRef.current) return;
     const n = Number(draft);
     setDirty(false);
     if (Number.isFinite(n) && n !== degrees) onChange(n);
@@ -116,9 +123,9 @@ export function AngleField({ path, degrees, onChange, readonly }: Common & { deg
 }
 
 export function NumberField({ path, value, onChange, readonly, integer }: Common & { value: number; onChange(v: number): void; integer?: boolean }) {
-  const { draft, setDraft, dirty, setDirty } = useDraft(value, (v) => String(v));
+  const { draft, setDraft, dirtyRef, setDirty } = useDraft(value, (v) => String(v));
   const commit = () => {
-    if (!dirty) return;
+    if (!dirtyRef.current) return;
     const n = integer ? parseInt(draft, 10) : Number(draft);
     setDirty(false);
     if (Number.isFinite(n) && n !== value) onChange(n);
@@ -146,9 +153,9 @@ export function NumberField({ path, value, onChange, readonly, integer }: Common
 }
 
 export function StringField({ path, value, onChange, readonly, multiline }: Common & { value: string; onChange(v: string): void; multiline?: boolean }) {
-  const { draft, setDraft, dirty, setDirty } = useDraft(value, (v) => v);
+  const { draft, setDraft, dirtyRef, setDirty } = useDraft(value, (v) => v);
   const commit = () => {
-    if (!dirty) return;
+    if (!dirtyRef.current) return;
     setDirty(false);
     if (draft !== value) onChange(draft);
   };

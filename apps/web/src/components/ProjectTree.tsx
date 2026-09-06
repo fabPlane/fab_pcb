@@ -9,7 +9,7 @@ interface ProjectTreeProps {
   sheets: SheetInfo[];
   footprints: string[];
   active: { kind: DocumentKind | 'project'; id?: string };
-  dirty: Record<DocumentKind, boolean>;
+  dirty: Partial<Record<DocumentKind, boolean>>;
   onOpen(kind: DocumentKind, id: string, title: string): void;
 }
 

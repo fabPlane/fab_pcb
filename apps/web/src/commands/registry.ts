@@ -9,7 +9,7 @@ export type CommandGroup = 'File' | 'Edit' | 'View' | 'Place' | 'Route' | 'Inspe
 
 export interface CommandContext {
   /** Which editor is focused: gate `when` on it. */
-  editor: 'project' | 'board' | 'schematic' | 'footprint';
+  editor: 'project' | 'board' | 'schematic' | 'footprint' | 'symbol';
 }
 
 export interface Command {

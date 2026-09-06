@@ -407,8 +407,12 @@ export function registerBuiltinCommands(services: Services): () => void {
     { id: 'tools.textVariables', title: 'Text variables…', group: 'Tools', when: inEditor, run: () => useUiStore.getState().openDialog('text-variables') },
     { id: 'tools.variants', title: 'Variants…', group: 'Tools', when: inEditor, keywords: ['dnp', 'assembly'], run: () => useUiStore.getState().openDialog('variants') },
     // --------------------------------------------------------------- Board
-    { id: 'board.refillZones', title: 'Refill all zones', group: 'Board', shortcut: 'B', when: inBoard, run: () => {
-      log('RefillZones: 1 zone filled (GND pour, B.Cu)');
+    { id: 'board.refillZones', title: 'Refill all zones', group: 'Board', shortcut: 'B', when: inBoard, run: async () => {
+      const refill = (documents as { refillZones?: () => Promise<void> }).refillZones;
+      if (refill) {
+        await refill.call(documents);
+        log('RefillZones: all zones refilled');
+      } else log('RefillZones: 1 zone filled (GND pour, B.Cu) [mock]');
       useAppStore.getState().notify('Zones refilled');
     } },
     { id: 'board.unfillZones', title: 'Unfill all zones', group: 'Board', shortcut: 'Mod+B', when: inBoard, run: () => log('Zones unfilled') },
@@ -446,7 +450,7 @@ export function registerBuiltinCommands(services: Services): () => void {
     { id: 'window.project', title: 'Show project screen', group: 'Window', run: () => useAppStore.getState().setActiveEditor('project') },
     { id: 'window.board', title: 'Open board editor', group: 'Window', shortcut: 'Mod+Shift+B', run: () => {
       const s = documents.board();
-      if (s) useAppStore.getState().openDoc({ kind: 'board', id: 'board', title: 'api_kitchen_sink.kicad_pcb' });
+      if (s) useAppStore.getState().openDoc({ kind: 'board', id: 'board', title: `${useAppStore.getState().session?.projectName ?? 'board'}.kicad_pcb` });
     } },
     { id: 'window.schematic', title: 'Open schematic editor', group: 'Window', shortcut: 'Mod+Shift+E', run: () => {
       const root = documents.sheets()[0];

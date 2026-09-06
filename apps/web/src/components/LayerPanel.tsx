@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { Theme } from '@/contracts';
+import { layerColour } from '@/canvas/theme';
 import type { LayerInfo } from '@/services/types';
 import { useEditorDoc, useEditorStore } from '@/state/editorStore';
 import { Panel } from './layout/Panel';
@@ -69,7 +70,7 @@ export function LayerPanel({ storeKey, layers, theme, counts }: LayerPanelProps)
                 >
                   {isHidden ? '○' : '●'}
                 </button>
-                <span className="swatch" style={{ background: theme.layers[l.id] ?? theme.ui.text, opacity: isHidden ? 0.3 : 1 }} />
+                <span className="swatch" style={{ background: layerColour(theme, l.id), opacity: isHidden ? 0.3 : 1 }} />
                 <span className="name truncate">
                   {l.name}
                   {counts && counts[l.id] ? <span className="hint">{counts[l.id]}</span> : null}

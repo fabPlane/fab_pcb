@@ -2,6 +2,13 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'node:url';
 
+// The bridge (packages/bridge) listens on PORT (default 4020) and serves /sessions, /files,
+// /health and the /ws WebSocket. In dev they are proxied so the app can talk to it on the
+// same origin; set BRIDGE_PORT (or BRIDGE_URL) when the bridge runs elsewhere.
+const bridgePort = process.env.BRIDGE_PORT ?? '4020';
+const bridge = process.env.BRIDGE_URL ?? `http://127.0.0.1:${bridgePort}`;
+const bridgeWs = bridge.replace(/^http/, 'ws');
+
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -9,13 +16,11 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    // The bridge (packages/bridge) serves /sessions, /files and /ws; proxy them in dev
-    // so the real SessionService can be swapped in without touching URLs.
     proxy: {
-      '/sessions': 'http://127.0.0.1:8787',
-      '/files': 'http://127.0.0.1:8787',
-      '/health': 'http://127.0.0.1:8787',
-      '/ws': { target: 'ws://127.0.0.1:8787', ws: true },
+      '/sessions': bridge,
+      '/files': bridge,
+      '/health': bridge,
+      '/ws': { target: bridgeWs, ws: true },
     },
   },
   build: {

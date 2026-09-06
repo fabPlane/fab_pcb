@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { CommandPalette } from '@/components/CommandPalette';
 import { MenuBar } from '@/components/MenuBar';
 import { StatusBar } from '@/components/StatusBar';
@@ -107,6 +107,7 @@ export function App() {
   const notify = useAppStore((s) => s.notify);
   const openDoc = useAppStore((s) => s.openDoc);
   const [busy, setBusy] = useState(false);
+  const autoOpened = useRef(false);
   useThemeAttribute();
   useKeyboard();
   const activeDoc = useActiveDocument();
@@ -121,9 +122,14 @@ export function App() {
         const s = await services.session.connect(path);
         log(`Session ${s.id} open · KiCad ${s.kicadVersion} · token ${s.kicadToken}`);
         services.commands.clearHistory();
-        openDoc({ kind: 'board', id: 'board', title: `${s.projectName}.kicad_pcb` });
         const root = services.documents.sheets()[0];
-        if (root) useAppStore.getState().openDocs.some((d) => d.kind === 'schematic') || useAppStore.setState((st) => ({ openDocs: [...st.openDocs, { kind: 'schematic', id: root.path, title: root.file }] }));
+        const hasBoard = !!services.documents.board();
+        if (hasBoard) openDoc({ kind: 'board', id: 'board', title: `${s.projectName}.kicad_pcb` });
+        if (root) {
+          if (hasBoard) useAppStore.getState().openDocs.some((d) => d.kind === 'schematic') || useAppStore.setState((st) => ({ openDocs: [...st.openDocs, { kind: 'schematic', id: root.path, title: root.file }] }));
+          else openDoc({ kind: 'schematic', id: root.path, title: root.file });
+        }
+        if (!hasBoard && !root) notify('The session opened but KiCad reports no board or schematic', 'error');
       } catch (e) {
         log((e as Error).message, 'error');
         notify((e as Error).message, 'error');
@@ -137,7 +143,10 @@ export function App() {
   useEffect(() => {
     const url = new URL(window.location.href);
     const p = url.searchParams.get('project');
-    if (p && !session) void openProject(p);
+    if (p && !session && !autoOpened.current) {
+      autoOpened.current = true;
+      void openProject(p);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

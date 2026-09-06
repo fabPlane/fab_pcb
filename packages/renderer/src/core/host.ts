@@ -503,7 +503,11 @@ export abstract class BaseCanvasHost implements CanvasHost {
   }
 
   private local(e: PointerEvent): Vec2 {
-    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    // `currentTarget` is only set while the event dispatches; hover updates are deferred to
+    // the next frame, so fall back to the canvas element.
+    const target = (e.currentTarget as HTMLElement | null) ?? this.app?.canvas;
+    if (!target) return { x: e.clientX, y: e.clientY };
+    const r = target.getBoundingClientRect();
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   }
 

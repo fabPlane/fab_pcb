@@ -1,96 +1,110 @@
-// KiCad default colour theme (resources/colors/... "KiCad Default"), light and dark
-// variants for the canvas. The renderer will ship the full JSON; this subset covers the
-// layers the mock uses and the UI swatches in the layer panel.
+// Canvas colour themes: the renderer's KiCad Default JSON (dark board background) for the
+// app's dark mode and a light variant (white board background, KiCad's schematic colours
+// are light already) for light mode. `mockPalette` flattens a theme into the CSS colours
+// the Canvas2D mock host and the layer-panel swatches use.
 
-import type { Theme } from '@/contracts';
+import { KICAD_DEFAULT_THEME, colorToCss, layerColor, mergeThemes, themeColor, uiColors, type Theme, type ThemeColor } from '@kicad-web/renderer';
 
-const BOARD_LAYER_COLOURS: Record<string, string> = {
-  BL_F_Cu: '#c83434',
-  BL_In1_Cu: '#c2c200',
-  BL_In2_Cu: '#c200c2',
-  BL_In3_Cu: '#c20000',
-  BL_In4_Cu: '#00c2c2',
-  BL_B_Cu: '#4d7fc4',
-  BL_F_Adhes: '#a900a9',
-  BL_B_Adhes: '#0000a9',
-  BL_F_Paste: '#a8a8a8',
-  BL_B_Paste: '#00b7b7',
-  BL_F_SilkS: '#f2eda2',
-  BL_B_SilkS: '#e8b2a7',
-  BL_F_Mask: '#d3a4a4',
-  BL_B_Mask: '#8f6b7c',
-  BL_Dwgs_User: '#c2c2c2',
-  BL_Cmts_User: '#0000d0',
-  BL_Eco1_User: '#008500',
-  BL_Eco2_User: '#c2c200',
-  BL_Edge_Cuts: '#d0d2cd',
-  BL_Margin: '#ff26e2',
-  BL_F_CrtYd: '#ff26e2',
-  BL_B_CrtYd: '#26e9ff',
-  BL_F_Fab: '#afafaf',
-  BL_B_Fab: '#585d84',
-  // schematic pseudo-layers
-  SLT_WIRE: '#00a000',
-  SLT_BUS: '#0000c0',
-  SLT_GRAPHIC: '#0000c0',
-};
+const c = (r: number, g: number, b: number, a = 1): ThemeColor => ({ r, g, b, a });
 
-export const DARK_THEME: Theme = {
+export const DARK_THEME: Theme = mergeThemes(KICAD_DEFAULT_THEME, {
   name: 'KiCad Default (dark)',
-  layers: BOARD_LAYER_COLOURS,
-  ui: {
-    background: '#001023',
-    grid: '#848484',
-    cursor: '#ffffff',
-    selection: '#ffffff',
-    hover: '#ffd21f',
-    highlight: '#ffbf00',
-    ratsnest: '#a8b3d8',
-    text: '#e5e5e5',
-    pinName: '#00a0a0',
-    wire: '#00a000',
-    bus: '#0000c0',
-    label: '#000000',
-    symbolBody: '#ffffc2',
-    symbolOutline: '#800000',
-    sheet: '#800080',
+  colors: {
+    'schematic.background': c(20, 24, 33),
+    'schematic.grid': c(70, 76, 90),
+    'schematic.cursor': c(255, 255, 255),
+    'schematic.note': c(220, 220, 220),
+    'schematic.sheet_background': c(0, 0, 0, 0),
+    'schematic.note_background': c(0, 0, 0, 0),
   },
-};
+  overrideSchItemColors: false,
+});
 
-export const LIGHT_THEME: Theme = {
-  name: 'KiCad Classic (light)',
-  layers: {
-    ...BOARD_LAYER_COLOURS,
-    BL_F_Cu: '#c83434',
-    BL_B_Cu: '#3f68b0',
-    BL_F_SilkS: '#8a8240',
-    BL_Edge_Cuts: '#3a3a3a',
-    BL_F_Fab: '#6f6f6f',
-    BL_F_CrtYd: '#c218a8',
+export const LIGHT_THEME: Theme = mergeThemes(KICAD_DEFAULT_THEME, {
+  name: 'KiCad Default (light)',
+  colors: {
+    'board.background': c(250, 250, 252),
+    'board.grid': c(190, 190, 196),
+    'board.grid_axes': c(120, 120, 130),
+    'board.cursor': c(0, 0, 0),
+    'board.worksheet': c(90, 90, 120),
+    'board.aux_items': c(60, 60, 60),
+    'board.anchor': c(0, 0, 200),
+    'board.copper.f': c(200, 52, 52),
+    'board.copper.b': c(63, 104, 176),
+    'board.edge_cuts': c(58, 58, 58),
+    'board.silkscreen_top': c(138, 130, 64),
+    'board.silkscreen_bottom': c(150, 90, 70),
+    'board.fab_top': c(111, 111, 111),
+    'board.courtyard_top': c(194, 24, 168),
+    'board.user_drawings': c(90, 90, 90),
+    'board.user_comments': c(0, 0, 208),
   },
-  ui: {
-    background: '#ffffff',
-    grid: '#c8c8c8',
-    cursor: '#000000',
-    selection: '#0058c8',
-    hover: '#c86400',
-    highlight: '#e8a000',
-    ratsnest: '#7080a0',
-    text: '#202020',
-    pinName: '#007070',
-    wire: '#00a000',
-    bus: '#0000c0',
-    label: '#000000',
-    symbolBody: '#ffffc2',
-    symbolOutline: '#800000',
-    sheet: '#800080',
-  },
-};
+  overrideSchItemColors: false,
+});
 
 export function themeFor(mode: 'light' | 'dark'): Theme {
   return mode === 'dark' ? DARK_THEME : LIGHT_THEME;
 }
 
+/** Theme key for the schematic pseudo layers the mock/layer panel use. */
+const SCH_LAYER_KEYS: Record<string, string> = {
+  SLT_WIRE: 'schematic.wire',
+  SLT_BUS: 'schematic.bus',
+  SLT_GRAPHIC: 'schematic.note',
+};
+
+/** CSS colour of a render-model layer (`BL_*` board layer or `SLT_*` pseudo layer). */
 export function layerColour(theme: Theme, layer: string | undefined): string {
-  return (layer && theme.layers[layer]) || theme.ui.text;
+  if (!layer) return colorToCss(themeColor(theme, 'board.aux_items'));
+  const sch = SCH_LAYER_KEYS[layer] ?? (layer.startsWith('schematic.') ? layer : undefined);
+  if (sch) return colorToCss(themeColor(theme, sch));
+  return colorToCss(layerColor(theme, layer));
+}
+
+export interface MockPalette {
+  layers: (layer: string | undefined) => string;
+  ui: {
+    background: string;
+    grid: string;
+    cursor: string;
+    selection: string;
+    hover: string;
+    highlight: string;
+    ratsnest: string;
+    text: string;
+    pinName: string;
+    wire: string;
+    bus: string;
+    label: string;
+    symbolBody: string;
+    symbolOutline: string;
+    sheet: string;
+  };
+}
+
+/** Flattened CSS palette for the Canvas2D mock host. */
+export function mockPalette(theme: Theme, kind: 'board' | 'schematic' | 'footprint' | 'symbol'): MockPalette {
+  const ui = uiColors(theme, kind === 'schematic' || kind === 'symbol' ? 'schematic' : 'board');
+  const key = (k: string) => colorToCss(themeColor(theme, k));
+  return {
+    layers: (layer) => layerColour(theme, layer),
+    ui: {
+      background: colorToCss(ui.background),
+      grid: colorToCss(ui.grid),
+      cursor: colorToCss(ui.cursor),
+      selection: colorToCss(ui.selection),
+      hover: colorToCss(ui.hover),
+      highlight: key('board.ratsnest'),
+      ratsnest: colorToCss(ui.ratsnest),
+      text: kind === 'schematic' ? key('schematic.note') : key('board.aux_items'),
+      pinName: key('schematic.pin_name'),
+      wire: key('schematic.wire'),
+      bus: key('schematic.bus'),
+      label: key('schematic.label_local'),
+      symbolBody: key('schematic.component_body'),
+      symbolOutline: key('schematic.component_outline'),
+      sheet: key('schematic.sheet'),
+    },
+  };
 }

@@ -1,13 +1,22 @@
-// SWAP SEAM: the only place that constructs a CanvasHost.
+// The only place that constructs a CanvasHost.
 //
-//   import { BoardCanvasHost, SchematicCanvasHost } from '@kicad-web/renderer';
-//   export function createCanvasHost(kind) {
-//     return kind === 'schematic' ? new SchematicCanvasHost() : new BoardCanvasHost();
-//   }
+// Mock services draw with the Canvas2D `MockCanvasHost` (the e2e smoke tests depend on it);
+// the KiCad services install a factory (`setCanvasHostFactory`) that returns the PixiJS
+// `BoardCanvasHost` / `SchematicCanvasHost` from `@kicad-web/renderer` with the adapter
+// contexts (pad polygons, text shapes, copper layers) wired to the live document.
 
-import type { CanvasHost, DocumentKind } from '@/contracts';
+import type { CanvasHost, DocumentKind, ItemStore } from '@/contracts';
 import { MockCanvasHost } from './MockCanvasHost';
 
-export function createCanvasHost(kind: DocumentKind): CanvasHost {
-  return new MockCanvasHost(kind);
+export type CanvasHostFactory = (kind: DocumentKind, storeKey: string, store: ItemStore) => CanvasHost;
+
+let factory: CanvasHostFactory | null = null;
+
+/** Installs the real-renderer factory (called by `createKicadServices`); `null` restores the mock. */
+export function setCanvasHostFactory(f: CanvasHostFactory | null): void {
+  factory = f;
+}
+
+export function createCanvasHost(kind: DocumentKind, storeKey: string, store: ItemStore): CanvasHost {
+  return factory ? factory(kind, storeKey, store) : new MockCanvasHost(kind);
 }
