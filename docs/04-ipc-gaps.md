@@ -24,6 +24,13 @@ progress. New proto `common/events.proto`. Bridge fans the PUB stream out over t
 same WebSocket. Cheap interim: `GetDocumentRevision` (monotonic counter bumped in
 `pushCurrentCommit`) so the UI can poll one small message.
 
+### G1a · Event follow-ups (found by the bridge relay)
+Footprint `UpdateItems` is recorded as remove+add so `DocumentChanged` lists the KIID
+under both `created` and `deleted`; no event for UpdateBoardStackup, embedded files,
+appearance settings, InjectDrcError, title block, page settings, variants, or project-level
+netclass/text-variable changes (needs a `ProjectChanged` event); `JobProgress` has no
+publisher yet (pairs with G17).
+
 ### G3 · `RunAction` headless
 **Today:** gated by `checkForHeadless`; the headless `TOOL_MANAGER` in
 `HEADLESS_PCB_CONTEXT` has no tools registered.
