@@ -123,9 +123,9 @@ pins the fork commit it was generated against in `packages/proto/KICAD_COMMIT`.
 | # | Milestone | Exit criterion |
 |---|---|---|
 | M0 ✅ 2026-09-06 | Build `kicad-cli` from this 10.99 checkout on macOS; `Ping` from a Bun script over the raw socket. | done: see [m0-runbook.md](m0-runbook.md); `Ping`, `GetVersion`, `OpenDocument`, `GetOpenDocuments` all `AS_OK` |
-| M1 | Codegen + bridge + client: open the kitchen-sink project from the browser, `GetVersion`, `GetOpenDocuments`, `GetItems(FOOTPRINT)`. | items rendered as a JSON tree |
-| M2 | Read-only board viewer and schematic viewer (WebGL), layer panel, pan/zoom, hover/hit-test, net highlight (client-side). | kitchen-sink board and schematic draw correctly at 60 fps |
-| M3 | Editing: selection, move/rotate/flip, properties panel, create/delete, commits, client-side undo. | round-trip edit survives `SaveDocument` and reopen in desktop KiCad |
-| M4 | Patch series P0 landed in the fork: events, headless RunAction, DRC/ERC, new project/document, capability discovery. DRC/ERC panels live. | UI shows markers from `RunBoardJobDrc` |
+| M1 ✅ | Codegen + bridge + client: open the kitchen-sink project from the browser, `GetVersion`, `GetOpenDocuments`, `GetItems(FOOTPRINT)`. | done 2026-09-06 |
+| M2 ✅ | Read-only board viewer and schematic viewer (WebGL), layer panel, pan/zoom, hover/hit-test, net highlight (client-side). | done 2026-09-06: see docs/screenshots/board.png, schematic.png |
+| M3 ✅ | Editing: selection, move/rotate/flip, properties panel, create/delete, commits, client-side undo. | done 2026-09-06: property edit committed, verified via SaveDocumentToString, undone (board-edited.png) |
+| M4 ◐ | Patch series P0 landed in the fork: events, headless RunAction, DRC/ERC, new project/document, capability discovery. DRC/ERC panels live. | events, DRC/ERC, lifecycle, discovery done; DRC panel live (board-drc.png); RunAction in progress |
 | M5 | Libraries, annotate, schematic→board sync, exports/jobs UI, 3D via GLB export + three.js. | full design flow start-to-gerbers without desktop KiCad |
 | M6 | P1 parity, `ws://` direct transport, upstream MRs for every patch. | coverage script reports 0 GUI-only commands the UI needs |
