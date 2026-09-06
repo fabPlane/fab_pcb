@@ -1135,6 +1135,16 @@
     "headless": "ok"
   },
   {
+    "command": "ImportSpecctraSession",
+    "group": "board/commands",
+    "requestType": "kiapi.board.commands.ImportSpecctraSession",
+    "responseType": "kiapi.board.commands.ImportSpecctraSessionResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "InjectDrcError",
     "group": "board/commands",
     "requestType": "kiapi.board.commands.InjectDrcError",
@@ -1448,6 +1458,16 @@
     "command": "RunBoardJobExportRender",
     "group": "board/jobs",
     "requestType": "kiapi.board.jobs.RunBoardJobExportRender",
+    "responseType": "kiapi.common.types.RunJobResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "RunBoardJobExportSpecctra",
+    "group": "board/jobs",
+    "requestType": "kiapi.board.jobs.RunBoardJobExportSpecctra",
     "responseType": "kiapi.common.types.RunJobResponse",
     "handlers": [
       "pcb"

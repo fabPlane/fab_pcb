@@ -35,6 +35,13 @@ has staged changes. `RatsnestEdge.net.code` is always 0 (the handler packs only 
 `SetTeardropsResponse.item_count` counts pads and vias processed rather than changed, so
 `RemoveTeardrops` always reports the same number instead of dropping to zero.
 
+### G25 · Autorouting through the API
+**Status:** done (487ce9d827, 1f6937d5e5, 8cc9377988): a Specctra DSN export job (also
+`kicad-cli pcb export specctra`) and `ImportSpecctraSession` running in an undoable commit. Found
+while verifying with Freerouting: KiCad's DSN exporter does not emit copper text as keepouts, so
+a router happily runs tracks through copper silkscreen text and DRC flags it afterwards; and
+Freerouting 2.4.1 writes empty output for a board with filled zones, where 1.9.0 routes it.
+
 ### G24 · What a bridgeless browser client still cannot do
 **Status:** open, and partly by design. The bridge covers all of it today; these are what KiCad would need for a browser to run with no helper process at all.
 Found while proving the direct `ws://` path. No API command lists a directory or reads an arbitrary

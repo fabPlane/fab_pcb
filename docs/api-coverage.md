@@ -1,14 +1,14 @@
-# IPC API coverage matrix (KiCad 10.99, commit 163dec0e39)
+# IPC API coverage matrix (KiCad 10.99, commit 8cc9377988)
 
 Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the KiCad sources. "Handlers" names the C++ handler class that serves the command: server = API_HANDLER_SERVER (inside the API server, always loaded), common = API_HANDLER_COMMON (always loaded), editor = API_HANDLER_EDITOR, library = API_HANDLER_LIBRARY (base of the footprint and symbol library handlers), board = API_HANDLER_BOARD, pcb = API_HANDLER_PCB, footprint = API_HANDLER_FOOTPRINT, fplib = API_HANDLER_FOOTPRINT_LIBRARY, symlib = API_HANDLER_SYMBOL_LIBRARY, sch = API_HANDLER_SCH.
 
 | Status | Count | Meaning |
 |---|---:|---|
-| OK | 150 | works in `kicad-cli api-server` |
+| OK | 152 | works in `kicad-cli api-server` |
 | GUI-ONLY | 15 | handler returns "not available in headless mode" |
 | PARTIAL | 0 | headless in some handlers only |
 | UNREGISTERED | 0 | defined in .proto, no handler anywhere |
-| **Total** | **165** | request messages defined in the command protos |
+| **Total** | **167** | request messages defined in the command protos |
 
 
 ## common/base
@@ -160,6 +160,7 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `GetVisibleLayers` | board | no | gated by checkForHeadless in board |
 | `GlobalDeletion` | pcb | yes |  |
 | `ImportNetlist` | pcb | yes |  |
+| `ImportSpecctraSession` | pcb | yes |  |
 | `InjectDrcError` | pcb | yes |  |
 | `InteractiveMoveItems` | board | no | gated by checkForHeadless in board |
 | `RefillZones` | pcb | yes |  |
@@ -197,6 +198,7 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `RunBoardJobExportPosition` | pcb | yes |  |
 | `RunBoardJobExportPs` | pcb | yes |  |
 | `RunBoardJobExportRender` | pcb | yes |  |
+| `RunBoardJobExportSpecctra` | pcb | yes |  |
 | `RunBoardJobExportStats` | pcb | yes |  |
 | `RunBoardJobExportSvg` | pcb | yes |  |
 
