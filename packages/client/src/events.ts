@@ -21,14 +21,13 @@ import type { WebSocketTransport } from "./transport/websocket";
 
 export type EventKind = Exclude<Event["kind"]["case"], undefined>;
 
-export interface EventPayloads {
-  documentChanged: DocumentChanged;
-  documentOpened: DocumentOpened;
-  documentClosed: DocumentClosed;
-  documentSaved: DocumentSaved;
-  jobProgress: JobProgress;
-  serverShutdown: ServerShutdown;
-}
+/**
+ * Payload type for each event kind, derived from the generated oneof so a new event kind in the
+ * proto is picked up here without an edit (KiCad keeps adding them).
+ */
+export type EventPayloads = {
+  [K in EventKind]: Extract<Event["kind"], { case: K }>["value"];
+};
 
 export interface EventGap {
   /** Last sequence number seen before the gap. */
