@@ -1,0 +1,19 @@
+Third-party fixtures
+====================
+
+e2e/fixtures/pic_programmer/
+  Copied from the KiCad source tree, demos/pic_programmer (KiCad 10.99, fork branch web-api),
+  with the *-backups directory and cache files dropped. Two-sheet hierarchical schematic
+  (pic_programmer.kicad_sch -> pic_sockets.kicad_sch), a routed two-layer board, a project
+  symbol library and a footprint library with 3D models.
+
+  License: the KiCad demo projects are distributed under the Creative Commons
+  Attribution-ShareAlike 4.0 International license (CC-BY-SA-4.0); see LICENSE.README in
+  the KiCad tree ("All the demo files provided in demos/*") and LICENSE.CC-BY-SA-4.0 there.
+  Copyright the KiCad Developers. Modifications here: none beyond dropping the files above.
+  The KiCad source code itself is GPL-3.0-or-later; nothing from it is included in this
+  directory.
+
+Kitchen-sink fixtures (qa/data/pcbnew/api_kitchen_sink.* and qa/data/eeschema/api_kitchen_sink.*)
+are NOT copied: the integration tests read them from the sibling KiCad checkout
+(packages/client/test/kicad-fixtures.ts) so they always match the pinned KICAD_COMMIT.

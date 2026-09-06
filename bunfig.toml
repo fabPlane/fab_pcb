@@ -1,2 +1,9 @@
 [install]
 exact = true
+
+[test]
+# `bun test` from the root must never pick up compiled output (packages emit dist/ and
+# apps/web emits dist-tsc/, both of which contain *.test.d.ts / *.test.js copies).
+# Prefer `bun run test:unit`: it runs each workspace in its own process so apps/web's
+# happy-dom global registration cannot leak into the bridge/client tests.
+pathIgnorePatterns = ["**/dist/**", "**/dist-tsc/**", "**/node_modules/**", "**/e2e/**"]

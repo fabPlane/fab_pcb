@@ -3,15 +3,30 @@
   "private": true,
   "version": "0.0.1",
   "description": "Headless KiCad web UI over the KiCad IPC API (Bun + TypeScript)",
-  "workspaces": ["apps/*", "packages/*", "tooling/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "tooling/*",
+    "e2e"
+  ],
   "scripts": {
     "gen": "bun run --filter @kicad-web/proto gen",
+    "gen:check": "bun run --filter @kicad-web/proto check",
     "coverage": "bun run --filter @kicad-web/coverage run",
-    "test": "bun test",
-    "typecheck": "tsc -b"
+    "coverage:check": "bun tooling/coverage/run.ts --check",
+    "coverage:summary": "bun tooling/coverage/summary.ts",
+    "typecheck": "tsc -b",
+    "test": "bun run test:unit",
+    "test:unit": "bun tooling/ci/run-tests.ts unit",
+    "test:integration": "bun tooling/ci/run-tests.ts integration",
+    "test:e2e": "bun run --filter @kicad-web/e2e test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "ci": "bun install --frozen-lockfile && bun run gen:check && bun run coverage:check && bun tooling/coverage/summary.ts --check && bun run typecheck && bun run test:unit"
   },
   "devDependencies": {
     "@types/bun": "^1.2.0",
+    "prettier": "3.6.2",
     "typescript": "^5.6.0"
   }
 }

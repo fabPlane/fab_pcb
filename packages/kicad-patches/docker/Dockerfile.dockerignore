@@ -1,0 +1,12 @@
+# Applies when the KiCad checkout itself is the build context (docker build -f docker/Dockerfile <kicad>).
+# build-linux.sh normally exports `git archive` into a scratch dir instead, which is smaller still.
+.git
+build
+build-*
+demos
+qa/data
+# translation/ is ~100 MB of .po files; CMake still reads pofiles/LINGUAS with KICAD_BUILD_I18N=OFF
+translation/**
+!translation/pofiles/LINGUAS
+**/*.o
+**/CMakeCache.txt

@@ -1,0 +1,20 @@
+{
+  "name": "@kicad-web/e2e",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Playwright smoke tests for apps/web (mock services) and pointers to the API conformance suite",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "report": "playwright show-report output/report",
+    "install-browsers": "playwright install --with-deps chromium",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/bun": "^1.2.0",
+    "typescript": "^5.6.0"
+  }
+}

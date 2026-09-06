@@ -96,11 +96,12 @@ them in parallel.
 - Owns fixtures beyond kitchen-sink (a real multi-sheet project, a large board).
 - Exit: red/green on every PR in < 15 min; coverage number in the README.
 - Status 2026-09-06: root scripts (`ci`, `test:unit`, `test:integration`, `test:e2e`) and the
-  per-package runner `tooling/ci/run-tests.ts`; `e2e/` Playwright smoke (3 specs, ~3 s) on the
-  mock shell; `.github/workflows/ci.yml` (bun / e2e / kicad-integration); Linux image
-  `packages/kicad-patches/build-linux.sh` + `docker/`; `tooling/coverage/summary.ts` →
-  README line + `docs/coverage-badge.json`; `e2e/fixtures/pic_programmer` (CC-BY-SA, see NOTICE);
-  `docs/ownership.md`.
+  per-package runner `tooling/ci/run-tests.ts` (`*.kicad.test.ts` and `conformance/**` = integration);
+  `e2e/` Playwright smoke (3 specs, ~3 s, dev and `vite preview` modes) on the mock shell;
+  `.github/workflows/ci.yml` (bun / e2e / kicad-integration); Linux image
+  `packages/kicad-patches/build-linux.sh` + `docker/` (built locally on Docker Desktop, see the
+  docker README); `tooling/coverage/summary.ts` → README line + `docs/coverage-badge.json`
+  (`ci` checks it); `e2e/fixtures/pic_programmer` (CC-BY-SA, see NOTICE); `docs/ownership.md`.
 
 ## Contracts between agents (the only things that are allowed to block)
 

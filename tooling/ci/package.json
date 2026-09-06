@@ -1,0 +1,13 @@
+{
+  "name": "@kicad-web/ci",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Workspace test runner (unit / integration split) and CI helpers",
+  "scripts": {
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.0"
+  }
+}

@@ -1,0 +1,245 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      build_kicad:
+        description: "Force a rebuild of the kicad-cli Docker image"
+        type: boolean
+        default: false
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BUN_VERSION: "1.4.0"
+  # Image with kicad-cli + kifaces built from the fork (packages/kicad-patches/docker). Until the
+  # first image is published to GHCR the kicad-integration job builds it from KICAD_REPO/KICAD_REF.
+  KICAD_IMAGE: ghcr.io/${{ github.repository_owner }}/kicad-cli
+  KICAD_REPO: https://gitlab.com/kicad/code/kicad.git
+  KICAD_REF: web-api
+
+jobs:
+  # ----------------------------------------------------------------- unit, typecheck, generated files
+  bun:
+    name: bun (unit)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Cache bun install cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      # gen:check and coverage:check need the KiCad fork's api/proto and C++ handler sources at the
+      # pinned commit. A shallow checkout of that one commit is enough (no build).
+      - name: Check out the KiCad fork at KICAD_COMMIT
+        run: |
+          set -euo pipefail
+          commit="$(cat packages/proto/KICAD_COMMIT)"
+          git init -q ../kicad
+          git -C ../kicad remote add origin "$KICAD_REPO"
+          git -C ../kicad fetch --depth 1 origin "$commit"
+          git -C ../kicad checkout -q FETCH_HEAD
+          echo "KICAD_SRC=$(cd ../kicad && pwd)" >> "$GITHUB_ENV"
+
+      - name: Generated files are fresh (proto codegen, coverage matrix, badge)
+        run: |
+          bun run gen:check
+          bun run coverage:check
+          bun tooling/coverage/summary.ts --check
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Unit tests
+        run: bun run test:unit
+
+      - name: Coverage summary
+        run: |
+          bun tooling/coverage/summary.ts | tee coverage-summary.md
+          { echo "### IPC API coverage"; echo; cat coverage-summary.md; } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-summary
+          path: |
+            coverage-summary.md
+            docs/coverage-badge.json
+            docs/api-coverage.md
+
+  # ----------------------------------------------------------------- Playwright smoke (mock services)
+  e2e:
+    name: e2e (Playwright smoke)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Cache bun install cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Playwright version
+        id: pw
+        run: echo "version=$(bun -e 'console.log(require("@playwright/test/package.json").version)' 2>/dev/null || cat e2e/package.json | jq -r '.devDependencies["@playwright/test"]')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+
+      - name: Install chromium (+ OS deps)
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: cd e2e && bunx playwright install --with-deps chromium
+
+      - name: Install chromium OS deps only (browser cached)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: cd e2e && bunx playwright install-deps chromium
+
+      - name: Smoke tests (vite build + preview)
+        env:
+          E2E_SERVER: preview
+        run: cd e2e && bunx playwright test
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: |
+            e2e/output/report
+            e2e/output/results
+          retention-days: 7
+
+  # ----------------------------------------------------------------- integration against the fork's kicad-cli
+  #
+  # Builds (or pulls) the Linux image with `kicad-cli api-server` from the fork and runs the
+  # *.kicad.test.ts suites with KICAD_CLI pointing at a wrapper that execs into the container.
+  #
+  # continue-on-error is set ON PURPOSE until the image exists on GHCR and the fork remote is
+  # public: a full KiCad build is ~1 h on a hosted runner and the fork URL above is a placeholder.
+  # Once `docker pull $KICAD_IMAGE:<KICAD_COMMIT>` succeeds, remove `continue-on-error` so the job
+  # gates PRs like the other two.
+  kicad-integration:
+    name: kicad-integration (Docker kicad-cli)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Cache bun install cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve image tag
+        id: tag
+        run: |
+          commit="$(cat packages/proto/KICAD_COMMIT)"
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
+          echo "tag=${KICAD_IMAGE}:${commit:0:10}" >> "$GITHUB_OUTPUT"
+
+      - name: Pull the prebuilt image
+        id: pull
+        continue-on-error: true
+        run: |
+          if [ "${{ github.event.inputs.build_kicad }}" = "true" ]; then exit 1; fi
+          docker pull "${{ steps.tag.outputs.tag }}"
+
+      - uses: docker/setup-buildx-action@v3
+        if: steps.pull.outcome != 'success'
+
+      - name: Build the image from the fork (KICAD_SOURCE=git)
+        if: steps.pull.outcome != 'success'
+        uses: docker/build-push-action@v6
+        with:
+          context: packages/kicad-patches/docker
+          file: packages/kicad-patches/docker/Dockerfile
+          build-args: |
+            KICAD_SOURCE=git
+            KICAD_REPO=${{ env.KICAD_REPO }}
+            KICAD_REF=${{ steps.tag.outputs.commit }}
+            JOBS=4
+          tags: ${{ steps.tag.outputs.tag }}
+          load: true
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Push the image (default branch only)
+        if: steps.pull.outcome != 'success' && github.ref == 'refs/heads/master'
+        run: docker push "${{ steps.tag.outputs.tag }}"
+
+      - name: kicad-cli version
+        run: docker run --rm "${{ steps.tag.outputs.tag }}" version
+
+      # The integration tests spawn `$KICAD_CLI api-server <file> --socket <path>` and expect the
+      # socket to appear on the host, so KICAD_CLI is a wrapper that runs the container with the
+      # host's /tmp/kicad and the checkout mounted at the same paths.
+      - name: Check out the KiCad fork (fixtures) and write the kicad-cli wrapper
+        run: |
+          set -euo pipefail
+          commit="${{ steps.tag.outputs.commit }}"
+          git init -q ../kicad
+          git -C ../kicad remote add origin "$KICAD_REPO"
+          git -C ../kicad fetch --depth 1 origin "$commit"
+          git -C ../kicad checkout -q FETCH_HEAD
+          mkdir -p /tmp/kicad
+          cat > /tmp/kicad-cli <<EOS
+          #!/bin/sh
+          exec docker run --rm -i --user "\$(id -u):\$(id -g)" -e HOME=/tmp \
+            -v /tmp/kicad:/tmp/kicad -v "$(cd .. && pwd):$(cd .. && pwd)" \
+            "${{ steps.tag.outputs.tag }}" "\$@"
+          EOS
+          chmod +x /tmp/kicad-cli
+          echo "KICAD_CLI=/tmp/kicad-cli" >> "$GITHUB_ENV"
+
+      - name: Integration tests
+        env:
+          KICAD_INTEGRATION_REQUIRED: "1"
+        run: bun run test:integration
