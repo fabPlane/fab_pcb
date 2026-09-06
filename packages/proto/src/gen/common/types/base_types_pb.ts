@@ -2602,6 +2602,10 @@ export enum DocumentType {
   DOCTYPE_FOOTPRINT = 4,
 
   /**
+   * Drawing sheets are used by name (see PageSettings.drawing_sheet) but cannot themselves be
+   * opened as a document: their items have no API representation, and the loaded sheet is shared
+   * by every open board and schematic.  OpenDocument answers AS_UNIMPLEMENTED for this type
+   *
    * @generated from enum value: DOCTYPE_DRAWING_SHEET = 5;
    */
   DOCTYPE_DRAWING_SHEET = 5,

@@ -437,28 +437,31 @@ export type BOMFormatSettings = Message<"kiapi.schematic.jobs.BOMFormatSettings"
   presetName: string;
 
   /**
-   * Delimiter between fields (columns) in a data row
+   * Delimiter between fields (columns) in a data row; defaults to a comma when empty.
+   * Since 11.0: was previously taken literally, which produced rows with no separator
    *
    * @generated from field: string field_delimiter = 2;
    */
   fieldDelimiter: string;
 
   /**
-   * Character to use for quoting strings
+   * Character to use for quoting strings; defaults to a double quote when empty.  Since 11.0
    *
    * @generated from field: string string_delimiter = 3;
    */
   stringDelimiter: string;
 
   /**
-   * Delimiter between reference designators when exporting a list (e.g. "R1,R3,R5")
+   * Delimiter between reference designators when exporting a list (e.g. "R1,R3,R5");
+   * defaults to a comma when empty.  Since 11.0
    *
    * @generated from field: string ref_delimiter = 4;
    */
   refDelimiter: string;
 
   /**
-   * Delimiter between reference designators when exporting a range (e.g. "R1-R10")
+   * Delimiter between reference designators when exporting a range (e.g. "R1-R10");
+   * defaults to a dash when empty.  Since 11.0
    *
    * @generated from field: string ref_range_delimiter = 5;
    */
@@ -499,28 +502,31 @@ export type BOMFormatSettingsJson = {
   presetName?: string;
 
   /**
-   * Delimiter between fields (columns) in a data row
+   * Delimiter between fields (columns) in a data row; defaults to a comma when empty.
+   * Since 11.0: was previously taken literally, which produced rows with no separator
    *
    * @generated from field: string field_delimiter = 2;
    */
   fieldDelimiter?: string;
 
   /**
-   * Character to use for quoting strings
+   * Character to use for quoting strings; defaults to a double quote when empty.  Since 11.0
    *
    * @generated from field: string string_delimiter = 3;
    */
   stringDelimiter?: string;
 
   /**
-   * Delimiter between reference designators when exporting a list (e.g. "R1,R3,R5")
+   * Delimiter between reference designators when exporting a list (e.g. "R1,R3,R5");
+   * defaults to a comma when empty.  Since 11.0
    *
    * @generated from field: string ref_delimiter = 4;
    */
   refDelimiter?: string;
 
   /**
-   * Delimiter between reference designators when exporting a range (e.g. "R1-R10")
+   * Delimiter between reference designators when exporting a range (e.g. "R1-R10");
+   * defaults to a dash when empty.  Since 11.0
    *
    * @generated from field: string ref_range_delimiter = 5;
    */
@@ -628,13 +634,17 @@ export type BOMFieldSettings = Message<"kiapi.schematic.jobs.BOMFieldSettings"> 
   presetName: string;
 
   /**
-   * An ordered list of fields to export
+   * An ordered list of fields to export.  Since 11.0: when this is empty and no preset_name is
+   * given, the same columns `kicad-cli sch export bom` defaults to are exported (Reference,
+   * Value, Footprint, QUANTITY, DNP); an empty list used to export a file with no columns
    *
    * @generated from field: repeated kiapi.schematic.jobs.BOMField fields = 2;
    */
   fields: BOMField[];
 
   /**
+   * Field to sort on; defaults to Reference when empty.  Since 11.0
+   *
    * @generated from field: string sort_field = 3;
    */
   sortField: string;
@@ -673,13 +683,17 @@ export type BOMFieldSettingsJson = {
   presetName?: string;
 
   /**
-   * An ordered list of fields to export
+   * An ordered list of fields to export.  Since 11.0: when this is empty and no preset_name is
+   * given, the same columns `kicad-cli sch export bom` defaults to are exported (Reference,
+   * Value, Footprint, QUANTITY, DNP); an empty list used to export a file with no columns
    *
    * @generated from field: repeated kiapi.schematic.jobs.BOMField fields = 2;
    */
   fields?: BOMFieldJson[];
 
   /**
+   * Field to sort on; defaults to Reference when empty.  Since 11.0
+   *
    * @generated from field: string sort_field = 3;
    */
   sortField?: string;

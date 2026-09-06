@@ -8,9 +8,9 @@
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { existsSync } from "node:fs";
-import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import {
   ApiStatusCode,
   Board3DFormat,
@@ -29,14 +29,17 @@ import {
   JobStatus,
   KiCadObjectType,
   MapMergeMode,
+  PadTeardropMode,
   PadstackPresence,
   PageSize,
+  ProjectChangeKind,
   ProjectFileType,
   RenderFormat,
   RuleSeverity,
   RunActionStatus,
   SchematicNetlistFormat,
   StatsOutputFormat,
+  WizardGenerationStatus,
   type DrcResultsResponse,
   type ErcResultsResponse,
   type JobProgress,
@@ -50,6 +53,7 @@ import {
   Board,
   Footprint,
   KiCad,
+  LibFootprint,
   LibSymbol,
   Project,
   Schematic,
@@ -57,12 +61,24 @@ import {
   SchematicSymbol,
   Track,
   activeMarkers,
+  flattenHierarchy,
   embeddedFileContent,
   type Pad,
 } from "../../src/model";
 import { NngIpcSubscriber, NngIpcTransport } from "../../src/transport";
+import { DocumentUndo, MemoryItemStore, UndoStack, toStoredItem } from "../../src/store";
 import { mm, toDistance, toVector2 } from "../../src/units";
-import { QA_DEVICE_LIB, QA_NETLIST, haveKicad, startKiCad, tempProject, type RunningKiCad, type TempProject } from "../kicad-server";
+import {
+  KITCHEN_SINK_SCH,
+  QA_DEVICE_LIB,
+  QA_NETLIST,
+  QA_RESISTOR_LIB,
+  haveKicad,
+  startKiCad,
+  tempProject,
+  type RunningKiCad,
+  type TempProject,
+} from "../kicad-server";
 
 type Status = "pass" | "fail" | "skip";
 const results = new Map<string, { status: Status; note: string }>();
@@ -1011,6 +1027,122 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
   guiOnlyTest("RevertDocument", () => board.revert());
   guiOnlyTest("SaveSelectionToString", () => cmd.saveSelectionToString(c(), {}));
 
+  // ---- common/editor: undo / redo (KiCad >= 11.0) -------------------------------------------------------
+  cmdTest("GetUndoStack", async () => {
+    const before = await board.undoStack();
+    const fp = (await board.getFootprints())[0]!;
+    const home = fp.position;
+    const tx = await board.beginCommit();
+    const r = await tx.run("conformance undo probe", (t) => {
+      fp.position = { x: home.x + mm(1), y: home.y };
+      return t.update([fp]);
+    });
+    const after = await board.undoStack();
+    expect(after.undo.length).toBe(before.undo.length + 1);
+    const top = after.undo.at(-1)!;
+    expect(top.description).toBe("conformance undo probe");
+    expect(top.commitId?.value).toBe(r.commitId);
+    expect(top.clientName).toBe(c().clientName);
+    expect(top.itemCount).toBeGreaterThan(0);
+    // Commit.undo() prefers the server stack; it refuses once the commit is no longer on top.
+    const undone = await tx.undo();
+    expect(undone.applied).toBe(1);
+    expect(((await board.getItem(fp.id)) as Footprint).position).toEqual(home);
+    await board.redo();
+    await board.undo();
+    return `${after.undo.length} undo entries, top = "${top.description}" by ${top.clientName} (commit ${top.commitId?.value.slice(0, 8)}, ${top.itemCount} items); Commit.undo() reverted it`;
+  });
+  cmdTest("Undo", async () => {
+    // an edit outside a commit is undoable too
+    const origin = await board.origin("grid");
+    await board.setOrigin("grid", { x: mm(12), y: mm(13) });
+    expect(await board.origin("grid")).toEqual({ x: mm(12), y: mm(13) });
+    const stack = await board.undoStack();
+    const top = stack.undo.at(-1)!;
+    const r = await board.undo();
+    expect(r.applied).toBe(1);
+    expect(r.redoCount).toBeGreaterThan(0);
+    expect(await board.origin("grid")).toEqual(origin);
+    // KiCad refuses an undo while a client holds *staged* changes
+    const tx = await board.beginCommit();
+    const t = new Track();
+    t.start = { x: mm(60), y: mm(60) };
+    t.end = { x: mm(62), y: mm(60) };
+    t.width = mm(0.2);
+    t.layerId = BoardLayer.BL_F_Cu;
+    await tx.create([t]);
+    const busy = await board.undo().then(
+      () => undefined,
+      (e: unknown) => e,
+    );
+    await tx.drop();
+    const busyNote = KiCadApiError.is(busy, ApiStatusCode.AS_BUSY)
+      ? "refused with AS_BUSY while a commit holds staged changes"
+      : `KICAD-BUG: undo with staged changes answered ${KiCadApiError.is(busy) ? busy.codeName : "success"} instead of AS_BUSY`;
+    // ... but an *empty* open commit does not block it, although the proto says "Refused while a
+    // client has an open commit" (the handler only checks for non-empty commits).
+    const empty = await board.beginCommit();
+    await board.setOrigin("grid", { x: mm(5), y: mm(5) });
+    const withEmpty = await board.undo().then(
+      (x) => `applied ${x.applied}`,
+      (e: unknown) => (KiCadApiError.is(e) ? e.codeName : String(e)),
+    );
+    await empty.drop();
+    await board.setOrigin("grid", origin);
+    const emptyNote = withEmpty.startsWith("applied")
+      ? "KICAD-BUG: Undo is documented as refused while a client has an open commit, but an open commit with no staged changes is allowed through (api_handler_editor.cpp only rejects non-empty commits)"
+      : `an empty open commit also blocks it (${withEmpty})`;
+    return `SetBoardOrigin undone (applied ${r.applied}, redo stack ${r.redoCount}); ${busyNote}; ${emptyNote}`;
+  });
+  cmdTest("Redo", async () => {
+    const fp = (await board.getFootprints())[0]!;
+    const home = fp.position;
+    const moved = { x: home.x + mm(2), y: home.y };
+    await board.commit("conformance redo probe", (tx) => {
+      fp.position = moved;
+      return tx.update([fp]);
+    });
+    const u = await board.undo();
+    expect(u.applied).toBe(1);
+    expect(((await board.getItem(fp.id)) as Footprint).position).toEqual(home);
+    const r = await board.redo();
+    expect(r.applied).toBe(1);
+    expect(r.redoCount).toBe(0);
+    expect(((await board.getItem(fp.id)) as Footprint).position).toEqual(moved);
+    await board.undo(); // leave the board where the rest of the suite expects it
+    expect(((await board.getItem(fp.id)) as Footprint).position).toEqual(home);
+    // redoing past the end of the stack is not an error, it just applies nothing
+    const past = await board.redo(5);
+    expect(past.applied).toBeLessThanOrEqual(1);
+    if (past.applied) await board.undo(past.applied);
+    return `undo/redo round trip on a footprint move (applied ${r.applied}); redo(5) past the stack applied ${past.applied} without erroring`;
+  });
+  extraTest("store/undo.ts: DocumentUndo prefers KiCad's undo when the capability is present", async () => {
+    const store = new MemoryItemStore("board", board.specifier);
+    const stack = new UndoStack(store);
+    const clientOnly = new DocumentUndo(stack);
+    expect(await clientOnly.useServer()).toBe(false);
+    const both = new DocumentUndo(stack, board);
+    expect(await both.useServer()).toBe(await board.supportsServerUndo());
+    const fp = (await board.getFootprints())[0]!;
+    const home = fp.position;
+    await board.commit("conformance DocumentUndo probe", (tx) => {
+      fp.position = { x: home.x + mm(3), y: home.y };
+      return tx.update([fp]);
+    });
+    const out = await both.undo();
+    expect(out.via).toBe("server");
+    expect(out.applied).toBe(1);
+    expect(((await board.getItem(fp.id)) as Footprint).position).toEqual(home);
+    // the client fallback still works on its own store
+    stack.apply("local", { added: [toStoredItem(fp)] });
+    expect(store.size).toBe(1);
+    const local = await clientOnly.undo();
+    expect(local.via).toBe("client");
+    expect(store.size).toBe(0);
+    return `DocumentUndo(document) -> server path (applied ${out.applied}); DocumentUndo(store only) -> client patch path`;
+  });
+
   // ---- events + store (not commands) ------------------------------------------------------------------------
   extraTest("Events: DocumentChanged / DocumentSaved on the events socket", async () => {
     if (!events) throw new Error(`no events subscriber: ${eventsError}`);
@@ -1152,6 +1284,214 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     cmd.syncSelection(c(), { items: [{ spec: { case: "footprint", value: { reference: firstFp.reference } } }] }),
   );
 
+  // ---- common/library (library tables, entries, items, wizards) -------------------------------------------
+  cmdTest("GetLibraryTables", async () => {
+    const fp = await k().libraries.tables("footprint");
+    const sym = await k().libraries.tables("symbol");
+    const db = await k().libraries.tables("designBlock");
+    expect(fp.length).toBeGreaterThan(0);
+    expect(sym.length).toBeGreaterThan(0);
+    // The temp project's own tables (written by tempProject) come back as project-scope rows.
+    const fpProject = fp.filter((r) => r.scope === 2).map((r) => r.nickname);
+    const symProject = sym.filter((r) => r.scope === 2).map((r) => r.nickname);
+    expect(fpProject).toContain("Resistor_SMD");
+    expect(symProject).toContain("Device");
+    const row = fp.find((r) => r.nickname === "Resistor_SMD")!;
+    expect(row.type).toBe("KiCad");
+    expect(row.enabled).toBe(true);
+    expect(row.ok).toBe(true);
+    expect(row.resolvedUri).toBe(QA_RESISTOR_LIB);
+    // scope filters
+    expect((await k().libraries.tables("symbol", "project")).map((r) => r.nickname)).toEqual(symProject);
+    expect((await k().libraries.tables("symbol", "global")).every((r) => r.scope === 1)).toBe(true);
+    const bad = fp.filter((r) => !r.ok).map((r) => `${r.nickname}: ${r.error}`);
+    return `footprint ${fp.length} rows (${fpProject.length} project), symbol ${sym.length} (${symProject.length} project), design block ${db.length}; ${bad.length} rows failed to resolve${bad.length ? `: ${bad.slice(0, 3).join("; ")}` : ""}`;
+  });
+  cmdTest("ListLibraryEntries", async () => {
+    const fps = await k().libraries.footprints.entries("Resistor_SMD", "0603");
+    expect(fps.length).toBeGreaterThan(0);
+    const r0603 = fps.find((e) => e.name === "R_0603_1608Metric")!;
+    expect(r0603).toBeDefined();
+    expect(r0603.id?.libraryNickname).toBe("Resistor_SMD");
+    expect(r0603.info.case).toBe("footprint");
+    const fpInfo = r0603.info.value as { padCount: number; uniquePadCount: number; models: string[] };
+    expect(fpInfo.padCount).toBe(2);
+    expect(fpInfo.uniquePadCount).toBe(2);
+    expect(r0603.description.length).toBeGreaterThan(0);
+    const all = await k().libraries.footprints.entries("Resistor_SMD");
+    expect(all.length).toBeGreaterThanOrEqual(fps.length);
+    const syms = await k().libraries.symbols.entries("Device");
+    expect(syms.length).toBeGreaterThan(0);
+    expect(syms[0]!.info.case).toBe("symbol");
+    const unknown = await k()
+      .libraries.footprints.entries("NoSuchLibrary")
+      .then(
+        () => undefined,
+        (e: unknown) => e,
+      );
+    expect(KiCadApiError.is(unknown, ApiStatusCode.AS_BAD_REQUEST)).toBe(true);
+    return `Resistor_SMD: ${all.length} entries (${fps.length} match "0603", R_0603_1608Metric has ${fpInfo.padCount} pads and ${fpInfo.models.length} 3D model(s)); Device: ${syms.length} symbols; unknown nickname AS_BAD_REQUEST`;
+  });
+  cmdTest("GetLibraryItem", async () => {
+    const fp = await k().libraries.footprints.get("Resistor_SMD:R_0603_1608Metric");
+    expect(fp).toBeInstanceOf(LibFootprint);
+    const lf = fp as LibFootprint;
+    expect(lf.libraryId).toBe("Resistor_SMD:R_0603_1608Metric");
+    expect(lf.padCount).toBe(2);
+    expect(lf.items.length).toBeGreaterThan(lf.padCount);
+    const symName = /^\s*\(symbol "([^"]+)"/m.exec(await readFile(QA_DEVICE_LIB, "utf8"))![1]!;
+    const sym = await k().libraries.symbols.get(`Device:${symName}`);
+    expect(sym).toBeInstanceOf(LibSymbol);
+    const ls = sym as LibSymbol;
+    expect(ls.libraryId).toBe(`Device:${symName}`);
+    expect(ls.pins.length).toBeGreaterThan(0);
+    const missing = await k()
+      .libraries.footprints.get("Resistor_SMD:NoSuchFootprint")
+      .then(
+        () => undefined,
+        (e: unknown) => e,
+      );
+    expect(KiCadApiError.is(missing, ApiStatusCode.AS_BAD_REQUEST)).toBe(true);
+    return `Resistor_SMD:R_0603_1608Metric -> LibFootprint (${lf.padCount} pads, ${lf.items.length} items); Device:${symName} -> LibSymbol (${ls.pins.length} pins, ${ls.unitCount} unit(s)); missing entry AS_BAD_REQUEST`;
+  });
+  cmdTest("CreateLibrary", async () => {
+    const fpRow = await k().libraries.footprints.createLibrary({ nickname: "conf_fp", scope: "project", description: "conformance" });
+    expect(fpRow.nickname).toBe("conf_fp");
+    expect(fpRow.scope).toBe(2);
+    expect(fpRow.type).toBe("KiCad");
+    expect(fpRow.ok).toBe(true);
+    expect(fpRow.uri).toContain("${KIPRJMOD}");
+    expect(existsSync(join(tmp.dir, "conf_fp.pretty"))).toBe(true);
+    const symRow = await k().libraries.symbols.createLibrary({ nickname: "conf_sym", scope: "project" });
+    expect(symRow.resolvedUri).toBe(join(tmp.dir, "conf_sym.kicad_sym"));
+    expect(existsSync(symRow.resolvedUri)).toBe(true);
+    expect(await k().libraries.nicknames("footprint", "project")).toContain("conf_fp");
+    return `conf_fp -> ${fpRow.uri} (created on disk), conf_sym -> ${symRow.uri}`;
+  });
+  cmdTest("SaveLibraryItem", async () => {
+    const src = (await k().libraries.footprints.get("Resistor_SMD:R_0603_1608Metric")) as LibFootprint;
+    const id = await k().libraries.footprints.save("conf_fp:conf_r", src);
+    expect(id.libraryNickname).toBe("conf_fp");
+    expect(id.entryName).toBe("conf_r");
+    const back = (await k().libraries.footprints.get("conf_fp:conf_r")) as LibFootprint;
+    expect(back).toBeInstanceOf(LibFootprint);
+    expect(back.libraryId).toBe("conf_fp:conf_r");
+    expect(back.padCount).toBe(src.padCount);
+    expect(back.pads.map((p) => p.number).sort()).toEqual(src.pads.map((p) => p.number).sort());
+    expect((await k().libraries.footprints.entries("conf_fp")).map((e) => e.name)).toEqual(["conf_r"]);
+    // a second write needs overwrite
+    const clash = await k()
+      .libraries.footprints.save("conf_fp:conf_r", src)
+      .then(
+        () => undefined,
+        (e: unknown) => e,
+      );
+    expect(KiCadApiError.is(clash, ApiStatusCode.AS_BAD_REQUEST)).toBe(true);
+    await k().libraries.footprints.save("conf_fp:conf_r", src, { overwrite: true });
+    // symbols travel the same way
+    const symName = /^\s*\(symbol "([^"]+)"/m.exec(await readFile(QA_DEVICE_LIB, "utf8"))![1]!;
+    const sym = (await k().libraries.symbols.get(`Device:${symName}`)) as LibSymbol;
+    const symId = await k().libraries.symbols.save("conf_sym:conf_s", sym);
+    expect(symId.entryName).toBe("conf_s");
+    const symBack = (await k().libraries.symbols.get("conf_sym:conf_s")) as LibSymbol;
+    expect(symBack.pins.length).toBe(sym.pins.length);
+    return `footprint round trip conf_fp:conf_r (${back.padCount} pads, pad numbers preserved); overwrite refused without the flag (AS_BAD_REQUEST) and accepted with it; symbol round trip conf_sym:conf_s (${symBack.pins.length} pins)`;
+  });
+  cmdTest("DeleteLibraryItem", async () => {
+    expect((await k().libraries.footprints.entries("conf_fp")).length).toBe(1);
+    await k().libraries.footprints.delete("conf_fp:conf_r");
+    expect(await k().libraries.footprints.entries("conf_fp")).toEqual([]);
+    const gone = await k()
+      .libraries.footprints.get("conf_fp:conf_r")
+      .then(
+        () => undefined,
+        (e: unknown) => e,
+      );
+    expect(KiCadApiError.is(gone, ApiStatusCode.AS_BAD_REQUEST)).toBe(true);
+    return "conf_fp:conf_r deleted; the library is empty and GetLibraryItem answers AS_BAD_REQUEST";
+  });
+  cmdTest("AddLibraryTableRow", async () => {
+    const uri = join(tmp.dir, "conf_row.pretty");
+    const row = await k().libraries.footprints.addTableRow("project", { nickname: "conf_row", uri, description: "added by the API" });
+    expect(row.nickname).toBe("conf_row");
+    expect(row.uri).toBe(uri);
+    expect(row.type).toBe("KiCad");
+    expect(row.scope).toBe(2);
+    expect(await k().libraries.nicknames("footprint", "project")).toContain("conf_row");
+    // the library files are not created for a plain row
+    expect(existsSync(uri)).toBe(false);
+    const clash = await k()
+      .libraries.footprints.addTableRow("project", { nickname: "conf_row", uri })
+      .then(
+        () => undefined,
+        (e: unknown) => e,
+      );
+    expect(KiCadApiError.is(clash, ApiStatusCode.AS_BAD_REQUEST)).toBe(true);
+    const replaced = await k().libraries.footprints.addTableRow("project", { nickname: "conf_row", uri, description: "replaced" }, true);
+    expect(replaced.description).toBe("replaced");
+    return `conf_row added (no files created), duplicate refused AS_BAD_REQUEST, replace:true updates the row`;
+  });
+  cmdTest("RemoveLibraryTableRow", async () => {
+    await k().libraries.footprints.removeTableRow("project", "conf_row");
+    expect(await k().libraries.nicknames("footprint", "project")).not.toContain("conf_row");
+    const gone = await k()
+      .libraries.footprints.removeTableRow("project", "conf_row")
+      .then(
+        () => undefined,
+        (e: unknown) => e,
+      );
+    expect(KiCadApiError.is(gone, ApiStatusCode.AS_BAD_REQUEST)).toBe(true);
+    // the table file on disk reflects the change
+    const table = await readFile(join(tmp.dir, "fp-lib-table"), "utf8");
+    expect(table).not.toContain("conf_row");
+    expect(table).toContain("Resistor_SMD");
+    return "row removed from the project table and from fp-lib-table on disk; removing it twice is AS_BAD_REQUEST";
+  });
+  cmdTest("ListWizards", async () => {
+    const list = await k().libraries.wizards(true);
+    // Footprint wizards come from installed API (Python) plugins; a bare CLI server has none.
+    expect(Array.isArray(list)).toBe(true);
+    for (const w of list) expect(w.meta?.identifier.length).toBeGreaterThan(0);
+    return list.length
+      ? `${list.length} wizards: ${list.map((w) => w.meta?.identifier).join(", ")}`
+      : "0 wizards (kicad-cli api-server loads no API plugins, so FOOTPRINT_WIZARD_MANAGER finds nothing)";
+  });
+  cmdTest("RunWizard", async () => {
+    const list = await k().libraries.wizards();
+    const unknown = await k()
+      .libraries.runWizard("no.such.wizard")
+      .then(
+        () => undefined,
+        (e: unknown) => e,
+      );
+    expect(KiCadApiError.is(unknown, ApiStatusCode.AS_BAD_REQUEST)).toBe(true);
+    expect((unknown as KiCadApiError).serverMessage).toContain("see ListWizards");
+    if (!list.length) {
+      record("RunWizard", "pass", "no wizards installed; unknown identifier answers AS_BAD_REQUEST (\"no wizard '...'; see ListWizards\")");
+      return;
+    }
+    const w = list[0]!;
+    const r = await k().libraries.runWizard(w.meta!.identifier);
+    expect(r.status).toBe(WizardGenerationStatus.WGS_OK);
+    expect(r.footprint).toBeInstanceOf(LibFootprint);
+    return `${w.meta!.identifier} generated a footprint with ${r.footprint!.padCount} pads`;
+  });
+  extraTest("Events: ProjectChanged{PCK_LIBRARY_TABLES} for library table edits", async () => {
+    if (!events) throw new Error(`no events subscriber: ${eventsError}`);
+    const seen: ProjectChangeKind[] = [];
+    const off = events.onProjectChanged((e) => seen.push(e.kind), [ProjectChangeKind.PCK_LIBRARY_TABLES]);
+    const next = events.next("projectChanged", { timeoutMs: 10_000, filter: (e) => e.kind === ProjectChangeKind.PCK_LIBRARY_TABLES });
+    await k().libraries.footprints.addTableRow("project", { nickname: "conf_evt", uri: join(tmp.dir, "conf_evt.pretty") });
+    const ev = await next;
+    expect(ev.kind).toBe(ProjectChangeKind.PCK_LIBRARY_TABLES);
+    expect(ev.project?.name).toBe("api_kitchen_sink");
+    await k().libraries.footprints.removeTableRow("project", "conf_evt");
+    await Bun.sleep(200);
+    off();
+    expect(seen.length).toBeGreaterThanOrEqual(2);
+    return `${seen.length} PCK_LIBRARY_TABLES events (add + remove), client "${ev.clientName}"`;
+  });
+
   // ---- board/commands -----------------------------------------------------------------------------------
   cmdTest("GetBoardStackup", async () => {
     const s = await board.stackup();
@@ -1183,6 +1523,26 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
   cmdTest("GetGraphicsDefaults", async () => {
     const d = await board.graphicsDefaults();
     expect(d?.layers.length ?? 0).toBeGreaterThan(0);
+    return `${d!.layers.length} layer classes`;
+  });
+  cmdTest("SetGraphicsDefaults", async () => {
+    const before = (await board.graphicsDefaults())!;
+    const first = before.layers[0]!;
+    const width = Number(first.lineThickness?.valueNm ?? 0n);
+    const r = await board.setGraphicsDefaults({
+      layers: [{ layer: first.layer, text: first.text, lineThickness: toDistance(width + mm(0.05)) }],
+    });
+    const changed = r!.layers.find((l) => l.layer === first.layer)!;
+    expect(Number(changed.lineThickness!.valueNm)).toBe(width + mm(0.05));
+    // the classes that were not sent keep their values
+    expect(r!.layers.length).toBe(before.layers.length);
+    for (const l of before.layers.slice(1)) {
+      const now = r!.layers.find((x) => x.layer === l.layer)!;
+      expect(now.lineThickness?.valueNm).toBe(l.lineThickness?.valueNm);
+    }
+    await board.setGraphicsDefaults({ layers: [first] });
+    expect(Number((await board.graphicsDefaults())!.layers.find((l) => l.layer === first.layer)!.lineThickness!.valueNm)).toBe(width);
+    return `layer class ${first.layer} line thickness ${(width / 1e6).toFixed(3)} -> ${((width + mm(0.05)) / 1e6).toFixed(3)} mm and back; the other ${before.layers.length - 1} classes untouched`;
   });
   cmdTest("GetBoardDesignRules", async () => {
     const r = await board.designRules();
@@ -1439,6 +1799,444 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     },
     120_000,
   );
+
+  // ---- sch/commands: annotation, settings, fields, board sync (late: these mutate the schematic) ---------
+  cmdTest("GetSchematicSettings", async () => {
+    const s = await sch.settings();
+    expect(Number(s.defaultLineWidth?.valueNm ?? 0n)).toBeGreaterThan(0);
+    expect(Number(s.defaultTextSize?.valueNm ?? 0n)).toBeGreaterThan(0);
+    // every field is optional so SetSchematicSettings can change one at a time
+    expect(s.labelSizeRatio).toBeDefined();
+    return `line ${(Number(s.defaultLineWidth!.valueNm) / 1e6).toFixed(3)} mm, text ${(Number(s.defaultTextSize!.valueNm) / 1e6).toFixed(3)} mm, junction choice ${s.junctionSizeChoice}, DNP markers ${s.showDnpMarkers}, annotate start ${s.annotateStartNumber}, drawing sheet "${s.drawingSheetFile ?? ""}"`;
+  });
+  cmdTest("SetSchematicSettings", async () => {
+    const before = await sch.settings();
+    const r = await sch.setSettings({
+      annotateStartNumber: 200,
+      showDnpMarkers: !(before.showDnpMarkers ?? false),
+      intersheetRefsPrefix: "[",
+    });
+    expect(r.annotateStartNumber).toBe(200);
+    expect(r.showDnpMarkers).toBe(!(before.showDnpMarkers ?? false));
+    expect(r.intersheetRefsPrefix).toBe("[");
+    // fields that were not sent are untouched
+    expect(r.defaultLineWidth?.valueNm).toBe(before.defaultLineWidth?.valueNm);
+    expect((await sch.settings()).annotateStartNumber).toBe(200);
+    await sch.setSettings({
+      annotateStartNumber: before.annotateStartNumber ?? 0,
+      showDnpMarkers: before.showDnpMarkers ?? true,
+      intersheetRefsPrefix: before.intersheetRefsPrefix ?? "",
+    });
+    return `annotate start ${before.annotateStartNumber} -> 200, DNP markers toggled, intersheet prefix "["; unsent fields unchanged (restored afterwards)`;
+  });
+  cmdTest("GetSymbolFieldsTable", async () => {
+    const rows = await sch.fieldsTable();
+    expect(rows.length).toBeGreaterThan(0);
+    const row = rows.find((r) => r.reference)!;
+    expect(row.id).toMatch(UUID);
+    expect(row.sheetPath?.path.length ?? 0).toBeGreaterThan(0);
+    expect(row.unit).toBeGreaterThanOrEqual(1);
+    for (const f of ["Reference", "Value", "Footprint", "Datasheet", "Description"]) expect(Object.keys(row.fields)).toContain(f);
+    expect(row.fields["Reference"]).toBe(row.reference);
+    // power symbols are excluded like the dialog does
+    const withPower = await sch.fieldsTable({ includePowerSymbols: true });
+    expect(withPower.length).toBeGreaterThanOrEqual(rows.length);
+    // a field filter narrows the map
+    const onlyValue = await sch.fieldsTable({ fields: ["Value"] });
+    expect(onlyValue.length).toBe(rows.length);
+    expect(Object.keys(onlyValue[0]!.fields)).toEqual(["Value"]);
+    return `${rows.length} placements (${withPower.length} including power symbols); ${row.reference} on sheet ${row.sheet || "(no human-readable path)"} unit ${row.unit} with ${Object.keys(row.fields).length} fields; field filter honoured`;
+  });
+  cmdTest("SetSymbolFields", async () => {
+    const rows = await sch.fieldsTable();
+    const row = rows.find((r) => r.reference)!;
+    const before = row.fields["Value"] ?? "";
+    const r = await sch.setFields([
+      { id: row.id, sheetPath: row.sheetPath!, field: "Value", value: `${before}-conf` },
+      { id: row.id, field: "ConfProbe", value: "set by the API" },
+    ]);
+    expect(r.updatedCount).toBe(2);
+    expect(r.errors).toEqual([]);
+    const after = (await sch.fieldsTable()).find((x) => x.id === row.id)!;
+    expect(after.fields["Value"]).toBe(`${before}-conf`);
+    expect(after.fields["ConfProbe"]).toBe("set by the API");
+    // removing a user field works; removing a mandatory one is reported as an error
+    const rm = await sch.setFields([
+      { id: row.id, field: "ConfProbe", remove: true },
+      { id: row.id, field: "Reference", sheetPath: row.sheetPath!, remove: true },
+    ]);
+    const back = (await sch.fieldsTable()).find((x) => x.id === row.id)!;
+    expect(back.fields["ConfProbe"]).toBeUndefined();
+    expect(back.fields["Reference"]).toBe(row.reference);
+    const unknown = await sch.setFields([{ id: crypto.randomUUID(), field: "Value", value: "x" }]);
+    expect(unknown.updatedCount).toBe(0);
+    expect(unknown.errors.length).toBe(1);
+    await sch.setFields([{ id: row.id, sheetPath: row.sheetPath!, field: "Value", value: before }]);
+    return `Value + a new user field set on ${row.reference} (${r.updatedCount} updates); user field removed, mandatory Reference removal reported (${rm.errors.length} error(s): ${rm.errors[0] ?? "none"}); unknown symbol -> ${unknown.errors[0] ?? "no error"}`;
+  });
+  cmdTest("AssignFootprints", async () => {
+    const rows = await sch.fieldsTable();
+    const row = rows.find((r) => r.reference)!;
+    const before = row.fields["Footprint"] ?? "";
+    const r = await sch.assignFootprints({
+      [row.reference]: "Resistor_SMD:R_0603_1608Metric",
+      NOSUCHREF99: "Resistor_SMD:R_0402_1005Metric",
+    });
+    expect(r.assignedCount).toBe(1);
+    expect(r.unmatchedReferences).toEqual(["NOSUCHREF99"]);
+    const after = (await sch.fieldsTable()).find((x) => x.id === row.id)!;
+    expect(after.fields["Footprint"]).toBe("Resistor_SMD:R_0603_1608Metric");
+    // the array form is accepted too, and restores the original value
+    await sch.assignFootprints([{ reference: row.reference, footprint: before }]);
+    expect((await sch.fieldsTable()).find((x) => x.id === row.id)!.fields["Footprint"]).toBe(before);
+    return `${row.reference} assigned Resistor_SMD:R_0603_1608Metric (restored afterwards); unknown reference reported in unmatched_references`;
+  });
+  cmdTest("ClearAnnotation", async () => {
+    const before = (await sch.fieldsTable()).map((r) => r.reference);
+    const r = await sch.clearAnnotation("all");
+    expect(r.annotatedCount).toBeGreaterThan(0);
+    expect(r.symbolCount).toBeGreaterThanOrEqual(r.annotatedCount);
+    expect(r.messages.length).toBe(r.annotatedCount);
+    const cleared = (await sch.fieldsTable()).map((r2) => r2.reference);
+    expect(cleared.every((ref) => ref.endsWith("?"))).toBe(true);
+    // put the references back for the tests that follow
+    await sch.annotate({ scope: "all", resetExisting: true, sortOrder: "x", numbering: "incremental" });
+    return `${r.annotatedCount} of ${r.symbolCount} symbols cleared to "?" (${before.slice(0, 3).join(", ")} -> ${cleared.slice(0, 3).join(", ")}); "${r.messages[0]}"`;
+  });
+  cmdTest("Annotate", async () => {
+    // a fully annotated schematic is a no-op
+    const noop = await sch.annotate({ scope: "all" });
+    expect(noop.annotatedCount).toBe(0);
+    expect(noop.symbolCount).toBeGreaterThan(0);
+    expect(noop.errorCount).toBe(0);
+    // reset_existing renumbers everything
+    const full = await sch.annotate({ scope: "all", resetExisting: true, sortOrder: "y", numbering: "incremental", startNumber: 1 });
+    expect(full.annotatedCount).toBeGreaterThan(0);
+    expect(full.messages.length).toBe(full.annotatedCount);
+    const refs = (await sch.fieldsTable()).map((r) => r.reference);
+    expect(refs.every((ref) => /^[A-Za-z#_]+\d+$/.test(ref))).toBe(true);
+    expect(new Set(refs).size).toBe(refs.length);
+    // sheet numbering starts each sheet at sheet * 100
+    const bySheet = await sch.annotate({ scope: "all", resetExisting: true, numbering: "sheetX100" });
+    expect(bySheet.annotatedCount).toBeGreaterThan(0);
+    const sheetRefs = (await sch.fieldsTable()).map((r) => r.reference);
+    // one sheet only
+    const root = await sch.rootSheet();
+    const oneSheet = await sch.annotate({ scope: "sheet", sheetPath: root.path, resetExisting: true, recursive: false });
+    expect(oneSheet.symbolCount).toBeLessThanOrEqual(full.symbolCount);
+    await sch.annotate({ scope: "all", resetExisting: true, sortOrder: "x", numbering: "incremental" });
+    return `already annotated -> 0 of ${noop.symbolCount}; reset_existing renumbered ${full.annotatedCount} ("${full.messages[0]}"); ANM_SHEET_NUMBER_X100 gave [${sheetRefs.slice(0, 4).join(", ")}]; ANS_SHEET on the root touched ${oneSheet.symbolCount} symbol(s)`;
+  });
+  cmdTest(
+    "SyncSchematicToBoard",
+    async () => {
+      // "Update PCB from Schematic" needs a board and a schematic open in the same instance; run
+      // it on the scratch server, in a project made of the kitchen-sink schematic plus a fresh board.
+      const s = await scratchServer();
+      const dir = join(scratchDir, "sync");
+      await mkdir(dir, { recursive: true });
+      await cp(KITCHEN_SINK_SCH, join(dir, "sync.kicad_sch"));
+      for (const f of await readdir(dirname(KITCHEN_SINK_SCH))) {
+        if (f.startsWith("erc_test_dynamic_power_symbol_subsheet")) await cp(join(dirname(KITCHEN_SINK_SCH), f), join(dir, f));
+      }
+      await writeFile(
+        join(dir, "fp-lib-table"),
+        `(fp_lib_table\n  (version 7)\n  (lib (name "Resistor_SMD") (type "KiCad") (uri "${QA_RESISTOR_LIB}") (options "") (descr "QA resistors"))\n)\n`,
+      );
+      const proj = await s.kicad.newProject(dir, { skipStubDocuments: true });
+      const schematic = await s.kicad.openSchematic(join(dir, "sync.kicad_sch"));
+      const brd = await proj.newBoard();
+      expect(await brd.getFootprints()).toEqual([]);
+
+      // an unannotated schematic is refused, exactly as the dialog is
+      await schematic.clearAnnotation("all");
+      const refused = await schematic.syncToBoard(brd, { dryRun: true }).then(
+        () => undefined,
+        (e: unknown) => e,
+      );
+      expect(KiCadApiError.is(refused, ApiStatusCode.AS_BAD_REQUEST)).toBe(true);
+      expect((refused as KiCadApiError).serverMessage).toContain("annotated");
+      await schematic.annotate({ scope: "all", resetExisting: true });
+
+      // give every symbol a footprint so the updater has something to place
+      const refs = [...new Set((await schematic.fieldsTable()).map((r) => r.reference).filter(Boolean))];
+      const assigned = await schematic.assignFootprints(Object.fromEntries(refs.map((r) => [r, "Resistor_SMD:R_0603_1608Metric"])));
+      expect(assigned.assignedCount).toBe(refs.length);
+
+      const dry = await schematic.syncToBoard(brd, { dryRun: true });
+      expect(dry.newFootprintCount).toBe(refs.length);
+      expect(dry.report).toContain("Add ");
+      expect(dry.netlistPath.length).toBeGreaterThan(0);
+      expect(await brd.getFootprints()).toEqual([]); // dry run changed nothing
+
+      const applied = await schematic.syncToBoard(brd);
+      expect(applied.errorCount).toBe(0);
+      expect(applied.newFootprintCount).toBe(refs.length);
+      expect(applied.report).toContain("Added ");
+      const fps = await brd.getFootprints();
+      expect(fps.length).toBe(refs.length);
+      expect(new Set(fps.map((f) => f.reference))).toEqual(new Set(refs));
+      expect(fps.every((f) => f.libraryId === "Resistor_SMD:R_0603_1608Metric")).toBe(true);
+      // the nets came across with the footprints
+      const nets = (await brd.nets()).map((n) => n.name).filter(Boolean);
+      expect(nets.length).toBeGreaterThan(0);
+      // the temporary netlist file is removed by the server
+      expect(existsSync(applied.netlistPath)).toBe(false);
+      // a second sync is idempotent
+      const again = await schematic.syncToBoard(brd);
+      expect(again.newFootprintCount).toBe(0);
+      expect((await brd.getFootprints()).length).toBe(refs.length);
+      return `${refs.length} symbols -> ${fps.length} footprints on a fresh board (${nets.length} nets, ${applied.warningCount} warnings, 0 errors); dry run changed nothing; the temporary netlist ${applied.netlistPath.split("/").pop()} is removed; a repeat sync adds 0`;
+    },
+    180_000,
+  );
+  extraTest("CreateItems(SCH_SHEET): the sheet file KiCad names is written to disk", async () => {
+    // A8 reported that a new sheet is referenced by the parent but its file is never written.
+    const root = await sch.rootSheet();
+    const filename = "conf_new_sheet.kicad_sch";
+    const target = join(tmp.dir, filename);
+    await rm(target, { force: true });
+    const sheet = await sch.newSheet({
+      parentPath: root.path,
+      name: "ConfSheet",
+      filename,
+      position: { x: mm(200), y: mm(100) },
+      size: { x: mm(30), y: mm(20) },
+    });
+    expect(sheet.name).toBe("ConfSheet");
+    expect(sheet.filename).toBe(filename);
+    const afterCreate = existsSync(target);
+    await sch.save();
+    const afterSave = existsSync(target);
+    const parent = await readFile(tmp.sch, "utf8");
+    expect(parent).toContain(filename);
+    const names = flattenHierarchy(await sch.hierarchy()).map(({ sheet: s }) => s.name);
+    expect(names).toContain("ConfSheet");
+    if (!afterSave) {
+      throw new Error(
+        `KICAD-BUG: ${filename} is referenced by the parent schematic and appears in GetSchematicHierarchy, but no file was written by CreateItems or SaveDocument`,
+      );
+    }
+    expect((await readFile(target, "utf8")).startsWith("(kicad_sch")).toBe(true);
+    // naming an existing file adopts it rather than overwriting it
+    const reused = await sch.newSheet({ parentPath: root.path, name: "ConfReused", filename, position: { x: mm(250), y: mm(100) } });
+    expect(reused.filename).toBe(filename);
+    expect(flattenHierarchy(await sch.hierarchy()).map(({ sheet: s }) => s.name)).toContain("ConfReused");
+    return `CreateItems(SCH_SHEET) attaches a screen and writes ${filename} immediately (on disk before SaveDocument: ${afterCreate}); the parent references it and GetSchematicHierarchy lists it -- A8's report no longer reproduces at this commit; a second sheet naming the same file adopts the existing screen`;
+  });
+
+  // ---- board/commands: connectivity + global edits (late: these mutate the board and undo again) ---------
+  /**
+   * Runs `fn` on a board with every track, arc, via and zone removed (so the ratsnest has
+   * something to report), then undoes the deletion.
+   */
+  async function ripUp<T>(fn: (deleted: number) => Promise<T>): Promise<T> {
+    const deleted = await board.globalDeletion({
+      types: [KiCadObjectType.KOT_PCB_TRACE, KiCadObjectType.KOT_PCB_ARC, KiCadObjectType.KOT_PCB_VIA, KiCadObjectType.KOT_PCB_ZONE],
+    });
+    try {
+      return await fn(deleted);
+    } finally {
+      await board.undo();
+    }
+  }
+
+  cmdTest("GetRatsnest", async () => {
+    // the kitchen sink is fully routed: no airlines
+    const routed = await board.ratsnest();
+    expect(routed.edges).toEqual([]);
+    expect(routed.unroutedCount).toBe(0);
+    const note = await ripUp(async () => {
+      const r = await board.ratsnest();
+      expect(r.edges.length).toBeGreaterThan(0);
+      expect(r.unroutedCount).toBe(r.edges.length);
+      const e = r.edges[0]!;
+      expect(e.net.length).toBeGreaterThan(0);
+      expect(e.source).toMatch(UUID);
+      expect(e.target).toMatch(UUID);
+      expect(e.source).not.toBe(e.target);
+      expect(e.length).toBeGreaterThan(0);
+      // the airline length is the distance between the two anchors
+      const dx = e.targetPosition.x - e.sourcePosition.x;
+      const dy = e.targetPosition.y - e.sourcePosition.y;
+      expect(Math.abs(Math.hypot(dx, dy) - e.length)).toBeLessThan(2);
+      // a net filter narrows `edges` but `unrouted_count` stays board-wide
+      const one = await board.ratsnest([e.net]);
+      expect(one.edges.every((x) => x.net === e.net)).toBe(true);
+      expect(one.unroutedCount).toBe(r.unroutedCount);
+      const unknown = await board.ratsnest(["no-such-net"]).then(
+        () => undefined,
+        (x: unknown) => x,
+      );
+      expect(KiCadApiError.is(unknown, ApiStatusCode.AS_BAD_REQUEST)).toBe(true);
+      // KICAD-BUG: RatsnestEdge.net only carries the name; `code` is left at 0.
+      const codes = r.edges.map((x) => x.netCode);
+      return `${r.edges.length} airlines after rip-up (net "${e.net}", ${(e.length / 1e6).toFixed(3)} mm, positions match the length); filter by net -> ${one.edges.length} edges with the board-wide unrouted_count ${one.unroutedCount}; unknown net AS_BAD_REQUEST${codes.every((x) => x === 0) ? "; KICAD-BUG: RatsnestEdge.net.code is left 0 (only the name is packed)" : ""}`;
+    });
+    expect((await board.ratsnest()).edges).toEqual([]);
+    return `fully routed board: 0 edges; ${note}`;
+  });
+  cmdTest("GetUnroutedCount", async () => {
+    const routed = await board.unroutedCount();
+    expect(routed.unroutedCount).toBe(0);
+    expect(routed.unroutedNetCount).toBe(0);
+    return await ripUp(async () => {
+      const u = await board.unroutedCount();
+      const r = await board.ratsnest();
+      expect(u.unroutedCount).toBe(r.unroutedCount);
+      expect(u.unroutedNetCount).toBeGreaterThan(0);
+      expect(u.unroutedNetCount).toBeLessThanOrEqual(u.unroutedCount);
+      return `routed board 0/0; ripped up ${u.unroutedCount} unrouted connection(s) over ${u.unroutedNetCount} net(s), agreeing with GetRatsnest`;
+    });
+  });
+  cmdTest("GetNetLengths", async () => {
+    const all = await board.netLengths();
+    expect(all.length).toBeGreaterThan(0);
+    const named = all.find((l) => (l.net?.name ?? "") !== "") ?? all[0]!;
+    expect(named.padCount).toBeGreaterThan(0);
+    const total = Number(named.totalLength?.valueNm ?? 0n);
+    expect(total).toBeGreaterThan(0);
+    expect(Number(named.unroutedLength?.valueNm ?? 0n)).toBe(0);
+    const parts =
+      Number(named.trackLength?.valueNm ?? 0n) + Number(named.viaLength?.valueNm ?? 0n) + Number(named.padToDieLength?.valueNm ?? 0n);
+    expect(Math.abs(parts - total)).toBeLessThanOrEqual(1);
+    // filtering by name returns just that net; an unknown name is rejected
+    const one = await board.netLengths([named.net!.name]);
+    expect(one.length).toBe(1);
+    expect(one[0]!.net?.name).toBe(named.net!.name);
+    const unknown = await board.netLengths(["no-such-net"]).then(
+      () => undefined,
+      (e: unknown) => e,
+    );
+    expect(KiCadApiError.is(unknown, ApiStatusCode.AS_BAD_REQUEST)).toBe(true);
+    const delayed = await board.netLengths([named.net!.name], { withDelays: true });
+    expect(delayed.length).toBe(1);
+    const unroutedNote = await ripUp(async () => {
+      const after = (await board.netLengths([named.net!.name]))[0]!;
+      expect(Number(after.totalLength?.valueNm ?? 0n)).toBe(0);
+      const unrouted = Number(after.unroutedLength?.valueNm ?? 0n);
+      expect(unrouted).toBeGreaterThan(0);
+      return `after rip-up the same net reports 0 routed and ${(unrouted / 1e6).toFixed(3)} mm unrouted`;
+    });
+    return `${all.length} net(s); "${named.net!.name}": ${named.padCount} pads, ${named.viaCount} vias, ${(total / 1e6).toFixed(3)} mm total over ${named.layerLengths.length} layer(s) (track+via+pad-to-die adds up); ${unroutedNote}; with_delays -> ${delayed[0]!.totalDelayPs} ps`;
+  });
+  cmdTest("GlobalDeletion", async () => {
+    const countOf = async (t: KiCadObjectType) => (await board.itemCounts()).counts.get(t) ?? 0;
+    const textsBefore = await countOf(KiCadObjectType.KOT_PCB_TEXT);
+    const deletedTexts = await board.globalDeletion({ types: [KiCadObjectType.KOT_PCB_TEXT] });
+    expect(deletedTexts).toBe(textsBefore);
+    expect(await countOf(KiCadObjectType.KOT_PCB_TEXT)).toBe(0);
+    await board.undo();
+    expect(await countOf(KiCadObjectType.KOT_PCB_TEXT)).toBe(textsBefore);
+    // a layer filter restricts the deletion; Edge.Cuts shapes survive unless board_edges is set
+    const shapesBefore = await countOf(KiCadObjectType.KOT_PCB_SHAPE);
+    const onEdgeCuts = await board.globalDeletion({ types: [KiCadObjectType.KOT_PCB_SHAPE], layers: [BoardLayer.BL_Edge_Cuts] });
+    expect(onEdgeCuts).toBe(0);
+    expect(await countOf(KiCadObjectType.KOT_PCB_SHAPE)).toBe(shapesBefore);
+    const withEdges = await board.globalDeletion({
+      types: [KiCadObjectType.KOT_PCB_SHAPE],
+      layers: [BoardLayer.BL_Edge_Cuts],
+      boardEdges: true,
+    });
+    expect(await countOf(KiCadObjectType.KOT_PCB_SHAPE)).toBe(shapesBefore - withEdges);
+    if (withEdges) await board.undo();
+    expect(await countOf(KiCadObjectType.KOT_PCB_SHAPE)).toBe(shapesBefore);
+    // a type the board has none of deletes nothing; an empty type list is refused
+    const barcodes = await countOf(KiCadObjectType.KOT_PCB_BARCODE);
+    const deletedBarcodes = await board.globalDeletion({ types: [KiCadObjectType.KOT_PCB_BARCODE] });
+    expect(deletedBarcodes).toBe(barcodes);
+    if (deletedBarcodes) await board.undo();
+    const none = await board.globalDeletion({ types: [] }).then(
+      () => undefined,
+      (e: unknown) => e,
+    );
+    expect(KiCadApiError.is(none, ApiStatusCode.AS_BAD_REQUEST)).toBe(true);
+    const tracks = await ripUp(async (n) => {
+      expect(await countOf(KiCadObjectType.KOT_PCB_TRACE)).toBe(0);
+      expect(await countOf(KiCadObjectType.KOT_PCB_VIA)).toBe(0);
+      return n;
+    });
+    expect(await countOf(KiCadObjectType.KOT_PCB_TRACE)).toBeGreaterThan(0);
+    return `texts ${deletedTexts} deleted and restored by Undo; Edge.Cuts shape filter removed ${onEdgeCuts} of ${shapesBefore} shapes without board_edges and ${withEdges} with it; ${deletedBarcodes} barcode(s); an empty type list is AS_BAD_REQUEST; tracks/arcs/vias/zones ${tracks} deleted and restored`;
+  });
+  cmdTest("UpdateFootprintsFromLibrary", async () => {
+    const r = await board.updateFootprintsFromLibrary([], { onlyChanged: true });
+    expect(r.updatedCount + r.unchangedCount).toBeGreaterThan(0);
+    expect(r.messages.length).toBeGreaterThan(0);
+    // footprints whose library is not in the project table are reported, not silently skipped
+    for (const ref of r.missing) expect(r.messages.some((m) => m.startsWith(`${ref} `))).toBe(true);
+    if (r.updatedCount) await board.undo();
+    // "Change Footprints": point one footprint at another library entry
+    const fp = (await board.getFootprints()).find((f) => f.libraryId.startsWith("Resistor_SMD:"))!;
+    expect(fp).toBeDefined();
+    const changed = await board.updateFootprintsFromLibrary([fp.id], { newFootprint: "Resistor_SMD:R_0402_1005Metric" });
+    expect(changed.updatedCount).toBe(1);
+    expect(
+      ((await board.getItem(fp.id)) as Footprint | undefined)?.libraryId ??
+        (await board.getFootprints()).find((f) => f.reference === fp.reference)!.libraryId,
+    ).toBe("Resistor_SMD:R_0402_1005Metric");
+    await board.undo();
+    return `only_changed over the whole board: ${r.updatedCount} updated, ${r.unchangedCount} unchanged, missing library footprints for [${r.missing.join(", ")}]; new_footprint changed ${fp.reference} to R_0402_1005Metric (undone)`;
+  });
+  cmdTest("SetTeardrops", async () => {
+    const n = await board.setTeardrops({ vias: true, pthPads: true, smdPads: true });
+    expect(n).toBeGreaterThan(0);
+    await board.undo();
+    // TDA_SET with explicit parameters
+    const set = await board.setTeardrops(
+      { vias: true, pthPads: true, smdPads: true },
+      {
+        mode: PadTeardropMode.PTM_ENABLED,
+        bestLengthRatio: 0.5,
+        bestWidthRatio: 1,
+        maxLength: toDistance(mm(1)),
+        maxWidth: toDistance(mm(2)),
+      },
+    );
+    expect(set).toBeGreaterThan(0);
+    await board.undo();
+    // round shapes only, and a net filter, are both accepted
+    const round = await board.setTeardrops({ vias: true, roundShapesOnly: true });
+    if (round) await board.undo();
+    const byNet = netNames.filter(Boolean).length
+      ? await board.setTeardrops({ vias: true, nets: netNames.filter(Boolean).slice(0, 1) })
+      : 0;
+    if (byNet) await board.undo();
+    return `TDA_ADD on vias + PTH + SMD pads: ${n} items; TDA_SET with explicit parameters: ${set}; round shapes only: ${round}; restricted to net "${netNames.filter(Boolean)[0] ?? "-"}": ${byNet}`;
+  });
+  cmdTest("RemoveTeardrops", async () => {
+    const added = await board.setTeardrops({ vias: true, pthPads: true, smdPads: true });
+    const removed = await board.removeTeardrops();
+    expect(removed).toBeGreaterThanOrEqual(0);
+    await board.undo();
+    await board.undo();
+    // removing when there are none is a no-op, not an error
+    const none = await board.removeTeardrops();
+    if (none) await board.undo();
+    return `${added} pads/vias given teardrops, RemoveTeardrops reported ${removed}; a second call still reports ${none} -- KICAD-BUG: SetTeardropsResponse.item_count is documented as "pads and vias whose teardrop settings changed" but api_handler_pcb.cpp counts every pad/via it processes, so it never reaches 0`;
+  });
+  cmdTest("AutoplaceFootprints", async () => {
+    const fps = await board.getFootprints();
+    const homes = new Map(fps.map((f) => [f.id, f.position]));
+    const r = await board.autoplace(
+      fps.slice(0, 2).map((f) => f.id),
+      { includeOffboard: true },
+    );
+    let note: string;
+    if (r.ok) {
+      expect(r.placedCount).toBeGreaterThan(0);
+      const moved = (await board.getFootprints()).filter((f) => {
+        const h = homes.get(f.id);
+        return h && (h.x !== f.position.x || h.y !== f.position.y);
+      });
+      note = `APR_COMPLETED, ${r.placedCount} footprint(s) placed inside the board outline (${moved.length} moved)`;
+      await board.undo();
+    } else {
+      note = `${r.result === 2 ? "APR_NO_BOARD_OUTLINE" : `result ${r.result}`}, nothing placed`;
+    }
+    // A board with no outline answers APR_NO_BOARD_OUTLINE rather than failing.
+    return `${note}; the API has no bounding box parameter — the board outline is the placement area`;
+  });
 
   // ---- symbol document (not a command; OpenDocument(DOCTYPE_SYMBOL)) ------------------------------------------
   extraTest("OpenDocument(DOCTYPE_SYMBOL): headless symbol document items / counts / commit", async () => {

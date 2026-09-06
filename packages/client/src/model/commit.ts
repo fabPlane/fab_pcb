@@ -9,7 +9,7 @@ import type { Any } from "@bufbuild/protobuf/wkt";
 import { CommitAction, ItemDeletionStatus, ItemRequestStatus, ItemStatusCode, KiCadObjectType, type ItemStatus } from "@kicad-web/proto";
 import * as cmd from "../commands";
 import { CommitDroppedError, KiCadItemError, type ItemFailure } from "../errors";
-import type { Document, ItemScope } from "./document";
+import type { Document, ItemScope, UndoRedoResult } from "./document";
 import { Item, toAnyItem, wrapAny } from "./items";
 
 export type ItemInput = Item | Message | Any;
@@ -96,7 +96,8 @@ export class Commit {
   /** `CreateItems`. Items with an empty id get a fresh UUID so the store can track them optimistically. */
   create(items: readonly ItemInput[], scope?: ItemScope): Promise<Item[]> {
     const wrappers = items.map(toWrapper);
-    for (const w of wrappers) if (!w.id && w.schema.fields.some((f) => f.name === "id" && f.fieldKind === "message")) w.id = crypto.randomUUID();
+    for (const w of wrappers)
+      if (!w.id && w.schema.fields.some((f) => f.name === "id" && f.fieldKind === "message")) w.id = crypto.randomUUID();
     return this.enqueue("create", wrappers, scope) as Promise<Item[]>;
   }
 
@@ -153,6 +154,27 @@ export class Commit {
     } catch {
       /* best effort */
     }
+  }
+
+  /**
+   * Undoes this commit after it was pushed, through KiCad's own undo stack (`Undo`, KiCad >=
+   * 11.0) rather than by replaying inverse patches client-side: the server holds the authoritative
+   * history, so its undo also restores state the client never mirrored (zone fills, connectivity,
+   * netlist changes). Only valid while this commit is still the newest entry on the document's
+   * undo stack — anything pushed after it would be undone instead, so this throws when
+   * `GetUndoStack`'s last undo entry carries a different commit id. Throws `KiCadApiError` when
+   * the server predates `Undo`; `drop()` is the pre-push equivalent.
+   */
+  async undo(): Promise<UndoRedoResult> {
+    if (!this.ended) throw new Error(`commit ${this.id || "(one-shot)"} has not been pushed yet — use drop()`);
+    if (this.id) {
+      const top = (await this.doc.undoStack()).undo.at(-1);
+      const topId = top?.commitId?.value ?? "";
+      if (topId && topId !== this.id) {
+        throw new Error(`commit ${this.id} is no longer the top of the undo stack (${top?.description ?? topId})`);
+      }
+    }
+    return this.doc.undo(1);
   }
 
   /** Runs `fn`, pushing on success and dropping on throw. */
@@ -272,7 +294,9 @@ export class Commit {
       const rows =
         op.kind === "create"
           ? await cmd.createItems(doc.client, { header, items: op.anys }).then((r) => (this.checkStatus(r.status, command), r.createdItems))
-          : await cmd.updateItems(doc.client, { header, items: op.anys }).then((r) => (this.checkStatus(r.status, command), r.updatedItems));
+          : await cmd
+              .updateItems(doc.client, { header, items: op.anys })
+              .then((r) => (this.checkStatus(r.status, command), r.updatedItems));
       const canonical: (Item | undefined)[] = [];
       const failures: ItemFailure[] = [];
       rows.forEach((row: { status?: ItemStatus; item?: Any }, i) => {

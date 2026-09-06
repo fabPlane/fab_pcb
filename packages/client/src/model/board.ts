@@ -11,9 +11,15 @@ import {
   CustomRulesStatus,
   DrcSeverity,
   EmbeddedFilesSchema,
+  GraphicsDefaultsSchema,
   ItemStatusCode,
   KiCadObjectType,
+  LockFilter,
+  NetSchema,
   NetlistMatchMode,
+  AutoplaceResult,
+  PadTeardropSettingsSchema,
+  TeardropAction,
   type BoardDesignRules,
   type BoardPlotSettings,
   type BoardStackup,
@@ -21,14 +27,16 @@ import {
   type EmbeddedFile,
   type EmbeddedFileSchema,
   type GraphicsDefaults,
+  type LibraryIdentifier,
   type Net,
   type NetClass,
+  type NetLength,
   type PadstackPresence,
   type PolygonWithHoles,
 } from "@kicad-web/proto";
 import * as cmd from "../commands";
 import { KiCadItemError, type ItemFailure } from "../errors";
-import { toVector2, vec2, type Vec2 } from "../units";
+import { nm, toVector2, vec2, type Vec2 } from "../units";
 import { Document, checkItemRequestStatus, type DocumentKind, type ItemScope } from "./document";
 import {
   Arc,
@@ -46,6 +54,7 @@ import {
   type Item,
 } from "./items";
 import { toEmbeddedFile, type EmbeddedFileInput } from "./embedded";
+import { toLibraryId, type LibIdLike } from "./libraries";
 import { BoardDrc } from "./checks";
 import { BoardJobs } from "./jobs";
 import { DocumentSync } from "../store/document-sync";
@@ -68,6 +77,72 @@ export interface NetlistImportResult {
   warningCount: number;
   newFootprintCount: number;
   report: string;
+}
+
+/** One unrouted connection (airline) of the ratsnest, with positions in nanometres. */
+export interface RatsnestEdge {
+  net: string;
+  netCode: number;
+  /** KIID of the copper item (pad, via, track, zone) at each end. */
+  source: string;
+  target: string;
+  sourcePosition: Vec2;
+  targetPosition: Vec2;
+  /** Straight-line distance between the ends, nanometres. */
+  length: number;
+}
+
+export interface Ratsnest {
+  edges: RatsnestEdge[];
+  /** Unrouted connections on the whole board, not only the requested nets. */
+  unroutedCount: number;
+}
+
+export interface UnroutedCount {
+  unroutedCount: number;
+  /** Nets with at least one unrouted connection. */
+  unroutedNetCount: number;
+}
+
+export interface FootprintUpdateResult {
+  updatedCount: number;
+  /** Footprints left alone because they already matched the library (`onlyChanged`). */
+  unchangedCount: number;
+  /** References whose library footprint could not be loaded. */
+  missing: string[];
+  messages: string[];
+}
+
+/** Which pads and vias `setTeardrops` affects. Listing `items` replaces the kind flags. */
+export interface TeardropTargets {
+  vias?: boolean;
+  pthPads?: boolean;
+  smdPads?: boolean;
+  trackToTrack?: boolean;
+  /** Restrict to these pads and vias instead of the kinds above. */
+  items?: readonly string[];
+  /** Restrict to items on these nets. */
+  nets?: readonly string[];
+  roundShapesOnly?: boolean;
+}
+
+export interface AutoplaceOutcome {
+  result: AutoplaceResult;
+  placedCount: number;
+  /** False when the board has no outline to place within (`APR_NO_BOARD_OUTLINE`). */
+  ok: boolean;
+}
+
+export interface GlobalDeletionOptions {
+  /** Item types to delete (footprints, tracks, arcs, vias, zones, shapes, texts, ...). */
+  types: readonly KiCadObjectType[];
+  /** Only items on these layers; empty means every layer. */
+  layers?: readonly BoardLayer[];
+  locked?: "all" | "locked" | "unlocked";
+  /** Also delete board outline shapes (Edge.Cuts). */
+  boardEdges?: boolean;
+  /** Also delete teardrop zones when zones are listed. */
+  teardrops?: boolean;
 }
 
 export class Board extends Document {
@@ -167,6 +242,18 @@ export class Board extends Document {
     return (await cmd.getGraphicsDefaults(this.client, { board: this.specifier })).defaults;
   }
 
+  /**
+   * `SetGraphicsDefaults` (Board Setup > Text & Graphics Defaults): replaces the defaults of the
+   * layer classes present in `defaults`; classes left out keep theirs. Returns the resulting set.
+   */
+  async setGraphicsDefaults(defaults: MessageInitShape<typeof GraphicsDefaultsSchema>): Promise<GraphicsDefaults | undefined> {
+    const res = await cmd.setGraphicsDefaults(this.client, {
+      board: this.specifier,
+      defaults: create(GraphicsDefaultsSchema, defaults),
+    });
+    return res.defaults;
+  }
+
   async designRules(): Promise<{ rules: BoardDesignRules; customRulesStatus: CustomRulesStatus }> {
     const res = await cmd.getBoardDesignRules(this.client, { board: this.specifier });
     return { rules: res.rules ?? create(BoardDesignRulesSchema), customRulesStatus: res.customRulesStatus };
@@ -186,7 +273,10 @@ export class Board extends Document {
 
   /** Replaces the custom rules; returns KiCad's parsed result (`status` CRS_INVALID + `errorText` when rejected). */
   async setCustomRules(rules: readonly MessageInitShape<typeof CustomRuleSchema>[]): Promise<CustomRules> {
-    const res = await cmd.setCustomDesignRules(this.client, { board: this.specifier, rules: rules.map((r) => create(CustomRuleSchema, r)) });
+    const res = await cmd.setCustomDesignRules(this.client, {
+      board: this.specifier,
+      rules: rules.map((r) => create(CustomRuleSchema, r)),
+    });
     return { status: res.status, rules: res.rules, errorText: res.errorText };
   }
 
@@ -245,7 +335,11 @@ export class Board extends Document {
 
   /** Items physically connected to the given items (through copper), optionally filtered by type. */
   async connectedItems(ids: readonly string[], types: readonly KiCadObjectType[] = []): Promise<Item[]> {
-    const res = await cmd.getConnectedItems(this.client, { header: this.header(), items: ids.map((value) => ({ value })), types: [...types] });
+    const res = await cmd.getConnectedItems(this.client, {
+      header: this.header(),
+      items: ids.map((value) => ({ value })),
+      types: [...types],
+    });
     checkItemRequestStatus(res.status, "GetConnectedItems");
     return wrapAll(res.items);
   }
@@ -277,6 +371,154 @@ export class Board extends Document {
       overrideLocks: opts.overrideLocks ?? false,
     });
     return { errorCount: res.errorCount, warningCount: res.warningCount, newFootprintCount: res.newFootprintCount, report: res.report };
+  }
+
+  /**
+   * `GetRatsnest`: the unrouted connections the connectivity engine computes, for `nets` or the
+   * whole board. `unroutedCount` always counts the whole board, so it can exceed `edges.length`
+   * when a net filter is given.
+   */
+  async ratsnest(nets: readonly string[] = []): Promise<Ratsnest> {
+    const res = await cmd.getRatsnest(this.client, {
+      board: this.specifier,
+      nets: nets.map((name) => create(NetSchema, { name })),
+    });
+    return {
+      unroutedCount: res.unroutedCount,
+      edges: res.edges.map((e) => ({
+        net: e.net?.name ?? "",
+        netCode: e.net?.code?.value ?? 0,
+        source: e.source?.value ?? "",
+        target: e.target?.value ?? "",
+        sourcePosition: vec2(e.sourcePosition),
+        targetPosition: vec2(e.targetPosition),
+        length: nm(e.length),
+      })),
+    };
+  }
+
+  /** `GetUnroutedCount`: the same figure as `ratsnest()` without serialising the edges. */
+  async unroutedCount(): Promise<UnroutedCount> {
+    const res = await cmd.getUnroutedCount(this.client, { board: this.specifier });
+    return { unroutedCount: res.unroutedCount, unroutedNetCount: res.unroutedNetCount };
+  }
+
+  /**
+   * `GetNetLengths`: the net inspector's figures (track / via / pad-to-die / unrouted lengths in
+   * nanometres, per-layer breakdown, optional propagation delay) for `nets`, or every net with
+   * pads when empty.
+   */
+  async netLengths(nets: readonly string[] = [], opts: { withDelays?: boolean } = {}): Promise<NetLength[]> {
+    const res = await cmd.getNetLengths(this.client, {
+      board: this.specifier,
+      nets: nets.map((name) => create(NetSchema, { name })),
+      withDelays: opts.withDelays ?? false,
+    });
+    return res.lengths;
+  }
+
+  /**
+   * `UpdateFootprintsFromLibrary` ("Update Footprints from Library", or "Change Footprints" when
+   * `newFootprint` names a replacement). `footprintIds` empty updates every footprint. Every
+   * reset option defaults to true in KiCad except `resetTransform`; pass false to keep the
+   * board's version of that aspect.
+   */
+  async updateFootprintsFromLibrary(
+    footprintIds: readonly string[] = [],
+    opts: {
+      newFootprint?: LibIdLike;
+      onlyChanged?: boolean;
+      matchPadPositions?: boolean;
+      deleteExtraTexts?: boolean;
+      resetTextLayers?: boolean;
+      resetTextEffects?: boolean;
+      resetTextPositions?: boolean;
+      resetTextContent?: boolean;
+      resetFabricationAttributes?: boolean;
+      resetClearanceOverrides?: boolean;
+      reset3dModels?: boolean;
+      resetTransform?: boolean;
+    } = {},
+  ): Promise<FootprintUpdateResult> {
+    const res = await cmd.updateFootprintsFromLibrary(this.client, {
+      board: this.specifier,
+      footprints: footprintIds.map((value) => ({ value })),
+      newFootprint: opts.newFootprint ? (toLibraryId(opts.newFootprint) as LibraryIdentifier) : undefined,
+      onlyChanged: opts.onlyChanged ?? false,
+      matchPadPositions: opts.matchPadPositions ?? false,
+      deleteExtraTexts: opts.deleteExtraTexts,
+      resetTextLayers: opts.resetTextLayers,
+      resetTextEffects: opts.resetTextEffects,
+      resetTextPositions: opts.resetTextPositions,
+      resetTextContent: opts.resetTextContent,
+      resetFabricationAttributes: opts.resetFabricationAttributes,
+      resetClearanceOverrides: opts.resetClearanceOverrides,
+      reset3dModels: opts.reset3dModels,
+      resetTransform: opts.resetTransform ?? false,
+    });
+    return { updatedCount: res.updatedCount, unchangedCount: res.unchangedCount, missing: res.missing, messages: res.messages };
+  }
+
+  /**
+   * `SetTeardrops`: enables (`settings` omitted), edits (`settings` given) or disables
+   * (`remove()`, i.e. `action: "remove"`) teardrops on the chosen pads, vias and track joints, as
+   * the global teardrop dialog does. Returns the number of pads and vias whose settings changed.
+   */
+  async setTeardrops(
+    targets: TeardropTargets = {},
+    settings?: MessageInitShape<typeof PadTeardropSettingsSchema>,
+    action: "add" | "remove" | "set" = settings ? "set" : "add",
+  ): Promise<number> {
+    const res = await cmd.setTeardrops(this.client, {
+      board: this.specifier,
+      action: action === "remove" ? TeardropAction.TDA_REMOVE : action === "set" ? TeardropAction.TDA_SET : TeardropAction.TDA_ADD,
+      vias: targets.vias ?? false,
+      pthPads: targets.pthPads ?? false,
+      smdPads: targets.smdPads ?? false,
+      trackToTrack: targets.trackToTrack ?? false,
+      items: (targets.items ?? []).map((value) => ({ value })),
+      nets: (targets.nets ?? []).map((name) => create(NetSchema, { name })),
+      roundShapesOnly: targets.roundShapesOnly ?? false,
+      settings: settings ? create(PadTeardropSettingsSchema, settings) : undefined,
+    });
+    return res.itemCount;
+  }
+
+  /** `RemoveTeardrops`: drops every teardrop and disables them on every pad and via. */
+  async removeTeardrops(): Promise<number> {
+    const res = await cmd.removeTeardrops(this.client, { board: this.specifier });
+    return res.itemCount;
+  }
+
+  /**
+   * `AutoplaceFootprints`: the legacy autoplacer, which places footprints *inside the board
+   * outline* (there is no bounding-box parameter in the API — the outline is the box). An empty
+   * `footprintIds` places the footprints that are currently outside the outline; with a list,
+   * `includeOffboard` adds those too. Answers `APR_NO_BOARD_OUTLINE` when the board has no outline.
+   */
+  async autoplace(footprintIds: readonly string[] = [], opts: { includeOffboard?: boolean } = {}): Promise<AutoplaceOutcome> {
+    const res = await cmd.autoplaceFootprints(this.client, {
+      board: this.specifier,
+      footprints: footprintIds.map((value) => ({ value })),
+      includeOffboard: opts.includeOffboard ?? false,
+    });
+    return { result: res.result, placedCount: res.placedCount, ok: res.result === AutoplaceResult.APR_COMPLETED };
+  }
+
+  /**
+   * `GlobalDeletion`: deletes every item of the given types, as the Global Deletions dialog does.
+   * Zones on Edge.Cuts and board outline shapes survive unless `boardEdges` is set.
+   */
+  async globalDeletion(opts: GlobalDeletionOptions): Promise<number> {
+    const res = await cmd.globalDeletion(this.client, {
+      board: this.specifier,
+      types: [...opts.types],
+      layers: [...(opts.layers ?? [])],
+      locked: opts.locked === "locked" ? LockFilter.LF_LOCKED : opts.locked === "unlocked" ? LockFilter.LF_UNLOCKED : LockFilter.LF_ALL,
+      boardEdges: opts.boardEdges ?? false,
+      teardrops: opts.teardrops ?? false,
+    });
+    return res.deletedCount;
   }
 
   // --- geometry helpers --------------------------------------------------------------------------------
@@ -321,7 +563,13 @@ export class Board extends Document {
       if (r.status?.code === ItemStatusCode.ISC_OK && r.item) {
         items.push(...wrapAll([r.item]));
       } else {
-        failures.push({ id: ids[i] ?? "", index: i, code: r.status?.code ?? 0, codeName: ItemStatusCode[r.status?.code ?? 0] ?? "", message: r.status?.errorMessage ?? "" });
+        failures.push({
+          id: ids[i] ?? "",
+          index: i,
+          code: r.status?.code ?? 0,
+          codeName: ItemStatusCode[r.status?.code ?? 0] ?? "",
+          message: r.status?.errorMessage ?? "",
+        });
       }
     });
     if (failures.length) throw new KiCadItemError("FlipItems", failures);
@@ -340,12 +588,18 @@ export class Board extends Document {
    * expects the on-disk form; see `model/embedded.ts`), unless `encoded` is set.
    */
   async addEmbeddedFiles(files: readonly (EmbeddedFileInput | MessageInitShape<typeof EmbeddedFileSchema>)[]): Promise<void> {
-    await cmd.addEmbeddedFiles(this.client, { board: this.specifier, files: create(EmbeddedFilesSchema, { files: files.map(toEmbeddedFile) }) });
+    await cmd.addEmbeddedFiles(this.client, {
+      board: this.specifier,
+      files: create(EmbeddedFilesSchema, { files: files.map(toEmbeddedFile) }),
+    });
   }
 
   /** Replaces the embedded file set (an empty list clears it). */
   async setEmbeddedFiles(files: readonly (EmbeddedFileInput | MessageInitShape<typeof EmbeddedFileSchema>)[]): Promise<void> {
-    await cmd.setEmbeddedFiles(this.client, { board: this.specifier, files: create(EmbeddedFilesSchema, { files: files.map(toEmbeddedFile) }) });
+    await cmd.setEmbeddedFiles(this.client, {
+      board: this.specifier,
+      files: create(EmbeddedFilesSchema, { files: files.map(toEmbeddedFile) }),
+    });
   }
 
   /** Adds a DRC marker from an external checker; returns the marker's KIID. */

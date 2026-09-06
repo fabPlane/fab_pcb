@@ -573,6 +573,136 @@
     "headless": "ok"
   },
   {
+    "command": "AddLibraryTableRow",
+    "group": "common/library",
+    "requestType": "kiapi.common.commands.AddLibraryTableRow",
+    "responseType": "kiapi.common.commands.LibraryTableRow",
+    "handlers": [
+      "library"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "CreateLibrary",
+    "group": "common/library",
+    "requestType": "kiapi.common.commands.CreateLibrary",
+    "responseType": "kiapi.common.commands.LibraryTableRow",
+    "handlers": [
+      "library"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "DeleteLibraryItem",
+    "group": "common/library",
+    "requestType": "kiapi.common.commands.DeleteLibraryItem",
+    "responseType": "google.protobuf.Empty",
+    "handlers": [
+      "library"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "GetLibraryItem",
+    "group": "common/library",
+    "requestType": "kiapi.common.commands.GetLibraryItem",
+    "responseType": "kiapi.common.commands.GetLibraryItemResponse",
+    "handlers": [
+      "library"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "GetLibraryTables",
+    "group": "common/library",
+    "requestType": "kiapi.common.commands.GetLibraryTables",
+    "responseType": "kiapi.common.commands.GetLibraryTablesResponse",
+    "handlers": [
+      "library"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "ListLibraryEntries",
+    "group": "common/library",
+    "requestType": "kiapi.common.commands.ListLibraryEntries",
+    "responseType": "kiapi.common.commands.ListLibraryEntriesResponse",
+    "handlers": [
+      "library"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "ListWizards",
+    "group": "common/library",
+    "requestType": "kiapi.common.commands.ListWizards",
+    "responseType": "kiapi.common.commands.ListWizardsResponse",
+    "handlers": [
+      "fplib"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "RemoveLibraryTableRow",
+    "group": "common/library",
+    "requestType": "kiapi.common.commands.RemoveLibraryTableRow",
+    "responseType": "google.protobuf.Empty",
+    "handlers": [
+      "library"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "RunWizard",
+    "group": "common/library",
+    "requestType": "kiapi.common.commands.RunWizard",
+    "responseType": "kiapi.common.types.WizardGeneratedContent",
+    "handlers": [
+      "fplib"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "SaveLibraryItem",
+    "group": "common/library",
+    "requestType": "kiapi.common.commands.SaveLibraryItem",
+    "responseType": "kiapi.common.commands.SaveLibraryItemResponse",
+    "handlers": [
+      "library"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "GetAppSettings",
+    "group": "common/settings",
+    "requestType": "kiapi.common.commands.GetAppSettings",
+    "responseType": "kiapi.common.commands.AppSettings",
+    "handlers": [
+      "common"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "GetColorTheme",
+    "group": "common/settings",
+    "requestType": "kiapi.common.commands.GetColorTheme",
+    "responseType": "kiapi.common.commands.ColorThemeResponse",
+    "handlers": [
+      "common"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "ListColorThemes",
+    "group": "common/settings",
+    "requestType": "kiapi.common.commands.ListColorThemes",
+    "responseType": "kiapi.common.commands.ColorThemesResponse",
+    "handlers": [
+      "common"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "AddVariant",
     "group": "common/variant",
     "requestType": "kiapi.common.commands.AddVariant",
@@ -889,7 +1019,8 @@
     "requestType": "kiapi.board.commands.GetGraphicsDefaults",
     "responseType": "kiapi.board.commands.GraphicsDefaultsResponse",
     "handlers": [
-      "board"
+      "board",
+      "pcb"
     ],
     "headless": "ok"
   },
@@ -1148,6 +1279,16 @@
     "group": "board/commands",
     "requestType": "kiapi.board.commands.SetEmbeddedFiles",
     "responseType": "google.protobuf.Empty",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "SetGraphicsDefaults",
+    "group": "board/commands",
+    "requestType": "kiapi.board.commands.SetGraphicsDefaults",
+    "responseType": "kiapi.board.commands.GraphicsDefaultsResponse",
     "handlers": [
       "pcb"
     ],

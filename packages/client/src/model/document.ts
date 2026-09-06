@@ -26,6 +26,7 @@ import {
   type ProjectSpecifier,
   type SheetPath,
   type TitleBlockInfo,
+  type UndoStackEntry,
 } from "@kicad-web/proto";
 import type { KiCadClient } from "../client";
 import * as cmd from "../commands";
@@ -88,6 +89,20 @@ export interface ItemsSince {
    * attributed to items. Replace, do not merge.
    */
   full: boolean;
+}
+
+/** `Undo` / `Redo`: how much was applied and what is left on each stack. */
+export interface UndoRedoResult {
+  /** Commands actually undone or redone — fewer than asked when the stack ran out. */
+  applied: number;
+  undoCount: number;
+  redoCount: number;
+}
+
+/** `GetUndoStack`: both stacks, oldest first (the last entry is what `undo()`/`redo()` takes next). */
+export interface UndoStacks {
+  undo: UndoStackEntry[];
+  redo: UndoStackEntry[];
 }
 
 /** `GetItemCounts`: per-type item counts without serialising anything. */
@@ -226,7 +241,11 @@ export abstract class Document {
    * set with `full: true`. Completeness is decided against `GetItemCounts` taken at the same
    * revision, so a `full: false` result is always a safe delta to merge.
    */
-  async getItemsSince(revision: bigint | undefined, types: readonly KiCadObjectType[] = this.itemTypes, scope?: ItemScope): Promise<ItemsSince> {
+  async getItemsSince(
+    revision: bigint | undefined,
+    types: readonly KiCadObjectType[] = this.itemTypes,
+    scope?: ItemScope,
+  ): Promise<ItemsSince> {
     const full = async (): Promise<ItemsSince> => {
       const res = await this.getItemsResponse(types, scope);
       return { items: wrapAll(res.items), deletedIds: [], revision: res.revision, full: true };
@@ -296,7 +315,8 @@ export abstract class Document {
     const res = await cmd.parseAndCreateItemsFromString(this.client, { document: this.specifierFor(scope), contents });
     checkItemRequestStatus(res.status, "ParseAndCreateItemsFromString");
     const items = wrapAll(res.createdItems.map((r) => r.item).filter((a): a is Any => !!a));
-    if (items.length) this.emitChange({ kind: "create", phase: "applied", items, ids: items.map((i) => i.id), scope: scope ?? {}, commitId: "" });
+    if (items.length)
+      this.emitChange({ kind: "create", phase: "applied", items, ids: items.map((i) => i.id), scope: scope ?? {}, commitId: "" });
     return items;
   }
 
@@ -353,6 +373,39 @@ export abstract class Document {
     }
   }
 
+  // --- undo / redo (KiCad >= 11.0) ------------------------------------------------------------------
+
+  /**
+   * `Undo`: undoes the most recent commands of the document — API commits, API commands that edit
+   * outside a commit (`SetBoardOrigin`, a zone refill, ...), and in the GUI the user's own edits.
+   * KiCad refuses it while any client has an open commit. Returns how many were applied.
+   */
+  async undo(count = 1): Promise<UndoRedoResult> {
+    const res = await cmd.undo(this.client, { document: this.specifier, count });
+    return { applied: res.applied, undoCount: res.undoCount, redoCount: res.redoCount };
+  }
+
+  /** `Redo`: replays commands undone by `undo()`. */
+  async redo(count = 1): Promise<UndoRedoResult> {
+    const res = await cmd.redo(this.client, { document: this.specifier, count });
+    return { applied: res.applied, undoCount: res.undoCount, redoCount: res.redoCount };
+  }
+
+  /** `GetUndoStack`: the undo and redo stacks with their descriptions, client names and commit ids. */
+  async undoStack(): Promise<UndoStacks> {
+    const res = await cmd.getUndoStack(this.client, { document: this.specifier });
+    return { undo: res.undo, redo: res.redo };
+  }
+
+  /**
+   * True when the server implements `Undo`/`Redo`/`GetUndoStack` (KiCad >= 11.0). `Commit.undo()`
+   * and `store/undo.ts`'s `DocumentUndo` use this to prefer KiCad's own undo over replaying
+   * client-side inverse patches.
+   */
+  supportsServerUndo(): Promise<boolean> {
+    return this.client.supports("Undo");
+  }
+
   async hitTest(id: string, position: Vec2, toleranceNm = 0, scope?: ItemScope): Promise<boolean> {
     const res = await cmd.hitTest(this.client, {
       header: this.header(scope),
@@ -364,7 +417,11 @@ export abstract class Document {
   }
 
   /** Bounding boxes (nm) keyed by KIID. KiCad implements this for boards only today. */
-  async boundingBoxes(ids: readonly string[], mode: BoundingBoxMode = BoundingBoxMode.BBM_ITEM_ONLY, scope?: ItemScope): Promise<Map<string, Box>> {
+  async boundingBoxes(
+    ids: readonly string[],
+    mode: BoundingBoxMode = BoundingBoxMode.BBM_ITEM_ONLY,
+    scope?: ItemScope,
+  ): Promise<Map<string, Box>> {
     if (ids.length === 0) return new Map();
     const res = await cmd.getBoundingBox(this.client, { header: this.header(scope), items: ids.map((value) => ({ value })), mode });
     const out = new Map<string, Box>();

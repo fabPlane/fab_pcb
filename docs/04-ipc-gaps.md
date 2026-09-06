@@ -28,6 +28,12 @@ same WebSocket. Cheap interim: `GetDocumentRevision` (monotonic counter bumped i
 **Status:** done (1c372484ca): replaced items are reported as `updated`, and `ProjectChanged` is
 published for project-level commands.
 
+### G20 · Bugs found by the client conformance suite (batch 3)
+`Undo` is documented as refused while a client has an open commit but only refuses when the commit
+has staged changes. `RatsnestEdge.net.code` is always 0 (the handler packs only the name).
+`SetTeardropsResponse.item_count` counts pads and vias processed rather than changed, so
+`RemoveTeardrops` always reports the same number instead of dropping to zero.
+
 ### G19 · Bugs found by the renderer's pixel-diff harness
 `GetTextAsShapes` given a `TextBox` returns its glyphs around the origin instead of at the box
 position (the kitchen-sink "Hello" cell at 25, 24.5 mm comes back at 0.3, 0.6 mm), so a client
@@ -127,6 +133,7 @@ Undo stacks live on frames. Add an `UNDO_REDO_CONTAINER` to the headless context
 and `Undo`, `Redo`, `GetUndoStack`. Until then the client keeps history (see 01).
 
 ### G11 · Settings the UI needs to render like KiCad
+**Status:** done (b743d2b6bd): ListColorThemes, GetColorTheme, GetAppSettings, SetGraphicsDefaults.
 `ListColorThemes`, `GetColorTheme{name}`, `GetAppSettings{app}` (grid, units,
 defaults), `SetGraphicsDefaults`. Read-only first.
 
@@ -140,6 +147,7 @@ Not needed while the bridge runs one server per project. Revisit if the process
 model becomes a problem.
 
 ### G15 · Transport
+**Status:** done (8eafd9cf01): `--socket` accepts ipc/tcp/ws URLs, plus `--token` and `--no-events`.
 Let `--socket` accept a full nng URL (`ws://`, `tcp://`, `ipc://`) in
 `KICAD_API_SERVER::Start` and `command_api_server.cpp`. Enables browser-direct
 WebSocket with nng's built-in `ws` transport. Also add a `--token` option so the

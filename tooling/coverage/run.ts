@@ -34,6 +34,8 @@ export const COMMAND_FILES: ReadonlyArray<{ proto: string; group: string }> = [
   { proto: "common/commands/base_commands.proto", group: "common/base" },
   { proto: "common/commands/project_commands.proto", group: "common/project" },
   { proto: "common/commands/editor_commands.proto", group: "common/editor" },
+  { proto: "common/commands/library_commands.proto", group: "common/library" },
+  { proto: "common/commands/settings_commands.proto", group: "common/settings" },
   { proto: "common/commands/variant_commands.proto", group: "common/variant" },
   { proto: "common/commands/cross_probe_commands.proto", group: "common/crossprobe" },
   { proto: "board/board_commands.proto", group: "board/commands" },
@@ -47,9 +49,16 @@ export const HANDLER_FILES: ReadonlyArray<{ path: string; handler: string; cls: 
   { path: "common/api/api_server.cpp", handler: "server", cls: "API_HANDLER_SERVER (inside the API server, always loaded)" },
   { path: "common/api/api_handler_common.cpp", handler: "common", cls: "API_HANDLER_COMMON" },
   { path: "common/api/api_handler_editor.cpp", handler: "editor", cls: "API_HANDLER_EDITOR" },
+  {
+    path: "common/api/api_handler_library.cpp",
+    handler: "library",
+    cls: "API_HANDLER_LIBRARY (base of the footprint and symbol library handlers)",
+  },
   { path: "pcbnew/api/api_handler_board.cpp", handler: "board", cls: "API_HANDLER_BOARD" },
   { path: "pcbnew/api/api_handler_pcb.cpp", handler: "pcb", cls: "API_HANDLER_PCB" },
   { path: "pcbnew/api/api_handler_footprint.cpp", handler: "footprint", cls: "API_HANDLER_FOOTPRINT" },
+  { path: "pcbnew/api/api_handler_footprint_library.cpp", handler: "fplib", cls: "API_HANDLER_FOOTPRINT_LIBRARY" },
+  { path: "eeschema/api/api_handler_symbol_library.cpp", handler: "symlib", cls: "API_HANDLER_SYMBOL_LIBRARY" },
   { path: "eeschema/api/api_handler_sch.cpp", handler: "sch", cls: "API_HANDLER_SCH" },
   { path: "kicad/cli/command_api_server.cpp", handler: "cli", cls: "kicad-cli api-server" },
 ];
@@ -109,6 +118,22 @@ function gitHead(src: string): string {
 
 export function useWorktree(): boolean {
   return process.env.KICAD_WORKTREE === "1";
+}
+
+/** Every `*_commands.proto` / `*_jobs.proto` under api/proto, as repo-relative paths. */
+async function listCommandProtos(src: string): Promise<string[]> {
+  const r = Bun.spawnSync(
+    useWorktree()
+      ? ["git", "-C", src, "ls-files", "api/proto"]
+      : ["git", "-C", src, "ls-tree", "-r", "--name-only", "HEAD", "api/proto"],
+  );
+  if (r.exitCode !== 0) throw new Error(`git failed listing protos in ${src}: ${r.stderr.toString()}`);
+  return r.stdout
+    .toString()
+    .split("\n")
+    .filter((f) => /_(commands|jobs)\.proto$/.test(f))
+    .map((f) => f.replace(/^api\/proto\//, ""))
+    .sort();
 }
 
 /** Reads a file from the checkout: git HEAD by default, the working tree with KICAD_WORKTREE=1. */
@@ -178,7 +203,13 @@ export function scanHandlerSource(handler: string, text: string): HandlerScan {
   return { handler, registrations, gated };
 }
 
-const PREFERRED_PACKAGES = ["kiapi.common.commands", "kiapi.board.commands", "kiapi.schematic.commands", "kiapi.common.types", "kiapi.common"];
+const PREFERRED_PACKAGES = [
+  "kiapi.common.commands",
+  "kiapi.board.commands",
+  "kiapi.schematic.commands",
+  "kiapi.common.types",
+  "kiapi.common",
+];
 
 export async function analyze(src = kicadSrc()): Promise<CoverageResult> {
   const warnings: string[] = [];
@@ -218,6 +249,16 @@ export async function analyze(src = kicadSrc()): Promise<CoverageResult> {
   const commands: CommandInfo[] = [];
   const skipped: string[] = [];
   const seen = new Set<string>();
+  // A command proto that nobody lists here silently produces zero client wrappers, which happened
+  // for library_commands.proto: four commits shipped with no way to call them. Fail instead.
+  for (const proto of await listCommandProtos(src)) {
+    if (!COMMAND_FILES.some((c) => c.proto === proto)) {
+      throw new Error(
+        `${proto} defines commands but is not in COMMAND_FILES (tooling/coverage/run.ts); ` +
+          `add it with a group name so the client gets wrappers for it`,
+      );
+    }
+  }
   for (const { proto, group } of COMMAND_FILES) {
     const file = fileByName.get(proto);
     if (!file) throw new Error(`command proto ${proto} is not in the generated descriptors; run \`bun run gen\``);
@@ -235,8 +276,7 @@ export async function analyze(src = kicadSrc()): Promise<CoverageResult> {
         warnings.push(`${msg.name}: handlers disagree on the response type: ${[...responses].join(", ")}`);
       }
       const gated = regs.filter((r) => r.gated).length;
-      const headless: Headless =
-        regs.length === 0 ? "unregistered" : gated === 0 ? "ok" : gated === regs.length ? "gui-only" : "partial";
+      const headless: Headless = regs.length === 0 ? "unregistered" : gated === 0 ? "ok" : gated === regs.length ? "gui-only" : "partial";
       rows.push({
         command: msg.name,
         group,
@@ -350,7 +390,10 @@ if (import.meta.main) {
   const md = renderMarkdown(result);
   if (check) {
     const bad: string[] = [];
-    for (const [p, want] of [[jsonPath, json], [mdPath, md]] as const) {
+    for (const [p, want] of [
+      [jsonPath, json],
+      [mdPath, md],
+    ] as const) {
       if ((await readFile(p, "utf8").catch(() => "")) !== want) bad.push(p);
     }
     if (bad.length) {

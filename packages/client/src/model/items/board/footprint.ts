@@ -4,6 +4,7 @@ import {
   BoardLayer,
   FieldSchema,
   FootprintInstanceSchema,
+  FootprintSchema,
   KiCadObjectType,
   NetSchema,
   PadSchema,
@@ -229,3 +230,63 @@ export class Footprint extends Item<FootprintInstance> {
   }
 }
 registerItem(Footprint);
+
+/**
+ * The *library* definition of a footprint (`kiapi.board.types.Footprint`), as
+ * `library_commands.proto` exchanges it — the counterpart of `LibSymbol` for symbols. A placed
+ * `Footprint` carries one of these in `definition`; this wrapper is what
+ * `kicad.libraries.footprints.get()` returns and what `save()` writes back.
+ */
+export class LibFootprint extends Item<FootprintDefinition> {
+  static readonly schema = FootprintSchema;
+  static readonly objectType = KiCadObjectType.KOT_PCB_FOOTPRINT;
+
+  constructor(proto: FootprintDefinition = create(FootprintSchema)) {
+    super(proto);
+  }
+
+  /** Library footprints carry no KIID; the library id is the identity. */
+  override get id(): string {
+    return "";
+  }
+  /** `nickname:name` */
+  get libraryId(): string {
+    const id = this.proto.id;
+    return id ? `${id.libraryNickname}:${id.entryName}` : "";
+  }
+  get name(): string {
+    return this.proto.id?.entryName ?? "";
+  }
+  get reference(): string {
+    return this.proto.referenceField?.text?.text?.text ?? "";
+  }
+  get value(): string {
+    return this.proto.valueField?.text?.text?.text ?? "";
+  }
+  set value(v: string) {
+    if (this.proto.valueField?.text?.text) this.proto.valueField.text.text.text = v;
+  }
+  get description(): string {
+    return this.proto.descriptionField?.text?.text?.text ?? "";
+  }
+  get datasheet(): string {
+    return this.proto.datasheetField?.text?.text?.text ?? "";
+  }
+  get attributes(): FootprintAttributes | undefined {
+    return this.proto.attributes;
+  }
+  get anchor(): Vec2 {
+    return this.vec(this.proto.anchor);
+  }
+  /** Every child item of the definition (pads, shapes, texts, ...). */
+  get items(): Item[] {
+    return wrapAll(this.proto.items);
+  }
+  get pads(): Pad[] {
+    return this.items.filter((i): i is Pad => i instanceof Pad);
+  }
+  get padCount(): number {
+    return this.pads.length;
+  }
+}
+registerItem(LibFootprint);

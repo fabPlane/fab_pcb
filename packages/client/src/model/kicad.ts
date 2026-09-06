@@ -27,6 +27,7 @@ import type { Transport } from "../transport/types";
 import { Board } from "./board";
 import { FootprintDocument } from "./footprint-doc";
 import { Job } from "./jobs";
+import { Libraries } from "./libraries";
 import { Project } from "./project";
 import { Schematic } from "./schematic";
 import { SymbolDocument } from "./symbol-doc";
@@ -38,7 +39,15 @@ export interface TextShapes {
 }
 
 export class KiCad {
-  constructor(readonly client: KiCadClient) {}
+  /**
+   * Symbol / footprint / design-block libraries and the footprint wizards
+   * (`library_commands.proto`, KiCad >= 11.0). Served only while a project is open.
+   */
+  readonly libraries: Libraries;
+
+  constructor(readonly client: KiCadClient) {
+    this.libraries = new Libraries(this);
+  }
 
   /** Connects a transport and waits for the server to be ready. */
   static async connect(transport: Transport, opts: KiCadClientOptions): Promise<KiCad> {
@@ -224,7 +233,9 @@ export class KiCad {
   }
 
   /** Server-side tessellation of texts / text boxes into polygons (for the renderer). */
-  async textAsShapes(items: readonly ({ text: MessageInitShape<typeof TextSchema> } | { textbox: MessageInitShape<typeof TextBoxSchema> })[]): Promise<TextShapes[]> {
+  async textAsShapes(
+    items: readonly ({ text: MessageInitShape<typeof TextSchema> } | { textbox: MessageInitShape<typeof TextBoxSchema> })[],
+  ): Promise<TextShapes[]> {
     const res = await cmd.getTextAsShapes(this.client, {
       text: items.map((i) =>
         "text" in i
@@ -236,7 +247,11 @@ export class KiCad {
   }
 
   /** Registers this client as a cross-probe peer (`CrossProbeAnnounce`). */
-  async crossProbeAnnounce(frameType: FrameType, socketPath: string, apiToken = ""): Promise<{ status: CrossProbeStatus; message: string }> {
+  async crossProbeAnnounce(
+    frameType: FrameType,
+    socketPath: string,
+    apiToken = "",
+  ): Promise<{ status: CrossProbeStatus; message: string }> {
     const res = await cmd.crossProbeAnnounce(this.client, { frameType, socketPath, apiToken });
     return { status: res.status, message: res.message };
   }

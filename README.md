@@ -8,7 +8,7 @@ never opens a window.
 
 ![IPC API headless](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftensorfleet%2Fkicad-web%2Fmaster%2Fdocs%2Fcoverage-badge.json)
 
-IPC API coverage: **136/151** commands headless (90.1%) · 15 GUI-only · 0 unregistered — KiCad 27aa7e67fa
+IPC API coverage: **150/165** commands headless (90.9%) · 15 GUI-only · 0 unregistered — KiCad 6033d9ef42
 (`bun run coverage:summary` prints this line from `tooling/coverage/commands.json`; `--badge` rewrites
 `docs/coverage-badge.json`, the shields.io endpoint behind the badge; CI checks both are fresh).
 The 15 GUI-only commands are selection, visible layers and appearance state, which a web page owns

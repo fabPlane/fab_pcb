@@ -14,6 +14,8 @@ import {
   type Event,
   type EventJson,
   type JobProgress,
+  type ProjectChangeKind,
+  type ProjectChanged,
   type ServerShutdown,
 } from "@kicad-web/proto";
 import type { Subscriber, SubscriberState } from "./transport/nng-ipc-sub";
@@ -174,6 +176,49 @@ export class KiCadEvents {
     const fn = cb as (payload: unknown, event: Event) => void;
     set.add(fn);
     return () => set.delete(fn);
+  }
+
+  // --- convenience helpers ------------------------------------------------------------------------
+  // `EventPayloads` is derived from the generated oneof, so `on(kind, cb)` already covers every
+  // event KiCad defines; these are just named shorthands for the ones clients subscribe to most.
+
+  /** A document changed (an API commit, an edit outside a commit, or a revert). */
+  onDocumentChanged(cb: (e: DocumentChanged, event: Event) => void): () => void {
+    return this.on("documentChanged", cb);
+  }
+
+  onDocumentOpened(cb: (e: DocumentOpened, event: Event) => void): () => void {
+    return this.on("documentOpened", cb);
+  }
+
+  onDocumentClosed(cb: (e: DocumentClosed, event: Event) => void): () => void {
+    return this.on("documentClosed", cb);
+  }
+
+  onDocumentSaved(cb: (e: DocumentSaved, event: Event) => void): () => void {
+    return this.on("documentSaved", cb);
+  }
+
+  onJobProgress(cb: (e: JobProgress, event: Event) => void): () => void {
+    return this.on("jobProgress", cb);
+  }
+
+  /**
+   * Project-level state changed through the API (`ProjectChanged`, KiCad >= 11.0): net classes,
+   * text variables, variants, project settings or the library tables. `kind` says which
+   * (`PCK_NET_CLASSES`, `PCK_LIBRARY_TABLES`, ...); pass `kinds` to filter. The event carries no
+   * payload beyond that, so re-read the state you care about.
+   */
+  onProjectChanged(cb: (e: ProjectChanged, event: Event) => void, kinds?: readonly ProjectChangeKind[]): () => void {
+    return this.on("projectChanged", (payload, event) => {
+      if (kinds && !kinds.includes(payload.kind)) return;
+      cb(payload, event);
+    });
+  }
+
+  /** The API server is stopping; both sockets are about to go away. */
+  onServerShutdown(cb: (e: ServerShutdown, event: Event) => void): () => void {
+    return this.on("serverShutdown", cb);
   }
 
   /** Fired when a sequence number jumps (events were missed); re-read state through the request socket. */

@@ -1,6 +1,17 @@
 /**
- * Client-side undo helpers: compute the inverse of a patch before it is applied, and keep a
- * forward/inverse history that can be replayed onto a store.
+ * Undo helpers.
+ *
+ * Two mechanisms, and `DocumentUndo` picks between them:
+ *
+ * - **Server undo** (`Undo` / `Redo` / `GetUndoStack`, KiCad >= 11.0). KiCad owns the
+ *   authoritative history, so undoing there also reverts what the client never mirrored — zone
+ *   fills, connectivity, netlist changes, and edits made outside a commit such as
+ *   `SetBoardOrigin`. The store then re-syncs from the document. This is the preferred path
+ *   whenever the capability is present.
+ * - **Client patches** (`inversePatch` + `UndoStack`). The pre-11.0 fallback: the inverse of each
+ *   patch is computed before it is applied and replayed onto the store. It only knows about items
+ *   that passed through the store, and it cannot revert anything on the KiCad side, so a document
+ *   undone this way has diverged from the server until the next full sync.
  */
 import type { ItemStore, StorePatch, StoredItem } from "./item-store";
 import type { MemoryItemStore } from "./item-store";
@@ -33,6 +44,22 @@ export interface HistoryEntry {
   forward: StorePatch;
   inverse: StorePatch;
   revision: number;
+}
+
+/** The slice of a `Document` that `DocumentUndo` needs (see `model/document.ts`). */
+export interface ServerUndoTarget {
+  undo(count?: number): Promise<{ applied: number; undoCount: number; redoCount: number }>;
+  redo(count?: number): Promise<{ applied: number; undoCount: number; redoCount: number }>;
+  supportsServerUndo(): Promise<boolean>;
+}
+
+/** How one `DocumentUndo` step was carried out. */
+export interface UndoOutcome {
+  via: "server" | "client" | "none";
+  /** Commands KiCad undid/redid (server path). */
+  applied: number;
+  /** The client-side entry that was replayed (client path). */
+  entry?: HistoryEntry;
 }
 
 /** A linear undo/redo stack over store patches. */
@@ -87,5 +114,55 @@ export class UndoStack {
   clear(): void {
     this.entries.length = 0;
     this.cursor = 0;
+  }
+}
+
+/**
+ * Undo for a live document: KiCad's own undo stack when the server implements it, the client-side
+ * patch stack otherwise.
+ *
+ * The capability is probed once (`supportsServerUndo()`, i.e. `GetSupportedCommands` carrying
+ * `Undo`) and cached. On the server path the local `UndoStack` is still fed by `apply()` so that a
+ * later downgrade — or a document that never reached the server — can fall back cleanly, but its
+ * cursor is not moved: after a server undo the caller re-reads the document (`DocumentSync.syncSince()`
+ * or a `DocumentChanged` event) instead of trusting the local inverse.
+ */
+export class DocumentUndo {
+  private serverOk: Promise<boolean> | undefined;
+
+  constructor(
+    readonly stack: UndoStack,
+    /** The document; omit to force the client-side path. */
+    readonly document?: ServerUndoTarget,
+  ) {}
+
+  /** Records a patch on the client stack (harmless on the server path; see the class docs). */
+  apply(label: string, patch: StorePatch): HistoryEntry | undefined {
+    return this.stack.apply(label, patch);
+  }
+
+  /** Whether KiCad's `Undo` is available; probed once and cached. */
+  useServer(): Promise<boolean> {
+    if (!this.document) return Promise.resolve(false);
+    this.serverOk ??= this.document.supportsServerUndo().catch(() => false);
+    return this.serverOk;
+  }
+
+  async undo(count = 1): Promise<UndoOutcome> {
+    if (this.document && (await this.useServer())) {
+      const r = await this.document.undo(count);
+      return { via: "server", applied: r.applied };
+    }
+    const entry = this.stack.undo();
+    return entry ? { via: "client", applied: 1, entry } : { via: "none", applied: 0 };
+  }
+
+  async redo(count = 1): Promise<UndoOutcome> {
+    if (this.document && (await this.useServer())) {
+      const r = await this.document.redo(count);
+      return { via: "server", applied: r.applied };
+    }
+    const entry = this.stack.redo();
+    return entry ? { via: "client", applied: 1, entry } : { via: "none", applied: 0 };
   }
 }

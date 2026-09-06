@@ -1,14 +1,14 @@
-# IPC API coverage matrix (KiCad 10.99, commit 27aa7e67fa)
+# IPC API coverage matrix (KiCad 10.99, commit 6033d9ef42)
 
-Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the KiCad sources. "Handlers" names the C++ handler class that serves the command: server = API_HANDLER_SERVER (inside the API server, always loaded), common = API_HANDLER_COMMON (always loaded), editor = API_HANDLER_EDITOR, board = API_HANDLER_BOARD, pcb = API_HANDLER_PCB, footprint = API_HANDLER_FOOTPRINT, sch = API_HANDLER_SCH.
+Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the KiCad sources. "Handlers" names the C++ handler class that serves the command: server = API_HANDLER_SERVER (inside the API server, always loaded), common = API_HANDLER_COMMON (always loaded), editor = API_HANDLER_EDITOR, library = API_HANDLER_LIBRARY (base of the footprint and symbol library handlers), board = API_HANDLER_BOARD, pcb = API_HANDLER_PCB, footprint = API_HANDLER_FOOTPRINT, fplib = API_HANDLER_FOOTPRINT_LIBRARY, symlib = API_HANDLER_SYMBOL_LIBRARY, sch = API_HANDLER_SCH.
 
 | Status | Count | Meaning |
 |---|---:|---|
-| OK | 136 | works in `kicad-cli api-server` |
+| OK | 150 | works in `kicad-cli api-server` |
 | GUI-ONLY | 15 | handler returns "not available in headless mode" |
 | PARTIAL | 0 | headless in some handlers only |
 | UNREGISTERED | 0 | defined in .proto, no handler anywhere |
-| **Total** | **151** | request messages defined in the command protos |
+| **Total** | **165** | request messages defined in the command protos |
 
 
 ## common/base
@@ -81,6 +81,29 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `Undo` | editor | yes |  |
 | `UpdateItems` | editor | yes |  |
 
+## common/library
+
+| Command | Handlers | Headless | Notes |
+|---|---|---|---|
+| `AddLibraryTableRow` | library | yes |  |
+| `CreateLibrary` | library | yes |  |
+| `DeleteLibraryItem` | library | yes |  |
+| `GetLibraryItem` | library | yes |  |
+| `GetLibraryTables` | library | yes |  |
+| `ListLibraryEntries` | library | yes |  |
+| `ListWizards` | fplib | yes |  |
+| `RemoveLibraryTableRow` | library | yes |  |
+| `RunWizard` | fplib | yes |  |
+| `SaveLibraryItem` | library | yes |  |
+
+## common/settings
+
+| Command | Handlers | Headless | Notes |
+|---|---|---|---|
+| `GetAppSettings` | common | yes |  |
+| `GetColorTheme` | common | yes |  |
+| `ListColorThemes` | common | yes |  |
+
 ## common/variant
 
 | Command | Handlers | Headless | Notes |
@@ -125,7 +148,7 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `GetDrcMarkers` | pcb | yes |  |
 | `GetDrcSeverities` | pcb | yes |  |
 | `GetEmbeddedFiles` | pcb | yes |  |
-| `GetGraphicsDefaults` | board | yes |  |
+| `GetGraphicsDefaults` | board, pcb | yes |  |
 | `GetItemsByNet` | pcb | yes |  |
 | `GetItemsByNetClass` | pcb | yes |  |
 | `GetNetClassForNets` | pcb | yes |  |
@@ -152,6 +175,7 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `SetDrcMarkerExcluded` | pcb | yes |  |
 | `SetDrcSeverities` | pcb | yes |  |
 | `SetEmbeddedFiles` | pcb | yes |  |
+| `SetGraphicsDefaults` | pcb | yes |  |
 | `SetTeardrops` | pcb | yes |  |
 | `SetVisibleLayers` | board | no | gated by checkForHeadless in board |
 | `UpdateBoardStackup` | pcb | yes |  |
