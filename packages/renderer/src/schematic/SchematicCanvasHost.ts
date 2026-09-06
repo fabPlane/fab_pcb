@@ -30,6 +30,7 @@ export class SchematicCanvasHost extends BaseCanvasHost {
     if (options.textGlyphs !== false && !scene.primitiveBuilder) scene.primitiveBuilder = createTextGlyphBuilder(options.textGlyphs || {});
     super(theme, { ...options, scene, overlays: { gridUnit: 'mil', ...(options.overlays ?? {}) } });
     this.overlays.setTheme(theme, 'schematic');
+    this.markers.setKind('schematic'); // ERC colours + sch_marker.cpp scale
     this.adapter = { ...(options.adapter ?? {}) };
   }
 

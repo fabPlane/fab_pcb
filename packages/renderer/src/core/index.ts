@@ -5,4 +5,6 @@ export * from './camera.js';
 export * from './scene.js';
 export * from './picker.js';
 export * from './overlays.js';
+export * from './ratsnest.js';
+export * from './markers.js';
 export * from './host.js';

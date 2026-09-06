@@ -22,15 +22,19 @@
     "typecheck": "tsc -b",
     "gen:themes": "bun run scripts/gen-themes.ts",
     "demo:build": "bun build demo/main.ts --outdir demo/dist --target browser --format esm",
-    "demo": "bun run demo/serve.ts"
+    "demo": "bun run demo/serve.ts",
+    "pixel-diff": "bun run scripts/pixel-diff.ts"
   },
   "dependencies": {
     "flatbush": "4.6.2",
     "pixi.js": "8.20.1"
   },
   "devDependencies": {
+    "@kicad-web/client": "workspace:*",
+    "@kicad-web/proto": "workspace:*",
     "@types/bun": "^1.2.0",
     "happy-dom": "20.14.0",
+    "playwright": "1.63.0",
     "typescript": "^5.6.0"
   }
 }

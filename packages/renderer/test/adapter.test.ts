@@ -284,7 +284,7 @@ describe('board layers', () => {
     expect(idx(front, 'BL_F_SilkS')).toBeGreaterThan(idx(front, 'BL_F_Cu'));
     expect(idx(front, 'board.via_hole')).toBeGreaterThan(idx(front, 'BL_F_Fab'));
     expect(idx(front, 'BL_Edge_Cuts')).toBeGreaterThan(idx(front, 'board.via_hole'));
-    expect(idx(front, 'BL_Dwgs_User')).toBe(front.length - 1 - 7); // topmost drawing layer before markers
+    expect(idx(front, 'BL_Dwgs_User')).toBe(front.length - 1 - 12); // topmost drawing layer before labels / grid items / overlays / markers (ALWAYS_TOP)
     expect(new Set(front).size).toBe(front.length);
 
     const back = boardDrawOrder({ copperLayers: copperLayerList(4), flipped: true, activeLayer: 'BL_B_Cu' });

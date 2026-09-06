@@ -16,6 +16,8 @@ src/
                   GraphicsContext instancing, earcut meshes for zone fills
     picker.ts     flatbush index + exact per-primitive tests, nearest-first
     overlays.ts   grid (mm/mil, adaptive), origin/axes, selection, hover, rubber band
+    ratsnest.ts   airlines from GetRatsnest as hairlines, emphasis by net highlight / selection
+    markers.ts    DRC / ERC marker glyphs (MARKER_BASE arrow), zoom-scaled, picked, legend
     host.ts       BaseCanvasHost (CanvasHost contract, pointer events, resize, render loop)
   board/
     boardLayers.ts   BoardLayer enum table, copper/tech classification, pcbnew draw order
@@ -32,8 +34,9 @@ src/
 themes/
   kicad-default.json, kicad-classic.json   generated from the KiCad sources (see below)
 scripts/gen-themes.ts
+scripts/pixel-diff.ts + pixel-diff/page.ts   pixel diff against KiCad's own SVG export
 demo/            synthetic board for eyeballing pan/zoom/pick
-test/            bun tests (theme, camera, picker/geometry, adapter, headless scene)
+test/            bun tests (theme, camera, picker/geometry, adapter, overlays, headless scene)
 ```
 
 ## Usage
@@ -60,6 +63,11 @@ host.setActiveLayer('BL_B_Cu');                      // draw order like pcbnew
 host.flipView(true);                                 // view from the back
 host.setTheme(loadUserTheme(await file.text()));     // ~/.config/kicad/10.0/colors/user.json
 host.setAdapterContext({ padPolygons: ... });         // rebuilds everything once server shapes arrive
+
+host.setRatsnest(edges);                             // GetRatsnest airlines (see below)
+host.setMarkers(markers);                            // DRC violations
+host.focusMarker(markerId);                          // animate the camera to it + show the legend
+host.setLabelOptions({ padNumbers: true, netNames: true });   // board only, zoom-gated
 ```
 
 `setLayerVisible` / `setLayerOpacity` take render-model layer ids: `BL_*` BoardLayer enum names or
@@ -68,7 +76,8 @@ theme keys for pseudo layers (`board.via_hole`, `board.pad_plated_hole`, `board.
 
 Extra (beyond the contract): `onBoxSelect`, `pickBox(box, touching)`, `flipView`, `isFlipped`,
 `contentBox()`, `rebuildAll()`, `rebuildItems(ids)`, `getRenderItem(id)`, `requestRender()`,
-`renderNow()`, `overlays.options` (grid unit/style/visibility), `camera`, `scene`, `picker`.
+`renderNow()`, `overlays.options` (grid unit/style/visibility), `camera`, `scene`, `picker`,
+plus the overlay APIs below (`setRatsnest`, `setMarkers`, `focusMarker`, `setLabelOptions`).
 
 ### PickResult
 
@@ -275,6 +284,139 @@ Input: wheel = zoom (ctrl/⌘+wheel = pinch zoom, horizontal/shift wheel = pan),
 touch = pan, two-finger pinch, arrows / +/- keys, left-drag = rubber band (`leftDrag: 'pan'`
 to pan instead), click = pick.
 
+## Overlays: ratsnest, DRC/ERC markers, labels
+
+All three live above the scene in world space, so pan / zoom stays a GPU uniform and a theme
+switch never rebuilds geometry.
+
+### Ratsnest (`core/ratsnest.ts`, board + schematic host)
+
+```ts
+host.setRatsnest(edges);                 // RatsnestEdge[]: { net, a, b, source?, target? }
+host.setRatsnestVisible(false);          // or setLayerVisible('board.ratsnest', false)
+```
+
+One hairline per edge in the theme's `board.ratsnest` colour. `a` / `b` are
+`GetRatsnest`'s `source_position` / `target_position` in nm; `source` / `target` are the KIIDs
+at each end. Emphasis follows pcbnew: while a net highlight (`setHighlightNets`) or a
+selection is active, edges of the highlighted nets and edges touching a selected item draw at
+full alpha and the rest is dimmed to `dimAlpha` (0.2, same as the scene); with neither, every
+edge uses the theme colour's own alpha. The overlay is not part of the pick index.
+
+### Markers (`core/markers.ts`)
+
+```ts
+host.setMarkers([{ id, position, severity: 'error' | 'warning' | 'exclusion', description, layer?, endPosition? }]);
+host.setMarkersVisible(true);
+host.focusMarker(id, { durationMs: 320 });   // -> boolean (false = unknown id); focusMarker(null) clears
+host.focusedMarker;                          // string | null
+```
+
+KiCad's `MARKER_BASE` arrow polygon (`MarkerShapeCorners`), filled in
+`board.drc_error` / `board.drc_warning` / `board.drc_exclusion` — or `schematic.erc_*` on the
+schematic host, which also uses `sch_marker.cpp`'s scale. Like pcbnew the glyph grows as the
+view zooms out (`SetZoom( 1 / sqrt( zoomFactor ) )`), so it is drawn per frame at
+`markerScaleNm(zoom, kind)` and picked directly rather than through the flatbush index:
+a hit yields `{ id: 'marker:<id>', ref: '<marker kiid>', owner: 'marker', layer: 'board.drc_error' }`.
+Per-severity visibility is `setLayerVisible('board.drc_warning', false)`. The focused marker
+also draws the violation legend (the path from `position` to `endPosition` with perpendicular
+end stops, or a cross for a collision) and `focusMarker` eases the camera to it — an immediate
+jump under `prefers-reduced-motion` or `durationMs: 0`, and it zooms in to 40 px/mm when the
+glyph would otherwise be under ~12 px.
+
+### Net-name / pad-number labels (board only)
+
+```ts
+new BoardCanvasHost(theme, { labels: { padNumbers: true, netNames: true, minPxPerMm: 20 } });
+host.setLabelOptions({ netNames: true, minPxPerMm: 40 });
+host.labelOptions;    // Readonly<BoardLabelOptions>
+host.labelsVisible;   // gate state at the current zoom
+```
+
+Pad numbers inside pads and net names on pads / vias / tracks, sized as `pcb_painter.cpp`
+does, on the pseudo layers `board.pad_numbers`, `board.pad_net_names`, `board.via_net_names`,
+`board.track_net_names` (top of the draw order). Off by default. They are `text-glyphs`
+primitives drawn by the same Pixi `BitmapText` builder the schematic host uses, and the whole
+group is zoom-gated at `minPxPerMm` (default 20): `setLayerVisible` on a label layer is
+remembered and combined with the gate, so a user toggle survives zooming out and back.
+
+## Pixel-diff harness
+
+`scripts/pixel-diff.ts` is the A5 exit test: it renders the KiCad kitchen-sink documents with
+the real hosts in a headless Chromium and compares them against KiCad's own SVG export.
+
+```
+bun run pixel-diff                                    # both documents, needs a KiCad build
+bun run pixel-diff -- --only board --px-per-mm 16
+bun run pixel-diff -- --export-only                   # step 1+2 only: snapshot + SVG
+bun run pixel-diff -- --snapshot board.snapshot.json --svg board.svg   # two-step: no server
+```
+
+1. spawns `kicad-cli api-server` on a unique socket over a temp copy of the project, loads the
+   board and the root sheet, fetches the same server shapes the app feeds the hosts
+   (`GetPadShapeAsPolygon` per copper layer, `GetTextAsShapes` for texts / fields / labels /
+   dimensions) and runs `RunBoardJobExportSvg` (fit page to board, scale 1, all layers on one
+   page, no drawing sheet) and `RunSchematicJobExportSvg` (root sheet, no drawing sheet);
+2. writes `<out>/<kind>.snapshot.json` + `<kind>.svg` and kills the server;
+3. serves `pixel-diff/page.ts` to a headless Chromium (SwiftShader WebGL), which renders the
+   snapshot with `BoardCanvasHost` / `SchematicCanvasHost` at `--px-per-mm` and rasterises the
+   SVG at the same scale — KiCad's SVG user unit is 1 mm at scale 1, so the viewBox *is* the
+   world window — then compares the two as ink masks (any pixel more than `--ink` from white);
+4. writes `<kind>.ours.png`, `<kind>.svg.png`, `<kind>.diff.png` and `report.json`.
+
+`--export-only` plus `--snapshot`/`--svg` is the two-step flow for a machine without a KiCad
+build. Output goes to `scripts/pixel-diff-out/` (gitignored).
+
+`mismatch` = XOR / all pixels, `inkMismatch` = XOR / ink union (1 − IoU), and the `tolerant*`
+figures are the same after ignoring pixels within `--tolerance` px of the other image's ink,
+so anti-aliasing and sub-pixel stroke-width differences do not count. **±1 px is the tolerance
+we settled on** — half a hairline at 8 px/mm; above that the numbers stop moving, below it
+every anti-aliased edge counts twice.
+
+### Results (`qa/data/{pcbnew,eeschema}/api_kitchen_sink.*`, 8 px/mm, ±1 px, ink 40)
+
+| document | size | render items | mismatch (all px) | ink mismatch | tolerant (all px) | tolerant ink |
+|---|---|---|---|---|---|---|
+| board `api_kitchen_sink.kicad_pcb` | 2079 × 1245 | 355 | 7.57 % | 34.88 % | 6.79 % | 31.27 % |
+| board, excluding the two barcodes | | | 3.09 % | 17.93 % | | |
+| schematic `api_kitchen_sink.kicad_sch` | 2376 × 1680 | 156 | 0.55 % | 18.80 % | 0.31 % | 10.45 % |
+
+![board pixel diff](../../docs/screenshots/pixel-diff-board.png)
+![schematic pixel diff](../../docs/screenshots/pixel-diff-schematic.png)
+
+Grey = drawn by both, red = only in KiCad's SVG, cyan = only in our render (strong outside the
+tolerance band). Copper, silkscreen, zones, pads, holes, wires, symbol bodies, pins, labels,
+sheets and dashed/dotted styles are grey everywhere; the ink-union percentages are large only
+because the kitchen sink is mostly thin lines, where a one-pixel offset costs two pixels of
+XOR against a small union.
+
+**Known differences**, in order of how much ink they cost:
+
+- **Barcodes** (59 % of the board XOR on their own). We draw the frame and a placeholder
+  module pattern: there is no QR / DataMatrix / Code128 encoder in the renderer and the API
+  sends only the payload string and the box, so the module bitmap cannot match. Excluding
+  their two bounding boxes the board is 3.09 % / 17.93 %.
+- **Fonts.** With `GetTextAsShapes` results (texts, fields, dimensions) the glyphs are the
+  server's own outlines and match to the anti-aliasing. Everything else is a fallback:
+  board text boxes and table cells draw the metrics-estimated outline and schematic pin
+  names / numbers draw stretched `BitmapText` in a system font. `GetTextAsShapes` *does*
+  accept a `TextBox`, but it returns the glyphs around the origin instead of the box position
+  (measured: the kitchen sink's "Hello" cell at (25, 24.5) mm comes back at (0.3, 0.6) mm), so
+  the harness does not request them — see the note on `TextRef` in `pixel-diff.ts`.
+- **Hatch patterns.** Rule areas are hatched over their whole face here while the plotter
+  draws only their outline, and our hatch pitch / phase for `GFT_HATCH` fills is KiCad's
+  30 mil nominal rather than the exact per-shape phase, so hatched circles and rectangles
+  cross-hatch out of step (visible as the blue crosshatch in the schematic diff).
+- **Anti-aliasing and stroke ends.** Every remaining thin-line difference is a sub-pixel edge:
+  the ±1 px tolerant figures drop the board by 3.6 points and the schematic by 8.4, which is
+  what that band is worth.
+- **Not compared:** board reference images. The renderer draws them; pcbnew's plotter does not
+  (`PCB_REFERENCE_IMAGE_T: // Not plotted at all`, `plot_brditems_plotter.cpp`), so the harness
+  drops them from the board snapshot. Schematic bitmaps *are* plotted and are compared — their
+  textures load asynchronously, so the page waits before grabbing its single frame.
+- **Not drawn at all:** symbol alternate pin functions, and line-ending arrows on some bezier
+  leaders.
+
 ## Demo
 
 ```
@@ -292,23 +434,29 @@ area) with a button that switches to the child sheet through `setStore` and back
 ## Tests
 
 ```
-bun test          # theme port, camera math, picker/geometry, board + schematic adapter fixtures, symbol transforms, headless scene
+bun test          # theme port, camera math, picker/geometry, board + schematic adapter fixtures,
+                  # symbol transforms, ratsnest / marker / label overlays, headless scene
 bunx tsc -b
+bun run pixel-diff # exit test against KiCad's SVG export (needs a KiCad build; see above)
 ```
 
 ## Known gaps
 
-- No pixel-diff harness against `RunBoardJobExportSvg` yet (A5 exit test).
 - Text without server shapes is a metrics-estimated box on boards and BitmapText stretched to
   that box on schematics (KiCad fonts are never shipped); glyph widths are approximate until
-  `GetTextAsShapes` results are fed through `textShapes`.
-- Schematic: no pixel-diff harness against `RunSchematicJobExportSvg`; ERC markers, dangling-end
-  markers, net-name overlays and symbol alternate pin functions are not drawn; bitmap symbols
-  (`SchematicImage` inside a symbol) are ignored.
+  `GetTextAsShapes` results are fed through `textShapes`. `GetTextAsShapes` returns a
+  `TextBox`'s glyphs around the origin rather than the box position, so text boxes and table
+  cells stay on the fallback even when the server is reachable.
+- Barcodes draw the frame and a placeholder module pattern: no QR / DataMatrix / Code128
+  encoder, and the API sends only the payload string.
+- Schematic: dangling-end markers and symbol alternate pin functions are not drawn; bitmap
+  symbols (`SchematicImage` inside a symbol) are ignored.
 - Pad solder mask / paste expansion is not applied (technical layers reuse the copper shape);
   hatched zone fills, thermal reliefs and teardrops render as whatever `filled_polygons` holds.
-- Zone hatch border (`ZBS_DIAGONAL_EDGE`) draws only the outline; rule areas are fully hatched.
-- Pixi's own font/text is unused; no net names on tracks/pads.
+- Zone hatch border (`ZBS_DIAGONAL_EDGE`) draws only the outline; rule areas are fully hatched
+  where the plotter draws only their outline. `GFT_HATCH` fills use a nominal 30 mil pitch
+  rather than KiCad's exact per-shape phase.
 - Reference images assume 300 ppi (`imagePixelNm`); scale factor from `image_scale`.
-- Ratsnest, DRC markers, routing preview, snapping: wave 3.
+- Ratsnest and DRC/ERC markers are drawn but are fed by the app: the renderer never calls
+  `GetRatsnest` / DRC itself. Routing preview and snapping: still to come.
 - Large initial loads are converted synchronously (100k items ≈ hundreds of ms); chunking TBD.

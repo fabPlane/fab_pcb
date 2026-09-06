@@ -6,10 +6,12 @@ import { Application } from 'pixi.js';
 import type { Box, RenderItem, Vec2 } from './model.js';
 import { EMPTY_BOX, boxUnion, boxIsEmpty } from './model.js';
 import { type Theme, colorToHex, uiColors } from './theme.js';
-import { Camera, CameraController, type CameraState, type CameraControllerOptions } from './camera.js';
+import { Camera, CameraController, type CameraState, type CameraControllerOptions, type CameraAnimationOptions, animateCamera } from './camera.js';
 import { Scene, type SceneOptions } from './scene.js';
 import { Picker } from './picker.js';
 import { Overlays, type OverlayOptions } from './overlays.js';
+import { RatsnestLayer, type RatsnestEdge } from './ratsnest.js';
+import { MarkerLayer, type MarkerSpec } from './markers.js';
 
 // ---------------------------------------------------------------------------
 // Contract types (structural copies of docs/contracts.md so this package has no
@@ -104,6 +106,10 @@ export abstract class BaseCanvasHost implements CanvasHost {
   scene: Scene;
   picker: Picker;
   overlays: Overlays;
+  /** unrouted connections (`setRatsnest`) */
+  ratsnest: RatsnestLayer;
+  /** DRC / ERC marker glyphs (`setMarkers`) */
+  markers: MarkerLayer;
   protected app?: Application;
   protected controller?: CameraController;
   protected flipped = false;
@@ -125,13 +131,20 @@ export abstract class BaseCanvasHost implements CanvasHost {
   private drag: { start: Vec2; pointerId: number; dragging: boolean } | null = null;
   private detachFns: Array<() => void> = [];
   private fitPending = true;
+  private cancelAnimation: (() => void) | null = null;
 
   constructor(theme: Theme, options: CanvasHostOptions = {}) {
     this.theme = theme;
     this.options = options;
     this.scene = new Scene(theme, options.scene);
     this.picker = new Picker(() => this.scene.items());
+    // `kind` is overridden by a subclass field initialised after this constructor; the
+    // schematic host re-keys the overlays / markers to 'schematic' in its own constructor.
     this.overlays = new Overlays(theme, this.kind, options.overlays);
+    this.ratsnest = new RatsnestLayer(theme);
+    this.ratsnest.dimAlpha = this.scene.dimAlpha;
+    this.markers = new MarkerLayer(theme, this.kind);
+    this.scene.root.addChild(this.ratsnest.root, this.markers.root);
   }
 
   /** Convert one store item into render items. */
@@ -223,6 +236,8 @@ export abstract class BaseCanvasHost implements CanvasHost {
   }
 
   unmount(): void {
+    this.cancelAnimation?.();
+    this.cancelAnimation = null;
     this.unsubStore?.();
     this.unsubCamera?.();
     this.unsubStore = undefined;
@@ -319,7 +334,11 @@ export abstract class BaseCanvasHost implements CanvasHost {
   private frame = (): void => {
     this.raf = 0;
     if (!this.app) return;
-    if (this.camera.maybeRebase()) this.scene.setOrigin(this.camera.originX, this.camera.originY);
+    if (this.camera.maybeRebase()) {
+      this.scene.setOrigin(this.camera.originX, this.camera.originY);
+      this.ratsnest.setOrigin(this.camera.originX, this.camera.originY);
+      this.markers.setOrigin(this.camera.originX, this.camera.originY);
+    }
     const t = this.camera.rootTransform();
     this.scene.root.position.set(t.x, t.y);
     this.scene.root.scale.set(t.scaleX, t.scaleY);
@@ -328,6 +347,8 @@ export abstract class BaseCanvasHost implements CanvasHost {
       this.pendingHover = null;
       this.updateHover(ev);
     }
+    this.ratsnest.update();
+    this.markers.update(this.camera.zoom);
     this.overlays.redraw(this.camera);
     this.app.render();
   };
@@ -347,6 +368,8 @@ export abstract class BaseCanvasHost implements CanvasHost {
     this.theme = theme;
     this.scene.setTheme(theme);
     this.overlays.setTheme(theme, this.kind);
+    this.ratsnest.setTheme(theme);
+    this.markers.setTheme(theme);
     if (this.app) this.app.renderer.background.color = this.options.background ?? colorToHex(uiColors(theme, this.kind).background);
     this.requestRender();
   }
@@ -375,7 +398,10 @@ export abstract class BaseCanvasHost implements CanvasHost {
   }
 
   setLayerVisible(layer: string, visible: boolean): void {
-    this.scene.setLayerVisible(layer, visible);
+    const severity = MarkerLayer.severityOfLayer(layer);
+    if (severity) this.markers.setSeverityVisible(severity, visible);
+    else if (layer === 'board.ratsnest') this.ratsnest.setVisible(visible);
+    else this.scene.setLayerVisible(layer, visible);
     this.requestRender();
   }
 
@@ -418,6 +444,9 @@ export abstract class BaseCanvasHost implements CanvasHost {
       }
     }
     this.overlays.setSelection(items);
+    const refs = new Set<string>(this.selectionIds);
+    for (const it of items) refs.add(it.ref ?? it.id);
+    this.ratsnest.setSelectedRefs(refs);
     if (this.hoverId && !this.scene.getItem(this.hoverId)) {
       this.hoverId = null;
       this.overlays.setHover(null);
@@ -426,15 +455,90 @@ export abstract class BaseCanvasHost implements CanvasHost {
 
   setHighlightNets(nets: string[]): void {
     this.scene.setNetHighlight(nets);
+    this.ratsnest.setHighlightNets(nets);
     this.requestRender();
   }
 
   pick(screenX: number, screenY: number, tolerancePx = this.options.pickTolerancePx ?? 6): PickResult[] {
     const w = this.camera.screenToWorld(screenX, screenY);
     const tol = tolerancePx / this.camera.zoom;
-    return this.picker
+    const zoom = this.camera.zoom;
+    // markers are drawn above everything, so they come first
+    const markerHits: PickResult[] = this.markers.pick(w, tol).map((h) => ({ id: `marker:${h.id}`, owner: 'marker', ref: h.id, layer: h.layer, distance: h.distance * zoom }));
+    const hits = this.picker
       .pick(w, tol, { layers: (l) => this.scene.isLayerVisible(l) })
-      .map((h) => ({ id: h.id, owner: h.owner, ref: h.ref, layer: h.layer, net: h.net, distance: h.distance * this.camera.zoom }));
+      .map((h) => ({ id: h.id, owner: h.owner, ref: h.ref, layer: h.layer, net: h.net, distance: h.distance * zoom }));
+    return markerHits.length ? [...markerHits, ...hits] : hits;
+  }
+
+  // ------------------------------------------------------------------ ratsnest / markers
+
+  /**
+   * Unrouted connections (airlines) from `GetRatsnest`: one edge per `RatsnestEdge`
+   * (`a` = source_position, `b` = target_position). Edges of highlighted nets or touching a
+   * selected item are emphasised; the rest is dimmed while any emphasis is active.
+   */
+  setRatsnest(edges: RatsnestEdge[]): void {
+    this.ratsnest.setEdges(edges);
+    this.requestRender();
+  }
+
+  setRatsnestVisible(visible: boolean): void {
+    this.ratsnest.setVisible(visible);
+    this.requestRender();
+  }
+
+  /**
+   * DRC / ERC markers. Picking a marker yields `{ id: 'marker:<id>', ref: <id>, owner: 'marker',
+   * layer: 'board.drc_error' | ... }`. Per-severity visibility goes through
+   * `setLayerVisible('board.drc_warning' | 'schematic.erc_warning' | ..., visible)`.
+   */
+  setMarkers(markers: MarkerSpec[]): void {
+    this.markers.setMarkers(markers);
+    this.requestRender();
+  }
+
+  setMarkersVisible(visible: boolean): void {
+    this.markers.setVisible(visible);
+    this.requestRender();
+  }
+
+  /**
+   * Animate the camera to a marker (ease-out; an immediate jump with
+   * `prefers-reduced-motion` or `durationMs: 0`) and show its violation legend. `zoom`
+   * sets a target zoom (px per nm); by default the zoom is kept unless the glyph would be
+   * smaller than ~12 px, in which case the view zooms in to 40 px/mm. Returns false for an
+   * unknown id.
+   */
+  focusMarker(id: string | null, opts: CameraAnimationOptions & { zoom?: number } = {}): boolean {
+    this.cancelAnimation?.();
+    this.cancelAnimation = null;
+    if (id === null) {
+      this.markers.setFocused(null);
+      this.requestRender();
+      return true;
+    }
+    const m = this.markers.get(id);
+    if (!m) return false;
+    this.markers.setFocused(id);
+    this.fitPending = false;
+    let zoom = opts.zoom;
+    if (zoom === undefined && this.camera.zoom < 1e-5) zoom = 4e-5;
+    this.cancelAnimation = animateCamera(this.camera, { x: m.position.x, y: m.position.y, zoom }, {
+      durationMs: opts.durationMs,
+      reducedMotion: opts.reducedMotion,
+      onDone: () => {
+        this.cancelAnimation = null;
+        opts.onDone?.();
+      },
+    });
+    this.requestRender();
+    return true;
+  }
+
+  /** Marker currently focused (legend shown), if any. */
+  get focusedMarker(): string | null {
+    return this.markers.focused;
   }
 
   /** Items in a world box (for the app's own box-select tools). */

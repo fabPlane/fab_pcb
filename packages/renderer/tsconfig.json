@@ -6,5 +6,19 @@
     "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo",
     "resolveJsonModule": true
   },
-  "include": ["src", "test", "scripts", "demo/*.ts", "themes/*.json"]
+  "include": [
+    "src",
+    "test",
+    "scripts",
+    "demo/*.ts",
+    "themes/*.json"
+  ],
+  "references": [
+    {
+      "path": "../proto"
+    },
+    {
+      "path": "../client"
+    }
+  ]
 }

@@ -24,6 +24,7 @@ import {
   trapezoidPolygon,
 } from '../core/geometry.js';
 import type { StoredItemLike } from '../core/host.js';
+import { textGlyphPrims } from '../schematic/textMetrics.js';
 import { PSEUDO_LAYERS, boardLayerName, copperLayerList, flipLayer, isBackLayer, isCopperLayer, isFrontLayer } from './boardLayers.js';
 
 // ---------------------------------------------------------------------------
@@ -153,6 +154,20 @@ export interface BoardAdapterContext {
   imagePixelNm?: number;
   /** arc approximation tolerance (nm) for polygon arcs */
   arcTolerance?: number;
+  /**
+   * Pad number / net name labels as `text-glyphs` primitives on the `board.pad_numbers`,
+   * `board.pad_net_names`, `board.track_net_names` and `board.via_net_names` layers
+   * (pcb_painter.cpp sizing). Off by default; `BoardCanvasHost.setLabelOptions` sets it and
+   * gates the layers by zoom.
+   */
+  labels?: BoardLabelOptions;
+}
+
+export interface BoardLabelOptions {
+  /** pad numbers inside pads */
+  padNumbers?: boolean;
+  /** net names inside pads and vias and along tracks */
+  netNames?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -663,6 +678,94 @@ export function textShapesToPrims(shapes: TextShapesInput, ctx: BoardAdapterCont
   return out;
 }
 
+// ---------------------------------------------------------------------------
+// Pad number / net name labels (PCB_PAINTER::draw(PAD) / renderNetNameForSegment / draw(PCB_VIA))
+// ---------------------------------------------------------------------------
+
+/** PCB_RENDER_SETTINGS::MAX_FONT_SIZE */
+const MAX_LABEL_FONT_NM = 10_000_000;
+/** Xscale_for_stroked_font */
+const LABEL_X_SCALE = 0.9;
+
+const charCount = (s: string): number => Math.max(1, [...s].length);
+
+function labelPrim(text: string, pos: Vec2, size: Vec2, thickness: number, angle: number, bold: boolean): Primitive | undefined {
+  if (!text || size.y <= 0) return undefined;
+  return textGlyphPrims(text, pos, { size, thickness, angle, halign: 'center', valign: 'center', bold })[0];
+}
+
+/**
+ * Pad number (upper half) and net name (lower half) inside a pad, sized from the pad's
+ * axis-aligned bounding box the way pcbnew does; the text turns 90° for tall pads.
+ */
+export function padLabelPrims(padNumber: string, netname: string, box: Box, round: boolean, opts: BoardLabelOptions): { number?: Primitive; net?: Primitive } {
+  const number = opts.padNumbers ? padNumber : '';
+  const net = opts.netNames ? netname : '';
+  if ((!number && !net) || boxIsEmptyBox(box)) return {};
+  const centre = { x: box.x + box.w / 2, y: box.y + box.h / 2 };
+  let padsize = { x: box.w, y: box.h };
+  let size = padsize.y;
+  let angle = 0;
+  if (padsize.x < padsize.y * 0.95) {
+    angle = 90;
+    size = padsize.x;
+    padsize = { x: padsize.y, y: padsize.x };
+  }
+  size = Math.min(size, MAX_LABEL_FONT_NM);
+  let yNet = 0;
+  let yNum = 0;
+  if (number && net) {
+    size = size / 2.5;
+    yNet = size / 1.4;
+    yNum = size / 1.7;
+  }
+  // local (0, y) offsets rotate with the text
+  const at = (y: number): Vec2 => vAdd(centre, vRotate({ x: 0, y }, angle));
+  const out: { number?: Primitive; net?: Primitive } = {};
+  if (net) {
+    let tsize = (1.5 * padsize.x) / Math.max(charCount(net) + 1, 5);
+    tsize = Math.min(tsize, size) * 0.85;
+    if (round) tsize *= 0.9;
+    out.net = labelPrim(net, at(Math.min(tsize * 1.4, yNet)), { x: tsize * LABEL_X_SCALE, y: tsize }, (tsize * LABEL_X_SCALE) / 6, angle, true);
+  }
+  if (number) {
+    let tsize = (1.5 * padsize.x) / Math.max(charCount(number), 3);
+    tsize = Math.min(tsize, size) * 0.85;
+    out.number = labelPrim(number, at(-yNum), { x: tsize * LABEL_X_SCALE, y: tsize }, (tsize * LABEL_X_SCALE) / 6, angle, true);
+  }
+  return out;
+}
+
+const boxIsEmptyBox = (b: Box): boolean => !(b.w > 0 && b.h > 0);
+
+/** Net name along a track segment (one name at the midpoint; pcbnew repeats it on very long tracks). */
+export function trackLabelPrim(netname: string, a: Vec2, b: Vec2, width: number): Primitive | undefined {
+  if (!netname || width <= 0) return undefined;
+  const len = vDist(a, b);
+  if (len < width * charCount(netname)) return undefined;
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  let angle = 0;
+  if (dy === 0) angle = 0;
+  else if (dx === 0) angle = 90;
+  else {
+    angle = (-Math.atan2(dy, dx) * 180) / Math.PI; // -EDA_ANGLE(segV)
+    while (angle > 90) angle -= 180; // Normalize90
+    while (angle <= -90) angle += 180;
+  }
+  const textSize = width;
+  return labelPrim(netname, { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, { x: textSize * 0.55, y: textSize * 0.55 }, textSize / 12, angle, false);
+}
+
+/** Net name inside a via (layer ids are not drawn). */
+export function viaLabelPrim(netname: string, pos: Vec2, diameter: number): Primitive | undefined {
+  if (!netname || diameter <= 0) return undefined;
+  const size = Math.min(diameter, MAX_LABEL_FONT_NM);
+  let tsize = (1.5 * size) / Math.max(charCount(netname), 3);
+  tsize = Math.min(tsize, size) * 0.75;
+  return labelPrim(netname, pos, { x: tsize, y: tsize }, tsize / 6, 0, false);
+}
+
 function textPrims(textId: string, t: TextLike | undefined, ctx: BoardAdapterContext, knockout = false): { prims: Primitive[]; cacheKey?: string } {
   if (!t) return { prims: [] };
   const shapes = ctx.textShapes?.(textId);
@@ -716,11 +819,17 @@ function netName(n: NetLike | undefined): string | undefined {
   return name ? name : undefined;
 }
 
-function convertTrack(p: Record<string, unknown>, id: string, o: ConvertOpts): RenderItem[] {
+function convertTrack(p: Record<string, unknown>, id: string, o: ConvertOpts, ctx: BoardAdapterContext = {}): RenderItem[] {
   const a = vec(p.start as Vector2Like);
   const b = vec(p.end as Vector2Like);
   const width = dist(p.width as DistanceLike);
-  return [finish(id, boardLayerName(p.layer as number), [{ kind: 'segment', a, b, width }], o, { net: netName(p.net as NetLike) })];
+  const net = netName(p.net as NetLike);
+  const out = [finish(id, boardLayerName(p.layer as number), [{ kind: 'segment', a, b, width }], o, { net })];
+  if (net && ctx.labels?.netNames) {
+    const label = trackLabelPrim(net, a, b, width);
+    if (label) out.push(finish(`${id}@label:net`, PSEUDO_LAYERS.trackNetNames, [label], o, { net, ref: id, pickable: false }));
+  }
+  return out;
 }
 
 function convertArc(p: Record<string, unknown>, id: string, o: ConvertOpts): RenderItem[] {
@@ -759,6 +868,11 @@ function convertVia(p: Record<string, unknown>, id: string, o: ConvertOpts, ctx:
   }
   const hole = drillPrims(ps.drill, pos, deg(ps.angle));
   if (hole.length) out.push(finish(`${id}@hole`, PSEUDO_LAYERS.viaHole, hole, o, { ref: id, pickable: false, cacheKey: `viahole|${nm(ps.drill?.diameter?.xNm)}|${nm(ps.drill?.diameter?.yNm)}`, anchor: pos }));
+  if (net && ctx.labels?.netNames && out.length) {
+    const size = vec(padStackEntryFor(ps, viaLayers(ps, copper)[0] ?? 'BL_F_Cu', copper)?.size);
+    const label = viaLabelPrim(net, pos, size.x || size.y);
+    if (label) out.push(finish(`${id}@label:net`, PSEUDO_LAYERS.viaNetNames, [label], o, { net, ref: id, pickable: false }));
+  }
   return out;
 }
 
@@ -776,15 +890,27 @@ function convertPad(p: Record<string, unknown>, id: string, o: ConvertOpts, ctx:
     for (const c of copper) if (!layers.includes(c) && (layers.includes('BL_F_Cu') || layers.includes('BL_B_Cu'))) layers.push(c);
   }
   const out: RenderItem[] = [];
+  let labelBox: Box | undefined;
+  let labelRound = false;
   for (const layer of layers) {
     const r = padPrims(p, ps, layer, pos, angle, ctx);
     if (!r || !r.prims.length) continue;
     out.push(finish(`${id}@${layer}`, layer, r.prims, o, { net, ref: id, cacheKey: `pad|${layer}|${r.key}`, anchor: pos }));
+    if (!labelBox && isCopperLayer(layer)) {
+      labelBox = boxOfPrimitives(r.prims);
+      const shape = enumName('PadStackShape', padStackEntryFor(ps, layer, copper)?.shape);
+      labelRound = shape === 'PSS_CIRCLE' || shape === 'PSS_OVAL';
+    }
   }
   const hole = drillPrims(ps.drill, pos, angle);
   if (hole.length) {
     const layer = type === 'PT_NPTH' ? PSEUDO_LAYERS.nonPlatedHole : PSEUDO_LAYERS.padPlatedHole;
     out.push(finish(`${id}@hole`, layer, hole, o, { ref: id, pickable: false, cacheKey: `hole|${nm(ps.drill?.diameter?.xNm)}|${nm(ps.drill?.diameter?.yNm)}|${angle}`, anchor: pos }));
+  }
+  if (ctx.labels && labelBox) {
+    const labels = padLabelPrims(String(p.number ?? ''), net ?? '', labelBox, labelRound, ctx.labels);
+    if (labels.number) out.push(finish(`${id}@label:number`, PSEUDO_LAYERS.padNumbers, [labels.number], o, { net, ref: id, pickable: false, color: PSEUDO_LAYERS.padNetNames }));
+    if (labels.net) out.push(finish(`${id}@label:net`, PSEUDO_LAYERS.padNetNames, [labels.net], o, { net, ref: id, pickable: false }));
   }
   return out;
 }
@@ -1170,7 +1296,7 @@ function convertTable(p: Record<string, unknown>, id: string, o: ConvertOpts, ct
 function convert(type: string, proto: Record<string, unknown>, id: string, o: ConvertOpts, ctx: BoardAdapterContext): RenderItem[] {
   switch (type) {
     case 'KOT_PCB_TRACE':
-      return convertTrack(proto, id, o);
+      return convertTrack(proto, id, o, ctx);
     case 'KOT_PCB_ARC':
       return convertArc(proto, id, o);
     case 'KOT_PCB_VIA':

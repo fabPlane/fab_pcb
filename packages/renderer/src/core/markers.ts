@@ -88,26 +88,42 @@ export class MarkerLayer {
   private severityVisible: Record<MarkerSeverity, boolean> = { error: true, warning: true, exclusion: true };
   private originX = 0;
   private originY = 0;
-  private scaleNm = MARKER_BASE_SCALE_NM.board;
+  private scaleNm: number = MARKER_BASE_SCALE_NM.board;
   private zoom = 0;
   private focusedId: string | null = null;
   private legendDirty = true;
   /** background colour of the view, for the legend outline */
   private background: ThemeColor;
 
+  private theme: Theme;
+
   constructor(
     theme: Theme,
-    readonly kind: 'board' | 'schematic' = 'board',
+    private _kind: 'board' | 'schematic' = 'board',
   ) {
+    this.theme = theme;
     this.root.label = 'markers';
     this.root.eventMode = 'none';
     this.root.zIndex = 1_000_001;
     this.root.addChild(this.legend);
-    this.background = themeColor(theme, kind === 'schematic' ? 'schematic.background' : 'board.background');
+    this.background = themeColor(theme, _kind === 'schematic' ? 'schematic.background' : 'board.background');
     this.setTheme(theme);
   }
 
+  /** 'board' (DRC colours, 0.1625 mm scale) or 'schematic' (ERC colours, 0.15 mm). */
+  get kind(): 'board' | 'schematic' {
+    return this._kind;
+  }
+
+  setKind(kind: 'board' | 'schematic'): void {
+    if (kind === this._kind) return;
+    this._kind = kind;
+    this.zoom = 0; // force a rescale on the next update
+    this.setTheme(this.theme);
+  }
+
   setTheme(theme: Theme): void {
+    this.theme = theme;
     this.colors = {
       error: themeColor(theme, markerLayerKey(this.kind, 'error')),
       warning: themeColor(theme, markerLayerKey(this.kind, 'warning')),

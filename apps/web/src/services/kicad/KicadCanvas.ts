@@ -6,6 +6,9 @@
 //     labels and symbol fields in one batched request; cached by a hash of the text so an edit
 //     only re-tessellates what changed),
 //   - `decodeAny` via the proto registry.
+// Board hosts also feed the ratsnest overlay from `GetRatsnest` (`host.setRatsnest`), refreshed
+// after every store diff that touches copper. DRC/ERC markers go through `host.setMarkers` /
+// `host.focusMarker`; the app's DRC panel drives those directly.
 // The host first paints with the renderer's fallbacks and `setAdapterContext` upgrades it
 // once the server shapes arrive; later store diffs only re-fetch the affected texts and
 // `rebuildItems` them.
@@ -198,6 +201,9 @@ export interface KicadCanvasOptions {
   log?: (m: string, level?: 'info' | 'warn' | 'error') => void;
 }
 
+/** Store item types whose edits can change the ratsnest. */
+const COPPER_TYPES = new Set(['KOT_PCB_TRACE', 'KOT_PCB_ARC', 'KOT_PCB_VIA', 'KOT_PCB_PAD', 'KOT_PCB_ZONE', 'KOT_PCB_FOOTPRINT']);
+
 /** Builds renderer hosts wired to the document service. Install with `setCanvasHostFactory`. */
 export function createKicadCanvasFactory({ docs, theme, log = () => {} }: KicadCanvasOptions) {
   return (kind: DocumentKind, _storeKey: string, store: ItemStore): CanvasHost => {
@@ -227,6 +233,22 @@ export function createKicadCanvasFactory({ docs, theme, log = () => {} }: KicadC
       adapter: { padPolygons: pads.get, textShapes: texts.get, footprintChildrenAbsolute: true },
       pickTolerancePx: 5,
     });
+    // Ratsnest overlay: GetRatsnest -> host.setRatsnest, coalesced so a burst of edits
+    // triggers one request. Failures are logged and leave the last edges in place.
+    let ratsnestPending: ReturnType<typeof setTimeout> | null = null;
+    const refreshRatsnest = (delayMs = 0): void => {
+      if (kind !== 'board') return;
+      if (ratsnestPending) clearTimeout(ratsnestPending);
+      ratsnestPending = setTimeout(() => {
+        ratsnestPending = null;
+        const board = docs.boardDoc;
+        if (!board) return;
+        void board
+          .ratsnest()
+          .then((r) => host.setRatsnest(r.edges.map((e) => ({ net: e.net, a: e.sourcePosition, b: e.targetPosition, source: e.source, target: e.target }))))
+          .catch((e) => log(`GetRatsnest failed: ${e instanceof Error ? e.message : String(e)}`, 'warn'));
+      }, delayMs);
+    };
     const origMount = host.mount.bind(host);
     host.mount = (el, s, th) => {
       origMount(el, s, th);
@@ -240,9 +262,11 @@ export function createKicadCanvasFactory({ docs, theme, log = () => {} }: KicadC
         }
         texts.request(store.all(), true);
       })();
+      refreshRatsnest();
     };
     const off = store.subscribe((diff) => {
       const changed = [...diff.added, ...diff.updated];
+      if (changed.some((i) => COPPER_TYPES.has(i.type)) || diff.removed.length) refreshRatsnest(150);
       if (!changed.length) return;
       pads.invalidate(changed.map((i) => i.id));
       void pads.request(changed, copperLayers).then((n) => n && host.rebuildItems(changed.map((i) => i.id)));
@@ -251,6 +275,8 @@ export function createKicadCanvasFactory({ docs, theme, log = () => {} }: KicadC
     const origUnmount = host.unmount.bind(host);
     host.unmount = () => {
       off();
+      if (ratsnestPending) clearTimeout(ratsnestPending);
+      ratsnestPending = null;
       origUnmount();
     };
     return host;

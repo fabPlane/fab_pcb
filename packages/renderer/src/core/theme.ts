@@ -239,6 +239,10 @@ export interface UiColors {
   auxItems: ThemeColor;
   drcError: ThemeColor;
   drcWarning: ThemeColor;
+  drcExclusion: ThemeColor;
+  padNetNames: ThemeColor;
+  trackNetNames: ThemeColor;
+  viaNetNames: ThemeColor;
 }
 
 export function uiColors(theme: Theme, kind: 'board' | 'schematic' = 'board'): UiColors {
@@ -256,6 +260,10 @@ export function uiColors(theme: Theme, kind: 'board' | 'schematic' = 'board'): U
       auxItems: themeColor(theme, 'schematic.aux_items'),
       drcError: themeColor(theme, 'schematic.erc_error'),
       drcWarning: themeColor(theme, 'schematic.erc_warning'),
+      drcExclusion: themeColor(theme, 'schematic.erc_exclusion'),
+      padNetNames: themeColor(theme, 'board.pad_net_names'),
+      trackNetNames: themeColor(theme, 'board.track_net_names'),
+      viaNetNames: themeColor(theme, 'board.via_net_names'),
     };
   }
   return {
@@ -271,5 +279,9 @@ export function uiColors(theme: Theme, kind: 'board' | 'schematic' = 'board'): U
     auxItems: themeColor(theme, 'board.aux_items'),
     drcError: themeColor(theme, 'board.drc_error'),
     drcWarning: themeColor(theme, 'board.drc_warning'),
+    drcExclusion: themeColor(theme, 'board.drc_exclusion'),
+    padNetNames: themeColor(theme, 'board.pad_net_names'),
+    trackNetNames: themeColor(theme, 'board.track_net_names'),
+    viaNetNames: themeColor(theme, 'board.via_net_names'),
   };
 }

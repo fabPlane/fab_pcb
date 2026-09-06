@@ -10,3 +10,4 @@ e2e/.auth/
 /coverage/
 **/coverage-report/
 coverage-summary.md
+packages/renderer/scripts/pixel-diff-out/

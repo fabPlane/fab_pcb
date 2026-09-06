@@ -412,3 +412,56 @@ export class CameraController {
     this.options.onFrame?.();
   }
 }
+
+// ---------------------------------------------------------------------------
+// Camera animation (focusMarker, "zoom to selection")
+// ---------------------------------------------------------------------------
+
+/** `prefers-reduced-motion: reduce` (false outside a browser). */
+export function prefersReducedMotion(): boolean {
+  return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+export interface CameraAnimationOptions {
+  /** total duration in ms (default 320); 0 or reduced motion jumps immediately */
+  durationMs?: number;
+  /** force an immediate jump (defaults to `prefersReducedMotion()`) */
+  reducedMotion?: boolean;
+  /** called when the animation ends or is cancelled by a new one */
+  onDone?: () => void;
+}
+
+/**
+ * Ease the camera to `target` (missing fields keep their value). Zoom interpolates
+ * geometrically so a pan+zoom feels uniform. Returns a cancel function. Without
+ * `requestAnimationFrame` (tests) or with reduced motion the camera jumps at once.
+ */
+export function animateCamera(camera: Camera, target: Partial<CameraState>, opts: CameraAnimationOptions = {}): () => void {
+  const from = camera.getState();
+  const to: CameraState = { x: target.x ?? from.x, y: target.y ?? from.y, zoom: target.zoom ?? from.zoom };
+  const duration = opts.durationMs ?? 320;
+  const reduced = opts.reducedMotion ?? prefersReducedMotion();
+  if (reduced || duration <= 0 || typeof requestAnimationFrame !== 'function' || typeof performance === 'undefined') {
+    camera.setState(to);
+    opts.onDone?.();
+    return () => {};
+  }
+  const start = performance.now();
+  const lnz0 = Math.log(from.zoom);
+  const lnz1 = Math.log(to.zoom);
+  let raf = 0;
+  let cancelled = false;
+  const step = (now: number): void => {
+    if (cancelled) return;
+    const t = Math.min(1, (now - start) / duration);
+    const e = 1 - Math.pow(1 - t, 3); // ease-out cubic
+    camera.setState({ x: from.x + (to.x - from.x) * e, y: from.y + (to.y - from.y) * e, zoom: Math.exp(lnz0 + (lnz1 - lnz0) * e) });
+    if (t < 1) raf = requestAnimationFrame(step);
+    else opts.onDone?.();
+  };
+  raf = requestAnimationFrame(step);
+  return () => {
+    cancelled = true;
+    if (raf) cancelAnimationFrame(raf);
+  };
+}

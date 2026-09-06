@@ -83,8 +83,48 @@ interface CanvasHost {
   onCameraChange(cb: (cam: Camera) => void): () => void;
   setStore(store: ItemStore): void;                      // switch documents (schematic sheets) without remounting
   // move preview: the app moves items optimistically by patching the store; no renderer API needed
+
+  // --- overlays (A5): world-space, above the scene; a theme switch never rebuilds geometry
+  setRatsnest(edges: RatsnestEdge[]): void;              // GetRatsnest airlines
+  setRatsnestVisible(visible: boolean): void;
+  setMarkers(markers: MarkerSpec[]): void;               // DRC / ERC violations
+  setMarkersVisible(visible: boolean): void;
+  focusMarker(id: string | null, opts?: { durationMs?: number; reducedMotion?: boolean; zoom?: number; onDone?: () => void }): boolean;
+  readonly focusedMarker: string | null;
+}
+
+interface RatsnestEdge {
+  net: string;                 // net name; edges of highlighted nets draw at full alpha
+  a: Vec2; b: Vec2;            // GetRatsnest source_position / target_position, nm
+  source?: string; target?: string;   // KIIDs at each end; edges touching a selected item are emphasised
+}
+
+interface MarkerSpec {
+  id: string;                  // PCB_MARKER / SCH_MARKER KIID; becomes PickResult.ref
+  position: Vec2;
+  severity: 'error' | 'warning' | 'exclusion';
+  description: string;
+  layer?: string;              // board layer of the violation, informational
+  endPosition?: Vec2;          // far end of the violation, for the focused marker's legend
 }
 ```
+
+Markers are picked directly rather than through the spatial index: a hit is
+`{ id: 'marker:<id>', ref: '<marker kiid>', owner: 'marker', layer: 'board.drc_error' }`.
+Per-severity visibility goes through `setLayerVisible` on `board.drc_error` /
+`board.drc_warning` / `board.drc_exclusion` (or `schematic.erc_*`). `focusMarker` eases the
+camera to the marker (immediate under `prefers-reduced-motion`) and returns false for an
+unknown id; `focusMarker(null)` clears the legend.
+
+`BoardCanvasHost` additionally has `setLabelOptions({ padNumbers?, netNames?, minPxPerMm? })`
+for pad numbers and net names on pads / vias / tracks, off by default and zoom-gated at
+`minPxPerMm` (default 20). They live on the pseudo layers `board.pad_numbers`,
+`board.pad_net_names`, `board.via_net_names`, `board.track_net_names`; `setLayerVisible` on one
+of those is remembered and combined with the zoom gate.
+
+The app owns the data: `apps/web/src/services/kicad/KicadCanvas.ts` calls `GetRatsnest` after
+mount and after every store diff that touches copper, and the DRC/ERC panel drives
+`setMarkers` / `focusMarker`. The renderer never issues IPC itself.
 
 Board and schematic hosts are separate classes (`BoardCanvasHost`, `SchematicCanvasHost`)
 sharing `renderer/core`. `setStore` rebuilds the scene from the new store and moves the store
