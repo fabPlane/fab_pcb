@@ -25,7 +25,15 @@ same WebSocket. Cheap interim: `GetDocumentRevision` (monotonic counter bumped i
 `pushCurrentCommit`) so the UI can poll one small message.
 
 ### G1a · Event follow-ups (found by the bridge relay)
-**Status:** open (batch 4).
+**Status:** done (1c372484ca): replaced items are reported as `updated`, and `ProjectChanged` is
+published for project-level commands.
+
+### G19 · Bugs found by the renderer's pixel-diff harness
+`GetTextAsShapes` given a `TextBox` returns its glyphs around the origin instead of at the box
+position (the kitchen-sink "Hello" cell at 25, 24.5 mm comes back at 0.3, 0.6 mm), so a client
+cannot use server glyphs for text boxes or table cells. Barcode messages carry only the payload,
+not the encoded modules, so a client cannot draw a QR or DataMatrix without its own encoder;
+consider returning the module bitmap or a polygon set.
 Footprint `UpdateItems` is recorded as remove+add so `DocumentChanged` lists the KIID
 under both `created` and `deleted`; no event for UpdateBoardStackup, embedded files,
 appearance settings, InjectDrcError, title block, page settings, variants, or project-level
