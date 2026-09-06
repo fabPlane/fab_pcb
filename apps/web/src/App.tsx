@@ -1,0 +1,166 @@
+import { useCallback, useEffect, useState } from 'react';
+import { CommandPalette } from '@/components/CommandPalette';
+import { MenuBar } from '@/components/MenuBar';
+import { StatusBar } from '@/components/StatusBar';
+import { Dialogs } from '@/components/dialogs';
+import { TipProvider } from '@/components/layout/Tip';
+import { useKeyboard } from '@/hooks/useKeyboard';
+import { BoardEditor } from '@/screens/BoardEditor';
+import { FootprintEditor } from '@/screens/FootprintEditor';
+import { ProjectScreen } from '@/screens/ProjectScreen';
+import { SchematicEditor } from '@/screens/SchematicEditor';
+import { useServices, useServiceVersion } from '@/services';
+import { useAppStore } from '@/state/appStore';
+import { useActiveDocument } from '@/state/active';
+import { log } from '@/state/logStore';
+import { resolveTheme, useUiStore } from '@/state/uiStore';
+
+function useThemeAttribute(): void {
+  const theme = useUiStore((s) => s.theme);
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'system') root.removeAttribute('data-theme');
+    else root.setAttribute('data-theme', theme);
+  }, [theme]);
+}
+
+function Toast() {
+  const toast = useAppStore((s) => s.toast);
+  const clear = useAppStore((s) => s.clearToast);
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(clear, toast.kind === 'error' ? 6000 : 2500);
+    return () => clearTimeout(t);
+  }, [toast, clear]);
+  if (!toast) return null;
+  return (
+    <div className={`toast ${toast.kind}`} role="status">
+      {toast.text}
+    </div>
+  );
+}
+
+function TitleBar() {
+  const session = useAppStore((s) => s.session);
+  const openDocs = useAppStore((s) => s.openDocs);
+  const active = useAppStore((s) => s.activeEditor);
+  const activeSheet = useAppStore((s) => s.activeSheet);
+  const activeFp = useAppStore((s) => s.activeFootprint);
+  const openDoc = useAppStore((s) => s.openDoc);
+  const closeDoc = useAppStore((s) => s.closeDoc);
+  const setActiveEditor = useAppStore((s) => s.setActiveEditor);
+  const theme = useUiStore((s) => s.theme);
+  const setTheme = useUiStore((s) => s.setTheme);
+  const { documents } = useServices();
+  const sub = useCallback((cb: () => void) => documents.onChange(cb), [documents]);
+  useServiceVersion(sub);
+  const resolved = resolveTheme(theme);
+  const isActive = (d: (typeof openDocs)[number]) => d.kind === active && (d.kind === 'board' || (d.kind === 'schematic' && d.id === activeSheet) || (d.kind === 'footprint' && d.id === activeFp));
+  return (
+    <div className="titlebar">
+      <div className="brand" onClick={() => setActiveEditor('project')} style={{ cursor: 'pointer' }} title="Project screen">
+        <span className="logo" />
+        <span>KiCad Web</span>
+      </div>
+      <MenuBar />
+      <div className="doc-tabs">
+        {session && (
+          <button className={`doc-tab${active === 'project' ? ' active' : ''}`} onClick={() => setActiveEditor('project')}>
+            {session.projectName}
+          </button>
+        )}
+        {openDocs.map((d) => (
+          <button key={`${d.kind}:${d.id}`} className={`doc-tab${isActive(d) ? ' active' : ''}`} onClick={() => openDoc(d)} title={`${d.kind} · ${d.id}`}>
+            <span className="faint">{d.kind === 'board' ? '▦' : d.kind === 'schematic' ? '▤' : '▣'}</span>
+            {d.title}
+            {documents.isDirty(d.kind) && <span className="dirty">●</span>}
+            <span
+              className="close"
+              onClick={(e) => {
+                e.stopPropagation();
+                closeDoc(d.kind, d.id);
+              }}
+            >
+              ×
+            </span>
+          </button>
+        ))}
+      </div>
+      <div className="right">
+        <span className="session-pill" title={session ? `${session.projectPath}\nsession ${session.id}\ntoken ${session.kicadToken}` : 'Not connected to a bridge session'}>
+          <span className={`dot ${session?.state ?? ''}`} />
+          {session ? (session.state === 'open' ? `KiCad ${session.kicadVersion.split('-')[0]}` : session.state) : 'offline'}
+        </span>
+        <button className="btn ghost sm" onClick={() => setTheme(resolved === 'dark' ? 'light' : 'dark')} title={`Theme: ${theme} (click to toggle, View → Follow system theme resets)`}>
+          {resolved === 'dark' ? '☾' : '☼'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function App() {
+  const services = useServices();
+  const session = useAppStore((s) => s.session);
+  const setSession = useAppStore((s) => s.setSession);
+  const active = useAppStore((s) => s.activeEditor);
+  const notify = useAppStore((s) => s.notify);
+  const openDoc = useAppStore((s) => s.openDoc);
+  const [busy, setBusy] = useState(false);
+  useThemeAttribute();
+  useKeyboard();
+  const activeDoc = useActiveDocument();
+
+  useEffect(() => services.session.onChange((s) => setSession(s)), [services, setSession]);
+
+  const openProject = useCallback(
+    async (path: string) => {
+      setBusy(true);
+      try {
+        log(`POST /sessions {path: "${path}"}`);
+        const s = await services.session.connect(path);
+        log(`Session ${s.id} open · KiCad ${s.kicadVersion} · token ${s.kicadToken}`);
+        services.commands.clearHistory();
+        openDoc({ kind: 'board', id: 'board', title: `${s.projectName}.kicad_pcb` });
+        const root = services.documents.sheets()[0];
+        if (root) useAppStore.getState().openDocs.some((d) => d.kind === 'schematic') || useAppStore.setState((st) => ({ openDocs: [...st.openDocs, { kind: 'schematic', id: root.path, title: root.file }] }));
+      } catch (e) {
+        log((e as Error).message, 'error');
+        notify((e as Error).message, 'error');
+      } finally {
+        setBusy(false);
+      }
+    },
+    [services, notify, openDoc],
+  );
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const p = url.searchParams.get('project');
+    if (p && !session) void openProject(p);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const screen = !session || session.state !== 'open' || active === 'project' ? (
+    <ProjectScreen onOpen={openProject} busy={busy} />
+  ) : active === 'board' ? (
+    <BoardEditor />
+  ) : active === 'schematic' ? (
+    <SchematicEditor />
+  ) : (
+    <FootprintEditor />
+  );
+
+  return (
+    <TipProvider>
+      <div className="app-shell">
+        <TitleBar />
+        {screen}
+        <StatusBar storeKey={session && active !== 'project' && activeDoc ? activeDoc.key : null} store={activeDoc?.store ?? null} />
+        <CommandPalette />
+        <Dialogs onProjectCreated={(p) => void openProject(p)} />
+        <Toast />
+      </div>
+    </TipProvider>
+  );
+}
