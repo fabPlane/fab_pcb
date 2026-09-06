@@ -40,11 +40,11 @@ describe.skipIf(!haveKicad)("coverage against the pinned KiCad checkout (git HEA
     expect(renderJson(r)).toBe(await readFile(join(TOOL_DIR, "commands.json"), "utf8"));
     expect(renderMarkdown(r)).toBe(await readFile(join(REPO_DIR, "docs", "api-coverage.md"), "utf8"));
     const s = summarize(r.commands);
-    // KiCad 3c7ce604bf: 115 commands. Since ef0ed71606 (113: 94 ok / 16 gui-only / 3 unregistered),
-    // RefreshEditor, FocusOnItem and UpdateBoardStackup gained handlers (unregistered -> ok) and
-    // SaveItemsToString + GetDocumentRevision were added (+2 ok).
-    expect(s.total).toBe(115);
-    expect(s.ok).toBe(99);
+    // The fork keeps adding commands; the invariants are: every command is either headless or
+    // one of the 16 known GUI-only ones, nothing is partial or unregistered, and the totals agree
+    // with the committed commands.json (checked byte-for-byte above).
+    expect(s.total).toBeGreaterThanOrEqual(115);
+    expect(s.ok + s["gui-only"]).toBe(s.total);
     expect(s["gui-only"]).toBe(16);
     expect(s.partial).toBe(0);
     expect(s.unregistered).toBe(0);
