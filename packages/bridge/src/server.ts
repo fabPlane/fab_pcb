@@ -1,0 +1,222 @@
+/**
+ * `Bun.serve` front: HTTP JSON API for sessions and files, WebSocket `/ws?session=<id>` that
+ * forwards binary frames byte-for-byte to the session's KiCad server, optional static hosting.
+ */
+import { stat } from "node:fs/promises";
+import { extname, resolve } from "node:path";
+import {
+  TransportError,
+  WS_BRIDGE_PROTOCOL_VERSION,
+  decodeWsFrame,
+  encodeControl,
+  encodeWsFrame,
+  parseControl,
+  type BridgeErrorCode,
+} from "@kicad-web/client/transport";
+import type { BridgeConfig } from "./config";
+import { handleFiles } from "./files";
+import { SessionManager, type WsData } from "./session";
+
+export interface BridgeServer {
+  readonly port: number;
+  readonly hostname: string;
+  readonly url: string;
+  readonly config: BridgeConfig;
+  readonly sessions: SessionManager;
+  stop(): Promise<void>;
+}
+
+const CORS: Record<string, string> = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "access-control-allow-headers": "content-type",
+  "access-control-expose-headers": "x-file-path",
+};
+
+function json(data: unknown, status = 200): Response {
+  return new Response(JSON.stringify(data), { status, headers: { ...CORS, "content-type": "application/json; charset=utf-8" } });
+}
+
+export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
+  const sessions = new SessionManager(cfg);
+  const startedAt = Date.now();
+  let clientCounter = 0;
+  await sessions.cleanStaleSockets();
+  const kicadCliExists = await stat(cfg.kicadCli).then((s) => s.isFile()).catch(() => false);
+  if (!kicadCliExists) cfg.log(`warning: kicad-cli not found at ${cfg.kicadCli} (set KICAD_CLI)`);
+
+  const server = Bun.serve<WsData>({
+    port: cfg.port,
+    hostname: cfg.hostname,
+    idleTimeout: 255,
+    async fetch(req, srv) {
+      const url = new URL(req.url);
+      const path = url.pathname;
+      if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
+
+      if (path === "/ws") {
+        const id = url.searchParams.get("session") ?? "";
+        const session = sessions.get(id);
+        if (!session) return json({ error: `unknown session "${id}"` }, 404);
+        const ok = srv.upgrade(req, { data: { session, clientId: ++clientCounter } });
+        return ok ? undefined : json({ error: "WebSocket upgrade failed" }, 400);
+      }
+
+      if (path === "/health") {
+        return json({
+          ok: true,
+          name: "@kicad-web/bridge",
+          protocolVersion: WS_BRIDGE_PROTOCOL_VERSION,
+          uptimeSec: Math.round((Date.now() - startedAt) / 1000),
+          kicadCli: cfg.kicadCli,
+          kicadCliExists,
+          workspaceRoot: cfg.workspaceRoot,
+          staticDir: cfg.staticDir,
+          sessions: sessions.list().map((s) => ({ id: s.id, state: s.state, path: s.path, clients: s.clients })),
+        });
+      }
+
+      if (path === "/sessions") {
+        if (req.method === "GET") return json({ sessions: sessions.list() });
+        if (req.method === "POST") {
+          let body: { path?: string | null; socket?: string; id?: string } = {};
+          const text = await req.text();
+          if (text.trim()) {
+            try {
+              body = JSON.parse(text);
+            } catch {
+              return json({ error: "body must be JSON" }, 400);
+            }
+          }
+          try {
+            const s = await sessions.create({ path: body.path ?? null, socket: body.socket, id: body.id });
+            return json({ session: s.info(), wsUrl: `/ws?session=${encodeURIComponent(s.id)}` }, 201);
+          } catch (e) {
+            const msg = e instanceof Error ? e.message : String(e);
+            const status = /not found|invalid|already exists/.test(msg) ? 400 : 502;
+            return json({ error: msg }, status);
+          }
+        }
+        return json({ error: "method not allowed" }, 405);
+      }
+
+      const m = /^\/sessions\/([^/]+)(?:\/(log))?$/.exec(path);
+      if (m) {
+        const id = decodeURIComponent(m[1]!);
+        const session = sessions.get(id);
+        if (!session) return json({ error: `unknown session "${id}"` }, 404);
+        if (m[2] === "log") return json({ id, lines: session.logLines });
+        if (req.method === "GET") return json({ session: session.info() });
+        if (req.method === "DELETE") {
+          await sessions.destroy(id);
+          return json({ ok: true, id });
+        }
+        return json({ error: "method not allowed" }, 405);
+      }
+
+      if (path === "/files" || path.startsWith("/files/")) return handleFiles(req, url, cfg, CORS);
+
+      if (cfg.staticDir && req.method === "GET") {
+        const res = await serveStatic(cfg.staticDir, path);
+        if (res) return res;
+      }
+      return json({ error: `not found: ${path}` }, 404);
+    },
+    websocket: {
+      maxPayloadLength: cfg.maxPayloadBytes,
+      idleTimeout: Math.min(960, Math.max(0, cfg.wsIdleTimeoutSec)),
+      sendPings: true,
+      open(ws) {
+        const { session, clientId } = ws.data;
+        session.clients.add(ws);
+        cfg.log(`session ${session.id}: client #${clientId} connected (${session.clients.size} total)`);
+        ws.send(
+          encodeControl({
+            type: "hello",
+            protocolVersion: WS_BRIDGE_PROTOCOL_VERSION,
+            sessionId: session.id,
+            kicadToken: session.kicadToken,
+            serverState: session.state,
+          }),
+        );
+      },
+      message(ws, raw) {
+        const { session } = ws.data;
+        if (typeof raw === "string") {
+          try {
+            const m = parseControl(raw);
+            if (m.type === "ping") ws.send(encodeControl({ type: "pong", t: m.t }));
+          } catch (e) {
+            ws.send(encodeControl({ type: "error", id: null, code: "bad-request", message: e instanceof Error ? e.message : String(e) }));
+          }
+          return;
+        }
+        let id: number;
+        let payload: Uint8Array;
+        try {
+          ({ id, payload } = decodeWsFrame(raw));
+        } catch (e) {
+          ws.send(encodeControl({ type: "error", id: null, code: "bad-request", message: e instanceof Error ? e.message : String(e) }));
+          return;
+        }
+        const transport = session.transport;
+        if (session.state !== "running" || !transport || transport.state !== "open") {
+          ws.send(encodeControl({ type: "error", id, code: "closed", message: `KiCad server is ${session.state}${session.error ? `: ${session.error}` : ""}` }));
+          return;
+        }
+        // Copy: Bun may reuse the message buffer after this callback returns.
+        const request = payload.slice();
+        transport.send(request, { timeoutMs: cfg.requestTimeoutMs }).then(
+          (reply) => {
+            if (ws.readyState === 1) ws.send(encodeWsFrame(id, reply));
+          },
+          (e: unknown) => {
+            if (ws.readyState !== 1) return;
+            const code: BridgeErrorCode = e instanceof TransportError ? e.code : "internal";
+            ws.send(encodeControl({ type: "error", id, code, message: e instanceof Error ? e.message : String(e) }));
+          },
+        );
+      },
+      close(ws) {
+        const { session, clientId } = ws.data;
+        session.clients.delete(ws);
+        cfg.log(`session ${session.id}: client #${clientId} disconnected (${session.clients.size} left)`);
+      },
+    },
+  });
+
+  const url = `http://${server.hostname}:${server.port}`;
+  cfg.log(`listening on ${url} (kicad-cli: ${cfg.kicadCli}, workspace: ${cfg.workspaceRoot}${cfg.staticDir ? `, static: ${cfg.staticDir}` : ""})`);
+
+  return {
+    port: server.port!,
+    hostname: server.hostname!,
+    url,
+    config: cfg,
+    sessions,
+    async stop() {
+      await sessions.destroyAll();
+      await server.stop(true);
+      cfg.log("stopped");
+    },
+  };
+}
+
+async function serveStatic(dir: string, pathname: string): Promise<Response | null> {
+  const root = resolve(dir);
+  let rel: string;
+  try {
+    rel = decodeURIComponent(pathname);
+  } catch {
+    return null;
+  }
+  const target = resolve(root, `.${rel}`);
+  if (target !== root && !target.startsWith(root + "/")) return null;
+  const candidates = [target];
+  if (!extname(target)) candidates.push(resolve(target, "index.html"), resolve(root, "index.html"));
+  for (const c of candidates) {
+    const s = await stat(c).catch(() => null);
+    if (s?.isFile()) return new Response(Bun.file(c), { headers: CORS });
+  }
+  return null;
+}

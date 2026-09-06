@@ -1,0 +1,23 @@
+{
+  "name": "@kicad-web/bridge",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Bun bridge: WebSocket <-> kicad-cli api-server (nng ipc), process supervision, file API, static hosting",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "start": "bun run src/main.ts",
+    "dev": "bun --watch run src/main.ts",
+    "test": "bun test",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "@kicad-web/client": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.0",
+    "typescript": "^5.6.0"
+  }
+}

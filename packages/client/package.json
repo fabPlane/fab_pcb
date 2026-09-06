@@ -1,0 +1,19 @@
+{
+  "name": "@kicad-web/client",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Transport-agnostic KiCad IPC API client (Layer 1: transports; Layers 2/3 added by the client agent)",
+  "exports": {
+    ".": "./src/index.ts",
+    "./transport": "./src/transport/index.ts"
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc -b"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.0",
+    "typescript": "^5.6.0"
+  }
+}
