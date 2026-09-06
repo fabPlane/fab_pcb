@@ -1,14 +1,14 @@
-# IPC API coverage matrix (KiCad 10.99, commit e118ed3f81)
+# IPC API coverage matrix (KiCad 10.99, commit 1ca7f148a5)
 
 Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the KiCad sources. "Handlers" names the C++ handler class that serves the command: server = API_HANDLER_SERVER (inside the API server, always loaded), common = API_HANDLER_COMMON (always loaded), editor = API_HANDLER_EDITOR, board = API_HANDLER_BOARD, pcb = API_HANDLER_PCB, footprint = API_HANDLER_FOOTPRINT, sch = API_HANDLER_SCH.
 
 | Status | Count | Meaning |
 |---|---:|---|
-| OK | 103 | works in `kicad-cli api-server` |
+| OK | 113 | works in `kicad-cli api-server` |
 | GUI-ONLY | 16 | handler returns "not available in headless mode" |
 | PARTIAL | 0 | headless in some handlers only |
 | UNREGISTERED | 0 | defined in .proto, no handler anywhere |
-| **Total** | **119** | request messages defined in the command protos |
+| **Total** | **129** | request messages defined in the command protos |
 
 
 ## common/base
@@ -115,6 +115,8 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `GetBoardStackup` | board | yes |  |
 | `GetConnectedItems` | pcb | yes |  |
 | `GetCustomDesignRules` | pcb | yes |  |
+| `GetDrcMarkers` | pcb | yes |  |
+| `GetDrcSeverities` | pcb | yes |  |
 | `GetEmbeddedFiles` | pcb | yes |  |
 | `GetGraphicsDefaults` | board | yes |  |
 | `GetItemsByNet` | pcb | yes |  |
@@ -127,6 +129,7 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `InjectDrcError` | pcb | yes |  |
 | `InteractiveMoveItems` | board | no | gated by checkForHeadless in board |
 | `RefillZones` | pcb | yes |  |
+| `RunBoardJobDrc` | pcb | yes |  |
 | `SetActiveLayer` | board | no | gated by checkForHeadless in board |
 | `SetBoardDesignRules` | pcb | yes |  |
 | `SetBoardEditorAppearanceSettings` | pcb | no | gated by checkForHeadless in pcb |
@@ -134,6 +137,8 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `SetBoardOrigin` | pcb | yes |  |
 | `SetBoardPlotSettings` | pcb | yes |  |
 | `SetCustomDesignRules` | pcb | yes |  |
+| `SetDrcMarkerExcluded` | pcb | yes |  |
+| `SetDrcSeverities` | pcb | yes |  |
 | `SetEmbeddedFiles` | pcb | yes |  |
 | `SetVisibleLayers` | board | no | gated by checkForHeadless in board |
 | `UpdateBoardStackup` | pcb | yes |  |
@@ -161,8 +166,13 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 
 | Command | Handlers | Headless | Notes |
 |---|---|---|---|
+| `GetErcMarkers` | sch | yes |  |
+| `GetErcSeverities` | sch | yes |  |
 | `GetSchematicHierarchy` | sch | yes |  |
 | `GetSchematicNetlist` | sch | yes |  |
+| `RunSchematicJobErc` | sch | yes |  |
+| `SetErcMarkerExcluded` | sch | yes |  |
+| `SetErcSeverities` | sch | yes |  |
 
 ## sch/jobs
 

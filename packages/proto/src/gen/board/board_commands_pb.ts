@@ -35,7 +35,7 @@ import type { NetClass, NetClassJson } from "../common/types/project_settings_pb
 import { file_common_types_project_settings } from "../common/types/project_settings_pb.js";
 import type { BoardStackup, BoardStackupJson, GraphicsDefaults, GraphicsDefaultsJson } from "./board_pb.js";
 import { file_board_board } from "./board_pb.js";
-import type { BoardDesignRules, BoardDesignRulesJson, CustomRule, CustomRuleJson } from "./board_rules_pb.js";
+import type { BoardDesignRules, BoardDesignRulesJson, CustomRule, CustomRuleJson, DrcMarker, DrcMarkerJson, DrcSeveritySetting, DrcSeveritySettingJson } from "./board_rules_pb.js";
 import { file_board_board_rules } from "./board_rules_pb.js";
 import type { BoardLayer, BoardLayerJson, Net, NetJson } from "./board_types_pb.js";
 import { file_board_board_types } from "./board_types_pb.js";
@@ -49,7 +49,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file board/board_commands.proto.
  */
 export const file_board_board_commands: GenFile = /*@__PURE__*/
-  fileDesc("Chpib2FyZC9ib2FyZF9jb21tYW5kcy5wcm90bxIUa2lhcGkuYm9hcmQuY29tbWFuZHMiRwoPR2V0Qm9hcmRTdGFja3VwEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIkIKFEJvYXJkU3RhY2t1cFJlc3BvbnNlEioKB3N0YWNrdXAYASABKAsyGS5raWFwaS5ib2FyZC5Cb2FyZFN0YWNrdXAidgoSVXBkYXRlQm9hcmRTdGFja3VwEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEioKB3N0YWNrdXAYAiABKAsyGS5raWFwaS5ib2FyZC5Cb2FyZFN0YWNrdXAiTQoVR2V0Qm9hcmRFbmFibGVkTGF5ZXJzEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyImcKGkJvYXJkRW5hYmxlZExheWVyc1Jlc3BvbnNlEhoKEmNvcHBlcl9sYXllcl9jb3VudBgBIAEoDRItCgZsYXllcnMYAiADKA4yHS5raWFwaS5ib2FyZC50eXBlcy5Cb2FyZExheWVyIpgBChVTZXRCb2FyZEVuYWJsZWRMYXllcnMSNAoFYm9hcmQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISGgoSY29wcGVyX2xheWVyX2NvdW50GAIgASgNEi0KBmxheWVycxgDIAMoDjIdLmtpYXBpLmJvYXJkLnR5cGVzLkJvYXJkTGF5ZXIiSAoQR2V0RW1iZWRkZWRGaWxlcxI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciJ6ChBBZGRFbWJlZGRlZEZpbGVzEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEjAKBWZpbGVzGAIgASgLMiEua2lhcGkuY29tbW9uLnR5cGVzLkVtYmVkZGVkRmlsZXMiegoQU2V0RW1iZWRkZWRGaWxlcxI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchIwCgVmaWxlcxgCIAEoCzIhLmtpYXBpLmNvbW1vbi50eXBlcy5FbWJlZGRlZEZpbGVzIksKE0dldEdyYXBoaWNzRGVmYXVsdHMSNAoFYm9hcmQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIiSwoYR3JhcGhpY3NEZWZhdWx0c1Jlc3BvbnNlEi8KCGRlZmF1bHRzGAEgASgLMh0ua2lhcGkuYm9hcmQuR3JhcGhpY3NEZWZhdWx0cyJLChNHZXRCb2FyZERlc2lnblJ1bGVzEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyInkKE1NldEJvYXJkRGVzaWduUnVsZXMSNAoFYm9hcmQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISLAoFcnVsZXMYAiABKAsyHS5raWFwaS5ib2FyZC5Cb2FyZERlc2lnblJ1bGVzIo4BChhCb2FyZERlc2lnblJ1bGVzUmVzcG9uc2USLAoFcnVsZXMYASABKAsyHS5raWFwaS5ib2FyZC5Cb2FyZERlc2lnblJ1bGVzEkQKE2N1c3RvbV9ydWxlc19zdGF0dXMYAiABKA4yJy5raWFwaS5ib2FyZC5jb21tYW5kcy5DdXN0b21SdWxlc1N0YXR1cyJMChRHZXRDdXN0b21EZXNpZ25SdWxlcxI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciJ0ChRTZXRDdXN0b21EZXNpZ25SdWxlcxI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchImCgVydWxlcxgCIAMoCzIXLmtpYXBpLmJvYXJkLkN1c3RvbVJ1bGUiigEKE0N1c3RvbVJ1bGVzUmVzcG9uc2USNwoGc3RhdHVzGAEgASgOMicua2lhcGkuYm9hcmQuY29tbWFuZHMuQ3VzdG9tUnVsZXNTdGF0dXMSJgoFcnVsZXMYAiADKAsyFy5raWFwaS5ib2FyZC5DdXN0b21SdWxlEhIKCmVycm9yX3RleHQYAyABKAkiewoOR2V0Qm9hcmRPcmlnaW4SNAoFYm9hcmQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISMwoEdHlwZRgCIAEoDjIlLmtpYXBpLmJvYXJkLmNvbW1hbmRzLkJvYXJkT3JpZ2luVHlwZSKoAQoOU2V0Qm9hcmRPcmlnaW4SNAoFYm9hcmQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISMwoEdHlwZRgCIAEoDjIlLmtpYXBpLmJvYXJkLmNvbW1hbmRzLkJvYXJkT3JpZ2luVHlwZRIrCgZvcmlnaW4YAyABKAsyGy5raWFwaS5jb21tb24udHlwZXMuVmVjdG9yMiJ3ChFHZXRCb2FyZExheWVyTmFtZRI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchIsCgVsYXllchgCIAEoDjIdLmtpYXBpLmJvYXJkLnR5cGVzLkJvYXJkTGF5ZXIiJgoWQm9hcmRMYXllck5hbWVSZXNwb25zZRIMCgRuYW1lGAEgASgJIlkKE0dldEJvYXJkTGF5ZXJCeU5hbWUSNAoFYm9hcmQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISDAoEbmFtZRgCIAEoCSJYCgdHZXROZXRzEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEhcKD25ldGNsYXNzX2ZpbHRlchgCIAMoCSI0CgxOZXRzUmVzcG9uc2USJAoEbmV0cxgBIAMoCzIWLmtpYXBpLmJvYXJkLnR5cGVzLk5ldCKZAQoNR2V0SXRlbXNCeU5ldBIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchIyCgV0eXBlcxgCIAMoDjIjLmtpYXBpLmNvbW1vbi50eXBlcy5LaUNhZE9iamVjdFR5cGUSJAoEbmV0cxgEIAMoCzIWLmtpYXBpLmJvYXJkLnR5cGVzLk5ldCKNAQoSR2V0SXRlbXNCeU5ldENsYXNzEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEjIKBXR5cGVzGAIgAygOMiMua2lhcGkuY29tbW9uLnR5cGVzLktpQ2FkT2JqZWN0VHlwZRITCgtuZXRfY2xhc3NlcxgDIAMoCSKgAQoRR2V0Q29ubmVjdGVkSXRlbXMSLgoGaGVhZGVyGAEgASgLMh4ua2lhcGkuY29tbW9uLnR5cGVzLkl0ZW1IZWFkZXISJwoFaXRlbXMYAiADKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRBIyCgV0eXBlcxgDIAMoDjIjLmtpYXBpLmNvbW1vbi50eXBlcy5LaUNhZE9iamVjdFR5cGUiOQoSR2V0TmV0Q2xhc3NGb3JOZXRzEiMKA25ldBgBIAMoCzIWLmtpYXBpLmJvYXJkLnR5cGVzLk5ldCK2AQoXTmV0Q2xhc3NGb3JOZXRzUmVzcG9uc2USSwoHY2xhc3NlcxgBIAMoCzI6LmtpYXBpLmJvYXJkLmNvbW1hbmRzLk5ldENsYXNzRm9yTmV0c1Jlc3BvbnNlLkNsYXNzZXNFbnRyeRpOCgxDbGFzc2VzRW50cnkSCwoDa2V5GAEgASgJEi0KBXZhbHVlGAIgASgLMh4ua2lhcGkuY29tbW9uLnByb2plY3QuTmV0Q2xhc3M6AjgBIpUCCg1JbXBvcnROZXRsaXN0EjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEhQKDG5ldGxpc3RfcGF0aBgCIAEoCRIPCgdkcnlfcnVuGAMgASgIEjoKCm1hdGNoX21vZGUYBCABKA4yJi5raWFwaS5ib2FyZC5jb21tYW5kcy5OZXRsaXN0TWF0Y2hNb2RlEh8KF2RlbGV0ZV9leHRyYV9mb290cHJpbnRzGAUgASgIEhkKEXVwZGF0ZV9mb290cHJpbnRzGAYgASgIEhcKD3RyYW5zZmVyX2dyb3VwcxgHIAEoCBIWCg5vdmVycmlkZV9sb2NrcxgIIAEoCCJwChVJbXBvcnROZXRsaXN0UmVzcG9uc2USEwoLZXJyb3JfY291bnQYASABKA0SFQoNd2FybmluZ19jb3VudBgCIAEoDRIbChNuZXdfZm9vdHByaW50X2NvdW50GAMgASgNEg4KBnJlcG9ydBgEIAEoCSJsCgtSZWZpbGxab25lcxI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchInCgV6b25lcxgCIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEIqIBChRHZXRQYWRTaGFwZUFzUG9seWdvbhI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchImCgRwYWRzGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSLAoFbGF5ZXIYAyABKA4yHS5raWFwaS5ib2FyZC50eXBlcy5Cb2FyZExheWVyInsKGVBhZFNoYXBlQXNQb2x5Z29uUmVzcG9uc2USJgoEcGFkcxgBIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEjYKCHBvbHlnb25zGAIgAygLMiQua2lhcGkuY29tbW9uLnR5cGVzLlBvbHlnb25XaXRoSG9sZXMirQEKHUNoZWNrUGFkc3RhY2tQcmVzZW5jZU9uTGF5ZXJzEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEicKBWl0ZW1zGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSLQoGbGF5ZXJzGAMgAygOMh0ua2lhcGkuYm9hcmQudHlwZXMuQm9hcmRMYXllciKnAQoVUGFkc3RhY2tQcmVzZW5jZUVudHJ5EiYKBGl0ZW0YASABKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRBIsCgVsYXllchgCIAEoDjIdLmtpYXBpLmJvYXJkLnR5cGVzLkJvYXJkTGF5ZXISOAoIcHJlc2VuY2UYAyABKA4yJi5raWFwaS5ib2FyZC5jb21tYW5kcy5QYWRzdGFja1ByZXNlbmNlIlgKGFBhZHN0YWNrUHJlc2VuY2VSZXNwb25zZRI8CgdlbnRyaWVzGAEgAygLMisua2lhcGkuYm9hcmQuY29tbWFuZHMuUGFkc3RhY2tQcmVzZW5jZUVudHJ5IuQBCg5JbmplY3REcmNFcnJvchI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchIzCghzZXZlcml0eRgCIAEoDjIhLmtpYXBpLmJvYXJkLmNvbW1hbmRzLkRyY1NldmVyaXR5Eg8KB21lc3NhZ2UYAyABKAkSLQoIcG9zaXRpb24YBCABKAsyGy5raWFwaS5jb21tb24udHlwZXMuVmVjdG9yMhInCgVpdGVtcxgFIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEIkIKFkluamVjdERyY0Vycm9yUmVzcG9uc2USKAoGbWFya2VyGAEgASgLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQiSAoQR2V0VmlzaWJsZUxheWVycxI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciJCChJCb2FyZExheWVyUmVzcG9uc2USLAoFbGF5ZXIYASABKA4yHS5raWFwaS5ib2FyZC50eXBlcy5Cb2FyZExheWVyIjwKC0JvYXJkTGF5ZXJzEi0KBmxheWVycxgBIAMoDjIdLmtpYXBpLmJvYXJkLnR5cGVzLkJvYXJkTGF5ZXIidwoQU2V0VmlzaWJsZUxheWVycxI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchItCgZsYXllcnMYAiADKA4yHS5raWFwaS5ib2FyZC50eXBlcy5Cb2FyZExheWVyIkYKDkdldEFjdGl2ZUxheWVyEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyInQKDlNldEFjdGl2ZUxheWVyEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEiwKBWxheWVyGAIgASgOMh0ua2lhcGkuYm9hcmQudHlwZXMuQm9hcmRMYXllciKzAgodQm9hcmRFZGl0b3JBcHBlYXJhbmNlU2V0dGluZ3MSTgoWaW5hY3RpdmVfbGF5ZXJfZGlzcGxheRgBIAEoDjIuLmtpYXBpLmJvYXJkLmNvbW1hbmRzLkluYWN0aXZlTGF5ZXJEaXNwbGF5TW9kZRJEChFuZXRfY29sb3JfZGlzcGxheRgCIAEoDjIpLmtpYXBpLmJvYXJkLmNvbW1hbmRzLk5ldENvbG9yRGlzcGxheU1vZGUSNwoKYm9hcmRfZmxpcBgDIAEoDjIjLmtpYXBpLmJvYXJkLmNvbW1hbmRzLkJvYXJkRmxpcE1vZGUSQwoQcmF0c25lc3RfZGlzcGxheRgEIAEoDjIpLmtpYXBpLmJvYXJkLmNvbW1hbmRzLlJhdHNuZXN0RGlzcGxheU1vZGUiIgogR2V0Qm9hcmRFZGl0b3JBcHBlYXJhbmNlU2V0dGluZ3MiaQogU2V0Qm9hcmRFZGl0b3JBcHBlYXJhbmNlU2V0dGluZ3MSRQoIc2V0dGluZ3MYASABKAsyMy5raWFwaS5ib2FyZC5jb21tYW5kcy5Cb2FyZEVkaXRvckFwcGVhcmFuY2VTZXR0aW5ncyJMChRHZXRCb2FyZFBsb3RTZXR0aW5ncxI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciKIAQoUU2V0Qm9hcmRQbG90U2V0dGluZ3MSNAoFYm9hcmQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISOgoNcGxvdF9zZXR0aW5ncxgCIAEoCzIjLmtpYXBpLmJvYXJkLmpvYnMuQm9hcmRQbG90U2V0dGluZ3MiVwoZQm9hcmRQbG90U2V0dGluZ3NSZXNwb25zZRI6Cg1wbG90X3NldHRpbmdzGAEgASgLMiMua2lhcGkuYm9hcmQuam9icy5Cb2FyZFBsb3RTZXR0aW5ncyKhAQoJRmxpcEl0ZW1zEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEicKBWl0ZW1zGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSOwoJZGlyZWN0aW9uGAMgASgOMigua2lhcGkuYm9hcmQuY29tbWFuZHMuQm9hcmRGbGlwRGlyZWN0aW9uImcKDkl0ZW1GbGlwUmVzdWx0EjEKBnN0YXR1cxgBIAEoCzIhLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5JdGVtU3RhdHVzEiIKBGl0ZW0YAiABKAsyFC5nb29nbGUucHJvdG9idWYuQW55IrcBChFGbGlwSXRlbXNSZXNwb25zZRIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchI1CgZzdGF0dXMYAiABKA4yJS5raWFwaS5jb21tb24udHlwZXMuSXRlbVJlcXVlc3RTdGF0dXMSOwoNZmxpcHBlZF9pdGVtcxgDIAMoCzIkLmtpYXBpLmJvYXJkLmNvbW1hbmRzLkl0ZW1GbGlwUmVzdWx0InUKFEludGVyYWN0aXZlTW92ZUl0ZW1zEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEicKBWl0ZW1zGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQqUgoRQ3VzdG9tUnVsZXNTdGF0dXMSDwoLQ1JTX1VOS05PV04QABIMCghDUlNfTk9ORRABEg0KCUNSU19WQUxJRBACEg8KC0NSU19JTlZBTElEEAMqPwoPQm9hcmRPcmlnaW5UeXBlEg8KC0JPVF9VTktOT1dOEAASDAoIQk9UX0dSSUQQARINCglCT1RfRFJJTEwQAipEChBOZXRsaXN0TWF0Y2hNb2RlEg8KC05NTV9VTktOT1dOEAASDAoITk1NX1VVSUQQARIRCg1OTU1fUkVGRVJFTkNFEAIqSQoQUGFkc3RhY2tQcmVzZW5jZRIPCgtQU1BfVU5LTk9XThAAEg8KC1BTUF9QUkVTRU5UEAESEwoPUFNQX05PVF9QUkVTRU5UEAIqoQEKC0RyY1NldmVyaXR5Eg8KC0RSU19VTktOT1dOEAASDwoLRFJTX1dBUk5JTkcQARINCglEUlNfRVJST1IQAhIRCg1EUlNfRVhDTFVTSU9OEAMSDgoKRFJTX0lHTk9SRRAEEgwKCERSU19JTkZPEAUSDgoKRFJTX0FDVElPThAGEg0KCURSU19ERUJVRxAHEhEKDURSU19VTkRFRklORUQQCCpfChhJbmFjdGl2ZUxheWVyRGlzcGxheU1vZGUSEAoMSUxETV9VTktOT1dOEAASDwoLSUxETV9OT1JNQUwQARIPCgtJTERNX0RJTU1FRBACEg8KC0lMRE1fSElEREVOEAMqVgoTTmV0Q29sb3JEaXNwbGF5TW9kZRIQCgxOQ0RNX1VOS05PV04QABIMCghOQ0RNX0FMTBABEhEKDU5DRE1fUkFUU05FU1QQAhIMCghOQ0RNX09GRhADKkMKDUJvYXJkRmxpcE1vZGUSDwoLQkZNX1VOS05PV04QABIOCgpCRk1fTk9STUFMEAESEQoNQkZNX0ZMSVBQRURfWBACKlIKE1JhdHNuZXN0RGlzcGxheU1vZGUSDwoLUkRNX1VOS05PV04QABISCg5SRE1fQUxMX0xBWUVSUxABEhYKElJETV9WSVNJQkxFX0xBWUVSUxACKk0KEkJvYXJkRmxpcERpcmVjdGlvbhIPCgtCRkRfVU5LTk9XThAAEhIKDkJGRF9MRUZUX1JJR0hUEAESEgoOQkZEX1RPUF9CT1RUT00QAmIGcHJvdG8z", [file_common_types_base_types, file_common_types_embedded_files, file_google_protobuf_any, file_common_types_enums, file_common_types_project_settings, file_board_board, file_board_board_rules, file_board_board_types, file_board_board_jobs, file_common_commands_editor_commands]);
+  fileDesc("Chpib2FyZC9ib2FyZF9jb21tYW5kcy5wcm90bxIUa2lhcGkuYm9hcmQuY29tbWFuZHMiRwoPR2V0Qm9hcmRTdGFja3VwEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIkIKFEJvYXJkU3RhY2t1cFJlc3BvbnNlEioKB3N0YWNrdXAYASABKAsyGS5raWFwaS5ib2FyZC5Cb2FyZFN0YWNrdXAidgoSVXBkYXRlQm9hcmRTdGFja3VwEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEioKB3N0YWNrdXAYAiABKAsyGS5raWFwaS5ib2FyZC5Cb2FyZFN0YWNrdXAiTQoVR2V0Qm9hcmRFbmFibGVkTGF5ZXJzEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyImcKGkJvYXJkRW5hYmxlZExheWVyc1Jlc3BvbnNlEhoKEmNvcHBlcl9sYXllcl9jb3VudBgBIAEoDRItCgZsYXllcnMYAiADKA4yHS5raWFwaS5ib2FyZC50eXBlcy5Cb2FyZExheWVyIpgBChVTZXRCb2FyZEVuYWJsZWRMYXllcnMSNAoFYm9hcmQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISGgoSY29wcGVyX2xheWVyX2NvdW50GAIgASgNEi0KBmxheWVycxgDIAMoDjIdLmtpYXBpLmJvYXJkLnR5cGVzLkJvYXJkTGF5ZXIiSAoQR2V0RW1iZWRkZWRGaWxlcxI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciJ6ChBBZGRFbWJlZGRlZEZpbGVzEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEjAKBWZpbGVzGAIgASgLMiEua2lhcGkuY29tbW9uLnR5cGVzLkVtYmVkZGVkRmlsZXMiegoQU2V0RW1iZWRkZWRGaWxlcxI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchIwCgVmaWxlcxgCIAEoCzIhLmtpYXBpLmNvbW1vbi50eXBlcy5FbWJlZGRlZEZpbGVzIksKE0dldEdyYXBoaWNzRGVmYXVsdHMSNAoFYm9hcmQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIiSwoYR3JhcGhpY3NEZWZhdWx0c1Jlc3BvbnNlEi8KCGRlZmF1bHRzGAEgASgLMh0ua2lhcGkuYm9hcmQuR3JhcGhpY3NEZWZhdWx0cyJLChNHZXRCb2FyZERlc2lnblJ1bGVzEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyInkKE1NldEJvYXJkRGVzaWduUnVsZXMSNAoFYm9hcmQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISLAoFcnVsZXMYAiABKAsyHS5raWFwaS5ib2FyZC5Cb2FyZERlc2lnblJ1bGVzIo4BChhCb2FyZERlc2lnblJ1bGVzUmVzcG9uc2USLAoFcnVsZXMYASABKAsyHS5raWFwaS5ib2FyZC5Cb2FyZERlc2lnblJ1bGVzEkQKE2N1c3RvbV9ydWxlc19zdGF0dXMYAiABKA4yJy5raWFwaS5ib2FyZC5jb21tYW5kcy5DdXN0b21SdWxlc1N0YXR1cyJMChRHZXRDdXN0b21EZXNpZ25SdWxlcxI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciJ0ChRTZXRDdXN0b21EZXNpZ25SdWxlcxI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchImCgVydWxlcxgCIAMoCzIXLmtpYXBpLmJvYXJkLkN1c3RvbVJ1bGUiigEKE0N1c3RvbVJ1bGVzUmVzcG9uc2USNwoGc3RhdHVzGAEgASgOMicua2lhcGkuYm9hcmQuY29tbWFuZHMuQ3VzdG9tUnVsZXNTdGF0dXMSJgoFcnVsZXMYAiADKAsyFy5raWFwaS5ib2FyZC5DdXN0b21SdWxlEhIKCmVycm9yX3RleHQYAyABKAkiewoOR2V0Qm9hcmRPcmlnaW4SNAoFYm9hcmQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISMwoEdHlwZRgCIAEoDjIlLmtpYXBpLmJvYXJkLmNvbW1hbmRzLkJvYXJkT3JpZ2luVHlwZSKoAQoOU2V0Qm9hcmRPcmlnaW4SNAoFYm9hcmQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISMwoEdHlwZRgCIAEoDjIlLmtpYXBpLmJvYXJkLmNvbW1hbmRzLkJvYXJkT3JpZ2luVHlwZRIrCgZvcmlnaW4YAyABKAsyGy5raWFwaS5jb21tb24udHlwZXMuVmVjdG9yMiJ3ChFHZXRCb2FyZExheWVyTmFtZRI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchIsCgVsYXllchgCIAEoDjIdLmtpYXBpLmJvYXJkLnR5cGVzLkJvYXJkTGF5ZXIiJgoWQm9hcmRMYXllck5hbWVSZXNwb25zZRIMCgRuYW1lGAEgASgJIlkKE0dldEJvYXJkTGF5ZXJCeU5hbWUSNAoFYm9hcmQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISDAoEbmFtZRgCIAEoCSJYCgdHZXROZXRzEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEhcKD25ldGNsYXNzX2ZpbHRlchgCIAMoCSI0CgxOZXRzUmVzcG9uc2USJAoEbmV0cxgBIAMoCzIWLmtpYXBpLmJvYXJkLnR5cGVzLk5ldCKZAQoNR2V0SXRlbXNCeU5ldBIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchIyCgV0eXBlcxgCIAMoDjIjLmtpYXBpLmNvbW1vbi50eXBlcy5LaUNhZE9iamVjdFR5cGUSJAoEbmV0cxgEIAMoCzIWLmtpYXBpLmJvYXJkLnR5cGVzLk5ldCKNAQoSR2V0SXRlbXNCeU5ldENsYXNzEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEjIKBXR5cGVzGAIgAygOMiMua2lhcGkuY29tbW9uLnR5cGVzLktpQ2FkT2JqZWN0VHlwZRITCgtuZXRfY2xhc3NlcxgDIAMoCSKgAQoRR2V0Q29ubmVjdGVkSXRlbXMSLgoGaGVhZGVyGAEgASgLMh4ua2lhcGkuY29tbW9uLnR5cGVzLkl0ZW1IZWFkZXISJwoFaXRlbXMYAiADKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRBIyCgV0eXBlcxgDIAMoDjIjLmtpYXBpLmNvbW1vbi50eXBlcy5LaUNhZE9iamVjdFR5cGUiOQoSR2V0TmV0Q2xhc3NGb3JOZXRzEiMKA25ldBgBIAMoCzIWLmtpYXBpLmJvYXJkLnR5cGVzLk5ldCK2AQoXTmV0Q2xhc3NGb3JOZXRzUmVzcG9uc2USSwoHY2xhc3NlcxgBIAMoCzI6LmtpYXBpLmJvYXJkLmNvbW1hbmRzLk5ldENsYXNzRm9yTmV0c1Jlc3BvbnNlLkNsYXNzZXNFbnRyeRpOCgxDbGFzc2VzRW50cnkSCwoDa2V5GAEgASgJEi0KBXZhbHVlGAIgASgLMh4ua2lhcGkuY29tbW9uLnByb2plY3QuTmV0Q2xhc3M6AjgBIpUCCg1JbXBvcnROZXRsaXN0EjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEhQKDG5ldGxpc3RfcGF0aBgCIAEoCRIPCgdkcnlfcnVuGAMgASgIEjoKCm1hdGNoX21vZGUYBCABKA4yJi5raWFwaS5ib2FyZC5jb21tYW5kcy5OZXRsaXN0TWF0Y2hNb2RlEh8KF2RlbGV0ZV9leHRyYV9mb290cHJpbnRzGAUgASgIEhkKEXVwZGF0ZV9mb290cHJpbnRzGAYgASgIEhcKD3RyYW5zZmVyX2dyb3VwcxgHIAEoCBIWCg5vdmVycmlkZV9sb2NrcxgIIAEoCCJwChVJbXBvcnROZXRsaXN0UmVzcG9uc2USEwoLZXJyb3JfY291bnQYASABKA0SFQoNd2FybmluZ19jb3VudBgCIAEoDRIbChNuZXdfZm9vdHByaW50X2NvdW50GAMgASgNEg4KBnJlcG9ydBgEIAEoCSJsCgtSZWZpbGxab25lcxI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchInCgV6b25lcxgCIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEIqIBChRHZXRQYWRTaGFwZUFzUG9seWdvbhI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchImCgRwYWRzGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSLAoFbGF5ZXIYAyABKA4yHS5raWFwaS5ib2FyZC50eXBlcy5Cb2FyZExheWVyInsKGVBhZFNoYXBlQXNQb2x5Z29uUmVzcG9uc2USJgoEcGFkcxgBIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEjYKCHBvbHlnb25zGAIgAygLMiQua2lhcGkuY29tbW9uLnR5cGVzLlBvbHlnb25XaXRoSG9sZXMirQEKHUNoZWNrUGFkc3RhY2tQcmVzZW5jZU9uTGF5ZXJzEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEicKBWl0ZW1zGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSLQoGbGF5ZXJzGAMgAygOMh0ua2lhcGkuYm9hcmQudHlwZXMuQm9hcmRMYXllciKnAQoVUGFkc3RhY2tQcmVzZW5jZUVudHJ5EiYKBGl0ZW0YASABKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRBIsCgVsYXllchgCIAEoDjIdLmtpYXBpLmJvYXJkLnR5cGVzLkJvYXJkTGF5ZXISOAoIcHJlc2VuY2UYAyABKA4yJi5raWFwaS5ib2FyZC5jb21tYW5kcy5QYWRzdGFja1ByZXNlbmNlIlgKGFBhZHN0YWNrUHJlc2VuY2VSZXNwb25zZRI8CgdlbnRyaWVzGAEgAygLMisua2lhcGkuYm9hcmQuY29tbWFuZHMuUGFkc3RhY2tQcmVzZW5jZUVudHJ5IuQBCg5JbmplY3REcmNFcnJvchI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchIzCghzZXZlcml0eRgCIAEoDjIhLmtpYXBpLmJvYXJkLmNvbW1hbmRzLkRyY1NldmVyaXR5Eg8KB21lc3NhZ2UYAyABKAkSLQoIcG9zaXRpb24YBCABKAsyGy5raWFwaS5jb21tb24udHlwZXMuVmVjdG9yMhInCgVpdGVtcxgFIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEIkIKFkluamVjdERyY0Vycm9yUmVzcG9uc2USKAoGbWFya2VyGAEgASgLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQiSAoQR2V0VmlzaWJsZUxheWVycxI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciJCChJCb2FyZExheWVyUmVzcG9uc2USLAoFbGF5ZXIYASABKA4yHS5raWFwaS5ib2FyZC50eXBlcy5Cb2FyZExheWVyIjwKC0JvYXJkTGF5ZXJzEi0KBmxheWVycxgBIAMoDjIdLmtpYXBpLmJvYXJkLnR5cGVzLkJvYXJkTGF5ZXIidwoQU2V0VmlzaWJsZUxheWVycxI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchItCgZsYXllcnMYAiADKA4yHS5raWFwaS5ib2FyZC50eXBlcy5Cb2FyZExheWVyIkYKDkdldEFjdGl2ZUxheWVyEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyInQKDlNldEFjdGl2ZUxheWVyEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEiwKBWxheWVyGAIgASgOMh0ua2lhcGkuYm9hcmQudHlwZXMuQm9hcmRMYXllciKzAgodQm9hcmRFZGl0b3JBcHBlYXJhbmNlU2V0dGluZ3MSTgoWaW5hY3RpdmVfbGF5ZXJfZGlzcGxheRgBIAEoDjIuLmtpYXBpLmJvYXJkLmNvbW1hbmRzLkluYWN0aXZlTGF5ZXJEaXNwbGF5TW9kZRJEChFuZXRfY29sb3JfZGlzcGxheRgCIAEoDjIpLmtpYXBpLmJvYXJkLmNvbW1hbmRzLk5ldENvbG9yRGlzcGxheU1vZGUSNwoKYm9hcmRfZmxpcBgDIAEoDjIjLmtpYXBpLmJvYXJkLmNvbW1hbmRzLkJvYXJkRmxpcE1vZGUSQwoQcmF0c25lc3RfZGlzcGxheRgEIAEoDjIpLmtpYXBpLmJvYXJkLmNvbW1hbmRzLlJhdHNuZXN0RGlzcGxheU1vZGUiIgogR2V0Qm9hcmRFZGl0b3JBcHBlYXJhbmNlU2V0dGluZ3MiaQogU2V0Qm9hcmRFZGl0b3JBcHBlYXJhbmNlU2V0dGluZ3MSRQoIc2V0dGluZ3MYASABKAsyMy5raWFwaS5ib2FyZC5jb21tYW5kcy5Cb2FyZEVkaXRvckFwcGVhcmFuY2VTZXR0aW5ncyJMChRHZXRCb2FyZFBsb3RTZXR0aW5ncxI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciKIAQoUU2V0Qm9hcmRQbG90U2V0dGluZ3MSNAoFYm9hcmQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISOgoNcGxvdF9zZXR0aW5ncxgCIAEoCzIjLmtpYXBpLmJvYXJkLmpvYnMuQm9hcmRQbG90U2V0dGluZ3MiVwoZQm9hcmRQbG90U2V0dGluZ3NSZXNwb25zZRI6Cg1wbG90X3NldHRpbmdzGAEgASgLMiMua2lhcGkuYm9hcmQuam9icy5Cb2FyZFBsb3RTZXR0aW5ncyKhAQoJRmxpcEl0ZW1zEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEicKBWl0ZW1zGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSOwoJZGlyZWN0aW9uGAMgASgOMigua2lhcGkuYm9hcmQuY29tbWFuZHMuQm9hcmRGbGlwRGlyZWN0aW9uImcKDkl0ZW1GbGlwUmVzdWx0EjEKBnN0YXR1cxgBIAEoCzIhLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5JdGVtU3RhdHVzEiIKBGl0ZW0YAiABKAsyFC5nb29nbGUucHJvdG9idWYuQW55IrcBChFGbGlwSXRlbXNSZXNwb25zZRIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchI1CgZzdGF0dXMYAiABKA4yJS5raWFwaS5jb21tb24udHlwZXMuSXRlbVJlcXVlc3RTdGF0dXMSOwoNZmxpcHBlZF9pdGVtcxgDIAMoCzIkLmtpYXBpLmJvYXJkLmNvbW1hbmRzLkl0ZW1GbGlwUmVzdWx0InUKFEludGVyYWN0aXZlTW92ZUl0ZW1zEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEicKBWl0ZW1zGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQiyAEKDlJ1bkJvYXJkSm9iRHJjEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEhQKDHJlZmlsbF96b25lcxgCIAEoCBIfChdyZXBvcnRfYWxsX3RyYWNrX2Vycm9ycxgDIAEoCBIpCiF0ZXN0X2Zvb3RwcmludHNfYWdhaW5zdF9zY2hlbWF0aWMYBCABKAgSHgoWc2NoZW1hdGljX25ldGxpc3RfcGF0aBgFIAEoCSKzAQoSRHJjUmVzdWx0c1Jlc3BvbnNlEicKB21hcmtlcnMYASADKAsyFi5raWFwaS5ib2FyZC5EcmNNYXJrZXISEwoLZXJyb3JfY291bnQYAiABKA0SFQoNd2FybmluZ19jb3VudBgDIAEoDRIXCg9leGNsdXNpb25fY291bnQYBCABKA0SGQoRdW5jb25uZWN0ZWRfY291bnQYBSABKA0SFAoMcGFyaXR5X2NvdW50GAYgASgNIkUKDUdldERyY01hcmtlcnMSNAoFYm9hcmQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIimgEKFFNldERyY01hcmtlckV4Y2x1ZGVkEjQKBWJvYXJkGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEikKB21hcmtlcnMYAiADKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRBIQCghleGNsdWRlZBgDIAEoCBIPCgdjb21tZW50GAQgASgJIkgKEEdldERyY1NldmVyaXRpZXMSNAoFYm9hcmQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIiTAoVRHJjU2V2ZXJpdGllc1Jlc3BvbnNlEjMKCnNldmVyaXRpZXMYASADKAsyHy5raWFwaS5ib2FyZC5EcmNTZXZlcml0eVNldHRpbmcifQoQU2V0RHJjU2V2ZXJpdGllcxI0CgVib2FyZBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchIzCgpzZXZlcml0aWVzGAIgAygLMh8ua2lhcGkuYm9hcmQuRHJjU2V2ZXJpdHlTZXR0aW5nKlIKEUN1c3RvbVJ1bGVzU3RhdHVzEg8KC0NSU19VTktOT1dOEAASDAoIQ1JTX05PTkUQARINCglDUlNfVkFMSUQQAhIPCgtDUlNfSU5WQUxJRBADKj8KD0JvYXJkT3JpZ2luVHlwZRIPCgtCT1RfVU5LTk9XThAAEgwKCEJPVF9HUklEEAESDQoJQk9UX0RSSUxMEAIqRAoQTmV0bGlzdE1hdGNoTW9kZRIPCgtOTU1fVU5LTk9XThAAEgwKCE5NTV9VVUlEEAESEQoNTk1NX1JFRkVSRU5DRRACKkkKEFBhZHN0YWNrUHJlc2VuY2USDwoLUFNQX1VOS05PV04QABIPCgtQU1BfUFJFU0VOVBABEhMKD1BTUF9OT1RfUFJFU0VOVBACKqEBCgtEcmNTZXZlcml0eRIPCgtEUlNfVU5LTk9XThAAEg8KC0RSU19XQVJOSU5HEAESDQoJRFJTX0VSUk9SEAISEQoNRFJTX0VYQ0xVU0lPThADEg4KCkRSU19JR05PUkUQBBIMCghEUlNfSU5GTxAFEg4KCkRSU19BQ1RJT04QBhINCglEUlNfREVCVUcQBxIRCg1EUlNfVU5ERUZJTkVEEAgqXwoYSW5hY3RpdmVMYXllckRpc3BsYXlNb2RlEhAKDElMRE1fVU5LTk9XThAAEg8KC0lMRE1fTk9STUFMEAESDwoLSUxETV9ESU1NRUQQAhIPCgtJTERNX0hJRERFThADKlYKE05ldENvbG9yRGlzcGxheU1vZGUSEAoMTkNETV9VTktOT1dOEAASDAoITkNETV9BTEwQARIRCg1OQ0RNX1JBVFNORVNUEAISDAoITkNETV9PRkYQAypDCg1Cb2FyZEZsaXBNb2RlEg8KC0JGTV9VTktOT1dOEAASDgoKQkZNX05PUk1BTBABEhEKDUJGTV9GTElQUEVEX1gQAipSChNSYXRzbmVzdERpc3BsYXlNb2RlEg8KC1JETV9VTktOT1dOEAASEgoOUkRNX0FMTF9MQVlFUlMQARIWChJSRE1fVklTSUJMRV9MQVlFUlMQAipNChJCb2FyZEZsaXBEaXJlY3Rpb24SDwoLQkZEX1VOS05PV04QABISCg5CRkRfTEVGVF9SSUdIVBABEhIKDkJGRF9UT1BfQk9UVE9NEAJiBnByb3RvMw", [file_common_types_base_types, file_common_types_embedded_files, file_google_protobuf_any, file_common_types_enums, file_common_types_project_settings, file_board_board, file_board_board_rules, file_board_board_types, file_board_board_jobs, file_common_commands_editor_commands]);
 
 /**
  * @generated from message kiapi.board.commands.GetBoardStackup
@@ -2385,6 +2385,415 @@ export type InteractiveMoveItemsJson = {
  */
 export const InteractiveMoveItemsSchema: GenMessage<InteractiveMoveItems, {jsonType: InteractiveMoveItemsJson}> = /*@__PURE__*/
   messageDesc(file_board_board_commands, 54);
+
+/**
+ * Runs the design rule checker on an open board, replacing the board's DRC markers with the
+ * results, exactly as the "kicad-cli pcb drc" job does.  The check runs synchronously.
+ * Returns DrcResultsResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.board.commands.RunBoardJobDrc
+ */
+export type RunBoardJobDrc = Message<"kiapi.board.commands.RunBoardJobDrc"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier board = 1;
+   */
+  board?: DocumentSpecifier | undefined;
+
+  /**
+   * Refill all zones before running the check
+   *
+   * @generated from field: bool refill_zones = 2;
+   */
+  refillZones: boolean;
+
+  /**
+   * Report every track clearance error instead of only the first per track
+   *
+   * @generated from field: bool report_all_track_errors = 3;
+   */
+  reportAllTrackErrors: boolean;
+
+  /**
+   * Compare the board against the schematic (schematic parity checks); requires either
+   * schematic_netlist_path or a schematic next to the board file
+   *
+   * @generated from field: bool test_footprints_against_schematic = 4;
+   */
+  testFootprintsAgainstSchematic: boolean;
+
+  /**
+   * Optional path to a KiCad netlist file to use for the parity checks instead of netlisting the
+   * project's schematic
+   *
+   * @generated from field: string schematic_netlist_path = 5;
+   */
+  schematicNetlistPath: string;
+};
+
+/**
+ * Runs the design rule checker on an open board, replacing the board's DRC markers with the
+ * results, exactly as the "kicad-cli pcb drc" job does.  The check runs synchronously.
+ * Returns DrcResultsResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.board.commands.RunBoardJobDrc
+ */
+export type RunBoardJobDrcJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier board = 1;
+   */
+  board?: DocumentSpecifierJson;
+
+  /**
+   * Refill all zones before running the check
+   *
+   * @generated from field: bool refill_zones = 2;
+   */
+  refillZones?: boolean;
+
+  /**
+   * Report every track clearance error instead of only the first per track
+   *
+   * @generated from field: bool report_all_track_errors = 3;
+   */
+  reportAllTrackErrors?: boolean;
+
+  /**
+   * Compare the board against the schematic (schematic parity checks); requires either
+   * schematic_netlist_path or a schematic next to the board file
+   *
+   * @generated from field: bool test_footprints_against_schematic = 4;
+   */
+  testFootprintsAgainstSchematic?: boolean;
+
+  /**
+   * Optional path to a KiCad netlist file to use for the parity checks instead of netlisting the
+   * project's schematic
+   *
+   * @generated from field: string schematic_netlist_path = 5;
+   */
+  schematicNetlistPath?: string;
+};
+
+/**
+ * Describes the message kiapi.board.commands.RunBoardJobDrc.
+ * Use `create(RunBoardJobDrcSchema)` to create a new message.
+ */
+export const RunBoardJobDrcSchema: GenMessage<RunBoardJobDrc, {jsonType: RunBoardJobDrcJson}> = /*@__PURE__*/
+  messageDesc(file_board_board_commands, 55);
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.board.commands.DrcResultsResponse
+ */
+export type DrcResultsResponse = Message<"kiapi.board.commands.DrcResultsResponse"> & {
+  /**
+   * Every DRC, unconnected-item, and parity marker on the board, including excluded ones
+   *
+   * @generated from field: repeated kiapi.board.DrcMarker markers = 1;
+   */
+  markers: DrcMarker[];
+
+  /**
+   * Counts of markers by effective severity; excluded markers are only counted in exclusion_count
+   *
+   * @generated from field: uint32 error_count = 2;
+   */
+  errorCount: number;
+
+  /**
+   * @generated from field: uint32 warning_count = 3;
+   */
+  warningCount: number;
+
+  /**
+   * @generated from field: uint32 exclusion_count = 4;
+   */
+  exclusionCount: number;
+
+  /**
+   * Of the markers above, how many are unconnected-item (ratsnest) markers
+   *
+   * @generated from field: uint32 unconnected_count = 5;
+   */
+  unconnectedCount: number;
+
+  /**
+   * Of the markers above, how many are schematic parity markers
+   *
+   * @generated from field: uint32 parity_count = 6;
+   */
+  parityCount: number;
+};
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.board.commands.DrcResultsResponse
+ */
+export type DrcResultsResponseJson = {
+  /**
+   * Every DRC, unconnected-item, and parity marker on the board, including excluded ones
+   *
+   * @generated from field: repeated kiapi.board.DrcMarker markers = 1;
+   */
+  markers?: DrcMarkerJson[];
+
+  /**
+   * Counts of markers by effective severity; excluded markers are only counted in exclusion_count
+   *
+   * @generated from field: uint32 error_count = 2;
+   */
+  errorCount?: number;
+
+  /**
+   * @generated from field: uint32 warning_count = 3;
+   */
+  warningCount?: number;
+
+  /**
+   * @generated from field: uint32 exclusion_count = 4;
+   */
+  exclusionCount?: number;
+
+  /**
+   * Of the markers above, how many are unconnected-item (ratsnest) markers
+   *
+   * @generated from field: uint32 unconnected_count = 5;
+   */
+  unconnectedCount?: number;
+
+  /**
+   * Of the markers above, how many are schematic parity markers
+   *
+   * @generated from field: uint32 parity_count = 6;
+   */
+  parityCount?: number;
+};
+
+/**
+ * Describes the message kiapi.board.commands.DrcResultsResponse.
+ * Use `create(DrcResultsResponseSchema)` to create a new message.
+ */
+export const DrcResultsResponseSchema: GenMessage<DrcResultsResponse, {jsonType: DrcResultsResponseJson}> = /*@__PURE__*/
+  messageDesc(file_board_board_commands, 56);
+
+/**
+ * Returns the DRC markers currently on the board without running the checker.
+ * Returns DrcResultsResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.board.commands.GetDrcMarkers
+ */
+export type GetDrcMarkers = Message<"kiapi.board.commands.GetDrcMarkers"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier board = 1;
+   */
+  board?: DocumentSpecifier | undefined;
+};
+
+/**
+ * Returns the DRC markers currently on the board without running the checker.
+ * Returns DrcResultsResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.board.commands.GetDrcMarkers
+ */
+export type GetDrcMarkersJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier board = 1;
+   */
+  board?: DocumentSpecifierJson;
+};
+
+/**
+ * Describes the message kiapi.board.commands.GetDrcMarkers.
+ * Use `create(GetDrcMarkersSchema)` to create a new message.
+ */
+export const GetDrcMarkersSchema: GenMessage<GetDrcMarkers, {jsonType: GetDrcMarkersJson}> = /*@__PURE__*/
+  messageDesc(file_board_board_commands, 57);
+
+/**
+ * Marks the given markers as excluded (or clears the exclusion).  The board's exclusion list is
+ * updated so the change persists with the project.
+ * Since 11.0
+ *
+ * @generated from message kiapi.board.commands.SetDrcMarkerExcluded
+ */
+export type SetDrcMarkerExcluded = Message<"kiapi.board.commands.SetDrcMarkerExcluded"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier board = 1;
+   */
+  board?: DocumentSpecifier | undefined;
+
+  /**
+   * @generated from field: repeated kiapi.common.types.KIID markers = 2;
+   */
+  markers: KIID[];
+
+  /**
+   * @generated from field: bool excluded = 3;
+   */
+  excluded: boolean;
+
+  /**
+   * Comment stored with the exclusion; ignored when clearing
+   *
+   * @generated from field: string comment = 4;
+   */
+  comment: string;
+};
+
+/**
+ * Marks the given markers as excluded (or clears the exclusion).  The board's exclusion list is
+ * updated so the change persists with the project.
+ * Since 11.0
+ *
+ * @generated from message kiapi.board.commands.SetDrcMarkerExcluded
+ */
+export type SetDrcMarkerExcludedJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier board = 1;
+   */
+  board?: DocumentSpecifierJson;
+
+  /**
+   * @generated from field: repeated kiapi.common.types.KIID markers = 2;
+   */
+  markers?: KIIDJson[];
+
+  /**
+   * @generated from field: bool excluded = 3;
+   */
+  excluded?: boolean;
+
+  /**
+   * Comment stored with the exclusion; ignored when clearing
+   *
+   * @generated from field: string comment = 4;
+   */
+  comment?: string;
+};
+
+/**
+ * Describes the message kiapi.board.commands.SetDrcMarkerExcluded.
+ * Use `create(SetDrcMarkerExcludedSchema)` to create a new message.
+ */
+export const SetDrcMarkerExcludedSchema: GenMessage<SetDrcMarkerExcluded, {jsonType: SetDrcMarkerExcludedJson}> = /*@__PURE__*/
+  messageDesc(file_board_board_commands, 58);
+
+/**
+ * Returns DrcSeveritiesResponse: the severity of every DRC rule type for the open board
+ * Since 11.0
+ *
+ * @generated from message kiapi.board.commands.GetDrcSeverities
+ */
+export type GetDrcSeverities = Message<"kiapi.board.commands.GetDrcSeverities"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier board = 1;
+   */
+  board?: DocumentSpecifier | undefined;
+};
+
+/**
+ * Returns DrcSeveritiesResponse: the severity of every DRC rule type for the open board
+ * Since 11.0
+ *
+ * @generated from message kiapi.board.commands.GetDrcSeverities
+ */
+export type GetDrcSeveritiesJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier board = 1;
+   */
+  board?: DocumentSpecifierJson;
+};
+
+/**
+ * Describes the message kiapi.board.commands.GetDrcSeverities.
+ * Use `create(GetDrcSeveritiesSchema)` to create a new message.
+ */
+export const GetDrcSeveritiesSchema: GenMessage<GetDrcSeverities, {jsonType: GetDrcSeveritiesJson}> = /*@__PURE__*/
+  messageDesc(file_board_board_commands, 59);
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.board.commands.DrcSeveritiesResponse
+ */
+export type DrcSeveritiesResponse = Message<"kiapi.board.commands.DrcSeveritiesResponse"> & {
+  /**
+   * @generated from field: repeated kiapi.board.DrcSeveritySetting severities = 1;
+   */
+  severities: DrcSeveritySetting[];
+};
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.board.commands.DrcSeveritiesResponse
+ */
+export type DrcSeveritiesResponseJson = {
+  /**
+   * @generated from field: repeated kiapi.board.DrcSeveritySetting severities = 1;
+   */
+  severities?: DrcSeveritySettingJson[];
+};
+
+/**
+ * Describes the message kiapi.board.commands.DrcSeveritiesResponse.
+ * Use `create(DrcSeveritiesResponseSchema)` to create a new message.
+ */
+export const DrcSeveritiesResponseSchema: GenMessage<DrcSeveritiesResponse, {jsonType: DrcSeveritiesResponseJson}> = /*@__PURE__*/
+  messageDesc(file_board_board_commands, 60);
+
+/**
+ * Sets the severity of the given DRC rule types; rule types not listed keep their current
+ * severity.  Only error, warning, and ignore are accepted.
+ * Returns DrcSeveritiesResponse with the full resulting set
+ * Since 11.0
+ *
+ * @generated from message kiapi.board.commands.SetDrcSeverities
+ */
+export type SetDrcSeverities = Message<"kiapi.board.commands.SetDrcSeverities"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier board = 1;
+   */
+  board?: DocumentSpecifier | undefined;
+
+  /**
+   * @generated from field: repeated kiapi.board.DrcSeveritySetting severities = 2;
+   */
+  severities: DrcSeveritySetting[];
+};
+
+/**
+ * Sets the severity of the given DRC rule types; rule types not listed keep their current
+ * severity.  Only error, warning, and ignore are accepted.
+ * Returns DrcSeveritiesResponse with the full resulting set
+ * Since 11.0
+ *
+ * @generated from message kiapi.board.commands.SetDrcSeverities
+ */
+export type SetDrcSeveritiesJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier board = 1;
+   */
+  board?: DocumentSpecifierJson;
+
+  /**
+   * @generated from field: repeated kiapi.board.DrcSeveritySetting severities = 2;
+   */
+  severities?: DrcSeveritySettingJson[];
+};
+
+/**
+ * Describes the message kiapi.board.commands.SetDrcSeverities.
+ * Use `create(SetDrcSeveritiesSchema)` to create a new message.
+ */
+export const SetDrcSeveritiesSchema: GenMessage<SetDrcSeverities, {jsonType: SetDrcSeveritiesJson}> = /*@__PURE__*/
+  messageDesc(file_board_board_commands, 61);
 
 /**
  * @generated from enum kiapi.board.commands.CustomRulesStatus

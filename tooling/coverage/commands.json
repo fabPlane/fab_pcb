@@ -780,6 +780,26 @@
     "headless": "ok"
   },
   {
+    "command": "GetDrcMarkers",
+    "group": "board/commands",
+    "requestType": "kiapi.board.commands.GetDrcMarkers",
+    "responseType": "kiapi.board.commands.DrcResultsResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "GetDrcSeverities",
+    "group": "board/commands",
+    "requestType": "kiapi.board.commands.GetDrcSeverities",
+    "responseType": "kiapi.board.commands.DrcSeveritiesResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "GetEmbeddedFiles",
     "group": "board/commands",
     "requestType": "kiapi.board.commands.GetEmbeddedFiles",
@@ -900,6 +920,16 @@
     "headless": "ok"
   },
   {
+    "command": "RunBoardJobDrc",
+    "group": "board/commands",
+    "requestType": "kiapi.board.commands.RunBoardJobDrc",
+    "responseType": "kiapi.board.commands.DrcResultsResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "SetActiveLayer",
     "group": "board/commands",
     "requestType": "kiapi.board.commands.SetActiveLayer",
@@ -964,6 +994,26 @@
     "group": "board/commands",
     "requestType": "kiapi.board.commands.SetCustomDesignRules",
     "responseType": "kiapi.board.commands.CustomRulesResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "SetDrcMarkerExcluded",
+    "group": "board/commands",
+    "requestType": "kiapi.board.commands.SetDrcMarkerExcluded",
+    "responseType": "google.protobuf.Empty",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "SetDrcSeverities",
+    "group": "board/commands",
+    "requestType": "kiapi.board.commands.SetDrcSeverities",
+    "responseType": "kiapi.board.commands.DrcSeveritiesResponse",
     "handlers": [
       "pcb"
     ],
@@ -1140,6 +1190,26 @@
     "headless": "ok"
   },
   {
+    "command": "GetErcMarkers",
+    "group": "sch/commands",
+    "requestType": "kiapi.schematic.commands.GetErcMarkers",
+    "responseType": "kiapi.schematic.commands.ErcResultsResponse",
+    "handlers": [
+      "sch"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "GetErcSeverities",
+    "group": "sch/commands",
+    "requestType": "kiapi.schematic.commands.GetErcSeverities",
+    "responseType": "kiapi.schematic.commands.ErcSeveritiesResponse",
+    "handlers": [
+      "sch"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "GetSchematicHierarchy",
     "group": "sch/commands",
     "requestType": "kiapi.schematic.commands.GetSchematicHierarchy",
@@ -1154,6 +1224,36 @@
     "group": "sch/commands",
     "requestType": "kiapi.schematic.commands.GetSchematicNetlist",
     "responseType": "kiapi.schematic.commands.SchematicNetlistResponse",
+    "handlers": [
+      "sch"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "RunSchematicJobErc",
+    "group": "sch/commands",
+    "requestType": "kiapi.schematic.commands.RunSchematicJobErc",
+    "responseType": "kiapi.schematic.commands.ErcResultsResponse",
+    "handlers": [
+      "sch"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "SetErcMarkerExcluded",
+    "group": "sch/commands",
+    "requestType": "kiapi.schematic.commands.SetErcMarkerExcluded",
+    "responseType": "google.protobuf.Empty",
+    "handlers": [
+      "sch"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "SetErcSeverities",
+    "group": "sch/commands",
+    "requestType": "kiapi.schematic.commands.SetErcSeverities",
+    "responseType": "kiapi.schematic.commands.ErcSeveritiesResponse",
     "handlers": [
       "sch"
     ],

@@ -22,10 +22,12 @@
 
 import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
-import type { DocumentSpecifier, DocumentSpecifierJson } from "../common/types/base_types_pb.js";
+import type { DocumentSpecifier, DocumentSpecifierJson, KIID, KIIDJson } from "../common/types/base_types_pb.js";
 import { file_common_types_base_types } from "../common/types/base_types_pb.js";
 import type { KiCadObjectType, KiCadObjectTypeJson } from "../common/types/enums_pb.js";
 import { file_common_types_enums } from "../common/types/enums_pb.js";
+import type { ErcMarker, ErcMarkerJson, ErcSeveritySetting, ErcSeveritySettingJson } from "./schematic_rules_pb.js";
+import { file_schematic_schematic_rules } from "./schematic_rules_pb.js";
 import type { SchematicNet, SchematicNetJson, SheetInstance, SheetInstanceJson } from "./schematic_types_pb.js";
 import { file_schematic_schematic_types } from "./schematic_types_pb.js";
 import type { Message } from "@bufbuild/protobuf";
@@ -34,7 +36,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file schematic/schematic_commands.proto.
  */
 export const file_schematic_schematic_commands: GenFile = /*@__PURE__*/
-  fileDesc("CiJzY2hlbWF0aWMvc2NoZW1hdGljX2NvbW1hbmRzLnByb3RvEhhraWFwaS5zY2hlbWF0aWMuY29tbWFuZHMiUAoVR2V0U2NoZW1hdGljSGllcmFyY2h5EjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIpUBChpTY2hlbWF0aWNIaWVyYXJjaHlSZXNwb25zZRI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchI+ChB0b3BfbGV2ZWxfc2hlZXRzGAIgAygLMiQua2lhcGkuc2NoZW1hdGljLnR5cGVzLlNoZWV0SW5zdGFuY2UiggEKE0dldFNjaGVtYXRpY05ldGxpc3QSNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISMgoFdHlwZXMYAiADKA4yIy5raWFwaS5jb21tb24udHlwZXMuS2lDYWRPYmplY3RUeXBlIoYBChhTY2hlbWF0aWNOZXRsaXN0UmVzcG9uc2USNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISMQoEbmV0cxgCIAMoCzIjLmtpYXBpLnNjaGVtYXRpYy50eXBlcy5TY2hlbWF0aWNOZXRiBnByb3RvMw", [file_common_types_base_types, file_common_types_enums, file_schematic_schematic_types]);
+  fileDesc("CiJzY2hlbWF0aWMvc2NoZW1hdGljX2NvbW1hbmRzLnByb3RvEhhraWFwaS5zY2hlbWF0aWMuY29tbWFuZHMiUAoVR2V0U2NoZW1hdGljSGllcmFyY2h5EjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIpUBChpTY2hlbWF0aWNIaWVyYXJjaHlSZXNwb25zZRI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchI+ChB0b3BfbGV2ZWxfc2hlZXRzGAIgAygLMiQua2lhcGkuc2NoZW1hdGljLnR5cGVzLlNoZWV0SW5zdGFuY2UiggEKE0dldFNjaGVtYXRpY05ldGxpc3QSNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISMgoFdHlwZXMYAiADKA4yIy5raWFwaS5jb21tb24udHlwZXMuS2lDYWRPYmplY3RUeXBlIoYBChhTY2hlbWF0aWNOZXRsaXN0UmVzcG9uc2USNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISMQoEbmV0cxgCIAMoCzIjLmtpYXBpLnNjaGVtYXRpYy50eXBlcy5TY2hlbWF0aWNOZXQiTgoSUnVuU2NoZW1hdGljSm9iRXJjEjgKCXNjaGVtYXRpYxgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciKGAQoSRXJjUmVzdWx0c1Jlc3BvbnNlEisKB21hcmtlcnMYASADKAsyGi5raWFwaS5zY2hlbWF0aWMuRXJjTWFya2VyEhMKC2Vycm9yX2NvdW50GAIgASgNEhUKDXdhcm5pbmdfY291bnQYAyABKA0SFwoPZXhjbHVzaW9uX2NvdW50GAQgASgNIkkKDUdldEVyY01hcmtlcnMSOAoJc2NoZW1hdGljGAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIp4BChRTZXRFcmNNYXJrZXJFeGNsdWRlZBI4CglzY2hlbWF0aWMYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISKQoHbWFya2VycxgCIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEhAKCGV4Y2x1ZGVkGAMgASgIEg8KB2NvbW1lbnQYBCABKAkiTAoQR2V0RXJjU2V2ZXJpdGllcxI4CglzY2hlbWF0aWMYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIiUAoVRXJjU2V2ZXJpdGllc1Jlc3BvbnNlEjcKCnNldmVyaXRpZXMYASADKAsyIy5raWFwaS5zY2hlbWF0aWMuRXJjU2V2ZXJpdHlTZXR0aW5nIoUBChBTZXRFcmNTZXZlcml0aWVzEjgKCXNjaGVtYXRpYxgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchI3CgpzZXZlcml0aWVzGAIgAygLMiMua2lhcGkuc2NoZW1hdGljLkVyY1NldmVyaXR5U2V0dGluZ2IGcHJvdG8z", [file_common_types_base_types, file_common_types_enums, file_schematic_schematic_rules, file_schematic_schematic_types]);
 
 /**
  * @generated from message kiapi.schematic.commands.GetSchematicHierarchy
@@ -193,4 +195,325 @@ export type SchematicNetlistResponseJson = {
  */
 export const SchematicNetlistResponseSchema: GenMessage<SchematicNetlistResponse, {jsonType: SchematicNetlistResponseJson}> = /*@__PURE__*/
   messageDesc(file_schematic_schematic_commands, 3);
+
+/**
+ * Runs the electrical rules checker on an open schematic, replacing its ERC markers with the
+ * results, exactly as the "kicad-cli sch erc" job does.  The check runs synchronously.
+ * Returns ErcResultsResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.RunSchematicJobErc
+ */
+export type RunSchematicJobErc = Message<"kiapi.schematic.commands.RunSchematicJobErc"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifier | undefined;
+};
+
+/**
+ * Runs the electrical rules checker on an open schematic, replacing its ERC markers with the
+ * results, exactly as the "kicad-cli sch erc" job does.  The check runs synchronously.
+ * Returns ErcResultsResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.RunSchematicJobErc
+ */
+export type RunSchematicJobErcJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifierJson;
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.RunSchematicJobErc.
+ * Use `create(RunSchematicJobErcSchema)` to create a new message.
+ */
+export const RunSchematicJobErcSchema: GenMessage<RunSchematicJobErc, {jsonType: RunSchematicJobErcJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 4);
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.ErcResultsResponse
+ */
+export type ErcResultsResponse = Message<"kiapi.schematic.commands.ErcResultsResponse"> & {
+  /**
+   * Every ERC marker in the schematic hierarchy, including excluded ones
+   *
+   * @generated from field: repeated kiapi.schematic.ErcMarker markers = 1;
+   */
+  markers: ErcMarker[];
+
+  /**
+   * Counts of markers by effective severity; excluded markers are only counted in exclusion_count
+   *
+   * @generated from field: uint32 error_count = 2;
+   */
+  errorCount: number;
+
+  /**
+   * @generated from field: uint32 warning_count = 3;
+   */
+  warningCount: number;
+
+  /**
+   * @generated from field: uint32 exclusion_count = 4;
+   */
+  exclusionCount: number;
+};
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.ErcResultsResponse
+ */
+export type ErcResultsResponseJson = {
+  /**
+   * Every ERC marker in the schematic hierarchy, including excluded ones
+   *
+   * @generated from field: repeated kiapi.schematic.ErcMarker markers = 1;
+   */
+  markers?: ErcMarkerJson[];
+
+  /**
+   * Counts of markers by effective severity; excluded markers are only counted in exclusion_count
+   *
+   * @generated from field: uint32 error_count = 2;
+   */
+  errorCount?: number;
+
+  /**
+   * @generated from field: uint32 warning_count = 3;
+   */
+  warningCount?: number;
+
+  /**
+   * @generated from field: uint32 exclusion_count = 4;
+   */
+  exclusionCount?: number;
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.ErcResultsResponse.
+ * Use `create(ErcResultsResponseSchema)` to create a new message.
+ */
+export const ErcResultsResponseSchema: GenMessage<ErcResultsResponse, {jsonType: ErcResultsResponseJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 5);
+
+/**
+ * Returns the ERC markers currently in the schematic without running the checker.
+ * Returns ErcResultsResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.GetErcMarkers
+ */
+export type GetErcMarkers = Message<"kiapi.schematic.commands.GetErcMarkers"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifier | undefined;
+};
+
+/**
+ * Returns the ERC markers currently in the schematic without running the checker.
+ * Returns ErcResultsResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.GetErcMarkers
+ */
+export type GetErcMarkersJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifierJson;
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.GetErcMarkers.
+ * Use `create(GetErcMarkersSchema)` to create a new message.
+ */
+export const GetErcMarkersSchema: GenMessage<GetErcMarkers, {jsonType: GetErcMarkersJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 6);
+
+/**
+ * Marks the given markers as excluded (or clears the exclusion).  The project's exclusion list
+ * is updated so the change persists.
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SetErcMarkerExcluded
+ */
+export type SetErcMarkerExcluded = Message<"kiapi.schematic.commands.SetErcMarkerExcluded"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifier | undefined;
+
+  /**
+   * @generated from field: repeated kiapi.common.types.KIID markers = 2;
+   */
+  markers: KIID[];
+
+  /**
+   * @generated from field: bool excluded = 3;
+   */
+  excluded: boolean;
+
+  /**
+   * Comment stored with the exclusion; ignored when clearing
+   *
+   * @generated from field: string comment = 4;
+   */
+  comment: string;
+};
+
+/**
+ * Marks the given markers as excluded (or clears the exclusion).  The project's exclusion list
+ * is updated so the change persists.
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SetErcMarkerExcluded
+ */
+export type SetErcMarkerExcludedJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifierJson;
+
+  /**
+   * @generated from field: repeated kiapi.common.types.KIID markers = 2;
+   */
+  markers?: KIIDJson[];
+
+  /**
+   * @generated from field: bool excluded = 3;
+   */
+  excluded?: boolean;
+
+  /**
+   * Comment stored with the exclusion; ignored when clearing
+   *
+   * @generated from field: string comment = 4;
+   */
+  comment?: string;
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.SetErcMarkerExcluded.
+ * Use `create(SetErcMarkerExcludedSchema)` to create a new message.
+ */
+export const SetErcMarkerExcludedSchema: GenMessage<SetErcMarkerExcluded, {jsonType: SetErcMarkerExcludedJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 7);
+
+/**
+ * Returns ErcSeveritiesResponse: the severity of every ERC rule type for the open schematic
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.GetErcSeverities
+ */
+export type GetErcSeverities = Message<"kiapi.schematic.commands.GetErcSeverities"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifier | undefined;
+};
+
+/**
+ * Returns ErcSeveritiesResponse: the severity of every ERC rule type for the open schematic
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.GetErcSeverities
+ */
+export type GetErcSeveritiesJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifierJson;
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.GetErcSeverities.
+ * Use `create(GetErcSeveritiesSchema)` to create a new message.
+ */
+export const GetErcSeveritiesSchema: GenMessage<GetErcSeverities, {jsonType: GetErcSeveritiesJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 8);
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.ErcSeveritiesResponse
+ */
+export type ErcSeveritiesResponse = Message<"kiapi.schematic.commands.ErcSeveritiesResponse"> & {
+  /**
+   * @generated from field: repeated kiapi.schematic.ErcSeveritySetting severities = 1;
+   */
+  severities: ErcSeveritySetting[];
+};
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.ErcSeveritiesResponse
+ */
+export type ErcSeveritiesResponseJson = {
+  /**
+   * @generated from field: repeated kiapi.schematic.ErcSeveritySetting severities = 1;
+   */
+  severities?: ErcSeveritySettingJson[];
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.ErcSeveritiesResponse.
+ * Use `create(ErcSeveritiesResponseSchema)` to create a new message.
+ */
+export const ErcSeveritiesResponseSchema: GenMessage<ErcSeveritiesResponse, {jsonType: ErcSeveritiesResponseJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 9);
+
+/**
+ * Sets the severity of the given ERC rule types; rule types not listed keep their current
+ * severity.  Only error, warning, and ignore are accepted.
+ * Returns ErcSeveritiesResponse with the full resulting set
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SetErcSeverities
+ */
+export type SetErcSeverities = Message<"kiapi.schematic.commands.SetErcSeverities"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifier | undefined;
+
+  /**
+   * @generated from field: repeated kiapi.schematic.ErcSeveritySetting severities = 2;
+   */
+  severities: ErcSeveritySetting[];
+};
+
+/**
+ * Sets the severity of the given ERC rule types; rule types not listed keep their current
+ * severity.  Only error, warning, and ignore are accepted.
+ * Returns ErcSeveritiesResponse with the full resulting set
+ * Since 11.0
+ *
+ * @generated from message kiapi.schematic.commands.SetErcSeverities
+ */
+export type SetErcSeveritiesJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier schematic = 1;
+   */
+  schematic?: DocumentSpecifierJson;
+
+  /**
+   * @generated from field: repeated kiapi.schematic.ErcSeveritySetting severities = 2;
+   */
+  severities?: ErcSeveritySettingJson[];
+};
+
+/**
+ * Describes the message kiapi.schematic.commands.SetErcSeverities.
+ * Use `create(SetErcSeveritiesSchema)` to create a new message.
+ */
+export const SetErcSeveritiesSchema: GenMessage<SetErcSeverities, {jsonType: SetErcSeveritiesJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_commands, 10);
 

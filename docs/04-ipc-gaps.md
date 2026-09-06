@@ -13,7 +13,7 @@ API fields with `// Since 11.0` comments, we follow that.
 ## Priority 0 — blocks the web UI
 
 ### G1 · Events / notifications
-**Status:** interim `GetDocumentRevision` landed (web-api 3c7ce604bf); PUB socket in progress.
+**Status:** done. `GetDocumentRevision` (3c7ce604bf) and the PUB0 events socket with `GetServerInfo` discovery (e8cd61a2f2): DocumentChanged/Opened/Closed/Saved/ServerShutdown.
 **Today:** REQ/REP only; the UI cannot learn that a document changed (another
 client, a job finishing, a save).
 **Fix:** add a PUB0 socket next to the REP socket (`api-events.sock`).
@@ -35,6 +35,7 @@ view (zoom, interactive move) stay excluded. Same for schematic with
 `SCH_CONTEXT`.
 
 ### G4 · DRC / ERC
+**Status:** done (1ca7f148a5): RunBoardJobDrc/GetDrcMarkers/SetDrcMarkerExcluded/Get+SetDrcSeverities and the ERC mirror; marker counts match `kicad-cli pcb drc` and `sch erc` exactly.
 **Today:** `DrcMarker`/`ErcMarker`/severity/exclusion messages exist in
 `board_rules.proto` and `schematic_rules.proto`; `InjectDrcError` exists; nothing
 runs a check or returns markers.
@@ -45,6 +46,7 @@ SetDrcSeverities`, `GetErcSeverities / SetErcSeverities`. Add `unconnected` and
 `footprint mismatch` categories as first-class fields.
 
 ### G5 · Project and document lifecycle
+**Status:** done (e118ed3f81): NewProject, NewDocument, GetProjectInfo, headless DOCTYPE_SYMBOL documents. Drawing sheets still open.
 **Today:** `OpenDocument` only opens existing files; no way to create a project,
 board, or schematic; `DOCTYPE_SYMBOL` and `DOCTYPE_DRAWING_SHEET` are rejected.
 **Fix:** `NewProject{path, template?}`, `NewDocument{project, type}`,
