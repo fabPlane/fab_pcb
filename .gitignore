@@ -1,0 +1,7 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.DS_Store
+e2e/output/
+e2e/test-results/
+*.log

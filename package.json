@@ -1,0 +1,17 @@
+{
+  "name": "kicad-web",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Headless KiCad web UI over the KiCad IPC API (Bun + TypeScript)",
+  "workspaces": ["apps/*", "packages/*", "tooling/*", "e2e"],
+  "scripts": {
+    "gen": "bun run --filter @kicad-web/proto gen",
+    "coverage": "bun run --filter @kicad-web/coverage run",
+    "test": "bun test",
+    "typecheck": "tsc -b"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.0",
+    "typescript": "^5.6.0"
+  }
+}
