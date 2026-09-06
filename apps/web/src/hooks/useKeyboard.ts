@@ -4,6 +4,7 @@ import { chordFromEvent, chordKey } from '@/lib/keys';
 import { useAppStore } from '@/state/appStore';
 import { useKeymapStore } from '@/state/keymapStore';
 import { usePaletteStore } from '@/state/paletteStore';
+import { usePromptStore } from '@/state/promptStore';
 import { useUiStore } from '@/state/uiStore';
 
 function isTextTarget(t: EventTarget | null): boolean {
@@ -31,6 +32,7 @@ export function useKeyboard(): void {
       // Let Radix dialogs/menus and the palette own their keys.
       if (usePaletteStore.getState().open) return;
       if (useUiStore.getState().dialog) return;
+      if (usePromptStore.getState().spec) return;
       const candidates = keymap.get(chordKey(chord));
       if (!candidates?.length) return;
       const ctx: CommandContext = { editor: useAppStore.getState().activeEditor };

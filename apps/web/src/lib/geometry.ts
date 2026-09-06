@@ -2,7 +2,9 @@
 // the mock (numbers, enum names) and real protobuf-es messages (bigint nm, numeric enums).
 // They operate structurally so the move/rotate/flip tools work for every item type.
 
-import { BoardLayer, SchematicSymbolOrientation } from '@kicad-web/proto';
+import { create } from '@bufbuild/protobuf';
+import type { Any } from '@bufbuild/protobuf/wkt';
+import { BoardLayer, SchematicSymbolOrientation, kiapiRegistry, packAny, unpackAny } from '@kicad-web/proto';
 import type { StoredItem } from '@/contracts';
 import { structuredCloneSafe } from './patch';
 
@@ -46,20 +48,51 @@ function walk(obj: unknown, fn: (vec: VecLike) => void, key?: string): void {
     for (const el of obj) walk(el, fn, key);
     return;
   }
-  // symbol/footprint definitions carry coordinates relative to the instance: skip them
+  // Symbol definitions carry coordinates relative to the instance; footprint definition items
+  // are absolute but packed as `Any` (handled by `mapDefinitionItems`): skip both here.
   for (const [k, v] of Object.entries(obj)) {
     if (k === 'definition') continue;
     walk(v, fn, k);
   }
 }
 
+const isAny = (v: unknown): v is Any => !!v && typeof v === 'object' && typeof (v as Any).typeUrl === 'string' && (v as Any).value instanceof Uint8Array;
+
+/**
+ * KiCad's `FOOTPRINT::Deserialize` rebuilds pads / shapes / texts from `definition.items` in
+ * absolute board coordinates (`PAD::Serialize` writes `GetPosition()`), so an update that moves
+ * the anchor but keeps stale children leaves the pads where they were. Every transform of a
+ * footprint therefore unpacks the children, applies `edit` and repacks them.
+ */
+export function mapDefinitionItems(proto: Record<string, unknown>, edit: (child: Record<string, unknown>) => void): void {
+  const def = proto.definition as { items?: unknown[] } | undefined;
+  if (!def?.items?.length) return;
+  def.items = def.items.map((raw) => {
+    if (!isAny(raw)) {
+      // already decoded (mock / wrappers): edit in place
+      if (raw && typeof raw === 'object') edit(raw as Record<string, unknown>);
+      return raw;
+    }
+    const msg = unpackAny(raw);
+    if (!msg) return raw;
+    const desc = kiapiRegistry.getMessage(msg.$typeName);
+    if (!desc) return raw;
+    const clone = structuredCloneSafe(msg) as Record<string, unknown>;
+    edit(clone);
+    const { $typeName: _t, ...rest } = clone;
+    return packAny(desc, create(desc, rest as never));
+  });
+}
+
 /** Returns a translated copy of the item (proto + bbox). */
 export function translateItem(item: StoredItem, dx: number, dy: number): StoredItem {
   const proto = structuredCloneSafe(item.proto);
-  walk(proto, (vec) => {
+  const shift = (vec: VecLike) => {
     vec.xNm = like(vec.xNm, num(vec.xNm) + dx);
     vec.yNm = like(vec.yNm, num(vec.yNm) + dy);
-  });
+  };
+  walk(proto, shift);
+  if (item.type === 'KOT_PCB_FOOTPRINT') mapDefinitionItems(proto as Record<string, unknown>, (child) => walk(child, shift));
   return { ...item, proto, bbox: item.bbox ? { ...item.bbox, x: item.bbox.x + dx, y: item.bbox.y + dy } : undefined };
 }
 
@@ -69,15 +102,28 @@ export function rotateItem(item: StoredItem, cx: number, cy: number, deg: number
   const rad = (deg * Math.PI) / 180;
   const cos = Math.cos(rad);
   const sin = Math.sin(rad);
-  walk(proto, (vec) => {
+  const rot = (vec: VecLike) => {
     const x = num(vec.xNm) - cx;
     const y = num(vec.yNm) - cy;
     // KiCad's y axis points down, so a positive (CCW on screen) rotation is applied inverted
     vec.xNm = like(vec.xNm, cx + x * cos + y * sin);
     vec.yNm = like(vec.yNm, cy - x * sin + y * cos);
-  });
-  const orient = proto.orientation as { valueDegrees?: number } | undefined;
-  if (orient && typeof orient.valueDegrees === 'number') orient.valueDegrees = ((orient.valueDegrees + deg) % 360 + 360) % 360;
+  };
+  const bump = (a: { valueDegrees?: number } | undefined) => {
+    if (a && typeof a.valueDegrees === 'number') a.valueDegrees = ((a.valueDegrees + deg) % 360 + 360) % 360;
+  };
+  walk(proto, rot);
+  bump(proto.orientation as { valueDegrees?: number } | undefined);
+  const textAngle = (t: unknown) => bump((t as { attributes?: { angle?: { valueDegrees?: number } } } | undefined)?.attributes?.angle);
+  textAngle(proto.text);
+  for (const f of ['referenceField', 'valueField', 'datasheetField', 'descriptionField']) textAngle((proto[f] as { text?: { text?: unknown } } | undefined)?.text?.text);
+  if (item.type === 'KOT_PCB_FOOTPRINT') {
+    mapDefinitionItems(proto, (child) => {
+      walk(child, rot);
+      bump((child.padStack as { angle?: { valueDegrees?: number } } | undefined)?.angle);
+      textAngle(child.text);
+    });
+  }
   const transform = proto.transform as { orientation?: string | number } | undefined;
   if (transform && typeof transform.orientation === 'string') {
     const order = ['SSO_0', 'SSO_90', 'SSO_180', 'SSO_270'];
@@ -110,19 +156,37 @@ export function rotateItem(item: StoredItem, cx: number, cy: number, deg: number
 /** Flips a board item to the other side about a vertical axis through `cx`. */
 export function flipItem(item: StoredItem, cx: number): StoredItem {
   const proto = structuredCloneSafe(item.proto) as Record<string, unknown>;
-  walk(proto, (vec) => {
+  const mirror = (vec: VecLike) => {
     vec.xNm = like(vec.xNm, 2 * cx - num(vec.xNm));
-  });
+  };
+  walk(proto, mirror);
   const swap = (l: string) => (l.startsWith('BL_F_') ? l.replace('BL_F_', 'BL_B_') : l.startsWith('BL_B_') ? l.replace('BL_B_', 'BL_F_') : l);
   const swapEnum = (l: number) => {
     const name = BoardLayer[l];
     const flipped = name ? swap(name) : undefined;
     return flipped && flipped in BoardLayer ? BoardLayer[flipped as keyof typeof BoardLayer] : l;
   };
-  if (typeof proto.layer === 'string') proto.layer = swap(proto.layer);
-  else if (typeof proto.layer === 'number') proto.layer = swapEnum(proto.layer);
-  const ps = proto.padStack as { layers?: (string | number)[] } | undefined;
-  if (ps?.layers) ps.layers = ps.layers.map((l) => (typeof l === 'number' ? swapEnum(l) : swap(l)));
+  const swapLayers = (o: Record<string, unknown>) => {
+    if (typeof o.layer === 'string') o.layer = swap(o.layer);
+    else if (typeof o.layer === 'number') o.layer = swapEnum(o.layer);
+    const ps = o.padStack as { layers?: (string | number)[] } | undefined;
+    if (ps?.layers) ps.layers = ps.layers.map((l) => (typeof l === 'number' ? swapEnum(l) : swap(l)));
+    const t = o.text as { layer?: string | number; text?: { attributes?: { mirrored?: boolean } } } | undefined;
+    if (t && typeof t.layer === 'string') t.layer = swap(t.layer);
+    else if (t && typeof t.layer === 'number') t.layer = swapEnum(t.layer);
+    if (t?.text?.attributes && typeof t.text.attributes.mirrored === 'boolean') t.text.attributes.mirrored = !t.text.attributes.mirrored;
+  };
+  swapLayers(proto);
+  for (const f of ['referenceField', 'valueField', 'datasheetField', 'descriptionField']) {
+    const field = proto[f] as Record<string, unknown> | undefined;
+    if (field) swapLayers(field);
+  }
+  if (item.type === 'KOT_PCB_FOOTPRINT') {
+    mapDefinitionItems(proto, (child) => {
+      walk(child, mirror);
+      swapLayers(child);
+    });
+  }
   const transform = proto.transform as { mirrorY?: boolean } | undefined;
   if (transform && typeof transform.mirrorY === 'boolean') transform.mirrorY = !transform.mirrorY;
   const bbox = item.bbox ? { ...item.bbox, x: 2 * cx - item.bbox.x - item.bbox.w } : undefined;

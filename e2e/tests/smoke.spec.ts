@@ -104,7 +104,9 @@ test.describe("shell smoke", () => {
     });
 
     await test.step("command palette toggles the theme", async () => {
-      await expect(page.locator("html")).not.toHaveAttribute("data-theme", /./);
+      // Dark is the default for a fresh browser profile; data-theme always carries the resolved theme.
+      await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+      await expect(page.locator("html")).toHaveAttribute("data-theme-mode", "dark");
       await page.keyboard.press("ControlOrMeta+k");
       const palette = page.getByRole("dialog", { name: "Command palette" });
       await expect(palette).toBeVisible();
@@ -113,10 +115,22 @@ test.describe("shell smoke", () => {
       await expect(palette.getByRole("option").first()).toContainText("Toggle light / dark theme");
       await page.keyboard.press("Enter");
       await expect(palette).toBeHidden();
-      await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+      await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
       // and back via the title-bar button
       await page.locator(".titlebar button[title^='Theme']").click();
+      await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    });
+
+    await test.step("settings dialog switches the theme and survives a reload", async () => {
+      await page.keyboard.press("ControlOrMeta+,");
+      const settings = page.getByRole("dialog", { name: "Settings" });
+      await expect(settings).toBeVisible();
+      await settings.getByRole("radio", { name: /^Light/ }).click();
       await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+      await settings.getByRole("radio", { name: /^Dark/ }).click();
+      await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+      await page.keyboard.press("Escape");
+      await expect(settings).toBeHidden();
     });
 
     await test.step("open the schematic", async () => {

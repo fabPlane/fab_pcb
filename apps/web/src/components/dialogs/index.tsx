@@ -1,10 +1,12 @@
 import { AboutDialog } from './AboutDialog';
 import { BoardSetupDialog } from './BoardSetupDialog';
-import { KeymapDialog } from './KeymapDialog';
+import { SettingsDialog } from './SettingsDialog';
 import { NetclassesDialog } from './NetclassesDialog';
 import { NewProjectDialog } from './NewProjectDialog';
 import { TextVariablesDialog } from './TextVariablesDialog';
 import { VariantsDialog } from './VariantsDialog';
+import { PromptDialog } from './PromptDialog';
+import { PageSettingsDialog } from './PageSettingsDialog';
 
 export function Dialogs({ onProjectCreated }: { onProjectCreated(path: string): void }) {
   return (
@@ -13,9 +15,11 @@ export function Dialogs({ onProjectCreated }: { onProjectCreated(path: string): 
       <NetclassesDialog />
       <TextVariablesDialog />
       <VariantsDialog />
-      <KeymapDialog />
+      <SettingsDialog />
       <NewProjectDialog onCreated={onProjectCreated} />
       <AboutDialog />
+      <PageSettingsDialog />
+      <PromptDialog />
     </>
   );
 }

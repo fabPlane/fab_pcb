@@ -9,19 +9,17 @@ import { BoardEditor } from '@/screens/BoardEditor';
 import { FootprintEditor } from '@/screens/FootprintEditor';
 import { ProjectScreen } from '@/screens/ProjectScreen';
 import { SchematicEditor } from '@/screens/SchematicEditor';
+import { ThreeDView } from '@/screens/ThreeDView';
 import { useServices, useServiceVersion } from '@/services';
 import { useAppStore } from '@/state/appStore';
 import { useActiveDocument } from '@/state/active';
 import { log } from '@/state/logStore';
 import { resolveTheme, useUiStore } from '@/state/uiStore';
+import { installThemeSync } from '@/theme';
 
+/** Keeps `<html data-theme>` in step with the store (and prefers-color-scheme in system mode); see src/theme. */
 function useThemeAttribute(): void {
-  const theme = useUiStore((s) => s.theme);
-  useEffect(() => {
-    const root = document.documentElement;
-    if (theme === 'system') root.removeAttribute('data-theme');
-    else root.setAttribute('data-theme', theme);
-  }, [theme]);
+  useEffect(() => installThemeSync(), []);
 }
 
 function Toast() {
@@ -71,9 +69,9 @@ function TitleBar() {
         )}
         {openDocs.map((d) => (
           <button key={`${d.kind}:${d.id}`} className={`doc-tab${isActive(d) ? ' active' : ''}`} onClick={() => openDoc(d)} title={`${d.kind} · ${d.id}`}>
-            <span className="faint">{d.kind === 'board' ? '▦' : d.kind === 'schematic' ? '▤' : '▣'}</span>
+            <span className="faint">{d.kind === 'board' ? '▦' : d.kind === 'schematic' ? '▤' : d.kind === '3d' ? '⬡' : '▣'}</span>
             {d.title}
-            {documents.isDirty(d.kind) && <span className="dirty">●</span>}
+            {d.kind !== '3d' && documents.isDirty(d.kind) && <span className="dirty">●</span>}
             <span
               className="close"
               onClick={(e) => {
@@ -156,6 +154,8 @@ export function App() {
     <BoardEditor />
   ) : active === 'schematic' ? (
     <SchematicEditor />
+  ) : active === '3d' ? (
+    <ThreeDView />
   ) : (
     <FootprintEditor />
   );

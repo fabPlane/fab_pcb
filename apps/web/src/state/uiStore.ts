@@ -3,6 +3,8 @@ import { persist } from 'zustand/middleware';
 import type { Unit } from '@/lib/units';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
+/** Canvas colour theme: follow the UI theme, or one of the renderer's built-in KiCad themes (canvas/theme.ts). */
+export type CanvasThemeId = 'auto' | 'kicad-default' | 'kicad-classic';
 export type PanelSide = 'left' | 'right' | 'bottom';
 
 export interface PanelLayout {
@@ -10,10 +12,12 @@ export interface PanelLayout {
   collapsed: boolean;
 }
 
-export type DialogId = 'board-setup' | 'netclasses' | 'text-variables' | 'variants' | 'keymap' | 'new-project' | 'about' | null;
+export type DialogId = 'board-setup' | 'netclasses' | 'text-variables' | 'variants' | 'keymap' | 'settings' | 'new-project' | 'about' | 'page-settings' | null;
 
 interface UiState {
+  /** UI theme preference. Defaults to dark for new users; a persisted value (any of the three) wins. */
   theme: ThemeMode;
+  canvasTheme: CanvasThemeId;
   units: Unit;
   gridNm: number;
   showGrid: boolean;
@@ -22,6 +26,7 @@ interface UiState {
   leftTab: 'tree' | 'layers' | 'nets';
   dialog: DialogId;
   setTheme(t: ThemeMode): void;
+  setCanvasTheme(id: CanvasThemeId): void;
   cycleUnits(): void;
   setUnits(u: Unit): void;
   setGrid(nm: number): void;
@@ -51,7 +56,8 @@ export const GRID_CHOICES_NM = [5_000_000, 2_540_000, 1_270_000, 1_000_000, 635_
 export const useUiStore = create<UiState>()(
   persist(
     (set, get) => ({
-      theme: 'system',
+      theme: 'dark',
+      canvasTheme: 'auto',
       units: 'mm',
       gridNm: 1_270_000,
       showGrid: true,
@@ -60,6 +66,7 @@ export const useUiStore = create<UiState>()(
       leftTab: 'tree',
       dialog: null,
       setTheme: (theme) => set({ theme }),
+      setCanvasTheme: (canvasTheme) => set({ canvasTheme }),
       setUnits: (units) => set({ units }),
       cycleUnits: () => {
         const order: Unit[] = ['mm', 'mil', 'in'];
@@ -82,16 +89,16 @@ export const useUiStore = create<UiState>()(
     {
       name: 'kicad-web.ui',
       version: 1,
-      partialize: (s) => ({ theme: s.theme, units: s.units, gridNm: s.gridNm, showGrid: s.showGrid, panels: s.panels, bottomTab: s.bottomTab, leftTab: s.leftTab }),
+      partialize: (s) => ({ theme: s.theme, canvasTheme: s.canvasTheme, units: s.units, gridNm: s.gridNm, showGrid: s.showGrid, panels: s.panels, bottomTab: s.bottomTab, leftTab: s.leftTab }),
     },
   ),
 );
 
-/** Resolves 'system' against prefers-color-scheme. */
+/** Resolves 'system' against prefers-color-scheme (dark when media queries are unavailable). */
 export function resolveTheme(mode: ThemeMode): 'light' | 'dark' {
   if (mode !== 'system') return mode;
   if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
-  return 'light';
+  return 'dark';
 }

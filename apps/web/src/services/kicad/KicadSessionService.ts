@@ -333,6 +333,42 @@ export class KicadSessionService implements SessionService {
     return path;
   }
 
+  /**
+   * A second bridge session on the same project, for work that must not disturb the main
+   * server: the headless api-server holds one PCB-face document, so opening a library
+   * footprint (`OpenDocument(DOCTYPE_FOOTPRINT)`) there would unload the board. Library
+   * look-ups and the footprint editor live here instead.
+   */
+  async openAuxSession(path: string | null, label = 'aux'): Promise<{ id: string; kicad: KiCad; close(): Promise<void> }> {
+    const created = await this.json<{ session: BridgeSessionRecord }>('/sessions', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ path }),
+    });
+    const id = created.session.id;
+    try {
+      const wsUrl = this.opts.bridgeUrl ? bridgeWsUrl(this.opts.bridgeUrl, id) : bridgeWsUrl(location.origin, id);
+      const transport = this.opts.createTransport ? await this.opts.createTransport(wsUrl) : await WebSocketTransport.connect(wsUrl, { log: (m) => this.log(`${label}: ${m}`) });
+      const kicad = await KiCad.connect(transport, { clientName: `kicad-web/${id}/${clientTab}-${label}`, log: (m) => this.log(`${label}: ${m}`) });
+      this.log(`${label} session ${id} open${path ? ` on ${path.split('/').pop()}` : ''}`);
+      const close = async () => {
+        try {
+          await kicad.close();
+        } catch {
+          /* ignore */
+        }
+        await this.deleteSession(id).catch(() => undefined);
+      };
+      if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+        window.addEventListener('pagehide', () => void this.fetchImpl(this.url(`/sessions/${encodeURIComponent(id)}`), { method: 'DELETE', keepalive: true }).catch(() => undefined));
+      }
+      return { id, kicad, close };
+    } catch (e) {
+      await this.deleteSession(id).catch(() => undefined);
+      throw e;
+    }
+  }
+
   private remember(path: string, name: string): void {
     const list = readRecent().filter((r) => r.path !== path);
     list.unshift({ path, name, lastOpened: new Date().toISOString(), boards: 1, sheets: 1 });

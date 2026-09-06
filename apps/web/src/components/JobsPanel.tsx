@@ -46,8 +46,13 @@ export function JobsPanel({ document }: { document: DocumentKind }) {
                 <OptionField key={o.key} option={o} value={optionsFor(def)[o.key]} onChange={(v) => setOptions({ ...options, [def.id]: { ...(options[def.id] ?? {}), [o.key]: v } })} />
               ))}
             </div>
+            {def.unavailable && (
+              <p className="dialog-desc" role="note" style={{ color: 'var(--warning)' }}>
+                Not available on this server: {def.unavailable}
+              </p>
+            )}
             <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>
-              <button className="btn primary" onClick={start}>
+              <button className="btn primary" onClick={start} disabled={!!def.unavailable}>
                 Run {def.title}
               </button>
               <button className="btn" onClick={() => setOptions({ ...options, [def.id]: {} })}>

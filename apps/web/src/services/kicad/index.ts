@@ -15,10 +15,11 @@ import { createKicadCanvasFactory } from './KicadCanvas';
 import { KicadCommitBackend } from './KicadCommitBackend';
 import { KicadDocumentService } from './KicadDocumentService';
 import { KicadJobsService } from './KicadJobsService';
+import { KicadLibraryService } from './KicadLibraryService';
 import { KicadMarkerService } from './KicadMarkerService';
 import { KicadSessionService } from './KicadSessionService';
 
-export { KicadSessionService, KicadDocumentService, KicadCommitBackend, KicadJobsService, KicadMarkerService };
+export { KicadSessionService, KicadDocumentService, KicadCommitBackend, KicadJobsService, KicadMarkerService, KicadLibraryService };
 export { toItem } from './KicadCommitBackend';
 
 export interface KicadServicesOptions {
@@ -35,20 +36,30 @@ export interface KicadServices extends Services {
   documents: KicadDocumentService;
   jobs: KicadJobsService;
   markers: KicadMarkerService;
+  /** Library look-ups + footprint editor documents, in a second bridge session. */
+  library: KicadLibraryService;
 }
 
 /** Builds the service graph; resolves once the bridge answered `/health` (workspace root known). */
 export async function createKicadServices(opts: KicadServicesOptions): Promise<KicadServices> {
   const log = opts.log ?? ((m, level) => appLog(m, level === 'warn' ? 'warn' : level === 'error' ? 'error' : 'info'));
   const documents = new KicadDocumentService();
+  let library!: KicadLibraryService;
   const session = new KicadSessionService({
     bridgeUrl: opts.bridgeUrl,
     log,
     onConnected: async (kicad, info) => {
       await documents.open(kicad, info.projectPath, { exists: async (p) => (await session.stat(p))?.kind === 'file', log });
     },
-    onDisconnected: () => documents.close(),
+    onDisconnected: async () => {
+      await library.close().catch((e: unknown) => log(`library session close: ${e instanceof Error ? e.message : String(e)}`, 'warn'));
+      await documents.close();
+    },
   });
+  library = new KicadLibraryService(session, log);
+  // Library footprints are opened in the library session: opening one on the project's server
+  // would unload the board (the headless api-server holds one PCB-face document).
+  documents.openFootprintDocument = (libId) => library.openFootprintDocument(libId);
   const commands = new CommandServiceImpl(new KicadCommitBackend(documents, log));
   const jobs = new KicadJobsService(documents, session, log);
   const markers = new KicadMarkerService(documents, log);
@@ -63,5 +74,5 @@ export async function createKicadServices(opts: KicadServicesOptions): Promise<K
       log(`bridge ${opts.bridgeUrl || location.origin} unreachable: ${e instanceof Error ? e.message : String(e)}`, 'error');
     }
   }
-  return { session, documents, commands, jobs, markers };
+  return { session, documents, commands, jobs, markers, library };
 }

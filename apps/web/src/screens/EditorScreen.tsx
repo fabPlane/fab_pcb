@@ -40,7 +40,8 @@ export function EditorScreen({ kind, id, store, layers, leftExtra }: EditorScree
   useServiceVersion(markersSub);
   const storeKey = storeKeyFor(kind, id);
   const themeMode = useUiStore((s) => s.theme);
-  const theme = themeFor(resolveTheme(themeMode));
+  const canvasTheme = useUiStore((s) => s.canvasTheme);
+  const theme = themeFor(resolveTheme(themeMode), canvasTheme);
   const leftTab = useUiStore((s) => s.leftTab);
   const setLeftTab = useUiStore((s) => s.setLeftTab);
   const bottomTab = useUiStore((s) => s.bottomTab);

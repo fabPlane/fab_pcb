@@ -2,10 +2,10 @@ import { create } from 'zustand';
 import type { DocumentKind } from '@/contracts';
 import type { SessionInfo } from '@/services/types';
 
-export type EditorKind = 'project' | DocumentKind;
+export type EditorKind = 'project' | DocumentKind | '3d';
 
 export interface OpenDoc {
-  kind: DocumentKind;
+  kind: DocumentKind | '3d';
   id: string; // 'board' | sheet path | footprint lib id
   title: string;
 }
@@ -20,7 +20,7 @@ interface AppState {
   setSession(s: SessionInfo | null): void;
   setActiveEditor(kind: EditorKind): void;
   openDoc(doc: OpenDoc): void;
-  closeDoc(kind: DocumentKind, id: string): void;
+  closeDoc(kind: DocumentKind | '3d', id: string): void;
   setActiveSheet(path: string): void;
   setActiveFootprint(libId: string | null): void;
   notify(text: string, kind?: 'info' | 'error'): void;

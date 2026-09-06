@@ -1,9 +1,12 @@
 // Canvas colour themes: the renderer's KiCad Default JSON (dark board background) for the
 // app's dark mode and a light variant (white board background, KiCad's schematic colours
-// are light already) for light mode. `mockPalette` flattens a theme into the CSS colours
-// the Canvas2D mock host and the layer-panel swatches use.
+// are light already) for light mode. The Settings dialog can pin the canvas to one of the
+// renderer's built-in themes instead (`CANVAS_THEMES`, persisted as `uiStore.canvasTheme`).
+// `mockPalette` flattens a theme into the CSS colours the Canvas2D mock host and the
+// layer-panel swatches use.
 
-import { KICAD_DEFAULT_THEME, colorToCss, layerColor, mergeThemes, themeColor, uiColors, type Theme, type ThemeColor } from '@kicad-web/renderer';
+import { KICAD_CLASSIC_THEME, KICAD_DEFAULT_THEME, colorToCss, layerColor, mergeThemes, themeColor, uiColors, type Theme, type ThemeColor } from '@kicad-web/renderer';
+import { useUiStore, type CanvasThemeId } from '@/state/uiStore';
 
 const c = (r: number, g: number, b: number, a = 1): ThemeColor => ({ r, g, b, a });
 
@@ -43,8 +46,26 @@ export const LIGHT_THEME: Theme = mergeThemes(KICAD_DEFAULT_THEME, {
   overrideSchItemColors: false,
 });
 
-export function themeFor(mode: 'light' | 'dark'): Theme {
-  return mode === 'dark' ? DARK_THEME : LIGHT_THEME;
+/** Choices offered by Settings → Appearance → Canvas colours. */
+export const CANVAS_THEMES: readonly { id: CanvasThemeId; label: string; description: string }[] = [
+  { id: 'auto', label: 'Follow UI theme', description: 'KiCad Default on a dark UI, its light variant on a light UI' },
+  { id: 'kicad-default', label: KICAD_DEFAULT_THEME.name, description: 'KiCad’s stock colours regardless of the UI theme' },
+  { id: 'kicad-classic', label: KICAD_CLASSIC_THEME.name, description: 'The pre-6.0 KiCad palette, black background' },
+];
+
+/**
+ * Canvas theme for the resolved UI theme. `canvas` defaults to the persisted choice; 'auto'
+ * follows the UI theme, the others pin one of the renderer's built-in themes.
+ */
+export function themeFor(mode: 'light' | 'dark', canvas: CanvasThemeId = useUiStore.getState().canvasTheme): Theme {
+  switch (canvas) {
+    case 'kicad-default':
+      return KICAD_DEFAULT_THEME;
+    case 'kicad-classic':
+      return KICAD_CLASSIC_THEME;
+    default:
+      return mode === 'dark' ? DARK_THEME : LIGHT_THEME;
+  }
 }
 
 /** Theme key for the schematic pseudo layers the mock/layer panel use. */

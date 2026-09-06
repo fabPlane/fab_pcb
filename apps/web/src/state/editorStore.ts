@@ -14,7 +14,8 @@ export interface EditorDocState {
   highlightNets: string[];
   camera: Camera;
   cursor: { x: number; y: number } | null; // world nm
-  tool: 'select' | 'move' | 'route' | 'wire' | 'label' | 'measure';
+  /** 'select', 'move', or an interactive tool id (canvas/tools.ts) */
+  tool: string;
 }
 
 const fresh = (kind: DocumentKind): EditorDocState => ({

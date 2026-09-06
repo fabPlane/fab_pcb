@@ -1620,3 +1620,140 @@ h3.section:first-child {
 .keymap-row .capture.custom {
   border-style: solid;
 }
+
+/* placement tool preview */
+.tool-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+  color: var(--accent);
+  overflow: visible;
+}
+.tool-overlay path,
+.tool-overlay rect,
+.tool-overlay line,
+.tool-overlay circle {
+  stroke: var(--accent);
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}
+.tool-overlay text {
+  fill: var(--accent);
+  font-size: 11px;
+  font-family: var(--font-mono, monospace);
+}
+.canvas-slot[data-tool]:not([data-tool='select']):not([data-tool='move']) canvas {
+  cursor: crosshair;
+}
+
+/* canvas context menu */
+.context-menu {
+  position: fixed;
+  z-index: 120;
+  min-width: 220px;
+  padding: 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.3));
+  display: flex;
+  flex-direction: column;
+}
+.context-menu .context-title {
+  padding: 4px 8px 6px;
+  font-size: var(--fs-xs);
+  color: var(--fg-muted);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+}
+.context-menu .context-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 4px 8px;
+  font: inherit;
+  font-size: var(--fs-sm);
+  color: var(--fg);
+  background: none;
+  border: 0;
+  border-radius: 3px;
+  text-align: left;
+  cursor: pointer;
+}
+.context-menu .context-item:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--accent-fg, #fff);
+}
+.context-menu .context-item:hover:not(:disabled) .faint {
+  color: inherit;
+  opacity: 0.8;
+}
+.context-menu .context-item:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.context-menu .menu-separator {
+  height: 1px;
+  background: var(--border);
+  margin: 3px 4px;
+}
+.prompt-form .field-with-unit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.prompt-form .input,
+.prompt-form .select,
+.prompt-form .textarea {
+  width: 100%;
+  min-width: 180px;
+}
+
+/* 3D view */
+.three-view {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-canvas, #1b1d21);
+}
+.three-view .three-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elevated);
+  font-size: var(--fs-sm);
+}
+.three-view .three-canvas {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+.three-view .three-canvas canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+.three-view .three-status {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  padding: 4px 8px;
+  font-size: var(--fs-xs);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--fg-muted);
+  max-width: 70%;
+  white-space: pre-wrap;
+}
+.three-view .three-status.error {
+  color: var(--danger, #f66);
+}

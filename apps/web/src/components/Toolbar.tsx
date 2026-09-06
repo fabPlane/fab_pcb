@@ -60,23 +60,37 @@ export function Toolbar({ kind, storeKey, layers }: { kind: DocumentKind; storeK
       <span className="sep" />
       {kind === 'schematic' ? (
         <>
-          <ToolButton id="schematic.placeSymbol" glyph="A" label="Symbol" />
-          <ToolButton id="schematic.wire" glyph="W" label="Wire" />
-          <ToolButton id="schematic.label" glyph="L" label="Label" />
-          <ToolButton id="schematic.junction" glyph="J" />
-          <ToolButton id="schematic.noConnect" glyph="Q" />
+          <ToolButton id="schematic.placeSymbol" glyph="A" label="Symbol" active={doc.tool === 'symbol'} />
+          <ToolButton id="schematic.wire" glyph="W" label="Wire" active={doc.tool === 'wire'} />
+          <ToolButton id="schematic.bus" glyph="B" label="Bus" active={doc.tool === 'bus'} />
+          <ToolButton id="schematic.label" glyph="L" label="Label" active={doc.tool === 'label'} />
+          <ToolButton id="schematic.globalLabel" glyph="G" active={doc.tool === 'globalLabel'} />
+          <ToolButton id="schematic.hierLabel" glyph="H" active={doc.tool === 'hierLabel'} />
+          <ToolButton id="schematic.junction" glyph="J" active={doc.tool === 'junction'} />
+          <ToolButton id="schematic.noConnect" glyph="Q" active={doc.tool === 'noconnect'} />
+          <ToolButton id="schematic.text" glyph="T" active={doc.tool === 'schText'} />
+          <ToolButton id="schematic.sheet" glyph="S" label="Sheet" active={doc.tool === 'sheet'} />
           <span className="sep" />
           <ToolButton id="inspect.runErc" glyph="✓" label="ERC" />
           <ToolButton id="schematic.updatePcb" glyph="→" label="Update PCB" />
         </>
       ) : (
         <>
-          {kind === 'board' && <ToolButton id="board.placeFootprint" glyph="A" label="Footprint" />}
-          {kind === 'board' && <ToolButton id="board.route" glyph="X" label="Route" />}
+          {kind === 'board' && <ToolButton id="board.placeFootprint" glyph="A" label="Footprint" active={doc.tool === 'footprint'} />}
+          {kind === 'board' && <ToolButton id="board.route" glyph="X" label="Route" active={doc.tool === 'route'} />}
+          {kind === 'board' && <ToolButton id="board.placeVia" glyph="◎" label="Via" active={doc.tool === 'via'} />}
+          <ToolButton id="board.drawLine" glyph="╱" active={doc.tool === 'line'} />
+          <ToolButton id="board.drawRect" glyph="▭" active={doc.tool === 'rect'} />
+          <ToolButton id="board.drawCircle" glyph="○" active={doc.tool === 'circle'} />
+          <ToolButton id="board.drawArc" glyph="◠" active={doc.tool === 'arc'} />
+          <ToolButton id="board.drawPolygon" glyph="⬠" active={doc.tool === 'polygon'} />
+          <ToolButton id="board.placeText" glyph="T" active={doc.tool === 'text'} />
+          {kind === 'board' && <ToolButton id="board.drawZone" glyph="▨" label="Zone" active={doc.tool === 'zone'} />}
           {kind === 'board' && <ToolButton id="board.refillZones" glyph="B" label="Refill" />}
           <span className="sep" />
           {kind === 'board' && <ToolButton id="inspect.runDrc" glyph="✓" label="DRC" />}
           {kind === 'board' && <ToolButton id="tools.boardSetup" glyph="⚙" label="Setup" />}
+          {kind === 'board' && <ToolButton id="window.view3d" glyph="⬡" label="3D" />}
           <span className="sep" />
           <label className="muted" style={{ fontSize: 'var(--fs-sm)' }}>
             layer

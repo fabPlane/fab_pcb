@@ -84,7 +84,7 @@ export function registerBuiltinCommands(services: Services): () => void {
       shortcut: 'Mod+S',
       when: inEditor,
       run: async (ctx) => {
-        if (ctx.editor === 'project') return;
+        if (ctx.editor === 'project' || ctx.editor === '3d') return;
         await documents.save(ctx.editor);
         log(`Saved ${ctx.editor}`);
         useAppStore.getState().notify(`${ctx.editor === 'board' ? 'Board' : ctx.editor === 'schematic' ? 'Schematic' : 'Footprint'} saved`);
@@ -401,7 +401,8 @@ export function registerBuiltinCommands(services: Services): () => void {
     // --------------------------------------------------------------- Tools
     { id: 'tools.commandPalette', title: 'Command palette', group: 'Tools', shortcut: 'Mod+K', run: () => usePaletteStore.getState().toggle() },
     { id: 'tools.commandPaletteAlt', title: 'Command palette', group: 'Tools', shortcut: 'Mod+Shift+P', hidden: true, run: () => usePaletteStore.getState().toggle() },
-    { id: 'tools.keymap', title: 'Keyboard shortcuts…', group: 'Tools', shortcut: 'Mod+,', keywords: ['hotkeys', 'settings', 'preferences'], run: () => useUiStore.getState().openDialog('keymap') },
+    { id: 'tools.settings', title: 'Settings…', group: 'Tools', shortcut: 'Mod+,', keywords: ['preferences', 'theme', 'dark', 'light', 'appearance', 'open settings'], run: () => useUiStore.getState().openDialog('settings') },
+    { id: 'tools.keymap', title: 'Keyboard shortcuts…', group: 'Tools', keywords: ['hotkeys', 'settings', 'preferences'], run: () => useUiStore.getState().openDialog('keymap') },
     { id: 'tools.boardSetup', title: 'Board setup…', group: 'Board', when: inBoard, keywords: ['stackup', 'design rules', 'constraints'], run: () => useUiStore.getState().openDialog('board-setup') },
     { id: 'tools.netclasses', title: 'Net classes…', group: 'Tools', when: inEditor, run: () => useUiStore.getState().openDialog('netclasses') },
     { id: 'tools.textVariables', title: 'Text variables…', group: 'Tools', when: inEditor, run: () => useUiStore.getState().openDialog('text-variables') },
@@ -420,7 +421,7 @@ export function registerBuiltinCommands(services: Services): () => void {
     { id: 'board.route', title: 'Route single track', group: 'Route', shortcut: 'X', when: inBoard, run: () => useAppStore.getState().notify('Interactive routing needs gap G9 (headless router); manual track placement arrives in M3') },
     { id: 'board.placeVia', title: 'Place via', group: 'Place', shortcut: 'Mod+Shift+V', when: inBoard, run: () => useAppStore.getState().notify('Via placement arrives with the create-items flow in M3') },
     { id: 'board.placeFootprint', title: 'Place footprint…', group: 'Place', shortcut: 'A', when: inBoard, keywords: ['add component', 'library'], run: () => useAppStore.getState().notify('Footprint browser needs gap G7 (library access)') },
-    { id: 'board.drawZone', title: 'Draw filled zone', group: 'Place', shortcut: 'Mod+Shift+Z', when: inBoard, hidden: true, run: () => undefined },
+    { id: 'board.drawZone', title: 'Draw filled zone', group: 'Place', when: inBoard, hidden: true, run: () => undefined }, // no default chord: Mod+Shift+Z is redo (edit.redoAlt); the real tool is registered in commands/editing.ts
     { id: 'board.openFootprintEditor', title: 'Open footprint editor', group: 'Window', when: inBoard, run: () => {
       const sel = selectedItems();
       const fp = sel?.items.find((i) => i.type === 'KOT_PCB_FOOTPRINT');

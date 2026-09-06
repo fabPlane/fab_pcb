@@ -5,13 +5,15 @@ import { useKeymapStore } from '@/state/keymapStore';
 import { useUiStore } from '@/state/uiStore';
 import { Dialog } from '../layout/Dialog';
 
-export function KeymapDialog() {
-  const open = useUiStore((s) => s.dialog === 'keymap');
-  const openDialog = useUiStore((s) => s.openDialog);
+/**
+ * The shortcut editor: filter bar plus one row per visible command with a click-to-capture
+ * binding. Rendered inside the Settings dialog's Keyboard tab (SettingsDialog.tsx); the
+ * standalone KeymapDialog below wraps it for callers that still want a dialog of its own.
+ */
+export function KeymapEditor({ maxHeight = '60vh', autoFocus = true }: { maxHeight?: string; autoFocus?: boolean }) {
   const overrides = useKeymapStore((s) => s.overrides);
   const setBinding = useKeymapStore((s) => s.setBinding);
   const resetBinding = useKeymapStore((s) => s.resetBinding);
-  const resetAll = useKeymapStore((s) => s.resetAll);
   const [filter, setFilter] = useState('');
   const [listening, setListening] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
@@ -58,30 +60,12 @@ export function KeymapDialog() {
   const visible = commands.filter((c) => `${c.group} ${c.title} ${effectiveBinding(c, overrides) ?? ''}`.toLowerCase().includes(filter.toLowerCase()));
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(o) => !o && openDialog(null)}
-      title="Keyboard Shortcuts"
-      size="wide"
-      noPad
-      footer={
-        <>
-          <span className="muted">Click a shortcut and press the new key combination. Esc cancels. Stored in this browser.</span>
-          <span className="spacer" />
-          <button className="btn" onClick={resetAll} disabled={Object.keys(overrides).length === 0}>
-            Reset all to defaults
-          </button>
-          <button className="btn primary" onClick={() => openDialog(null)}>
-            Close
-          </button>
-        </>
-      }
-    >
+    <>
       <div className="filter-bar">
-        <input className="input" placeholder="Filter commands" value={filter} onChange={(e) => setFilter(e.target.value)} style={{ flex: 1 }} autoFocus />
+        <input className="input" placeholder="Filter commands" value={filter} onChange={(e) => setFilter(e.target.value)} style={{ flex: 1 }} autoFocus={autoFocus} aria-label="Filter commands" />
         <span className="muted">{visible.length} commands</span>
       </div>
-      <div style={{ maxHeight: '60vh', overflow: 'auto' }}>
+      <div style={{ maxHeight, overflow: 'auto' }}>
         {visible.map((c) => {
           const binding = effectiveBinding(c, overrides);
           const custom = c.id in overrides;
@@ -114,6 +98,41 @@ export function KeymapDialog() {
           );
         })}
       </div>
+    </>
+  );
+}
+
+/**
+ * Standalone shortcuts dialog. Not mounted by default any more: the 'keymap' dialog id now
+ * opens Settings on its Keyboard tab (see dialogs/index.tsx). Kept for embedding elsewhere.
+ */
+export function KeymapDialog() {
+  const open = useUiStore((s) => s.dialog === 'keymap');
+  const openDialog = useUiStore((s) => s.openDialog);
+  const overrides = useKeymapStore((s) => s.overrides);
+  const resetAll = useKeymapStore((s) => s.resetAll);
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(o) => !o && openDialog(null)}
+      title="Keyboard Shortcuts"
+      size="wide"
+      noPad
+      footer={
+        <>
+          <span className="muted">Click a shortcut and press the new key combination. Esc cancels. Stored in this browser.</span>
+          <span className="spacer" />
+          <button className="btn" onClick={resetAll} disabled={Object.keys(overrides).length === 0}>
+            Reset all to defaults
+          </button>
+          <button className="btn primary" onClick={() => openDialog(null)}>
+            Close
+          </button>
+        </>
+      }
+    >
+      <KeymapEditor />
     </Dialog>
   );
 }

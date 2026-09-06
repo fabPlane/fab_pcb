@@ -3,8 +3,33 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="light dark" />
+    <meta name="color-scheme" content="dark light" />
     <title>KiCad Web</title>
+    <script>
+      // Apply the persisted theme before the first paint so there is no flash of the wrong
+      // theme. Mirrors readPersistedTheme / resolveThemeMode in src/theme/index.ts (which
+      // takes over once the app mounts): dark is the default, 'system' follows the OS.
+      (function () {
+        var mode = 'dark';
+        try {
+          var raw = localStorage.getItem('kicad-web.ui');
+          var t = raw && JSON.parse(raw).state.theme;
+          if (t === 'dark' || t === 'light' || t === 'system') mode = t;
+        } catch (e) {}
+        var resolved = mode;
+        if (mode === 'system') {
+          try {
+            resolved = window.matchMedia && !window.matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'dark';
+          } catch (e) {
+            resolved = 'dark';
+          }
+        }
+        var root = document.documentElement;
+        root.setAttribute('data-theme', resolved);
+        root.setAttribute('data-theme-mode', mode);
+        root.style.colorScheme = resolved;
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

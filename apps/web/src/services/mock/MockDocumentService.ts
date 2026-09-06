@@ -67,6 +67,8 @@ export class MockDocumentService implements DocumentService {
         minTextThicknessNm: mm(0.08),
       },
       customRules: `(version 1)\n(rule "HV clearance"\n  (condition "A.NetClass == 'HV'")\n  (constraint clearance (min 1.5mm)))\n`,
+      customRuleList: [{ name: 'HV clearance', condition: "A.NetClass == 'HV'", comments: '', severity: 0, constraints: 1 }],
+      origin: { grid: { x: 0, y: 0 }, drill: { x: 0, y: 0 } },
     };
     this.netclassList = [
       { name: 'Default', clearanceNm: mm(0.2), trackWidthNm: mm(0.25), viaDiameterNm: mm(0.8), viaDrillNm: mm(0.4), diffPairWidthNm: mm(0.2), diffPairGapNm: mm(0.25), wireWidthNm: mm(0.15), busWidthNm: mm(0.3), colour: '' },

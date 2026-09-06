@@ -5,7 +5,9 @@ import { useUiStore } from '@/state/uiStore';
 import { formatDistance, parseDistance } from '@/lib/units';
 import { Dialog } from '../layout/Dialog';
 
-type Page = 'stackup' | 'rules' | 'custom';
+type Page = 'stackup' | 'rules' | 'custom' | 'origin';
+
+const SEVERITIES = [{ value: 0, label: 'default' }, { value: 1, label: 'warning' }, { value: 2, label: 'error' }, { value: 3, label: 'exclusion' }, { value: 4, label: 'ignore' }];
 
 const RULE_LABELS: { key: keyof DesignRules; label: string; help: string }[] = [
   { key: 'minClearanceNm', label: 'Minimum clearance', help: 'Copper to copper, any net' },
@@ -26,8 +28,13 @@ export function BoardSetupDialog() {
   const units = useUiStore((s) => s.units);
   const [page, setPage] = useState<Page>('stackup');
   const [draft, setDraft] = useState<BoardSetup>(() => documents.boardSetup());
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   useEffect(() => {
-    if (open) setDraft(structuredClone(documents.boardSetup()));
+    if (open) {
+      setDraft(structuredClone(documents.boardSetup()));
+      setError(null);
+    }
   }, [open, documents]);
 
   const dist = (nm: number, onChange: (nm: number) => void) => (
@@ -58,16 +65,31 @@ export function BoardSetupDialog() {
       noPad
       footer={
         <>
-          <span className="muted">Writes GetBoardStackup / SetBoardDesignRules / SetCustomRules on OK.</span>
+          {error ? (
+            <span className="muted" role="alert" style={{ color: 'var(--danger)' }}>
+              {error}
+            </span>
+          ) : (
+            <span className="muted">Changed pages are written with SetBoardDesignRules / UpdateBoardStackup / SetCustomDesignRules / SetBoardOrigin on OK.</span>
+          )}
           <span className="spacer" />
           <button className="btn" onClick={() => openDialog(null)}>
             Cancel
           </button>
           <button
             className="btn primary"
+            disabled={busy}
+            data-testid="board-setup-ok"
             onClick={async () => {
-              await documents.setBoardSetup(draft);
-              openDialog(null);
+              setBusy(true);
+              try {
+                await documents.setBoardSetup(draft);
+                openDialog(null);
+              } catch (e) {
+                setError(e instanceof Error ? e.message : String(e));
+              } finally {
+                setBusy(false);
+              }
             }}
           >
             OK
@@ -85,6 +107,9 @@ export function BoardSetupDialog() {
           </button>
           <button className={page === 'custom' ? 'active' : ''} onClick={() => setPage('custom')}>
             Custom rules
+          </button>
+          <button className={page === 'origin' ? 'active' : ''} onClick={() => setPage('origin')}>
+            Origins
           </button>
         </nav>
         {page === 'stackup' && (
@@ -148,9 +173,80 @@ export function BoardSetupDialog() {
           </section>
         )}
         {page === 'custom' && (
-          <section style={{ display: 'flex', flexDirection: 'column' }}>
-            <p className="dialog-desc">Custom design rules in the .kicad_dru s-expression syntax. Sent with SetCustomRules; syntax errors are reported by the server on DRC.</p>
-            <textarea className="textarea" style={{ flex: 1, minHeight: 240 }} value={draft.customRules} onChange={(e) => setDraft({ ...draft, customRules: e.target.value })} spellCheck={false} />
+          <section style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <p className="dialog-desc">
+              Custom design rules as KiCad serves them (GetCustomDesignRules). Name, condition, comment and severity are written back with SetCustomDesignRules; constraints are shown
+              read-only in the .kicad_dru rendering below.
+              {draft.customRulesError && <span style={{ color: 'var(--danger)' }}> Server parse error: {draft.customRulesError}</span>}
+            </p>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Rule</th>
+                  <th>Condition</th>
+                  <th>Severity</th>
+                  <th>Comment</th>
+                  <th className="num">Constraints</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {draft.customRuleList.map((r, i) => {
+                  const patch = (p: Partial<typeof r>) => setDraft({ ...draft, customRuleList: draft.customRuleList.map((x, j) => (j === i ? { ...x, ...p } : x)) });
+                  return (
+                    <tr key={i}>
+                      <td>
+                        <input className="input" value={r.name} onChange={(e) => patch({ name: e.target.value })} data-rule={`name-${i}`} />
+                      </td>
+                      <td>
+                        <input className="input mono" value={r.condition} onChange={(e) => patch({ condition: e.target.value })} data-rule={`condition-${i}`} />
+                      </td>
+                      <td>
+                        <select className="select" value={r.severity} onChange={(e) => patch({ severity: Number(e.target.value) })}>
+                          {SEVERITIES.map((s) => (
+                            <option key={s.value} value={s.value}>
+                              {s.label}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td>
+                        <input className="input" value={r.comments} onChange={(e) => patch({ comments: e.target.value })} />
+                      </td>
+                      <td className="num">{r.constraints}</td>
+                      <td>
+                        <button className="btn ghost sm" title="Remove rule" onClick={() => setDraft({ ...draft, customRuleList: draft.customRuleList.filter((_x, j) => j !== i) })}>
+                          ×
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {draft.customRuleList.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="muted">
+                      No custom rules. New rules are authored in the .kicad_dru file (the API takes structured constraints only).
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+            <textarea className="textarea mono" style={{ flex: 1, minHeight: 160 }} value={draft.customRules} readOnly spellCheck={false} />
+          </section>
+        )}
+        {page === 'origin' && (
+          <section>
+            <p className="dialog-desc">Grid origin and drill/place file origin (GetBoardOrigin / SetBoardOrigin).</p>
+            <div className="form-grid">
+              <label>Grid origin X</label>
+              {dist(draft.origin.grid.x, (nm) => setDraft({ ...draft, origin: { ...draft.origin, grid: { ...draft.origin.grid, x: nm } } }))}
+              <label>Grid origin Y</label>
+              {dist(draft.origin.grid.y, (nm) => setDraft({ ...draft, origin: { ...draft.origin, grid: { ...draft.origin.grid, y: nm } } }))}
+              <label>Drill/place origin X</label>
+              {dist(draft.origin.drill.x, (nm) => setDraft({ ...draft, origin: { ...draft.origin, drill: { ...draft.origin.drill, x: nm } } }))}
+              <label>Drill/place origin Y</label>
+              {dist(draft.origin.drill.y, (nm) => setDraft({ ...draft, origin: { ...draft.origin, drill: { ...draft.origin.drill, y: nm } } }))}
+            </div>
           </section>
         )}
       </div>

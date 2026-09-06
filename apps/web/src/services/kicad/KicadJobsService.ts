@@ -6,7 +6,7 @@
 // `RunSchematicJobExportNetlist` is deliberately absent: it never answers headless and
 // wedges the server (packages/client/dist/conformance-summary.txt).
 
-import { BoardLayer, Board3DFormat, DrillFormat, DrillMapFormat, DrillOrigin, GerberPrecision, PositionSide, Units } from '@kicad-web/proto';
+import { BoardLayer, Board3DFormat, DrillFormat, DrillMapFormat, DrillOrigin, GerberPrecision, Ipc2581Version, OdbCompression, PositionSide, Units } from '@kicad-web/proto';
 import { JobError, type JobResult } from '@kicad-web/client';
 import type { JobDefinition, JobOutput, JobRun, JobsService } from '../types';
 import type { KicadDocumentService } from './KicadDocumentService';
@@ -85,15 +85,71 @@ export function jobDefinitions(enabledLayers: readonly string[]): JobDefinition[
     },
     {
       id: 'board.step',
-      title: 'STEP / GLB 3D model',
-      description: 'Export the board with 3D models (RunBoardJobExport3D).',
+      title: 'STEP 3D model',
+      description: 'Export the board with 3D models as STEP (RunBoardJobExport3D, B3D_STEP).',
       document: 'board',
       command: 'RunBoardJobExport3D',
       options: [
-        { key: 'format', label: 'Format', type: 'select', default: 'step', choices: [{ value: 'step', label: 'STEP' }, { value: 'glb', label: 'GLB (binary glTF)' }] },
         { key: 'substituteModels', label: 'Substitute STEP for VRML models', type: 'boolean', default: true },
         { key: 'includeDnp', label: 'Include DNP', type: 'boolean', default: false },
+        { key: 'includeUnspecified', label: 'Include unspecified footprints', type: 'boolean', default: true },
+        { key: 'exportTracksAndVias', label: 'Export tracks and vias', type: 'boolean', default: false },
+        { key: 'exportZones', label: 'Export zones', type: 'boolean', default: false },
+        { key: 'fuseShapes', label: 'Fuse shapes', type: 'boolean', default: false },
+        { key: 'optimizeStep', label: 'Optimize STEP', type: 'boolean', default: true },
+        { key: 'origin', label: 'Origin', type: 'select', default: 'center', choices: [{ value: 'center', label: 'Board centre' }, { value: 'grid', label: 'Grid origin' }, { value: 'drill', label: 'Drill/place origin' }] },
       ],
+    },
+    {
+      id: 'board.glb',
+      title: 'GLB 3D model (3D viewer)',
+      description: 'Binary glTF of the board with 3D models, what the 3D tab shows (RunBoardJobExport3D, B3D_GLB).',
+      document: 'board',
+      command: 'RunBoardJobExport3D',
+      options: [
+        { key: 'substituteModels', label: 'Substitute STEP for VRML models', type: 'boolean', default: true },
+        { key: 'includeDnp', label: 'Include DNP', type: 'boolean', default: false },
+        { key: 'exportTracksAndVias', label: 'Export tracks and vias', type: 'boolean', default: true },
+        { key: 'exportZones', label: 'Export zones', type: 'boolean', default: true },
+        { key: 'exportSilkscreen', label: 'Export silkscreen', type: 'boolean', default: true },
+        { key: 'exportSoldermask', label: 'Export solder mask', type: 'boolean', default: true },
+      ],
+    },
+    {
+      id: 'board.ipc2581',
+      title: 'IPC-2581',
+      description: 'IPC-2581 XML assembly/fabrication data (RunBoardJobExportIpc2581).',
+      document: 'board',
+      command: 'RunBoardJobExportIpc2581',
+      options: [
+        { key: 'units', label: 'Units', type: 'select', default: 'mm', choices: [{ value: 'mm', label: 'Millimetres' }, { value: 'in', label: 'Inches' }] },
+        { key: 'version', label: 'Version', type: 'select', default: 'C', choices: [{ value: 'B', label: 'IPC-2581 B' }, { value: 'C', label: 'IPC-2581 C' }] },
+        { key: 'precision', label: 'Precision (digits)', type: 'number', default: 3 },
+        { key: 'compress', label: 'Compress (zip)', type: 'boolean', default: false },
+        { key: 'bomRevision', label: 'BOM revision', type: 'string', default: '' },
+        { key: 'mpnColumn', label: 'Manufacturer part number field', type: 'string', default: '' },
+        { key: 'manufacturerColumn', label: 'Manufacturer field', type: 'string', default: '' },
+      ],
+    },
+    {
+      id: 'board.odb',
+      title: 'ODB++',
+      description: 'ODB++ fabrication data (RunBoardJobExportODB).',
+      document: 'board',
+      command: 'RunBoardJobExportODB',
+      options: [
+        { key: 'units', label: 'Units', type: 'select', default: 'mm', choices: [{ value: 'mm', label: 'Millimetres' }, { value: 'in', label: 'Inches' }] },
+        { key: 'precision', label: 'Precision (digits)', type: 'number', default: 2 },
+        { key: 'compression', label: 'Compression', type: 'select', default: 'zip', choices: [{ value: 'none', label: 'None (directory)' }, { value: 'zip', label: 'ZIP' }, { value: 'tgz', label: 'TGZ' }] },
+      ],
+    },
+    {
+      id: 'board.dxf',
+      title: 'DXF',
+      description: 'DXF plot of the selected layers (RunBoardJobExportDxf).',
+      document: 'board',
+      command: 'RunBoardJobExportDxf',
+      options: [{ key: 'layers', label: 'Layers', type: 'layers', default: ['BL_Edge_Cuts', 'BL_F_SilkS'].filter((l) => layers.includes(l)), choices: layerChoices(layers) }],
     },
     {
       id: 'schematic.svg',
@@ -117,6 +173,15 @@ export function jobDefinitions(enabledLayers: readonly string[]): JobDefinition[
         { key: 'plotDrawingSheet', label: 'Plot drawing sheet (frame)', type: 'boolean', default: true },
         { key: 'hierarchicalLinks', label: 'Hierarchical links', type: 'boolean', default: true },
       ],
+    },
+    {
+      id: 'schematic.netlist',
+      title: 'Netlist',
+      description: 'KiCad s-expression netlist (RunSchematicJobExportNetlist).',
+      document: 'schematic',
+      command: 'RunSchematicJobExportNetlist',
+      options: [],
+      unavailable: 'RunSchematicJobExportNetlist never answers on the headless api-server and wedges it (packages/client/dist/conformance-summary.txt); use GetSchematicNetlist through the Nets panel instead.',
     },
     {
       id: 'schematic.bom',
@@ -185,6 +250,7 @@ export class KicadJobsService implements JobsService {
   async run(jobId: string, options: Record<string, unknown>): Promise<JobRun> {
     const def = this.jobs().find((j) => j.id === jobId);
     if (!def) throw new Error(`Unknown job ${jobId}`);
+    if (def.unavailable) throw new Error(`${def.title}: ${def.unavailable}`);
     const run: JobRun = { id: `run-${this.seq++}`, jobId, title: def.title, startedAt: Date.now(), state: 'queued', progress: 0, log: [`${def.command} ${JSON.stringify(options)}`], outputs: [] };
     this.runList = [run, ...this.runList];
     this.emit();
@@ -257,12 +323,60 @@ export class KicadJobsService implements JobsService {
         return board.jobs.exportPdf(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.pdf`, { plotSettings: { layers: layerEnums(o.layers), blackAndWhite: bool('blackAndWhite') } });
       case 'board.step':
         if (!board) throw new Error('no board is open');
-        return board.jobs.export3D(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.${o.format === 'glb' ? 'glb' : 'step'}`, {
-          format: o.format === 'glb' ? Board3DFormat.B3D_GLB : Board3DFormat.B3D_STEP,
+        return board.jobs.export3D(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.step`, {
+          format: Board3DFormat.B3D_STEP,
           substituteModels: bool('substituteModels'),
           includeDnp: bool('includeDnp'),
+          includeUnspecified: bool('includeUnspecified'),
+          exportTracksAndVias: bool('exportTracksAndVias'),
+          exportZones: bool('exportZones'),
+          fuseShapes: bool('fuseShapes'),
+          optimizeStep: bool('optimizeStep'),
+          exportBoardBody: true,
+          exportComponents: true,
+          usePcbCenterOrigin: o.origin === 'center',
+          useGridOrigin: o.origin === 'grid',
+          useDrillOrigin: o.origin === 'drill',
           overwrite: true,
         });
+      case 'board.glb':
+        if (!board) throw new Error('no board is open');
+        return board.jobs.export3D(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.glb`, {
+          format: Board3DFormat.B3D_GLB,
+          substituteModels: o.substituteModels === undefined ? true : bool('substituteModels'),
+          includeDnp: bool('includeDnp'),
+          includeUnspecified: true,
+          exportBoardBody: true,
+          exportComponents: true,
+          exportTracksAndVias: o.exportTracksAndVias === undefined ? true : bool('exportTracksAndVias'),
+          exportPads: true,
+          exportZones: o.exportZones === undefined ? true : bool('exportZones'),
+          exportSilkscreen: o.exportSilkscreen === undefined ? true : bool('exportSilkscreen'),
+          exportSoldermask: o.exportSoldermask === undefined ? true : bool('exportSoldermask'),
+          usePcbCenterOrigin: true,
+          overwrite: true,
+        });
+      case 'board.ipc2581':
+        if (!board) throw new Error('no board is open');
+        return board.jobs.exportIpc2581(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.xml`, {
+          units,
+          version: o.version === 'B' ? Ipc2581Version.IPC2581V_B : Ipc2581Version.IPC2581V_C,
+          precision: Number(o.precision ?? 3),
+          compress: bool('compress'),
+          bomRevision: String(o.bomRevision ?? ''),
+          manufacturerPartNumberColumn: String(o.mpnColumn ?? ''),
+          manufacturerColumn: String(o.manufacturerColumn ?? ''),
+        });
+      case 'board.odb':
+        if (!board) throw new Error('no board is open');
+        return board.jobs.exportOdb(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}-odb${o.compression === 'zip' ? '.zip' : o.compression === 'tgz' ? '.tgz' : ''}`, {
+          units,
+          precision: Number(o.precision ?? 2),
+          compression: o.compression === 'none' ? OdbCompression.ODBC_NONE : o.compression === 'tgz' ? OdbCompression.ODBC_TGZ : OdbCompression.ODBC_ZIP,
+        });
+      case 'board.dxf':
+        if (!board) throw new Error('no board is open');
+        return board.jobs.exportDxf(`${dir}/`, { plotSettings: { layers: layerEnums(o.layers) } });
       case 'schematic.svg':
         if (!sch) throw new Error('no schematic is open');
         return sch.jobs.exportSvg(`${dir}/`, { plotSettings: { blackAndWhite: bool('blackAndWhite'), plotDrawingSheet: bool('plotDrawingSheet'), plotAll: true } });

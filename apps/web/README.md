@@ -63,7 +63,13 @@ inside the bridge workspace root). The project screen's file browser is `GET /fi
   batched, cached by a hash of the text so edits re-tessellate only what changed), `decodeAny`
   through the proto registry. The first paint uses the renderer's fallbacks;
   `setAdapterContext` upgrades it when the server shapes arrive. Theme: the renderer's
-  `kicad-default.json` (dark) and a light variant (`src/canvas/theme.ts`).
+  `kicad-default.json` (dark) and a light variant (`src/canvas/theme.ts`), or one of the
+  renderer's built-in KiCad themes pinned from Settings.
+- **Theme**: dark by default, light and "system" (follows `prefers-color-scheme`) from
+  Settings… (Mod+,) → Appearance. Tokens live in `src/theme/tokens.css` (dark on `:root`,
+  light under `[data-theme="light"]`); `src/theme/index.ts` resolves the persisted preference
+  (`localStorage["kicad-web.ui"]`) and keeps `<html data-theme>` in sync, and an inline script
+  in `index.html` applies it before the first paint so there is no flash.
 - **Properties**: `fromDescriptor` / `schemaFor(..., desc)` read the protobuf-es descriptors
   (`kiapiRegistry`) so real items are editable — numeric enums show their value names, int64
   distances stay `bigint`, oneofs expose `case` / `value`; value-shape inference remains the

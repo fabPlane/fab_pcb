@@ -105,12 +105,41 @@ export interface DesignRules {
   minTextThicknessNm: number;
 }
 
+export interface CustomRuleInfo {
+  name: string;
+  condition: string;
+  comments: string;
+  /** DrcSeverity enum value */
+  severity: number;
+  /** number of constraints (edited structurally in KiCad; shown read-only here) */
+  constraints: number;
+}
+
 export interface BoardSetup {
   copperLayers: number;
   thicknessNm: number;
   stackup: StackupLayer[];
   rules: DesignRules;
-  customRules: string; // .kicad_dru text
+  customRules: string; // .kicad_dru text (read-only rendering of the structured rules)
+  /** Structured custom rules (SetCustomDesignRules writeback: name / condition / comments / severity). */
+  customRuleList: CustomRuleInfo[];
+  customRulesError?: string;
+  /** Grid and drill/place origins (SetBoardOrigin), nm. */
+  origin: { grid: { x: number; y: number }; drill: { x: number; y: number } };
+}
+
+export interface PageInfo {
+  /** PageSize enum name, e.g. 'PS_A4' */
+  pageSize: string;
+  orientation: 'landscape' | 'portrait';
+  userWidthNm: number;
+  userHeightNm: number;
+  drawingSheet: string;
+  title: string;
+  date: string;
+  revision: string;
+  company: string;
+  comments: string[];
 }
 
 export interface TextVariable {
@@ -210,6 +239,8 @@ export interface JobDefinition {
   document: DocumentKind | 'project';
   command: string; // kiapi request type, e.g. 'RunBoardJobExportGerbers'
   options: JobOption[];
+  /** Why the job cannot run on this server (shown instead of the Run button). */
+  unavailable?: string;
 }
 
 export interface JobOutput {

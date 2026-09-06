@@ -1,0 +1,193 @@
+/* Design tokens for the app shell.
+ *
+ * Dark is the base theme (`:root`) and the default for new users; the light set lives under
+ * `:root[data-theme="light"]`. `data-theme` is always the *resolved* theme ('dark' | 'light'):
+ * the inline script in index.html sets it from the persisted preference before the first
+ * paint, and `src/theme/index.ts` keeps it in sync with the store afterwards ('system' is
+ * resolved against prefers-color-scheme there, so the CSS never has to guess). The mode the
+ * user picked is mirrored on `data-theme-mode` for tooling and tests.
+ *
+ * Dark palette: low-glare near-black with a slight cool (blue) bias for long sessions, no
+ * pure black and no pure white. Every text token clears WCAG AA (4.5:1) on every surface it
+ * is meant to sit on; the fill accent keeps 4.5:1 for white text, the text accent keeps
+ * 7:1 on panels. Light keeps the same structure and the same guarantees.
+ */
+:root {
+  /* ---- typography / metrics (theme independent) ---- */
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --fs-xs: 10.5px;
+  --fs-sm: 11.5px;
+  --fs-md: 12.5px;
+  --fs-lg: 14px;
+  --fs-xl: 18px;
+  --lh: 1.35;
+  --radius: 3px;
+  --radius-lg: 6px;
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 8px;
+  --space-4: 12px;
+  --space-5: 16px;
+  --space-6: 24px;
+  --row-h: 22px;
+  --control-h: 22px;
+  --titlebar-h: 30px;
+  --toolbar-h: 32px;
+  --statusbar-h: 24px;
+
+  /* ---- dark (base) ---- */
+  color-scheme: dark;
+
+  /* surfaces, darkest to lightest */
+  --bg-app: #121417;
+  --bg-panel-alt: #16191d;
+  --bg-panel: #1a1d21;
+  --bg-elevated: #22262b;
+  --bg-input: #0f1114;
+  --bg-canvas: #001023;
+  --bg-stripe: rgba(255, 255, 255, 0.025);
+  --bg-hover: rgba(255, 255, 255, 0.06);
+  --bg-active: rgba(255, 255, 255, 0.1);
+  --bg-selected: #24395a;
+  --bg-selected-strong: #2f6fd6;
+  --bg-overlay: rgba(0, 0, 0, 0.55);
+  --bg-tooltip: #2b3037;
+  --fg-tooltip: #eceff3;
+
+  /* borders */
+  --border: #2a2f36;
+  --border-strong: #3a4149;
+  --border-focus: #5c9cf5;
+
+  /* text */
+  --fg: #e6e9ee;
+  --fg-muted: #a4acb7;
+  --fg-faint: #7f8896;
+  --fg-on-strong: #ffffff;
+
+  /* accent: `--accent` is a fill (buttons, menu highlight, badges) that carries white text;
+     `--accent-text` is the same hue lifted for use as text / icons on dark panels. */
+  --accent: #2f6fd6;
+  --accent-fg: #ffffff;
+  --accent-text: #7fb2ff;
+  --accent-soft: rgba(95, 158, 245, 0.18);
+  --focus-ring: 0 0 0 2px rgba(92, 156, 245, 0.45);
+
+  /* semantic */
+  --danger: #ff6f6b;
+  --warning: #e8ac3f;
+  --success: #5fc46c;
+  --info: #5ab9f0;
+  --danger-fill: #c0392b;
+  --warning-fill: #a86a00;
+  --success-fill: #2e7d32;
+  --fg-on-fill: #ffffff;
+
+  /* misc */
+  --shadow: 0 10px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.45);
+  --scrollbar: rgba(255, 255, 255, 0.18);
+  --scrollbar-hover: rgba(255, 255, 255, 0.32);
+  --selection-bg: #2f5a9e;
+  --selection-fg: #ffffff;
+}
+
+/* ---- light ---- */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg-app: #e8eaee;
+  --bg-panel-alt: #eef0f3;
+  --bg-panel: #f6f7f9;
+  --bg-elevated: #ffffff;
+  --bg-input: #ffffff;
+  --bg-canvas: #fafafc;
+  --bg-stripe: rgba(0, 0, 0, 0.025);
+  --bg-hover: rgba(0, 0, 0, 0.05);
+  --bg-active: rgba(0, 0, 0, 0.09);
+  --bg-selected: #d5e3fa;
+  --bg-selected-strong: #2563c9;
+  --bg-overlay: rgba(20, 24, 32, 0.35);
+  --bg-tooltip: #1b1f26;
+  --fg-tooltip: #f6f7f9;
+
+  --border: #d0d4da;
+  --border-strong: #b4bac3;
+  --border-focus: #2563c9;
+
+  --fg: #1b1f26;
+  --fg-muted: #586070;
+  --fg-faint: #656d7a;
+  --fg-on-strong: #ffffff;
+
+  --accent: #2563c9;
+  --accent-fg: #ffffff;
+  --accent-text: #1f5fc4;
+  --accent-soft: rgba(37, 99, 201, 0.14);
+  --focus-ring: 0 0 0 2px rgba(37, 99, 201, 0.35);
+
+  --danger: #c62828;
+  --warning: #9a5b00;
+  --success: #2a6f2e;
+  --info: #0b6fa4;
+  --danger-fill: #c62828;
+  --warning-fill: #b26a00;
+  --success-fill: #2e7d32;
+  --fg-on-fill: #ffffff;
+
+  --shadow: 0 6px 24px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.12);
+  --scrollbar: rgba(0, 0, 0, 0.22);
+  --scrollbar-hover: rgba(0, 0, 0, 0.38);
+  --selection-bg: #b9d1f7;
+  --selection-fg: #101418;
+}
+
+/* ---- theme-aware defaults that app.css does not set itself ----
+ * This sheet is @imported at the top of app.css, so these rules either target things app.css
+ * leaves alone (selection, stripes, accent-color, scrollbar hover) or carry one extra `html`
+ * of specificity where app.css hard-codes a colour that has to differ per theme (overlay,
+ * tooltip, toast). Keep this block small; component styling belongs in app.css. */
+::selection {
+  background: var(--selection-bg);
+  color: var(--selection-fg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-hover);
+  background-clip: padding-box;
+}
+input,
+select,
+textarea,
+progress {
+  accent-color: var(--accent);
+}
+html .dialog-overlay {
+  background: var(--bg-overlay);
+}
+html .tooltip,
+html .toast {
+  background: var(--bg-tooltip);
+  color: var(--fg-tooltip);
+}
+html .toast.error {
+  background: var(--danger-fill);
+  color: var(--fg-on-fill);
+}
+html .badge.error {
+  background: var(--danger-fill);
+  color: var(--fg-on-fill);
+}
+html .badge.warning {
+  background: var(--warning-fill);
+  color: var(--fg-on-fill);
+}
+html .keymap-row .capture.listening,
+html .file-row .icon.project,
+html .tool-overlay {
+  color: var(--accent-text);
+}
+.table tbody tr:nth-child(even) > td {
+  background: var(--bg-stripe);
+}

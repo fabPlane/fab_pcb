@@ -12,6 +12,7 @@ import {
   BoardStackupLayerType,
   DocumentType,
   KiCadObjectType,
+  type BoardStackup,
   type BoardStackupLayer,
   type CustomRule,
   type DocumentChanged,
@@ -37,7 +38,9 @@ import {
 import { NetClassSchema } from '@kicad-web/proto';
 import type { DocumentKind, ItemStore } from '@/contracts';
 import { layerDisplayName } from '@/lib/enums';
-import type { BoardSetup, DesignRules, DocumentService, LayerInfo, NetInfo, NetclassInfo, SheetInfo, StackupLayer, TextVariable, VariantInfo } from '../types';
+import type { BoardSetup, CustomRuleInfo, DesignRules, DocumentService, LayerInfo, NetInfo, NetclassInfo, SheetInfo, StackupLayer, TextVariable, VariantInfo } from '../types';
+import { applyBoardSetup, readPageInfo, writePageInfo } from './KicadBoardSetup';
+import type { PageInfo } from '../types';
 
 /** Anything the commit backend can open a KiCad commit on. */
 export interface CommitTarget {
@@ -117,9 +120,17 @@ export class KicadDocumentService implements DocumentService {
   private rootSheetKey = '';
   private footprintDocs = new Map<string, FootprintDocument>();
   private footprintPending = new Set<string>();
+  /**
+   * Opens library footprint documents somewhere that does not disturb the board: the headless
+   * server unloads its board when a DOCTYPE_FOOTPRINT is opened on it (KicadLibraryService).
+   */
+  openFootprintDocument: ((libId: string) => Promise<FootprintDocument>) | null = null;
+  /** Raw setup messages kept for writeback (UpdateBoardStackup / SetCustomDesignRules). */
+  rawStackup: BoardStackup | null = null;
+  rawCustomRules: CustomRule[] = [];
   private layerList: LayerInfo[] = [];
   private netList: NetInfo[] = [];
-  private setup: BoardSetup = { copperLayers: 2, thicknessNm: 1_600_000, stackup: [], rules: emptyRules(), customRules: '' };
+  private setup: BoardSetup = { copperLayers: 2, thicknessNm: 1_600_000, stackup: [], rules: emptyRules(), customRules: '', customRuleList: [], origin: { grid: { x: 0, y: 0 }, drill: { x: 0, y: 0 } } };
   private netclassList: NetclassInfo[] = [];
   private textVars: TextVariable[] = [];
   private variantList: VariantInfo[] = [];
@@ -275,7 +286,16 @@ export class KicadDocumentService implements DocumentService {
     const board = this.boardDoc;
     if (!board) return;
     try {
-      const [stackup, rules, custom, enabled] = await Promise.all([board.stackup(), board.designRules(), board.customRules().catch(() => null), board.enabledLayers()]);
+      const [stackup, rules, custom, enabled, gridOrigin, drillOrigin] = await Promise.all([
+        board.stackup(),
+        board.designRules(),
+        board.customRules().catch(() => null),
+        board.enabledLayers(),
+        board.origin('grid').catch(() => ({ x: 0, y: 0 })),
+        board.origin('drill').catch(() => ({ x: 0, y: 0 })),
+      ]);
+      this.rawStackup = stackup;
+      this.rawCustomRules = custom?.rules ?? [];
       const layers: StackupLayer[] = stackup.layers.map((l: BoardStackupLayer, i: number) => {
         const id = l.type === BoardStackupLayerType.BSLT_DIELECTRIC ? `dielectric${i}` : (BoardLayer[l.layer] ?? `layer${i}`);
         return {
@@ -303,6 +323,9 @@ export class KicadDocumentService implements DocumentService {
           minTextThicknessNm: dist(c?.minSilkTextThickness),
         },
         customRules: custom ? customRulesText(custom.rules) : '',
+        customRuleList: (custom?.rules ?? []).map<CustomRuleInfo>((r) => ({ name: r.name, condition: r.condition, comments: r.comments ?? '', severity: r.severity, constraints: r.constraints.length })),
+        customRulesError: custom?.errorText || undefined,
+        origin: { grid: gridOrigin, drill: drillOrigin },
       };
     } catch (e) {
       this.log(`board setup: ${describe(e)}`, 'warn');
@@ -350,6 +373,36 @@ export class KicadDocumentService implements DocumentService {
 
   private sheetKey(h: SheetHandle): string {
     return `/${h.path.path.map((k) => k.value).join('/')}`;
+  }
+
+  /** Re-reads `GetSchematicHierarchy` after a sheet was added or removed; new sheets get stores. */
+  async reloadHierarchy(): Promise<void> {
+    const sch = this.schematicDoc;
+    if (!sch) return;
+    const top = await sch.hierarchy();
+    const toInfo = (s: (typeof top)[number]): SheetInfo => {
+      const handle = sch.sheet(s.path!, s);
+      const key = this.sheetKey(handle);
+      if (!this.sheetHandles.has(key)) {
+        this.sheetHandles.set(key, handle);
+        void handle.documentSync.load().then(() => {
+          this.storeSubs.push(handle.store.subscribe(() => this.onStoreChanged('schematic')));
+          this.emit();
+        });
+      }
+      return { path: key, name: s.name || 'Root', file: s.filename, page: s.pageNumber, children: s.children.map(toInfo) };
+    };
+    this.sheetList = top.map(toInfo);
+    this.emit();
+  }
+
+  /** Forgets an open footprint document (after the library session closed). */
+  closeFootprint(libId: string): void {
+    const doc = this.footprintDocs.get(libId);
+    if (!doc) return;
+    doc.documentSync.dispose();
+    this.footprintDocs.delete(libId);
+    this.emit();
   }
 
   // ------------------------------------------------------------------ revisions / dirty
@@ -580,10 +633,10 @@ export class KicadDocumentService implements DocumentService {
   footprint(libId: string): ItemStore | null {
     const doc = this.footprintDocs.get(libId);
     if (doc) return doc.store;
-    if (this.kicad && !this.footprintPending.has(libId)) {
+    const open = this.openFootprintDocument ?? (this.kicad ? (id: string) => this.kicad!.openFootprint(id) : null);
+    if (open && !this.footprintPending.has(libId)) {
       this.footprintPending.add(libId);
-      void this.kicad
-        .openFootprint(libId)
+      void open(libId)
         .then(async (fp) => {
           await fp.documentSync.load();
           this.footprintDocs.set(libId, fp);
@@ -615,24 +668,15 @@ export class KicadDocumentService implements DocumentService {
   async setBoardSetup(setup: BoardSetup): Promise<void> {
     const board = this.boardDoc;
     if (!board) return;
-    const r = setup.rules;
-    const nm = (v: number) => ({ valueNm: BigInt(Math.round(v)) });
-    await board.setDesignRules({
-      constraints: {
-        minClearance: nm(r.minClearanceNm),
-        minTrackWidth: nm(r.minTrackWidthNm),
-        minViaSize: nm(r.minViaDiameterNm),
-        minThroughDrill: nm(r.minViaDrillNm),
-        holeToHoleMin: nm(r.minHoleToHoleNm),
-        copperEdgeClearance: nm(r.copperToEdgeNm),
-        minViaAnnularWidth: nm(r.minAnnularWidthNm),
-        minSilkTextHeight: nm(r.minTextHeightNm),
-        minSilkTextThickness: nm(r.minTextThicknessNm),
-      },
-    });
-    await this.loadSetup();
-    await this.afterCommit('board');
-    this.emit();
+    const done = this.beginActivity();
+    try {
+      await applyBoardSetup(board, this.setup, setup, { stackup: this.rawStackup, customRules: this.rawCustomRules }, (m, l) => this.log(m, l));
+      await this.loadSetup();
+      await this.afterCommit('board');
+      this.emit();
+    } finally {
+      done();
+    }
   }
 
   netclasses(): NetclassInfo[] {
@@ -715,6 +759,26 @@ export class KicadDocumentService implements DocumentService {
     return this.dirty[kind] ?? false;
   }
 
+  /** GetPageSettings + GetTitleBlockInfo of the board or the schematic. */
+  async pageInfo(kind: 'board' | 'schematic'): Promise<PageInfo> {
+    const doc = kind === 'board' ? this.boardDoc : this.schematicDoc;
+    if (!doc) throw new Error(`no ${kind} is open`);
+    return readPageInfo(doc);
+  }
+
+  async setPageInfo(kind: 'board' | 'schematic', info: PageInfo): Promise<void> {
+    const doc = kind === 'board' ? this.boardDoc : this.schematicDoc;
+    if (!doc) throw new Error(`no ${kind} is open`);
+    const done = this.beginActivity();
+    try {
+      const before = await readPageInfo(doc).catch(() => null);
+      await writePageInfo(doc, before, info, (m, l) => this.log(m, l));
+      await this.afterCommit(kind);
+    } finally {
+      done();
+    }
+  }
+
   /** `RefillZones` on every zone, then re-reads the zones (filled polygons change). */
   async refillZones(): Promise<void> {
     const board = this.boardDoc;
@@ -757,8 +821,8 @@ function netclassInfo(n: NetClass): NetclassInfo {
     name: n.name,
     clearanceNm: dist(n.board?.clearance),
     trackWidthNm: dist(n.board?.trackWidth),
-    viaDiameterNm: dist(n.board?.viaStack?.drill?.diameter ? { valueNm: n.board.viaStack.drill.diameter.xNm } : undefined),
-    viaDrillNm: dist(n.board?.viaStack?.drill?.diameter ? { valueNm: n.board.viaStack.drill.diameter.xNm } : undefined),
+    viaDiameterNm: num(n.board?.viaStack?.copperLayers[0]?.size?.xNm),
+    viaDrillNm: num(n.board?.viaStack?.drill?.diameter?.xNm),
     diffPairWidthNm: dist(n.board?.diffPairTrackWidth),
     diffPairGapNm: dist(n.board?.diffPairGap),
     wireWidthNm: dist(n.schematic?.wireWidth),

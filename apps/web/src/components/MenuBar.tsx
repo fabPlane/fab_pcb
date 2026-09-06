@@ -10,15 +10,21 @@ type MenuEntry = string | '-' | { label: string };
 
 const MENUS: { label: string; items: MenuEntry[] }[] = [
   { label: 'File', items: ['file.newProject', 'file.openProject', '-', 'file.save', 'file.saveAll', '-', 'file.exportJobs', '-', 'file.closeProject'] },
-  { label: 'Edit', items: ['edit.undo', 'edit.redo', '-', 'edit.move', 'edit.rotateCcw', 'edit.rotateCw', 'edit.flip', 'edit.duplicate', 'edit.delete', '-', 'edit.selectAll', 'edit.escape', '-', 'edit.properties'] },
+  {
+    label: 'Edit',
+    items: ['edit.undo', 'edit.redo', '-', 'edit.cut', 'edit.copy', 'edit.paste', 'edit.duplicate', 'edit.delete', '-', 'edit.move', 'edit.rotateCcw', 'edit.rotateCw', 'edit.rotateBy', 'edit.flip', 'edit.setLayer', 'edit.setNet', '-', { label: 'Align' }, 'edit.alignLeft', 'edit.alignRight', 'edit.alignTop', 'edit.alignBottom', 'edit.alignCenterX', 'edit.alignCenterY', 'edit.distributeH', 'edit.distributeV', '-', 'edit.selectAll', 'edit.escape', '-', 'edit.properties'],
+  },
   {
     label: 'View',
     items: ['view.zoomIn', 'view.zoomOut', 'view.zoomFit', 'view.zoomSelection', '-', 'view.toggleGrid', 'view.nextGrid', 'view.cycleUnits', '-', { label: 'Layers' }, 'view.layerFront', 'view.layerBack', 'view.layerIn1', 'view.layerIn2', 'view.layerFlipSide', '-', 'view.toggleLeftPanel', 'view.toggleRightPanel', 'view.toggleBottomPanel', 'view.resetLayout', '-', 'view.toggleTheme', 'view.themeSystem'],
   },
-  { label: 'Place', items: ['board.placeFootprint', 'board.placeVia', 'board.route', '-', 'schematic.placeSymbol', 'schematic.wire', 'schematic.label', 'schematic.globalLabel', 'schematic.hierLabel', 'schematic.junction', 'schematic.noConnect'] },
-  { label: 'Inspect', items: ['inspect.runDrc', 'inspect.runErc', '-', 'inspect.highlightNet', 'inspect.clearHighlight', 'inspect.nets'] },
-  { label: 'Tools', items: ['tools.boardSetup', 'tools.netclasses', 'tools.textVariables', 'tools.variants', '-', 'board.refillZones', 'board.unfillZones', 'board.updateFromSchematic', 'schematic.annotate', 'schematic.updatePcb', '-', 'board.openFootprintEditor', '-', 'tools.commandPalette', 'tools.keymap'] },
-  { label: 'Window', items: ['window.project', 'window.board', 'window.schematic'] },
+  {
+    label: 'Place',
+    items: ['board.placeFootprint', 'board.route', 'board.placeVia', 'board.drawZone', '-', 'board.drawLine', 'board.drawRect', 'board.drawCircle', 'board.drawArc', 'board.drawPolygon', 'board.placeText', '-', 'schematic.placeSymbol', 'schematic.wire', 'schematic.bus', 'schematic.junction', 'schematic.noConnect', 'schematic.label', 'schematic.globalLabel', 'schematic.hierLabel', 'schematic.text', 'schematic.sheet'],
+  },
+  { label: 'Inspect', items: ['inspect.runDrc', 'inspect.runErc', '-', 'inspect.highlightNet', 'inspect.clearHighlight', 'inspect.nets', '-', 'inspect.crossProbe'] },
+  { label: 'Tools', items: ['tools.boardSetup', 'tools.pageSettings', 'tools.netclasses', 'tools.textVariables', 'tools.variants', '-', 'board.refillZones', 'board.unfillZones', 'board.updateFromSchematic', 'schematic.annotate', 'schematic.updatePcb', '-', 'board.openFootprintEditor', '-', 'tools.commandPalette', 'tools.keymap', '-', 'tools.settings'] },
+  { label: 'Window', items: ['window.project', 'window.board', 'window.schematic', 'window.view3d'] },
   { label: 'Help', items: ['help.shortcuts', 'help.about'] },
 ];
 

@@ -6,7 +6,7 @@
 // Also hosts the interactive move tool: press M with a selection, the pointer drags the
 // items through an open transaction, click commits, Esc drops.
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CanvasHost, DocumentKind, ItemStore, PickResult } from '@/contracts';
 import { useServices } from '@/services';
 import type { Transaction } from '@/services/types';
@@ -16,6 +16,9 @@ import { translateItem, snap } from '@/lib/geometry';
 import { createCanvasHost } from './hostFactory';
 import { themeFor } from './theme';
 import { MockCanvasHost } from './MockCanvasHost';
+import { ToolOverlay } from './ToolOverlay';
+import { activeTool, toolClick, toolFinish, useToolStore } from './tools';
+import { CanvasContextMenu, type ContextMenuState } from './CanvasContextMenu';
 
 export interface CanvasSlotProps {
   kind: DocumentKind;
@@ -77,6 +80,8 @@ export function CanvasSlot({ kind, storeKey, store, layers }: CanvasSlotProps) {
   const showGrid = useUiStore((s) => s.showGrid);
   const doc = useEditorStore((s) => s.docs[storeKey]);
   const ensure = useEditorStore((s) => s.ensure);
+  const toolSession = useToolStore((s) => s.session);
+  const [menu, setMenu] = useState<ContextMenuState | null>(null);
 
   useEffect(() => ensure(storeKey, kind), [ensure, storeKey, kind]);
 
@@ -105,6 +110,12 @@ export function CanvasSlot({ kind, storeKey, store, layers }: CanvasSlotProps) {
       const s = useEditorStore.getState();
       if (moveSessions.has(storeKey)) {
         void endMove(storeKey, true);
+        return;
+      }
+      if (activeTool(storeKey)) {
+        const rect = el.getBoundingClientRect();
+        const world = host.screenToWorld(ev.clientX - rect.left, ev.clientY - rect.top);
+        void toolClick(storeKey, world, hits[0] ?? null);
         return;
       }
       const top = hits[0];
@@ -139,7 +150,26 @@ export function CanvasSlot({ kind, storeKey, store, layers }: CanvasSlotProps) {
         }
       }
     });
+    const onDblClick = () => {
+      if (activeTool(storeKey)) void toolFinish();
+    };
+    el.addEventListener('dblclick', onDblClick);
+    const onContextMenu = (ev: MouseEvent) => {
+      ev.preventDefault();
+      const rect = el.getBoundingClientRect();
+      const hits = host.pick(ev.clientX - rect.left, ev.clientY - rect.top, 6);
+      const s = useEditorStore.getState();
+      const top = hits[0];
+      if (top) {
+        const id = pickedId(top);
+        if (!s.docs[storeKey]?.selection.includes(id)) s.setSelection(storeKey, [id]);
+      }
+      setMenu({ x: ev.clientX, y: ev.clientY, target: top ? pickedId(top) : null });
+    };
+    el.addEventListener('contextmenu', onContextMenu);
     return () => {
+      el.removeEventListener('dblclick', onDblClick);
+      el.removeEventListener('contextmenu', onContextMenu);
       offPick();
       offHover();
       offCam();
@@ -191,14 +221,23 @@ export function CanvasSlot({ kind, storeKey, store, layers }: CanvasSlotProps) {
 
   const tool = doc?.tool ?? 'select';
   const selCount = selection?.length ?? 0;
+  const activeSession = toolSession && toolSession.storeKey === storeKey ? toolSession : null;
   return (
-    <div className="canvas-slot" ref={ref} data-store={storeKey}>
+    <div className="canvas-slot" ref={ref} data-store={storeKey} data-tool={activeSession?.id ?? tool}>
+      <ToolOverlay storeKey={storeKey} host={() => hostRef.current ?? undefined} />
       <div className="canvas-overlay">
         {tool === 'move' && <div className="hint tool">Moving {selCount} item{selCount === 1 ? '' : 's'} — click to place, Esc to cancel, R rotates</div>}
-        {tool === 'select' && selCount === 0 && (
-          <div className="hint">Click to select · Shift+click adds · Wheel zooms · Middle-drag or Alt-drag pans</div>
+        {activeSession && (
+          <div className="hint tool" data-testid="tool-hint">
+            {activeSession.hint}
+            {activeSession.points.length ? ` · ${activeSession.points.length} point${activeSession.points.length === 1 ? '' : 's'}` : ''}
+          </div>
+        )}
+        {tool === 'select' && selCount === 0 && !activeSession && (
+          <div className="hint">Click to select · Shift+click adds · Wheel zooms · Middle-drag or Alt-drag pans · Right-click for actions</div>
         )}
       </div>
+      {menu && <CanvasContextMenu state={menu} storeKey={storeKey} store={store} kind={kind} onClose={() => setMenu(null)} />}
     </div>
   );
 }
