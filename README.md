@@ -8,12 +8,17 @@ never opens a window.
 
 ![IPC API headless](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftensorfleet%2Fkicad-web%2Fmaster%2Fdocs%2Fcoverage-badge.json)
 
-IPC API coverage: **113/129** commands headless (87.6%) · 16 GUI-only · 0 unregistered — KiCad 1ca7f148a5
+IPC API coverage: **136/151** commands headless (90.1%) · 15 GUI-only · 0 unregistered — KiCad 27aa7e67fa
 (`bun run coverage:summary` prints this line from `tooling/coverage/commands.json`; `--badge` rewrites
 `docs/coverage-badge.json`, the shields.io endpoint behind the badge; CI checks both are fresh).
+The 15 GUI-only commands are selection, visible layers and appearance state, which a web page owns
+itself; every headless command passes the conformance suite against a live server.
 
-Milestone M0 is done (kicad-cli built, Ping answered from Bun — [docs/m0-runbook.md](docs/m0-runbook.md));
-M1–M3 are in progress in parallel (client SDK, bridge, renderers, app shell on mock services).
+Milestones M0–M4 are done: `kicad-cli` builds from the fork ([docs/m0-runbook.md](docs/m0-runbook.md)),
+the board and schematic render in the browser from live server data, edits commit back through
+KiCad's own commit API and undo, and DRC/ERC, exports and a 3D view run from the UI. See
+[docs/screenshots](docs/screenshots). The fork's `web-api` branch carries 21 API commits that closed
+every P0 gap and most P1 gaps ([docs/04-ipc-gaps.md](docs/04-ipc-gaps.md)).
 
 ```bash
 bun install
