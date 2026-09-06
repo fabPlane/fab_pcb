@@ -12,7 +12,7 @@ this file first.
 ## ItemStore (`@kicad-web/client/store`) — producer A4, consumers A5/A6/A8
 
 ```ts
-type DocumentKind = 'board' | 'schematic' | 'footprint';
+type DocumentKind = 'board' | 'schematic' | 'footprint' | 'symbol';   // 'symbol' = headless library symbol (DOCTYPE_SYMBOL)
 
 interface StoredItem {
   id: string;                       // KIID
@@ -54,7 +54,14 @@ interface Theme { /* KiCad colour theme: per-layer colours + ui colours; see ren
 
 interface Camera { x: number; y: number; zoom: number }  // world nm at viewport centre; zoom = px per nm
 
-interface PickResult { id: string; distance: number }    // nearest first
+interface PickResult {                                   // nearest first
+  id: string;        // render item id: the KIID, or `<kiid>@<suffix>` for per-layer / child geometry
+  distance: number;  // screen px from the pointer (0 = inside)
+  owner: string;     // store item that produced the hit: footprint / symbol / sheet KIID for their children, else == ref
+  ref: string;       // what the UI should treat as picked: object KIID without suffix; schematic pins use `<symbol kiid>:<pin number>`
+  layer: string;     // render-model layer id (`BL_F_Cu`, `schematic.wire`, ...)
+  net?: string;      // net name when the item carries one
+}
 
 interface CanvasHost {
   mount(el: HTMLElement, store: ItemStore, theme: Theme): void;
@@ -74,12 +81,16 @@ interface CanvasHost {
   onPick(cb: (hits: PickResult[], ev: PointerEvent) => void): () => void;
   onHover(cb: (hit: PickResult | null, ev: PointerEvent) => void): () => void;
   onCameraChange(cb: (cam: Camera) => void): () => void;
+  setStore(store: ItemStore): void;                      // switch documents (schematic sheets) without remounting
   // move preview: the app moves items optimistically by patching the store; no renderer API needed
 }
 ```
 
 Board and schematic hosts are separate classes (`BoardCanvasHost`, `SchematicCanvasHost`)
-sharing `renderer/core`.
+sharing `renderer/core`. `setStore` rebuilds the scene from the new store and moves the store
+subscription; `SchematicCanvasHost` additionally remembers the camera per store, so switching
+between `schematic.sheet(path).store` instances restores each sheet's view (first visit: zoom to
+fit). Selection ids are re-resolved against the new store; hover is cleared.
 
 ## Render model (`@kicad-web/renderer/core`) — internal to A5/A6
 

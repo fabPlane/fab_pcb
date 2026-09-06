@@ -10,9 +10,13 @@
     ".": "./src/index.ts",
     "./core": "./src/core/index.ts",
     "./board": "./src/board/index.ts",
-    "./themes/*": "./themes/*"
+    "./themes/*": "./themes/*",
+    "./schematic": "./src/schematic/index.ts"
   },
-  "files": ["src", "themes"],
+  "files": [
+    "src",
+    "themes"
+  ],
   "scripts": {
     "test": "bun test",
     "typecheck": "tsc -b",

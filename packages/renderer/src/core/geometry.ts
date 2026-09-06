@@ -464,5 +464,10 @@ export function distanceToPrimitive(p: Vec2, prim: Primitive): number {
       const dy = Math.max(prim.c.y - prim.h / 2 - p.y, 0, p.y - (prim.c.y + prim.h / 2));
       return Math.hypot(dx, dy);
     }
+    case 'text-glyphs': {
+      if (prim.outline.length < 3) return vDist(p, prim.pos);
+      if (pointInPolygon(p, prim.outline)) return 0;
+      return pointPolylineDistance(p, prim.outline, true);
+    }
   }
 }

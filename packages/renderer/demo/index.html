@@ -21,14 +21,16 @@
     <div id="app">
       <div id="toolbar">
         <strong>@kicad-web/renderer</strong>
+        <label>Document <select id="doc"><option value="board">Board</option><option value="schematic">Schematic</option></select></label>
         <button id="fit">Zoom to fit (Home)</button>
         <button id="flip">Flip view</button>
+        <button id="sheet" hidden>Open sub-sheet "Power"</button>
         <label>Theme <select id="theme"><option value="default">KiCad Default</option><option value="classic">KiCad Classic</option></select></label>
         <label>User theme JSON <input id="theme-file" type="file" accept=".json" /></label>
         <label>Highlight net <select id="net"><option value="">none</option><option>GND</option><option>VCC</option></select></label>
         <label>Grid <select id="grid"><option value="mm">mm</option><option value="mil">mil</option><option value="off">off</option></select></label>
-        <button id="move">Move R1 +1 mm (store diff)</button>
-        <button id="remove">Remove track t3</button>
+        <button id="move">Move R1 (store diff)</button>
+        <button id="remove">Remove item</button>
         <span id="fps"></span>
       </div>
       <div id="layers"></div>

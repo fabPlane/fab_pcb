@@ -228,6 +228,9 @@ function drawPrimScreen(g: Graphics, p: Primitive, camera: Camera, zoom: number,
       g.rect(Math.min(a.x, b.x), Math.min(a.y, b.y), Math.abs(b.x - a.x), Math.abs(b.y - a.y));
       break;
     }
+    case 'text-glyphs':
+      if (p.outline.length >= 3) g.poly(p.outline.map(s).flatMap((q) => [q.x, q.y]), true);
+      break;
   }
 }
 

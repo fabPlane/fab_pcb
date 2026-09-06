@@ -292,7 +292,7 @@ export function polySetToPrims(ps: PolySetLike | undefined, fill: boolean, width
 const isPolyList = (x: PadPolygonsInput | TextShapesInput): x is Vec2[][] => Array.isArray(x) && (x.length === 0 || Array.isArray(x[0]));
 
 /** Dash pattern (nm) for a KiCad line style, using the default 12/3 dash/gap ratios. */
-function dashPattern(style: string, width: number): number[] | undefined {
+export function dashPattern(style: string, width: number): number[] | undefined {
   const w = Math.max(width, 100_000); // KiCad uses a minimum for hairlines
   switch (style) {
     case 'SLS_DASH':
@@ -308,7 +308,7 @@ function dashPattern(style: string, width: number): number[] | undefined {
   }
 }
 
-function strokedPolyline(pts: Vec2[], width: number, pattern: number[] | undefined, closed: boolean): Primitive[] {
+export function strokedPolyline(pts: Vec2[], width: number, pattern: number[] | undefined, closed: boolean): Primitive[] {
   if (pts.length < 2) return [];
   const line = closed ? [...pts, pts[0]!] : pts;
   if (!pattern) {
@@ -320,7 +320,7 @@ function strokedPolyline(pts: Vec2[], width: number, pattern: number[] | undefin
   return dashPolyline(line, pattern).map(([a, b]) => ({ kind: 'segment', a, b, width }) as Primitive);
 }
 
-function lineEnding(at: Vec2, from: Vec2, ending: LineEndingLike | undefined, width: number): Primitive[] {
+export function lineEnding(at: Vec2, from: Vec2, ending: LineEndingLike | undefined, width: number): Primitive[] {
   const style = enumName('LineEndingStyle', ending?.style);
   if (style === 'LES_NONE' || style === 'LES_UNKNOWN') return [];
   const len = dist(ending?.length) || Math.max(6 * width, 500_000);
@@ -619,6 +619,10 @@ export function transformPrim(p: Primitive, angle: number, offset: Vec2, mirrorY
       return { ...p, polys: p.polys.map((poly) => poly.map(t)) };
     case 'image':
       return { ...p, c: t(p.c) };
+    case 'text-glyphs':
+      // rotation only moves the anchor / outline here; the schematic adapter has the
+      // justification-aware version (transformTextGlyphs)
+      return { ...p, pos: t(p.pos), outline: p.outline.map(t), angle: mirrorY ? -p.angle + angle : p.angle + angle, mirrored: mirrorY ? !p.mirrored : p.mirrored };
   }
 }
 
@@ -652,7 +656,7 @@ export function textFallbackPolygon(t: TextLike): Vec2[] {
   return transformPoly(local, deg(attr.angle), pos, !!attr.mirrored);
 }
 
-function textShapesToPrims(shapes: TextShapesInput, ctx: BoardAdapterContext): Primitive[] {
+export function textShapesToPrims(shapes: TextShapesInput, ctx: BoardAdapterContext): Primitive[] {
   if (isPolyList(shapes)) return [{ kind: 'text-shapes', polys: shapes }];
   const out: Primitive[] = [];
   for (const s of shapes) out.push(...graphicShapeToPrims(s, ctx));
@@ -984,7 +988,7 @@ function convertDimension(p: Record<string, unknown>, id: string, o: ConvertOpts
   return [finish(id, boardLayerName(p.layer as number), prims, o)];
 }
 
-function bytesOf(v: unknown): Uint8Array | undefined {
+export function bytesOf(v: unknown): Uint8Array | undefined {
   if (v instanceof Uint8Array) return v;
   if (typeof v === 'string' && typeof atob === 'function') {
     try {
@@ -1026,7 +1030,7 @@ export function imageInfo(bytes: Uint8Array): { w: number; h: number; mime: stri
   return undefined;
 }
 
-function toBase64(bytes: Uint8Array): string {
+export function toBase64(bytes: Uint8Array): string {
   if (typeof Buffer !== 'undefined') return Buffer.from(bytes).toString('base64');
   let s = '';
   for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));

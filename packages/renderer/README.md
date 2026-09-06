@@ -21,6 +21,14 @@ src/
     boardLayers.ts   BoardLayer enum table, copper/tech classification, pcbnew draw order
     boardAdapter.ts  kiapi board messages -> RenderItems (every KOT_PCB_* type)
     BoardCanvasHost.ts
+  schematic/
+    schematicLayers.ts   theme-key layer ids (`schematic.wire`, ...), eeschema draw order, default sizes
+    symbolTransform.ts   SCH_SYMBOL TRANSFORM (orientation + mirror), pin draw orientation, text through it
+    labelShapes.ts       global / hierarchical / directive label and sheet-pin outlines (sch_label.cpp)
+    textMetrics.ts       font-free text box estimates (EDA_TEXT::GetTextBox / GetLinePositions)
+    textGlyphs.ts        Pixi BitmapText builder for the `text-glyphs` fallback primitive
+    schematicAdapter.ts  kiapi schematic messages -> RenderItems (every KOT_SCH_* type)
+    SchematicCanvasHost.ts
 themes/
   kicad-default.json, kicad-classic.json   generated from the KiCad sources (see below)
 scripts/gen-themes.ts
@@ -121,6 +129,106 @@ orthogonal, radial, leader, center), ReferenceImage (PNG/JPEG/GIF header → siz
 Group (bbox), Barcode, ReferencePoint, GridItem (cartesian/polar), Table. Markers,
 generators, constraints and 3D models produce nothing.
 
+## Schematic host
+
+```ts
+import { SchematicCanvasHost, KICAD_DEFAULT_THEME } from '@kicad-web/renderer';
+
+const host = new SchematicCanvasHost(KICAD_DEFAULT_THEME, {
+  adapter: { textShapes: (id) => textShapeCache.get(id) },   // GetTextAsShapes, keyed as below
+  textGlyphs: { fontFamily: 'Helvetica, Arial, sans-serif' },  // BitmapText fallback (false = draw no fallback text)
+});
+host.mount(div, schematic.sheet(rootPath).store, KICAD_DEFAULT_THEME);
+host.setStore(schematic.sheet(childPath).store);   // switch sheets; the camera is remembered per store
+host.onPick((hits) => {
+  const pin = hits.find(SchematicCanvasHost.isPinHit);   // pin.ref === '<symbol kiid>:<pin number>'
+  select(hits[0]?.owner);                                // symbol / sheet / label / wire KIID
+});
+```
+
+Layers are KiCad theme keys (`SCH_LAYERS`: `schematic.wire`, `schematic.bus`, `schematic.junction`,
+`schematic.label_local` / `label_global` / `label_hier`, `schematic.netclass_flag`, `schematic.pin`,
+`schematic.pin_number` / `pin_name`, `schematic.reference` / `value` / `fields`,
+`schematic.component_outline` / `component_body`, `schematic.note` / `note_background` /
+`private_note`, `schematic.sheet` / `sheet_background` / `sheet_name` / `sheet_filename` /
+`sheet_fields` / `sheet_label`, `schematic.no_connect`, `schematic.rule_area`, `schematic.dnp_marker`,
+`schematic.hidden`, ... plus `schematic.bitmaps` for images), drawn bottom-up in
+`SCHEMATIC_DRAW_ORDER` (the reverse of eeschema's `SCH_LAYER_ORDER`). `setActiveLayer` is a no-op.
+Items with their own colour (wires, shapes, text with a `color`) carry it as `RenderItem.color`;
+`theme.overrideSchItemColors` makes the layer colour win, as in eeschema. Hierarchical-label and
+sheet-pin flags are filled with `schematic.background` through a theme-key reference so theme
+switches never rebuild geometry.
+
+### Render item ids (schematic)
+
+| item | id | ref | owner |
+|---|---|---|---|
+| wire / bus / junction / no-connect / bus entry / text / shape / label | `<kiid>` | `<kiid>` | `<kiid>` |
+| label / sheet field | `<kiid>:field:<name>` | `<kiid>` | `<kiid>` |
+| text box / sheet parts | `<kiid>@bg`, `<kiid>@border`, `<kiid>` | `<kiid>` | `<kiid>` |
+| hier label / sheet pin fill | `<id>@fill` (not pickable, `schematic.background`) | | |
+| sheet pin | `<sheet>:pin:<pin kiid>` | `<pin kiid>` | `<sheet>` |
+| symbol body shape / text | `<sym>:shape:<kiid>`, `<sym>:text:<kiid>` (not pickable) | `<sym>` | `<sym>` |
+| symbol pin | `<sym>@pin:<pin kiid>` | `<sym>:<pin number>` | `<sym>` |
+| pin number / name | `<sym>@pin:<pin kiid>:number` / `:name` (not pickable) | `<sym>:<pin number>` | `<sym>` |
+| symbol field | `<sym>:field:<name>` | `<sym>` | `<sym>` |
+| DNP cross | `<sym>@dnp` (not pickable) | `<sym>` | `<sym>` |
+| symbol / sheet body | `<kiid>` (bbox only, sorted after its children) | `<kiid>` | `<kiid>` |
+
+Clicking a pin yields `[pin, symbol body]`; `pickPin(x, y)` returns the nearest pin hit only.
+
+### What the schematic adapter expects
+
+`schematicItemToRenderItems(item, ctx)` takes the contract `StoredItem` (`type` = `KOT_SCH_*`
+name, derived from `proto.$typeName` when empty) with the protobuf-es message as `proto`,
+same conventions as the board adapter (camelCase, `{ xNm, yNm }`, `{ valueNm }`,
+`{ valueDegrees }`, numeric enums or their names, `{ case, value }` oneofs, int64 as
+`bigint | number | string`). `SchematicSymbolInstance.definition.items[]` are `{ item, unit,
+bodyStyle, isPrivate }`; `item` may be a decoded message (`$typeName`), a `{ type: 'KOT_SCH_PIN',
+proto }` wrapper, or a `google.protobuf.Any` when `decodeAny` is supplied. Children are filtered
+to the instance's `unit` / `bodyStyle` (0 = all) and pushed through `SCH_SYMBOL::GetTransform`
+(`transform.orientation` SSO_0..270 + `mirrorX` / `mirrorY`, applied in that order) about
+`position`. Pin positions are absolute sheet coordinates by default (API semantics:
+`SCH_PIN::Serialize` uses `GetPosition()`); set `symbolPinsAbsolute: false` for library-relative
+pins. Instance fields (`referenceField`, `valueField`, ..., `userFields`) are in absolute sheet
+coordinates and are rotated through the transform the way eeschema keeps them readable
+(mirrors and 180° become justification flips). If the store also lists `KOT_SCH_PIN` /
+`KOT_SCH_FIELD` / `KOT_SCH_SHEET_PIN` items with `parent` set, the host skips them when the
+parent is in the store.
+
+`SchematicAdapterContext`:
+
+| field | purpose |
+|---|---|
+| `textShapes(textId)` | `GraphicShape[]` (`CompoundShape.shapes` from `GetTextAsShapes`) or plain glyph polygons, in sheet coordinates. Keys: the item KIID for text / labels / text boxes; `<sym>:field:<name>`, `<sym>:pin:<pin kiid>:name` / `:number`, `<sym>:text:<kiid>` for symbols; `<sheet>:field:<name>`, `<sheet>:pin:<pin kiid>` for sheets; `<label>:field:<name>` for label fields |
+| `decodeAny(any)` | decoder for `Any` symbol children (`unpackAny` from @kicad-web/proto) |
+| `itemBBox(id)` | bbox lookup for group outlines |
+| `symbolPinsAbsolute` | default true; false = pins in library coordinates |
+| `showHiddenPins` / `showHiddenFields` | draw hidden pins / fields on `schematic.hidden` |
+| `showDnpMarkers` | DNP cross (default true) |
+| `textFallback` | `'glyphs'` (default: `text-glyphs` primitives for the BitmapText builder), `'box'` (metrics outline), `'none'` |
+| `imagePixelNm`, `arcTolerance` | as for the board adapter |
+| `defaults` | overrides for line / wire / bus widths, junction diameter, text sizes, offset ratios (`eeschema/default_values.h`) |
+
+Text: with `textShapes` the server glyphs are drawn verbatim (exact output). Without them the
+adapter emits `text-glyphs` primitives sized by a stroke-font estimate (`textMetrics.ts`:
+0.8 × size.x per character, KiCad interline); the schematic host's `primitiveBuilder`
+(`textGlyphs.ts`) draws them as Pixi `BitmapText` stretched to that box, so picking and
+drawing agree. The core stays font-free: `text-glyphs` only contribute their outline to
+bbox / picking there. Pixi text is used nowhere else.
+
+Covered types: SchematicLine (wire / bus / graphic with line styles and endings), Junction,
+NoConnectMarker, BusEntry (wire / bus), SchematicText, SchematicTextBox (margins, border,
+fill), SchematicGraphicShape (all geometries; fills: filled, colour, background-body, hatch /
+reverse / cross hatch), SchematicImage, LocalLabel, GlobalLabel (input / output / bidi /
+tristate / passive flags per `SCH_GLOBALLABEL::CreateGraphicShape`), HierarchicalLabel
+(template shapes), DirectiveLabel (circle / dot / diamond / rectangle + fields), Group (bbox),
+SchematicRuleArea, SheetSymbol (background, border, name / file / user fields, SheetPins with
+input ↔ output swapped shapes, DNP), SchematicSymbolInstance (shapes, text, text boxes, pins
+with number / name text placement per `PIN_LAYOUT_CACHE` and electrical-type / shape
+decorations, instance fields, DNP cross from `SCH_PAINTER::draw(SCH_SYMBOL)`), standalone
+SchematicPin / SchematicField / SheetPin, SchematicTable. Markers produce nothing.
+
 ## Themes
 
 `themes/kicad-default.json` and `themes/kicad-classic.json` are generated by
@@ -177,18 +285,26 @@ Open the URL; middle-drag/touch to pan, wheel to zoom, click to pick (cycles thr
 overlapping hits), left-drag to box-select, toggle layers / opacity / active layer, switch
 themes or upload a user theme JSON, highlight a net, move R1 through a store diff.
 `?n=100000` adds a 100k-primitive stress set, `&spin=1` pans continuously for an fps reading.
+`?doc=schematic` shows the synthetic sheet from `test/schematicFixtures.ts` (symbols in every
+orientation, every label shape, a bus with entries, a sub-sheet with pins, a text box, a rule
+area) with a button that switches to the child sheet through `setStore` and back.
 
 ## Tests
 
 ```
-bun test          # 48 tests: theme port, camera math, picker/geometry, adapter fixtures, headless scene
+bun test          # theme port, camera math, picker/geometry, board + schematic adapter fixtures, symbol transforms, headless scene
 bunx tsc -b
 ```
 
 ## Known gaps
 
 - No pixel-diff harness against `RunBoardJobExportSvg` yet (A5 exit test).
-- Text without server shapes is a metrics-estimated box (KiCad fonts are never shipped).
+- Text without server shapes is a metrics-estimated box on boards and BitmapText stretched to
+  that box on schematics (KiCad fonts are never shipped); glyph widths are approximate until
+  `GetTextAsShapes` results are fed through `textShapes`.
+- Schematic: no pixel-diff harness against `RunSchematicJobExportSvg`; ERC markers, dangling-end
+  markers, net-name overlays and symbol alternate pin functions are not drawn; bitmap symbols
+  (`SchematicImage` inside a symbol) are ignored.
 - Pad solder mask / paste expansion is not applied (technical layers reuse the copper shape);
   hatched zone fills, thermal reliefs and teardrops render as whatever `filled_polygons` holds.
 - Zone hatch border (`ZBS_DIAGONAL_EDGE`) draws only the outline; rule areas are fully hatched.

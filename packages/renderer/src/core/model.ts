@@ -6,6 +6,8 @@
  * 0 means "hairline" (one device pixel regardless of zoom).
  */
 
+import type { ThemeColor } from './theme.js';
+
 export interface Vec2 {
   x: number;
   y: number;
@@ -33,7 +35,36 @@ export type Primitive =
     }
   | { kind: 'bezier'; p0: Vec2; p1: Vec2; p2: Vec2; p3: Vec2; width: number }
   | { kind: 'text-shapes'; polys: Vec2[][] } // from GetTextAsShapes (filled glyph polygons)
-  | { kind: 'image'; c: Vec2; w: number; h: number; dataUrl: string };
+  | { kind: 'image'; c: Vec2; w: number; h: number; dataUrl: string }
+  | TextGlyphsPrimitive;
+
+/**
+ * A run of text to be drawn with a *client-side font* (schematic fallback when the server's
+ * `GetTextAsShapes` output is not available). The core stays font-free: it only uses
+ * `outline` (the adapter's metrics estimate of the glyph box, world nm, 4 corners) for
+ * bounding boxes and picking, and draws nothing unless a `primitiveBuilder` is registered on
+ * the Scene (the schematic layer registers a Pixi BitmapText builder).
+ */
+export interface TextGlyphsPrimitive {
+  kind: 'text-glyphs';
+  /** one line of text (adapters split multi-line text into one primitive per line) */
+  text: string;
+  /** anchor point, world nm */
+  pos: Vec2;
+  /** KiCad text size (x = glyph width scale, y = glyph height), nm */
+  size: Vec2;
+  /** stroke thickness, nm (0 = default) */
+  thickness: number;
+  /** KiCad text angle, degrees (positive = counter-clockwise on screen) */
+  angle: number;
+  halign: 'left' | 'center' | 'right';
+  valign: 'top' | 'center' | 'bottom';
+  mirrored?: boolean;
+  bold?: boolean;
+  italic?: boolean;
+  /** estimated glyph box (4 corners, world nm) — bbox + picking */
+  outline: Vec2[];
+}
 
 export interface RenderItem {
   /** Id of the thing this render item represents (pad KIID, track KIID, ...). */
@@ -56,6 +87,13 @@ export interface RenderItem {
    */
   cacheKey?: string;
   anchor?: Vec2;
+  /**
+   * Per-item colour override (schematic items carry their own colours): either an explicit
+   * colour or a theme key (`'schematic.background'`) resolved against the current theme, so
+   * theme changes never rebuild geometry. Ignored when `theme.overrideSchItemColors` is set
+   * (explicit colours only; theme-key references always apply).
+   */
+  color?: ThemeColor | string;
 }
 
 // ---------------------------------------------------------------------------
@@ -152,6 +190,8 @@ export function boxOfPrimitive(p: Primitive): Box {
     }
     case 'image':
       return { x: p.c.x - p.w / 2, y: p.c.y - p.h / 2, w: p.w, h: p.h };
+    case 'text-glyphs':
+      return p.outline.length ? boxFromPoints(p.outline) : boxFromPoints([p.pos]);
   }
 }
 

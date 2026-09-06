@@ -8,7 +8,14 @@ import { Assets, Container, Graphics, GraphicsContext, Mesh, MeshGeometry, Sprit
 import type { Primitive, RenderItem, Vec2 } from './model.js';
 import { boxCenter, boxIsEmpty } from './model.js';
 import { arcToPolylineFixed, bezierToPolyline, circleSegments, circleToPolygon, offsetPathPolygon, stadiumPolygon } from './geometry.js';
-import { type Theme, type ThemeColor, colorToHex, layerColor } from './theme.js';
+import { type Theme, type ThemeColor, colorToHex, layerColor, themeColor } from './theme.js';
+
+/**
+ * Hook for primitive kinds the font-free core does not draw itself (`text-glyphs`). Called
+ * from `buildGraphics` for every primitive; return true to claim it (nothing else is drawn
+ * for it). Display objects go into `host` relative to (ax, ay) in world nm.
+ */
+export type PrimitiveBuilder = (prim: Primitive, ax: number, ay: number, host: Container) => boolean;
 
 const WHITE = 0xffffff;
 
@@ -45,6 +52,8 @@ export interface SceneOptions {
   meshThreshold?: number;
   /** alpha multiplier for items outside the highlighted nets */
   dimAlpha?: number;
+  /** builder for primitives the core leaves alone (`text-glyphs`); see PrimitiveBuilder */
+  primitiveBuilder?: PrimitiveBuilder;
 }
 
 export class Scene {
@@ -59,6 +68,7 @@ export class Scene {
   private highlightNets: Set<string> | null = null;
   readonly meshThreshold: number;
   readonly dimAlpha: number;
+  primitiveBuilder?: PrimitiveBuilder;
   /** bumped on every structural change (picker cache key) */
   revision = 0;
 
@@ -72,6 +82,7 @@ export class Scene {
     this.root.isRenderGroup = true;
     this.meshThreshold = opts.meshThreshold ?? 200;
     this.dimAlpha = opts.dimAlpha ?? 0.2;
+    this.primitiveBuilder = opts.primitiveBuilder;
   }
 
   // ------------------------------------------------------------------ queries
@@ -169,10 +180,18 @@ export class Scene {
   }
 
   private colourObject(o: ItemObject): void {
-    const c = this.layer(o.item.layer).color;
+    const c = this.itemColor(o.item);
     o.tint = colorToHex(c);
     o.baseAlpha = c.a;
     o.alpha = this.effectiveAlpha(o);
+  }
+
+  /** Colour an item is painted with: its own colour (or theme-key reference) or its layer colour. */
+  itemColor(item: RenderItem): ThemeColor {
+    const own = item.color;
+    if (typeof own === 'string') return themeColor(this.theme, own);
+    if (own && !this.theme.overrideSchItemColors) return own;
+    return this.layer(item.layer).color;
   }
 
   private effectiveAlpha(o: ItemObject): number {
@@ -285,14 +304,14 @@ export class Scene {
         ctx = cached.ctx;
       } else {
         ctx = new GraphicsContext();
-        buildGraphics(ctx, item.prims, ax, ay, this.meshThreshold, obj);
+        buildGraphics(ctx, item.prims, ax, ay, this.meshThreshold, obj, this.primitiveBuilder);
         this.contextCache.set(item.cacheKey, { ctx, refs: 1 });
       }
       obj.cacheKey = item.cacheKey;
       obj.addChild(new Graphics(ctx));
     } else {
       ctx = new GraphicsContext();
-      const used = buildGraphics(ctx, item.prims, ax, ay, this.meshThreshold, obj);
+      const used = buildGraphics(ctx, item.prims, ax, ay, this.meshThreshold, obj, this.primitiveBuilder);
       if (used) {
         const g = new Graphics(ctx);
         obj.addChildAt(g, 0);
@@ -336,7 +355,15 @@ function flat(pts: Vec2[], ax: number, ay: number): number[] {
  * which cannot live in a GraphicsContext, are added to `host`. Returns true if the context
  * received any drawing instructions.
  */
-export function buildGraphics(ctx: GraphicsContext, prims: Primitive[], ax: number, ay: number, meshThreshold: number, host: Container): boolean {
+export function buildGraphics(
+  ctx: GraphicsContext,
+  prims: Primitive[],
+  ax: number,
+  ay: number,
+  meshThreshold: number,
+  host: Container,
+  builder?: PrimitiveBuilder,
+): boolean {
   let used = false;
   let pendingFill = 0;
   const addFill = (poly: Vec2[]): void => {
@@ -363,6 +390,7 @@ export function buildGraphics(ctx: GraphicsContext, prims: Primitive[], ax: numb
   };
 
   for (const p of prims) {
+    if (builder && builder(p, ax, ay, host)) continue;
     switch (p.kind) {
       case 'segment':
         if (p.width > 0) addFill(stadiumPolygon(p.a, p.b, p.width));
@@ -437,6 +465,9 @@ export function buildGraphics(ctx: GraphicsContext, prims: Primitive[], ax: numb
         else hairline([{ x: p.c.x - p.w / 2, y: p.c.y - p.h / 2 }, { x: p.c.x + p.w / 2, y: p.c.y - p.h / 2 }, { x: p.c.x + p.w / 2, y: p.c.y + p.h / 2 }, { x: p.c.x - p.w / 2, y: p.c.y + p.h / 2 }], true);
         break;
       }
+      case 'text-glyphs':
+        // font-free core: nothing without a builder (the schematic layer supplies one)
+        break;
     }
   }
   flushFill();

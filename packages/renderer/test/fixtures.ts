@@ -207,12 +207,13 @@ export function syntheticBoard(): StoredItemLike[] {
 
 /** Minimal ItemStore-shaped object over an array. */
 export class MemoryStore {
-  readonly kind = 'board';
+  readonly kind: string;
   readonly document = {};
   revision = 0;
   private items = new Map<string, StoredItemLike>();
   private subs = new Set<(d: { added: StoredItemLike[]; updated: StoredItemLike[]; removed: string[]; revision: number }) => void>();
-  constructor(items: StoredItemLike[] = []) {
+  constructor(items: StoredItemLike[] = [], kind: 'board' | 'schematic' | 'footprint' = 'board') {
+    this.kind = kind;
     for (const it of items) this.items.set(it.id, it);
   }
   get(id: string) {

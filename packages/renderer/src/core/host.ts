@@ -200,6 +200,28 @@ export abstract class BaseCanvasHost implements CanvasHost {
     this.requestRender();
   }
 
+  /**
+   * Switch to another store (a different schematic sheet) without tearing down the canvas:
+   * the scene is rebuilt from the new store and the store subscription moves with it. The
+   * camera is left where it is; `SchematicCanvasHost` layers per-sheet camera memory on top.
+   */
+  setStore(store: ItemStoreLike): void {
+    if (store === this.store) return;
+    this.unsubStore?.();
+    this.store = store;
+    this.hoverId = null;
+    this.overlays.setHover(null);
+    this.loadAll();
+    this.unsubStore = store.subscribe((diff) => this.applyStoreDiff(diff));
+    this.refreshSelection();
+    this.requestRender();
+  }
+
+  /** The store currently rendered. */
+  get currentStore(): ItemStoreLike | undefined {
+    return this.store;
+  }
+
   unmount(): void {
     this.unsubStore?.();
     this.unsubCamera?.();
