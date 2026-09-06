@@ -1,14 +1,14 @@
-# IPC API coverage matrix (KiCad 10.99, commit ef0ed71606)
+# IPC API coverage matrix (KiCad 10.99, commit e118ed3f81)
 
 Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the KiCad sources. "Handlers" names the C++ handler class that serves the command: server = API_HANDLER_SERVER (inside the API server, always loaded), common = API_HANDLER_COMMON (always loaded), editor = API_HANDLER_EDITOR, board = API_HANDLER_BOARD, pcb = API_HANDLER_PCB, footprint = API_HANDLER_FOOTPRINT, sch = API_HANDLER_SCH.
 
 | Status | Count | Meaning |
 |---|---:|---|
-| OK | 94 | works in `kicad-cli api-server` |
+| OK | 103 | works in `kicad-cli api-server` |
 | GUI-ONLY | 16 | handler returns "not available in headless mode" |
 | PARTIAL | 0 | headless in some handlers only |
-| UNREGISTERED | 3 | defined in .proto, no handler anywhere |
-| **Total** | **113** | request messages defined in the command protos |
+| UNREGISTERED | 0 | defined in .proto, no handler anywhere |
+| **Total** | **119** | request messages defined in the command protos |
 
 
 ## common/base
@@ -18,6 +18,7 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `GetKiCadBinaryPath` | common | yes |  |
 | `GetPaths` | common | yes |  |
 | `GetPluginSettingsPath` | common | yes |  |
+| `GetServerInfo` | server | yes |  |
 | `GetSupportedCommands` | server | yes |  |
 | `GetTextAsShapes` | common | yes |  |
 | `GetTextExtents` | common | yes |  |
@@ -32,7 +33,10 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `CloseDocument` | common | yes |  |
 | `ExpandTextVariables` | common, board, sch | yes |  |
 | `GetNetClasses` | common | yes |  |
+| `GetProjectInfo` | common | yes |  |
 | `GetTextVariables` | common | yes |  |
+| `NewDocument` | common | yes |  |
+| `NewProject` | common | yes |  |
 | `OpenDocument` | common | yes |  |
 | `SaveDocument` | pcb, footprint, sch | yes |  |
 | `SetNetClasses` | common | yes |  |
@@ -49,6 +53,7 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `DeleteItems` | editor | yes |  |
 | `EndCommit` | editor | yes |  |
 | `GetBoundingBox` | board | yes |  |
+| `GetDocumentRevision` | editor | yes |  |
 | `GetItems` | pcb, footprint, sch | yes |  |
 | `GetItemsById` | board, sch | yes |  |
 | `GetOpenDocuments` | pcb, footprint, sch | yes |  |
@@ -58,12 +63,13 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `HitTest` | editor | yes |  |
 | `OpenLibraryItem` | footprint | yes |  |
 | `ParseAndCreateItemsFromString` | board | yes |  |
-| `RefreshEditor` | - | n/a | no registerHandler call in any handler |
+| `RefreshEditor` | editor | yes |  |
 | `RemoveFromSelection` | board, sch | no | gated by checkForHeadless in board, sch |
 | `RevertDocument` | pcb, footprint, sch | no | gated by checkForHeadless in pcb, footprint, sch |
 | `RunAction` | board | no | gated by checkForHeadless in board |
 | `SaveCopyOfDocument` | pcb, footprint, sch | yes |  |
 | `SaveDocumentToString` | board | yes |  |
+| `SaveItemsToString` | board | yes |  |
 | `SaveSelectionToString` | board | no | gated by checkForHeadless in board |
 | `SetPageSettings` | pcb, sch | yes |  |
 | `SetTitleBlockInfo` | editor | yes |  |
@@ -87,7 +93,7 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | Command | Handlers | Headless | Notes |
 |---|---|---|---|
 | `CrossProbeAnnounce` | pcb, sch | yes |  |
-| `FocusOnItem` | - | n/a | no registerHandler call in any handler |
+| `FocusOnItem` | editor | yes |  |
 | `HighlightNets` | pcb, sch | no | gated by checkForHeadless in pcb, sch |
 | `SyncSelection` | pcb, sch | no | gated by checkForHeadless in pcb, sch |
 
@@ -130,7 +136,7 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `SetCustomDesignRules` | pcb | yes |  |
 | `SetEmbeddedFiles` | pcb | yes |  |
 | `SetVisibleLayers` | board | no | gated by checkForHeadless in board |
-| `UpdateBoardStackup` | - | n/a | no registerHandler call in any handler |
+| `UpdateBoardStackup` | pcb | yes |  |
 
 ## board/jobs
 

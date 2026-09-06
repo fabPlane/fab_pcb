@@ -20,9 +20,9 @@
 // @generated from file common/commands/project_commands.proto (package kiapi.common.commands, syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
-import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
-import type { DocumentSpecifier, DocumentSpecifierJson, DocumentType, DocumentTypeJson, MapMergeMode, MapMergeModeJson } from "../types/base_types_pb.js";
+import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
+import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
+import type { DocumentSpecifier, DocumentSpecifierJson, DocumentType, DocumentTypeJson, MapMergeMode, MapMergeModeJson, ProjectSpecifier, ProjectSpecifierJson } from "../types/base_types_pb.js";
 import { file_common_types_base_types } from "../types/base_types_pb.js";
 import type { NetClass, NetClassJson, TextVariables, TextVariablesJson } from "../types/project_settings_pb.js";
 import { file_common_types_project_settings } from "../types/project_settings_pb.js";
@@ -32,7 +32,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file common/commands/project_commands.proto.
  */
 export const file_common_commands_project_commands: GenFile = /*@__PURE__*/
-  fileDesc("CiZjb21tb24vY29tbWFuZHMvcHJvamVjdF9jb21tYW5kcy5wcm90bxIVa2lhcGkuY29tbW9uLmNvbW1hbmRzIg8KDUdldE5ldENsYXNzZXMiSQoSTmV0Q2xhc3Nlc1Jlc3BvbnNlEjMKC25ldF9jbGFzc2VzGAEgAygLMh4ua2lhcGkuY29tbW9uLnByb2plY3QuTmV0Q2xhc3MiegoNU2V0TmV0Q2xhc3NlcxIzCgtuZXRfY2xhc3NlcxgBIAMoCzIeLmtpYXBpLmNvbW1vbi5wcm9qZWN0Lk5ldENsYXNzEjQKCm1lcmdlX21vZGUYAyABKA4yIC5raWFwaS5jb21tb24udHlwZXMuTWFwTWVyZ2VNb2RlInUKE0V4cGFuZFRleHRWYXJpYWJsZXMSNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISDAoEdGV4dBgCIAMoCRIXCg9leHBhbmRfZW52X3ZhcnMYAyABKAgiKwobRXhwYW5kVGV4dFZhcmlhYmxlc1Jlc3BvbnNlEgwKBHRleHQYASADKAkiSwoQR2V0VGV4dFZhcmlhYmxlcxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciK5AQoQU2V0VGV4dFZhcmlhYmxlcxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchI2Cgl2YXJpYWJsZXMYAiABKAsyIy5raWFwaS5jb21tb24ucHJvamVjdC5UZXh0VmFyaWFibGVzEjQKCm1lcmdlX21vZGUYAyABKA4yIC5raWFwaS5jb21tb24udHlwZXMuTWFwTWVyZ2VNb2RlIkwKDE9wZW5Eb2N1bWVudBIuCgR0eXBlGAEgASgOMiAua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50VHlwZRIMCgRwYXRoGAIgASgJIk8KFE9wZW5Eb2N1bWVudFJlc3BvbnNlEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIkgKDUNsb3NlRG9jdW1lbnQSNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIiIgoRQ2xvc2VBbGxEb2N1bWVudHMSDQoFZm9yY2UYASABKAgiRwoMU2F2ZURvY3VtZW50EjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyYgZwcm90bzM", [file_common_types_base_types, file_common_types_project_settings]);
+  fileDesc("CiZjb21tb24vY29tbWFuZHMvcHJvamVjdF9jb21tYW5kcy5wcm90bxIVa2lhcGkuY29tbW9uLmNvbW1hbmRzIg8KDUdldE5ldENsYXNzZXMiSQoSTmV0Q2xhc3Nlc1Jlc3BvbnNlEjMKC25ldF9jbGFzc2VzGAEgAygLMh4ua2lhcGkuY29tbW9uLnByb2plY3QuTmV0Q2xhc3MiegoNU2V0TmV0Q2xhc3NlcxIzCgtuZXRfY2xhc3NlcxgBIAMoCzIeLmtpYXBpLmNvbW1vbi5wcm9qZWN0Lk5ldENsYXNzEjQKCm1lcmdlX21vZGUYAyABKA4yIC5raWFwaS5jb21tb24udHlwZXMuTWFwTWVyZ2VNb2RlInUKE0V4cGFuZFRleHRWYXJpYWJsZXMSNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISDAoEdGV4dBgCIAMoCRIXCg9leHBhbmRfZW52X3ZhcnMYAyABKAgiKwobRXhwYW5kVGV4dFZhcmlhYmxlc1Jlc3BvbnNlEgwKBHRleHQYASADKAkiSwoQR2V0VGV4dFZhcmlhYmxlcxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciK5AQoQU2V0VGV4dFZhcmlhYmxlcxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchI2Cgl2YXJpYWJsZXMYAiABKAsyIy5raWFwaS5jb21tb24ucHJvamVjdC5UZXh0VmFyaWFibGVzEjQKCm1lcmdlX21vZGUYAyABKA4yIC5raWFwaS5jb21tb24udHlwZXMuTWFwTWVyZ2VNb2RlIkwKDE9wZW5Eb2N1bWVudBIuCgR0eXBlGAEgASgOMiAua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50VHlwZRIMCgRwYXRoGAIgASgJIk8KFE9wZW5Eb2N1bWVudFJlc3BvbnNlEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIkgKDUNsb3NlRG9jdW1lbnQSNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIiIgoRQ2xvc2VBbGxEb2N1bWVudHMSDQoFZm9yY2UYASABKAgiRwoMU2F2ZURvY3VtZW50EjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyInMKCk5ld1Byb2plY3QSDAoEcGF0aBgBIAEoCRIaCg10ZW1wbGF0ZV9wYXRoGAIgASgJSACIAQESDAoEb3BlbhgDIAEoCBIbChNza2lwX3N0dWJfZG9jdW1lbnRzGAQgASgIQhAKDl90ZW1wbGF0ZV9wYXRoIksKC05ld0RvY3VtZW50Ei4KBHR5cGUYASABKA4yIC5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRUeXBlEgwKBHBhdGgYAiABKAkiowEKC1Byb2plY3RGaWxlEgwKBHBhdGgYASABKAkSNAoEa2luZBgCIAEoDjImLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5Qcm9qZWN0RmlsZVR5cGUSLgoEdHlwZRgDIAEoDjIgLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFR5cGUSDwoHaXNfb3BlbhgEIAEoCBIPCgdpc19yb290GAUgASgIIhAKDkdldFByb2plY3RJbmZvIpcBChNQcm9qZWN0SW5mb1Jlc3BvbnNlEjUKB3Byb2plY3QYASABKAsyJC5raWFwaS5jb21tb24udHlwZXMuUHJvamVjdFNwZWNpZmllchIWCg5raWNhZF9wcm9fcGF0aBgCIAEoCRIxCgVmaWxlcxgDIAMoCzIiLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5Qcm9qZWN0RmlsZSqSAgoPUHJvamVjdEZpbGVUeXBlEg8KC1BGVF9VTktOT1dOEAASDwoLUEZUX1BST0pFQ1QQARIRCg1QRlRfU0NIRU1BVElDEAISCwoHUEZUX1BDQhADEhQKEFBGVF9ERVNJR05fUlVMRVMQBBIWChJQRlRfTE9DQUxfU0VUVElOR1MQBRIWChJQRlRfU1lNQk9MX0xJQlJBUlkQBhIZChVQRlRfRk9PVFBSSU5UX0xJQlJBUlkQBxIYChRQRlRfU1lNQk9MX0xJQl9UQUJMRRAIEhsKF1BGVF9GT09UUFJJTlRfTElCX1RBQkxFEAkSFQoRUEZUX0RSQVdJTkdfU0hFRVQQChIOCgpQRlRfSk9CU0VUEAtiBnByb3RvMw", [file_common_types_base_types, file_common_types_project_settings]);
 
 /**
  * @generated from message kiapi.common.commands.GetNetClasses
@@ -461,4 +461,427 @@ export type SaveDocumentJson = {
  */
 export const SaveDocumentSchema: GenMessage<SaveDocument, {jsonType: SaveDocumentJson}> = /*@__PURE__*/
   messageDesc(file_common_commands_project_commands, 11);
+
+/**
+ * Creates a new project on disk and, optionally, opens it.  Currently only supported in CLI
+ * api-server mode.  Unless skip_stub_documents is set, a minimal root schematic and board are
+ * created next to the project file if they do not already exist (or come from the template).
+ * Returns OpenDocumentResponse describing the project.
+ * Since 11.0
+ *
+ * @generated from message kiapi.common.commands.NewProject
+ */
+export type NewProject = Message<"kiapi.common.commands.NewProject"> & {
+  /**
+   * Path of the new .kicad_pro file, or of a directory (the project takes the directory's name).
+   * Missing directories are created.  Fails if the project file already exists.
+   *
+   * @generated from field: string path = 1;
+   */
+  path: string;
+
+  /**
+   * Optional path to a project template directory (one containing a .kicad_pro and a meta/
+   * folder, as under the stock "template" directory).  If empty, the stock blank project is used.
+   *
+   * @generated from field: optional string template_path = 2;
+   */
+  templatePath?: string | undefined;
+
+  /**
+   * If set, any currently open project is closed and the new project is opened
+   *
+   * @generated from field: bool open = 3;
+   */
+  open: boolean;
+
+  /**
+   * By default a minimal root schematic and board are created next to the project file, as the
+   * project manager does.  Set this to create only the project file (NewDocument can add them
+   * later).
+   *
+   * @generated from field: bool skip_stub_documents = 4;
+   */
+  skipStubDocuments: boolean;
+};
+
+/**
+ * Creates a new project on disk and, optionally, opens it.  Currently only supported in CLI
+ * api-server mode.  Unless skip_stub_documents is set, a minimal root schematic and board are
+ * created next to the project file if they do not already exist (or come from the template).
+ * Returns OpenDocumentResponse describing the project.
+ * Since 11.0
+ *
+ * @generated from message kiapi.common.commands.NewProject
+ */
+export type NewProjectJson = {
+  /**
+   * Path of the new .kicad_pro file, or of a directory (the project takes the directory's name).
+   * Missing directories are created.  Fails if the project file already exists.
+   *
+   * @generated from field: string path = 1;
+   */
+  path?: string;
+
+  /**
+   * Optional path to a project template directory (one containing a .kicad_pro and a meta/
+   * folder, as under the stock "template" directory).  If empty, the stock blank project is used.
+   *
+   * @generated from field: optional string template_path = 2;
+   */
+  templatePath?: string;
+
+  /**
+   * If set, any currently open project is closed and the new project is opened
+   *
+   * @generated from field: bool open = 3;
+   */
+  open?: boolean;
+
+  /**
+   * By default a minimal root schematic and board are created next to the project file, as the
+   * project manager does.  Set this to create only the project file (NewDocument can add them
+   * later).
+   *
+   * @generated from field: bool skip_stub_documents = 4;
+   */
+  skipStubDocuments?: boolean;
+};
+
+/**
+ * Describes the message kiapi.common.commands.NewProject.
+ * Use `create(NewProjectSchema)` to create a new message.
+ */
+export const NewProjectSchema: GenMessage<NewProject, {jsonType: NewProjectJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_project_commands, 12);
+
+/**
+ * Creates a new, empty document in the currently open project and opens it.  Currently only
+ * supported in CLI api-server mode.  Only DOCTYPE_SCHEMATIC and DOCTYPE_PCB are accepted.
+ * Returns OpenDocumentResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.common.commands.NewDocument
+ */
+export type NewDocument = Message<"kiapi.common.commands.NewDocument"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentType type = 1;
+   */
+  type: DocumentType;
+
+  /**
+   * Optional path of the new file, relative to the project directory if not absolute.  Defaults
+   * to <project name>.kicad_sch / <project name>.kicad_pcb.  Fails if the file already exists.
+   *
+   * @generated from field: string path = 2;
+   */
+  path: string;
+};
+
+/**
+ * Creates a new, empty document in the currently open project and opens it.  Currently only
+ * supported in CLI api-server mode.  Only DOCTYPE_SCHEMATIC and DOCTYPE_PCB are accepted.
+ * Returns OpenDocumentResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.common.commands.NewDocument
+ */
+export type NewDocumentJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentType type = 1;
+   */
+  type?: DocumentTypeJson;
+
+  /**
+   * Optional path of the new file, relative to the project directory if not absolute.  Defaults
+   * to <project name>.kicad_sch / <project name>.kicad_pcb.  Fails if the file already exists.
+   *
+   * @generated from field: string path = 2;
+   */
+  path?: string;
+};
+
+/**
+ * Describes the message kiapi.common.commands.NewDocument.
+ * Use `create(NewDocumentSchema)` to create a new message.
+ */
+export const NewDocumentSchema: GenMessage<NewDocument, {jsonType: NewDocumentJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_project_commands, 13);
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.common.commands.ProjectFile
+ */
+export type ProjectFile = Message<"kiapi.common.commands.ProjectFile"> & {
+  /**
+   * Absolute path
+   *
+   * @generated from field: string path = 1;
+   */
+  path: string;
+
+  /**
+   * @generated from field: kiapi.common.commands.ProjectFileType kind = 2;
+   */
+  kind: ProjectFileType;
+
+  /**
+   * The document type that OpenDocument accepts for this file, or DOCTYPE_UNKNOWN if it cannot
+   * be opened as a document
+   *
+   * @generated from field: kiapi.common.types.DocumentType type = 3;
+   */
+  type: DocumentType;
+
+  /**
+   * True if the file is currently open as a document in this KiCad instance
+   *
+   * @generated from field: bool is_open = 4;
+   */
+  isOpen: boolean;
+
+  /**
+   * For PFT_SCHEMATIC: true if this is the project's root sheet
+   *
+   * @generated from field: bool is_root = 5;
+   */
+  isRoot: boolean;
+};
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.common.commands.ProjectFile
+ */
+export type ProjectFileJson = {
+  /**
+   * Absolute path
+   *
+   * @generated from field: string path = 1;
+   */
+  path?: string;
+
+  /**
+   * @generated from field: kiapi.common.commands.ProjectFileType kind = 2;
+   */
+  kind?: ProjectFileTypeJson;
+
+  /**
+   * The document type that OpenDocument accepts for this file, or DOCTYPE_UNKNOWN if it cannot
+   * be opened as a document
+   *
+   * @generated from field: kiapi.common.types.DocumentType type = 3;
+   */
+  type?: DocumentTypeJson;
+
+  /**
+   * True if the file is currently open as a document in this KiCad instance
+   *
+   * @generated from field: bool is_open = 4;
+   */
+  isOpen?: boolean;
+
+  /**
+   * For PFT_SCHEMATIC: true if this is the project's root sheet
+   *
+   * @generated from field: bool is_root = 5;
+   */
+  isRoot?: boolean;
+};
+
+/**
+ * Describes the message kiapi.common.commands.ProjectFile.
+ * Use `create(ProjectFileSchema)` to create a new message.
+ */
+export const ProjectFileSchema: GenMessage<ProjectFile, {jsonType: ProjectFileJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_project_commands, 14);
+
+/**
+ * Describes the currently open project and the files in its directory.  Currently only
+ * supported in CLI api-server mode.
+ * Returns ProjectInfoResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.common.commands.GetProjectInfo
+ */
+export type GetProjectInfo = Message<"kiapi.common.commands.GetProjectInfo"> & {
+};
+
+/**
+ * Describes the currently open project and the files in its directory.  Currently only
+ * supported in CLI api-server mode.
+ * Returns ProjectInfoResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.common.commands.GetProjectInfo
+ */
+export type GetProjectInfoJson = {
+};
+
+/**
+ * Describes the message kiapi.common.commands.GetProjectInfo.
+ * Use `create(GetProjectInfoSchema)` to create a new message.
+ */
+export const GetProjectInfoSchema: GenMessage<GetProjectInfo, {jsonType: GetProjectInfoJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_project_commands, 15);
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.common.commands.ProjectInfoResponse
+ */
+export type ProjectInfoResponse = Message<"kiapi.common.commands.ProjectInfoResponse"> & {
+  /**
+   * @generated from field: kiapi.common.types.ProjectSpecifier project = 1;
+   */
+  project?: ProjectSpecifier | undefined;
+
+  /**
+   * Absolute path of the .kicad_pro file
+   *
+   * @generated from field: string kicad_pro_path = 2;
+   */
+  kicadProPath: string;
+
+  /**
+   * @generated from field: repeated kiapi.common.commands.ProjectFile files = 3;
+   */
+  files: ProjectFile[];
+};
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.common.commands.ProjectInfoResponse
+ */
+export type ProjectInfoResponseJson = {
+  /**
+   * @generated from field: kiapi.common.types.ProjectSpecifier project = 1;
+   */
+  project?: ProjectSpecifierJson;
+
+  /**
+   * Absolute path of the .kicad_pro file
+   *
+   * @generated from field: string kicad_pro_path = 2;
+   */
+  kicadProPath?: string;
+
+  /**
+   * @generated from field: repeated kiapi.common.commands.ProjectFile files = 3;
+   */
+  files?: ProjectFileJson[];
+};
+
+/**
+ * Describes the message kiapi.common.commands.ProjectInfoResponse.
+ * Use `create(ProjectInfoResponseSchema)` to create a new message.
+ */
+export const ProjectInfoResponseSchema: GenMessage<ProjectInfoResponse, {jsonType: ProjectInfoResponseJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_project_commands, 16);
+
+/**
+ * Classifies the files that make up a project; see ProjectFile.
+ * Since 11.0
+ *
+ * @generated from enum kiapi.common.commands.ProjectFileType
+ */
+export enum ProjectFileType {
+  /**
+   * @generated from enum value: PFT_UNKNOWN = 0;
+   */
+  PFT_UNKNOWN = 0,
+
+  /**
+   * .kicad_pro
+   *
+   * @generated from enum value: PFT_PROJECT = 1;
+   */
+  PFT_PROJECT = 1,
+
+  /**
+   * .kicad_sch
+   *
+   * @generated from enum value: PFT_SCHEMATIC = 2;
+   */
+  PFT_SCHEMATIC = 2,
+
+  /**
+   * .kicad_pcb
+   *
+   * @generated from enum value: PFT_PCB = 3;
+   */
+  PFT_PCB = 3,
+
+  /**
+   * .kicad_dru
+   *
+   * @generated from enum value: PFT_DESIGN_RULES = 4;
+   */
+  PFT_DESIGN_RULES = 4,
+
+  /**
+   * .kicad_prl
+   *
+   * @generated from enum value: PFT_LOCAL_SETTINGS = 5;
+   */
+  PFT_LOCAL_SETTINGS = 5,
+
+  /**
+   * .kicad_sym
+   *
+   * @generated from enum value: PFT_SYMBOL_LIBRARY = 6;
+   */
+  PFT_SYMBOL_LIBRARY = 6,
+
+  /**
+   * .pretty directory
+   *
+   * @generated from enum value: PFT_FOOTPRINT_LIBRARY = 7;
+   */
+  PFT_FOOTPRINT_LIBRARY = 7,
+
+  /**
+   * sym-lib-table
+   *
+   * @generated from enum value: PFT_SYMBOL_LIB_TABLE = 8;
+   */
+  PFT_SYMBOL_LIB_TABLE = 8,
+
+  /**
+   * fp-lib-table
+   *
+   * @generated from enum value: PFT_FOOTPRINT_LIB_TABLE = 9;
+   */
+  PFT_FOOTPRINT_LIB_TABLE = 9,
+
+  /**
+   * .kicad_wks
+   *
+   * @generated from enum value: PFT_DRAWING_SHEET = 10;
+   */
+  PFT_DRAWING_SHEET = 10,
+
+  /**
+   * .kicad_jobset
+   *
+   * @generated from enum value: PFT_JOBSET = 11;
+   */
+  PFT_JOBSET = 11,
+}
+
+/**
+ * Classifies the files that make up a project; see ProjectFile.
+ * Since 11.0
+ *
+ * @generated from enum kiapi.common.commands.ProjectFileType
+ */
+export type ProjectFileTypeJson = "PFT_UNKNOWN" | "PFT_PROJECT" | "PFT_SCHEMATIC" | "PFT_PCB" | "PFT_DESIGN_RULES" | "PFT_LOCAL_SETTINGS" | "PFT_SYMBOL_LIBRARY" | "PFT_FOOTPRINT_LIBRARY" | "PFT_SYMBOL_LIB_TABLE" | "PFT_FOOTPRINT_LIB_TABLE" | "PFT_DRAWING_SHEET" | "PFT_JOBSET";
+
+/**
+ * Describes the enum kiapi.common.commands.ProjectFileType.
+ */
+export const ProjectFileTypeSchema: GenEnum<ProjectFileType, ProjectFileTypeJson> = /*@__PURE__*/
+  enumDesc(file_common_commands_project_commands, 0);
 

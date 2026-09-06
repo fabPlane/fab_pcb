@@ -3,14 +3,26 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Transport-agnostic KiCad IPC API client (Layer 1: transports; Layers 2/3 added by the client agent)",
+  "description": "Transport-agnostic KiCad IPC API client: transports (Layer 1), KiCadClient + generated commands (Layer 2), object model (Layer 3), ItemStore (Layer 4)",
   "exports": {
     ".": "./src/index.ts",
-    "./transport": "./src/transport/index.ts"
+    "./transport": "./src/transport/index.ts",
+    "./client": "./src/client.ts",
+    "./commands": "./src/commands.ts",
+    "./units": "./src/units.ts",
+    "./errors": "./src/errors.ts",
+    "./model": "./src/model/index.ts",
+    "./store": "./src/store/index.ts"
   },
   "scripts": {
+    "gen": "bun run gen-commands.ts",
     "test": "bun test",
+    "test:conformance": "bun test test/conformance",
     "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "2.14.1",
+    "@kicad-web/proto": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "^1.2.0",

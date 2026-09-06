@@ -1,7 +1,8 @@
 /**
  * nng "SP" wire format over ipc:// (unix domain socket), as spoken by `kicad-cli api-server`.
  *
- *   handshake   8 bytes each way:  00 'S' 'P' 00 <proto BE16> 00 00   (REQ0 = 0x30, REP0 = 0x31)
+ *   handshake   8 bytes each way:  00 'S' 'P' 00 <proto BE16> 00 00   (REQ0 = 0x30, REP0 = 0x31, PUB0 = 0x20, SUB0 = 0x21)
+ *   PUB0 body   the raw message; no request id (sub0 filtering is subscriber-side, so we see every event)
  *   message     9-byte header: byte 0 = 0x01 ("data"), bytes 1..8 = big-endian uint64 body length; then body
  *   REQ0 body   4-byte big-endian request id with the top bit set + payload; the reply echoes the id
  *
@@ -14,6 +15,9 @@ import { TransportError } from "./types";
 export const SP_HANDSHAKE_LENGTH = 8;
 export const SP_PROTO_REQ0 = 0x30;
 export const SP_PROTO_REP0 = 0x31;
+/** nng pub0 / sub0 (the events socket: KiCad publishes, we subscribe). */
+export const SP_PROTO_PUB0 = 0x20;
+export const SP_PROTO_SUB0 = 0x21;
 export const NNG_FRAME_HEADER_LENGTH = 9;
 export const NNG_FRAME_TYPE_DATA = 0x01;
 /** REQ0 request ids carry the top bit so they cannot collide with backtrace pipe ids. */

@@ -30,6 +30,16 @@
     "headless": "ok"
   },
   {
+    "command": "GetServerInfo",
+    "group": "common/base",
+    "requestType": "kiapi.common.commands.GetServerInfo",
+    "responseType": "kiapi.common.commands.GetServerInfoResponse",
+    "handlers": [
+      "server"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "GetSupportedCommands",
     "group": "common/base",
     "requestType": "kiapi.common.commands.GetSupportedCommands",
@@ -122,10 +132,40 @@
     "headless": "ok"
   },
   {
+    "command": "GetProjectInfo",
+    "group": "common/project",
+    "requestType": "kiapi.common.commands.GetProjectInfo",
+    "responseType": "kiapi.common.commands.ProjectInfoResponse",
+    "handlers": [
+      "common"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "GetTextVariables",
     "group": "common/project",
     "requestType": "kiapi.common.commands.GetTextVariables",
     "responseType": "kiapi.common.project.TextVariables",
+    "handlers": [
+      "common"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "NewDocument",
+    "group": "common/project",
+    "requestType": "kiapi.common.commands.NewDocument",
+    "responseType": "kiapi.common.commands.OpenDocumentResponse",
+    "handlers": [
+      "common"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "NewProject",
+    "group": "common/project",
+    "requestType": "kiapi.common.commands.NewProject",
+    "responseType": "kiapi.common.commands.OpenDocumentResponse",
     "handlers": [
       "common"
     ],
@@ -246,6 +286,16 @@
     "headless": "ok"
   },
   {
+    "command": "GetDocumentRevision",
+    "group": "common/editor",
+    "requestType": "kiapi.common.commands.GetDocumentRevision",
+    "responseType": "kiapi.common.commands.DocumentRevisionResponse",
+    "handlers": [
+      "editor"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "GetItems",
     "group": "common/editor",
     "requestType": "kiapi.common.commands.GetItems",
@@ -346,9 +396,11 @@
     "command": "RefreshEditor",
     "group": "common/editor",
     "requestType": "kiapi.common.commands.RefreshEditor",
-    "responseType": null,
-    "handlers": [],
-    "headless": "unregistered"
+    "responseType": "google.protobuf.Empty",
+    "handlers": [
+      "editor"
+    ],
+    "headless": "ok"
   },
   {
     "command": "RemoveFromSelection",
@@ -400,6 +452,16 @@
     "group": "common/editor",
     "requestType": "kiapi.common.commands.SaveDocumentToString",
     "responseType": "kiapi.common.commands.SavedDocumentResponse",
+    "handlers": [
+      "board"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "SaveItemsToString",
+    "group": "common/editor",
+    "requestType": "kiapi.common.commands.SaveItemsToString",
+    "responseType": "kiapi.common.commands.SavedSelectionResponse",
     "handlers": [
       "board"
     ],
@@ -549,9 +611,11 @@
     "command": "FocusOnItem",
     "group": "common/crossprobe",
     "requestType": "kiapi.common.commands.FocusOnItem",
-    "responseType": null,
-    "handlers": [],
-    "headless": "unregistered"
+    "responseType": "kiapi.common.commands.FocusOnItemResponse",
+    "handlers": [
+      "editor"
+    ],
+    "headless": "ok"
   },
   {
     "command": "HighlightNets",
@@ -929,9 +993,11 @@
     "command": "UpdateBoardStackup",
     "group": "board/commands",
     "requestType": "kiapi.board.commands.UpdateBoardStackup",
-    "responseType": null,
-    "handlers": [],
-    "headless": "unregistered"
+    "responseType": "kiapi.board.commands.BoardStackupResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
   },
   {
     "command": "RunBoardJobExport3D",

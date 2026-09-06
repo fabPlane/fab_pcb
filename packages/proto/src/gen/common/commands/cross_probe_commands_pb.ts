@@ -414,6 +414,9 @@ export const HighlightNetsResponseSchema: GenMessage<HighlightNetsResponse, {jso
   messageDesc(file_common_commands_cross_probe_commands, 8);
 
 /**
+ * Scrolls the editor to the given item and highlights it.  In headless mode (no editor window)
+ * this succeeds with CPS_OK without doing anything, so clients do not need to branch.
+ *
  * @generated from message kiapi.common.commands.FocusOnItem
  */
 export type FocusOnItem = Message<"kiapi.common.commands.FocusOnItem"> & {
@@ -424,6 +427,9 @@ export type FocusOnItem = Message<"kiapi.common.commands.FocusOnItem"> & {
 };
 
 /**
+ * Scrolls the editor to the given item and highlights it.  In headless mode (no editor window)
+ * this succeeds with CPS_OK without doing anything, so clients do not need to branch.
+ *
  * @generated from message kiapi.common.commands.FocusOnItem
  */
 export type FocusOnItemJson = {

@@ -40,14 +40,14 @@ describe.skipIf(!haveKicad)("coverage against the pinned KiCad checkout (git HEA
     expect(renderJson(r)).toBe(await readFile(join(TOOL_DIR, "commands.json"), "utf8"));
     expect(renderMarkdown(r)).toBe(await readFile(join(REPO_DIR, "docs", "api-coverage.md"), "utf8"));
     const s = summarize(r.commands);
-    // KiCad ef0ed71606: docs/api-coverage.md listed 111 (92/15/1/3) at cbd303d16b; since then
-    // GetSupportedCommands was added (+1 ok), CheckPadstackPresenceOnLayers was missed by the original
-    // hand analysis (+1 ok), and RevertDocument became GUI-only in the footprint handler too (partial -> gui-only).
-    expect(s.total).toBe(113);
-    expect(s.ok).toBe(94);
+    // KiCad 3c7ce604bf: 115 commands. Since ef0ed71606 (113: 94 ok / 16 gui-only / 3 unregistered),
+    // RefreshEditor, FocusOnItem and UpdateBoardStackup gained handlers (unregistered -> ok) and
+    // SaveItemsToString + GetDocumentRevision were added (+2 ok).
+    expect(s.total).toBe(115);
+    expect(s.ok).toBe(99);
     expect(s["gui-only"]).toBe(16);
     expect(s.partial).toBe(0);
-    expect(s.unregistered).toBe(3);
+    expect(s.unregistered).toBe(0);
     expect(r.commands.find((c) => c.command === "GetSupportedCommands")).toMatchObject({
       group: "common/base",
       requestType: "kiapi.common.commands.GetSupportedCommands",

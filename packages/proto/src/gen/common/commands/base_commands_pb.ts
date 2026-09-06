@@ -32,7 +32,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file common/commands/base_commands.proto.
  */
 export const file_common_commands_base_commands: GenFile = /*@__PURE__*/
-  fileDesc("CiNjb21tb24vY29tbWFuZHMvYmFzZV9jb21tYW5kcy5wcm90bxIVa2lhcGkuY29tbW9uLmNvbW1hbmRzIgwKCkdldFZlcnNpb24iRwoSR2V0VmVyc2lvblJlc3BvbnNlEjEKB3ZlcnNpb24YASABKAsyIC5raWFwaS5jb21tb24udHlwZXMuS2lDYWRWZXJzaW9uIgYKBFBpbmciKQoSR2V0S2lDYWRCaW5hcnlQYXRoEhMKC2JpbmFyeV9uYW1lGAEgASgJIhwKDFBhdGhSZXNwb25zZRIMCgRwYXRoGAEgASgJIjgKDkdldFRleHRFeHRlbnRzEiYKBHRleHQYASABKAsyGC5raWFwaS5jb21tb24udHlwZXMuVGV4dCJyCg1UZXh0T3JUZXh0Qm94EigKBHRleHQYASABKAsyGC5raWFwaS5jb21tb24udHlwZXMuVGV4dEgAEi4KB3RleHRib3gYAiABKAsyGy5raWFwaS5jb21tb24udHlwZXMuVGV4dEJveEgAQgcKBWlubmVyIkUKD0dldFRleHRBc1NoYXBlcxIyCgR0ZXh0GAEgAygLMiQua2lhcGkuY29tbW9uLmNvbW1hbmRzLlRleHRPclRleHRCb3gidwoOVGV4dFdpdGhTaGFwZXMSMgoEdGV4dBgBIAEoCzIkLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5UZXh0T3JUZXh0Qm94EjEKBnNoYXBlcxgCIAEoCzIhLmtpYXBpLmNvbW1vbi50eXBlcy5Db21wb3VuZFNoYXBlIloKF0dldFRleHRBc1NoYXBlc1Jlc3BvbnNlEj8KEHRleHRfd2l0aF9zaGFwZXMYASADKAsyJS5raWFwaS5jb21tb24uY29tbWFuZHMuVGV4dFdpdGhTaGFwZXMiKwoVR2V0UGx1Z2luU2V0dGluZ3NQYXRoEhIKCmlkZW50aWZpZXIYASABKAkiIgoOU3RyaW5nUmVzcG9uc2USEAoIcmVzcG9uc2UYASABKAkiCgoIR2V0UGF0aHMiRQoJUGF0aEVudHJ5EioKBHR5cGUYASABKA4yHC5raWFwaS5jb21tb24udHlwZXMuUGF0aFR5cGUSDAoEcGF0aBgCIAEoCSJDChBHZXRQYXRoc1Jlc3BvbnNlEi8KBXBhdGhzGAEgAygLMiAua2lhcGkuY29tbW9uLmNvbW1hbmRzLlBhdGhFbnRyeSJRChBTdXBwb3J0ZWRDb21tYW5kEhAKCHR5cGVfdXJsGAEgASgJEhkKEXJlc3BvbnNlX3R5cGVfdXJsGAIgASgJEhAKCGhlYWRsZXNzGAMgASgIIhYKFEdldFN1cHBvcnRlZENvbW1hbmRzIlkKHEdldFN1cHBvcnRlZENvbW1hbmRzUmVzcG9uc2USOQoIY29tbWFuZHMYASADKAsyJy5raWFwaS5jb21tb24uY29tbWFuZHMuU3VwcG9ydGVkQ29tbWFuZGIGcHJvdG8z", [file_common_types_base_types, file_common_types_enums]);
+  fileDesc("CiNjb21tb24vY29tbWFuZHMvYmFzZV9jb21tYW5kcy5wcm90bxIVa2lhcGkuY29tbW9uLmNvbW1hbmRzIgwKCkdldFZlcnNpb24iRwoSR2V0VmVyc2lvblJlc3BvbnNlEjEKB3ZlcnNpb24YASABKAsyIC5raWFwaS5jb21tb24udHlwZXMuS2lDYWRWZXJzaW9uIgYKBFBpbmciKQoSR2V0S2lDYWRCaW5hcnlQYXRoEhMKC2JpbmFyeV9uYW1lGAEgASgJIhwKDFBhdGhSZXNwb25zZRIMCgRwYXRoGAEgASgJIjgKDkdldFRleHRFeHRlbnRzEiYKBHRleHQYASABKAsyGC5raWFwaS5jb21tb24udHlwZXMuVGV4dCJyCg1UZXh0T3JUZXh0Qm94EigKBHRleHQYASABKAsyGC5raWFwaS5jb21tb24udHlwZXMuVGV4dEgAEi4KB3RleHRib3gYAiABKAsyGy5raWFwaS5jb21tb24udHlwZXMuVGV4dEJveEgAQgcKBWlubmVyIkUKD0dldFRleHRBc1NoYXBlcxIyCgR0ZXh0GAEgAygLMiQua2lhcGkuY29tbW9uLmNvbW1hbmRzLlRleHRPclRleHRCb3gidwoOVGV4dFdpdGhTaGFwZXMSMgoEdGV4dBgBIAEoCzIkLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5UZXh0T3JUZXh0Qm94EjEKBnNoYXBlcxgCIAEoCzIhLmtpYXBpLmNvbW1vbi50eXBlcy5Db21wb3VuZFNoYXBlIloKF0dldFRleHRBc1NoYXBlc1Jlc3BvbnNlEj8KEHRleHRfd2l0aF9zaGFwZXMYASADKAsyJS5raWFwaS5jb21tb24uY29tbWFuZHMuVGV4dFdpdGhTaGFwZXMiKwoVR2V0UGx1Z2luU2V0dGluZ3NQYXRoEhIKCmlkZW50aWZpZXIYASABKAkiIgoOU3RyaW5nUmVzcG9uc2USEAoIcmVzcG9uc2UYASABKAkiCgoIR2V0UGF0aHMiRQoJUGF0aEVudHJ5EioKBHR5cGUYASABKA4yHC5raWFwaS5jb21tb24udHlwZXMuUGF0aFR5cGUSDAoEcGF0aBgCIAEoCSJDChBHZXRQYXRoc1Jlc3BvbnNlEi8KBXBhdGhzGAEgAygLMiAua2lhcGkuY29tbW9uLmNvbW1hbmRzLlBhdGhFbnRyeSJRChBTdXBwb3J0ZWRDb21tYW5kEhAKCHR5cGVfdXJsGAEgASgJEhkKEXJlc3BvbnNlX3R5cGVfdXJsGAIgASgJEhAKCGhlYWRsZXNzGAMgASgIIhYKFEdldFN1cHBvcnRlZENvbW1hbmRzIlkKHEdldFN1cHBvcnRlZENvbW1hbmRzUmVzcG9uc2USOQoIY29tbWFuZHMYASADKAsyJy5raWFwaS5jb21tb24uY29tbWFuZHMuU3VwcG9ydGVkQ29tbWFuZCIPCg1HZXRTZXJ2ZXJJbmZvIlsKFUdldFNlcnZlckluZm9SZXNwb25zZRISCgpzb2NrZXRfdXJsGAEgASgJEhkKEWV2ZW50c19zb2NrZXRfdXJsGAIgASgJEhMKC2tpY2FkX3Rva2VuGAMgASgJYgZwcm90bzM", [file_common_types_base_types, file_common_types_enums]);
 
 /**
  * @generated from message kiapi.common.commands.GetVersion
@@ -650,4 +650,98 @@ export type GetSupportedCommandsResponseJson = {
  */
 export const GetSupportedCommandsResponseSchema: GenMessage<GetSupportedCommandsResponse, {jsonType: GetSupportedCommandsResponseJson}> = /*@__PURE__*/
   messageDesc(file_common_commands_base_commands, 17);
+
+/**
+ * Describes the sockets and token of the running API server.  Unlike GetVersion, this is
+ * served before any document is open, so a client can use it to find the events socket.
+ * Returns GetServerInfoResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.common.commands.GetServerInfo
+ */
+export type GetServerInfo = Message<"kiapi.common.commands.GetServerInfo"> & {
+};
+
+/**
+ * Describes the sockets and token of the running API server.  Unlike GetVersion, this is
+ * served before any document is open, so a client can use it to find the events socket.
+ * Returns GetServerInfoResponse
+ * Since 11.0
+ *
+ * @generated from message kiapi.common.commands.GetServerInfo
+ */
+export type GetServerInfoJson = {
+};
+
+/**
+ * Describes the message kiapi.common.commands.GetServerInfo.
+ * Use `create(GetServerInfoSchema)` to create a new message.
+ */
+export const GetServerInfoSchema: GenMessage<GetServerInfo, {jsonType: GetServerInfoJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_base_commands, 18);
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.common.commands.GetServerInfoResponse
+ */
+export type GetServerInfoResponse = Message<"kiapi.common.commands.GetServerInfoResponse"> & {
+  /**
+   * URL of the request/reply socket the client is talking to (for example, "ipc:///tmp/kicad/api.sock")
+   *
+   * @generated from field: string socket_url = 1;
+   */
+  socketUrl: string;
+
+  /**
+   * URL of the publish/subscribe socket that carries kiapi.common.events.Event messages, or
+   * empty if the server is not publishing events
+   *
+   * @generated from field: string events_socket_url = 2;
+   */
+  eventsSocketUrl: string;
+
+  /**
+   * Token identifying this KiCad instance; see ApiRequestHeader.kicad_token
+   *
+   * @generated from field: string kicad_token = 3;
+   */
+  kicadToken: string;
+};
+
+/**
+ * Since 11.0
+ *
+ * @generated from message kiapi.common.commands.GetServerInfoResponse
+ */
+export type GetServerInfoResponseJson = {
+  /**
+   * URL of the request/reply socket the client is talking to (for example, "ipc:///tmp/kicad/api.sock")
+   *
+   * @generated from field: string socket_url = 1;
+   */
+  socketUrl?: string;
+
+  /**
+   * URL of the publish/subscribe socket that carries kiapi.common.events.Event messages, or
+   * empty if the server is not publishing events
+   *
+   * @generated from field: string events_socket_url = 2;
+   */
+  eventsSocketUrl?: string;
+
+  /**
+   * Token identifying this KiCad instance; see ApiRequestHeader.kicad_token
+   *
+   * @generated from field: string kicad_token = 3;
+   */
+  kicadToken?: string;
+};
+
+/**
+ * Describes the message kiapi.common.commands.GetServerInfoResponse.
+ * Use `create(GetServerInfoResponseSchema)` to create a new message.
+ */
+export const GetServerInfoResponseSchema: GenMessage<GetServerInfoResponse, {jsonType: GetServerInfoResponseJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_base_commands, 19);
 

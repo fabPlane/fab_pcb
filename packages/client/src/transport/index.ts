@@ -4,6 +4,8 @@ export {
   SP_HANDSHAKE_LENGTH,
   SP_PROTO_REQ0,
   SP_PROTO_REP0,
+  SP_PROTO_PUB0,
+  SP_PROTO_SUB0,
   NNG_FRAME_HEADER_LENGTH,
   NNG_FRAME_TYPE_DATA,
   REQ_ID_FLAG,
@@ -17,6 +19,8 @@ export {
 export type { SpHandshake, NngFrameParserOptions } from "./nng-framing";
 export { NngIpcTransport } from "./nng-ipc";
 export type { NngIpcOptions, ReconnectOptions } from "./nng-ipc";
+export { NngIpcSubscriber } from "./nng-ipc-sub";
+export type { NngIpcSubscriberOptions, Subscriber, SubscriberState } from "./nng-ipc-sub";
 export { WebSocketTransport } from "./websocket";
 export type { WebSocketTransportOptions, WebSocketLike } from "./websocket";
 export {

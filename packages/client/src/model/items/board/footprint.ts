@@ -1,0 +1,231 @@
+/** `Footprint` (a placed `FootprintInstance`), `Pad`, and `BoardField`. */
+import { create } from "@bufbuild/protobuf";
+import {
+  BoardLayer,
+  FieldSchema,
+  FootprintInstanceSchema,
+  KiCadObjectType,
+  NetSchema,
+  PadSchema,
+  PadType,
+  type Field as FieldProto,
+  type Footprint as FootprintDefinition,
+  type FootprintAttributes,
+  type FootprintInstance,
+  type Pad as PadProto,
+  type PadStack,
+} from "@kicad-web/proto";
+import { deg, nm, toAngle, type Vec2 } from "../../../units";
+import { Item, registerItem, wrapAll } from "../base";
+
+export class BoardField extends Item<FieldProto> {
+  static readonly schema = FieldSchema;
+  static readonly objectType = KiCadObjectType.KOT_PCB_FIELD;
+
+  constructor(proto: FieldProto = create(FieldSchema)) {
+    super(proto);
+  }
+
+  /** Fields carry their KIID inside the nested `BoardText`. */
+  override get id(): string {
+    return this.proto.text?.id?.value ?? "";
+  }
+  override set id(value: string) {
+    if (!this.proto.text) this.proto.text = create(FieldSchema).text!;
+    this.proto.text!.id = { $typeName: "kiapi.common.types.KIID", value };
+  }
+  /** Field number; 0 = reference, 1 = value, 2 = footprint, 3 = datasheet, 4 = description, >= 5 user. */
+  get fieldId(): number {
+    return this.proto.id?.id ?? 0;
+  }
+  get name(): string {
+    return this.proto.name;
+  }
+  set name(v: string) {
+    this.proto.name = v;
+  }
+  get text(): string {
+    return this.proto.text?.text?.text ?? "";
+  }
+  set text(v: string) {
+    if (this.proto.text?.text) this.proto.text.text.text = v;
+  }
+  get visible(): boolean {
+    return this.proto.visible;
+  }
+  set visible(v: boolean) {
+    this.proto.visible = v;
+  }
+  get position(): Vec2 {
+    return this.vec(this.proto.text?.text?.position);
+  }
+  override get layerId(): BoardLayer | undefined {
+    return this.proto.text?.layer;
+  }
+  override get parent(): string | undefined {
+    return this.proto.text?.parent?.value || undefined;
+  }
+  override get locked(): boolean {
+    return this.proto.text?.locked === 2;
+  }
+}
+registerItem(BoardField);
+
+export class Pad extends Item<PadProto> {
+  static readonly schema = PadSchema;
+  static readonly objectType = KiCadObjectType.KOT_PCB_PAD;
+
+  constructor(proto: PadProto = create(PadSchema)) {
+    super(proto);
+  }
+
+  get number(): string {
+    return this.proto.number;
+  }
+  set number(v: string) {
+    this.proto.number = v;
+  }
+  get position(): Vec2 {
+    return this.vec(this.proto.position);
+  }
+  set position(v: Vec2) {
+    this.setVec((x) => (this.proto.position = x), v);
+  }
+  get padType(): PadType {
+    return this.proto.type;
+  }
+  set padType(t: PadType) {
+    this.proto.type = t;
+  }
+  get padStack(): PadStack | undefined {
+    return this.proto.padStack;
+  }
+  get layers(): BoardLayer[] {
+    return this.proto.padStack?.layers ?? [];
+  }
+  override get layerId(): BoardLayer | undefined {
+    return this.proto.padStack?.layers[0];
+  }
+  /** Size on the first copper layer entry of the pad stack. */
+  get size(): Vec2 {
+    return this.vec(this.proto.padStack?.copperLayers[0]?.size);
+  }
+  get orientation(): number {
+    return deg(this.proto.padStack?.angle);
+  }
+  get drillDiameter(): Vec2 {
+    return this.vec(this.proto.padStack?.drill?.diameter);
+  }
+  get netCode(): number | undefined {
+    return this.proto.net?.code?.value;
+  }
+  setNet(name: string, code?: number): void {
+    this.proto.net = create(NetSchema, { name, code: code === undefined ? undefined : { value: code } });
+  }
+  get pinName(): string | undefined {
+    return this.proto.symbolPin?.name;
+  }
+  get padToDieLength(): number {
+    return nm(this.proto.padToDieLength);
+  }
+}
+registerItem(Pad);
+
+export class Footprint extends Item<FootprintInstance> {
+  static readonly schema = FootprintInstanceSchema;
+  static readonly objectType = KiCadObjectType.KOT_PCB_FOOTPRINT;
+
+  constructor(proto: FootprintInstance = create(FootprintInstanceSchema)) {
+    super(proto);
+  }
+
+  get position(): Vec2 {
+    return this.vec(this.proto.position);
+  }
+  set position(v: Vec2) {
+    this.setVec((x) => (this.proto.position = x), v);
+  }
+  /** Rotation in degrees. */
+  get orientation(): number {
+    return deg(this.proto.orientation);
+  }
+  set orientation(d: number) {
+    this.proto.orientation = toAngle(d);
+  }
+  override get layerId(): BoardLayer {
+    return this.proto.layer;
+  }
+  set layerId(l: BoardLayer) {
+    this.proto.layer = l;
+  }
+  get isFlipped(): boolean {
+    return this.proto.layer === BoardLayer.BL_B_Cu;
+  }
+  get reference(): string {
+    return this.proto.referenceField?.text?.text?.text ?? "";
+  }
+  set reference(v: string) {
+    if (this.proto.referenceField?.text?.text) this.proto.referenceField.text.text.text = v;
+  }
+  get value(): string {
+    return this.proto.valueField?.text?.text?.text ?? "";
+  }
+  set value(v: string) {
+    if (this.proto.valueField?.text?.text) this.proto.valueField.text.text.text = v;
+  }
+  get datasheet(): string {
+    return this.proto.datasheetField?.text?.text?.text ?? "";
+  }
+  get description(): string {
+    return this.proto.descriptionField?.text?.text?.text ?? "";
+  }
+  get referenceField(): BoardField | undefined {
+    return this.proto.referenceField ? new BoardField(this.proto.referenceField) : undefined;
+  }
+  get valueField(): BoardField | undefined {
+    return this.proto.valueField ? new BoardField(this.proto.valueField) : undefined;
+  }
+  get attributes(): FootprintAttributes | undefined {
+    return this.proto.attributes;
+  }
+  get doNotPopulate(): boolean {
+    return this.proto.attributes?.doNotPopulate ?? false;
+  }
+  get excludeFromBom(): boolean {
+    return this.proto.attributes?.excludeFromBillOfMaterials ?? false;
+  }
+  /** The library definition (pads, graphics, 3D models) the instance was placed from. */
+  get definition(): FootprintDefinition | undefined {
+    return this.proto.definition;
+  }
+  /** Library id as `nickname:name`. */
+  get libraryId(): string {
+    const id = this.proto.definition?.id;
+    return id ? `${id.libraryNickname}:${id.entryName}` : "";
+  }
+  /** Sheet path of the driving schematic symbol (`symbol_path`), human readable. */
+  get symbolPath(): string {
+    return this.proto.symbolPath?.pathHumanReadable ?? "";
+  }
+  /**
+   * Child items embedded in the definition (pads, shapes, texts, fields...). These are snapshots;
+   * to edit a pad, fetch it with `board.getPads()` (which sets `parent`) and update it in a commit.
+   */
+  get items(): Item[] {
+    return wrapAll(this.proto.definition?.items ?? []);
+  }
+  get pads(): Pad[] {
+    return this.items.filter((i): i is Pad => i instanceof Pad);
+  }
+  get padCount(): number {
+    return this.pads.length;
+  }
+  /** Set the net of the pad numbered `padNumber` inside the definition snapshot. */
+  padByNumber(padNumber: string): Pad | undefined {
+    return this.pads.find((p) => p.number === padNumber);
+  }
+  padSizeOf(padNumber: string): number {
+    return nm(this.padByNumber(padNumber)?.proto.padStack?.copperLayers[0]?.size?.xNm);
+  }
+}
+registerItem(Footprint);

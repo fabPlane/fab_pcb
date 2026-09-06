@@ -9,11 +9,21 @@ import { resolve } from "node:path";
 const KICAD_ROOT = resolve(import.meta.dir, "../../../../kicad");
 export const DEFAULT_KICAD_CLI = `${KICAD_ROOT}/build/release/kicad/KiCad.app/Contents/MacOS/kicad-cli`;
 export const KICAD_CLI = process.env.KICAD_CLI ?? DEFAULT_KICAD_CLI;
+/**
+ * A newer (development) build used only for commands the stable binary predates (events socket,
+ * NewProject/NewDocument/GetProjectInfo, symbol documents). Tests skip cleanly when it is absent.
+ */
+export const DEFAULT_KICAD_CLI_DEV = `${KICAD_ROOT}/build/dev/kicad/KiCad.app/Contents/MacOS/kicad-cli`;
+export const KICAD_CLI_DEV = process.env.KICAD_CLI_DEV ?? DEFAULT_KICAD_CLI_DEV;
 export const KITCHEN_SINK_PCB = `${KICAD_ROOT}/qa/data/pcbnew/api_kitchen_sink.kicad_pcb`;
 export const KITCHEN_SINK_SCH = `${KICAD_ROOT}/qa/data/eeschema/api_kitchen_sink.kicad_sch`;
 
 export function haveKicad(): boolean {
   return existsSync(KICAD_CLI);
+}
+
+export function haveKicadDev(): boolean {
+  return existsSync(KICAD_CLI_DEV);
 }
 
 /** `ApiRequest{ header{client_name:"kicad-web/m0-ping"}, message: Any(kiapi.common.commands.Ping) }` */
@@ -101,6 +111,10 @@ export function decodeApiResponse(bytes: Uint8Array): { token: string; status: n
 export interface KicadServer {
   socketPath: string;
   proc: ReturnType<typeof Bun.spawn>;
+  /** True once the process has exited on its own (crash) — `stop()` was not called. */
+  readonly crashed: boolean;
+  /** Everything the server wrote to stderr so far (crash diagnostics). */
+  stderr(): string;
   stop(): Promise<void>;
 }
 
@@ -108,11 +122,11 @@ export interface KicadServer {
  * Spawn `kicad-cli api-server <file> --socket /tmp/kicad/<prefix>-<pid>-<random>.sock` and wait for
  * the socket file to appear. (Readiness — replies other than AS_NOT_READY — is up to the caller.)
  */
-export async function startKicadServer(file: string | null, prefix = "test"): Promise<KicadServer> {
+export async function startKicadServer(file: string | null, prefix = "test", cli: string = KICAD_CLI): Promise<KicadServer> {
   await mkdir("/tmp/kicad", { recursive: true });
   const socketPath = `/tmp/kicad/${prefix}-${process.pid}-${Math.random().toString(36).slice(2, 8)}.sock`;
   await rm(socketPath, { force: true });
-  const proc = Bun.spawn([KICAD_CLI, "api-server", ...(file ? [file] : []), "--socket", socketPath], {
+  const proc = Bun.spawn([cli, "api-server", ...(file ? [file] : []), "--socket", socketPath], {
     stdout: "ignore",
     stderr: "pipe",
   });
@@ -142,10 +156,18 @@ export async function startKicadServer(file: string | null, prefix = "test"): Pr
     }
     await Bun.sleep(20);
   }
+  let stopping = false;
   return {
     socketPath,
     proc,
+    get crashed() {
+      return !stopping && proc.exitCode !== null;
+    },
+    stderr() {
+      return stderrChunks.join("");
+    },
     async stop() {
+      stopping = true;
       if (proc.exitCode === null) {
         proc.kill("SIGTERM");
         const t = setTimeout(() => proc.kill("SIGKILL"), 3000);
@@ -153,6 +175,8 @@ export async function startKicadServer(file: string | null, prefix = "test"): Pr
         clearTimeout(t);
       }
       await rm(socketPath, { force: true });
+      // The events socket (KiCad >= e8cd61a2f2) sits next to the request socket.
+      await rm(socketPath.replace(/\.sock$/, "-events.sock"), { force: true });
     },
   };
 }

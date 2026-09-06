@@ -5,3 +5,8 @@ dist/
 e2e/output/
 e2e/test-results/
 *.log
+e2e/playwright-report/
+e2e/.auth/
+/coverage/
+**/coverage-report/
+coverage-summary.md
