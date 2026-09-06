@@ -728,3 +728,25 @@ by *later* MRs will be missing from `GetSupportedCommands`; run with the branch'
 command table, or read the "command in the table has no test" failures as expected and
 compare the per-MR summary against the full-series baseline
 (`165 commands: 150 pass, 15 skip (gui-only), 0 fail`) rather than requiring it.
+
+## QA status (updated 2026-09-07)
+
+The series' QA tests are now compiled and run, not just syntax-checked. A build with
+`-DKICAD_BUILD_QA_TESTS=ON` runs **148 `qa_api` cases and 1232 `qa_eeschema` cases green**, plus
+`qa_kinng` and the pcbnew suites. Getting there took 13 commits (`3bc9b20e69..ab43ac2538`) that fixed
+three compile errors (including a product header that was never self-contained), five wrong test
+expectations, and **six product bugs** the tests caught:
+
+- footprint text angle was serialized unnormalized, so round-tripped footprints came back 360 degrees
+  off. This was a regression introduced by this series' own round-trip commit, caught only here.
+- setup-panel headings leaked into the DRC and ERC severity lists as unknown rule types.
+- `GetItemCounts` never counted vias or arcs.
+- twenty handlers swallowed validation errors as a bare `AS_UNHANDLED` with no message.
+- `SCH_PIN::swapData` was never implemented, so updating a pin silently did nothing (and undo of a
+  pin edit in the symbol editor was broken too).
+- an empty commit advanced the document revision and published a change event naming no items.
+
+Fixture hygiene is also fixed: the accidentally committed `qa/data/.kicad-web-probe/` tree is
+untracked and ignored, and the tests no longer depend on a `.kicad_prl` that is gitignored repo-wide.
+The pre-existing failures in `qa_common`, `qa_pcbnew_other`, `qa_spice` and `qa_cli` are upstream or
+environmental and untouched by this series.
