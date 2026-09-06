@@ -1,9 +1,12 @@
 /**
  * `Bun.serve` front: HTTP JSON API for sessions and files, WebSocket `/ws?session=<id>` that
- * forwards binary frames byte-for-byte to the session's KiCad server, optional static hosting.
+ * forwards binary frames byte-for-byte to the session's KiCad server (and relays KiCad's events
+ * to it), `GET /sessions/:id/events` mirroring those events as JSON over SSE, optional static
+ * hosting.
  */
 import { stat } from "node:fs/promises";
 import { extname, resolve } from "node:path";
+import { decodeEvent, eventToJson } from "@kicad-web/client";
 import {
   TransportError,
   WS_BRIDGE_PROTOCOL_VERSION,
@@ -15,7 +18,7 @@ import {
 } from "@kicad-web/client/transport";
 import type { BridgeConfig } from "./config";
 import { handleFiles } from "./files";
-import { SessionManager, type WsData } from "./session";
+import { SessionManager, type Session, type WsData } from "./session";
 
 export interface BridgeServer {
   readonly port: number;
@@ -42,7 +45,9 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
   const startedAt = Date.now();
   let clientCounter = 0;
   await sessions.cleanStaleSockets();
-  const kicadCliExists = await stat(cfg.kicadCli).then((s) => s.isFile()).catch(() => false);
+  const kicadCliExists = await stat(cfg.kicadCli)
+    .then((s) => s.isFile())
+    .catch(() => false);
   if (!kicadCliExists) cfg.log(`warning: kicad-cli not found at ${cfg.kicadCli} (set KICAD_CLI)`);
 
   const server = Bun.serve<WsData>({
@@ -100,12 +105,13 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
         return json({ error: "method not allowed" }, 405);
       }
 
-      const m = /^\/sessions\/([^/]+)(?:\/(log))?$/.exec(path);
+      const m = /^\/sessions\/([^/]+)(?:\/(log|events))?$/.exec(path);
       if (m) {
         const id = decodeURIComponent(m[1]!);
         const session = sessions.get(id);
         if (!session) return json({ error: `unknown session "${id}"` }, 404);
         if (m[2] === "log") return json({ id, lines: session.logLines });
+        if (m[2] === "events") return req.method === "GET" ? eventStream(session, cfg) : json({ error: "method not allowed" }, 405);
         if (req.method === "GET") return json({ session: session.info() });
         if (req.method === "DELETE") {
           await sessions.destroy(id);
@@ -129,6 +135,7 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
       open(ws) {
         const { session, clientId } = ws.data;
         session.clients.add(ws);
+        session.touch();
         cfg.log(`session ${session.id}: client #${clientId} connected (${session.clients.size} total)`);
         ws.send(
           encodeControl({
@@ -137,6 +144,7 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
             sessionId: session.id,
             kicadToken: session.kicadToken,
             serverState: session.state,
+            eventsState: session.eventsState,
           }),
         );
       },
@@ -161,7 +169,14 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
         }
         const transport = session.transport;
         if (session.state !== "running" || !transport || transport.state !== "open") {
-          ws.send(encodeControl({ type: "error", id, code: "closed", message: `KiCad server is ${session.state}${session.error ? `: ${session.error}` : ""}` }));
+          ws.send(
+            encodeControl({
+              type: "error",
+              id,
+              code: "closed",
+              message: `KiCad server is ${session.state}${session.error ? `: ${session.error}` : ""}`,
+            }),
+          );
           return;
         }
         // Copy: Bun may reuse the message buffer after this callback returns.
@@ -180,13 +195,16 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
       close(ws) {
         const { session, clientId } = ws.data;
         session.clients.delete(ws);
+        session.touch();
         cfg.log(`session ${session.id}: client #${clientId} disconnected (${session.clients.size} left)`);
       },
     },
   });
 
   const url = `http://${server.hostname}:${server.port}`;
-  cfg.log(`listening on ${url} (kicad-cli: ${cfg.kicadCli}, workspace: ${cfg.workspaceRoot}${cfg.staticDir ? `, static: ${cfg.staticDir}` : ""})`);
+  cfg.log(
+    `listening on ${url} (kicad-cli: ${cfg.kicadCli}, workspace: ${cfg.workspaceRoot}${cfg.staticDir ? `, static: ${cfg.staticDir}` : ""})`,
+  );
 
   return {
     port: server.port!,
@@ -200,6 +218,64 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
       cfg.log("stopped");
     },
   };
+}
+
+/**
+ * `GET /sessions/:id/events`: Server-Sent Events mirroring the session's KiCad events as proto3
+ * JSON, for debugging with curl / EventSource. Stream layout:
+ *   event: state   data: {"sessionId","state":"connected"|"disconnected","message"?}   (on open, then on change)
+ *   event: event   data: {"sequence":"12","documentChanged":{...}}                    (one per KiCad event)
+ *   event: error   data: {"message"}                                                  (frame failed to decode)
+ *   ": keepalive" comment every 15 s. Holding the stream open counts as a client for idle reaping.
+ */
+function eventStream(session: Session, cfg: BridgeConfig): Response {
+  const enc = new TextEncoder();
+  let cleanup: (() => void) | undefined;
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      const send = (type: string, data: unknown) => {
+        try {
+          controller.enqueue(enc.encode(`event: ${type}\ndata: ${JSON.stringify(data)}\n\n`));
+        } catch {
+          cleanup?.();
+        }
+      };
+      send("state", { sessionId: session.id, state: session.eventsState, socket: session.eventsSocketPath, serverState: session.state });
+      const offEvent = session.onEvent((bytes) => {
+        try {
+          send("event", eventToJson(decodeEvent(bytes)));
+        } catch (e) {
+          send("error", { message: `undecodable event frame (${bytes.length} bytes): ${e instanceof Error ? e.message : String(e)}` });
+        }
+      });
+      const offState = session.onEventsState((state, message) => send("state", { sessionId: session.id, state, message }));
+      const keepalive = setInterval(() => {
+        try {
+          controller.enqueue(enc.encode(": keepalive\n\n"));
+        } catch {
+          cleanup?.();
+        }
+      }, 15_000);
+      cleanup = () => {
+        cleanup = undefined;
+        clearInterval(keepalive);
+        offEvent();
+        offState();
+        try {
+          controller.close();
+        } catch {
+          /* already closed */
+        }
+      };
+    },
+    cancel() {
+      cleanup?.();
+    },
+  });
+  cfg.log(`session ${session.id}: SSE listener attached`);
+  return new Response(stream, {
+    headers: { ...CORS, "content-type": "text/event-stream; charset=utf-8", "cache-control": "no-cache", connection: "keep-alive" },
+  });
 }
 
 async function serveStatic(dir: string, pathname: string): Promise<Response | null> {

@@ -1,11 +1,22 @@
 /**
- * A session = one `kicad-cli api-server` process + one `NngIpcTransport` + the WebSocket clients
- * bound to it. `SessionManager` spawns, supervises and tears sessions down.
+ * A session = one `kicad-cli api-server` process + one `NngIpcTransport` + one `NngIpcSubscriber`
+ * on KiCad's events socket + the WebSocket clients bound to it. Every event frame KiCad publishes
+ * is relayed verbatim to all clients (`encodeEventFrame`) and to `onEvent` listeners (SSE, CLI).
+ * `SessionManager` spawns, supervises and tears sessions down, and reaps idle ones.
  */
 import { mkdir, readdir, rm, stat } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import type { ServerWebSocket } from "bun";
-import { NngIpcTransport, encodeControl, type BridgeControlMessage, type KiCadServerState } from "@kicad-web/client/transport";
+import { KiCadClient, commands } from "@kicad-web/client";
+import {
+  NngIpcSubscriber,
+  NngIpcTransport,
+  encodeControl,
+  encodeEventFrame,
+  type BridgeControlMessage,
+  type BridgeEventsState,
+  type KiCadServerState,
+} from "@kicad-web/client/transport";
 import type { BridgeConfig } from "./config";
 import { pingUntilReady } from "./kicad-ping";
 
@@ -19,6 +30,11 @@ export interface SessionInfo {
   state: KiCadServerState;
   path: string | null;
   socketPath: string;
+  /** KiCad's pub/sub socket (from `GetServerInfo`, else derived); null when not relaying. */
+  eventsSocketPath: string | null;
+  eventsState: BridgeEventsState;
+  /** Event frames relayed so far. */
+  eventsRelayed: number;
   pid: number | null;
   kicadToken: string | null;
   exitCode: number | null;
@@ -26,8 +42,17 @@ export interface SessionInfo {
   error: string | null;
   startedAt: string;
   readyAt: string | null;
+  /** Last time a WebSocket/SSE client connected or disconnected (idle reaping starts here). */
+  lastClientAt: string;
   clients: number;
+  /** SSE subscribers on `/sessions/:id/events`. */
+  listeners: number;
   queued: number;
+}
+
+/** Derive KiCad's events socket path from its request socket path (`api-x.sock` -> `api-x-events.sock`). */
+export function eventsSocketPathFor(socketPath: string): string {
+  return socketPath.endsWith(".sock") ? `${socketPath.slice(0, -5)}-events.sock` : `${socketPath}-events`;
 }
 
 export interface CreateSessionOptions {
@@ -55,8 +80,15 @@ export class Session {
   error: string | null = null;
   proc: ReturnType<typeof Bun.spawn> | null = null;
   transport: NngIpcTransport | null = null;
+  subscriber: NngIpcSubscriber | null = null;
+  eventsSocketPath: string | null = null;
+  eventsState: BridgeEventsState = "disconnected";
+  eventsRelayed = 0;
+  lastClientAt = new Date();
   readonly clients = new Set<ServerWebSocket<WsData>>();
   readonly logLines: string[] = [];
+  private readonly eventListeners = new Set<(event: Uint8Array) => void>();
+  private readonly eventsStateListeners = new Set<(state: BridgeEventsState, message?: string) => void>();
   private stopping = false;
 
   constructor(
@@ -80,6 +112,9 @@ export class Session {
       state: this.state,
       path: this.path,
       socketPath: this.socketPath,
+      eventsSocketPath: this.eventsSocketPath,
+      eventsState: this.eventsState,
+      eventsRelayed: this.eventsRelayed,
       pid: this.pid,
       kicadToken: this.kicadToken,
       exitCode: this.exitCode,
@@ -87,9 +122,124 @@ export class Session {
       error: this.error,
       startedAt: this.startedAt.toISOString(),
       readyAt: this.readyAt?.toISOString() ?? null,
+      lastClientAt: this.lastClientAt.toISOString(),
       clients: this.clients.size,
+      listeners: this.eventListeners.size,
       queued: this.transport?.queued ?? 0,
     };
+  }
+
+  /** True when no WebSocket client and no SSE listener is attached. */
+  get idle(): boolean {
+    return this.clients.size === 0 && this.eventListeners.size === 0;
+  }
+
+  /** Records a client (WebSocket or SSE) coming or going, for idle reaping. */
+  touch(): void {
+    this.lastClientAt = new Date();
+  }
+
+  /** Raw event frames as KiCad published them (SSE endpoint, CLI, tests). */
+  onEvent(cb: (event: Uint8Array) => void): () => void {
+    this.eventListeners.add(cb);
+    this.touch();
+    return () => {
+      this.eventListeners.delete(cb);
+      this.touch();
+    };
+  }
+
+  onEventsState(cb: (state: BridgeEventsState, message?: string) => void): () => void {
+    this.eventsStateListeners.add(cb);
+    return () => {
+      this.eventsStateListeners.delete(cb);
+    };
+  }
+
+  /**
+   * Learn the events socket (`GetServerInfo`, falling back to the derived name), subscribe with
+   * reconnect, and relay every frame. Never throws: a session without events still works, the
+   * `events` state just stays `disconnected` and clients poll.
+   */
+  private async startEvents(): Promise<void> {
+    const { cfg } = this;
+    const transport = this.transport;
+    if (!cfg.relayEvents || !transport) return;
+    let path = eventsSocketPathFor(transport.path);
+    try {
+      const client = new KiCadClient(transport, {
+        clientName: `kicad-web/bridge/${this.id}`,
+        kicadToken: this.kicadToken ?? undefined,
+        waitForReady: false,
+      });
+      const info = await commands.getServerInfo(client, {}, { timeoutMs: 5000 });
+      if (info.eventsSocketUrl) path = info.eventsSocketUrl.replace(/^ipc:\/\//, "");
+      else cfg.log(`session ${this.id}: GetServerInfo reports no events socket; trying ${path}`);
+    } catch (e) {
+      cfg.log(`session ${this.id}: GetServerInfo failed (${errorMessage(e)}); trying ${path}`);
+    }
+    if (this.state !== "running" || this.stopping) return;
+    this.eventsSocketPath = path;
+    const sub = new NngIpcSubscriber({
+      path,
+      connectTimeoutMs: 5000,
+      reconnect: { initialDelayMs: 100, maxDelayMs: 2000 },
+      maxFrameBytes: cfg.maxPayloadBytes,
+      log: (m) => cfg.log(`session ${this.id}: events: ${m}`),
+    });
+    this.subscriber = sub;
+    sub.onMessage((body) => {
+      if (this.subscriber !== sub) return;
+      // Copy: the parser's buffer is reused for the next frame.
+      const event = body.slice();
+      this.eventsRelayed++;
+      const frame = encodeEventFrame(event);
+      for (const ws of this.clients) {
+        try {
+          ws.send(frame);
+        } catch {
+          /* ignore */
+        }
+      }
+      for (const cb of Array.from(this.eventListeners)) {
+        try {
+          cb(event);
+        } catch (e) {
+          cfg.log(`session ${this.id}: event listener threw: ${errorMessage(e)}`);
+        }
+      }
+    });
+    sub.onStateChange((s, err) => {
+      if (this.subscriber !== sub) return;
+      this.setEventsState(s === "open" ? "connected" : "disconnected", s === "open" ? path : (err?.message ?? `subscriber ${s}`));
+    });
+    // With reconnect on, a missing events socket (older KiCad) keeps the subscriber redialing in
+    // the background; do not hold up session start for it.
+    const timeout = new Promise<"timeout">((r) => setTimeout(() => r("timeout"), 3000));
+    const outcome = await Promise.race([sub.ready().then(() => "open" as const), timeout]).catch((e: unknown) => errorMessage(e));
+    if (outcome !== "open")
+      cfg.log(`session ${this.id}: events socket ${path} not connected yet (${outcome}); keep retrying in the background`);
+  }
+
+  private setEventsState(state: BridgeEventsState, message?: string): void {
+    if (this.eventsState === state) return;
+    this.eventsState = state;
+    this.cfg.log(`session ${this.id}: events ${state}${message ? ` (${message})` : ""}`);
+    this.broadcast({ type: "events", sessionId: this.id, state, message });
+    for (const cb of Array.from(this.eventsStateListeners)) {
+      try {
+        cb(state, message);
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+
+  private async stopEvents(): Promise<void> {
+    const sub = this.subscriber;
+    this.subscriber = null;
+    if (sub) await sub.close();
+    this.setEventsState("disconnected", "session stopped");
   }
 
   /** Spawn KiCad, wait for its socket, connect, and Ping until AS_OK. Throws (after cleanup) on failure. */
@@ -149,6 +299,7 @@ export class Session {
       this.readyAt = new Date();
       cfg.log(`session ${this.id}: running (pid ${proc.pid}, token ${this.kicadToken}) after ${Date.now() - this.startedAt.getTime()} ms`);
       this.broadcast({ type: "server-state", sessionId: this.id, state: "running", kicadToken: this.kicadToken });
+      await this.startEvents();
     } catch (e) {
       const msg = this.error ?? `${errorMessage(e)}${this.tailLog()}`;
       await this.stop();
@@ -161,6 +312,7 @@ export class Session {
   async stop(): Promise<void> {
     this.stopping = true;
     const proc = this.proc;
+    await this.stopEvents();
     await this.transport?.close();
     if (proc && proc.exitCode === null && proc.signalCode === null) {
       proc.kill("SIGTERM");
@@ -177,6 +329,8 @@ export class Session {
       }
     }
     this.clients.clear();
+    this.eventListeners.clear();
+    this.eventsStateListeners.clear();
   }
 
   broadcast(msg: BridgeControlMessage): void {
@@ -212,8 +366,10 @@ export class Session {
       if (!this.stopping) this.error = `kicad-cli exited unexpectedly (code ${code}, signal ${signal})`;
     }
     this.cfg.log(`session ${this.id}: kicad-cli exited (code ${code}, signal ${signal}) -> ${this.state}`);
+    void this.stopEvents();
     void this.transport?.close();
     void rm(this.socketPath, { force: true });
+    if (this.eventsSocketPath) void rm(this.eventsSocketPath, { force: true });
     if (wasRunning) {
       this.broadcast({
         type: "server-state",
@@ -266,7 +422,8 @@ export class Session {
           /* not yet */
         }
       }
-      if (Date.now() > deadline) throw new Error(`timeout after ${this.cfg.startTimeoutMs} ms waiting for ${this.socketPath}${this.tailLog()}`);
+      if (Date.now() > deadline)
+        throw new Error(`timeout after ${this.cfg.startTimeoutMs} ms waiting for ${this.socketPath}${this.tailLog()}`);
       await Bun.sleep(20);
     }
   }
@@ -274,8 +431,37 @@ export class Session {
 
 export class SessionManager {
   private readonly sessions = new Map<string, Session>();
+  private reaper: ReturnType<typeof setInterval> | null = null;
 
-  constructor(private readonly cfg: BridgeConfig) {}
+  constructor(private readonly cfg: BridgeConfig) {
+    if (cfg.sessionIdleTimeoutSec > 0) {
+      const period = Math.max(250, Math.min(10_000, (cfg.sessionIdleTimeoutSec * 1000) / 4));
+      this.reaper = setInterval(() => void this.reapIdle(), period);
+      // Do not keep a Bun process alive just for the reaper.
+      (this.reaper as { unref?: () => void }).unref?.();
+    }
+  }
+
+  /** Destroy sessions idle (no WebSocket/SSE client) for longer than `sessionIdleTimeoutSec`. */
+  async reapIdle(now = Date.now()): Promise<string[]> {
+    const limit = this.cfg.sessionIdleTimeoutSec * 1000;
+    if (limit <= 0) return [];
+    const reaped: string[] = [];
+    for (const s of [...this.sessions.values()]) {
+      if (s.state === "starting" || !s.idle) continue;
+      const idleMs = now - s.lastClientAt.getTime();
+      if (idleMs < limit) continue;
+      this.cfg.log(`session ${s.id}: idle for ${Math.round(idleMs / 1000)} s (limit ${this.cfg.sessionIdleTimeoutSec} s), destroying`);
+      await this.destroy(s.id);
+      reaped.push(s.id);
+    }
+    return reaped;
+  }
+
+  stopReaper(): void {
+    if (this.reaper) clearInterval(this.reaper);
+    this.reaper = null;
+  }
 
   list(): SessionInfo[] {
     return [...this.sessions.values()].map((s) => s.info());
@@ -324,6 +510,7 @@ export class SessionManager {
   }
 
   async destroyAll(): Promise<void> {
+    this.stopReaper();
     await Promise.all([...this.sessions.keys()].map((id) => this.destroy(id)));
   }
 
@@ -342,7 +529,7 @@ export class SessionManager {
     for (const name of names) {
       if (!/^api-.*\.sock$/.test(name)) continue;
       const p = join(this.cfg.socketDir, name);
-      if ([...this.sessions.values()].some((s) => s.socketPath === p)) continue;
+      if ([...this.sessions.values()].some((s) => s.socketPath === p || s.eventsSocketPath === p)) continue;
       if (await socketIsDead(p)) {
         await rm(p, { force: true });
         removed.push(p);

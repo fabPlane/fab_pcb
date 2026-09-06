@@ -7,7 +7,10 @@ import type { DocumentChange } from "../src/model/document";
 import { DocumentSync, MemoryItemStore, UndoStack, inversePatch, toStoredItem, type StoreDiff } from "../src/store";
 import { mm } from "../src/units";
 
-const DOC = create(DocumentSpecifierSchema, { type: DocumentType.DOCTYPE_PCB, identifier: { case: "boardFilename", value: "x.kicad_pcb" } });
+const DOC = create(DocumentSpecifierSchema, {
+  type: DocumentType.DOCTYPE_PCB,
+  identifier: { case: "boardFilename", value: "x.kicad_pcb" },
+});
 
 function track(id: string, layer = BoardLayer.BL_F_Cu, net = "GND"): Track {
   const t = new Track();
@@ -164,6 +167,56 @@ describe("DocumentSync", () => {
     src.emit({ kind: "delete", phase: "failed", items: [], ids: ["t3"], scope, commitId: "c4" });
     expect(sync.store.has("t3")).toBe(true);
     expect(diffs.every((d, i) => d.revision === i + 1)).toBe(true);
+  });
+
+  test("syncIds() re-reads the named items via getItemsById, drops deleted/missing ones, falls back to a full reload", async () => {
+    const server = new Map<string, Item>([
+      ["t1", track("t1")],
+      ["t2", track("t2")],
+    ]);
+    const src = {
+      ...source([...server.values()]),
+      byIdCalls: [] as string[][],
+      getItemsById: async (ids: readonly string[]) => (
+        src.byIdCalls.push([...ids]),
+        ids.map((id) => server.get(id)).filter((i): i is Item => !!i)
+      ),
+    };
+    const sync = new DocumentSync(src);
+    // before load: a full load
+    await sync.syncIds({ updated: ["t1"] });
+    expect(src.loads).toBe(1);
+    expect(src.byIdCalls).toEqual([]);
+
+    // another client moved t1 to B.Cu, created t3, deleted t2
+    server.set("t1", track("t1", BoardLayer.BL_B_Cu));
+    server.set("t3", track("t3"));
+    server.delete("t2");
+    const diffs: StoreDiff[] = [];
+    sync.store.subscribe((d) => diffs.push(d));
+    await sync.syncIds({ created: ["t3"], updated: ["t1"], deleted: ["t2"] });
+    expect(src.byIdCalls).toEqual([["t3", "t1"]]);
+    expect(src.loads).toBe(1);
+    expect(sync.store.get("t1")!.layer).toBe("BL_B_Cu");
+    expect(sync.store.has("t3")).toBe(true);
+    expect(sync.store.has("t2")).toBe(false);
+    expect(diffs.length).toBe(1);
+    expect(diffs[0]!.added.map((i) => i.id)).toEqual(["t3"]);
+    expect(diffs[0]!.updated.map((i) => i.id)).toEqual(["t1"]);
+    expect(diffs[0]!.removed).toEqual(["t2"]);
+
+    // KiCad records a footprint UpdateItems as remove + add of the same KIID: that is an update
+    server.set("t1", track("t1", BoardLayer.BL_In1_Cu));
+    await sync.syncIds({ created: ["t1"], deleted: ["t1"] });
+    expect(sync.store.get("t1")!.layer).toBe("BL_In1_Cu");
+    expect(src.byIdCalls.at(-1)).toEqual(["t1"]);
+
+    // an id KiCad no longer returns is removed; a "changed" item without ids is a full reload
+    server.delete("t3");
+    await sync.syncIds({ updated: ["t3"] });
+    expect(sync.store.has("t3")).toBe(false);
+    await sync.syncIds({});
+    expect(src.loads).toBe(2);
   });
 
   test("changes before load() are ignored; dispose() unsubscribes", async () => {

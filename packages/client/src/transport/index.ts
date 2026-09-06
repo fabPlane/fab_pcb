@@ -26,8 +26,12 @@ export type { WebSocketTransportOptions, WebSocketLike } from "./websocket";
 export {
   WS_BRIDGE_PROTOCOL_VERSION,
   WS_FRAME_ID_LENGTH,
+  WS_EVENT_FRAME_ID,
+  WS_MAX_REQUEST_ID,
   encodeWsFrame,
   decodeWsFrame,
+  encodeEventFrame,
+  isEventFrame,
   encodeControl,
   parseControl,
   isControlMessage,
@@ -39,6 +43,8 @@ export type {
   BridgeHello,
   BridgeError,
   BridgeServerState,
+  BridgeEvents,
+  BridgeEventsState,
   BridgeErrorCode,
   KiCadServerState,
 } from "./ws-bridge-protocol";

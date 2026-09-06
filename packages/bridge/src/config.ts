@@ -26,6 +26,13 @@ export interface BridgeConfig {
   wsIdleTimeoutSec: number;
   /** Largest WebSocket message accepted from a client. Env `WS_MAX_PAYLOAD_BYTES`, default 64 MiB. */
   maxPayloadBytes: number;
+  /**
+   * Destroy a session (as `DELETE /sessions/:id` would) once it has had no WebSocket or SSE
+   * client for this many seconds. Env `SESSION_IDLE_TIMEOUT_SEC`, default 0 = never.
+   */
+  sessionIdleTimeoutSec: number;
+  /** Relay KiCad's events socket to clients. Env `KICAD_EVENTS` (`0` disables), default on. */
+  relayEvents: boolean;
   /** Extra environment for the KiCad child processes. */
   kicadEnv: Record<string, string>;
   log: (message: string) => void;
@@ -50,6 +57,8 @@ export function configFromEnv(env: Record<string, string | undefined> = process.
     startTimeoutMs: int(env.KICAD_START_TIMEOUT_MS, 60_000),
     wsIdleTimeoutSec: int(env.WS_IDLE_TIMEOUT_SEC, 900),
     maxPayloadBytes: int(env.WS_MAX_PAYLOAD_BYTES, 64 * 1024 * 1024),
+    sessionIdleTimeoutSec: int(env.SESSION_IDLE_TIMEOUT_SEC, 0),
+    relayEvents: !["0", "false", "off", "no"].includes((env.KICAD_EVENTS ?? "1").toLowerCase()),
     kicadEnv: {},
     log: (m) => console.log(`[bridge ${new Date().toISOString()}] ${m}`),
   };

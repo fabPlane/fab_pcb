@@ -4,7 +4,7 @@
  * any `Subscriber` (Bun: `NngIpcSubscriber`; browser: the bridge relays the same bytes), fans them
  * out to typed listeners, and reports sequence gaps so a client knows when to re-read state.
  */
-import { fromBinary } from "@bufbuild/protobuf";
+import { fromBinary, toJson } from "@bufbuild/protobuf";
 import {
   EventSchema,
   type DocumentChanged,
@@ -12,10 +12,12 @@ import {
   type DocumentOpened,
   type DocumentSaved,
   type Event,
+  type EventJson,
   type JobProgress,
   type ServerShutdown,
 } from "@kicad-web/proto";
 import type { Subscriber, SubscriberState } from "./transport/nng-ipc-sub";
+import type { WebSocketTransport } from "./transport/websocket";
 
 export type EventKind = Exclude<Event["kind"]["case"], undefined>;
 
@@ -40,6 +42,74 @@ export function decodeEvent(bytes: Uint8Array): Event {
   return fromBinary(EventSchema, bytes);
 }
 
+/** Proto3 JSON of an event (bigints as strings, enums by name) — for logs, SSE and CLIs. */
+export function eventToJson(event: Event): EventJson {
+  return toJson(EventSchema, event);
+}
+
+/**
+ * `Subscriber` over a `WebSocketTransport`: the bridge relays KiCad's event frames and tells us
+ * (`events` control message) whether it is subscribed on the KiCad side. `open` while the
+ * bridge is subscribed, `connecting` while it is not (it redials on its own; events are missed
+ * meanwhile, so re-read state), `closed` once the WebSocket is gone or `close()` was called.
+ * Closing the subscriber detaches from the transport; it never closes the WebSocket.
+ */
+export class TransportEventSubscriber implements Subscriber {
+  private readonly messageListeners = new Set<(body: Uint8Array) => void>();
+  private readonly stateListeners = new Set<(s: SubscriberState, error?: Error) => void>();
+  private _state: SubscriberState;
+  private detach: (() => void) | undefined;
+
+  constructor(readonly transport: WebSocketTransport) {
+    this._state = TransportEventSubscriber.stateOf(transport);
+    const offEvent = transport.onEvent((b) => {
+      for (const cb of this.messageListeners) cb(b);
+    });
+    const offControl = transport.onControl((m) => {
+      if (m.type === "hello" || m.type === "events") this.setState(TransportEventSubscriber.stateOf(transport));
+    });
+    const offState = transport.onStateChange((s) => {
+      if (s === "closed") this.setState("closed");
+    });
+    this.detach = () => {
+      offEvent();
+      offControl();
+      offState();
+    };
+  }
+
+  private static stateOf(t: WebSocketTransport): SubscriberState {
+    if (t.state === "closed") return "closed";
+    return t.eventsState === "connected" ? "open" : "connecting";
+  }
+
+  get state(): SubscriberState {
+    return this._state;
+  }
+
+  onMessage(cb: (body: Uint8Array) => void): () => void {
+    this.messageListeners.add(cb);
+    return () => this.messageListeners.delete(cb);
+  }
+
+  onStateChange(cb: (state: SubscriberState, error?: Error) => void): () => void {
+    this.stateListeners.add(cb);
+    return () => this.stateListeners.delete(cb);
+  }
+
+  async close(): Promise<void> {
+    this.detach?.();
+    this.detach = undefined;
+    this.setState("closed");
+  }
+
+  private setState(s: SubscriberState): void {
+    if (this._state === s) return;
+    this._state = s;
+    for (const cb of this.stateListeners) cb(s);
+  }
+}
+
 /** Typed listener registry over a subscriber. Frames that fail to decode are reported, not thrown. */
 export class KiCadEvents {
   private readonly listeners = new Map<EventKind | "*", Set<(payload: unknown, event: Event) => void>>();
@@ -51,6 +121,16 @@ export class KiCadEvents {
 
   constructor(readonly subscriber?: Subscriber) {
     if (subscriber) this.off = subscriber.onMessage((b) => this.push(b));
+  }
+
+  /** Events relayed by `@kicad-web/bridge` over a `WebSocketTransport` (browser or Bun). */
+  static fromTransport(transport: WebSocketTransport): KiCadEvents {
+    return new KiCadEvents(new TransportEventSubscriber(transport));
+  }
+
+  /** Subscriber lifecycle (`open` = events flow; `connecting` = temporarily none, re-read state). */
+  onStateChange(cb: (state: SubscriberState, error?: Error) => void): () => void {
+    return this.subscriber?.onStateChange(cb) ?? (() => {});
   }
 
   get state(): SubscriberState {
@@ -109,9 +189,14 @@ export class KiCadEvents {
   }
 
   /** Resolves with the next event of `kind` (optionally filtered), or rejects after `timeoutMs`. */
-  next<K extends EventKind>(kind: K, opts: { timeoutMs?: number; filter?: (payload: EventPayloads[K]) => boolean } = {}): Promise<EventPayloads[K]> {
+  next<K extends EventKind>(
+    kind: K,
+    opts: { timeoutMs?: number; filter?: (payload: EventPayloads[K]) => boolean } = {},
+  ): Promise<EventPayloads[K]> {
     return new Promise((resolve, reject) => {
-      const timer = opts.timeoutMs ? setTimeout(() => (off(), reject(new Error(`timed out waiting for ${kind} event`))), opts.timeoutMs) : undefined;
+      const timer = opts.timeoutMs
+        ? setTimeout(() => (off(), reject(new Error(`timed out waiting for ${kind} event`))), opts.timeoutMs)
+        : undefined;
       const off = this.on(kind, (payload) => {
         if (opts.filter && !opts.filter(payload)) return;
         if (timer) clearTimeout(timer);

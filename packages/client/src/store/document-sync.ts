@@ -14,7 +14,16 @@ export interface SyncSource {
   readonly kind: DocumentKind;
   readonly specifier: DocumentSpecifier;
   getAllItems(): Promise<Item[]>;
+  /** `GetItemsById`; needed for `syncIds()`, which otherwise falls back to a full reload. */
+  getItemsById?(ids: readonly string[]): Promise<Item[]>;
   onChange(cb: (change: DocumentChange) => void): () => void;
+}
+
+/** KIIDs named by a `DocumentChanged` event. */
+export interface ChangedIds {
+  created?: readonly string[];
+  updated?: readonly string[];
+  deleted?: readonly string[];
 }
 
 export class DocumentSync {
@@ -50,6 +59,31 @@ export class DocumentSync {
 
   refresh(): Promise<void> {
     return this.load();
+  }
+
+  /**
+   * Re-reads just the items a `DocumentChanged` event named (another client's commit):
+   * created/updated ids are fetched with `GetItemsById` (plus the children the store already
+   * holds for them — pads of a moved footprint — since KiCad lists only the top-level item),
+   * deleted ids are removed. Ids KiCad no longer returns are dropped too. An id listed as both
+   * deleted and created/updated is an update (KiCad records a footprint `UpdateItems` as
+   * remove + add of the same KIID). Without ids, or when the source has no `getItemsById`, this
+   * is a full `refresh()`.
+   */
+  async syncIds(ids: ChangedIds): Promise<void> {
+    const created = ids.created ?? [];
+    const updated = ids.updated ?? [];
+    const deleted = ids.deleted ?? [];
+    if (!this.loaded || !this.source.getItemsById || created.length + updated.length + deleted.length === 0) return this.refresh();
+    const wanted = new Set<string>([...created, ...updated]);
+    const gone = deleted.filter((id) => !wanted.has(id));
+    for (const it of this.store.all()) if (it.parent && wanted.has(it.parent)) wanted.add(it.id);
+    for (const id of gone) wanted.delete(id);
+    const items = wanted.size ? await this.source.getItemsById([...wanted]) : [];
+    const stored = items.filter((i) => i.id).map(toStoredItem);
+    const found = new Set(stored.map((i) => i.id));
+    const removed = [...gone, ...[...wanted].filter((id) => !found.has(id) && this.store.has(id))];
+    this.store.apply({ updated: stored, removed });
   }
 
   dispose(): void {

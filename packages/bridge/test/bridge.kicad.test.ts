@@ -7,8 +7,9 @@ import { existsSync } from "node:fs";
 import { mkdtemp, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { Footprint, KiCad, KiCadEvents } from "@kicad-web/client";
 import { WebSocketTransport, bridgeWsUrl, type BridgeControlMessage } from "@kicad-web/client/transport";
-import { configFromEnv, KICAD_CHECKOUT, startBridge, type BridgeServer } from "../src/index";
+import { configFromEnv, KICAD_CHECKOUT, eventsSocketPathFor, startBridge, type BridgeServer } from "../src/index";
 import { decodeApiResponse, encodePing } from "../src/kicad-ping";
 
 const cfg = configFromEnv(process.env, { port: 0, log: () => {} });
@@ -56,7 +57,10 @@ describe.skipIf(!haveKicad)("bridge + kicad-cli api-server + WebSocketTransport"
     const t0 = performance.now();
     const res = await api("/sessions", { method: "POST", body: JSON.stringify({ path: PCB }) });
     expect(res.status).toBe(201);
-    const body = (await res.json()) as { session: { id: string; state: string; kicadToken: string; socketPath: string; pid: number }; wsUrl: string };
+    const body = (await res.json()) as {
+      session: { id: string; state: string; kicadToken: string; socketPath: string; pid: number };
+      wsUrl: string;
+    };
     console.log(`  session ${body.session.id} running after ${(performance.now() - t0).toFixed(0)} ms (pid ${body.session.pid})`);
     expect(body.session.state).toBe("running");
     expect(body.session.kicadToken).toMatch(/^[0-9a-f-]{36}$/);
@@ -85,6 +89,116 @@ describe.skipIf(!haveKicad)("bridge + kicad-cli api-server + WebSocketTransport"
     expect(r.statusName).toBe("AS_OK");
     expect(r.token).toBe(kicadToken);
   });
+
+  test("the bridge subscribes to KiCad's events socket (GetServerInfo) and announces it", async () => {
+    const session = bridge.sessions.get(sessionId)!;
+    const deadline = Date.now() + 5000;
+    while (ws.eventsState !== "connected" && Date.now() < deadline) await Bun.sleep(10);
+    expect(ws.eventsState).toBe("connected");
+    expect(session.eventsState).toBe("connected");
+    expect(session.eventsSocketPath).toBe(eventsSocketPathFor(session.socketPath));
+    expect((await stat(session.eventsSocketPath!)).isSocket()).toBe(true);
+    const info = (await (await api(`/sessions/${sessionId}`)).json()) as { session: { eventsState: string; eventsSocketPath: string } };
+    expect(info.session.eventsState).toBe("connected");
+  });
+
+  test("a commit made through the client SDK arrives as DocumentChanged on the WebSocket and on the SSE stream", async () => {
+    const events = KiCadEvents.fromTransport(ws);
+    expect(events.state).toBe("open");
+    const gaps: string[] = [];
+    events.onGap((g) => gaps.push(`${g.expected}->${g.received}`));
+
+    // SSE mirror of the same events
+    const sse = await fetch(`${bridge.url}/sessions/${sessionId}/events`);
+    expect(sse.status).toBe(200);
+    expect(sse.headers.get("content-type")).toContain("text/event-stream");
+    const reader = sse.body!.getReader();
+    const dec = new TextDecoder();
+    let sseText = "";
+    const readUntil = async (needle: string) => {
+      const deadline = Date.now() + 10_000;
+      while (!sseText.includes(needle) && Date.now() < deadline) {
+        const { value, done } = await Promise.race([reader.read(), Bun.sleep(200).then(() => ({ value: undefined, done: false }))]);
+        if (done) break;
+        if (value) sseText += dec.decode(value, { stream: true });
+      }
+    };
+    await readUntil("event: state");
+    expect(sseText).toContain('"state":"connected"');
+    expect(bridge.sessions.get(sessionId)!.info().listeners).toBe(1);
+
+    const kicad = await KiCad.connect(ws, { clientName: "kicad-web/bridge-test/sdk" });
+    const board = (await kicad.currentBoard())!;
+    const fp = (await board.getAllItems()).find((i): i is Footprint => i instanceof Footprint)!;
+    const orig = fp.position;
+    fp.position = { x: orig.x + 1_000_000, y: orig.y };
+
+    const changed = events.next("documentChanged", { timeoutMs: 10_000 });
+    const t0 = performance.now();
+    const res = await board.commit("bridge-test move", (tx) => tx.update([fp]));
+    const ev = await changed;
+    console.log(
+      `  DocumentChanged relayed ${(performance.now() - t0).toFixed(0)} ms after the commit started (sequence ${events.lastSequence})`,
+    );
+    expect(res.updated.length).toBe(1);
+    // KiCad (cbd303d16b) records a footprint UpdateItems in the COMMIT as remove + add of the same
+    // KIID, so the event lists it under created+deleted rather than updated.
+    const touched = [...ev.created, ...ev.updated].map((k) => k.value);
+    expect(touched).toEqual([fp.id]);
+    expect(ev.deleted.map((k) => k.value).every((id) => id === fp.id)).toBe(true);
+    expect(ev.message).toBe("bridge-test move");
+    expect(ev.clientName).toBe("kicad-web/bridge-test/sdk");
+    expect(ev.document?.type).toBe(board.documentType);
+    expect(ev.revision).toBe((await board.revision())!);
+    expect(gaps).toEqual([]);
+
+    await readUntil('"bridge-test move"');
+    const block = sseText.split("\n\n").find((b) => b.includes('"bridge-test move"'))!;
+    expect(block).toStartWith("event: event\n");
+    const json = JSON.parse(block.split("\n")[1]!.slice("data: ".length)) as {
+      sequence: string;
+      documentChanged: { created?: { value: string }[]; updated?: { value: string }[]; clientName: string };
+    };
+    expect([...(json.documentChanged.created ?? []), ...(json.documentChanged.updated ?? [])]).toEqual([{ value: fp.id }]);
+    expect(json.documentChanged.clientName).toBe("kicad-web/bridge-test/sdk");
+    expect(BigInt(json.sequence)).toBe(events.lastSequence!);
+
+    // put the footprint back so the checked-in fixture is not left modified in memory
+    fp.position = orig;
+    const restored = events.next("documentChanged", { timeoutMs: 10_000 });
+    await board.commit("bridge-test move back", (tx) => tx.update([fp]));
+    expect((await restored).message).toBe("bridge-test move back");
+    expect(bridge.sessions.get(sessionId)!.eventsRelayed).toBeGreaterThanOrEqual(2);
+
+    await reader.cancel();
+    await events.close();
+    expect(ws.state).toBe("open");
+    const deadline = Date.now() + 2000;
+    while (bridge.sessions.get(sessionId)!.info().listeners !== 0 && Date.now() < deadline) await Bun.sleep(10);
+    expect(bridge.sessions.get(sessionId)!.info().listeners).toBe(0);
+  }, 30_000);
+
+  test("an idle session is reaped after SESSION_IDLE_TIMEOUT_SEC", async () => {
+    const b2 = await startBridge({ ...cfg, workspaceRoot: workspace, sessionIdleTimeoutSec: 1 });
+    try {
+      const res = await fetch(`${b2.url}/sessions`, { method: "POST", body: JSON.stringify({ id: "idle-test" }) });
+      expect(res.status).toBe(201);
+      const s = b2.sessions.get("idle-test")!;
+      // a connected client keeps it alive
+      const t = await WebSocketTransport.connect(bridgeWsUrl(b2.url, "idle-test"), { keepaliveMs: 0 });
+      expect(await b2.sessions.reapIdle(Date.now() + 60_000)).toEqual([]);
+      await t.close();
+      // destroy() unlists the session first and then stops the process (SIGTERM, ~0.5 s)
+      const deadline = Date.now() + 8000;
+      while ((b2.sessions.get("idle-test") || s.state === "running") && Date.now() < deadline) await Bun.sleep(50);
+      expect(b2.sessions.get("idle-test")).toBeUndefined();
+      expect(s.state).toBe("exited");
+      expect(existsSync(s.socketPath)).toBe(false);
+      if (s.eventsSocketPath) expect(existsSync(s.eventsSocketPath)).toBe(false);
+    } finally {
+      await b2.stop();
+    }
+  }, 60_000);
 
   test("200 sequential Pings through WebSocket -> bridge -> nng (timed)", async () => {
     const t0 = performance.now();
@@ -193,7 +307,9 @@ describe.skipIf(!haveKicad)("bridge + kicad-cli api-server + WebSocketTransport"
     expect(s.state).toBe("running");
     const t0 = performance.now();
     await bridge.sessions.destroy("bare-test");
-    console.log(`  SIGTERM shutdown took ${(performance.now() - t0).toFixed(0)} ms, exit code ${s.exitCode}, log tail: ${JSON.stringify(s.logLines.slice(-2))}`);
+    console.log(
+      `  SIGTERM shutdown took ${(performance.now() - t0).toFixed(0)} ms, exit code ${s.exitCode}, log tail: ${JSON.stringify(s.logLines.slice(-2))}`,
+    );
     expect(s.state).toBe("exited");
   }, 60_000);
 });

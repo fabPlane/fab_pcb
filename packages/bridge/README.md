@@ -5,38 +5,45 @@ Bun process that sits between browser tabs and `kicad-cli api-server`:
 - speaks nng SP framing on KiCad's unix socket (`NngIpcTransport` from `@kicad-web/client/transport`, no native deps);
 - spawns and supervises one `kicad-cli api-server` per **session**, reports its state to clients;
 - forwards WebSocket binary frames byte-for-byte, serialising them onto KiCad's one-request-at-a-time REQ/REP socket;
+- subscribes to KiCad's events socket (nng PUB/SUB, `GetServerInfo.events_socket_url`) and relays every `kiapi.common.events.Event` to the session's WebSocket clients, plus a JSON mirror over SSE;
 - exposes a file API confined to a workspace root and optional static hosting for `apps/web`.
 
 ```
-bun run --filter @kicad-web/bridge start        # or: bun packages/bridge/src/main.ts
+bun run --filter @kicad-web/bridge start                 # or: bun packages/bridge/src/main.ts
+bun run --filter @kicad-web/bridge events                # list sessions
+bun run --filter @kicad-web/bridge events <session-id>   # print that session's KiCad events, decoded, one JSON line each (--sse: via the SSE route)
 ```
 
 ## Configuration (environment)
 
-| Variable | Default | Meaning |
-|---|---|---|
-| `PORT` | `4020` | HTTP + WebSocket port (`0` = pick a free one) |
-| `HOST` | `127.0.0.1` | bind address |
-| `KICAD_CLI` | `../kicad/build/release/kicad/KiCad.app/Contents/MacOS/kicad-cli` | server binary |
-| `KICAD_SOCKET_DIR` | `/tmp/kicad` | where `api-<session>.sock` files go |
-| `WORKSPACE_ROOT` | `../kicad/qa/data` | root of the `/files` API |
-| `STATIC_DIR` | unset | directory served for unmatched `GET`s, with SPA fallback to `index.html` |
-| `KICAD_REQUEST_TIMEOUT_MS` | `120000` | per-request timeout towards KiCad |
-| `KICAD_START_TIMEOUT_MS` | `60000` | time allowed for a new server to answer `Ping` with `AS_OK` |
-| `WS_IDLE_TIMEOUT_SEC` | `900` | WebSocket idle timeout (the bridge sends pings) |
-| `WS_MAX_PAYLOAD_BYTES` | 64 MiB | largest WebSocket message accepted |
+| Variable                   | Default                                                           | Meaning                                                                                                                                      |
+| -------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PORT`                     | `4020`                                                            | HTTP + WebSocket port (`0` = pick a free one)                                                                                                |
+| `HOST`                     | `127.0.0.1`                                                       | bind address                                                                                                                                 |
+| `KICAD_CLI`                | `../kicad/build/release/kicad/KiCad.app/Contents/MacOS/kicad-cli` | server binary                                                                                                                                |
+| `KICAD_SOCKET_DIR`         | `/tmp/kicad`                                                      | where `api-<session>.sock` files go                                                                                                          |
+| `WORKSPACE_ROOT`           | `../kicad/qa/data`                                                | root of the `/files` API                                                                                                                     |
+| `STATIC_DIR`               | unset                                                             | directory served for unmatched `GET`s, with SPA fallback to `index.html`                                                                     |
+| `KICAD_REQUEST_TIMEOUT_MS` | `120000`                                                          | per-request timeout towards KiCad                                                                                                            |
+| `KICAD_START_TIMEOUT_MS`   | `60000`                                                           | time allowed for a new server to answer `Ping` with `AS_OK`                                                                                  |
+| `WS_IDLE_TIMEOUT_SEC`      | `900`                                                             | WebSocket idle timeout (the bridge sends pings)                                                                                              |
+| `WS_MAX_PAYLOAD_BYTES`     | 64 MiB                                                            | largest WebSocket message accepted                                                                                                           |
+| `SESSION_IDLE_TIMEOUT_SEC` | `0` (off)                                                         | destroy a session (as `DELETE /sessions/:id`) once it has had no WebSocket or SSE client for this long; checked every `min(10 s, timeout/4)` |
+| `KICAD_EVENTS`             | `1`                                                               | `0` disables the events relay (clients then poll `GetDocumentRevision`)                                                                      |
+| `BRIDGE_URL`               | `http://127.0.0.1:4020`                                           | used by the `events` CLI only                                                                                                                |
 
 ## HTTP API
 
-| Route | Effect |
-|---|---|
-| `GET /health` | `{ok, kicadCli, kicadCliExists, workspaceRoot, sessions:[...]}` |
-| `GET /sessions` | list sessions (`id, state, path, socketPath, pid, kicadToken, exitCode, signal, clients, ...`) |
-| `POST /sessions` `{path?, socket?, id?}` | spawn `kicad-cli api-server [path] --socket <sock>`, wait until `Ping` is `AS_OK`; `201 {session, wsUrl}`. `path` may be a `.kicad_pro`, `.kicad_pcb` or `.kicad_sch` (relative paths resolve against the workspace root; a `.kicad_pro` loads only the project, not the board). `400` bad input, `502` the server failed to start (message includes the last kicad-cli output lines). |
-| `GET /sessions/:id` / `GET /sessions/:id/log` | one session / its last 200 stdout+stderr lines |
-| `DELETE /sessions/:id` | SIGTERM (SIGKILL after 5 s), unlink socket, close its WebSockets |
-| `GET /files/list?path=` · `GET /files/stat?path=` · `GET /files/read?path=` · `PUT /files/write?path=` · `POST /files/mkdir?path=` | confined to `WORKSPACE_ROOT` (lexically and through symlinks); `403` on escape |
-| `GET /ws?session=<id>` | WebSocket bound to a session (see below) |
+| Route                                                                                                                              | Effect                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /health`                                                                                                                      | `{ok, kicadCli, kicadCliExists, workspaceRoot, sessions:[...]}`                                                                                                                                                                                                                                                                                                                                                                 |
+| `GET /sessions`                                                                                                                    | list sessions (`id, state, path, socketPath, eventsSocketPath, eventsState, eventsRelayed, pid, kicadToken, exitCode, signal, lastClientAt, clients, listeners, ...`)                                                                                                                                                                                                                                                           |
+| `POST /sessions` `{path?, socket?, id?}`                                                                                           | spawn `kicad-cli api-server [path] --socket <sock>`, wait until `Ping` is `AS_OK`, then subscribe to its events socket; `201 {session, wsUrl}`. `path` may be a `.kicad_pro`, `.kicad_pcb` or `.kicad_sch` (relative paths resolve against the workspace root; a `.kicad_pro` loads only the project, not the board). `400` bad input, `502` the server failed to start (message includes the last kicad-cli output lines).     |
+| `GET /sessions/:id` / `GET /sessions/:id/log`                                                                                      | one session / its last 200 stdout+stderr lines                                                                                                                                                                                                                                                                                                                                                                                  |
+| `GET /sessions/:id/events`                                                                                                         | Server-Sent Events: `event: state` `{sessionId, state:'connected'\|'disconnected', message?}` on open and on change, `event: event` with the proto3 JSON of each KiCad event (`{"sequence":"12","documentChanged":{...}}`), `event: error` for an undecodable frame, `: keepalive` every 15 s. Same events as the WebSocket relay, for `curl -N` / `EventSource` debugging; an open stream counts as a client for idle reaping. |
+| `DELETE /sessions/:id`                                                                                                             | SIGTERM (SIGKILL after 5 s), unlink socket, close its WebSockets                                                                                                                                                                                                                                                                                                                                                                |
+| `GET /files/list?path=` · `GET /files/stat?path=` · `GET /files/read?path=` · `PUT /files/write?path=` · `POST /files/mkdir?path=` | confined to `WORKSPACE_ROOT` (lexically and through symlinks); `403` on escape                                                                                                                                                                                                                                                                                                                                                  |
+| `GET /ws?session=<id>`                                                                                                             | WebSocket bound to a session (see below)                                                                                                                                                                                                                                                                                                                                                                                        |
 
 All responses carry permissive CORS headers so a Vite dev server on another port can talk to the bridge.
 
@@ -44,14 +51,22 @@ All responses carry permissive CORS headers so a Vite dev server on another port
 
 Defined in `@kicad-web/client/transport/ws-bridge-protocol.ts`; `WebSocketTransport` implements the client side.
 
+Protocol version 2 (`WS_BRIDGE_PROTOCOL_VERSION`).
+
 - Binary frame: 4-byte big-endian correlation id + raw `ApiRequest` / `ApiResponse` bytes. Any number of requests may be in flight per socket; the bridge queues them FIFO onto KiCad.
+- Event frame (bridge → client): the reserved correlation id `0xFFFFFFFF` (`WS_EVENT_FRAME_ID`; `encodeEventFrame` / `isEventFrame`) + one raw `kiapi.common.events.Event`, exactly the bytes KiCad published. Clients never allocate that id (`WS_MAX_REQUEST_ID = 0xFFFFFFFE`). `WebSocketTransport.onEvent(cb)` hands the bytes out; `KiCadEvents.fromTransport(ws)` decodes them, dispatches by kind and reports sequence gaps.
 - Text frame: JSON control message
-  - `{type:'hello', protocolVersion, sessionId, kicadToken, serverState}` — sent on open
+  - `{type:'hello', protocolVersion, sessionId, kicadToken, serverState, eventsState}` — sent on open
   - `{type:'server-state', sessionId, state:'starting'|'running'|'exited'|'failed', kicadToken?, exitCode?, signal?, message?}` — pushed on every process state change
+  - `{type:'events', sessionId, state:'connected'|'disconnected', message?}` — pushed when the bridge's subscription to KiCad's events socket connects or drops; while `disconnected` clients should poll `GetDocumentRevision` (the subscriber redials with backoff and events published meanwhile are lost — KiCad's socket is fire-and-forget)
   - `{type:'error', id, code:'timeout'|'closed'|'protocol'|'connect'|'bad-request'|'no-session'|'internal', message}` — a request failed inside the bridge (`id` null for connection-level problems)
   - `{type:'ping'}` / `{type:'pong'}` — keepalive, either direction
 
-When the KiCad process dies the bridge rejects the in-flight request with `closed`, pushes `server-state`, keeps the session listed (state `failed`/`exited`, with `exitCode`/`signal`) until it is deleted, and answers later requests on that session with an `error{code:'closed'}` frame. The WebSocket itself stays open so the tab can show the state and start a new session.
+When the KiCad process dies the bridge rejects the in-flight request with `closed`, pushes `server-state` and `events{disconnected}`, keeps the session listed (state `failed`/`exited`, with `exitCode`/`signal`) until it is deleted, and answers later requests on that session with an `error{code:'closed'}` frame. The WebSocket itself stays open so the tab can show the state and start a new session.
+
+### Events relay
+
+After `Ping` is `AS_OK` the bridge asks `GetServerInfo` for `events_socket_url` (falling back to `<socket>-events.sock`, which is what KiCad uses), opens an `NngIpcSubscriber` with reconnect on it, and fans every frame out to the session's WebSocket clients and SSE listeners without decoding it. A KiCad without an events socket just leaves `eventsState: 'disconnected'` (session start is not delayed by more than 3 s). `KICAD_EVENTS=0` turns the relay off.
 
 ## Notes on KiCad's server behaviour (measured 2026-09-06, commit cbd303d16b)
 

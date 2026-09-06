@@ -1,9 +1,10 @@
 // DocumentService over `@kicad-web/client`'s object model. Owns the open Project / Board /
 // Schematic / FootprintDocuments of the session, their ItemStores (filled by the client's
 // DocumentSync), and the derived read models the panels want (layers, nets, board setup,
-// net classes, text variables, variants). Dirty flags come from `GetDocumentRevision`,
-// polled every 2 s while idle because the bridge does not forward KiCad's PUB events socket
-// yet (`GetServerInfo.events_socket_url` is set, nothing relays it).
+// net classes, text variables, variants). Dirty flags and foreign changes come from KiCad's
+// events (`KiCadEvents` over the bridge's relay of the PUB socket: DocumentChanged re-syncs the
+// listed KIIDs via GetItemsById, DocumentSaved clears dirty); `GetDocumentRevision` is polled
+// every 2 s only while the bridge reports its events subscription disconnected.
 
 import { create } from '@bufbuild/protobuf';
 import {
@@ -13,16 +14,22 @@ import {
   KiCadObjectType,
   type BoardStackupLayer,
   type CustomRule,
+  type DocumentChanged,
+  type DocumentSaved,
+  type DocumentSpecifier,
   type NetClass,
 } from '@kicad-web/proto';
 import {
   Board,
   FootprintDocument,
   KiCadApiError,
+  KiCadEvents,
   Project,
   Schematic,
   SheetHandle,
+  WebSocketTransport,
   flattenHierarchy,
+  type ChangedIds,
   type KiCad,
   type Commit,
   type DocumentSync,
@@ -42,6 +49,13 @@ export interface OpenOptions {
   /** Existence probe for sibling files (`<name>.kicad_pcb` next to a `.kicad_pro`); the bridge file API. */
   exists?: (path: string) => Promise<boolean>;
   log?: (message: string, level?: 'info' | 'warn' | 'error') => void;
+  /**
+   * KiCad event source. Default: `KiCadEvents.fromTransport()` when the client's transport is a
+   * `WebSocketTransport` (the bridge relays the events socket); `null` disables events (poll only).
+   */
+  events?: KiCadEvents | null;
+  /** KiCad announced `ServerShutdown`; the bridge's `server-state` follows once the process exits. */
+  onServerShutdown?: () => void;
 }
 
 const REVISION_POLL_MS = 2000;
@@ -118,6 +132,11 @@ export class KicadDocumentService implements DocumentService {
   private polling = false;
   private busy = 0;
   private opts: OpenOptions = {};
+  private events: KiCadEvents | null = null;
+  private ownsEvents = false;
+  private eventSubs: (() => void)[] = [];
+  /** DocumentChanged handlers run one at a time, in arrival order. */
+  private eventQueue: Promise<void> = Promise.resolve();
   /** Copper layer ids front to back, for the renderer. */
   copperLayers: string[] = ['BL_F_Cu', 'BL_B_Cu'];
   /** Enabled layer ids (BoardLayer names). */
@@ -149,7 +168,10 @@ export class KicadDocumentService implements DocumentService {
     this.kicad = kicad;
     this.opts = opts;
     const dir = path.slice(0, path.lastIndexOf('/'));
-    const base = path.split('/').pop()!.replace(/\.kicad_(pro|pcb|sch)$/, '');
+    const base = path
+      .split('/')
+      .pop()!
+      .replace(/\.kicad_(pro|pcb|sch)$/, '');
     const exists = opts.exists ?? (async () => false);
 
     // Documents the preload left open.
@@ -181,12 +203,14 @@ export class KicadDocumentService implements DocumentService {
 
     await Promise.all([this.loadBoard(), this.loadSchematic()]);
     await this.loadProjectData();
+    this.attachEvents(kicad, opts);
     this.startPolling();
     this.emit();
   }
 
   async close(): Promise<void> {
     this.stopPolling();
+    this.detachEvents();
     for (const off of this.storeSubs) off();
     this.storeSubs = [];
     this.boardDoc?.documentSync.dispose();
@@ -241,9 +265,7 @@ export class KicadDocumentService implements DocumentService {
       } catch (e) {
         this.log(`GetNetClassForNets failed: ${describe(e)}`, 'warn');
       }
-      this.netList = nets
-        .map((name) => ({ name, netclass: classes.get(name)?.name ?? 'Default', items: [...board.store.byNet(name)].length }))
-        .sort((a, b) => a.name.localeCompare(b.name));
+      this.netList = nets.map((name) => ({ name, netclass: classes.get(name)?.name ?? 'Default', items: [...board.store.byNet(name)].length })).sort((a, b) => a.name.localeCompare(b.name));
     } catch (e) {
       this.log(`GetNets failed: ${describe(e)}`, 'warn');
     }
@@ -256,7 +278,13 @@ export class KicadDocumentService implements DocumentService {
       const [stackup, rules, custom, enabled] = await Promise.all([board.stackup(), board.designRules(), board.customRules().catch(() => null), board.enabledLayers()]);
       const layers: StackupLayer[] = stackup.layers.map((l: BoardStackupLayer, i: number) => {
         const id = l.type === BoardStackupLayerType.BSLT_DIELECTRIC ? `dielectric${i}` : (BoardLayer[l.layer] ?? `layer${i}`);
-        return { layer: id, name: l.userName || (id.startsWith('BL_') ? layerDisplayName(id) : l.materialName || 'Dielectric'), material: l.materialName, thicknessNm: dist(l.thickness), type: stackupType(l.type, l.layer) };
+        return {
+          layer: id,
+          name: l.userName || (id.startsWith('BL_') ? layerDisplayName(id) : l.materialName || 'Dielectric'),
+          material: l.materialName,
+          thicknessNm: dist(l.thickness),
+          type: stackupType(l.type, l.layer),
+        };
       });
       const c = rules.rules.constraints;
       this.setup = {
@@ -354,6 +382,142 @@ export class KicadDocumentService implements DocumentService {
     this.emit();
   }
 
+  // ------------------------------------------------------------------ KiCad events
+
+  /** True while KiCad events flow (bridge subscribed); the revision poll is then a no-op. */
+  get eventsLive(): boolean {
+    return this.events?.state === 'open';
+  }
+
+  private attachEvents(kicad: KiCad, opts: OpenOptions): void {
+    this.detachEvents();
+    let events = opts.events;
+    if (events === undefined) {
+      const t = kicad.client.transport;
+      events = t instanceof WebSocketTransport ? KiCadEvents.fromTransport(t) : null;
+      this.ownsEvents = events !== null;
+    }
+    if (!events) return;
+    this.events = events;
+    const queued = (fn: () => Promise<void>) => {
+      this.eventQueue = this.eventQueue.then(fn).catch((e) => this.log(`event handler: ${describe(e)}`, 'warn'));
+    };
+    this.eventSubs.push(
+      events.on('documentChanged', (ev) => queued(() => this.onDocumentChanged(ev))),
+      events.on('documentSaved', (ev) => queued(async () => this.onDocumentSaved(ev))),
+      events.on('serverShutdown', () => {
+        this.log('KiCad server is shutting down', 'warn');
+        this.stopPolling();
+        this.opts.onServerShutdown?.();
+      }),
+      events.onGap((g) => {
+        this.log(`missed KiCad events (sequence ${g.expected} -> ${g.received}); re-checking revisions`, 'warn');
+        queued(() => this.poll(true));
+      }),
+      events.onStateChange((s) => {
+        this.log(`KiCad events ${s === 'open' ? 'connected' : s === 'connecting' ? 'disconnected (polling GetDocumentRevision)' : 'closed'}`);
+        // Anything that happened while events were down is caught by one revision check.
+        if (s === 'open') queued(() => this.poll(true));
+      }),
+      events.onError((e) => this.log(`undecodable KiCad event: ${e.message}`, 'warn')),
+    );
+    this.log(`KiCad events ${this.eventsLive ? 'connected' : 'not connected (polling GetDocumentRevision)'}`);
+  }
+
+  private detachEvents(): void {
+    for (const off of this.eventSubs) off();
+    this.eventSubs = [];
+    if (this.events && this.ownsEvents) void this.events.close();
+    this.events = null;
+    this.ownsEvents = false;
+  }
+
+  private kindOf(doc: DocumentSpecifier | undefined): DocumentKind | undefined {
+    switch (doc?.type) {
+      case DocumentType.DOCTYPE_PCB:
+        return this.boardDoc ? 'board' : undefined;
+      case DocumentType.DOCTYPE_SCHEMATIC:
+        return this.schematicDoc ? 'schematic' : undefined;
+      case DocumentType.DOCTYPE_FOOTPRINT:
+        return 'footprint';
+      case DocumentType.DOCTYPE_SYMBOL:
+        return 'symbol';
+      default:
+        return undefined;
+    }
+  }
+
+  private async onDocumentChanged(ev: DocumentChanged): Promise<void> {
+    const kind = this.kindOf(ev.document);
+    if (!kind || !this.kicad) return;
+    const own = ev.clientName !== '' && ev.clientName === this.kicad.client.clientName;
+    const ids: ChangedIds = { created: ev.created.map((k) => k.value), updated: ev.updated.map((k) => k.value), deleted: ev.deleted.map((k) => k.value) };
+    const n = ids.created!.length + ids.updated!.length + ids.deleted!.length;
+    if (!own) {
+      // Foreign change (another client, or an API command outside a commit): pull the items.
+      this.log(
+        `${kind} changed on the server (revision ${ev.revision}${ev.clientName ? ` by ${ev.clientName}` : ''}${ev.message ? `, "${ev.message}"` : ''}); ${n ? `re-reading ${n} item(s)` : 're-reading the document'}`,
+      );
+      const done = this.beginActivity();
+      try {
+        await this.resync(kind, ev.document, ids, n > 0);
+      } catch (e) {
+        this.log(`re-sync after DocumentChanged failed: ${describe(e)}`, 'warn');
+      } finally {
+        done();
+      }
+    }
+    if (kind === 'board' || kind === 'schematic') {
+      this.known[kind] = ev.revision;
+      this.dirty[kind] = this.saved[kind] === undefined || ev.revision !== this.saved[kind];
+    } else if (!own) {
+      this.dirty[kind] = true;
+    }
+    this.emit();
+  }
+
+  private async resync(kind: DocumentKind, doc: DocumentSpecifier | undefined, ids: ChangedIds, partial: boolean): Promise<void> {
+    if (kind === 'board') {
+      await (partial ? this.boardDoc!.documentSync.syncIds(ids) : this.boardDoc!.documentSync.refresh());
+      return;
+    }
+    if (kind === 'schematic') {
+      const handles = [...this.sheetHandles.values()];
+      const named = doc?.identifier.case === 'sheetPath' ? this.sheetHandles.get(`/${doc.identifier.value.path.map((k) => k.value).join('/')}`) : undefined;
+      if (partial && named) return named.documentSync.syncIds(ids);
+      if (partial) {
+        // No sheet in the event: route known ids to the sheet holding them; unknown created ids
+        // could be on any sheet, so fall back to reloading them all.
+        const unknownCreated = ids.created!.some((id) => !handles.some((h) => h.store.get(id) !== undefined));
+        if (!unknownCreated) {
+          for (const h of handles) {
+            const mine = (list: readonly string[] | undefined) => (list ?? []).filter((id) => h.store.get(id) !== undefined);
+            const sub: ChangedIds = { updated: [...mine(ids.created), ...mine(ids.updated)], deleted: mine(ids.deleted) };
+            if (sub.updated!.length + sub.deleted!.length) await h.documentSync.syncIds(sub);
+          }
+          return;
+        }
+      }
+      for (const h of handles) await h.documentSync.refresh();
+      return;
+    }
+    if (kind === 'footprint') {
+      const libId = doc?.identifier.case === 'libId' ? `${doc.identifier.value.libraryNickname}:${doc.identifier.value.entryName}` : undefined;
+      for (const [id, fp] of this.footprintDocs) if (!libId || id === libId) await fp.documentSync.refresh();
+    }
+  }
+
+  private onDocumentSaved(ev: DocumentSaved): void {
+    const kind = this.kindOf(ev.document);
+    if (!kind) return;
+    if (kind === 'board' || kind === 'schematic') this.saved[kind] = this.known[kind] = ev.revision;
+    this.dirty[kind] = false;
+    this.log(`${kind} saved${ev.path ? ` to ${ev.path}` : ''} (revision ${ev.revision})`);
+    this.emit();
+  }
+
+  // ------------------------------------------------------------------ revision poll (fallback)
+
   private startPolling(): void {
     this.stopPolling();
     this.pollTimer = setInterval(() => void this.poll(), REVISION_POLL_MS);
@@ -364,8 +528,10 @@ export class KicadDocumentService implements DocumentService {
     this.pollTimer = null;
   }
 
-  private async poll(): Promise<void> {
+  /** Compares revisions and reloads changed documents. Skipped while events are live unless `force`. */
+  private async poll(force = false): Promise<void> {
     if (this.polling || this.busy > 0 || !this.kicad) return;
+    if (!force && this.eventsLive) return;
     this.polling = true;
     try {
       for (const kind of ['board', 'schematic'] as const) {

@@ -3,17 +3,22 @@
  *
  * Every request gets a 4-byte correlation id; many may be in flight at once on the WebSocket
  * (the bridge serialises them onto KiCad's single REQ/REP socket). Control messages from the
- * bridge (`hello`, `server-state`, `error`) are surfaced via `onControl()` and the
- * `sessionId` / `kicadToken` / `serverState` getters.
+ * bridge (`hello`, `server-state`, `events`, `error`) are surfaced via `onControl()` and the
+ * `sessionId` / `kicadToken` / `serverState` / `eventsState` getters. KiCad events relayed by
+ * the bridge (frames with the reserved id `WS_EVENT_FRAME_ID`) go to `onEvent()` listeners as
+ * raw `kiapi.common.events.Event` bytes; `KiCadEvents.fromTransport()` decodes them.
  */
 
 import { TransportError, type SendOptions, type Transport, type TransportErrorCode, type TransportState } from "./types";
 import {
   type BridgeControlMessage,
+  type BridgeEventsState,
   type KiCadServerState,
+  WS_MAX_REQUEST_ID,
   decodeWsFrame,
   encodeControl,
   encodeWsFrame,
+  isEventFrame,
   parseControl,
   toUint8Array,
 } from "./ws-bridge-protocol";
@@ -57,6 +62,7 @@ export class WebSocketTransport implements Transport {
   private _state: TransportState = "connecting";
   private readonly stateListeners = new Set<(s: TransportState) => void>();
   private readonly controlListeners = new Set<(m: BridgeControlMessage) => void>();
+  private readonly eventListeners = new Set<(event: Uint8Array) => void>();
 
   private readonly pending = new Map<number, Pending>();
   private nextId = 1;
@@ -68,6 +74,7 @@ export class WebSocketTransport implements Transport {
   private _sessionId: string | null = null;
   private _kicadToken: string | null = null;
   private _serverState: KiCadServerState | null = null;
+  private _eventsState: BridgeEventsState = "disconnected";
 
   static async connect(url: string | URL, opts?: WebSocketTransportOptions): Promise<WebSocketTransport> {
     const t = new WebSocketTransport(url, opts);
@@ -106,10 +113,7 @@ export class WebSocketTransport implements Transport {
       clearTimeout(connectTimer);
       if (!this.lastError || this._state === "open") {
         const detail = ev.code ? ` (code ${ev.code}${ev.reason ? `: ${ev.reason}` : ""})` : "";
-        this.lastError = new TransportError(
-          this._state === "connecting" ? "connect" : "closed",
-          `WebSocket ${this.url} closed${detail}`,
-        );
+        this.lastError = new TransportError(this._state === "connecting" ? "connect" : "closed", `WebSocket ${this.url} closed${detail}`);
       }
       this.finish();
     });
@@ -151,9 +155,28 @@ export class WebSocketTransport implements Transport {
     return this._serverState;
   }
 
+  /**
+   * Whether the bridge is subscribed to KiCad's events socket for this session (`hello` /
+   * `events` control messages). `disconnected` also for protocol-version-1 bridges; poll then.
+   */
+  get eventsState(): BridgeEventsState {
+    return this._eventsState;
+  }
+
   /** Number of requests awaiting a reply. */
   get inFlight(): number {
     return this.pending.size;
+  }
+
+  /**
+   * Subscribe to KiCad events relayed by the bridge: one raw `kiapi.common.events.Event` per
+   * call, a standalone copy the listener owns. See `KiCadEvents.fromTransport()` for decoding.
+   */
+  onEvent(cb: (event: Uint8Array) => void): () => void {
+    this.eventListeners.add(cb);
+    return () => {
+      this.eventListeners.delete(cb);
+    };
   }
 
   onStateChange(cb: (state: TransportState) => void): () => void {
@@ -246,6 +269,17 @@ export class WebSocketTransport implements Transport {
       this.log(`ignoring bad binary frame: ${errorMessage(e)}`);
       return;
     }
+    if (isEventFrame({ id })) {
+      const event = payload.slice();
+      for (const cb of Array.from(this.eventListeners)) {
+        try {
+          cb(event);
+        } catch (e) {
+          this.log(`event listener threw: ${errorMessage(e)}`);
+        }
+      }
+      return;
+    }
     const p = this.pending.get(id);
     if (!p) {
       this.log(`dropping reply with unknown correlation id ${id}`);
@@ -263,11 +297,15 @@ export class WebSocketTransport implements Transport {
         this._sessionId = m.sessionId;
         this._kicadToken = m.kicadToken;
         this._serverState = m.serverState;
+        this._eventsState = m.eventsState ?? "disconnected";
         if (this._state === "connecting" && this.socketOpen) this.setState("open");
         break;
       case "server-state":
         this._serverState = m.state;
         if (m.kicadToken !== undefined) this._kicadToken = m.kicadToken;
+        break;
+      case "events":
+        this._eventsState = m.state;
         break;
       case "error": {
         if (m.id !== null) {
@@ -312,6 +350,7 @@ export class WebSocketTransport implements Transport {
       p.reject(err);
     }
     this.pending.clear();
+    this._eventsState = "disconnected";
     this.setState("closed");
   }
 
@@ -322,7 +361,8 @@ export class WebSocketTransport implements Transport {
   private allocId(): number {
     for (;;) {
       const id = this.nextId;
-      this.nextId = this.nextId >= 0xffffffff ? 1 : this.nextId + 1;
+      // WS_EVENT_FRAME_ID (0xffffffff) is reserved for relayed events; wrap before reaching it.
+      this.nextId = this.nextId >= WS_MAX_REQUEST_ID ? 1 : this.nextId + 1;
       if (!this.pending.has(id)) return id;
     }
   }
