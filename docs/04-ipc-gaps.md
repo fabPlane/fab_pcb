@@ -43,12 +43,14 @@ client renders "26.5000" where KiCad plots "26.5000 mm": the prefix, suffix, uni
 separate fields but the composition rules live in KiCad.
 
 ### G22 · `RunBoardJobDrc` hangs after the async export jobs have run
+**Status:** done (d5886f9e60, a99a1a803e). Root cause: KiCad's DRC test providers are process-wide singletons, so the jobs handler's own board copy stole them from the open document and a later check ran against the wrong board. Providers are now bound to the engine that runs them, checks drain the job queue first, and DRC gained the async treatment as an exclusive job.
 Found by the app's browser proof: once the 13 async export jobs have run in a session, a
 subsequent `RunBoardJobDrc` never answers at all, so a client's timeout is the only way out.
 Same class as the old `RunSchematicJobExportNetlist` wedge. Likely the job worker thread and the
 synchronous DRC path contending for the board.
 
 ### G21 · `GetColorTheme("KiCad Classic")` returns zero colours
+**Status:** done (a86517520d): a theme remembers its colour keys even when its parameters are cleared; both built-in themes return the same 301 keys.
 `COLOR_SETTINGS::CreateBuiltinColorSettings()` clears that theme's `m_params`, so `GetColorKeys()`
 is empty and the handler enumerates nothing. Only "KiCad Default" answers usefully.
 
