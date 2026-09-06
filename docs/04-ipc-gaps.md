@@ -34,6 +34,10 @@ has staged changes. `RatsnestEdge.net.code` is always 0 (the handler packs only 
 `SetTeardropsResponse.item_count` counts pads and vias processed rather than changed, so
 `RemoveTeardrops` always reports the same number instead of dropping to zero.
 
+### G21 · `GetColorTheme("KiCad Classic")` returns zero colours
+`COLOR_SETTINGS::CreateBuiltinColorSettings()` clears that theme's `m_params`, so `GetColorKeys()`
+is empty and the handler enumerates nothing. Only "KiCad Default" answers usefully.
+
 ### G19 · Bugs found by the renderer's pixel-diff harness
 `GetTextAsShapes` given a `TextBox` returns its glyphs around the origin instead of at the box
 position (the kitchen-sink "Hello" cell at 25, 24.5 mm comes back at 0.3, 0.6 mm), so a client
