@@ -57,8 +57,14 @@ function toResult(command: string, res: RunJobResponse, opts?: JobOptions): JobR
 abstract class Jobs {
   constructor(protected readonly doc: Document) {}
 
-  protected settings(outputPath: string): RunJobSettings {
-    return { $typeName: "kiapi.common.types.RunJobSettings", document: this.doc.specifier, outputPath };
+  protected settings(outputPath: string, opts: { async?: boolean; returnInline?: boolean } = {}): RunJobSettings {
+    return {
+      $typeName: "kiapi.common.types.RunJobSettings",
+      document: this.doc.specifier,
+      outputPath,
+      async: opts.async ?? false,
+      returnInline: opts.returnInline ?? false,
+    };
   }
 }
 
