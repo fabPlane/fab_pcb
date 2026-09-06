@@ -9,7 +9,9 @@ import { resolve } from "node:path";
  *
  * The bridge is started by the global setup when nothing answers on BRIDGE_URL
  * (default http://127.0.0.1:4020); the app is served by the usual webServer (vite dev) with
- * VITE_BRIDGE_URL pointing at the bridge. Set E2E_BASE_URL to reuse a running app.
+ * VITE_BRIDGE_URL pointing at the bridge. Set E2E_BASE_URL to reuse a running app. A server
+ * already listening on the port is NOT reused unless E2E_REUSE=1: a stale dev server in mock
+ * mode would otherwise be tested silently (`--strictPort` makes the clash fail loudly instead).
  */
 const PORT = Number(process.env.E2E_PORT ?? 5174);
 const BASE_URL = process.env.E2E_BASE_URL ?? `http://127.0.0.1:${PORT}`;
@@ -41,7 +43,7 @@ export default defineConfig({
         command: `bunx vite --host 127.0.0.1 --port ${PORT} --strictPort`,
         cwd: APP_DIR,
         url: BASE_URL,
-        reuseExistingServer: true,
+        reuseExistingServer: !!process.env.E2E_REUSE,
         timeout: 120_000,
         env: { VITE_BRIDGE_URL: BRIDGE_URL },
         stdout: "ignore",

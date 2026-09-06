@@ -299,6 +299,15 @@ export class CommandServiceImpl implements CommandService {
     await tx.commit();
   }
 
+  /**
+   * Records a change that already happened on the server outside a transaction (e.g.
+   * ParseAndCreateItemsFromString, which pushes its own KiCad commit) so undo / redo replay it.
+   */
+  record(store: ItemStore, message: string, forward: ItemOp[], inverse: ItemOp[]): void {
+    this.stores.set(storeKeyOf(store), store);
+    this.pushHistory({ id: nextEntryId++, message, storeKey: storeKeyOf(store), forward, inverse, at: Date.now() });
+  }
+
   /** @internal called by transactions */
   pushHistory(entry: HistoryEntry): void {
     if (this.replaying) return;

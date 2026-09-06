@@ -1,7 +1,7 @@
 // Creation and editing commands (batch 2 "editing parity"): the interactive placement tools
 // from canvas/tools.ts, rotate-by-angle, set layer / net, align / distribute, copy / paste
-// (in-app clipboard replayed as CreateItems: KiCad's ParseAndCreateItemsFromString is a stub,
-// see conformance-summary.txt), the 3D tab and the page-settings dialog. Registered after the
+// (the in-app clipboard replayed as CreateItems, and KiCad's clipboard text through
+// SaveItemsToString / ParseAndCreateItemsFromString), the 3D tab and the page-settings dialog. Registered after the
 // builtins so the placeholder entries with the same ids are replaced.
 
 import { BoardLayer, type SchematicSymbol as SchematicSymbolDefinition } from '@kicad-web/proto';
@@ -9,7 +9,7 @@ import type { StoredItem } from '@/contracts';
 import { getCanvasHost, isMoving } from '@/canvas/CanvasSlot';
 import { activeTool, cancelTool, startTool, toolFinish, toolKey, type ToolId } from '@/canvas/tools';
 import { cloneForPaste, nextReference, type LibraryFootprint } from '@/lib/create';
-import { childrenOf, flipItem, itemAnchor, itemsCentre, rotateItem, translateItem } from '@/lib/geometry';
+import { childrenOf, flipItem, itemAnchor, itemsCentre, referenceOf, rotateItem, translateItem } from '@/lib/geometry';
 import { layerDisplayName } from '@/lib/enums';
 import type { Services } from '@/services/types';
 import { activeDocument, storeKeyFor } from '@/state/active';
@@ -34,6 +34,14 @@ interface Clipboard {
   items: StoredItem[];
   kind: string;
   centre: { x: number; y: number };
+  /** KiCad clipboard s-expression (`SaveItemsToString`), when the services provide it. */
+  text?: string;
+}
+
+/** Optional document-service extras (the KiCad services have them, the mock does not). */
+interface ClipboardDocs {
+  saveItemsToString?(kind: string, id: string, ids: string[]): Promise<string>;
+  parseAndCreate?(kind: string, id: string, text: string): Promise<StoredItem[]>;
 }
 let clipboard: Clipboard | null = null;
 
@@ -66,8 +74,8 @@ export function registerEditingCommands(services: Services, extras: { library?: 
     if (isMoving(doc.key)) return;
     startTool(id, doc, params);
   };
-  const usedReferences = (store: { all(): Iterable<StoredItem> }, type: string): string[] =>
-    [...store.all()].filter((i) => i.type === type).map((i) => String((i.proto as { referenceField?: { text?: { text?: unknown } } }).referenceField?.text?.text ?? ''));
+  const usedReferences = (store: { all(): Iterable<StoredItem> }, type: string): string[] => [...store.all()].filter((i) => i.type === type).map(referenceOf);
+  const clipDocs = documents as ClipboardDocs;
   const refOf = (v: unknown): string => (typeof v === 'string' ? v : String((v as { text?: string } | undefined)?.text ?? ''));
 
   const list: Command[] = [
@@ -383,8 +391,20 @@ export function registerEditingCommands(services: Services, extras: { library?: 
         if (!sel || !sel.items.length) return;
         const items = withChildren(sel.store, sel.items);
         const centre = itemsCentre(sel.items) ?? { x: 0, y: 0 };
-        clipboard = { items: items.map((i) => ({ ...i, item: undefined, proto: structuredCloneProto(i.proto) })), kind: sel.kind, centre };
+        const clip: Clipboard = { items: items.map((i) => ({ ...i, item: undefined, proto: structuredCloneProto(i.proto) })), kind: sel.kind, centre };
+        clipboard = clip;
         notify(`Copied ${sel.items.length} item${sel.items.length === 1 ? '' : 's'}`);
+        // KiCad's own clipboard format as well (pasteable into the desktop editors and `edit.pasteText`).
+        if (clipDocs.saveItemsToString && sel.kind !== 'footprint') {
+          void clipDocs
+            .saveItemsToString(sel.kind, sel.id, sel.items.map((i) => i.id))
+            .then((text) => {
+              clip.text = text;
+              log(`SaveItemsToString: ${text.length} chars`);
+              return typeof navigator !== 'undefined' && navigator.clipboard?.writeText ? navigator.clipboard.writeText(text) : undefined;
+            })
+            .catch((e: unknown) => log(`SaveItemsToString failed: ${e instanceof Error ? e.message : String(e)}`, 'warn'));
+        }
       },
     },
     {
@@ -427,6 +447,54 @@ export function registerEditingCommands(services: Services, extras: { library?: 
           }
         });
         useEditorStore.getState().setSelection(doc.key, created);
+      },
+    },
+    {
+      id: 'edit.pasteText',
+      title: 'Paste KiCad clipboard text…',
+      group: 'Edit',
+      when: (ctx) => ctx.editor === 'board' || ctx.editor === 'schematic',
+      keywords: ['ParseAndCreateItemsFromString', 's-expression', 'clipboard'],
+      description: 'Pastes KiCad clipboard s-expression text (as copied from the desktop editors or Copy here) through ParseAndCreateItemsFromString',
+      run: async () => {
+        const doc = activeDocument(services);
+        if (!doc) return;
+        if (!clipDocs.parseAndCreate) {
+          notify('Pasting KiCad clipboard text needs the KiCad services (the mock cannot parse s-expressions)', 'error');
+          return;
+        }
+        let initial = clipboard?.text ?? '';
+        if (typeof navigator !== 'undefined' && navigator.clipboard?.readText) {
+          try {
+            const sys = await navigator.clipboard.readText();
+            if (sys.trim().startsWith('(')) initial = sys;
+          } catch {
+            /* permission denied: fall back to the in-app text */
+          }
+        }
+        const r = await prompt({
+          title: 'Paste KiCad clipboard text',
+          description: 'The text is parsed by KiCad (ParseAndCreateItemsFromString); items get fresh ids and land at their original coordinates.',
+          fields: [{ key: 'text', label: 'Text', type: 'multiline', default: initial }],
+          okLabel: 'Paste',
+        });
+        const text = String(r?.text ?? '').trim();
+        if (!text) return;
+        try {
+          const created = await clipDocs.parseAndCreate(doc.kind, doc.id, text);
+          commands.record(
+            doc.store,
+            `Paste ${created.length} item${created.length === 1 ? '' : 's'} (KiCad text)`,
+            created.map((item) => ({ kind: 'create' as const, item })),
+            created.map((item) => ({ kind: 'delete' as const, item })),
+          );
+          useEditorStore.getState().setSelection(doc.key, created.filter((i) => !i.parent).map((i) => i.id));
+          notify(`Pasted ${created.length} item${created.length === 1 ? '' : 's'} from KiCad text`);
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : String(e);
+          log(`ParseAndCreateItemsFromString failed: ${msg}`, 'error');
+          notify(`Paste failed: ${msg}`, 'error');
+        }
       },
     },
     ...alignCommands(services, selected),

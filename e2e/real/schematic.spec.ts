@@ -20,6 +20,9 @@ test.describe("real KiCad: schematic", () => {
     await page.waitForTimeout(1500);
     await page.evaluate(() => (window as any).__kicadWeb.stores.ui.getState().setGrid(1_270_000));
     const rootKey: string = await page.evaluate(() => `schematic:${(window as any).__kicadWeb.stores.app.getState().activeSheet}`);
+    // frame the region the clicks use; zoom-to-fit leaves y > ~137 mm under the bottom panel
+    await page.evaluate((k) => (window as any).__kicadWeb.host(k).setCamera({ x: 80e6, y: 140e6, zoom: 4e-6 }), rootKey);
+    await page.waitForTimeout(300);
     const sheetPath = rootKey.slice("schematic:".length);
     const count = (type: string) => page.evaluate(({ sheetPath, type }) => [...(window as any).__kicadWeb.services.documents.sheet(sheetPath).byType(type)].length, { sheetPath, type });
 

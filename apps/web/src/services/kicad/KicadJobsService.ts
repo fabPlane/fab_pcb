@@ -3,11 +3,16 @@
 // `/files/list` can enumerate the outputs and `/files/read` can serve them) and reports the
 // files KiCad returned in `RunJobResponse.output_path` plus whatever appeared in the folder.
 //
-// `RunSchematicJobExportNetlist` is deliberately absent: it never answers headless and
-// wedges the server (packages/client/dist/conformance-summary.txt).
+// Jobs are started with `async` so KiCad answers at once (JS_RUNNING + job id, KiCad >= 11) and
+// `Job.wait` polls GetJobStatus (JobProgress events wake it) into `JobRun.progress` / `log`; a
+// server that runs jobs synchronously just returns the finished result. `RunSchematicJobExportNetlist`
+// used to wedge the headless server; that is fixed in web-api 022e45f6d2+.
 
-import { BoardLayer, Board3DFormat, DrillFormat, DrillMapFormat, DrillOrigin, GerberPrecision, Ipc2581Version, OdbCompression, PositionSide, Units } from '@kicad-web/proto';
-import { JobError, type JobResult } from '@kicad-web/client';
+import { BoardLayer, Board3DFormat, DrillFormat, DrillMapFormat, DrillOrigin, GerberPrecision, Ipc2581Version, JobStatus, OdbCompression, PositionSide, SchematicNetlistFormat, Units } from '@kicad-web/proto';
+import { JobError, type JobOptions, type JobResult } from '@kicad-web/client';
+
+/** Every job runs async when the server supports it; see the header. */
+const JOB: JobOptions = { async: true };
 import type { JobDefinition, JobOutput, JobRun, JobsService } from '../types';
 import type { KicadDocumentService } from './KicadDocumentService';
 import type { KicadSessionService } from './KicadSessionService';
@@ -180,8 +185,7 @@ export function jobDefinitions(enabledLayers: readonly string[]): JobDefinition[
       description: 'KiCad s-expression netlist (RunSchematicJobExportNetlist).',
       document: 'schematic',
       command: 'RunSchematicJobExportNetlist',
-      options: [],
-      unavailable: 'RunSchematicJobExportNetlist never answers on the headless api-server and wedges it (packages/client/dist/conformance-summary.txt); use GetSchematicNetlist through the Nets panel instead.',
+      options: [{ key: 'format', label: 'Format', type: 'select', default: 'sexpr', choices: [{ value: 'sexpr', label: 'KiCad s-expression' }, { value: 'xml', label: 'KiCad XML' }] }],
     },
     {
       id: 'schematic.bom',
@@ -262,7 +266,23 @@ export class KicadJobsService implements JobsService {
     const release = this.docs.beginActivity();
     try {
       await this.session.mkdir(dir);
-      const result = await this.execute(def, options, dir);
+      let result = await this.execute(def, options, dir);
+      if (result.running && result.job) {
+        run.log.push(`job ${result.jobId} queued (async); polling GetJobStatus`);
+        run.progress = 0.15;
+        this.emit();
+        result = await result.job.wait({
+          intervalMs: 250,
+          events: this.docs.kicadEvents ?? undefined,
+          onProgress: (p) => {
+            run.progress = Math.max(run.progress, Math.min(0.95, 0.15 + (p.percent / 100) * 0.8));
+            const line = `${p.percent}% ${p.description}`.trim();
+            if (p.description && run.log[run.log.length - 1] !== line) run.log.push(line);
+            this.emit();
+          },
+        });
+        run.log.push(`job ${result.jobId} finished: ${JobStatus[result.status] ?? result.status}`);
+      }
       run.log.push(...result.message.split('\n').filter(Boolean));
       run.log.push(`KiCad reported ${result.outputPaths.length} output path(s)`);
       run.outputs = await this.collectOutputs(dir, result.outputPaths);
@@ -291,7 +311,7 @@ export class KicadJobsService implements JobsService {
     switch (def.id) {
       case 'board.svg':
         if (!board) throw new Error('no board is open');
-        return board.jobs.exportSvg(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.svg`, { plotSettings: { layers: layerEnums(o.layers), blackAndWhite: bool('blackAndWhite'), mirror: bool('mirror') }, fitPageToBoard: bool('fitPageToBoard') });
+        return board.jobs.exportSvg(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.svg`, { plotSettings: { layers: layerEnums(o.layers), blackAndWhite: bool('blackAndWhite'), mirror: bool('mirror') }, fitPageToBoard: bool('fitPageToBoard') }, JOB);
       case 'board.gerbers':
         if (!board) throw new Error('no board is open');
         return board.jobs.exportGerbers(`${dir}/`, {
@@ -301,7 +321,7 @@ export class KicadJobsService implements JobsService {
           createGerberJobFile: bool('createGerberJobFile'),
           useX2Format: true,
           precision: o.precision === '4.5' ? GerberPrecision.GP_5 : GerberPrecision.GP_6,
-        });
+        }, JOB);
       case 'board.drill':
         if (!board) throw new Error('no board is open');
         return board.jobs.exportDrill(`${dir}/`, {
@@ -309,7 +329,7 @@ export class KicadJobsService implements JobsService {
           units,
           origin: o.origin === 'plot' ? DrillOrigin.DO_PLOT : DrillOrigin.DO_ABSOLUTE,
           mapFormat: bool('generateMap') ? DrillMapFormat.DMF_PDF : DrillMapFormat.DMF_UNKNOWN,
-        });
+        }, JOB);
       case 'board.position':
         if (!board) throw new Error('no board is open');
         return board.jobs.exportPosition(`${dir}/`, {
@@ -317,10 +337,10 @@ export class KicadJobsService implements JobsService {
           side: o.side === 'front' ? PositionSide.PS_FRONT : o.side === 'back' ? PositionSide.PS_BACK : PositionSide.PS_BOTH,
           smdOnly: bool('smdOnly'),
           excludeDnp: bool('excludeDnp'),
-        });
+        }, JOB);
       case 'board.pdf':
         if (!board) throw new Error('no board is open');
-        return board.jobs.exportPdf(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.pdf`, { plotSettings: { layers: layerEnums(o.layers), blackAndWhite: bool('blackAndWhite') } });
+        return board.jobs.exportPdf(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.pdf`, { plotSettings: { layers: layerEnums(o.layers), blackAndWhite: bool('blackAndWhite') } }, JOB);
       case 'board.step':
         if (!board) throw new Error('no board is open');
         return board.jobs.export3D(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.step`, {
@@ -338,7 +358,7 @@ export class KicadJobsService implements JobsService {
           useGridOrigin: o.origin === 'grid',
           useDrillOrigin: o.origin === 'drill',
           overwrite: true,
-        });
+        }, JOB);
       case 'board.glb':
         if (!board) throw new Error('no board is open');
         return board.jobs.export3D(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.glb`, {
@@ -355,7 +375,7 @@ export class KicadJobsService implements JobsService {
           exportSoldermask: o.exportSoldermask === undefined ? true : bool('exportSoldermask'),
           usePcbCenterOrigin: true,
           overwrite: true,
-        });
+        }, JOB);
       case 'board.ipc2581':
         if (!board) throw new Error('no board is open');
         return board.jobs.exportIpc2581(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.xml`, {
@@ -366,26 +386,30 @@ export class KicadJobsService implements JobsService {
           bomRevision: String(o.bomRevision ?? ''),
           manufacturerPartNumberColumn: String(o.mpnColumn ?? ''),
           manufacturerColumn: String(o.manufacturerColumn ?? ''),
-        });
+        }, JOB);
       case 'board.odb':
         if (!board) throw new Error('no board is open');
         return board.jobs.exportOdb(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}-odb${o.compression === 'zip' ? '.zip' : o.compression === 'tgz' ? '.tgz' : ''}`, {
           units,
           precision: Number(o.precision ?? 2),
           compression: o.compression === 'none' ? OdbCompression.ODBC_NONE : o.compression === 'tgz' ? OdbCompression.ODBC_TGZ : OdbCompression.ODBC_ZIP,
-        });
+        }, JOB);
       case 'board.dxf':
         if (!board) throw new Error('no board is open');
-        return board.jobs.exportDxf(`${dir}/`, { plotSettings: { layers: layerEnums(o.layers) } });
+        // DXF wants a file name (a directory fails with "Failed to create file"); KiCad writes one file per layer next to it
+        return board.jobs.exportDxf(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.dxf`, { plotSettings: { layers: layerEnums(o.layers) } }, JOB);
       case 'schematic.svg':
         if (!sch) throw new Error('no schematic is open');
-        return sch.jobs.exportSvg(`${dir}/`, { plotSettings: { blackAndWhite: bool('blackAndWhite'), plotDrawingSheet: bool('plotDrawingSheet'), plotAll: true } });
+        return sch.jobs.exportSvg(`${dir}/`, { plotSettings: { blackAndWhite: bool('blackAndWhite'), plotDrawingSheet: bool('plotDrawingSheet'), plotAll: true } }, JOB);
       case 'schematic.pdf':
         if (!sch) throw new Error('no schematic is open');
-        return sch.jobs.exportPdf(`${dir}/${sch.name || 'schematic'}.pdf`, { plotSettings: { blackAndWhite: bool('blackAndWhite'), plotDrawingSheet: bool('plotDrawingSheet'), plotAll: true }, hierarchicalLinks: bool('hierarchicalLinks') });
+        return sch.jobs.exportPdf(`${dir}/${sch.name || 'schematic'}.pdf`, { plotSettings: { blackAndWhite: bool('blackAndWhite'), plotDrawingSheet: bool('plotDrawingSheet'), plotAll: true }, hierarchicalLinks: bool('hierarchicalLinks') }, JOB);
       case 'schematic.bom':
         if (!sch) throw new Error('no schematic is open');
-        return sch.jobs.exportBom(`${dir}/${sch.name || 'schematic'}-bom.csv`, { excludeDnp: bool('excludeDnp'), groupSymbols: bool('groupSymbols') });
+        return sch.jobs.exportBom(`${dir}/${sch.name || 'schematic'}-bom.csv`, { excludeDnp: bool('excludeDnp'), groupSymbols: bool('groupSymbols') }, JOB);
+      case 'schematic.netlist':
+        if (!sch) throw new Error('no schematic is open');
+        return sch.jobs.exportNetlist(`${dir}/${(sch.name || 'schematic').replace(/\.kicad_sch$/, '')}.${o.format === 'xml' ? 'xml' : 'net'}`, { format: o.format === 'xml' ? SchematicNetlistFormat.SNF_KICAD_XML : SchematicNetlistFormat.SNF_KICAD_SEXPR }, JOB);
       default:
         throw new Error(`job ${def.id} has no runner`);
     }

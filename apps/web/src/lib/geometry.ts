@@ -258,3 +258,16 @@ export function childrenOf(store: { all(): Iterable<StoredItem> }, parentId: str
   for (const it of store.all()) if (it.parent === parentId) out.push(it);
   return out;
 }
+
+/**
+ * Reference designator of a footprint or symbol. Board fields nest `Field → BoardText → Text`
+ * (`referenceField.text.text.text`), schematic fields `SchematicField → Text`
+ * (`referenceField.text.text`); the mock uses the flat form.
+ */
+export function referenceOf(item: StoredItem): string {
+  const field = (item.proto as { referenceField?: { text?: { text?: unknown } } }).referenceField;
+  const t = field?.text?.text;
+  if (typeof t === 'string') return t.trim();
+  const inner = (t as { text?: unknown } | undefined)?.text;
+  return typeof inner === 'string' ? inner.trim() : '';
+}

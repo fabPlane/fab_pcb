@@ -210,6 +210,8 @@ export interface CommandService {
   begin(store: ItemStore, message: string): Transaction;
   /** Convenience: begin, run `fn`, commit (or drop if `fn` throws). */
   run(store: ItemStore, message: string, fn: (tx: Transaction) => void): Promise<void>;
+  /** Records ops that already happened on the server (no transaction) so undo / redo replay them. */
+  record(store: ItemStore, message: string, forward: ItemOp[], inverse: ItemOp[]): void;
   undo(): Promise<HistoryEntry | null>;
   redo(): Promise<HistoryEntry | null>;
   canUndo(): boolean;

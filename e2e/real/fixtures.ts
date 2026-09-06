@@ -52,7 +52,11 @@ export async function openBoard(page: Page, pro: string): Promise<void> {
 export const revision = (page: Page): Promise<number> => page.evaluate(async () => Number(await (window as any).__kicadWeb.services.documents.boardDoc.revision()));
 export const waitRevisionAbove = (page: Page, r: number) => page.waitForFunction((r) => (window as any).__kicadWeb.services.documents.boardDoc.revision().then((v: bigint) => Number(v) > r), r, { timeout: 30_000 });
 export const countType = (page: Page, type: string): Promise<number> => page.evaluate((type) => [...(window as any).__kicadWeb.services.documents.board().byType(type)].length, type);
-export const runCommand = (page: Page, id: string) => page.evaluate((id) => (window as any).__kicadWeb.runCommand(id), id);
+/** Starts a command without awaiting it: commands that open a prompt only resolve once the dialog is answered. */
+export const runCommand = (page: Page, id: string) =>
+  page.evaluate((id) => {
+    void (window as any).__kicadWeb.runCommand(id);
+  }, id);
 
 export async function clickWorld(page: Page, storeKey: string, label: string, x: number, y: number): Promise<void> {
   const box = (await page.locator(`canvas[aria-label="${label}"]`).boundingBox())!;

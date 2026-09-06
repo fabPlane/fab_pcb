@@ -72,6 +72,8 @@ export interface RouteVia {
 
 export interface ToolSession {
   id: ToolId;
+  /** Increments per startTool: writes after an await are skipped when a newer session replaced this one. */
+  seq: number;
   storeKey: string;
   kind: DocumentKind;
   store: ItemStore;
@@ -102,6 +104,10 @@ export const useToolStore = create<ToolState>((set) => ({
 }));
 
 let services: Services | null = null;
+let toolSeq = 0;
+
+/** True while `s` is still the live session (nothing started or cancelled a tool since). */
+const stillActive = (s: Pick<ToolSession, 'seq'>): boolean => useToolStore.getState().session?.seq === s.seq;
 
 /** Called once from the composition root; tools need the command service and documents. */
 export function bindTools(s: Services): void {
@@ -140,7 +146,7 @@ export function activeTool(storeKey?: string): ToolSession | null {
 }
 
 export function startTool(id: ToolId, doc: { key: string; kind: DocumentKind; store: ItemStore }, params: Record<string, unknown> = {}): void {
-  const session: ToolSession = { id, storeKey: doc.key, kind: doc.kind, store: doc.store, points: [], params, vias: [], hint: HINTS[id] };
+  const session: ToolSession = { id, seq: ++toolSeq, storeKey: doc.key, kind: doc.kind, store: doc.store, points: [], params, vias: [], hint: HINTS[id] };
   useToolStore.setState({ session, lastClick: null });
   useEditorStore.getState().setTool(doc.key, id);
   useEditorStore.getState().setSelection(doc.key, []);
@@ -255,7 +261,7 @@ export async function toolClick(storeKey: string, world: Pt, hit?: PickResult | 
       if (a.x === p.x && a.y === p.y) return;
       const width = Number(s.params.widthNm ?? 150_000);
       await createItems(s, 'Draw line', [makeBoardShape({ kind: 'segment', a, b: p }, layer, width)]);
-      if (activeTool(storeKey)) useToolStore.setState({ session: { ...activeTool(storeKey)!, points: [{ ...p, layer }] } });
+      if (stillActive(s)) useToolStore.setState({ session: { ...useToolStore.getState().session!, points: [{ ...p, layer }] } });
       return;
     }
     case 'rect':
@@ -292,12 +298,12 @@ export async function toolClick(storeKey: string, world: Pt, hit?: PickResult | 
       return;
     case 'text': {
       const ok = await createItems(s, 'Place text', [makeBoardText(p, layer, { text: String(s.params.text ?? 'TEXT'), sizeNm: Number(s.params.sizeNm ?? 1_000_000) })]);
-      if (ok) cancelTool();
+      if (ok && stillActive(s)) cancelTool();
       return;
     }
     case 'schText': {
       const ok = await createItems(s, 'Place text', [makeSchematicText(p, String(s.params.text ?? 'Text'), Number(s.params.sizeNm ?? 1_270_000))]);
-      if (ok) cancelTool();
+      if (ok && stillActive(s)) cancelTool();
       return;
     }
     case 'label':
@@ -306,19 +312,19 @@ export async function toolClick(storeKey: string, world: Pt, hit?: PickResult | 
       const kind: LabelKind = s.id === 'label' ? 'local' : s.id === 'globalLabel' ? 'global' : 'hier';
       const title = kind === 'local' ? 'Place label' : kind === 'global' ? 'Place global label' : 'Place hierarchical label';
       const ok = await createItems(s, title, [makeLabel(p, kind, String(s.params.text ?? 'NET'), { shape: (s.params.shape as LabelShape | undefined) ?? 'input', sizeNm: Number(s.params.sizeNm ?? 1_270_000) })]);
-      if (ok) cancelTool();
+      if (ok && stillActive(s)) cancelTool();
       return;
     }
     case 'footprint': {
       const lib = s.params.library as LibraryFootprint;
       const ok = await createItems(s, `Place footprint ${s.params.reference}`, [makeFootprintInstance(p, layer.endsWith('_Cu') ? layer : 'BL_F_Cu', lib, String(s.params.reference), s.params.value as string | undefined)]);
-      if (ok) cancelTool();
+      if (ok && stillActive(s)) cancelTool();
       return;
     }
     case 'symbol': {
       const def = s.params.definition as SchematicSymbolDefinition;
       const ok = await createItems(s, `Place symbol ${s.params.reference}`, [makeSymbolInstance(p, def, String(s.params.reference), String(s.params.value ?? ''), { unit: Number(s.params.unit ?? 1), footprint: s.params.footprint as string | undefined })]);
-      if (ok) cancelTool();
+      if (ok && stillActive(s)) cancelTool();
       return;
     }
   }
@@ -331,7 +337,7 @@ export async function toolFinish(): Promise<void> {
   const pts = s.points;
   const layer = activeLayer(s.storeKey);
   const done = (ok: boolean, repeat = false) => {
-    if (!ok) return;
+    if (!ok || !stillActive(s)) return;
     if (repeat && !ONE_SHOT.has(s.id)) useToolStore.setState({ session: { ...s, points: [], vias: [], net: undefined } });
     else cancelTool();
   };
@@ -414,7 +420,7 @@ export async function toolFinish(): Promise<void> {
         ],
       });
       if (!answer) {
-        cancelTool();
+        if (stillActive(s)) cancelTool();
         return;
       }
       const ok = await createItems(s, 'Add zone', [makeZone(pts, [String(answer.layer)], { net: String(answer.net) || undefined, name: String(answer.name), clearanceNm: Number(answer.clearance), minThicknessNm: Number(answer.minThickness), keepout: Boolean(answer.keepout) })]);
@@ -446,7 +452,7 @@ export async function toolFinish(): Promise<void> {
         ],
       });
       if (!answer) {
-        cancelTool();
+        if (stillActive(s)) cancelTool();
         return;
       }
       const ok = await createItems(s, `Add sheet ${answer.name}`, [makeSheet(pts[0]!, pts[1]!, String(answer.name), String(answer.file))]);

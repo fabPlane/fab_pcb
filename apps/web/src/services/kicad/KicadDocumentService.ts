@@ -30,13 +30,15 @@ import {
   SheetHandle,
   WebSocketTransport,
   flattenHierarchy,
+  toStoredItem,
   type ChangedIds,
   type KiCad,
   type Commit,
   type DocumentSync,
+  type Item,
 } from '@kicad-web/client';
 import { NetClassSchema } from '@kicad-web/proto';
-import type { DocumentKind, ItemStore } from '@/contracts';
+import type { DocumentKind, ItemStore, StoredItem } from '@/contracts';
 import { layerDisplayName } from '@/lib/enums';
 import type { BoardSetup, CustomRuleInfo, DesignRules, DocumentService, LayerInfo, NetInfo, NetclassInfo, SheetInfo, StackupLayer, TextVariable, VariantInfo } from '../types';
 import { applyBoardSetup, readPageInfo, writePageInfo } from './KicadBoardSetup';
@@ -774,6 +776,44 @@ export class KicadDocumentService implements DocumentService {
       const before = await readPageInfo(doc).catch(() => null);
       await writePageInfo(doc, before, info, (m, l) => this.log(m, l));
       await this.afterCommit(kind);
+    } finally {
+      done();
+    }
+  }
+
+  /** KiCad event source (for `Job.wait`), null while events are off. */
+  get kicadEvents(): KiCadEvents | null {
+    return this.events;
+  }
+
+  /** `SaveItemsToString`: KiCad clipboard s-expression text for board items or items of one sheet. */
+  async saveItemsToString(kind: DocumentKind, id: string, ids: string[]): Promise<string> {
+    if (kind === 'board' && this.boardDoc) return this.boardDoc.saveItemsToString(ids);
+    if (kind === 'schematic' && this.schematicDoc) {
+      const h = this.sheetHandle(id);
+      if (!h) throw new Error(`sheet ${id} is not open`);
+      return this.schematicDoc.saveItemsToString(ids, h.scope);
+    }
+    throw new Error(`no ${kind} is open`);
+  }
+
+  /**
+   * `ParseAndCreateItemsFromString`: KiCad pastes clipboard-style text with fresh ids in a commit of
+   * its own; the store follows through DocumentSync. Returns the canonical items.
+   */
+  async parseAndCreate(kind: DocumentKind, id: string, text: string): Promise<StoredItem[]> {
+    const done = this.beginActivity();
+    try {
+      let items: Item[];
+      if (kind === 'board' && this.boardDoc) items = await this.boardDoc.parseAndCreate(text);
+      else if (kind === 'schematic' && this.schematicDoc) {
+        const h = this.sheetHandle(id);
+        if (!h) throw new Error(`sheet ${id} is not open`);
+        items = await this.schematicDoc.parseAndCreate(text, h.scope);
+      } else throw new Error(`no ${kind} is open`);
+      await this.afterCommit(kind);
+      this.log(`ParseAndCreateItemsFromString: ${items.length} item(s) created on the ${kind}`);
+      return items.map(toStoredItem);
     } finally {
       done();
     }

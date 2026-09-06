@@ -5,14 +5,14 @@
 
 import type { StoredItem } from '@/contracts';
 import { getCanvasHost } from '@/canvas/CanvasSlot';
-import { itemAnchor } from '@/lib/geometry';
+import { itemAnchor, referenceOf } from '@/lib/geometry';
 import type { Services, SheetInfo } from '@/services/types';
 import { storeKeyFor } from '@/state/active';
 import { useAppStore } from '@/state/appStore';
 import { useEditorStore } from '@/state/editorStore';
 import { log } from '@/state/logStore';
 
-const refOf = (it: StoredItem): string => String((it.proto as { referenceField?: { text?: { text?: unknown } } }).referenceField?.text?.text ?? '').trim();
+const refOf = referenceOf;
 
 function flatten(sheets: SheetInfo[]): SheetInfo[] {
   const out: SheetInfo[] = [];

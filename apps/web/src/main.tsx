@@ -7,6 +7,7 @@ import { getCommand } from './commands/registry';
 import { useAppStore } from './state/appStore';
 import { useEditorStore } from './state/editorStore';
 import { usePromptStore } from './state/promptStore';
+import { useLogStore } from './state/logStore';
 import { useUiStore } from './state/uiStore';
 import { registerEditingCommands } from './commands/editing';
 import { activeTool, bindTools, cancelTool, toolFinish, toolKey } from './canvas/tools';
@@ -52,7 +53,7 @@ bindHistory(services.commands);
     /** Runs a registered command in the active editor's context (the proof script / e2e). */
     runCommand: (id: string) => getCommand(id)?.run({ editor: useAppStore.getState().activeEditor }),
     tools: { activeTool, toolFinish, toolKey, cancelTool },
-    stores: { app: useAppStore, editor: useEditorStore, prompt: usePromptStore, ui: useUiStore },
+    stores: { app: useAppStore, editor: useEditorStore, prompt: usePromptStore, ui: useUiStore, log: useLogStore },
   };
 }
 

@@ -1,8 +1,9 @@
 # @kicad-web/app
 
 Browser UI for kicad-web: docked editor shell (React + Zustand), the PixiJS board and
-schematic canvases from `@kicad-web/renderer`, a schema-driven properties panel, client-side
-undo, jobs, DRC/ERC. It talks to KiCad through `@kicad-web/client` over the bridge.
+schematic canvases from `@kicad-web/renderer`, interactive placement tools, a schema-driven
+properties panel, client-side undo, jobs with async progress, DRC/ERC, a three.js 3D view and a
+footprint editor. It talks to KiCad through `@kicad-web/client` over the bridge.
 
 ## Running
 
@@ -47,9 +48,9 @@ inside the bridge workspace root). The project screen's file browser is `GET /fi
   `GetBoardEnabledLayers` + `GetBoardLayerName`, nets from `GetNets` + `GetNetClassForNets`,
   board setup from stackup / design rules / custom rules, net classes, text variables and
   variants through the client. Dirty flags compare `GetDocumentRevision` with the revision at
-  open/save; the revision is polled every 2 s while idle and a foreign change re-reads the
-  stores. (KiCad publishes an events socket, `GetServerInfo.events_socket_url`, but the bridge
-  does not relay it yet, hence the poll.)
+  open/save. KiCad's events socket is relayed by the bridge (`KiCadEvents`): `DocumentChanged`
+  re-syncs the stores, `DocumentSaved` clears the dirty flag, `JobProgress` wakes job waits; the
+  2 s `GetDocumentRevision` poll only runs while the bridge reports its events subscription down.
 - **Commits** (`KicadCommitBackend`): a `Transaction` becomes `BeginCommit` →
   `CreateItems` / `UpdateItems` / `DeleteItems` → `EndCommit(CMA_COMMIT)`; KiCad's canonical
   items replace the optimistic copies through the client's `DocumentSync`; a rejected item
@@ -74,11 +75,39 @@ inside the bridge workspace root). The project screen's file browser is `GET /fi
   (`kiapiRegistry`) so real items are editable — numeric enums show their value names, int64
   distances stay `bigint`, oneofs expose `case` / `value`; value-shape inference remains the
   fallback for the mock's plain objects.
-- **Jobs** (`KicadJobsService`): `RunBoardJobExport{Svg,Gerbers,Drill,Position,Pdf,3D}` and
-  `RunSchematicJobExport{Svg,Pdf,BOM}` write into `<project dir>/kicad-web-out/<job>-<run>/`
-  (created through `/files/mkdir`), outputs are listed through `/files/list` and downloadable
-  through `/files/read`. `RunSchematicJobExportNetlist` is left out on purpose (wedges the
-  headless server).
+- **Jobs** (`KicadJobsService`): `RunBoardJobExport{Svg,Gerbers,Drill,Position,Pdf,Dxf,3D (STEP
+  and GLB),Ipc2581,ODB}` and `RunSchematicJobExport{Svg,Pdf,BOM,Netlist}` write into
+  `<project dir>/kicad-web-out/<job>-<run>/` (created through `/files/mkdir`); outputs are listed
+  through `/files/list` and downloadable through `/files/read`. Every job is started with
+  `RunJobSettings.async`: the server answers `JS_RUNNING` + a job id and `Job.wait` polls
+  `GetJobStatus` (woken by `JobProgress` events) into the run's progress bar and log; a server
+  that runs jobs synchronously simply returns the finished result.
+- **Editing tools** (`src/canvas/tools.ts`, `src/commands/editing.ts`, `src/lib/create.ts`):
+  board route (click-click, `V` = via + layer switch), via, line / rect / circle / arc / polygon,
+  text, zone (outline → net/layer prompt → `RefillZones`), footprint by LIB_ID; schematic wire /
+  bus (90° bends), junction, no-connect, local / global / hierarchical labels, text, symbol by
+  LIB_ID, hierarchical sheet. Items are built as protobuf-es messages and committed as one
+  transaction (`BeginCommit` → `CreateItems` → `EndCommit`), so every tool run is one undo step.
+  Rotate by angle, set layer / net, align / distribute, duplicate, copy / paste (in-app clipboard
+  replayed through `CreateItems`) and `Edit → Paste KiCad clipboard text…` (`SaveItemsToString`
+  on copy, `ParseAndCreateItemsFromString` on paste, recorded in the history so undo deletes the
+  pasted items) live in the Edit menu and the canvas context menu.
+- **Library access** (`KicadLibraryService`): footprint and symbol definitions come from
+  `OpenDocument(DOCTYPE_FOOTPRINT / DOCTYPE_SYMBOL)` + `GetItems` in a second bridge session on
+  the same project (so the project's `fp-lib-table` / `sym-lib-table` apply); the footprint
+  editor edits and saves (`SaveDocument`) that library document. `FootprintInstance.definition`
+  carries the library children translated to the placement position (KiCad's deserializer
+  rebuilds pads from it in absolute coordinates), see `makeFootprintInstance`.
+- **Board setup / page settings** (`KicadBoardSetup.ts`): the dialog writes only the pages that
+  changed with `SetBoardDesignRules`, `UpdateBoardStackup`, `SetCustomDesignRules` (name /
+  condition / comment / severity on the rules KiCad served) and `SetBoardOrigin`; `Tools → Page
+  settings` reads / writes `GetPageSettings` / `GetTitleBlockInfo` and their setters for the board
+  and the schematic.
+- **3D** (`src/screens/ThreeDView.tsx`): `Window → Open 3D viewer` runs `RunBoardJobExport3D`
+  (GLB) and shows it with three.js (`GLTFLoader` + `OrbitControls`); Refresh re-exports.
+- **Cross-probe** (`src/services/crossProbe.ts`): selecting a footprint selects the symbol with
+  the same reference (and vice versa); `Inspect → Cross-probe` jumps to the other editor.
+  KiCad's `SyncSelection` / `FocusOnItem` are GUI-only, hence the client-side match.
 - **Markers** (`KicadMarkerService`): `RunBoardJobDrc` / `GetDrcMarkers` /
   `SetDrcMarkerExcluded` and the ERC twins, offered only when `GetSupportedCommands` advertises
   them (the capability table is re-read after documents open, because handlers register per
@@ -86,13 +115,20 @@ inside the bridge workspace root). The project screen's file browser is `GET /fi
 
 ## Proof against real KiCad
 
-`scripts/prove-kicad.mjs` drives the app in headless Chromium (Playwright from `e2e/`):
-opens the kitchen-sink project, hovers/selects R1, edits its X in the properties panel,
-verifies `GetDocumentRevision` incremented and `SaveDocumentToString` carries the new
-position, undoes (revision increments again, position restored), runs DRC, runs the SVG
-export and lists its output, opens `eeschema/api_kitchen_sink.kicad_sch` in its own session
-(KiCad holds one project per server), walks to the subsheet and tries ERC. Screenshots land in
-`docs/screenshots/`.
+`scripts/prove-kicad.mjs` drives the app in headless Chromium (Playwright from `e2e/`) against
+a throwaway copy of the kitchen-sink project inside the bridge workspace root (project-local
+library tables). Steps (`node apps/web/scripts/prove-kicad.mjs [step,...]`): `board` (open,
+pick R1), `edit` (properties X, undo through `SaveDocumentToString`), `route` (track + via +
+layer switch, undo / redo, via tool), `draw` (line / rect / circle / arc / polygon / text /
+filled zone), `footprint` (place `Resistor_SMD:R_0603_1608Metric`, pads verified in the file),
+`align` (align / distribute / rotate by 45° / set layer / set net), `clipboard` (duplicate,
+copy / paste, `SaveItemsToString` → `ParseAndCreateItemsFromString` + undo), `setup` (design
+rules, stackup, custom rules, origin round trip), `page` (title block / page size), `3d` (GLB
+export rendered in three.js), `jobs` (every export incl. async progress), `fpeditor` (edit a
+pad in the footprint editor, `SaveDocument` writes the `.kicad_mod`), `schematic` (wire, bus,
+junction, no-connect, three labels, text, `Device:R`, hierarchical sheet, save), `crossprobe`,
+`erc`. Commands that open a prompt are started without awaiting them (`run()`), then the
+prompt is filled. Screenshots land in `docs/screenshots/`.
 
 ## Tests
 
@@ -100,5 +136,7 @@ export and lists its output, opens `eeschema/api_kitchen_sink.kicad_sch` in its 
 bun test            # unit tests, incl. test/kicad-services.test.ts (fake transport: session
                     # lifecycle, store population from canned GetItems, commit backend)
 bunx tsc -b
-bun run build
+bun run --filter @kicad-web/app build
+cd e2e && bun run test          # mock smoke (E2E_PORT=5175 when a dev server holds 5173)
+KICAD_CLI=... bun run test:real # e2e/real: real KiCad through the bridge (skipped without KICAD_CLI)
 ```
