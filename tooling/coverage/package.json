@@ -1,0 +1,15 @@
+{
+  "name": "@kicad-web/coverage",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Diffs kiapi request messages against registerHandler<> calls in the KiCad sources; emits commands.json and docs/api-coverage.md",
+  "type": "module",
+  "scripts": {
+    "run": "bun run run.ts",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "2.14.1",
+    "@kicad-web/proto": "workspace:*"
+  }
+}

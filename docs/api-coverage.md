@@ -1,14 +1,14 @@
-# IPC API coverage matrix (KiCad 10.99, commit cbd303d16b)
+# IPC API coverage matrix (KiCad 10.99, commit ef0ed71606)
 
-Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the KiCad sources. "Handlers" names the C++ handler class that serves the command: common = API_HANDLER_COMMON (always loaded), editor = API_HANDLER_EDITOR, board = API_HANDLER_BOARD, pcb = API_HANDLER_PCB, footprint = API_HANDLER_FOOTPRINT, sch = API_HANDLER_SCH.
+Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the KiCad sources. "Handlers" names the C++ handler class that serves the command: server = API_HANDLER_SERVER (inside the API server, always loaded), common = API_HANDLER_COMMON (always loaded), editor = API_HANDLER_EDITOR, board = API_HANDLER_BOARD, pcb = API_HANDLER_PCB, footprint = API_HANDLER_FOOTPRINT, sch = API_HANDLER_SCH.
 
 | Status | Count | Meaning |
 |---|---:|---|
-| OK | 92 | works in `kicad-cli api-server` |
-| GUI-ONLY | 15 | handler returns "not available in headless mode" |
-| PARTIAL | 1 | headless in some handlers only |
+| OK | 94 | works in `kicad-cli api-server` |
+| GUI-ONLY | 16 | handler returns "not available in headless mode" |
+| PARTIAL | 0 | headless in some handlers only |
 | UNREGISTERED | 3 | defined in .proto, no handler anywhere |
-| **Total** | **111** | request messages defined in the command protos |
+| **Total** | **113** | request messages defined in the command protos |
 
 
 ## common/base
@@ -18,6 +18,7 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `GetKiCadBinaryPath` | common | yes |  |
 | `GetPaths` | common | yes |  |
 | `GetPluginSettingsPath` | common | yes |  |
+| `GetSupportedCommands` | server | yes |  |
 | `GetTextAsShapes` | common | yes |  |
 | `GetTextExtents` | common | yes |  |
 | `GetVersion` | common | yes |  |
@@ -59,7 +60,7 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `ParseAndCreateItemsFromString` | board | yes |  |
 | `RefreshEditor` | - | n/a | no registerHandler call in any handler |
 | `RemoveFromSelection` | board, sch | no | gated by checkForHeadless in board, sch |
-| `RevertDocument` | pcb, footprint, sch | partial | headless-gated in pcb, sch; footprint handler serves it |
+| `RevertDocument` | pcb, footprint, sch | no | gated by checkForHeadless in pcb, footprint, sch |
 | `RunAction` | board | no | gated by checkForHeadless in board |
 | `SaveCopyOfDocument` | pcb, footprint, sch | yes |  |
 | `SaveDocumentToString` | board | yes |  |
@@ -95,6 +96,7 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | Command | Handlers | Headless | Notes |
 |---|---|---|---|
 | `AddEmbeddedFiles` | pcb | yes |  |
+| `CheckPadstackPresenceOnLayers` | board | yes |  |
 | `FlipItems` | board | yes |  |
 | `GetActiveLayer` | board | no | gated by checkForHeadless in board |
 | `GetBoardDesignRules` | pcb | yes |  |

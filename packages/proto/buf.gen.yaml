@@ -1,0 +1,13 @@
+# buf v2 generation template for the KiCad IPC API protos.
+# The input directory is passed on the command line by gen.ts (KICAD_SRC/api/proto);
+# google/protobuf/*.proto imports are satisfied by buf's built-in well-known-types bundle,
+# and protoc-gen-es maps them to @bufbuild/protobuf/wkt instead of generating them.
+version: v2
+clean: true
+plugins:
+  - local: protoc-gen-es
+    out: src/gen
+    opt:
+      - target=ts
+      - import_extension=js
+      - json_types=true

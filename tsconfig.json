@@ -1,4 +1,8 @@
 {
   "files": [],
-  "references": []
+  "references": [
+    { "path": "packages/proto" },
+    { "path": "tooling/coverage" },
+    { "path": "apps/web" }
+  ]
 }

@@ -1,0 +1,26 @@
+{
+  "name": "@kicad-web/proto",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Generated protobuf-es types for the KiCad IPC API (kiapi.*) plus an Any registry",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./gen/*": "./src/gen/*"
+  },
+  "files": ["src", "KICAD_COMMIT"],
+  "scripts": {
+    "gen": "bun run gen.ts",
+    "check": "bun run check.ts",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "2.14.1"
+  },
+  "devDependencies": {
+    "@bufbuild/buf": "1.72.0",
+    "@bufbuild/protoc-gen-es": "2.14.1"
+  }
+}
