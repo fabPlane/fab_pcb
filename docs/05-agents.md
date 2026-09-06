@@ -30,6 +30,7 @@ them in parallel.
   `registerHandler<>` pairs and emits `api-coverage.md` plus `commands.json`
   (request → response → handler → headless flag) consumed by A4's generator.
 - Exit: `bun run gen` is reproducible; `commands.json` lists 111 commands.
+- **Done 2026-09-06.** Generated protobuf-es package with Any registry and drift check; coverage tool found 113 commands (two the hand analysis missed plus GetSupportedCommands).
 
 ### A3 · Transport & bridge agent
 - `NngIpcTransport` (Bun, `Bun.connect` unix socket) with the SP handshake, length framing, REQ0 ids,
@@ -39,6 +40,7 @@ them in parallel.
   a workspace root), static hosting of `apps/web`.
 - Exit: browser tab → bridge → KiCad `GetVersion` round trip; 1000 sequential
   `Ping`s < 2 s; server crash is detected and reported to the tab.
+- **Done 2026-09-06.** Bridge adds no measurable overhead; the 13 ms/request floor was KiCad's poll loop, fixed by G18 (now 0.05 ms).
 
 ## Wave 2 — client, renderers, first patches (parallel, ~3 weeks)
 
@@ -56,6 +58,7 @@ them in parallel.
   board type, pad/text shape cache, zone fill triangulation, theme, picker, camera.
 - Exit: kitchen-sink board visually matches `RunBoardJobExportSvg` output in a
   pixel-diff harness (tolerance documented); 60 fps pan/zoom on a 100k-item board.
+- **Done 2026-09-06** except the SVG pixel-diff harness (open): 52 tests, 60 fps at 187k render items, themes ported from KiCad's headers.
 
 ### A6 · Schematic renderer agent
 - `packages/renderer/schematic`: symbol rendering through transforms and units,
@@ -69,6 +72,7 @@ them in parallel.
 - Every patch: proto + handler + `qa/tests/api` test + note in `api-coverage.md`
   via A2's script + a conformance test handed to A4.
 - Exit for wave 2: G13, G6, G1, G5, G4 merged; events reach a browser tab.
+- **Batch 1 done 2026-09-06:** G13, G6, G18, interim G1 (GetDocumentRevision). Batch 2 (events socket, lifecycle, DRC/ERC) in progress.
 
 ### A8 · App shell agent
 - `apps/web`: layout, project screen, panels, command palette, properties editor
@@ -78,6 +82,7 @@ them in parallel.
   (`mount(el, store, theme)`, `onPick`, `setCamera`).
 - Exit: open project, view board and schematic, select, move, edit properties,
   save; reopen in desktop KiCad 10.99 and see the change.
+- **Shell done 2026-09-06** on mock services (40 tests); real client/renderer wiring is the integration step after A4.
 
 ## Wave 3 — parity (parallel, ~4 weeks)
 
@@ -90,6 +95,12 @@ them in parallel.
   tests on every PR; publish `api-coverage.md` as a status badge.
 - Owns fixtures beyond kitchen-sink (a real multi-sheet project, a large board).
 - Exit: red/green on every PR in < 15 min; coverage number in the README.
+- Status 2026-09-06: root scripts (`ci`, `test:unit`, `test:integration`, `test:e2e`) and the
+  per-package runner `tooling/ci/run-tests.ts`; `e2e/` Playwright smoke (3 specs, ~3 s) on the
+  mock shell; `.github/workflows/ci.yml` (bun / e2e / kicad-integration); Linux image
+  `packages/kicad-patches/build-linux.sh` + `docker/`; `tooling/coverage/summary.ts` →
+  README line + `docs/coverage-badge.json`; `e2e/fixtures/pic_programmer` (CC-BY-SA, see NOTICE);
+  `docs/ownership.md`.
 
 ## Contracts between agents (the only things that are allowed to block)
 
