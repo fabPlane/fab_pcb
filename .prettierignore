@@ -11,3 +11,7 @@ e2e/output
 e2e/test-results
 e2e/playwright-report
 *.kicad_*
+
+# @kicad-web/router: downloaded jar + JDK, bench renders
+packages/router/vendor/
+packages/router/bench/results/*.svg

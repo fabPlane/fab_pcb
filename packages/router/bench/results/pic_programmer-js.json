@@ -1,0 +1,53 @@
+{
+  "board": "pic_programmer",
+  "router": "js",
+  "routerImpl": "js",
+  "kicadVersion": "10.99.0-3711-g8cc9377988",
+  "date": "2026-09-06T23:46:47.951Z",
+  "connections": {
+    "before": 86,
+    "after": 2,
+    "routed": 84,
+    "completion": 0.9767441860465116
+  },
+  "vias": 16,
+  "trackLengthMm": 1656.845467,
+  "viaLengthMm": 25.28,
+  "tracksCreated": 441,
+  "viasCreated": 16,
+  "drcBefore": {
+    "errors": 86,
+    "warnings": 58,
+    "unconnected": 86,
+    "otherErrors": 0,
+    "byType": {
+      "DRCET_UNCONNECTED_ITEMS": 86,
+      "DRCET_LIB_FOOTPRINT_ISSUES": 58
+    }
+  },
+  "drcAfter": {
+    "errors": 7,
+    "warnings": 58,
+    "unconnected": 2,
+    "otherErrors": 5,
+    "byType": {
+      "DRCET_UNCONNECTED_ITEMS": 2,
+      "DRCET_CLEARANCE": 5,
+      "DRCET_LIB_FOOTPRINT_ISSUES": 58
+    }
+  },
+  "wallMs": 3168,
+  "routeMs": 3136,
+  "timedOut": false,
+  "svg": "packages/router/bench/results/pic_programmer-js.svg",
+  "log": [
+    "extract: 247 pads, 86 connections, 2 copper layers, 1 zones, 19 copper graphics",
+    "note: 1 copper zones are not obstacles for the JS router",
+    "srj: 2 layers, 266 obstacles, 33 nets to route",
+    "441 tracks, 16 vias, 33/33 nets in 3136 ms (122719 iterations)"
+  ],
+  "options": {
+    "maxTimeMs": 600000,
+    "effort": 1
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "board": "ecc83",
+  "router": "freerouting",
+  "routerImpl": "freerouting-kicad",
+  "kicadVersion": "10.99.0-3711-g8cc9377988",
+  "date": "2026-09-06T23:46:40.340Z",
+  "connections": {
+    "before": 14,
+    "after": 0,
+    "routed": 14,
+    "completion": 1
+  },
+  "vias": 1,
+  "trackLengthMm": 261.721527,
+  "viaLengthMm": 1.58,
+  "tracksCreated": 52,
+  "viasCreated": 1,
+  "drcBefore": {
+    "errors": 14,
+    "warnings": 2,
+    "unconnected": 14,
+    "otherErrors": 0,
+    "byType": {
+      "DRCET_UNCONNECTED_ITEMS": 14,
+      "DRCET_SILK_EDGE_CLEARANCE": 2
+    }
+  },
+  "drcAfter": {
+    "errors": 0,
+    "warnings": 2,
+    "unconnected": 0,
+    "otherErrors": 0,
+    "byType": {
+      "DRCET_SILK_EDGE_CLEARANCE": 2
+    }
+  },
+  "wallMs": 6121,
+  "routeMs": 6114,
+  "timedOut": false,
+  "svg": "packages/router/bench/results/ecc83-freerouting.svg",
+  "log": [
+    "server has Specctra API: true",
+    "extract: 33 pads, 14 connections, 2 copper layers, 1 zones, 0 copper graphics",
+    "mode: kicad; jar: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/jdk/Contents/Home/bin/java",
+    "dsn: 69948 bytes, 2 layers",
+    "freerouting: WARN   Polygon.winding_number_after_closing: winding number != 0 expected",
+    "freerouting: WARN   PolygonShape.DivisionPoint: projection not found for concave corner #5 at (1680740.0, -970894.0) in polygon with 46 corners: [(1693760,-974155), (1690400,-973824), (1687090,-973166), (1684890,-972497), (1683860,-972186), (1680740,-970894), (1677770,-969303), (1674960,-967427), (1672350,-965286), (1669960,-962899), (1667820,-960290), (1665950,-957483), (1664360,-954506), (1663060,-951388), (1662080,-948158), (1661430,-944847), (1661100,-941488), (1661100,-938112), (1661430,-934753), (1662080,-931442), (1663060,-928212), (1664360,-925094), (1665950,-922117), (1667820,-919310), (1669960,-916701), (1670170,-916498), (1670310,-916336), (1670670,-915575), (1670670,-914732), (1670300,-913973), (1669640,-913449), (1668820,-913263), (1720850,-913130), (1720850,-967378), (1720650,-966558), (1720120,-965907), (1719350,-965551), (1718510,-965563), (1717750,-965940), (1715940,-967427), (1713130,-969303), (1710160,-970894), (1707040,-972186), (1703810,-973166), (1700500,-973824), (1697140,-974155)]",
+    "freerouting: INFO   [26E4BE\\6A3A72] Auto-routing stage started on board '8932e5625e350b5f6386813fd6282bbf' for 21 unrouted items.",
+    "freerouting: WARN   PolygonShape.DivisionPoint: projection not found for concave corner #5 at (1680740.0, -970894.0) in polygon with 46 corners: [(1693760,-974155), (1690400,-973824), (1687090,-973166), (1684890,-972497), (1683860,-972186), (1680740,-970894), (1677770,-969303), (1674960,-967427), (1672350,-965286), (1669960,-962899), (1667820,-960290), (1665950,-957483), (1664360,-954506), (1663060,-951388), (1662080,-948158), (1661430,-944847), (1661100,-941488), (1661100,-938112), (1661430,-934753), (1662080,-931442), (1663060,-928212), (1664360,-925094), (1665950,-922117), (1667820,-919310), (1669960,-916701), (1670170,-916498), (1670310,-916336), (1670670,-915575), (1670670,-914732), (1670300,-913973), (1669640,-913449), (1668820,-913263), (1720850,-913130), (1720850,-967378), (1720650,-966558), (1720120,-965907), (1719350,-965551), (1718510,-965563), (1717750,-965940), (1715940,-967427), (1713130,-969303), (1710160,-970894), (1707040,-972186), (1703810,-973166), (1700500,-973824), (1697140,-974155)]",
+    "freerouting: INFO   [26E4BE\\6A3A72] Auto-routing pass #1 on board '8932e5625e350b5f6386813fd6282bbf' was completed in 0.76 seconds with score 952.38 (1 unrouted and 0 violations).",
+    "freerouting: INFO   [26E4BE\\6A3A72] Auto-routing pass #2 on board '66479b38c779aae45be5c48e7678ff96' was completed in 0.11 seconds with score 952.38 (1 unrouted and 0 violations).",
+    "freerouting: INFO   [26E4BE\\6A3A72] Auto-routing pass #3 on board '66479b38c779aae45be5c48e7678ff96' was completed in 0.11 seconds with score 952.38 (1 unrouted and 0 violations), using 1.01 CPU seconds and the job allocated 1.67 GB of memory so far.",
+    "freerouting: INFO   [26E4BE\\6A3A72] Auto-routing pass #4 on board '66479b38c779aae45be5c48e7678ff96' was completed in 0.10 seconds with score 952.38 (1 unrouted and 0 violations), using 1.01 CPU seconds and the job allocated 1.67 GB of memory so far.",
+    "freerouting: INFO   [26E4BE\\6A3A72] Auto-routing pass #5 on board '66479b38c779aae45be5c48e7678ff96' was completed in 0.10 seconds with score 952.38 (1 unrouted and 0 violations), using 1.01 CPU seconds and the job allocated 1.67 GB of memory so far.",
+    "freerouting: INFO   [26E4BE\\6A3A72] Auto-routing pass #6 on board '66479b38c779aae45be5c48e7678ff96' was completed in 0.10 seconds with score 952.38 (1 unrouted and 0 violations), using 1.01 CPU seconds and the job allocated 1.67 GB of memory so far.",
+    "freerouting: INFO   [26E4BE\\6A3A72] Auto-routing pass #7 on board '66479b38c779aae45be5c48e7678ff96' was completed in 0.10 seconds with score 952.38 (1 unrouted and 0 violations), using 1.01 CPU seconds and the job allocated 1.67 GB of memory so far.",
+    "freerouting: INFO   [26E4BE\\6A3A72] Auto-routing pass #8 on board '66479b38c779aae45be5c48e7678ff96' was completed in 0.09 seconds with score 952.38 (1 unrouted and 0 violations), using 1.01 CPU seconds and the job allocated 1.67 GB of memory so far.",
+    "freerouting: INFO   [26E4BE\\6A3A72] Auto-routing pass #9 on board '66479b38c779aae45be5c48e7678ff96' was completed in 0.10 seconds with score 952.38 (1 unrouted and 0 violations), using 1.01 CPU seconds and the job allocated 1.67 GB of memory so far.",
+    "freerouting: INFO   [26E4BE\\6A3A72] Auto-routing pass #10 on board '66479b38c779aae45be5c48e7678ff96' was completed in 0.08 seconds with score 952.38 (1 unrouted and 0 violations), using 1.01 CPU seconds and the job allocated 1.67 GB of memory so far.",
+    "freerouting: INFO   [26E4BE\\6A3A72] Auto-routing pass #11 on board '66479b38c779aae45be5c48e7678ff96' was completed in 0.08 seconds with score 952.38 (1 unrouted and 0 violations), using 1.01 CPU seconds and the job allocated 1.67 GB of memory so far.",
+    "freerouting: INFO   [26E4BE\\6A3A72] Auto-routing pass #12 on board '66479b38c779aae45be5c48e7678ff96' was completed in 0.09 seconds with score 952.38 (1 unrouted and 0 violations), using 2.00 CPU seconds and the job allocated 5.82 GB of memory so far.",
+    "freerouting: INFO   [26E4BE\\6A3A72] Auto-routing pass #13 on board '66479b38c779aae45be5c48e7678ff96' was completed in 0.08 seconds with score 952.38 (1 unrouted and 0 violations), using 2.00 CPU seconds and the job allocated 5.82 GB of memory so far.",
+    "freerouting: INFO   [26E4BE\\6A3A72] Auto-routing pass #14 on board '66479b38c779aae45be5c48e7678ff96' was completed in 0.08 seconds with score 952.38 (1 unrouted and 0 violations), using 2.00 CPU seconds and the job allocated 5.82 GB of memory so far.",
+    "freerouting: INFO   [26E4BE\\6A3A72] Auto-routing pass #15 on board '66479b38c779aae45be5c48e7678ff96' was completed in 0.09 seconds with score 952.38 (1 unrouted and 0 violations), using 2.00 CPU seconds and the job allocated 5.82 GB of memory so far.",
+    "freerouting: INFO   [26E4BE\\6A3A72] Auto-routing pass #16 on board '66479b38c779aae45be5c48e7678ff96' was completed in 0.08 seconds with score 952.38 (1 unrouted and 0 violations), using 2.00 CPU seconds and the job allocated 5.82 GB of memory so far.",
+    "freerouting: INFO   [26E4BE\\6A3A72] Auto-routing pass #17 on board '66479b38c779aae45be5c48e7678ff96' was completed in 0.08 seconds with score 952.38 (1 unrouted and 0 violations), using 2.00 CPU seconds and the job allocated 5.82 GB of memory so far.",
+    "freerouting: INFO   [26E4BE\\6A3A72] Auto-routing pass #18 on board '66479b38c779aae45be5c48e7678ff96' was completed in 0.08 seconds with score 952.38 (1 unrouted and 0 violations), using 2.00 CPU seconds and the job allocated 5.82 GB of memory so far.",
+    "freerouting: INFO   [26E4BE\\6A3A72] Auto-routing stage completed: started with 21 unrouted nets, completed in 2.65 seconds, final score: 952.38 (1 unrouted and 0 violations), using 2.00 total CPU seconds, 5.82 GB total allocated, and 414.9 MB peak heap usage.",
+    "freerouting: INFO   [26E4BE\\6A3A72] Optimization stage started on board '66479b38c779aae45be5c48e7678ff96' with score 952.38 (1 unrouted and 0 violations).",
+    "freerouting: INFO   [26E4BE\\6A3A72] Optimizer pass #1 on board '49340670af7021e79cc72ffbbaa55239' was completed in 0.42 seconds with the score of 952.38 (1 unrouted and 0 violations).",
+    "freerouting: INFO   [26E4BE\\6A3A72] Optimization stage completed: started with score 952.38 (1 unrouted and 0 violations), completed in 0.45 seconds, final score: 952.38 (1 unrouted and 0 violations), using 0.45 total CPU seconds, 1.36 GB total allocated, and 590.5 MB peak heap usage.",
+    "freerouting: INFO   [26E4BE\\6A3A72] Job '26E4BE\\6A3A72' finished with state: COMPLETED (elapsed: 3.15 seconds, finished at UTC: 2026-09-06T23:46:45.575705Z).",
+    "freerouting: INFO   Successfully saved output file '/var/folders/w9/mc3tp89n3p70j5512_9s930h0000gn/T/kicad-web-freerouting-BkDJG3/board.ses' (65138 bytes).",
+    "imported: 52 tracks, 1 vias, 0 footprints moved",
+    "0 tracks, 0 vias to create; 14/14 connections in 6114 ms"
+  ],
+  "options": {
+    "maxTimeMs": 600000,
+    "effort": 100
+  }
+}

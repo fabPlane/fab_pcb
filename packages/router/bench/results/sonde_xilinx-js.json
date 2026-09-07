@@ -1,0 +1,54 @@
+{
+  "board": "sonde_xilinx",
+  "router": "js",
+  "routerImpl": "js",
+  "kicadVersion": "10.99.0-3711-g8cc9377988",
+  "date": "2026-09-07T00:02:31.334Z",
+  "connections": {
+    "before": 48,
+    "after": 0,
+    "routed": 48,
+    "completion": 1
+  },
+  "vias": 12,
+  "trackLengthMm": 673.464156,
+  "viaLengthMm": 18.96,
+  "tracksCreated": 385,
+  "viasCreated": 12,
+  "drcBefore": {
+    "errors": 48,
+    "warnings": 1,
+    "unconnected": 48,
+    "otherErrors": 0,
+    "byType": {
+      "DRCET_UNCONNECTED_ITEMS": 48,
+      "DRCET_LIB_FOOTPRINT_MISMATCH": 1
+    }
+  },
+  "drcAfter": {
+    "errors": 9,
+    "warnings": 2,
+    "unconnected": 0,
+    "otherErrors": 9,
+    "byType": {
+      "DRCET_TRACKS_CROSSING": 8,
+      "DRCET_SHORTING_ITEMS": 1,
+      "DRCET_DRILLED_HOLES_COLOCATED": 1,
+      "DRCET_LIB_FOOTPRINT_MISMATCH": 1
+    }
+  },
+  "wallMs": 34393,
+  "routeMs": 34372,
+  "timedOut": false,
+  "svg": "packages/router/bench/results/sonde_xilinx-js.svg",
+  "log": [
+    "extract: 108 pads, 48 connections, 2 copper layers, 1 zones, 8 copper graphics",
+    "note: 1 copper zones are not obstacles for the JS router",
+    "srj: 2 layers, 116 obstacles, 26 nets to route",
+    "386 tracks, 12 vias, 26/26 nets in 34372 ms (2496058 iterations)"
+  ],
+  "options": {
+    "maxTimeMs": 600000,
+    "effort": 1
+  }
+}

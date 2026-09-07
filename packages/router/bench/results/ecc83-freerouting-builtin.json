@@ -1,0 +1,60 @@
+{
+  "board": "ecc83",
+  "router": "freerouting-builtin",
+  "routerImpl": "freerouting-builtin",
+  "kicadVersion": "10.99.0-3711-g8cc9377988",
+  "date": "2026-09-06T23:52:25.502Z",
+  "connections": {
+    "before": 14,
+    "after": 0,
+    "routed": 14,
+    "completion": 1
+  },
+  "vias": 1,
+  "trackLengthMm": 161.649393,
+  "viaLengthMm": 1.58,
+  "tracksCreated": 33,
+  "viasCreated": 1,
+  "drcBefore": {
+    "errors": 14,
+    "warnings": 2,
+    "unconnected": 14,
+    "otherErrors": 0,
+    "byType": {
+      "DRCET_UNCONNECTED_ITEMS": 14,
+      "DRCET_SILK_EDGE_CLEARANCE": 2
+    }
+  },
+  "drcAfter": {
+    "errors": 0,
+    "warnings": 2,
+    "unconnected": 0,
+    "otherErrors": 0,
+    "byType": {
+      "DRCET_SILK_EDGE_CLEARANCE": 2
+    }
+  },
+  "wallMs": 3019,
+  "routeMs": 3003,
+  "timedOut": false,
+  "svg": "packages/router/bench/results/ecc83-freerouting-builtin.svg",
+  "log": [
+    "server has Specctra API: true",
+    "extract: 33 pads, 14 connections, 2 copper layers, 1 zones, 0 copper graphics",
+    "mode: builtin; jar: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/jdk/Contents/Home/bin/java",
+    "dsn: 6419 bytes, 2 layers",
+    "freerouting: INFO   [654E2E\\6D5F08] Auto-routing stage started on board '89d847c1bf972e895a679e3077422f14' for 14 unrouted items.",
+    "freerouting: INFO   [654E2E\\6D5F08] Auto-routing pass #1 on board '89d847c1bf972e895a679e3077422f14' was completed in 0.16 seconds with score 1000.00 (0 unrouted and 0 violations).",
+    "freerouting: INFO   [654E2E\\6D5F08] Auto-routing pass #2 on board 'a2c5ec351d8c7ade4708d0e9c931df43' was completed in 0.00 seconds with score 1000.00 (0 unrouted and 0 violations).",
+    "freerouting: INFO   [654E2E\\6D5F08] Auto-routing stage completed: started with 14 unrouted nets, completed in 0.21 seconds, final score: 1000.00 (0 unrouted and 0 violations), using 0.00 total CPU seconds, 0.00 GB total allocated, and 0.0 MB peak heap usage.",
+    "freerouting: INFO   [654E2E\\6D5F08] Optimization stage started on board 'a2c5ec351d8c7ade4708d0e9c931df43' with score 1000.00 (0 unrouted and 0 violations).",
+    "freerouting: INFO   [654E2E\\6D5F08] Optimization stage completed: started with score 1000.00 (0 unrouted and 0 violations), completed in 0.01 seconds, final score: 1000.00 (0 unrouted and 0 violations), using 0.01 total CPU seconds, 0.02 GB total allocated, and 333.5 MB peak heap usage.",
+    "freerouting: INFO   [654E2E\\6D5F08] Job '654E2E\\6D5F08' finished with state: COMPLETED (elapsed: 0.26 seconds, finished at UTC: 2026-09-06T23:52:27.533Z).",
+    "freerouting: INFO   Successfully saved output file '/var/folders/w9/mc3tp89n3p70j5512_9s930h0000gn/T/kicad-web-freerouting-au5Nm5/board.ses' (5605 bytes).",
+    "33 tracks, 1 vias to create; 14/14 connections in 3003 ms"
+  ],
+  "options": {
+    "maxTimeMs": 600000,
+    "effort": 100
+  }
+}

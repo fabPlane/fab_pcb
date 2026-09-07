@@ -1,0 +1,78 @@
+{
+  "board": "pic_programmer",
+  "router": "freerouting-builtin",
+  "routerImpl": "freerouting-builtin",
+  "kicadVersion": "10.99.0-3711-g8cc9377988",
+  "date": "2026-09-06T23:52:30.027Z",
+  "connections": {
+    "before": 86,
+    "after": 7,
+    "routed": 79,
+    "completion": 0.9186046511627907
+  },
+  "vias": 1,
+  "trackLengthMm": 1464.00598,
+  "viaLengthMm": 1.58,
+  "tracksCreated": 238,
+  "viasCreated": 1,
+  "drcBefore": {
+    "errors": 86,
+    "warnings": 58,
+    "unconnected": 86,
+    "otherErrors": 0,
+    "byType": {
+      "DRCET_UNCONNECTED_ITEMS": 86,
+      "DRCET_LIB_FOOTPRINT_ISSUES": 58
+    }
+  },
+  "drcAfter": {
+    "errors": 7,
+    "warnings": 58,
+    "unconnected": 7,
+    "otherErrors": 0,
+    "byType": {
+      "DRCET_UNCONNECTED_ITEMS": 7,
+      "DRCET_LIB_FOOTPRINT_ISSUES": 58
+    }
+  },
+  "wallMs": 6579,
+  "routeMs": 6553,
+  "timedOut": false,
+  "svg": "packages/router/bench/results/pic_programmer-freerouting-builtin.svg",
+  "log": [
+    "server has Specctra API: true",
+    "extract: 247 pads, 86 connections, 2 copper layers, 1 zones, 19 copper graphics",
+    "mode: builtin; jar: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/jdk/Contents/Home/bin/java",
+    "dsn: 37009 bytes, 2 layers",
+    "freerouting: INFO   [476B6F\\67D2D2] Auto-routing stage started on board 'eca6d2162d222229268f65312aa6ca2c' for 86 unrouted items.",
+    "freerouting: INFO   [476B6F\\67D2D2] Auto-routing pass #1 on board 'eca6d2162d222229268f65312aa6ca2c' was completed in 1.21 seconds with score 949.20 (5 unrouted and 7 violations), using 0.99 CPU seconds and the job allocated 8.17 GB of memory so far.",
+    "freerouting: INFO   [476B6F\\67D2D2] Auto-routing pass #2 on board '35852c91b4d9027f43791a4486cf5dff' was completed in 0.13 seconds with score 949.20 (5 unrouted and 7 violations), using 0.99 CPU seconds and the job allocated 8.17 GB of memory so far.",
+    "freerouting: INFO   [476B6F\\67D2D2] Auto-routing pass #3 on board 'e1d096f37b3d7e38bbbe9964367644ac' was completed in 0.18 seconds with score 949.20 (5 unrouted and 7 violations), using 0.99 CPU seconds and the job allocated 8.17 GB of memory so far.",
+    "freerouting: INFO   [476B6F\\67D2D2] Auto-routing pass #4 on board 'e9e8dcc394fa5fb4bdc8e7a8691e76b8' was completed in 0.14 seconds with score 957.14 (4 unrouted and 7 violations), using 0.99 CPU seconds and the job allocated 8.17 GB of memory so far.",
+    "freerouting: INFO   [476B6F\\67D2D2] Auto-routing pass #5 on board '5bb8631bbfbd78cef0ac5dd2b74b41f6' was completed in 0.10 seconds with score 957.14 (4 unrouted and 7 violations), using 0.99 CPU seconds and the job allocated 8.17 GB of memory so far.",
+    "freerouting: INFO   [476B6F\\67D2D2] Auto-routing pass #6 on board 'a3a446849193be854735cb5cc9b57088' was completed in 0.11 seconds with score 957.14 (4 unrouted and 7 violations), using 1.98 CPU seconds and the job allocated 20.33 GB of memory so far.",
+    "freerouting: INFO   [476B6F\\67D2D2] Auto-routing pass #7 on board 'a8364fc6207866392a2ec5806f799e6c' was completed in 0.10 seconds with score 957.14 (4 unrouted and 7 violations), using 1.98 CPU seconds and the job allocated 20.33 GB of memory so far.",
+    "freerouting: INFO   [476B6F\\67D2D2] Auto-routing pass #8 on board '1fb19e07e5d5273f655f3bb95423a46e' was completed in 0.10 seconds with score 957.14 (4 unrouted and 7 violations), using 1.98 CPU seconds and the job allocated 20.33 GB of memory so far.",
+    "freerouting: INFO   [476B6F\\67D2D2] Auto-routing pass #9 on board '30b98f4ec68509f9599d44bbfda187f4' was completed in 0.09 seconds with score 957.14 (4 unrouted and 7 violations), using 1.98 CPU seconds and the job allocated 20.33 GB of memory so far.",
+    "freerouting: INFO   [476B6F\\67D2D2] Auto-routing pass #10 on board '5eed3625d48b0b570d30adcb2b44692e' was completed in 0.10 seconds with score 957.14 (4 unrouted and 7 violations), using 1.98 CPU seconds and the job allocated 20.33 GB of memory so far.",
+    "freerouting: INFO   [476B6F\\67D2D2] Auto-routing pass #11 on board '42d86b9f061370723bd774b8efb964f0' was completed in 0.10 seconds with score 957.14 (4 unrouted and 7 violations), using 1.98 CPU seconds and the job allocated 20.33 GB of memory so far.",
+    "freerouting: INFO   [476B6F\\67D2D2] Auto-routing pass #12 on board '350f70c3967b646dcb33b3d83825d47c' was completed in 0.11 seconds with score 957.14 (4 unrouted and 7 violations), using 1.98 CPU seconds and the job allocated 20.33 GB of memory so far.",
+    "freerouting: INFO   [476B6F\\67D2D2] Auto-routing pass #13 on board 'd9c3b2c028653d4b95eb28066ed7a353' was completed in 0.09 seconds with score 957.14 (4 unrouted and 7 violations), using 1.98 CPU seconds and the job allocated 20.33 GB of memory so far.",
+    "freerouting: INFO   [476B6F\\67D2D2] Auto-routing pass #14 on board 'f963d6e0dfb9fa41c12fc601b82ba4a8' was completed in 0.09 seconds with score 957.14 (4 unrouted and 7 violations), using 2.97 CPU seconds and the job allocated 36.09 GB of memory so far.",
+    "freerouting: INFO   [476B6F\\67D2D2] Auto-routing pass #15 on board '44b02048438af6ed6bb5afe4f2d31586' was completed in 0.10 seconds with score 957.14 (4 unrouted and 7 violations), using 2.97 CPU seconds and the job allocated 36.09 GB of memory so far.",
+    "freerouting: INFO   [476B6F\\67D2D2] Auto-routing pass #16 on board '24d0ed88b58d58720b42d6e13e4d6d0e' was completed in 0.09 seconds with score 957.14 (4 unrouted and 7 violations), using 2.97 CPU seconds and the job allocated 36.09 GB of memory so far.",
+    "freerouting: INFO   [476B6F\\67D2D2] Auto-routing pass #17 on board 'd83ed1ada599a10d7869be2b56bef302' was completed in 0.10 seconds with score 957.14 (4 unrouted and 7 violations), using 2.97 CPU seconds and the job allocated 36.09 GB of memory so far.",
+    "freerouting: INFO   [476B6F\\67D2D2] Auto-routing pass #18 on board 'ee56158f84c24f88e1ee8b35f9e252bb' was completed in 0.10 seconds with score 957.14 (4 unrouted and 7 violations), using 2.97 CPU seconds and the job allocated 36.09 GB of memory so far.",
+    "freerouting: INFO   [476B6F\\67D2D2] Auto-routing stage completed: started with 86 unrouted nets, completed in 3.53 seconds, final score: 957.14 (4 unrouted and 7 violations), using 2.97 total CPU seconds, 36.09 GB total allocated, and 1119.3 MB peak heap usage.",
+    "freerouting: INFO   [476B6F\\67D2D2] Optimization stage started on board 'cd3c7d4e18128b8e5633fa5019e09e46' with score 957.14 (4 unrouted and 7 violations).",
+    "freerouting: INFO   [476B6F\\67D2D2] Optimizer pass #1 on board '8bfa48a6f842fb5162a4ec1809cefb2e' was completed in 0.64 seconds with the score of 957.14 (4 unrouted and 7 violations).",
+    "freerouting: INFO   [476B6F\\67D2D2] Optimization stage completed: started with score 957.14 (4 unrouted and 7 violations), completed in 0.68 seconds, final score: 957.14 (4 unrouted and 7 violations), using 0.67 total CPU seconds, 14.87 GB total allocated, and 1024.0 MB peak heap usage.",
+    "freerouting: INFO   [476B6F\\67D2D2] Job '476B6F\\67D2D2' finished with state: COMPLETED (elapsed: 4.26 seconds, finished at UTC: 2026-09-06T23:52:36.260953Z).",
+    "freerouting: INFO   Successfully saved output file '/var/folders/w9/mc3tp89n3p70j5512_9s930h0000gn/T/kicad-web-freerouting-WCV1cM/board.ses' (32905 bytes).",
+    "238 tracks, 1 vias to create; 86/86 connections in 6553 ms"
+  ],
+  "options": {
+    "maxTimeMs": 600000,
+    "effort": 100
+  }
+}

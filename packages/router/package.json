@@ -1,0 +1,29 @@
+{
+  "name": "@kicad-web/router",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Autorouting for kicad-web: RouteInput from a Board, a JS router (tscircuit capacity-autorouter) and a Freerouting (Specctra DSN/SES) adapter, results applied with one CreateItems commit",
+  "exports": {
+    ".": "./src/index.ts",
+    "./bridge-job": "./src/bridge-job.ts",
+    "./freerouting": "./src/freerouting.ts",
+    "./js-router": "./src/js-router.ts",
+    "./specctra": "./src/specctra/index.ts"
+  },
+  "scripts": {
+    "test": "bun test",
+    "bench": "bun run bench/run.ts",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "2.14.1",
+    "@kicad-web/client": "workspace:*",
+    "@kicad-web/proto": "workspace:*",
+    "@tscircuit/capacity-autorouter": "0.0.885"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.0",
+    "typescript": "^5.6.0"
+  }
+}

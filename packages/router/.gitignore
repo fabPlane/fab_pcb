@@ -1,0 +1,6 @@
+dist/
+vendor/*.jar
+bench/results/*.svg
+bench/results/*.dsn
+bench/results/*.ses
+bench/results/*.log
