@@ -61,7 +61,7 @@
     "saved",
     "done",
     "job: route job 9836b4f5: done, 84/86 in 40351 ms",
-    "mode: kicad-dsn; jar: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/jdk/Contents/Home/bin/java",
+    "mode: kicad-dsn; jar: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/jdk/Contents/Home/bin/java",
     "dsn: 288003 bytes, 2 layers",
     "freerouting: WARN   PolygonShape.DivisionPoint: projection not found for concave corner #11 at (860022.0, -1381100.0) in polygon with 16 corners: [(863600,-1384300), (1032000,-1384300), (1031040,-1383950), (1030530,-1383070), (1030510,-1382810), (1030510,-1353780), (862506,-1353780), (862506,-1379990), (862157,-1380950), (861275,-1381460), (860271,-1381280), (860022,-1381100), (743446,-1276790), (742965,-1275900), (742950,-1275680), (742950,-1276350)]",
     "freerouting: INFO   [379AB7\\B8D996] Auto-routing stage started on board '237d9cde9e195a825adcde22d16db732' for 126 unrouted items.",
@@ -69,7 +69,7 @@
     "freerouting: INFO   [379AB7\\B8D996] Optimization stage started on board '03acdbe0240d7d859c6f183d17a3b61b' with score 974.60 (3 unrouted and 1 violation).",
     "freerouting: INFO   [379AB7\\B8D996] Optimization stage completed: started with score 974.60 (3 unrouted and 1 violation), completed in 7.79 seconds, final score: 974.60 (3 unrouted and 1 violation), using 7.76 total CPU seconds, 19.10 GB total allocated, and 931.0 MB peak heap usage.",
     "freerouting: INFO   [379AB7\\B8D996] Job '379AB7\\B8D996' finished with state: COMPLETED (elapsed: 37.39 seconds, finished at UTC: 2026-09-07T02:56:58.349756Z).",
-    "freerouting: INFO   Successfully saved output file '/var/folders/w9/mc3tp89n3p70j5512_9s930h0000gn/T/kicad-web-freerouting-RgwLgm/board.ses' (325043 bytes).",
+    "freerouting: INFO   Successfully saved output file '/var/folders/w9/mc3tp89n3p70j5512_9s930h0000gn/T/fp-pcb-freerouting-RgwLgm/board.ses' (325043 bytes).",
     "349 tracks, 3 vias to create; 86/86 connections in 40174 ms",
     "GetRatsnest after the apply: 2 connection(s) still unrouted (the router counted 0)"
   ],

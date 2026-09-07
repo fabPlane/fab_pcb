@@ -715,7 +715,7 @@ cmake --build build/mr5 --target kicad-cli pcbnew_kiface eeschema_kiface qa_api 
 ctest --test-dir build/mr5 -R "api|kinng" --output-on-failure
 
 # client conformance against a live server built from this branch
-cd /Users/hyper/projects/tensorfleet/kicad-web
+cd /Users/hyper/projects/tensorfleet/fab_pcb
 KICAD_CLI=/Users/hyper/projects/tensorfleet/kicad/build/mr5/kicad/KiCad.app/Contents/MacOS/kicad-cli \
   bun run --filter @fp-pcb/client test:conformance
 ```

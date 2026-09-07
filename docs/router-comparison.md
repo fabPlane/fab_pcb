@@ -43,7 +43,7 @@ Options: `{"maxTimeMs":600000,"effort":100}` (earlier harness). Created 33 track
 DRC after: silk_edge_clearance 2.
 
 - extract: 33 pads, 14 connections, 2 copper layers, 1 zones, 0 copper graphics
-- mode: builtin; jar: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/jdk/Contents/Home/bin/java
+- mode: builtin; jar: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/jdk/Contents/Home/bin/java
 - freerouting: Job '654E2E\6D5F08' finished with state: COMPLETED (elapsed: 0.26 seconds, finished at UTC: 2026-09-06T23:52:27.533Z).
 - 33 tracks, 1 vias to create; 14/14 connections in 3003 ms
 
@@ -54,7 +54,7 @@ Job done: History entry "Autoroute (freerouting): 14 connections"; the router co
 DRC after: silk_edge_clearance 2.
 
 - extract: 33 pads, 14 connections, 2 copper layers
-- mode: kicad-dsn; jar: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/jdk/Contents/Home/bin/java
+- mode: kicad-dsn; jar: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/jdk/Contents/Home/bin/java
 - freerouting: Job '01460D\AC46BC' finished with state: COMPLETED (elapsed: 4.15 seconds, finished at UTC: 2026-09-07T02:46:54.419831Z).
 - 52 tracks, 1 vias to create; 14/14 connections in 7200 ms
 
@@ -76,7 +76,7 @@ Job done: History entry "Autoroute (freerouting): 164 connections"; the router c
 DRC after: unconnected_items 8, starved_thermal 3.
 
 - extract: 379 pads, 164 connections, 2 copper layers
-- mode: kicad-dsn; jar: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/jdk/Contents/Home/bin/java
+- mode: kicad-dsn; jar: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/jdk/Contents/Home/bin/java
 - freerouting: Job '8E848D\B5B592' finished with state: COMPLETED (elapsed: 8 minutes 44.79 seconds, finished at UTC: 2026-09-07T02:55:43.131619Z).
 - 869 tracks, 38 vias to create; 164/164 connections in 531576 ms
 - GetRatsnest after the apply: 4 connection(s) still unrouted (the router counted 0)
@@ -103,7 +103,7 @@ Options: `{"maxTimeMs":600000,"effort":100}` (earlier harness). Created 238 trac
 DRC after: lib_footprint_issues 58, unconnected_items 7.
 
 - extract: 247 pads, 86 connections, 2 copper layers, 1 zones, 19 copper graphics
-- mode: builtin; jar: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/jdk/Contents/Home/bin/java
+- mode: builtin; jar: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/jdk/Contents/Home/bin/java
 - freerouting: Job '476B6F\67D2D2' finished with state: COMPLETED (elapsed: 4.26 seconds, finished at UTC: 2026-09-06T23:52:36.260953Z).
 - 238 tracks, 1 vias to create; 86/86 connections in 6553 ms
 
@@ -114,7 +114,7 @@ Job done: History entry "Autoroute (freerouting): 86 connections"; the router co
 DRC after: lib_footprint_issues 58, clearance 6, unconnected_items 2, shorting_items 2.
 
 - extract: 247 pads, 86 connections, 2 copper layers
-- mode: kicad-dsn; jar: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/jdk/Contents/Home/bin/java
+- mode: kicad-dsn; jar: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/jdk/Contents/Home/bin/java
 - freerouting: Job '379AB7\B8D996' finished with state: COMPLETED (elapsed: 37.39 seconds, finished at UTC: 2026-09-07T02:56:58.349756Z).
 - 349 tracks, 3 vias to create; 86/86 connections in 40174 ms
 - GetRatsnest after the apply: 2 connection(s) still unrouted (the router counted 0)
@@ -137,7 +137,7 @@ Job done: History entry "Autoroute (freerouting): 48 connections"; the router co
 DRC after: shorting_items 3, clearance 2, unconnected_items 1, lib_footprint_mismatch 1.
 
 - extract: 108 pads, 48 connections, 2 copper layers
-- mode: kicad-dsn; jar: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/jdk/Contents/Home/bin/java
+- mode: kicad-dsn; jar: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/jdk/Contents/Home/bin/java
 - freerouting: Job 'F72CC6\F96348' finished with state: COMPLETED (elapsed: 1 minute 44.03 seconds, finished at UTC: 2026-09-07T02:58:48.114475Z).
 - 180 tracks, 0 vias to create; 48/48 connections in 108289 ms
 
@@ -162,7 +162,7 @@ DRC after: lib_footprint_mismatch 36, unconnected_items 15, soldermask_bridge 11
 - freerouting: Job 'C5BDE7\793914' finished with state: COMPLETED (elapsed: 5 minutes 8.05 seconds, finished at UTC: 2026-09-07T03:04:02.928464Z).
 - 554 tracks, 42 vias to create; 128/128 connections in 312317 ms
 - GetRatsnest after the apply: 5 connection(s) still unrouted (the router counted 0)
-- mode: kicad-dsn; jar: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/jdk/Contents/Home/bin/java
+- mode: kicad-dsn; jar: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/jdk/Contents/Home/bin/java
 
 ### stickhub × js
 

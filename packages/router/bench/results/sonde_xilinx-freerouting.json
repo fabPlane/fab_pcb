@@ -69,7 +69,7 @@
     "saved",
     "done",
     "job: route job 2c7cf3ef: done, 48/48 in 108389 ms",
-    "mode: kicad-dsn; jar: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/jdk/Contents/Home/bin/java",
+    "mode: kicad-dsn; jar: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/jdk/Contents/Home/bin/java",
     "dsn: 106094 bytes, 2 layers",
     "freerouting: INFO   [F72CC6\\F96348] Auto-routing stage started on board '806c2f4890e5b26774bbf7f0463037e9' for 66 unrouted items.",
     "freerouting: INFO   [F72CC6\\F96348] Auto-routing pass #1 on board '806c2f4890e5b26774bbf7f0463037e9' was completed in 11.92 seconds with score 749.25 (10 unrouted and 34 violations), using 11.84 CPU seconds and the job allocated 75.37 GB of memory so far.",
@@ -84,7 +84,7 @@
     "freerouting: INFO   [F72CC6\\F96348] Optimizer pass #1 on board 'a17e25e2fb9ba607da34336a358bbe04' was completed in 73.98 seconds with the score of 898.50 (0 unrouted and 34 violations).",
     "freerouting: INFO   [F72CC6\\F96348] Optimization stage completed: started with score 898.50 (0 unrouted and 34 violations), completed in 75.20 seconds, final score: 898.50 (0 unrouted and 34 violations), using 74.41 total CPU seconds, 560.63 GB total allocated, and 869.5 MB peak heap usage.",
     "freerouting: INFO   [F72CC6\\F96348] Job 'F72CC6\\F96348' finished with state: COMPLETED (elapsed: 1 minute 44.03 seconds, finished at UTC: 2026-09-07T02:58:48.114475Z).",
-    "freerouting: INFO   Successfully saved output file '/var/folders/w9/mc3tp89n3p70j5512_9s930h0000gn/T/kicad-web-freerouting-oU20zn/board.ses' (147224 bytes).",
+    "freerouting: INFO   Successfully saved output file '/var/folders/w9/mc3tp89n3p70j5512_9s930h0000gn/T/fp-pcb-freerouting-oU20zn/board.ses' (147224 bytes).",
     "180 tracks, 0 vias to create; 48/48 connections in 108289 ms"
   ],
   "options": {

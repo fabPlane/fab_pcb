@@ -11,7 +11,7 @@ import { KiCad, NngIpcTransport, type Board, type Transport } from "@fp-pcb/clie
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const REPO = resolve(HERE, "..", "..", "..");
-export const KICAD_ROOT = resolve(REPO, "..", "kicad");
+export const KICAD_ROOT = process.env.KICAD_SRC ? resolve(process.env.KICAD_SRC) : resolve(REPO, "..", "kicad");
 export const DEFAULT_KICAD_CLI = `${KICAD_ROOT}/build/release/kicad/KiCad.app/Contents/MacOS/kicad-cli`;
 export const KICAD_CLI = process.env.KICAD_CLI ?? DEFAULT_KICAD_CLI;
 export const FIXTURE_BOARDS = join(REPO, "e2e", "fixtures", "boards");

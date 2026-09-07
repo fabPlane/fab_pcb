@@ -2,7 +2,7 @@ import { resolve } from "node:path";
 import { resolveFreerouting, type FreeroutingPaths } from "@fp-pcb/router/freerouting";
 
 /** `<repo>/../kicad` — the KiCad checkout that sits next to fp-pcb. */
-export const KICAD_CHECKOUT = resolve(import.meta.dir, "../../../../kicad");
+export const KICAD_CHECKOUT = process.env.KICAD_SRC ? resolve(process.env.KICAD_SRC) : resolve(import.meta.dir, "../../../../kicad");
 export const DEFAULT_KICAD_CLI = `${KICAD_CHECKOUT}/build/release/kicad/KiCad.app/Contents/MacOS/kicad-cli`;
 export const DEFAULT_WORKSPACE_ROOT = `${KICAD_CHECKOUT}/qa/data`;
 

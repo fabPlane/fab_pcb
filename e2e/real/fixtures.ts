@@ -8,7 +8,7 @@ import { resolve } from "node:path";
 import { test as base, type Page } from "@playwright/test";
 
 export const BRIDGE_URL = process.env.BRIDGE_URL ?? "http://127.0.0.1:4020";
-const KICAD_ROOT = resolve(import.meta.dirname, "..", "..", "..", "kicad");
+const KICAD_ROOT = process.env.KICAD_SRC ? resolve(process.env.KICAD_SRC) : resolve(import.meta.dirname, "..", "..", "..", "kicad");
 export const QA = process.env.KICAD_QA_DATA ?? `${KICAD_ROOT}/qa/data`;
 
 export const haveKicad = !!process.env.KICAD_CLI;

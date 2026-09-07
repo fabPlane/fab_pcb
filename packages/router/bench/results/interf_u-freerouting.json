@@ -79,7 +79,7 @@
     "saved",
     "done",
     "job: route job 372b2315: done, 160/164 in 531871 ms",
-    "mode: kicad-dsn; jar: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/jdk/Contents/Home/bin/java",
+    "mode: kicad-dsn; jar: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/jdk/Contents/Home/bin/java",
     "dsn: 246857 bytes, 2 layers",
     "freerouting: INFO   [8E848D\\B5B592] Auto-routing stage started on board 'faced3accce459f46c02fea3bbd7b052' for 201 unrouted items.",
     "freerouting: INFO   [8E848D\\B5B592] Auto-routing pass #1 on board 'faced3accce459f46c02fea3bbd7b052' was completed in 62.19 seconds with score 614.92 (65 unrouted and 62 violations), using 59.59 CPU seconds and the job allocated 311.38 GB of memory so far.",
@@ -107,7 +107,7 @@
     "freerouting: INFO   [8E848D\\B5B592] Optimizer pass #1 on board 'fc5cdf3fbd6ac468410cfbefd7f0db93' was completed in 18.61 seconds with the score of 833.82 (21 unrouted and 62 violations).",
     "freerouting: INFO   [8E848D\\B5B592] Optimization stage completed: started with score 833.82 (21 unrouted and 62 violations), completed in 20.33 seconds, final score: 833.82 (21 unrouted and 62 violations), using 20.15 total CPU seconds, 147.66 GB total allocated, and 1410.8 MB peak heap usage.",
     "freerouting: INFO   [8E848D\\B5B592] Job '8E848D\\B5B592' finished with state: COMPLETED (elapsed: 8 minutes 44.79 seconds, finished at UTC: 2026-09-07T02:55:43.131619Z).",
-    "freerouting: INFO   Successfully saved output file '/var/folders/w9/mc3tp89n3p70j5512_9s930h0000gn/T/kicad-web-freerouting-TzrohN/board.ses' (330171 bytes).",
+    "freerouting: INFO   Successfully saved output file '/var/folders/w9/mc3tp89n3p70j5512_9s930h0000gn/T/fp-pcb-freerouting-TzrohN/board.ses' (330171 bytes).",
     "869 tracks, 38 vias to create; 164/164 connections in 531576 ms",
     "GetRatsnest after the apply: 4 connection(s) still unrouted (the router counted 0)"
   ],

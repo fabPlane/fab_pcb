@@ -111,10 +111,10 @@
     "freerouting: INFO   [C5BDE7\\793914] Optimizer pass #1 on board '51c5a29d75a934551abb242a2429374d' was completed in 9.68 seconds with the score of 893.50 (22 unrouted and 13 violations).",
     "freerouting: INFO   [C5BDE7\\793914] Optimization stage completed: started with score 893.50 (22 unrouted and 13 violations), completed in 10.62 seconds, final score: 893.50 (22 unrouted and 13 violations), using 10.48 total CPU seconds, 84.17 GB total allocated, and 504.7 MB peak heap usage.",
     "freerouting: INFO   [C5BDE7\\793914] Job 'C5BDE7\\793914' finished with state: COMPLETED (elapsed: 5 minutes 8.05 seconds, finished at UTC: 2026-09-07T03:04:02.928464Z).",
-    "freerouting: INFO   Successfully saved output file '/var/folders/w9/mc3tp89n3p70j5512_9s930h0000gn/T/kicad-web-freerouting-rExDCd/board.ses' (183120 bytes).",
+    "freerouting: INFO   Successfully saved output file '/var/folders/w9/mc3tp89n3p70j5512_9s930h0000gn/T/fp-pcb-freerouting-rExDCd/board.ses' (183120 bytes).",
     "554 tracks, 42 vias to create; 128/128 connections in 312317 ms",
     "GetRatsnest after the apply: 5 connection(s) still unrouted (the router counted 0)",
-    "mode: kicad-dsn; jar: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/jdk/Contents/Home/bin/java",
+    "mode: kicad-dsn; jar: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/jdk/Contents/Home/bin/java",
     "dsn: 164444 bytes, 2 layers",
     "freerouting: WARN   Polygon.winding_number_after_closing: winding number != 0 expected"
   ],

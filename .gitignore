@@ -11,3 +11,4 @@ e2e/.auth/
 **/coverage-report/
 coverage-summary.md
 packages/renderer/scripts/pixel-diff-out/
+.worktrees/

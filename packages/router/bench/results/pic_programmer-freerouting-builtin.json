@@ -42,7 +42,7 @@
   "log": [
     "server has Specctra API: true",
     "extract: 247 pads, 86 connections, 2 copper layers, 1 zones, 19 copper graphics",
-    "mode: builtin; jar: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/jdk/Contents/Home/bin/java",
+    "mode: builtin; jar: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/fab_pcb/packages/router/vendor/jdk/Contents/Home/bin/java",
     "dsn: 37009 bytes, 2 layers",
     "freerouting: INFO   [476B6F\\67D2D2] Auto-routing stage started on board 'eca6d2162d222229268f65312aa6ca2c' for 86 unrouted items.",
     "freerouting: INFO   [476B6F\\67D2D2] Auto-routing pass #1 on board 'eca6d2162d222229268f65312aa6ca2c' was completed in 1.21 seconds with score 949.20 (5 unrouted and 7 violations), using 0.99 CPU seconds and the job allocated 8.17 GB of memory so far.",
@@ -68,7 +68,7 @@
     "freerouting: INFO   [476B6F\\67D2D2] Optimizer pass #1 on board '8bfa48a6f842fb5162a4ec1809cefb2e' was completed in 0.64 seconds with the score of 957.14 (4 unrouted and 7 violations).",
     "freerouting: INFO   [476B6F\\67D2D2] Optimization stage completed: started with score 957.14 (4 unrouted and 7 violations), completed in 0.68 seconds, final score: 957.14 (4 unrouted and 7 violations), using 0.67 total CPU seconds, 14.87 GB total allocated, and 1024.0 MB peak heap usage.",
     "freerouting: INFO   [476B6F\\67D2D2] Job '476B6F\\67D2D2' finished with state: COMPLETED (elapsed: 4.26 seconds, finished at UTC: 2026-09-06T23:52:36.260953Z).",
-    "freerouting: INFO   Successfully saved output file '/var/folders/w9/mc3tp89n3p70j5512_9s930h0000gn/T/kicad-web-freerouting-WCV1cM/board.ses' (32905 bytes).",
+    "freerouting: INFO   Successfully saved output file '/var/folders/w9/mc3tp89n3p70j5512_9s930h0000gn/T/fp-pcb-freerouting-WCV1cM/board.ses' (32905 bytes).",
     "238 tracks, 1 vias to create; 86/86 connections in 6553 ms"
   ],
   "options": {
