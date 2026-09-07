@@ -15,7 +15,7 @@ import { MarkerLayer, type MarkerSpec } from './markers.js';
 
 // ---------------------------------------------------------------------------
 // Contract types (structural copies of docs/contracts.md so this package has no
-// dependency on @kicad-web/client)
+// dependency on @fp-pcb/client)
 // ---------------------------------------------------------------------------
 
 export interface StoredItemLike {

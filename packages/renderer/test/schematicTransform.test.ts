@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { pinDrawOrientation, symbolTransform, transformCoordinate, transformDet, transformTextGlyphs, inverseTransform, composeTransform, IDENTITY_TRANSFORM } from '../src/schematic/symbolTransform.js';
 import { textGlyphPrims } from '../src/schematic/textMetrics.js';
 import { schematicItemToRenderItems } from '../src/schematic/schematicAdapter.js';
-import { SCH_LAYERS } from '../src/schematic/schematicLayers.js';
+import { SCH_DEFAULTS, SCH_LAYERS } from '../src/schematic/schematicLayers.js';
 import { MM, kicadTransformPoint, resistor } from './schematicFixtures.js';
 import type { Primitive } from '../src/core/model.js';
 
@@ -104,10 +104,15 @@ describe('symbol transform (SCH_SYMBOL::SetOrientation / TRANSFORM)', () => {
     const body = items.find((i) => i.layer === SCH_LAYERS.device && i.prims.length)!;
     expect(body.bbox.w).toBeCloseTo(5.08 * MM + 0.254 * MM, -3);
     expect(body.bbox.h).toBeCloseTo(2.032 * MM + 0.254 * MM, -3);
-    // the reference field (at +2.54, -1.27 from the symbol) rotates with it and turns vertical
+    // the reference field (at +2.54, -1.27 from the symbol) rotates with it and turns vertical;
+    // its anchor is shifted along the reading direction (here: up) by the closed-form
+    // δ = round(1.5 · size/8) − trunc(lineWidth / 1.52) that turns KiCad's bbox-centred draw
+    // into a left-justified one (symbolFieldPlacement)
     const ref = glyph(items.find((i) => i.id === 'R:field:Reference')!.prims[0]!);
     expect(ref.angle).toBe(90);
-    expect(ref.pos).toEqual({ x: 10 * MM - 1.27 * MM, y: 10 * MM - 2.54 * MM });
+    expect(ref.halign).toBe('left');
+    const delta = Math.round(1.5 * Math.round((1.27 * MM) / 8)) - Math.trunc(SCH_DEFAULTS.lineWidth / 1.52);
+    expect(ref.pos).toEqual({ x: 10 * MM - 1.27 * MM, y: 10 * MM - 2.54 * MM - delta });
     // absolute pins (API semantics) give the same geometry
     const abs = schematicItemToRenderItems(resistor('R', 'R', 10, 10, { orientation: 2 }));
     expect(seg(abs.find((i) => i.ref === 'R:1')!.prims[0]!)).toEqual(s);

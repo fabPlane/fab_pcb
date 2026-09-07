@@ -18,6 +18,8 @@ export interface Snapshot {
   padPolygons: Record<string, unknown>;
   /** adapter text key -> GraphicShape[] (GetTextAsShapes) */
   textShapes: Record<string, unknown[]>;
+  /** schematic adapter options the text requests were built with (must match what the host draws with) */
+  adapter?: { symbolPinsAbsolute?: boolean; assumePinNameOffset?: number };
 }
 
 export interface RunOptions {
@@ -114,7 +116,7 @@ async function renderOurs(snapshot: Snapshot, o: RunOptions, width: number, heig
   } else {
     host = new SchematicCanvasHost(theme, {
       ...common,
-      adapter: { textShapes: (id) => snapshot.textShapes[id] as never, symbolPinsAbsolute: true },
+      adapter: { symbolPinsAbsolute: true, ...(snapshot.adapter ?? {}), textShapes: (id) => snapshot.textShapes[id] as never },
     });
   }
   host.mount(el, store, theme);

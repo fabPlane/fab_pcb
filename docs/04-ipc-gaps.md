@@ -35,6 +35,12 @@ has staged changes. `RatsnestEdge.net.code` is always 0 (the handler packs only 
 `SetTeardropsResponse.item_count` counts pads and vias processed rather than changed, so
 `RemoveTeardrops` always reports the same number instead of dropping to zero.
 
+### G27 · `SchematicSymbolInstance.pin_name_offset` is always 0
+`SCH_SYMBOL::Serialize` packs the instance's never-populated `m_pinNameOffset`; the painter and
+plotter use the LIB_SYMBOL's offset, and the definition message has no such field. A client cannot
+place pin names where KiCad draws them without guessing (the harness assumes 0.508 mm). One-line
+fix in the serializer. Related: text variables in shown text are not expanded on the wire.
+
 ### G26 · Found by the five-board practice pass
 `GetDocumentRevision` reads non-monotonically right after `EndCommit` (1, then 0, 1, 1, 1 within
 600 ms on pic_programmer and stickhub), so a client cannot use it as a strict change counter

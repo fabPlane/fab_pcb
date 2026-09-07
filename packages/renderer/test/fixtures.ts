@@ -1,6 +1,6 @@
 /**
  * Hand-written board items in protobuf-es message shape (camelCase, bigint nm, numeric
- * enums, `{ case, value }` oneofs) — exactly what @kicad-web/client will hand the renderer.
+ * enums, `{ case, value }` oneofs) — exactly what @fp-pcb/client will hand the renderer.
  */
 import { BOARD_LAYER_ENUM } from '../src/board/boardLayers.js';
 import type { StoredItemLike } from '../src/core/host.js';
@@ -223,7 +223,7 @@ export function syntheticBoard(): StoredItemLike[] {
     via('v1', 20, 20, 0.8, 0.4),
     zone('z1', [L.BL_B_Cu!], [[2, 2], [38, 2], [38, 28], [2, 28]], [[15, 15], [25, 15], [25, 25], [15, 25]]),
     zone('ra1', [L.BL_F_Cu!], [[32, 3], [38, 3], [38, 8], [32, 8]], undefined, false, '', true),
-    text('txt-1', L.BL_F_SilkS!, 3, 28, 'kicad-web demo', 1.5),
+    text('txt-1', L.BL_F_SilkS!, 3, 28, 'fp-pcb demo', 1.5),
     dimension('dim-1', 0, 0, 40, 0, -3),
     graphic('arc-1', L.BL_Cmts_User!, arc(30, 26, 33, 23, 36, 26), 0.15),
     graphic('circ-1', L.BL_F_Fab!, circle(5, 25, 1.5), 0.1),

@@ -7,7 +7,7 @@
  *   bun run scripts/pixel-diff.ts [--out DIR] [--px-per-mm 8] [--only board|schematic]
  *                                 [--board FILE.kicad_pcb] [--schematic FILE.kicad_sch]
  *                                 [--layers all|default|BL_F_Cu,BL_B_Cu,...] [--kicad-cli PATH]
- *                                 [--tolerance 1] [--ink 40] [--no-white-holes]
+ *                                 [--tolerance 1] [--ink 40] [--no-white-holes] [--pin-name-offset MM]
  *
  *   1. spawns `kicad-cli api-server` on a unique socket with a temp copy of the kitchen-sink
  *      project, opens the board and the schematic, loads their ItemStores, fetches the same
@@ -44,10 +44,11 @@ import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { KiCad, NngIpcTransport, type Board, type ItemStore, type StoredItem } from '@kicad-web/client';
-import { BoardJobPaginationMode, BoardLayer, SchematicJobPageSize, ZoneType, unpackAny, type Text, type TextBox } from '@kicad-web/proto';
+import { KiCad, NngIpcTransport, type Board, type ItemStore, type StoredItem } from '@fp-pcb/client';
+import { BoardJobPaginationMode, BoardLayer, SchematicJobPageSize, ZoneType, unpackAny, type Text, type TextBox } from '@fp-pcb/proto';
 import type { RunOptions, RunResult } from './pixel-diff/page.js';
 import { dimensionText } from '../src/board/boardAdapter.js';
+import { type SchTextRequest, resolveTextRequests, schematicTextRequests } from '../src/schematic/textRequests.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const KICAD_ROOT = resolve(here, '..', '..', '..', '..', 'kicad');
@@ -71,6 +72,8 @@ interface Args {
   svg?: string;
   exportOnly: boolean;
   keepBrowser: boolean;
+  /** schematic: pin-name offset (nm) to assume when a symbol reports 0 (see SchematicAdapterContext.assumePinNameOffset) */
+  pinNameOffset?: number;
 }
 
 function parseArgs(argv: string[]): Args {
@@ -135,6 +138,9 @@ function parseArgs(argv: string[]): Args {
       case '--keep-browser':
         a.keepBrowser = true;
         break;
+      case '--pin-name-offset':
+        a.pinNameOffset = Math.round(Number(v()) * 1e6); // mm
+        break;
       case '-h':
       case '--help':
         console.log(readFileSync(fileURLToPath(import.meta.url), 'utf8').split('*/')[0]);
@@ -183,7 +189,7 @@ async function startServer(cli: string, projectFile: string, out: string): Promi
     await Bun.sleep(25);
   }
   const transport = await NngIpcTransport.connect({ path: socketPath, defaultTimeoutMs: 120_000 });
-  const kicad = await KiCad.connect(transport, { clientName: `kicad-web/pixel-diff-${process.pid}`, readyTimeoutMs: 120_000 });
+  const kicad = await KiCad.connect(transport, { clientName: `fp-pcb/pixel-diff-${process.pid}`, readyTimeoutMs: 120_000 });
   return {
     kicad,
     async stop() {
@@ -203,7 +209,7 @@ async function startServer(cli: string, projectFile: string, out: string): Promi
 
 /** Temp copy of the project (board + schematic + project + DRU) with local library tables. */
 async function tempProject(board: string, schematic: string): Promise<{ dir: string; pro: string; pcb: string; sch: string; cleanup(): Promise<void> }> {
-  const dir = await mkdtemp(join(tmpdir(), 'kicad-web-pixel-diff-'));
+  const dir = await mkdtemp(join(tmpdir(), 'fp-pcb-pixel-diff-'));
   const base = board.replace(/\.kicad_pcb$/, '');
   const name = basename(base);
   const pcb = join(dir, `${name}.kicad_pcb`);
@@ -214,12 +220,17 @@ async function tempProject(board: string, schematic: string): Promise<{ dir: str
   else await writeFile(pro, '{"meta":{"filename":"' + name + '.kicad_pro","version":1}}\n');
   if (existsSync(`${base}.kicad_dru`)) await cp(`${base}.kicad_dru`, join(dir, `${name}.kicad_dru`));
   await cp(schematic, sch);
-  // sub-sheets referenced by the kitchen-sink schematic
-  for (const f of await readdir(dirname(schematic))) {
-    if (f.endsWith('.kicad_sch') && f !== basename(schematic) && f.startsWith('erc_test')) await cp(join(dirname(schematic), f), join(dir, f));
+  // sub-sheets (the kitchen sink's erc_test*, a hierarchical project's own sheets), project
+  // libraries and lib tables next to the schematic travel with it
+  const schDir = dirname(schematic);
+  for (const f of await readdir(schDir)) {
+    const src = join(schDir, f);
+    const isSheet = f.endsWith('.kicad_sch') && f !== basename(schematic);
+    const isLib = f.endsWith('.kicad_sym') || f.endsWith('.pretty') || f === 'libs' || f === 'fp-lib-table' || f === 'sym-lib-table';
+    if (isSheet || isLib) await cp(src, join(dir, f), { recursive: true });
   }
-  await writeFile(join(dir, 'fp-lib-table'), `(fp_lib_table\n  (version 7)\n  (lib (name "Resistor_SMD") (type "KiCad") (uri "${QA}/libraries/Resistor_SMD.pretty") (options "") (descr ""))\n)\n`);
-  await writeFile(join(dir, 'sym-lib-table'), `(sym_lib_table\n  (version 7)\n  (lib (name "Device") (type "KiCad") (uri "${QA}/libraries/Device.kicad_sym") (options "") (descr ""))\n)\n`);
+  if (!existsSync(join(dir, 'fp-lib-table'))) await writeFile(join(dir, 'fp-lib-table'), `(fp_lib_table\n  (version 7)\n  (lib (name "Resistor_SMD") (type "KiCad") (uri "${QA}/libraries/Resistor_SMD.pretty") (options "") (descr ""))\n)\n`);
+  if (!existsSync(join(dir, 'sym-lib-table'))) await writeFile(join(dir, 'sym-lib-table'), `(sym_lib_table\n  (version 7)\n  (lib (name "Device") (type "KiCad") (uri "${QA}/libraries/Device.kicad_sym") (options "") (descr ""))\n)\n`);
   return { dir, pro, pcb, sch, cleanup: () => rm(dir, { recursive: true, force: true }) };
 }
 
@@ -269,6 +280,14 @@ interface TextRef {
   text?: Text;
   textbox?: TextBox;
 }
+
+/**
+ * Schematic requests come from the renderer's own builder (`schematicTextRequests`), keyed and
+ * placed exactly as the adapter draws them -- the same module the app feeds `TextShapeCache`
+ * with -- so the harness measures what the app draws. Some symbol fields carry a `measure`
+ * (`GetTextExtents`) stage that `resolveTextRequests` turns into the final `text`.
+ */
+type SchRef = SchTextRequest;
 
 /**
  * The `GetTextAsShapes` request for a dimension. `text.text` is the bare measurement
@@ -325,53 +344,16 @@ function boardTexts(it: StoredItem): TextRef[] {
   return out;
 }
 
-/** `schematicTexts` of the app plus labels (which the app leaves to BitmapText). */
-function schematicTexts(it: StoredItem): TextRef[] {
-  const p = it.proto as Record<string, any>;
-  const out: TextRef[] = [];
-  const push = (key: string | undefined, text: Text | undefined) => {
-    if (key && text && text.text && text.attributes?.visible !== false) out.push({ key, text });
-  };
-  const pushBox = (key: string | undefined, textbox: TextBox | undefined) => {
-    if (key && textbox && textbox.text) out.push({ key, textbox });
-  };
-  switch (it.type) {
-    case 'KOT_SCH_TEXT':
-    case 'KOT_SCH_LOCAL_LABEL':
-    case 'KOT_SCH_GLOBAL_LABEL':
-    case 'KOT_SCH_HIER_LABEL':
-    case 'KOT_SCH_DIRECTIVE_LABEL':
-      push(it.id, p.text);
-      break;
-    case 'KOT_PCB_DIMENSION':
-      out.push(...dimensionRefs(it.id, p));
-      break;
-    case 'KOT_SCH_TEXTBOX':
-      pushBox(it.id, p.textbox);
-      break;
-    case 'KOT_SCH_TABLE':
-      for (const cell of p.cells ?? []) pushBox(cell?.textBox?.id?.value, cell?.textBox?.textbox);
-      break;
-    case 'KOT_SCH_SYMBOL':
-      for (const f of [p.referenceField, p.valueField, p.footprintField, p.datasheetField, p.descriptionField, ...(p.userFields ?? [])]) {
-        if (f?.visible === false) continue;
-        push(`${it.id}:field:${f?.name}`, f?.text);
-      }
-      break;
-    default:
-      break;
-  }
-  return out;
-}
-
-async function fetchTextShapes(kicad: KiCad, refs: TextRef[]): Promise<Record<string, unknown[]>> {
+async function fetchTextShapes(kicad: KiCad, refs: Array<TextRef | SchRef>): Promise<Record<string, unknown[]>> {
   const out: Record<string, unknown[]> = {};
-  const seen = new Map<string, TextRef>();
+  const seen = new Map<string, TextRef | SchRef>();
   for (const r of refs) if (!seen.has(r.key) || seen.get(r.key) !== r) seen.set(r.key, r);
-  const list = [...seen.values()];
+  // symbol fields that need their KiCad text box first (one GetTextExtents each)
+  const measured = await resolveTextRequests([...seen.values()].filter((r): r is SchRef => 'hash' in r), (t) => kicad.textExtents(t as never));
+  const list = [...seen.values()].filter((r) => !('hash' in r) || measured.includes(r));
   for (let i = 0; i < list.length; i += 200) {
     const slice = list.slice(i, i + 200);
-    const res = await kicad.textAsShapes(slice.map((r) => (r.textbox ? { textbox: r.textbox } : { text: r.text! })));
+    const res = await kicad.textAsShapes(slice.map((r) => (r.textbox ? { textbox: r.textbox as TextBox } : { text: r.text as Text })));
     res.forEach((r, j) => {
       out[slice[j]!.key] = r.shapes?.shapes ?? [];
     });
@@ -453,15 +435,19 @@ async function exportSchematic(kicad: KiCad, schPath: string, args: Args, out: s
   const root = await schematic.rootSheet();
   await root.documentSync.load();
   const items: StoredItem[] = [];
-  const texts: TextRef[] = [];
+  const texts: SchRef[] = [];
+  // adapter options shared with the page (snapshot.adapter): the requests must be built with the options the host draws with
+  const adapter = { symbolPinsAbsolute: true, ...(args.pinNameOffset ? { assumePinNameOffset: args.pinNameOffset } : {}) };
   for (const it of root.store.all()) {
     const proto = it.proto as Record<string, any>;
     if (it.type === 'KOT_SCH_SYMBOL') decodeSymbolChildren(proto);
-    texts.push(...schematicTexts(it));
+    // the same requests apps/web builds (renderer `schematicTextRequests`)
+    texts.push(...schematicTextRequests({ id: it.id, type: it.type, proto }, adapter));
     items.push({ id: it.id, type: it.type, layer: it.layer, net: it.net, parent: it.parent, proto } as StoredItem);
   }
+  const measured = texts.filter((t) => t.measure).length;
   const textShapes = await fetchTextShapes(kicad, texts);
-  console.log(`schematic: ${items.length} items on the root sheet, ${Object.keys(textShapes).length} text shapes`);
+  console.log(`schematic: ${items.length} items on the root sheet, ${texts.length} text requests (${measured} measured first), ${Object.keys(textShapes).length} text shapes`);
   const dir = join(out, 'schematic-svg');
   await rm(dir, { recursive: true, force: true });
   await mkdir(dir, { recursive: true });
@@ -476,8 +462,7 @@ async function exportSchematic(kicad: KiCad, schPath: string, args: Args, out: s
   const svgPath = join(out, 'schematic.svg');
   await cp(join(dir, rootFile), svgPath);
   const snapshot = join(out, 'schematic.snapshot.json');
-  await writeFile(snapshot, JSON.stringify({ kind: 'schematic', copperLayers: [], layers: [], items, padPolygons: {}, textShapes }, replacer));
-  void args;
+  await writeFile(snapshot, JSON.stringify({ kind: 'schematic', copperLayers: [], layers: [], items, padPolygons: {}, textShapes, adapter }, replacer));
   return { snapshot, svg: svgPath };
 }
 

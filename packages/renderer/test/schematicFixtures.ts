@@ -1,6 +1,6 @@
 /**
  * Hand-written schematic items in protobuf-es message shape (camelCase, bigint nm, numeric
- * enums, `{ case, value }` oneofs), the way @kicad-web/client hands them to the renderer.
+ * enums, `{ case, value }` oneofs), the way @fp-pcb/client hands them to the renderer.
  * Symbol definition children are decoded messages (`$typeName`), as the client's
  * `unpackAny` produces; pin positions follow the API convention (absolute sheet coordinates)
  * unless `pinsRelative` is set.
@@ -392,7 +392,7 @@ export function syntheticSchematic(): StoredItemLike[] {
     busEntry('be2', 101.6, 60.96, true),
     wire('bw2', 99.06, 33.02, 91.44, 33.02),
     noConnect('nc1', 55.88, 73.66),
-    schText('t1', 30.48, 20.32, 'kicad-web schematic demo\nsecond line', 2.54),
+    schText('t1', 30.48, 20.32, 'fp-pcb schematic demo\nsecond line', 2.54),
     textBox('tb1', 91.44, 15.24, 127, 22.86, 'Text box with a\nyellow background'),
     schShape('s1', circleShape(40.64, 90, 3, 0.254, 1)),
     schShape('s2', rectShape(45, 85, 55, 95, 0.254, 5)),

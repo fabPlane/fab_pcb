@@ -1,9 +1,9 @@
-# @kicad-web/renderer
+# @fp-pcb/renderer
 
-PixiJS v8 canvas renderer for kicad-web. Implements the `CanvasHost` contract from
+PixiJS v8 canvas renderer for FabPlane PCB. Implements the `CanvasHost` contract from
 [docs/contracts.md](../../docs/contracts.md) over an `ItemStore`-shaped object, with a
 neutral render model (`RenderItem` / `Primitive`) so the core never depends on
-`@kicad-web/proto`. Wave-2 agent A5 owns `core/` and `board/`; A6 adds `schematic/` on top.
+`@fp-pcb/proto`. Wave-2 agent A5 owns `core/` and `board/`; A6 adds `schematic/` on top.
 
 ```
 src/
@@ -28,6 +28,7 @@ src/
     symbolTransform.ts   SCH_SYMBOL TRANSFORM (orientation + mirror), pin draw orientation, text through it
     labelShapes.ts       global / hierarchical / directive label and sheet-pin outlines (sch_label.cpp)
     textMetrics.ts       font-free text box estimates (EDA_TEXT::GetTextBox / GetLinePositions)
+    textRequests.ts      GetTextAsShapes / GetTextExtents requests for every text the plotter draws, keyed as the adapter looks them up
     textGlyphs.ts        Pixi BitmapText builder for the `text-glyphs` fallback primitive
     schematicAdapter.ts  kiapi schematic messages -> RenderItems (every KOT_SCH_* type)
     SchematicCanvasHost.ts
@@ -42,7 +43,7 @@ test/            bun tests (theme, camera, picker/geometry, adapter, overlays, h
 ## Usage
 
 ```ts
-import { BoardCanvasHost, KICAD_DEFAULT_THEME, loadUserTheme, copperLayerList } from '@kicad-web/renderer';
+import { BoardCanvasHost, KICAD_DEFAULT_THEME, loadUserTheme, copperLayerList } from '@fp-pcb/renderer';
 
 const host = new BoardCanvasHost(KICAD_DEFAULT_THEME, {
   copperLayers: copperLayerList(4),          // from GetBoardEnabledLayers / stackup
@@ -51,7 +52,7 @@ const host = new BoardCanvasHost(KICAD_DEFAULT_THEME, {
     textShapes: (textId) => textShapeCache.get(textId),                    // GetTextAsShapes
   },
 });
-host.mount(div, board.store, KICAD_DEFAULT_THEME);   // store: ItemStore from @kicad-web/client
+host.mount(div, board.store, KICAD_DEFAULT_THEME);   // store: ItemStore from @fp-pcb/client
 await host.ready;                                    // WebGL context up, first frame drawn
 
 host.onPick((hits, ev) => select(hits[0]?.owner));   // hits nearest-first, distance in px
@@ -143,7 +144,7 @@ generators, constraints and 3D models produce nothing.
 ## Schematic host
 
 ```ts
-import { SchematicCanvasHost, KICAD_DEFAULT_THEME } from '@kicad-web/renderer';
+import { SchematicCanvasHost, KICAD_DEFAULT_THEME } from '@fp-pcb/renderer';
 
 const host = new SchematicCanvasHost(KICAD_DEFAULT_THEME, {
   adapter: { textShapes: (id) => textShapeCache.get(id) },   // GetTextAsShapes, keyed as below
@@ -211,8 +212,10 @@ parent is in the store.
 
 | field | purpose |
 |---|---|
-| `textShapes(textId)` | `GraphicShape[]` (`CompoundShape.shapes` from `GetTextAsShapes`) or plain glyph polygons, in sheet coordinates. A `textbox` reply's four box edges are dropped, as on the board. Keys: the item KIID for text / labels / text boxes; the cell textbox KIID for table cells; `<sym>:field:<name>`, `<sym>:pin:<pin kiid>:name` / `:number`, `<sym>:text:<kiid>` for symbols; `<sheet>:field:<name>`, `<sheet>:pin:<pin kiid>` for sheets; `<label>:field:<name>` for label fields |
-| `decodeAny(any)` | decoder for `Any` symbol children (`unpackAny` from @kicad-web/proto) |
+| `textShapes(textId)` | `GraphicShape[]` (`CompoundShape.shapes` from `GetTextAsShapes`) or plain glyph polygons, in sheet coordinates. A `textbox` reply's four box edges are dropped, as on the board. Keys: the item KIID for text / labels / text boxes; the cell textbox KIID for table cells; `<sym>:field:<name>`, `<sym>:pin:<pin kiid>:name` / `:number`, `<sym>:text:<kiid>`, `<sym>:textbox:<kiid>` for symbols; `<sheet>:field:<name>`, `<sheet>:pin:<pin kiid>` for sheets; `<label>:field:<name>` for label fields. Build the requests with `schematicTextRequests(item, ctx)` (below) so they are placed exactly as drawn |
+| `assumePinNameOffset` | pin-name offset (nm) to use when a symbol instance reports 0 — the message always does, see "KiCad-side data gaps: open"; unset = names outside |
+| `subpartFirstId`, `subpartIdSeparator` | `LIB_SYMBOL::SubReference` settings for multi-unit references (`U2` → `U2A`); defaults `A` / none |
+| `decodeAny(any)` | decoder for `Any` symbol children (`unpackAny` from @fp-pcb/proto) |
 | `itemBBox(id)` | bbox lookup for group outlines |
 | `symbolPinsAbsolute` | default true; false = pins in library coordinates |
 | `showHiddenPins` / `showHiddenFields` | draw hidden pins / fields on `schematic.hidden` |
@@ -227,6 +230,23 @@ adapter emits `text-glyphs` primitives sized by a stroke-font estimate (`textMet
 (`textGlyphs.ts`) draws them as Pixi `BitmapText` stretched to that box, so picking and
 drawing agree. The core stays font-free: `text-glyphs` only contribute their outline to
 bbox / picking there. Pixi text is used nowhere else.
+
+`schematicTextRequests(item, ctx)` (`textRequests.ts`) returns the `GetTextAsShapes` requests
+for every text the plotter draws — pin names and numbers laid out per `SCH_PIN::PlotPinTexts`
+(draw orientation after the symbol transform, names inside / outside, alternates, hidden pins
+only with `showHiddenPins`), symbol fields, library texts and text boxes through the symbol
+transform, sheet name / `File:` file / user fields and sheet pins (with `${field}` resolved
+from the sheet's own fields), every label kind with `GetSchematicTextOffset` and its fields,
+plain text (with the 0.25 mm `SCH_TEXT` offset), text boxes and table cells with their margins
+— each with the plotter's pen width and a content `hash` for caches. The placement functions
+are the adapter's own (`pinTextLayouts`, `symbolFieldPlacement`, `labelTextLayout`,
+`sheetPinLayout`, `symbolTextPlacement`), so the fallback and the request agree. Symbol fields
+are centred by KiCad on `SCH_FIELD::GetBoundingBox().Centre()`; a vertically centred upright
+field is placed exactly without the text width (the width cancels between KiCad's centred draw
+and a justified draw shifted by `round(1.5 · boxPen) − trunc(plotPen / 1.52)`), any other
+field carries a `measure` (`GetTextExtents`) stage — `resolveTextRequests(requests,
+textExtents)` turns it into the final `text`. apps/web's `TextShapeCache` and the pixel-diff
+harness both use this builder.
 
 Covered types: SchematicLine (wire / bus / graphic with line styles and endings), Junction,
 NoConnectMarker, BusEntry (wire / bus), SchematicText, SchematicTextBox (margins, border,
@@ -365,10 +385,15 @@ bun run pixel-diff -- --snapshot board.snapshot.json --svg board.svg   # two-ste
 
 1. spawns `kicad-cli api-server` on a unique socket over a temp copy of the project, loads the
    board and the root sheet, fetches the same server shapes the app feeds the hosts
-   (`GetPadShapeAsPolygon` per copper layer, `GetTextAsShapes` for texts / fields / labels /
-   dimensions at their `resolved_text` / text boxes / table cells) and runs `RunBoardJobExportSvg` (fit page to board,
+   (`GetPadShapeAsPolygon` per copper layer, `GetTextAsShapes` for board texts / fields /
+   dimensions at their `resolved_text` / text boxes / table cells, and for the schematic every
+   request `schematicTextRequests` builds — the app's own — with the `GetTextExtents` stage
+   for the symbol fields that need it) and runs `RunBoardJobExportSvg` (fit page to board,
    scale 1, all layers on one page, no drawing sheet) and `RunSchematicJobExportSvg` (root
-   sheet, no drawing sheet);
+   sheet, no drawing sheet). `--board` / `--schematic` take any project: sub-sheets, project
+   libraries and lib tables next to the schematic travel with it, so hierarchical designs
+   (`e2e/fixtures/boards/pic_programmer`) work; `--pin-name-offset MM` sets the adapter's
+   `assumePinNameOffset` for the requests and the render alike;
 2. writes `<out>/<kind>.snapshot.json` + `<kind>.svg` and kills the server;
 3. serves `pixel-diff/page.ts` to a headless Chromium (SwiftShader WebGL), which renders the
    snapshot with `BoardCanvasHost` / `SchematicCanvasHost` at `--px-per-mm` and rasterises the
@@ -390,12 +415,26 @@ every anti-aliased edge counts twice.
 | document | size | render items | mismatch (all px) | ink mismatch | tolerant (all px) | tolerant ink |
 |---|---|---|---|---|---|---|
 | board `api_kitchen_sink.kicad_pcb` | 2079 × 1245 | 349 | 0.27 % | 1.35 % | 0.05 % | 0.26 % |
-| schematic `api_kitchen_sink.kicad_sch` | 2376 × 1680 | 156 | 0.51 % | 17.57 % | 0.31 % | 10.70 % |
+| schematic `api_kitchen_sink.kicad_sch` | 2376 × 1680 | 156 | 0.27 % | 9.98 % | 0.15 % | 5.58 % |
+| schematic, `--pin-name-offset 0.508` (see data gaps) | 2376 × 1680 | 156 | 0.23 % | 8.48 % | 0.11 % | 4.05 % |
 
 (board previously 0.65 % / 3.28 % / 0.35 % / 1.78 %, before `BoardText.knockout_shapes`,
 `BoardTextBox.knockout_shapes` and `Dimension.resolved_text`; and 7.57 % / 34.88 % / 6.79 % /
-31.27 % before barcodes and text boxes could be drawn from server geometry. The schematic is
-unchanged by all three — it has no knockout items and no dimensions.)
+31.27 % before barcodes and text boxes could be drawn from server geometry. The schematic was
+0.51 % / 17.57 % / 0.31 % / 10.70 % while pin names / numbers, symbol fields, sheet pins and
+table cells were BitmapText or unplaced — before `schematicTextRequests` asked the server for
+every text the plotter draws.)
+
+Other schematics (root sheet, same settings):
+
+| document | items | render items | mismatch (all px) | ink mismatch | tolerant (all px) | tolerant ink |
+|---|---|---|---|---|---|---|
+| `e2e/fixtures/boards/pic_programmer` (hierarchical, 8 measured fields) | 295 | 959 | 0.46 % | 13.92 % | 0.10 % | 3.01 % |
+| same, `--pin-name-offset 0.508` | 295 | 959 | 0.46 % | 14.11 % | 0.06 % | 1.89 % |
+| `e2e/fixtures/boards/ecc83` | 75 | 243 | 0.08 % | 11.08 % | 0.01 % | 1.42 % |
+
+Their raw ink figures are dominated by hairline wires (a one-pixel offset of a one-pixel line
+is two pixels of XOR); the ±1 px figures are what the text work moves.
 
 ![board pixel diff](../../docs/screenshots/pixel-diff-board.png)
 ![schematic pixel diff](../../docs/screenshots/pixel-diff-schematic.png)
@@ -441,11 +480,21 @@ Those 1.3k, largest first:
 - **Hatch patterns.** Our hatch pitch / phase for `GFT_HATCH` fills is KiCad's 30 mil nominal
   rather than the exact per-shape phase, so hatched circles and rectangles cross-hatch out of
   step (the blue crosshatch in the schematic diff).
-- **Schematic pin names / numbers and symbol fields.** Pin text is still stretched
-  `BitmapText` in a system font (`GetTextAsShapes` is not requested for pins), and fields on
-  rotated symbols (R2, R3) are drawn at the angle the API reports rather than the upright
-  angle eeschema draws them at — the schematic's version of the `keep_upright` gap above.
-  Together with the hatching this is most of the schematic's remaining ink.
+- **Schematic text is now server glyphs everywhere** — pin names / numbers, symbol fields on
+  rotated and mirrored symbols (R1, R2, R3 are grey), labels, sheet pins, table cells. The
+  schematic's remaining XOR is 10.9k px, 6.1k outside the ±1 px band, and it is:
+  the hatched shapes (4.9k / 3.3k, the phase gap above), **U1's pin names and numbers**
+  (2.4k / 1.8k — the `pin_name_offset` data gap below: the message says 0, so we draw the
+  names outside the body where KiCad draws them inside; `--pin-name-offset 0.508` takes it to
+  0.6k / 34, the rest being pin 8's `FALLING_EDGE_CLOCK` triangle, which `SCH_PIN::PlotPinType`
+  points outward while `SCH_PAINTER` — and we — point it inward), the **arrowhead of the
+  bezier leader** (0.9k / 0.7k, not drawn), the **dash phase** of the dashed circle and rule
+  area (0.5k / 0.2k), the table's border widths (0.4k, all within tolerance), the `G` global
+  label's flag (0.1k: its width comes from the stroke-font *estimate* of the text width, not a
+  measured box) and anti-aliasing (1.1k, faint). pic_programmer adds the multi-unit
+  references (`U2A`, now computed like `LIB_SYMBOL::SubReference`) and 0.25 mm footprint
+  fields that KiCad plots and we draw, but whose 2 px glyphs fall under `--ink 40` in our
+  anti-aliased render.
 - **Anti-aliasing and stroke ends.** The rest — 5.6k of the board's 6.9k XOR — is sub-pixel
   edges: the ±1 px band takes the board from 1.35 % to 0.26 % of the ink union and the
   schematic from 17.57 % to 10.70 %.
@@ -455,8 +504,28 @@ Those 1.3k, largest first:
   them, so the harness drops them from the board snapshot. Schematic bitmaps *are* plotted and
   are compared — their textures load asynchronously, so the page waits before grabbing its
   single frame.
-- **Not drawn at all:** symbol alternate pin functions, and line-ending arrows on some bezier
-  leaders.
+- **Not drawn at all:** line-ending arrows on some bezier leaders. (Alternate pin functions
+  are: an active alternate replaces the shown name, shape and electrical type.)
+
+### KiCad-side data gaps: open
+
+- **`SchematicSymbolInstance.pin_name_offset` is always 0.** `SCH_SYMBOL::Serialize` packs
+  `GetPinNameOffset()`, the `SYMBOL::m_pinNameOffset` of the instance, which nothing ever sets
+  from the library symbol (unlike `show_pin_names` / `show_pin_numbers`, which `SCH_SYMBOL`
+  overrides to read `m_part`). The painter and plotter draw the pins of a temporary
+  `LIB_SYMBOL` copy, so they use the library's offset (20 mil by default: names inside). The
+  `SchematicSymbol` definition message has no `pin_name_offset` / `show_pin_*` fields either,
+  so the value cannot be recovered from the API. One-line fix on the KiCad side: pack
+  `m_part->GetPinNameOffset()` (or override the getter like the other two). Until then
+  `assumePinNameOffset` is the workaround, and a guess.
+- **Shown text is not on the wire.** `Text.text` is the raw string: `${param}` on a sheet pin
+  (KiCad plots the sheet field's value), `U2` for a multi-unit reference (KiCad plots `U2A`).
+  Sheet-field variables and the unit suffix are computed client-side; project / global
+  variables, `${#}`, `${REF:...}` and the like are not (`ExpandTextVariables` only accepts a
+  project document). `SchematicField.show_name` and the `File:` prefix are reproduced.
+- **Stacked pin numbers** (`[1,2,3]`) are plotted single-line when they fit along the pin
+  and as a braced column otherwise, a decision that needs KiCad's font metrics
+  (`FormatStackedPinForDisplay`); the request carries the raw string.
 
 ### KiCad-side data gaps: closed
 
@@ -506,9 +575,12 @@ bun run pixel-diff # exit test against KiCad's SVG export (needs a KiCad build; 
 
 - Text without server shapes is a metrics-estimated box on boards and BitmapText stretched to
   that box on schematics (KiCad fonts are never shipped); glyph widths are approximate until
-  `GetTextAsShapes` results are fed through `textShapes`. Text boxes and table cells use server
-  glyphs too (KiCad >= 11.0 lays a `textbox` request out at the box); without them a text box
-  falls back to its own outline.
+  `GetTextAsShapes` results are fed through `textShapes`. On the schematic every plotted text
+  has a request (`schematicTextRequests`); the one placement that needs a second round trip
+  is a symbol field that is italic or top / bottom justified (`GetTextExtents` first). Text
+  boxes and table cells use server glyphs too (KiCad >= 11.0 lays a `textbox` request out at
+  the box); without them a text box falls back to its own outline. A global label's flag is
+  still sized from the estimated text width.
 - Knockout texts, text boxes and table cells are filled from `knockout_shapes` (KiCad >= 11.0),
   the box-minus-glyphs polygons KiCad plots. Against an older server, which sends only the
   `knockout` flag, they fall back to the border plus the glyph strokes: the renderer cannot
@@ -525,8 +597,10 @@ bun run pixel-diff # exit test against KiCad's SVG export (needs a KiCad build; 
 - Footprint fields with `keep_upright` are drawn at the angle the API reports, not the upright
   angle `PCB_TEXT::GetDrawRotation()` normalises to; the corrected angle has to reach the
   `GetTextAsShapes` request, not just the adapter.
-- Schematic: dangling-end markers and symbol alternate pin functions are not drawn; bitmap
-  symbols (`SchematicImage` inside a symbol) are ignored.
+- Schematic: dangling-end markers are not drawn; bitmap symbols (`SchematicImage` inside a
+  symbol) are ignored; a multi-line library text inside a mirrored symbol is laid out as one
+  block rather than line by line as `SCH_TEXT::Plot` does; `pin_name_offset` and text
+  variables: see "KiCad-side data gaps: open".
 - Pad solder mask / paste expansion is not applied (technical layers reuse the copper shape);
   hatched zone fills, thermal reliefs and teardrops render as whatever `filled_polygons` holds.
 - Zone hatch border (`ZBS_DIAGONAL_EDGE`) draws only the outline; `GFT_HATCH` fills use a

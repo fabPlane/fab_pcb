@@ -10,7 +10,7 @@
  * for the schematic host's BitmapText builder (see textGlyphs.ts).
  */
 import type { Box, Primitive, RenderItem, TextGlyphsPrimitive, Vec2 } from '../core/model.js';
-import { EMPTY_BOX, boxFromPoints, boxOfPrimitives, boxUnion, boxIsEmpty, vAdd, vScale, vSub } from '../core/model.js';
+import { EMPTY_BOX, boxFromPoints, boxOfPrimitives, boxUnion, boxIsEmpty, vAdd, vRotate, vScale, vSub } from '../core/model.js';
 import { circleToPolygon, hatchPolygon } from '../core/geometry.js';
 import type { ThemeColor } from '../core/theme.js';
 import type { StoredItemLike } from '../core/host.js';
@@ -60,7 +60,7 @@ import {
   spinStyleFromText,
   spinTextAttrs,
 } from './labelShapes.js';
-import { type HAlign, type TextAttrs, type VAlign, flipHAlign, halignFromEnum, textBlockExtents, textGlyphPrims, valignFromEnum } from './textMetrics.js';
+import { type HAlign, type TextAttrs, type VAlign, flipHAlign, flipVAlign, halignFromEnum, textBlockExtents, textGlyphPrims, valignFromEnum } from './textMetrics.js';
 import {
   type PinOrientation,
   type SymTransform,
@@ -69,6 +69,8 @@ import {
   pinDrawOrientation,
   pinOrientationFromEnum,
   symbolTransform,
+  toSheet,
+  transformCoordinate,
   transformPrimitive,
   transformTextGlyphs,
 } from './symbolTransform.js';
@@ -152,7 +154,7 @@ export interface SchematicAdapterContext {
   textShapes?: (textId: string) => TextShapesInput | undefined;
   /**
    * Decoder for `google.protobuf.Any` symbol children (`SchematicSymbolInstance.definition.items[].item`):
-   * return the protobuf-es message (with `$typeName`), e.g. `unpackAny` from @kicad-web/proto.
+   * return the protobuf-es message (with `$typeName`), e.g. `unpackAny` from @fp-pcb/proto.
    * Children that are already decoded messages or `{ type: 'KOT_SCH_PIN', proto }` wrappers
    * need no decoder.
    */
@@ -172,6 +174,20 @@ export interface SchematicAdapterContext {
   showDnpMarkers?: boolean;
   /** how text without server shapes is drawn: BitmapText glyphs (default), a metrics box, or nothing */
   textFallback?: 'glyphs' | 'box' | 'none';
+  /**
+   * Pin-name offset (nm, inside the body) to assume when a symbol instance reports 0.
+   * `SchematicSymbolInstance.pin_name_offset` is serialised from `SYMBOL::m_pinNameOffset` of the
+   * SCH_SYMBOL, which KiCad never fills in from the library symbol (the painter and plotter use
+   * the LIB_SYMBOL's, default 20 mil), so the message says 0 for every placed symbol. Unset =
+   * honour the message (names outside).
+   */
+  assumePinNameOffset?: number;
+  /**
+   * `LIB_SYMBOL::SubReference` settings for multi-unit references (`U2` -> `U2A`): the first
+   * unit id (default `A`; a digit counts units from that digit) and the separator (default none).
+   */
+  subpartFirstId?: string;
+  subpartIdSeparator?: string;
   /** nm per image pixel (KiCad: 25.4e6 / 300 ppi) */
   imagePixelNm?: number;
   /** arc approximation tolerance (nm) */
@@ -192,7 +208,7 @@ export interface SchematicDefaults {
   labelSizeRatio: number;
 }
 
-function defaultsOf(ctx: SchematicAdapterContext): SchematicDefaults {
+export function defaultsOf(ctx: SchematicAdapterContext): SchematicDefaults {
   return {
     lineWidth: SCH_DEFAULTS.lineWidth,
     wireWidth: SCH_DEFAULTS.wireWidth,
@@ -273,27 +289,47 @@ export function schematicItemTypeOf(x: unknown, ctx: SchematicAdapterContext = {
   return undefined;
 }
 
-function readTextAttrs(a: SchTextAttributesLike | undefined, d: SchematicDefaults): TextAttrs & { color?: ThemeColor } {
-  const sx = nm(a?.size?.xNm);
-  const sy = nm(a?.size?.yNm);
-  const size = { x: sx || sy || d.textSize, y: sy || sx || d.textSize };
+/**
+ * `EDA_TEXT::GetEffectiveTextPenWidth( aDefault )`: the stored thickness (× 1.6 when bold), else
+ * the bold pen (size / 5), else `aDefault`, else size / 8; clamped to a quarter of the size.
+ * The plotter passes the schematic's default line width; `GetTextBox` passes 0.
+ */
+export function effectivePenWidth(a: SchTextAttributesLike | undefined, size: Vec2, defaultPen: number): number {
   const bold = !!a?.bold;
   let thickness = dist(a?.strokeWidth);
-  if (thickness <= 1) thickness = bold ? Math.round(size.x / 5) : d.lineWidth;
-  thickness = Math.min(thickness, Math.round(Math.min(size.x, size.y) * 0.25)); // ClampTextPenSize
+  if (thickness <= 1) {
+    thickness = defaultPen;
+    if (bold) thickness = Math.round(size.x / 5);
+    else if (thickness <= 1) thickness = Math.round(size.x / 8);
+  } else if (bold) thickness = Math.round(thickness * 1.6); // BOLD_STROKE_MULTIPLIER
+  return Math.min(thickness, Math.round(Math.min(size.x, size.y) * 0.25)); // ClampTextPenSize
+}
+
+export function readTextSize(a: SchTextAttributesLike | undefined, d: SchematicDefaults): Vec2 {
+  const sx = nm(a?.size?.xNm);
+  const sy = nm(a?.size?.yNm);
+  return { x: sx || sy || d.textSize, y: sy || sx || d.textSize };
+}
+
+/** Text attributes the way the plotter draws them: pen width defaulted to the schematic line width. */
+export function readTextAttrs(a: SchTextAttributesLike | undefined, d: SchematicDefaults): TextAttrs & { color?: ThemeColor } {
+  const size = readTextSize(a, d);
   return {
     size,
-    thickness,
+    thickness: effectivePenWidth(a, size, d.lineWidth),
     angle: deg(a?.angle),
     halign: halignFromEnum(a?.horizontalAlignment, 'left'),
     valign: valignFromEnum(a?.verticalAlignment, 'bottom'),
     mirrored: !!a?.mirrored,
-    bold,
+    bold: !!a?.bold,
     italic: !!a?.italic,
     lineSpacing: a?.lineSpacing || 1,
     color: colorOf(a?.color),
   };
 }
+
+/** `SCH_TEXT::GetSchematicTextOffset`: plain text is drawn 0.25 mm (2500 schematic IU) above its position ("fudge factor to match KiCad 6"). */
+export const SCH_TEXT_OFFSET: Readonly<Vec2> = Object.freeze({ x: 0, y: -250_000 });
 
 const lineStyleOf = (s: SchStrokeLike | undefined): string => enumName('StrokeLineStyle', s?.style);
 
@@ -301,10 +337,15 @@ const lineStyleOf = (s: SchStrokeLike | undefined): string => enumName('StrokeLi
 // Primitive helpers
 // ---------------------------------------------------------------------------
 
-interface Ctx {
+/** Conversion state for one store item: the adapter context, resolved defaults and the owning item id. */
+export interface Ctx {
   ctx: SchematicAdapterContext;
   d: SchematicDefaults;
   owner: string;
+}
+
+export function makeCtx(ctx: SchematicAdapterContext, owner: string): Ctx {
+  return { ctx, d: defaultsOf(ctx), owner };
 }
 
 function finish(id: string, layer: string, prims: Primitive[], c: Ctx, extra: Partial<RenderItem> = {}): RenderItem {
@@ -476,7 +517,7 @@ function convertText(p: Record<string, unknown>, id: string, c: Ctx, layer = SCH
   const t = p.text as SchTextLike | undefined;
   if (!t) return [];
   const a = readTextAttrs(t.attributes, c.d);
-  const prims = textPrims(id, t.text ?? '', vec(t.position), a, c);
+  const prims = textPrims(id, t.text ?? '', vAdd(vec(t.position), SCH_TEXT_OFFSET), a, c);
   if (!prims.length) return [];
   return [finish(id, layer, prims, c, a.color ? { color: a.color } : {})];
 }
@@ -605,30 +646,124 @@ interface FieldOpts {
   /** library -> sheet transform for symbol fields (position relative to `origin`) */
   transform?: SymTransform;
   origin?: Vec2;
+  /** added to the field position (global-label fields: `GetSchematicTextOffset`) */
+  offset?: Vec2;
+  /** `sheetfile` prefixes the value with `File: ` unless the name is shown */
+  kind?: 'field' | 'sheetfile';
   pickable?: boolean;
   ref?: string;
 }
 
+/**
+ * The string a field shows (`SCH_FIELD::GetShownText( aAllowExtraText = true )`): `Name: value`
+ * when `show_name` is set, and `File: value` for a sheet's file field otherwise. Empty when
+ * hidden / private / empty.
+ */
+export function fieldShownText(f: SchFieldLike | undefined, showHidden = false, kind: 'field' | 'sheetfile' = 'field'): string {
+  if (!f?.text || f.isPrivate) return '';
+  if (f.visible === false && !showHidden) return '';
+  const text = f.text.text ?? '';
+  if (!text) return '';
+  if (f.showName && f.name) return `${f.name}: ${text}`;
+  return kind === 'sheetfile' ? `File: ${text}` : text;
+}
+
+/**
+ * Text variables a sheet resolves from its own fields (`SCH_SHEET::ResolveTextVar`: `${Sheetname}`,
+ * `${Sheetfile}`, `${<user field>}`), the way its pins' `GetShownText` does. Other variables
+ * (project, `${#}`, `${REF:...}`) stay as written: the API carries the raw text only.
+ */
+export function sheetTextVars(p: Record<string, unknown>): Record<string, string> {
+  const vars: Record<string, string> = {};
+  const add = (f: SchFieldLike | undefined, fallback: string): void => {
+    if (f?.text?.text !== undefined) vars[f.name || fallback] = f.text.text;
+  };
+  add(p.nameField as SchFieldLike | undefined, 'Sheetname');
+  add(p.filenameField as SchFieldLike | undefined, 'Sheetfile');
+  for (const f of (p.userFields as SchFieldLike[] | undefined) ?? []) add(f, '');
+  return vars;
+}
+
+export function expandTextVars(text: string, vars: Record<string, string> | undefined): string {
+  if (!vars || !text.includes('${')) return text;
+  return text.replace(/\$\{([^}]+)\}/g, (m, name: string) => vars[name] ?? m);
+}
+
+export interface FieldPlacement {
+  /** anchor to draw the text at, sheet coordinates */
+  pos: Vec2;
+  /** `SCH_FIELD::GetDrawRotation`: horizontal <-> vertical swapped when the transform turns the axes */
+  angle: number;
+  halign: HAlign;
+  valign: VAlign;
+  /**
+   * True when drawing `text` justified at `pos` reproduces KiCad exactly. KiCad plots symbol
+   * fields centred on `GetBoundingBox().Centre()`; for a vertically centred, upright field that
+   * centre can be written without knowing the text width (see below), otherwise the box must be
+   * measured (`GetTextExtents`) and `measured()` used.
+   */
+  exact: boolean;
+}
+
+/**
+ * Where eeschema draws a symbol field (`SCH_FIELD::Plot` / `SCH_PAINTER::draw( SCH_FIELD )`): the
+ * text is centred on the centre of `SCH_FIELD::GetBoundingBox()` -- the field's own text box in
+ * the untransformed frame, pushed through the symbol transform -- at `GetDrawRotation()`, so it
+ * stays readable on mirrored and rotated symbols.
+ *
+ * For a vertically centred upright field the centre is `pos' + d · (±(W/2 + ρ))` with W the glyph
+ * advance width, ρ = round(1.5 · boxPen) (`FONT::StringBoundaryLimits` inflates the advance box
+ * by that much) and d the transformed reading direction; drawing the same string justified
+ * left / right places its glyphs at `anchor + d' · (offsetX)` / `anchor − d' · (W + offsetX)`
+ * with offsetX = trunc(plotPen / 1.52) (`FONT::getLinePositions`). Both contain W, and it
+ * cancels: a justified draw at `pos' + d · δ` (δ = ρ − offsetX for a left-justified field,
+ * −δ for right, 0 for centre), justification flipped when d' = −d, is pixel-identical to
+ * KiCad's centred draw. Italic and top / bottom justified fields need the measured box.
+ *
+ * @param a       the stored attributes (plot pen width in `thickness`)
+ * @param pos     stored field position (untransformed frame, absolute)
+ * @param boxPen  `GetEffectiveTextPenWidth()` with default 0, the pen `GetTextBox` uses
+ */
+export function symbolFieldPlacement(a: TextAttrs, pos: Vec2, t: SymTransform, origin: Vec2, boxPen: number): FieldPlacement {
+  const posT = toSheet(t, vSub(pos, origin), origin);
+  const phi = ((a.angle % 360) + 360) % 360;
+  const horizontal = Math.abs(phi % 180) < 1e-6;
+  const angle = t.y1 !== 0 ? (horizontal ? 90 : 0) : phi;
+  const d = transformCoordinate(t, vRotate({ x: 1, y: 0 }, phi));
+  const dDraw = vRotate({ x: 1, y: 0 }, angle);
+  const flip = d.x * dDraw.x + d.y * dDraw.y < 0;
+  const rho = Math.round(1.5 * boxPen);
+  const offsetX = Math.trunc(a.thickness / 1.52);
+  const delta = a.halign === 'left' ? rho - offsetX : a.halign === 'right' ? offsetX - rho : 0;
+  const exact = a.valign === 'center' && !a.italic && !a.mirrored;
+  return { pos: vAdd(posT, vScale(d, delta)), angle, halign: flip ? flipHAlign(a.halign) : a.halign, valign: 'center', exact };
+}
+
+/**
+ * The centred placement from a measured text box (`GetTextExtents` of the field at its stored
+ * position and attributes = `EDA_TEXT::GetTextBox` rotated about the position): the box centre
+ * through the symbol transform, drawn centred at `GetDrawRotation()`.
+ */
+export function symbolFieldPlacementFromBox(a: TextAttrs, pos: Vec2, t: SymTransform, origin: Vec2, box: Box): FieldPlacement {
+  const centre = { x: box.x + box.w / 2, y: box.y + box.h / 2 };
+  const posT = toSheet(t, vSub(pos, origin), origin);
+  const phi = ((a.angle % 360) + 360) % 360;
+  const horizontal = Math.abs(phi % 180) < 1e-6;
+  const angle = t.y1 !== 0 ? (horizontal ? 90 : 0) : phi;
+  return { pos: vAdd(posT, transformCoordinate(t, vSub(centre, pos))), angle, halign: 'center', valign: 'center', exact: true };
+}
+
 /** A SchematicField as text. Returns [] when hidden / empty. */
 function fieldItems(f: SchFieldLike | undefined, c: Ctx, o: FieldOpts): RenderItem[] {
-  if (!f?.text) return [];
-  if (f.isPrivate) return [];
-  let layer = o.layer;
-  if (f.visible === false) {
-    if (!c.ctx.showHiddenFields) return [];
-    layer = SCH_LAYERS.hidden;
-  }
-  let text = f.text.text ?? '';
-  if (!text) return [];
-  if (f.showName && f.name) text = `${f.name}: ${text}`;
+  const text = fieldShownText(f, !!c.ctx.showHiddenFields, o.kind);
+  if (!text || !f?.text) return [];
+  const layer = f.visible === false ? SCH_LAYERS.hidden : o.layer;
   const a = readTextAttrs(f.text.attributes, c.d);
-  const absPos = vec(f.text.position);
+  const absPos = vAdd(vec(f.text.position), o.offset ?? { x: 0, y: 0 });
   let prims: Primitive[];
   if (o.transform && o.origin && !hasServerShapes(o.id, c)) {
-    const local = vSub(absPos, o.origin);
-    const t = o.transform;
-    const origin = o.origin;
-    prims = textPrims(o.id, text, local, a, c).map((p) => transformPrimitive(p, t, origin));
+    const placed = symbolFieldPlacement(a, absPos, o.transform, o.origin, effectivePenWidth(f.text.attributes, a.size, 0));
+    prims = textPrims(o.id, text, placed.pos, { ...a, angle: placed.angle, halign: placed.halign, valign: placed.valign }, c);
   } else {
     prims = textPrims(o.id, text, absPos, a, c);
   }
@@ -640,7 +775,8 @@ function fieldItems(f: SchFieldLike | undefined, c: Ctx, o: FieldOpts): RenderIt
 // Labels
 // ---------------------------------------------------------------------------
 
-interface LabelBase {
+export interface LabelBase {
+  /** the label position (shape anchor) */
   pos: Vec2;
   text: string;
   a: TextAttrs & { color?: ThemeColor };
@@ -660,19 +796,55 @@ function labelBase(p: Record<string, unknown>, c: Ctx, valign: VAlign): LabelBas
   return { pos, text: t.text ?? '', a, spin, penWidth: a.thickness };
 }
 
-function labelFields(p: Record<string, unknown>, id: string, c: Ctx, layer: string): RenderItem[] {
-  const out: RenderItem[] = [];
-  const fields = (p.fields as SchFieldLike[] | undefined) ?? [];
-  fields.forEach((f, i) => out.push(...fieldItems(f, c, { id: `${id}:field:${f.name || i}`, layer, ref: id, pickable: true })));
+/** Label fields: `<label>:field:<name>`, plus the intersheet refs. Only global labels shift them (`SCH_FIELD::Plot`). */
+export function labelFieldRefs(p: Record<string, unknown>, id: string): Array<{ key: string; field: SchFieldLike }> {
+  const out: Array<{ key: string; field: SchFieldLike }> = [];
+  ((p.fields as SchFieldLike[] | undefined) ?? []).forEach((f, i) => out.push({ key: `${id}:field:${f.name || i}`, field: f }));
   const isr = p.intersheetRefsField as SchFieldLike | undefined;
-  if (isr) out.push(...fieldItems(isr, c, { id: `${id}:field:${isr.name || 'Intersheetrefs'}`, layer, ref: id, pickable: true }));
+  if (isr) out.push({ key: `${id}:field:${isr.name || 'Intersheetrefs'}`, field: isr });
   return out;
 }
 
+function labelFields(p: Record<string, unknown>, id: string, c: Ctx, layer: string, offset?: Vec2): RenderItem[] {
+  const out: RenderItem[] = [];
+  for (const { key, field } of labelFieldRefs(p, id)) out.push(...fieldItems(field, c, { id: key, layer, ref: id, pickable: true, offset }));
+  return out;
+}
+
+export type LabelKind = 'local' | 'global' | 'hier';
+
+export interface LabelTextLayout extends LabelBase {
+  /** text anchor: the label position plus `GetSchematicTextOffset` */
+  anchor: Vec2;
+  shape: LabelShape;
+  /** the offset applied to a global label's fields as well (`SCH_FIELD::Plot`) */
+  fieldOffset?: Vec2;
+}
+
+/** `SCH_LABEL_BASE::Plot`: the label text at `GetTextPos() + GetSchematicTextOffset()` with the spin style's angle / justification. */
+export function labelTextLayout(kind: LabelKind, p: Record<string, unknown>, c: Ctx): LabelTextLayout {
+  switch (kind) {
+    case 'local': {
+      const l = labelBase(p, c, 'bottom');
+      return { ...l, anchor: vAdd(l.pos, localLabelTextOffset(l.a.size.y, l.penWidth, l.spin, c.d.textOffsetRatio)), shape: 'input' };
+    }
+    case 'global': {
+      const l = labelBase(p, c, 'center');
+      const shape = labelShapeFromEnum(p.shape as number | string, 'input');
+      const off = globalLabelTextOffset(l.a.size.y, shape, l.spin);
+      return { ...l, anchor: vAdd(l.pos, off), shape, fieldOffset: off };
+    }
+    case 'hier': {
+      const l = labelBase(p, c, 'center');
+      const shape = labelShapeFromEnum(p.shape as number | string, 'input');
+      return { ...l, anchor: vAdd(l.pos, hierLabelTextOffset(l.a.size.y, l.a.size.x, l.spin, c.d.textOffsetRatio)), shape };
+    }
+  }
+}
+
 function convertLocalLabel(p: Record<string, unknown>, id: string, c: Ctx): RenderItem[] {
-  const l = labelBase(p, c, 'bottom');
-  const off = localLabelTextOffset(l.a.size.y, l.penWidth, l.spin, c.d.textOffsetRatio);
-  const prims = textPrims(id, l.text, vAdd(l.pos, off), l.a, c);
+  const l = labelTextLayout('local', p, c);
+  const prims = textPrims(id, l.text, l.anchor, l.a, c);
   const out: RenderItem[] = [];
   if (prims.length) out.push(finish(id, SCH_LAYERS.labelLocal, prims, c, { bbox: boxUnion(boxOfPrimitives(prims), boxFromPoints([l.pos])), ...(l.a.color ? { color: l.a.color } : {}) }));
   out.push(...labelFields(p, id, c, SCH_LAYERS.fields));
@@ -680,14 +852,13 @@ function convertLocalLabel(p: Record<string, unknown>, id: string, c: Ctx): Rend
 }
 
 function convertGlobalLabel(p: Record<string, unknown>, id: string, c: Ctx): RenderItem[] {
-  const l = labelBase(p, c, 'center');
-  const shape = labelShapeFromEnum(p.shape as number | string, 'input');
+  const l = labelTextLayout('global', p, c);
   const textWidth = textBlockExtents(l.text, l.a).w;
-  const outline = globalLabelShape(l.pos, l.a.size.y, textWidth, l.penWidth, shape, l.spin);
+  const outline = globalLabelShape(l.pos, l.a.size.y, textWidth, l.penWidth, l.shape, l.spin);
   const prims: Primitive[] = polyline(outline, l.penWidth);
-  prims.push(...textPrims(id, l.text, vAdd(l.pos, globalLabelTextOffset(l.a.size.y, shape, l.spin)), l.a, c));
+  prims.push(...textPrims(id, l.text, l.anchor, l.a, c));
   const out: RenderItem[] = [finish(id, SCH_LAYERS.labelGlobal, prims, c, l.a.color ? { color: l.a.color } : {})];
-  out.push(...labelFields(p, id, c, SCH_LAYERS.fields));
+  out.push(...labelFields(p, id, c, SCH_LAYERS.fields, l.fieldOffset));
   return out;
 }
 
@@ -705,10 +876,9 @@ function flagItems(id: string, layer: string, outline: Vec2[], textAt: Vec2, l: 
 }
 
 function convertHierLabel(p: Record<string, unknown>, id: string, c: Ctx): RenderItem[] {
-  const l = labelBase(p, c, 'center');
-  const shape = labelShapeFromEnum(p.shape as number | string, 'input');
-  const outline = hierLabelShape(l.pos, l.a.size.y, shape, l.spin);
-  const out = flagItems(id, SCH_LAYERS.labelHier, outline, vAdd(l.pos, hierLabelTextOffset(l.a.size.y, l.a.size.x, l.spin, c.d.textOffsetRatio)), l, c);
+  const l = labelTextLayout('hier', p, c);
+  const outline = hierLabelShape(l.pos, l.a.size.y, l.shape, l.spin);
+  const out = flagItems(id, SCH_LAYERS.labelHier, outline, l.anchor, l, c);
   out.push(...labelFields(p, id, c, SCH_LAYERS.fields));
   return out;
 }
@@ -731,7 +901,17 @@ function convertDirectiveLabel(p: Record<string, unknown>, id: string, c: Ctx): 
 // Sheets
 // ---------------------------------------------------------------------------
 
-function sheetPinItems(pin: SchSheetPinLike, index: number, sheetId: string, c: Ctx): RenderItem[] {
+export interface SheetPinLayout extends LabelTextLayout {
+  /** textShapes key / render item id: `<sheet>:pin:<pin kiid>` */
+  key: string;
+  pinId: string;
+}
+
+/**
+ * A sheet pin is a hierarchical label (`SCH_SHEET_PIN` : `SCH_HIERLABEL`) whose spin style follows
+ * the sheet side; `vars` (`sheetTextVars`) resolves `${field}` in its text as KiCad's shown text does.
+ */
+export function sheetPinLayout(pin: SchSheetPinLike, index: number, sheetId: string, c: Ctx, vars?: Record<string, string>): SheetPinLayout {
   const pinId = kiid(pin.id) || `${sheetId}:pin${index}`;
   const t = pin.text ?? {};
   const a = readTextAttrs(t.attributes, c.d);
@@ -741,10 +921,14 @@ function sheetPinItems(pin: SchSheetPinLike, index: number, sheetId: string, c: 
   a.halign = st.halign;
   a.valign = 'center';
   const pos = pin.position ? vec(pin.position) : vec(t.position);
-  const l: LabelBase = { pos, text: t.text ?? '', a, spin, penWidth: a.thickness };
   const shape = labelShapeFromEnum(pin.shape, 'input');
-  const outline = sheetPinShape(pos, a.size.y, shape, spin);
-  return flagItems(`${sheetId}:pin:${pinId}`, SCH_LAYERS.sheetLabel, outline, vAdd(pos, hierLabelTextOffset(a.size.y, a.size.x, spin, c.d.textOffsetRatio)), l, c, { ref: pinId });
+  return { key: `${sheetId}:pin:${pinId}`, pinId, pos, text: expandTextVars(t.text ?? '', vars), a, spin, penWidth: a.thickness, anchor: vAdd(pos, hierLabelTextOffset(a.size.y, a.size.x, spin, c.d.textOffsetRatio)), shape };
+}
+
+function sheetPinItems(pin: SchSheetPinLike, index: number, sheetId: string, c: Ctx, vars?: Record<string, string>): RenderItem[] {
+  const l = sheetPinLayout(pin, index, sheetId, c, vars);
+  const outline = sheetPinShape(l.pos, l.a.size.y, l.shape, l.spin);
+  return flagItems(l.key, SCH_LAYERS.sheetLabel, outline, l.anchor, l, c, { ref: l.pinId });
 }
 
 function dnpCross(body: Box, withPins: Box, c: Ctx, id: string, ref: string): RenderItem[] {
@@ -793,9 +977,10 @@ function convertSheet(p: Record<string, unknown>, id: string, c: Ctx): RenderIte
   const nameField = p.nameField as SchFieldLike | undefined;
   const fileField = p.filenameField as SchFieldLike | undefined;
   out.push(...fieldItems(nameField, c, { id: `${id}:field:${nameField?.name || 'Sheetname'}`, layer: SCH_LAYERS.sheetName, ref: id, pickable: true }));
-  out.push(...fieldItems(fileField, c, { id: `${id}:field:${fileField?.name || 'Sheetfile'}`, layer: SCH_LAYERS.sheetFilename, ref: id, pickable: true }));
+  out.push(...fieldItems(fileField, c, { id: `${id}:field:${fileField?.name || 'Sheetfile'}`, layer: SCH_LAYERS.sheetFilename, ref: id, pickable: true, kind: 'sheetfile' }));
   ((p.userFields as SchFieldLike[] | undefined) ?? []).forEach((f, i) => out.push(...fieldItems(f, c, { id: `${id}:field:${f.name || i}`, layer: SCH_LAYERS.sheetFields, ref: id, pickable: true })));
-  ((p.pins as SchSheetPinLike[] | undefined) ?? []).forEach((pin, i) => out.push(...sheetPinItems(pin, i, id, c)));
+  const vars = sheetTextVars(p);
+  ((p.pins as SchSheetPinLike[] | undefined) ?? []).forEach((pin, i) => out.push(...sheetPinItems(pin, i, id, c, vars)));
   const body = boxFromPoints(rect);
   if (p.dnp && (c.ctx.showDnpMarkers ?? true)) {
     let withPins = body;
@@ -815,7 +1000,7 @@ const PIN_SHAPE_NAMES = ['SPS_UNKNOWN', 'SPS_LINE', 'SPS_INVERTED', 'SPS_CLOCK',
 const pinShapeName = (v: number | string | undefined): string => (typeof v === 'number' ? (PIN_SHAPE_NAMES[v] ?? 'SPS_LINE') : (v ?? 'SPS_LINE'));
 const isNoConnectPin = (v: number | string | undefined): boolean => v === 12 || v === 'EPT_NO_CONNECT';
 
-interface PinGeom {
+export interface PinGeom {
   /** connection point (sheet coordinates) */
   pos: Vec2;
   /** where the pin meets the body */
@@ -883,7 +1068,7 @@ function pinBodyPrims(g: PinGeom, shape: string, noConnect: boolean, numSize: nu
   return out;
 }
 
-interface PinTextLayout {
+export interface PinTextLayout {
   text: string;
   pos: Vec2;
   size: number;
@@ -893,166 +1078,222 @@ interface PinTextLayout {
   valign: VAlign;
 }
 
-/** PIN_LAYOUT_CACHE::GetPinNumberInfo. */
-function pinNumberLayout(g: PinGeom, number: string, numSize: number, thickness: number, nameOutside: boolean, c: Ctx): PinTextLayout | undefined {
-  if (!number) return undefined;
-  const textOffset = Math.round(24 * c.d.textOffsetRatio) * MIL;
-  const lines = number.split('\n').length;
-  const perpHeight = lines > 1 ? lines * Math.round(numSize * 1.3) : numSize;
-  const perp = Math.round(perpHeight / 2) + textOffset + SCH_DEFAULTS.pinTextMargin + thickness;
-  const half = Math.round(g.length / 2);
-  const vertical = g.orient === 'up' || g.orient === 'down';
-  if (vertical) {
-    return {
-      text: number,
-      pos: { x: nameOutside ? g.pos.x + perp : g.pos.x - perp, y: g.orient === 'down' ? g.pos.y + half : g.pos.y - half },
-      size: numSize,
-      thickness,
-      angle: 90,
-      halign: 'center',
-      valign: 'center',
-    };
-  }
-  return {
-    text: number,
-    pos: { x: g.orient === 'left' ? g.pos.x - half : g.pos.x + half, y: nameOutside ? g.pos.y + perp : g.pos.y - perp },
-    size: numSize,
-    thickness,
-    angle: 0,
-    halign: 'center',
-    valign: 'center',
-  };
+export interface SchPinAlternateLike {
+  name?: string;
+  shape?: number | string;
+  electricalType?: number | string;
 }
 
-/** PIN_LAYOUT_CACHE::GetPinNameInfo (+ transformTextForPin for names inside the body). */
-function pinNameLayout(g: PinGeom, name: string, nameSize: number, thickness: number, nameOffset: number, maxHalfHeight: number, c: Ctx): PinTextLayout | undefined {
-  if (!name) return undefined;
-  const textOffset = Math.round(24 * c.d.textOffsetRatio) * MIL;
-  if (nameOffset > 0) {
-    const local = { x: g.length + nameOffset, y: 0 };
-    let pos: Vec2 = local;
-    let angle = 0;
-    let halign: HAlign = 'left';
-    switch (g.orient) {
-      case 'left':
-        pos = { x: -local.x, y: -local.y };
-        halign = flipHAlign(halign);
-        break;
-      case 'up':
-        pos = { x: local.y, y: -local.x };
-        angle = 90;
-        break;
-      case 'down':
-        pos = { x: -local.y, y: local.x };
-        angle = 90;
-        halign = flipHAlign(halign);
-        break;
-      default:
-        break;
+/**
+ * What a pin shows: `SCH_PIN::GetShownName` returns the active alternate's name (and the
+ * alternate's shape / electrical type replace the pin's); a name of `~` is empty.
+ */
+export function pinShown(pin: SchPinLike & { alternates?: SchPinAlternateLike[]; activeAlternate?: string }): { name: string; number: string; shape: number | string | undefined; electricalType: number | string | undefined } {
+  const alt = pin.activeAlternate ? (pin.alternates ?? []).find((a) => a.name === pin.activeAlternate) : undefined;
+  const raw = alt?.name ?? pin.name ?? '';
+  return { name: raw === '~' ? '' : raw, number: pin.number ?? '', shape: alt?.shape ?? pin.shape, electricalType: alt?.electricalType ?? pin.electricalType };
+}
+
+/**
+ * `SCH_PIN::PlotPinTexts`: where the name and the number go, for the pin's draw orientation.
+ * `inside` is the symbol's `pin_name_offset`; 0 puts the name outside above the pin (and the
+ * number below it). Anchors sit `name_offset` = text offset + PIN_TEXT_MARGIN + pen width off the
+ * pin line, bottom- / top-justified, so the same string laid out by the stroke font lands where
+ * the plotter (and, for single-line text, `PIN_LAYOUT_CACHE`) puts it. `penWidth` is the
+ * schematic's default pen (the plotter uses it unclamped). Stacked numbers (`[1,2,3]`) are
+ * plotted single-line when they fit along the pin and as a braced column otherwise -- that
+ * decision needs KiCad's font metrics, so they are laid out single-line here.
+ */
+export function pinTextLayouts(g: PinGeom, name: string, number: string, numSize: number, nameSize: number, penWidth: number, inside: number, d: SchematicDefaults): { number?: PinTextLayout; name?: PinTextLayout } {
+  const drawName = !!name && nameSize > 0;
+  const drawNum = !!number && numSize > 0;
+  const out: { number?: PinTextLayout; name?: PinTextLayout } = {};
+  if (!drawName && !drawNum) return out;
+  const offset = Math.round(24 * d.textOffsetRatio) * MIL + SCH_DEFAULTS.pinTextMargin + penWidth; // name_offset == num_offset
+  const x1 = g.root.x;
+  const y1 = g.root.y;
+  const mk = (text: string, pos: Vec2, size: number, angle: number, halign: HAlign, valign: VAlign): PinTextLayout => ({ text, pos, size, thickness: penWidth, angle, halign, valign });
+  const horizontal = g.orient === 'left' || g.orient === 'right';
+  const midX = Math.trunc((x1 + g.pos.x) / 2);
+  const midY = Math.trunc((y1 + g.pos.y) / 2);
+  if (inside > 0) {
+    if (horizontal) {
+      if (drawName) out.name = g.orient === 'right' ? mk(name, { x: x1 + inside, y: y1 }, nameSize, 0, 'left', 'center') : mk(name, { x: x1 - inside, y: y1 }, nameSize, 0, 'right', 'center');
+      if (drawNum) out.number = mk(number, { x: midX, y: y1 - offset }, numSize, 0, 'center', 'bottom');
+    } else {
+      if (drawName) out.name = g.orient === 'down' ? mk(name, { x: x1, y: y1 + inside }, nameSize, 90, 'right', 'center') : mk(name, { x: x1, y: y1 - inside }, nameSize, 90, 'left', 'center');
+      if (drawNum) out.number = mk(number, { x: x1 - offset, y: midY }, numSize, 90, 'center', 'bottom');
     }
-    return { text: name, pos: vAdd(pos, g.pos), size: nameSize, thickness, angle, halign, valign: 'center' };
+  } else if (horizontal) {
+    if (drawName) out.name = mk(name, { x: midX, y: y1 - offset }, nameSize, 0, 'center', 'bottom');
+    if (drawNum) out.number = drawName ? mk(number, { x: midX, y: y1 + offset }, numSize, 0, 'center', 'top') : mk(number, { x: midX, y: y1 - offset }, numSize, 0, 'center', 'bottom');
+  } else {
+    if (drawName) out.name = mk(name, { x: x1 - offset, y: midY }, nameSize, 90, 'center', 'bottom');
+    if (drawNum) out.number = drawName ? mk(number, { x: x1 + offset, y: midY }, numSize, 90, 'center', 'top') : mk(number, { x: x1 - offset, y: midY }, numSize, 90, 'center', 'bottom');
   }
-  const clearance = textOffset + SCH_DEFAULTS.pinTextMargin;
-  const half = Math.round(g.length / 2);
-  const vertical = g.orient === 'up' || g.orient === 'down';
-  if (vertical) {
-    const perp = clearance + Math.round(nameSize / 2) + thickness;
-    return { text: name, pos: { x: g.pos.x - perp, y: g.orient === 'down' ? g.pos.y + half : g.pos.y - half }, size: nameSize, thickness, angle: 90, halign: 'center', valign: 'center' };
-  }
-  return {
-    text: name,
-    pos: { x: g.orient === 'left' ? g.pos.x - half : g.pos.x + half, y: g.pos.y - (maxHalfHeight + clearance + thickness) },
-    size: nameSize,
-    thickness,
-    angle: 0,
-    halign: 'center',
-    valign: 'center',
-  };
+  return out;
 }
 
-interface SymbolInfo {
+export interface SymbolInfo {
   id: string;
   pos: Vec2;
   t: SymTransform;
   showPinNames: boolean;
   showPinNumbers: boolean;
   pinNameOffset: number;
-  maxNameHalfHeight: number;
 }
 
-function pinItems(pin: SchPinLike, index: number, s: SymbolInfo, c: Ctx): { items: RenderItem[]; bbox: Box } {
-  const pinKiid = kiid(pin.id) || `${index}`;
-  const number = pin.number ?? '';
-  const ref = `${s.id}:${number}`;
-  const baseId = `${s.id}@pin:${pinKiid}`;
-  const items: RenderItem[] = [];
-  let layer = SCH_LAYERS.pin;
-  let textLayers = { num: SCH_LAYERS.pinNumber, name: SCH_LAYERS.pinName };
-  if (pin.visible === false) {
-    if (!c.ctx.showHiddenPins) return { items, bbox: EMPTY_BOX };
-    layer = SCH_LAYERS.hidden;
-    textLayers = { num: SCH_LAYERS.hidden, name: SCH_LAYERS.hidden };
-  }
+export interface PinLayout {
+  pinKiid: string;
+  geom: PinGeom;
+  numSize: number;
+  nameSize: number;
+  shown: ReturnType<typeof pinShown>;
+  texts: { number?: PinTextLayout; name?: PinTextLayout };
+  hidden: boolean;
+}
+
+/** Geometry and text placement of one symbol pin (sheet coordinates). Undefined when hidden and hidden pins are not shown. */
+export function pinLayout(pin: SchPinLike, index: number, s: SymbolInfo, c: Ctx): PinLayout | undefined {
+  const hidden = pin.visible === false;
+  if (hidden && !c.ctx.showHiddenPins) return undefined;
   const libOrient = pinOrientationFromEnum(pin.orientation);
   const orient = pinDrawOrientation(libOrient, s.t);
   const rawPos = vec(pin.position);
   const pos = c.ctx.symbolPinsAbsolute === false ? vAdd(s.pos, { x: s.t.x1 * rawPos.x + s.t.y1 * rawPos.y, y: s.t.x2 * rawPos.x + s.t.y2 * rawPos.y }) : rawPos;
   const length = dist(pin.length);
   const root = vAdd(pos, vScale(pinDirection(orient), length));
-  const g: PinGeom = { pos, root, orient, length };
+  const shown = pinShown(pin);
   const numSize = dist(pin.numberTextSize) || c.d.pinTextSize;
   const nameSize = dist(pin.nameTextSize) || c.d.pinTextSize;
+  const geom: PinGeom = { pos, root, orient, length };
+  const texts = pinTextLayouts(geom, s.showPinNames ? shown.name : '', s.showPinNumbers ? shown.number : '', numSize, nameSize, c.d.lineWidth, s.pinNameOffset, c.d);
+  return { pinKiid: kiid(pin.id) || `${index}`, geom, numSize, nameSize, shown, texts, hidden };
+}
+
+function pinItems(pin: SchPinLike, index: number, s: SymbolInfo, c: Ctx): { items: RenderItem[]; bbox: Box } {
+  const items: RenderItem[] = [];
+  const l = pinLayout(pin, index, s, c);
+  if (!l) return { items, bbox: EMPTY_BOX };
+  const ref = `${s.id}:${l.shown.number}`;
+  const baseId = `${s.id}@pin:${l.pinKiid}`;
+  const layer = l.hidden ? SCH_LAYERS.hidden : SCH_LAYERS.pin;
+  const textLayers = l.hidden ? { num: SCH_LAYERS.hidden, name: SCH_LAYERS.hidden } : { num: SCH_LAYERS.pinNumber, name: SCH_LAYERS.pinName };
   const width = c.d.lineWidth;
-  const body = pinBodyPrims(g, pinShapeName(pin.shape), isNoConnectPin(pin.electricalType), numSize, nameSize, width);
-  const bbox = body.length ? boxOfPrimitives(body) : boxFromPoints([pos, root], width);
+  const body = pinBodyPrims(l.geom, pinShapeName(l.shown.shape), isNoConnectPin(l.shown.electricalType), l.numSize, l.nameSize, width);
+  const bbox = body.length ? boxOfPrimitives(body) : boxFromPoints([l.geom.pos, l.geom.root], width);
   items.push({ id: baseId, layer, prims: body, bbox, owner: c.owner, ref });
-  const name = pin.name && pin.name !== '~' ? pin.name : '';
-  const showName = s.showPinNames && !!name;
-  const showNumber = s.showPinNumbers && !!number;
-  const thickness = Math.min(width, Math.round(Math.min(numSize, nameSize) * 0.25));
-  const textItem = (layout: PinTextLayout | undefined, suffix: 'number' | 'name', l: string): void => {
+  const textItem = (layout: PinTextLayout | undefined, suffix: 'number' | 'name', lay: string): void => {
     if (!layout) return;
     const a: TextAttrs = { size: { x: layout.size, y: layout.size }, thickness: layout.thickness, angle: layout.angle, halign: layout.halign, valign: layout.valign };
-    const prims = textPrims(`${s.id}:pin:${pinKiid}:${suffix}`, layout.text, layout.pos, a, c);
-    if (prims.length) items.push(finish(`${baseId}:${suffix}`, l, prims, c, { ref, pickable: false }));
+    const prims = textPrims(`${s.id}:pin:${l.pinKiid}:${suffix}`, layout.text, layout.pos, a, c);
+    if (prims.length) items.push(finish(`${baseId}:${suffix}`, lay, prims, c, { ref, pickable: false }));
   };
-  if (showNumber) textItem(pinNumberLayout(g, number, numSize, thickness, showName && s.pinNameOffset === 0, c), 'number', textLayers.num);
-  if (showName) textItem(pinNameLayout(g, name, nameSize, thickness, s.pinNameOffset, s.maxNameHalfHeight, c), 'name', textLayers.name);
+  textItem(l.texts.number, 'number', textLayers.num);
+  textItem(l.texts.name, 'name', textLayers.name);
   return { items, bbox };
 }
 
-function convertSymbol(p: Record<string, unknown>, id: string, c: Ctx): RenderItem[] {
+export interface SymbolParts {
+  info: SymbolInfo;
+  /** decoded, unit / body-style filtered children (pins included), with their child ids */
+  children: Array<{ type: string; proto: Record<string, unknown>; cid: string }>;
+  pins: SchPinLike[];
+  /** instance fields with their textShapes keys and layers */
+  fields: Array<{ key: string; field: SchFieldLike; layer: string }>;
+}
+
+/** The pieces of a SchematicSymbolInstance the renderer draws: transform, visible children, pins, instance fields. */
+export function symbolParts(p: Record<string, unknown>, id: string, c: Ctx): SymbolParts {
   const pos = vec(p.position as Vector2Like);
   const tr = p.transform as { orientation?: number | string; mirrorX?: boolean; mirrorY?: boolean } | undefined;
   const t = tr ? symbolTransform(tr.orientation, !!tr.mirrorX, !!tr.mirrorY) : { ...IDENTITY_TRANSFORM };
   const unit = (p.unit as { unit?: number } | undefined)?.unit || 1;
   const bodyStyle = (p.bodyStyle as { style?: number } | undefined)?.style || 1;
   const def = (p.definition ?? {}) as Record<string, unknown>;
-  const children = ((def.items as SchSymbolChildLike[] | undefined) ?? []).filter((ch) => {
+  const filtered = ((def.items as SchSymbolChildLike[] | undefined) ?? []).filter((ch) => {
     if (ch.isPrivate) return false;
     const u = ch.unit?.unit;
     const bs = ch.bodyStyle?.style;
     return (!u || u === unit) && (!bs || bs === bodyStyle);
   });
-  const decoded = children.map((ch) => schematicItemTypeOf(ch.item ?? ch, c.ctx)).filter((x): x is { type: string; proto: Record<string, unknown> } => !!x);
-  const pins = decoded.filter((d) => d.type === 'KOT_SCH_PIN').map((d) => d.proto as SchPinLike);
-  let maxNameHalfHeight = 0;
-  for (const pin of pins) if (pin.name && pin.name !== '~') maxNameHalfHeight = Math.max(maxNameHalfHeight, Math.round((dist(pin.nameTextSize) || c.d.pinTextSize) / 2));
+  const children = filtered
+    .map((ch) => schematicItemTypeOf(ch.item ?? ch, c.ctx))
+    .filter((x): x is { type: string; proto: Record<string, unknown> } => !!x)
+    .map((d, i) => ({ ...d, cid: kiid(d.proto.id as KiidLike) || `${i}` }));
+  const pins = children.filter((d) => d.type === 'KOT_SCH_PIN').map((d) => d.proto as SchPinLike);
   const info: SymbolInfo = {
     id,
     pos,
     t,
     showPinNames: (p.showPinNames as boolean | undefined) ?? true,
     showPinNumbers: (p.showPinNumbers as boolean | undefined) ?? true,
-    pinNameOffset: dist(p.pinNameOffset as DistanceLike),
-    maxNameHalfHeight,
+    pinNameOffset: dist(p.pinNameOffset as DistanceLike) || (c.ctx.assumePinNameOffset ?? 0),
   };
+  const fields: SymbolParts['fields'] = [];
+  const fieldLayer: Record<string, string> = { referenceField: SCH_LAYERS.reference, valueField: SCH_LAYERS.value, footprintField: SCH_LAYERS.fields, datasheetField: SCH_LAYERS.fields, descriptionField: SCH_LAYERS.fields };
+  const unitCount = Number(def.unitCount ?? 1);
+  for (const key of Object.keys(fieldLayer)) {
+    let f = p[key] as SchFieldLike | undefined;
+    if (!f) continue;
+    // SCH_FIELD::GetShownText of the reference: GetRef( sheet, true ) appends the unit letter
+    if (key === 'referenceField' && unitCount > 1 && f.text?.text) f = { ...f, text: { ...f.text, text: f.text.text + subReference(unit, c.ctx.subpartFirstId, c.ctx.subpartIdSeparator) } };
+    fields.push({ key: `${id}:field:${f.name || key}`, field: f, layer: fieldLayer[key]! });
+  }
+  ((p.userFields as SchFieldLike[] | undefined) ?? []).forEach((f, i) => fields.push({ key: `${id}:field:${f.name || `user${i}`}`, field: f, layer: SCH_LAYERS.fields }));
+  return { info, children, pins, fields };
+}
+
+/** `LIB_SYMBOL::SubReference`: `A`, `B`, ... `Z`, `AA`, ... (or digits from `firstId`), after the separator. */
+export function subReference(unit: number, firstId = 'A', separator = ''): string {
+  if (firstId >= '0' && firstId <= '9') return separator + String(unit);
+  const base = firstId.charCodeAt(0);
+  let suffix = '';
+  let n = unit;
+  do {
+    const u = (n - 1) % 26;
+    suffix = String.fromCharCode(base + u) + suffix;
+    n = Math.floor((n - u) / 26); // integer division, as in KiCad
+  } while (n > 0);
+  return separator + suffix;
+}
+
+/**
+ * `SCH_TEXT::Plot` for a library text inside a symbol (LAYER_DEVICE): the position goes through
+ * the transform; the angle is swapped when the transform turns the axes, the horizontal
+ * justification is flipped when the reading direction is reversed, and the vertical one when a
+ * mirror would stack the lines the other way round.
+ */
+export function symbolTextPlacement(a: TextAttrs, pos: Vec2, t: SymTransform, origin: Vec2): { pos: Vec2; angle: number; halign: HAlign; valign: VAlign } {
+  const origHoriz = Math.abs((((a.angle % 360) + 360) % 360) % 180) < 1e-6;
+  const screenHoriz = (t.x1 !== 0) !== !origHoriz;
+  const flipH = origHoriz ? (screenHoriz ? t.x1 < 0 : t.x2 > 0) : screenHoriz ? t.y1 > 0 : t.y2 < 0;
+  const det = t.x1 * t.y2 - t.x2 * t.y1;
+  const flipV = det < 0 && origHoriz === t.x1 > 0;
+  return { pos: toSheet(t, pos, origin), angle: screenHoriz ? 0 : 90, halign: flipH ? flipHAlign(a.halign) : a.halign, valign: flipV ? flipVAlign(a.valign) : a.valign };
+}
+
+/** `SCH_TEXTBOX::Plot` inside a symbol: the box corners go through the transform and the angle is swapped when it turns the axes. */
+export function symbolTextBoxProto(p: Record<string, unknown>, t: SymTransform, origin: Vec2): Record<string, unknown> {
+  const tb = p.textbox as TextBoxLike | undefined;
+  if (!tb) return p;
+  const a = toSheet(t, vec(tb.topLeft), origin);
+  const b = toSheet(t, vec(tb.bottomRight), origin);
+  const angle = deg(tb.attributes?.angle);
+  const horizontal = Math.abs((((angle % 360) + 360) % 360) % 180) < 1e-6;
+  const attributes = t.y1 !== 0 ? { ...(tb.attributes ?? {}), angle: { valueDegrees: horizontal ? 90 : 0 } } : tb.attributes;
+  return { ...p, textbox: { ...tb, topLeft: { xNm: Math.min(a.x, b.x), yNm: Math.min(a.y, b.y) }, bottomRight: { xNm: Math.max(a.x, b.x), yNm: Math.max(a.y, b.y) }, attributes } };
+}
+
+function convertSymbol(p: Record<string, unknown>, id: string, c: Ctx): RenderItem[] {
+  const { info, children, pins, fields } = symbolParts(p, id, c);
+  const { pos, t } = info;
   const out: RenderItem[] = [];
   const xf = (q: Primitive): Primitive => transformPrimitive(q, t, pos);
   let bodyBox = EMPTY_BOX;
   let pinsBox = EMPTY_BOX;
-  decoded.forEach((d, i) => {
-    const cid = kiid(d.proto.id as KiidLike) || `${i}`;
+  for (const d of children) {
+    const cid = d.cid;
     switch (d.type) {
       case 'KOT_SCH_SHAPE': {
         const items = shapeItems(`${id}:shape:${cid}`, d.proto.shape as GraphicShapeLike, SCH_LAYERS.device, SCH_LAYERS.deviceBackground, c, xf, { ref: id, pickable: false });
@@ -1065,7 +1306,8 @@ function convertSymbol(p: Record<string, unknown>, id: string, c: Ctx): RenderIt
         if (!txt) break;
         const a = readTextAttrs(txt.attributes, c.d);
         const tid = `${id}:text:${cid}`;
-        const prims = hasServerShapes(tid, c) ? textPrims(tid, txt.text ?? '', vec(txt.position), a, c) : textPrims(tid, txt.text ?? '', vec(txt.position), a, c).map(xf);
+        const placed = symbolTextPlacement(a, vec(txt.position), t, pos);
+        const prims = textPrims(tid, txt.text ?? '', placed.pos, { ...a, angle: placed.angle, halign: placed.halign, valign: placed.valign }, c);
         if (!prims.length) break;
         const it = finish(tid, SCH_LAYERS.device, prims, c, { ref: id, pickable: false, ...(a.color ? { color: a.color } : {}) });
         bodyBox = boxUnion(bodyBox, it.bbox);
@@ -1073,7 +1315,8 @@ function convertSymbol(p: Record<string, unknown>, id: string, c: Ctx): RenderIt
         break;
       }
       case 'KOT_SCH_TEXTBOX': {
-        const items = convertTextBox(d.proto, `${id}:textbox:${cid}`, c, SCH_LAYERS.device, SCH_LAYERS.deviceBackground, xf, { ref: id, pickable: false });
+        // the box is laid out in sheet coordinates (like the `textbox` request for it), so no primitive transform
+        const items = convertTextBox(symbolTextBoxProto(d.proto, t, pos), `${id}:textbox:${cid}`, c, SCH_LAYERS.device, SCH_LAYERS.deviceBackground, undefined, { ref: id, pickable: false });
         for (const it of items) bodyBox = boxUnion(bodyBox, it.bbox);
         out.push(...items);
         break;
@@ -1081,20 +1324,14 @@ function convertSymbol(p: Record<string, unknown>, id: string, c: Ctx): RenderIt
       default:
         break; // pins below; library fields are replaced by the instance fields
     }
-  });
+  }
   pins.forEach((pin, i) => {
     const r = pinItems(pin, i, info, c);
     out.push(...r.items);
     pinsBox = boxUnion(pinsBox, r.bbox);
   });
   // instance fields (reference / value / footprint / datasheet / description / user)
-  const fieldLayer: Record<string, string> = { referenceField: SCH_LAYERS.reference, valueField: SCH_LAYERS.value, footprintField: SCH_LAYERS.fields, datasheetField: SCH_LAYERS.fields, descriptionField: SCH_LAYERS.fields };
-  for (const key of Object.keys(fieldLayer)) {
-    const f = p[key] as SchFieldLike | undefined;
-    if (!f) continue;
-    out.push(...fieldItems(f, c, { id: `${id}:field:${f.name || key}`, layer: fieldLayer[key]!, transform: t, origin: pos, ref: id, pickable: true }));
-  }
-  ((p.userFields as SchFieldLike[] | undefined) ?? []).forEach((f, i) => out.push(...fieldItems(f, c, { id: `${id}:field:${f.name || `user${i}`}`, layer: SCH_LAYERS.fields, transform: t, origin: pos, ref: id, pickable: true })));
+  for (const f of fields) out.push(...fieldItems(f.field, c, { id: f.key, layer: f.layer, transform: t, origin: pos, ref: id, pickable: true }));
   // DNP cross (SCH_PAINTER::draw(SCH_SYMBOL))
   const attrs = p.attributes as { doNotPopulate?: boolean; excludeFromSimulation?: boolean } | undefined;
   if (attrs?.doNotPopulate && (c.ctx.showDnpMarkers ?? true)) out.push(...dnpCross(bodyBox, boxUnion(bodyBox, pinsBox), c, id, id));
@@ -1107,7 +1344,7 @@ function convertSymbol(p: Record<string, unknown>, id: string, c: Ctx): RenderIt
 
 /** A standalone SchematicPin item (identity transform, position as given). */
 function convertStandalonePin(p: Record<string, unknown>, id: string, c: Ctx): RenderItem[] {
-  const info: SymbolInfo = { id: c.owner, pos: { x: 0, y: 0 }, t: { ...IDENTITY_TRANSFORM }, showPinNames: true, showPinNumbers: true, pinNameOffset: 0, maxNameHalfHeight: Math.round((dist((p as SchPinLike).nameTextSize) || c.d.pinTextSize) / 2) };
+  const info: SymbolInfo = { id: c.owner, pos: { x: 0, y: 0 }, t: { ...IDENTITY_TRANSFORM }, showPinNames: true, showPinNumbers: true, pinNameOffset: 0 };
   const r = pinItems({ ...(p as SchPinLike), id: { value: id } }, 0, info, c);
   return r.items;
 }

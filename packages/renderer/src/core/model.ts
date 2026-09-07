@@ -1,6 +1,6 @@
 /**
  * Neutral render model (docs/contracts.md "Render model"). The core never imports
- * @kicad-web/proto: adapters turn protobuf items into RenderItems.
+ * @fp-pcb/proto: adapters turn protobuf items into RenderItems.
  *
  * Units: world coordinates in KiCad nanometres as `number`; widths in nm; a width of
  * 0 means "hairline" (one device pixel regardless of zoom).

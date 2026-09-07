@@ -3,5 +3,6 @@ export * from './symbolTransform.js';
 export * from './textMetrics.js';
 export * from './labelShapes.js';
 export * from './schematicAdapter.js';
+export * from './textRequests.js';
 export * from './textGlyphs.js';
 export * from './SchematicCanvasHost.js';

@@ -1,10 +1,13 @@
-// Real canvases: `BoardCanvasHost` / `SchematicCanvasHost` from `@kicad-web/renderer` with
+// Real canvases: `BoardCanvasHost` / `SchematicCanvasHost` from `@fp-pcb/renderer` with
 // their adapter contexts fed from KiCad:
 //   - `copperLayers` from GetBoardEnabledLayers,
 //   - `padPolygons` from GetPadShapeAsPolygon (one request per copper layer, cached per pad/layer),
 //   - `textShapes` from GetTextAsShapes (all board texts, text boxes, table cells and footprint
-//     fields, or all sheet texts, labels, text boxes and symbol fields in one batched request;
-//     cached by a hash of the text so an edit only re-tessellates what changed),
+//     fields; or every text the schematic plotter draws -- pin names / numbers, symbol fields and
+//     library texts, sheet fields and pins, labels and their fields, texts, text boxes, table
+//     cells -- built by the renderer's `schematicTextRequests` and batched 200 per request;
+//     cached by a content hash so an edit only re-tessellates what changed; a few symbol fields
+//     go through GetTextExtents first, see the renderer's textRequests.ts),
 //   - `decodeAny` via the proto registry.
 // Board hosts also feed the ratsnest overlay from `GetRatsnest` (`host.setRatsnest`), refreshed
 // after every store diff that touches copper. DRC/ERC markers go through `host.setMarkers` /
@@ -13,8 +16,8 @@
 // once the server shapes arrive; later store diffs only re-fetch the affected texts and
 // `rebuildItems` them.
 
-import { BoardLayer, unpackAny, type GraphicShape, type PolygonWithHoles, type Text, type TextBox } from '@kicad-web/proto';
-import { BoardCanvasHost, SchematicCanvasHost, dimensionText, type Theme } from '@kicad-web/renderer';
+import { BoardLayer, unpackAny, type GraphicShape, type PolygonWithHoles, type Text, type TextBox } from '@fp-pcb/proto';
+import { BoardCanvasHost, SchematicCanvasHost, dimensionText, resolveTextRequests, schematicTextRequests, type SchTextRequest, type SchematicAdapterContext, type Theme } from '@fp-pcb/renderer';
 import type { CanvasHost, DocumentKind, ItemStore, StoredItem } from '@/contracts';
 import type { KicadDocumentService } from './KicadDocumentService';
 
@@ -26,6 +29,11 @@ interface TextRef {
   /** exactly one of the two: a plain text, or a text box / table cell laid out at its box */
   text?: Text;
   textbox?: TextBox;
+  /** schematic requests (renderer `schematicTextRequests`) bring their own content hash ... */
+  hash?: string;
+  /** ... and some symbol fields a `GetTextExtents` stage that yields `text` (`resolveTextRequests`) */
+  measure?: SchTextRequest['measure'];
+  place?: SchTextRequest['place'];
 }
 
 function hashAttrs(a: Text['attributes']): string {
@@ -33,6 +41,7 @@ function hashAttrs(a: Text['attributes']): string {
 }
 
 function hashText(r: TextRef): string {
+  if (r.hash) return r.hash;
   if (r.textbox) {
     const b = r.textbox;
     return ['box', b.text, b.topLeft?.xNm, b.topLeft?.yNm, b.bottomRight?.xNm, b.bottomRight?.yNm, b.marginLeft?.valueNm, b.marginTop?.valueNm, b.marginRight?.valueNm, b.marginBottom?.valueNm, hashAttrs(b.attributes)].join('|');
@@ -86,36 +95,18 @@ function boardTexts(it: StoredItem): TextRef[] {
   return out;
 }
 
-/** Texts a schematic store item contributes, keyed for the schematic adapter. */
+/** Adapter options of the schematic host; the text requests are built with the same ones so they are placed as drawn. */
+const SCH_ADAPTER: SchematicAdapterContext = { symbolPinsAbsolute: true, decodeAny: (any) => unpackAny(any as never) };
+
+/**
+ * Texts a schematic store item contributes, keyed for the schematic adapter: pin names and
+ * numbers, symbol fields (some measured first), library texts, sheet fields and pins, labels
+ * and their fields, plain text, text boxes and table cells -- built by the renderer from the
+ * placement code that draws them (`schematicTextRequests`), the same requests the pixel-diff
+ * harness makes.
+ */
 function schematicTexts(it: StoredItem): TextRef[] {
-  const p = it.proto as Record<string, any>;
-  const out: TextRef[] = [];
-  const push = (key: string | undefined, text: Text | undefined) => {
-    if (key && text && text.text && text.attributes?.visible !== false) out.push({ key, text });
-  };
-  const pushBox = (key: string | undefined, textbox: TextBox | undefined) => {
-    if (key && textbox && textbox.text) out.push({ key, textbox });
-  };
-  switch (it.type) {
-    case 'KOT_SCH_TEXT':
-      push(it.id, p.text);
-      break;
-    case 'KOT_SCH_TEXTBOX':
-      pushBox(it.id, p.textbox);
-      break;
-    case 'KOT_SCH_TABLE':
-      for (const cell of p.cells ?? []) pushBox(cell?.textBox?.id?.value, cell?.textBox?.textbox);
-      break;
-    case 'KOT_SCH_SYMBOL':
-      for (const f of [p.referenceField, p.valueField, p.footprintField, p.datasheetField, p.descriptionField, ...(p.userFields ?? [])]) {
-        if (f?.visible === false) continue;
-        push(`${it.id}:field:${f?.name}`, f?.text);
-      }
-      break;
-    default:
-      break;
-  }
-  return out;
+  return schematicTextRequests(it, SCH_ADAPTER).map((r) => ({ key: r.key, hash: r.hash, text: r.text as Text | undefined, textbox: r.textbox as TextBox | undefined, measure: r.measure, place: r.place }));
 }
 
 type TextCollector = (it: StoredItem) => TextRef[];
@@ -159,8 +150,18 @@ export class TextShapeCache {
     this.queued.clear();
     this.inflight = (async () => {
       const done: string[] = [];
-      for (let i = 0; i < batch.length; i += TEXT_BATCH) {
-        const slice = batch.slice(i, i + TEXT_BATCH);
+      // symbol fields whose placement needs KiCad's text box: one GetTextExtents each, first
+      const pending = batch.filter((r) => r.measure && !r.text && !r.textbox);
+      if (pending.length) {
+        try {
+          await resolveTextRequests(pending as SchTextRequest[], (t) => kicad.textExtents(t as never));
+        } catch (e) {
+          this.log(`GetTextExtents failed: ${e instanceof Error ? e.message : String(e)}`, 'warn');
+        }
+      }
+      const ready = batch.filter((r) => r.text || r.textbox);
+      for (let i = 0; i < ready.length; i += TEXT_BATCH) {
+        const slice = ready.slice(i, i + TEXT_BATCH);
         try {
           const res = await kicad.textAsShapes(slice.map((r) => (r.textbox ? { textbox: r.textbox } : { text: r.text! })));
           res.forEach((r, j) => {
@@ -360,7 +361,7 @@ export function createKicadCanvasFactory({ docs, theme, log = () => {} }: KicadC
       } else host.rebuildItems(ownersOf(host.currentStore as ItemStore, keys));
     };
     host = new SchematicCanvasHost(theme(), {
-      adapter: { textShapes: texts.get, decodeAny: (any) => unpackAny(any as never), symbolPinsAbsolute: true },
+      adapter: { ...SCH_ADAPTER, textShapes: texts.get },
       pickTolerancePx: 5,
     });
     let off: (() => void) | null = null;
