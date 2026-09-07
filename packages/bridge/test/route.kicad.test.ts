@@ -10,9 +10,9 @@ import { cpSync, existsSync } from "node:fs";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { KiCad } from "@kicad-web/client";
-import { WebSocketTransport, bridgeWsUrl } from "@kicad-web/client/transport";
-import type { RouteJobInfo } from "@kicad-web/router/bridge-job";
+import { KiCad } from "@fp-pcb/client";
+import { WebSocketTransport, bridgeWsUrl } from "@fp-pcb/client/transport";
+import type { RouteJobInfo } from "@fp-pcb/router/bridge-job";
 import { configFromEnv, startBridge, type BridgeServer } from "../src/index";
 
 const cfg = configFromEnv(process.env, { port: 0, log: () => {} });
@@ -29,7 +29,7 @@ describe.skipIf(!haveKicad)("route jobs + kicad-cli api-server", () => {
   let ws: WebSocketTransport;
 
   beforeAll(async () => {
-    workspace = await mkdtemp(join(tmpdir(), "kicad-web-route-kicad-"));
+    workspace = await mkdtemp(join(tmpdir(), "fp-pcb-route-kicad-"));
     cpSync(FIXTURE, join(workspace, "ecc83"), { recursive: true });
     bridge = await startBridge({ ...cfg, workspaceRoot: workspace });
     const res = await fetch(`${bridge.url}/sessions`, {
@@ -39,7 +39,7 @@ describe.skipIf(!haveKicad)("route jobs + kicad-cli api-server", () => {
     expect(res.status).toBe(201);
     sessionId = ((await res.json()) as { session: { id: string } }).session.id;
     ws = await WebSocketTransport.connect(bridgeWsUrl(bridge.url, sessionId));
-    kicad = await KiCad.connect(ws, { clientName: "kicad-web/route-test" });
+    kicad = await KiCad.connect(ws, { clientName: "fp-pcb/route-test" });
   }, 90_000);
 
   afterAll(async () => {
@@ -126,7 +126,7 @@ describe.skipIf(!haveKicad)("route jobs + kicad-cli api-server", () => {
       expect(Date.now() - t0).toBeLessThan(10_000);
       expect((await board.unroutedCount()).unroutedCount).toBe(before.unroutedCount);
       // no stray java for our DSN
-      const ps = Bun.spawnSync(["pgrep", "-f", "kicad-web-freerouting-"]);
+      const ps = Bun.spawnSync(["pgrep", "-f", "fp-pcb-freerouting-"]);
       expect(ps.stdout.toString().trim()).toBe("");
     },
     120_000,
@@ -141,7 +141,7 @@ describe.skipIf(!haveKicad || !cfg.freerouting.ok)("Freerouting job (kicad-dsn m
   let ws: WebSocketTransport;
 
   beforeAll(async () => {
-    workspace = await mkdtemp(join(tmpdir(), "kicad-web-route-fr-"));
+    workspace = await mkdtemp(join(tmpdir(), "fp-pcb-route-fr-"));
     cpSync(FIXTURE, join(workspace, "ecc83"), { recursive: true });
     bridge = await startBridge({ ...cfg, workspaceRoot: workspace });
     const res = await fetch(`${bridge.url}/sessions`, {
@@ -150,7 +150,7 @@ describe.skipIf(!haveKicad || !cfg.freerouting.ok)("Freerouting job (kicad-dsn m
     });
     sessionId = ((await res.json()) as { session: { id: string } }).session.id;
     ws = await WebSocketTransport.connect(bridgeWsUrl(bridge.url, sessionId));
-    kicad = await KiCad.connect(ws, { clientName: "kicad-web/route-test-fr" });
+    kicad = await KiCad.connect(ws, { clientName: "fp-pcb/route-test-fr" });
   }, 90_000);
 
   afterAll(async () => {

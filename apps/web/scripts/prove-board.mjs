@@ -2,7 +2,7 @@
 // against a real KiCad through the bridge on one of the demo boards under e2e/fixtures/boards.
 // Entered through `node apps/web/scripts/prove-kicad.mjs --board <name> [step,...]`; prerequisites
 // are the same as the kitchen-sink proof, with the bridge's WORKSPACE_ROOT set to the fixtures
-// directory (or any directory: the board is copied into `<workspace root>/.kicad-web-practice-<name>/`
+// directory (or any directory: the board is copied into `<workspace root>/.fp-pcb-practice-<name>/`
 // so the fixture itself is never written).
 //
 // Steps (default all): open (timings, counts), view (zoom to fit, layers panel, hover, select),
@@ -63,7 +63,7 @@ mkdirSync(outDir, { recursive: true });
 // ---------------------------------------------------------------- practice copy inside the workspace root
 const health = await (await fetch(`${bridge}/health`)).json();
 const root = health.workspaceRoot.replace(/\/$/, '');
-const proj = `${root}/.kicad-web-practice-${name}`;
+const proj = `${root}/.fp-pcb-practice-${name}`;
 rmSync(proj, { recursive: true, force: true });
 cpSync(`${fixtures}/${board.dir}`, proj, { recursive: true });
 const pro = `${proj}/${board.project}.kicad_pro`;
@@ -82,7 +82,7 @@ await page.addInitScript(() => {
   // `__itemsAt`: the board store first holds items; `__firstDraw`: the first GL draw call after that
   const poll = setInterval(() => {
     try {
-      const b = window.__kicadWeb?.services?.documents?.board?.();
+      const b = window.__fpPcb?.services?.documents?.board?.();
       if (b && !b.all()[Symbol.iterator]().next().done) { window.__itemsAt = performance.now(); clearInterval(poll); }
     } catch { /* not ready */ }
   }, 10);
@@ -96,12 +96,12 @@ await page.addInitScript(() => {
 
 // ---------------------------------------------------------------- helpers
 const kw = (fn, arg) => page.evaluate(fn, arg);
-const rev = () => kw(async () => Number(await window.__kicadWeb.services.documents.boardDoc.revision()));
-const count = (type) => kw((type) => [...window.__kicadWeb.services.documents.board().byType(type)].length, type);
+const rev = () => kw(async () => Number(await window.__fpPcb.services.documents.boardDoc.revision()));
+const count = (type) => kw((type) => [...window.__fpPcb.services.documents.board().byType(type)].length, type);
 const counts = async () => ({ footprints: await count('KOT_PCB_FOOTPRINT'), pads: await count('KOT_PCB_PAD'), tracks: await count('KOT_PCB_TRACE'), arcs: await count('KOT_PCB_ARC'), vias: await count('KOT_PCB_VIA'), zones: await count('KOT_PCB_ZONE'), shapes: await count('KOT_PCB_SHAPE'), texts: await count('KOT_PCB_TEXT') });
-const run = (id, opts = {}) => kw(({ id, wait }) => { const p = window.__kicadWeb.runCommand(id); return wait ? p : undefined; }, { id, wait: !!opts.wait });
+const run = (id, opts = {}) => kw(({ id, wait }) => { const p = window.__fpPcb.runCommand(id); return wait ? p : undefined; }, { id, wait: !!opts.wait });
 const canvasBox = async (label) => page.locator(`canvas[aria-label="${label}"]`).boundingBox();
-const screenPt = (key, x, y) => kw(({ key, x, y }) => window.__kicadWeb.host(key).worldToScreen(x, y), { key, x, y });
+const screenPt = (key, x, y) => kw(({ key, x, y }) => window.__fpPcb.host(key).worldToScreen(x, y), { key, x, y });
 async function clickWorld(label, key, x, y, opts = {}) {
   const box = await canvasBox(label);
   const p = await screenPt(key, x, y);
@@ -118,12 +118,12 @@ async function moveWorld(label, key, x, y) {
   await page.waitForTimeout(60);
 }
 const focusCanvas = () => page.locator('.statusbar').click();
-const waitRev = async (after, timeout = 30000) => page.waitForFunction((r) => window.__kicadWeb.services.documents.boardDoc.revision().then((v) => Number(v) > r), after, { timeout });
+const waitRev = async (after, timeout = 30000) => page.waitForFunction((r) => window.__fpPcb.services.documents.boardDoc.revision().then((v) => Number(v) > r), after, { timeout });
 /** Text of an element that may be absent (no auto-wait: locator.innerText would block 30 s). */
 const textOf = async (sel) => ((await page.locator(sel).count()) ? page.locator(sel).first().innerText() : '');
 const toolHint = () => textOf('[data-testid="tool-hint"]');
 const statusText = () => page.locator('.statusbar').innerText().then((t) => t.replace(/\s+/g, ' ').trim());
-const appLog = () => kw(() => (window.__kicadWeb.stores.log.getState().lines ?? []).map((e) => `[${e.level}] ${e.text}`));
+const appLog = () => kw(() => (window.__fpPcb.stores.log.getState().lines ?? []).map((e) => `[${e.level}] ${e.text}`));
 const shot = (suffix) => page.screenshot({ path: `${shots}/${name}-${suffix}.png` });
 const mm = (v) => Math.round(v * 1e6);
 const fmt = (nm) => (nm / 1e6).toFixed(2);
@@ -140,11 +140,11 @@ async function openProject(path, label) {
   const firstDraw = await kw(() => Math.round(window.__firstDraw));
   const itemsAt = await kw(() => Math.round(window.__itemsAt));
   // the server-side pad polygons and text shapes upgrade the first (fallback) paint
-  await page.waitForFunction(() => (window.__kicadWeb.stores.log.getState().lines ?? []).some((l) => /text shapes from GetTextAsShapes/.test(l.text)), null, { timeout: 120000 }).catch(() => undefined);
+  await page.waitForFunction(() => (window.__fpPcb.stores.log.getState().lines ?? []).some((l) => /text shapes from GetTextAsShapes/.test(l.text)), null, { timeout: 120000 }).catch(() => undefined);
   const tShapes = Date.now() - tStart;
   await page.waitForTimeout(500);
-  await kw(() => window.__kicadWeb.stores.ui.getState().setGrid(10_000));
-  await kw(() => window.__kicadWeb.host('board').zoomToFit());
+  await kw(() => window.__fpPcb.stores.ui.getState().setGrid(10_000));
+  await kw(() => window.__fpPcb.host('board').zoomToFit());
   await page.waitForTimeout(300);
   const t = { canvasMs: tCanvas, sessionOpenMs: tOpen, storeItemsMs: itemsAt, firstDrawMs: firstDraw, serverShapesMs: tShapes };
   timings[label] = t;
@@ -158,7 +158,7 @@ async function frame(key, a, b, marginMm = 4) {
   const w = Math.abs(b.x - a.x) + 2 * mm(marginMm);
   const h = Math.abs(b.y - a.y) + 2 * mm(marginMm);
   const zoom = Math.min(box.width / w, box.height / h);
-  await kw(({ key, cam }) => window.__kicadWeb.host(key).setCamera(cam), { key, cam: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, zoom } });
+  await kw(({ key, cam }) => window.__fpPcb.host(key).setCamera(cam), { key, cam: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, zoom } });
   await page.waitForTimeout(150);
 }
 
@@ -169,7 +169,7 @@ const B_CU = 34; // kiapi BoardLayer.BL_B_Cu
 const padsByNet = () =>
   kw(({ F_CU, B_CU }) => {
     const out = {};
-    for (const p of window.__kicadWeb.services.documents.board().byType('KOT_PCB_PAD')) {
+    for (const p of window.__fpPcb.services.documents.board().byType('KOT_PCB_PAD')) {
       if (!p.net) continue;
       const layers = p.proto.padStack?.layers ?? [];
       (out[p.net] ??= []).push({ id: p.id, x: Number(p.proto.position.xNm), y: Number(p.proto.position.yNm), front: layers.includes(F_CU), back: layers.includes(B_CU), number: p.proto.number, parent: p.parent });
@@ -190,21 +190,21 @@ try {
 
   // ---------------------------------------------------------------- view
   if (want('view')) {
-    await kw(() => window.__kicadWeb.stores.ui.getState().setLeftTab('layers'));
+    await kw(() => window.__fpPcb.stores.ui.getState().setLeftTab('layers'));
     await page.waitForSelector('.layer-row', { timeout: 10000 });
     const layerRows = await page.locator('.layer-row').count();
     // hide B.Cu, screenshot, show it again
     const bcu = page.locator('.layer-row[title^="BL_B_Cu"]').first(); // rows show the user layer name (ecc83: bottom_cu), the title carries the id
     await bcu.locator('button.vis').click();
     await page.waitForTimeout(300);
-    const hidden = await kw(() => window.__kicadWeb.stores.editor.getState().docs.board?.hiddenLayers ?? null);
+    const hidden = await kw(() => window.__fpPcb.stores.editor.getState().docs.board?.hiddenLayers ?? null);
     await shot('layers');
     await bcu.locator('button.vis').click();
     await page.waitForTimeout(200);
-    const shownAgain = await kw(() => window.__kicadWeb.stores.editor.getState().docs.board?.hiddenLayers ?? null);
+    const shownAgain = await kw(() => window.__fpPcb.stores.editor.getState().docs.board?.hiddenLayers ?? null);
     // hover a pad: the status bar names the type, net and layer
     const fp = await kw(() => {
-      const b = window.__kicadWeb.services.documents.board();
+      const b = window.__fpPcb.services.documents.board();
       const routedNets = new Set([...b.byType('KOT_PCB_TRACE')].map((t) => t.net));
       const pads = [...b.byType('KOT_PCB_PAD')].filter((p) => p.parent);
       // a pad on an unrouted net (or none): where a track ends in a pad the smaller track wins the pick, as in KiCad
@@ -219,11 +219,11 @@ try {
     // select the footprint: click one of its pads (the pick returns the pad; the footprint owns it)
     await clickWorld('board canvas', 'board', fp.pad.x, fp.pad.y);
     await page.waitForFunction(() => document.querySelector('.statusbar')?.textContent?.includes('selected'), null, { timeout: 10000 });
-    const selected = await kw(() => window.__kicadWeb.stores.editor.getState().docs.board.selection);
-    const selType = await kw((ids) => ids.map((id) => { const it = window.__kicadWeb.services.documents.board().get(id); return it ? `${it.type}${it.net ? ` ${it.net}` : ''}` : id; }), selected);
+    const selected = await kw(() => window.__fpPcb.stores.editor.getState().docs.board.selection);
+    const selType = await kw((ids) => ids.map((id) => { const it = window.__fpPcb.services.documents.board().get(id); return it ? `${it.type}${it.net ? ` ${it.net}` : ''}` : id; }), selected);
     const propsTitle = (await textOf('.props-title')).replace(/\s+/g, ' ');
     await shot('selected');
-    await kw(() => window.__kicadWeb.host('board').zoomToFit());
+    await kw(() => window.__fpPcb.host('board').zoomToFit());
     log(`view: ${layerRows} layer rows, B.Cu hidden -> ${JSON.stringify(hidden)?.slice(0, 80)}, hover "${hoverText}", click on ${fp.ref} pad ${fp.pad.number} selected ${JSON.stringify(selType)}, props "${propsTitle}"`);
     record('view', layerRows > 0 && hidden?.includes('BL_B_Cu') && shownAgain?.length === 0 && selected.length === 1 && /Pad/.test(hoverText) && /KOT_PCB_PAD/.test(selType[0] ?? ''), `zoom to fit, ${layerRows} layer rows (B.Cu hidden and shown again), hover "${hoverText}", ${fp.ref} pad ${fp.pad.number} picked (${selType[0]}): props "${propsTitle}"`);
   }
@@ -235,17 +235,17 @@ try {
     await page.waitForSelector('canvas[aria-label="schematic canvas"]', { timeout: 120000 });
     await page.waitForTimeout(1500);
     const flat = (s, acc = []) => { acc.push(s); for (const c of s.children) flat(c, acc); return acc; };
-    const tree = await kw(() => window.__kicadWeb.services.documents.sheets());
+    const tree = await kw(() => window.__fpPcb.services.documents.sheets());
     const sheets = tree.flatMap((s) => flat(s));
     const perSheet = [];
     for (const [i, s] of sheets.entries()) {
-      await kw((path) => window.__kicadWeb.stores.app.getState().setActiveSheet(path), s.path);
-      await page.waitForFunction((path) => !!window.__kicadWeb.host(`schematic:${path}`), s.path, { timeout: 30000 });
-      await page.waitForFunction((path) => { const st = window.__kicadWeb.services.documents.sheet(path); return !!st && [...st.all()].length > 0; }, s.path, { timeout: 60000 }).catch(() => undefined);
+      await kw((path) => window.__fpPcb.stores.app.getState().setActiveSheet(path), s.path);
+      await page.waitForFunction((path) => !!window.__fpPcb.host(`schematic:${path}`), s.path, { timeout: 30000 });
+      await page.waitForFunction((path) => { const st = window.__fpPcb.services.documents.sheet(path); return !!st && [...st.all()].length > 0; }, s.path, { timeout: 60000 }).catch(() => undefined);
       await page.waitForTimeout(1200);
-      await kw((path) => window.__kicadWeb.host(`schematic:${path}`)?.zoomToFit(), s.path);
+      await kw((path) => window.__fpPcb.host(`schematic:${path}`)?.zoomToFit(), s.path);
       await page.waitForTimeout(400);
-      const c = await kw((path) => { const st = window.__kicadWeb.services.documents.sheet(path); const out = {}; if (!st) return out; for (const it of st.all()) out[it.type] = (out[it.type] ?? 0) + 1; return out; }, s.path);
+      const c = await kw((path) => { const st = window.__fpPcb.services.documents.sheet(path); const out = {}; if (!st) return out; for (const it of st.all()) out[it.type] = (out[it.type] ?? 0) + 1; return out; }, s.path);
       await shot(`sheet-${i + 1}`);
       perSheet.push({ name: s.name, file: s.file, path: s.path, symbols: c.KOT_SCH_SYMBOL ?? 0, lines: c.KOT_SCH_LINE ?? 0, labels: (c.KOT_SCH_LABEL ?? 0) + (c.KOT_SCH_GLOBAL_LABEL ?? 0) + (c.KOT_SCH_HIER_LABEL ?? 0), sheets: c.KOT_SCH_SHEET ?? 0, total: Object.values(c).reduce((a, b) => a + b, 0) });
       log(`sheet ${i + 1}/${sheets.length} ${s.name} (${s.file}): ${JSON.stringify(c)}`);
@@ -262,10 +262,10 @@ try {
   }
 
   // ---------------------------------------------------------------- edit a property
-  const firstFp = async () => kw(() => { const f = [...window.__kicadWeb.services.documents.board().byType('KOT_PCB_FOOTPRINT')].find((f) => !f.proto.locked) ?? [...window.__kicadWeb.services.documents.board().byType('KOT_PCB_FOOTPRINT')][0]; return { id: f.id, x: Number(f.proto.position.xNm), y: Number(f.proto.position.yNm), ref: f.proto.referenceField?.text?.text?.text }; });
+  const firstFp = async () => kw(() => { const f = [...window.__fpPcb.services.documents.board().byType('KOT_PCB_FOOTPRINT')].find((f) => !f.proto.locked) ?? [...window.__fpPcb.services.documents.board().byType('KOT_PCB_FOOTPRINT')][0]; return { id: f.id, x: Number(f.proto.position.xNm), y: Number(f.proto.position.yNm), ref: f.proto.referenceField?.text?.text?.text }; });
   if (want('edit')) {
     const fp = await firstFp();
-    await kw((id) => window.__kicadWeb.stores.editor.getState().setSelection('board', [id]), fp.id);
+    await kw((id) => window.__fpPcb.stores.editor.getState().setSelection('board', [id]), fp.id);
     await page.waitForSelector('input[data-path="position.xNm"]', { timeout: 10000 });
     const xField = page.locator('input[data-path="position.xNm"]');
     const shown = await xField.inputValue();
@@ -277,12 +277,12 @@ try {
     const revs = [r1];
     for (let i = 0; i < 4; i++) { await page.waitForTimeout(150); revs.push(await rev()); }
     if (new Set(revs).size > 1) log(`  GetDocumentRevision after the edit read ${revs.join(', ')} over 600 ms`);
-    const after = await kw((id) => Number(window.__kicadWeb.services.documents.board().get(id).proto.position.xNm), fp.id);
+    const after = await kw((id) => Number(window.__fpPcb.services.documents.board().get(id).proto.position.xNm), fp.id);
     await shot('edited');
     await focusCanvas();
     await page.keyboard.press('ControlOrMeta+z');
     await waitRev(r1);
-    const undone = await kw((id) => Number(window.__kicadWeb.services.documents.board().get(id).proto.position.xNm), fp.id);
+    const undone = await kw((id) => Number(window.__fpPcb.services.documents.board().get(id).proto.position.xNm), fp.id);
     log(`edit: ${fp.ref} X field showed "${shown}", set ${fmt(fp.x + mm(1))}: revision ${r0} -> ${r1}, store X ${fmt(after)}; undo -> ${fmt(undone)} (revision ${await rev()})`);
     record('edit', Math.max(...revs) > r0 && after === fp.x + mm(1) && undone === fp.x, `${fp.ref}.X ${fmt(fp.x)} -> ${fmt(after)} mm bumped the revision ${r0} -> ${Math.max(...revs)}${new Set(revs).size > 1 ? ` (GetDocumentRevision read ${revs.join(', ')} in the 600 ms after the commit)` : ''}; undo restored ${fmt(undone)}`);
   }
@@ -291,7 +291,7 @@ try {
   if (want('move')) {
     const fp = await firstFp();
     await frame('board', { x: fp.x - mm(10), y: fp.y - mm(10) }, { x: fp.x + mm(10), y: fp.y + mm(10) });
-    await kw((id) => window.__kicadWeb.stores.editor.getState().setSelection('board', [id]), fp.id);
+    await kw((id) => window.__fpPcb.stores.editor.getState().setSelection('board', [id]), fp.id);
     await moveWorld('board canvas', 'board', fp.x, fp.y);
     await page.waitForTimeout(200);
     const r0 = await rev();
@@ -307,18 +307,18 @@ try {
     await clickWorld('board canvas', 'board', fp.x + mm(5), fp.y + mm(3));
     await waitRev(r0);
     await page.waitForTimeout(400);
-    const after = await kw((id) => { const f = window.__kicadWeb.services.documents.board().get(id); return { x: Number(f.proto.position.xNm), y: Number(f.proto.position.yNm) }; }, fp.id);
-    const pads = await kw((id) => [...window.__kicadWeb.services.documents.board().byType('KOT_PCB_PAD')].filter((p) => p.parent === id).length, fp.id);
+    const after = await kw((id) => { const f = window.__fpPcb.services.documents.board().get(id); return { x: Number(f.proto.position.xNm), y: Number(f.proto.position.yNm) }; }, fp.id);
+    const pads = await kw((id) => [...window.__fpPcb.services.documents.board().byType('KOT_PCB_PAD')].filter((p) => p.parent === id).length, fp.id);
     await shot('moved');
     const r1 = await rev();
     await page.keyboard.press('Escape');
     await focusCanvas();
     await page.keyboard.press('ControlOrMeta+z');
     await waitRev(r1).catch(() => undefined);
-    const undone = await kw((id) => { const f = window.__kicadWeb.services.documents.board().get(id); return { x: Number(f.proto.position.xNm), y: Number(f.proto.position.yNm) }; }, fp.id);
+    const undone = await kw((id) => { const f = window.__fpPcb.services.documents.board().get(id); return { x: Number(f.proto.position.xNm), y: Number(f.proto.position.yNm) }; }, fp.id);
     log(`move: ${fp.ref} "${moving}" (${fmt(fp.x)}, ${fmt(fp.y)}) -> (${fmt(after.x)}, ${fmt(after.y)}), ${pads} pads still owned; undo -> (${fmt(undone.x)}, ${fmt(undone.y)})`);
     record('move', /Moving/.test(moving) && after.x === fp.x + mm(5) && after.y === fp.y + mm(3) && undone.x === fp.x, `M tool dragged ${fp.ref} by (5, 3) mm through an open transaction, click committed (revision ${r0} -> ${r1}), undo restored it`);
-    await kw(() => window.__kicadWeb.host('board').zoomToFit());
+    await kw(() => window.__fpPcb.host('board').zoomToFit());
   }
 
   // ---------------------------------------------------------------- the unrouted variant
@@ -326,7 +326,7 @@ try {
     const sessionsBefore = (await (await fetch(`${bridge}/sessions`)).json()).sessions.length;
     await openProject(unroutedPro, 'open-unrouted');
     const cu = await counts();
-    const unrouted0 = await kw(() => window.__kicadWeb.services.board.unrouted().catch((e) => ({ error: e.message })));
+    const unrouted0 = await kw(() => window.__fpPcb.services.board.unrouted().catch((e) => ({ error: e.message })));
     log('unrouted variant counts', JSON.stringify(cu), 'GetUnroutedCount', JSON.stringify(unrouted0));
     await shot('unrouted');
     // pick nets: two-pad nets first, both pads reachable on F.Cu, 3..60 mm apart
@@ -365,8 +365,8 @@ try {
       const m1 = { x: Math.round(c.a.x + (c.b.x - c.a.x) / 3), y: Math.round(c.a.y + (c.b.y - c.a.y) / 3) };
       const m2 = { x: Math.round(c.a.x + (2 * (c.b.x - c.a.x)) / 3), y: Math.round(c.a.y + (2 * (c.b.y - c.a.y)) / 3) };
       await clickWorld('board canvas', 'board', c.a.x, c.a.y);
-      const pickedNet = await kw(() => window.__kicadWeb.tools.activeTool()?.net ?? null);
-      if (pickedNet !== c.net) log(`  pick at pad A: ${JSON.stringify(await kw(({ x, y }) => { const h = window.__kicadWeb.host('board'); const s = h.worldToScreen(x, y); return h.pick(s.x, s.y, 5).slice(0, 4).map((r) => `${r.layer}:${r.net ?? '-'}:${r.distance.toFixed(1)}px`); }, c.a))}`);
+      const pickedNet = await kw(() => window.__fpPcb.tools.activeTool()?.net ?? null);
+      if (pickedNet !== c.net) log(`  pick at pad A: ${JSON.stringify(await kw(({ x, y }) => { const h = window.__fpPcb.host('board'); const s = h.worldToScreen(x, y); return h.pick(s.x, s.y, 5).slice(0, 4).map((r) => `${r.layer}:${r.net ?? '-'}:${r.distance.toFixed(1)}px`); }, c.a))}`);
       let vias = 0;
       let segments = 2; // A → m1 → B; each V adds a click at the via
       let layerAfterV = startLayer;
@@ -375,7 +375,7 @@ try {
         await clickWorld('board canvas', 'board', m1.x, m1.y);
         await moveWorld('board canvas', 'board', m1.x, m1.y);
         await page.keyboard.press('v');
-        layerAfterV = await kw(() => window.__kicadWeb.stores.editor.getState().docs.board.activeLayer);
+        layerAfterV = await kw(() => window.__fpPcb.stores.editor.getState().docs.board.activeLayer);
         vias = 1;
         if (!(c.b.front && c.b.back)) {
           await clickWorld('board canvas', 'board', m2.x, m2.y);
@@ -396,7 +396,7 @@ try {
       await page.waitForTimeout(500);
       const tr1 = await count('KOT_PCB_TRACE');
       const vi1 = await count('KOT_PCB_VIA');
-      const made = await kw((net) => [...window.__kicadWeb.services.documents.board().byType('KOT_PCB_TRACE')].filter((t) => t.net === net).map((t) => t.layer), c.net);
+      const made = await kw((net) => [...window.__fpPcb.services.documents.board().byType('KOT_PCB_TRACE')].filter((t) => t.net === net).map((t) => t.layer), c.net);
       const ok = pickedNet === c.net && tr1 === tr0 + segments && vi1 === vi0 + vias && made.length >= segments && (vias === 0 || layerAfterV === otherLayer);
       routed.push({ net: c.net, ok, segments: tr1 - tr0, vias: vi1 - vi0, layers: made, pickedNet, hint, layerAfterV, side: c.side });
       log(`route ${c.net} (${c.side}): picked net "${pickedNet}", layer after V ${layerAfterV}, tracks ${tr0} -> ${tr1}, vias ${vi0} -> ${vi1}, layers ${JSON.stringify(made)}${ok ? '' : ' !! unexpected'}`);
@@ -404,18 +404,18 @@ try {
       await page.keyboard.press('Escape');
       await page.keyboard.press('Escape');
     }
-    await kw(() => window.__kicadWeb.host('board').zoomToFit());
+    await kw(() => window.__fpPcb.host('board').zoomToFit());
     await page.waitForTimeout(300);
     await shot('routed');
-    const unrouted1 = await kw(() => window.__kicadWeb.services.board.unrouted().catch((e) => ({ error: e.message })));
+    const unrouted1 = await kw(() => window.__fpPcb.services.board.unrouted().catch((e) => ({ error: e.message })));
     record('route', routed.length >= 5 && routed.every((r) => r.ok) && routed.some((r) => r.vias > 0), `${routed.length} nets routed by hand with the route tool (V switches side and back on runs over 4 mm): ${routed.map((r) => `${r.net} ${r.segments} seg/${r.vias} via${r.side === 'back' ? ' from B.Cu' : ''}${r.ok ? '' : ' FAILED'}`).join(', ')}; unrouted ${unrouted0?.unroutedCount} -> ${unrouted1?.unroutedCount}`);
 
     // refill zones
     const tZ = Date.now();
-    const filledBefore = await kw(() => [...window.__kicadWeb.services.documents.board().byType('KOT_PCB_ZONE')].map((z) => z.proto.filledPolygons?.length ?? 0));
-    const refill = await kw(async () => { try { await window.__kicadWeb.services.documents.refillZones(); return 'ok'; } catch (e) { return e.message; } });
+    const filledBefore = await kw(() => [...window.__fpPcb.services.documents.board().byType('KOT_PCB_ZONE')].map((z) => z.proto.filledPolygons?.length ?? 0));
+    const refill = await kw(async () => { try { await window.__fpPcb.services.documents.refillZones(); return 'ok'; } catch (e) { return e.message; } });
     await page.waitForTimeout(1500);
-    const filledAfter = await kw(() => [...window.__kicadWeb.services.documents.board().byType('KOT_PCB_ZONE')].map((z) => ({ name: z.proto.name, filled: z.proto.filled, sets: z.proto.filledPolygons?.length ?? 0 })));
+    const filledAfter = await kw(() => [...window.__fpPcb.services.documents.board().byType('KOT_PCB_ZONE')].map((z) => ({ name: z.proto.name, filled: z.proto.filled, sets: z.proto.filledPolygons?.length ?? 0 })));
     timings.refillZonesMs = Date.now() - tZ;
     await shot('zones');
     log(`RefillZones: ${refill} in ${timings.refillZonesMs} ms; fills ${JSON.stringify(filledBefore)} -> ${JSON.stringify(filledAfter)}`);
@@ -429,7 +429,7 @@ try {
     await page.waitForTimeout(800);
     timings.drcMs = Date.now() - tD;
     const alert = await textOf('[role=alert]');
-    const markers = await kw(() => window.__kicadWeb.services.markers.markers('drc').map((m) => ({ severity: m.severity, message: m.message ?? m.description, rule: m.rule ?? m.code })));
+    const markers = await kw(() => window.__fpPcb.services.markers.markers('drc').map((m) => ({ severity: m.severity, message: m.message ?? m.description, rule: m.rule ?? m.code })));
     const rows = await page.locator('.marker-row').count();
     const byRule = {};
     for (const m of markers) byRule[m.rule ?? '?'] = (byRule[m.rule ?? '?'] ?? 0) + 1;
@@ -448,7 +448,7 @@ try {
       await page.waitForTimeout(300);
       steps.push({ tracks: await count('KOT_PCB_TRACE'), vias: await count('KOT_PCB_VIA') });
     }
-    const undoMode = await kw(() => window.__kicadWeb.services.undo?.mode?.() ?? window.__kicadWeb.services.undo?.stacks ? 'server' : 'client');
+    const undoMode = await kw(() => window.__fpPcb.services.undo?.mode?.() ?? window.__fpPcb.services.undo?.stacks ? 'server' : 'client');
     log(`undo x3 (${undoMode}): tracks ${before.tracks} -> ${steps.map((s) => s.tracks).join(' -> ')}, vias ${before.vias} -> ${steps.map((s) => s.vias).join(' -> ')}`);
     const lastRouted = routed.slice(-3).reverse();
     let expectT = before.tracks, expectV = before.vias, undoOk = true;
@@ -456,7 +456,7 @@ try {
     record('undo', undoOk, `three undos removed the last three routes one commit each: tracks ${before.tracks} -> ${steps.map((s) => s.tracks).join(' -> ')}, vias ${before.vias} -> ${steps.map((s) => s.vias).join(' -> ')}`);
 
     // save
-    const saveResult = await kw(async () => { try { await window.__kicadWeb.services.documents.save('board'); return 'ok'; } catch (e) { return e.message; } });
+    const saveResult = await kw(async () => { try { await window.__fpPcb.services.documents.save('board'); return 'ok'; } catch (e) { return e.message; } });
     await page.waitForTimeout(800);
     const file = readFileSync(unroutedPcb, 'utf8');
     const fileSegs = (file.match(/\(segment\b/g) ?? []).length;
@@ -471,7 +471,7 @@ try {
     const jobs = [];
     for (const id of ['board.gerbers', 'board.drill']) {
       const tJ = Date.now();
-      const r = await kw(async (id) => { const j = window.__kicadWeb.services.jobs; const def = j.jobs().find((d) => d.id === id); const o = {}; for (const x of def.options) o[x.key] = x.default; const run = await j.run(id, o); return { state: run.state, error: run.error, outputs: run.outputs.map((f) => f.name), bytes: run.outputs.reduce((a, f) => a + f.bytes, 0) }; }, id);
+      const r = await kw(async (id) => { const j = window.__fpPcb.services.jobs; const def = j.jobs().find((d) => d.id === id); const o = {}; for (const x of def.options) o[x.key] = x.default; const run = await j.run(id, o); return { state: run.state, error: run.error, outputs: run.outputs.map((f) => f.name), bytes: run.outputs.reduce((a, f) => a + f.bytes, 0) }; }, id);
       jobs.push({ id, ...r, ms: Date.now() - tJ });
       log(`job ${id}: ${r.state}${r.error ? ` (${r.error.slice(0, 160)})` : ''} in ${Date.now() - tJ} ms: ${r.outputs.length} file(s), ${(r.bytes / 1024).toFixed(0)} KiB`);
     }
@@ -486,7 +486,7 @@ try {
     await page.waitForTimeout(500);
     await openProject(unroutedPro, 'reopen');
     const again = await counts();
-    const routedNets = await kw((nets) => Object.fromEntries(nets.map((n) => [n, [...window.__kicadWeb.services.documents.board().byType('KOT_PCB_TRACE')].filter((t) => t.net === n).length])), routed.map((r) => r.net));
+    const routedNets = await kw((nets) => Object.fromEntries(nets.map((n) => [n, [...window.__fpPcb.services.documents.board().byType('KOT_PCB_TRACE')].filter((t) => t.net === n).length])), routed.map((r) => r.net));
     await shot('reopened');
     const sessionsNow = (await (await fetch(`${bridge}/sessions`)).json()).sessions;
     log(`reopened (${sessionsBefore} sessions before, ${sessionsNow.length} now): ${JSON.stringify(again)}; segments per routed net ${JSON.stringify(routedNets)}`);
@@ -501,9 +501,9 @@ try {
     await page.waitForTimeout(300);
     await openProject(unroutedPro, 'open-autoroute');
     const unroutedCell = () => textOf('[data-testid="unrouted-count"]').then((t) => t.replace(/\s+/g, ' ').trim());
-    const currentRun = () => kw(() => { const r = window.__kicadWeb.services.autoroute?.current(); return r ? { state: r.state, error: r.error, summary: r.summary, progress: r.progress, log: r.log.slice(-6) } : null; });
-    const historyTop = () => kw(async () => { const s = await window.__kicadWeb.services.undo.stacks(); return s.undo[s.undo.length - 1]?.description ?? null; });
-    const availability = await kw(() => window.__kicadWeb.services.autoroute.available());
+    const currentRun = () => kw(() => { const r = window.__fpPcb.services.autoroute?.current(); return r ? { state: r.state, error: r.error, summary: r.summary, progress: r.progress, log: r.log.slice(-6) } : null; });
+    const historyTop = () => kw(async () => { const s = await window.__fpPcb.services.undo.stacks(); return s.undo[s.undo.length - 1]?.description ?? null; });
+    const availability = await kw(() => window.__fpPcb.services.autoroute.available());
     log('autoroute availability', JSON.stringify(availability));
     // AUTOROUTE_ROUTERS=js|freerouting|js,freerouting narrows the run (default: both the board allows)
     const only = new Set((process.env.AUTOROUTE_ROUTERS ?? 'js,freerouting').split(','));
@@ -557,7 +557,7 @@ try {
       const tD = Date.now();
       await page.locator('[data-testid="autoroute-drc"]').click();
       await page.waitForFunction(() => /DRC:|DRC failed/.test(document.querySelector('[data-testid="autoroute-summary"]')?.textContent ?? ''), null, { timeout: 600000 });
-      const markers = await kw(() => window.__kicadWeb.services.markers.markers('drc').filter((m) => !m.excluded).map((m) => ({ severity: m.severity, rule: m.rule })));
+      const markers = await kw(() => window.__fpPcb.services.markers.markers('drc').filter((m) => !m.excluded).map((m) => ({ severity: m.severity, rule: m.rule })));
       const byRule = {};
       for (const m of markers) byRule[`${m.severity}:${m.rule}`] = (byRule[`${m.severity}:${m.rule}`] ?? 0) + 1;
       await shot(`autoroute-${tag}-drc`);

@@ -2,7 +2,7 @@
 import './setup';
 import { describe, expect, test } from 'bun:test';
 import { create } from '@bufbuild/protobuf';
-import { FootprintInstanceSchema, SchematicSymbolInstanceSchema } from '@kicad-web/proto';
+import { FootprintInstanceSchema, SchematicSymbolInstanceSchema } from '@fp-pcb/proto';
 import type { StoredItem } from '@/contracts';
 import { referenceOf } from '@/lib/geometry';
 

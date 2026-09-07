@@ -22,11 +22,11 @@ test.describe("real KiCad: board", () => {
       await page.keyboard.press("Escape");
       expect(await countType(page, "KOT_PCB_VIA")).toBe(vias0 + 1);
       const via = await page.evaluate(() => {
-        const v = [...(window as any).__kicadWeb.services.documents.board().byType("KOT_PCB_VIA")].find((x: any) => Number(x.proto.position.xNm) === 96_000_000);
+        const v = [...(window as any).__fpPcb.services.documents.board().byType("KOT_PCB_VIA")].find((x: any) => Number(x.proto.position.xNm) === 96_000_000);
         return v ? { y: Number(v.proto.position.yNm), layers: v.proto.padStack.layers.length } : null;
       });
       expect(via).toEqual({ y: 112_000_000, layers: 2 });
-      const saved: string = await page.evaluate(() => (window as any).__kicadWeb.services.documents.boardDoc.saveToString());
+      const saved: string = await page.evaluate(() => (window as any).__fpPcb.services.documents.boardDoc.saveToString());
       expect(saved).toMatch(/\(via[\s\S]{0,120}?\((?:at|translate) 96 112\)/);
     });
 
@@ -69,7 +69,7 @@ test.describe("real KiCad: board", () => {
     await page.keyboard.press("Enter");
     await waitRevisionAbove(page, r0);
     expect(await countType(page, "KOT_PCB_TRACE")).toBe(tracks0 + 2);
-    const layers = await page.evaluate(() => [...(window as any).__kicadWeb.services.documents.board().byType("KOT_PCB_TRACE")].slice(-2).map((t: any) => t.layer));
+    const layers = await page.evaluate(() => [...(window as any).__fpPcb.services.documents.board().byType("KOT_PCB_TRACE")].slice(-2).map((t: any) => t.layer));
     expect(layers.sort()).toEqual(["BL_B_Cu", "BL_F_Cu"]);
   });
 });

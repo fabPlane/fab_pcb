@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { create } from "@bufbuild/protobuf";
-import { Box2Schema, DistanceSchema, Vector2Schema } from "@kicad-web/proto";
+import { Box2Schema, DistanceSchema, Vector2Schema } from "@fp-pcb/proto";
 import {
   box2,
   boxFromPoints,

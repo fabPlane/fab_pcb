@@ -1,6 +1,6 @@
 // Autorouting for the board editor (Route -> Autoroute...). Three ways to run, one result shape:
 //
-//   js-tab       `@kicad-web/router`'s JsRouter in this tab: extractRouteInput over the session's
+//   js-tab       `@fp-pcb/router`'s JsRouter in this tab: extractRouteInput over the session's
 //                WebSocket, the solver's step loop yielding to the UI every few tens of ms (so the
 //                dialog stays live and Cancel works), applyRouteResult as one commit.
 //   js-server    the same router inside the bridge (`POST /sessions/:id/route {router:"js"}`),
@@ -14,12 +14,12 @@
 // "Autoroute (<router>): <n> connections" — in KiCad's stack, and in the app's own history
 // (recorded from the created items) when the server has no undo.
 
-import { BoardLayer } from '@kicad-web/proto';
-import type { Board } from '@kicad-web/client';
-import { applyRouteResult } from '@kicad-web/router/apply';
-import { extractRouteInput } from '@kicad-web/router/extract';
-import { JsRouter } from '@kicad-web/router/js-router';
-import { RouteCancelled, type Autorouter, type RouteInput, type RouteOptions, type RouteProgress, type RouteResult } from '@kicad-web/router/types';
+import { BoardLayer } from '@fp-pcb/proto';
+import type { Board } from '@fp-pcb/client';
+import { applyRouteResult } from '@fp-pcb/router/apply';
+import { extractRouteInput } from '@fp-pcb/router/extract';
+import { JsRouter } from '@fp-pcb/router/js-router';
+import { RouteCancelled, type Autorouter, type RouteInput, type RouteOptions, type RouteProgress, type RouteResult } from '@fp-pcb/router/types';
 import type { ItemOp, CommandService } from '../types';
 import type { AutorouteAvailability, AutorouteRequest, AutorouteRun, AutorouteService, AutorouteState, AutorouteSummary } from '../extras';
 import { SseParser, appendLog, applyBridgeEvent, autorouteMessage, buildJobRequest, emptyResultReason, isFinished, type BridgeRouteJobInfo } from '../autoroute-run';

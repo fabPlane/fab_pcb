@@ -5,7 +5,7 @@
 
 import type { AutorouteProgress, AutorouteRequest, AutorouteRun, AutorouteState, AutorouteSummary } from './extras';
 
-/** `RouteJobRequest` of `@kicad-web/router/bridge-job` (kept structural so the app compiles without the node-only module). */
+/** `RouteJobRequest` of `@fp-pcb/router/bridge-job` (kept structural so the app compiles without the node-only module). */
 export interface BridgeRouteJobRequest {
   router: 'js' | 'freerouting';
   options?: { layers?: number[]; viaCost?: number; maxTimeMs?: number; nets?: string[]; effort?: number };

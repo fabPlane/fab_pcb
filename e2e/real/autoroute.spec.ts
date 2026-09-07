@@ -23,7 +23,7 @@ const FIXTURES = resolve(import.meta.dirname, "..", "fixtures", "boards");
 
 async function copyBoard(name: string): Promise<{ root: string; cleanup(): void }> {
   const health = (await (await fetch(`${BRIDGE_URL}/health`)).json()) as { workspaceRoot: string };
-  const root = `${health.workspaceRoot.replace(/\/$/, "")}/.kicad-web-e2e-autoroute-${name}`;
+  const root = `${health.workspaceRoot.replace(/\/$/, "")}/.fp-pcb-e2e-autoroute-${name}`;
   rmSync(root, { recursive: true, force: true });
   cpSync(`${FIXTURES}/${name}`, root, { recursive: true });
   return { root, cleanup: () => rmSync(root, { recursive: true, force: true }) };
@@ -36,12 +36,12 @@ type Run = {
 };
 const currentRun = (page: import("@playwright/test").Page): Promise<Run | null> =>
   page.evaluate(() => {
-    const r = (window as any).__kicadWeb.services.autoroute?.current();
+    const r = (window as any).__fpPcb.services.autoroute?.current();
     return r ? { state: r.state, error: r.error, summary: r.summary } : null;
   });
 const historyTop = (page: import("@playwright/test").Page): Promise<string | null> =>
   page.evaluate(async () => {
-    const s = await (window as any).__kicadWeb.services.undo.stacks();
+    const s = await (window as any).__fpPcb.services.undo.stacks();
     return s.undo[s.undo.length - 1]?.description ?? null;
   });
 

@@ -26,7 +26,7 @@ import {
   type TableCell as TableCellProto,
   type TextAttributes,
   type Vector2,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import { deg, nm, toAngle, toDistance, type Vec2 } from "../../../units";
 import { Item, registerItem } from "../base";
 

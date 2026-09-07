@@ -215,7 +215,7 @@ export class MockJobsService implements JobsService {
   }
 
   private outputsFor(def: JobDefinition, options: Record<string, unknown>): JobRun['outputs'] {
-    const base = '/tmp/kicad-web/jobs/api_kitchen_sink';
+    const base = '/tmp/fp-pcb/jobs/api_kitchen_sink';
     switch (def.id) {
       case 'board.gerbers':
         return [

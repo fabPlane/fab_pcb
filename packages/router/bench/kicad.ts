@@ -7,7 +7,7 @@ import { cp, mkdir, mkdtemp, readdir, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { KiCad, NngIpcTransport, type Board } from "@kicad-web/client";
+import { KiCad, NngIpcTransport, type Board, type Transport } from "@fp-pcb/client";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const REPO = resolve(HERE, "..", "..", "..");
@@ -49,6 +49,8 @@ export interface RunningBoard {
   dir: string;
   pcb: string;
   socketPath: string;
+  /** The connection itself, for code that opens its own client on it (the bridge job does). */
+  transport: Transport;
   kicad: KiCad;
   board: Board;
   stderr(): string;
@@ -60,7 +62,7 @@ export async function openFixture(
   fixture: FixtureBoard,
   opts: { prefix?: string; file?: "unrouted" | "routed"; cli?: string } = {},
 ): Promise<RunningBoard> {
-  const dir = await mkdtemp(join(tmpdir(), `kicad-web-router-${fixture.name}-`));
+  const dir = await mkdtemp(join(tmpdir(), `fp-pcb-router-${fixture.name}-`));
   await cp(fixture.dir, dir, { recursive: true });
   const pcb = join(dir, opts.file === "routed" ? fixture.routed : fixture.unrouted);
   return openBoardFile(pcb, { ...opts, cleanupDir: dir });
@@ -93,7 +95,7 @@ export async function openBoardFile(pcb: string, opts: { prefix?: string; cli?: 
   }
   const transport = await NngIpcTransport.connect({ path: socketPath, defaultTimeoutMs: 120_000 });
   const kicad = await KiCad.connect(transport, {
-    clientName: `kicad-web/router-${opts.prefix ?? "bench"}-${process.pid}`,
+    clientName: `fp-pcb/router-${opts.prefix ?? "bench"}-${process.pid}`,
     readyTimeoutMs: 120_000,
   });
   const board = await kicad.currentBoard();
@@ -105,6 +107,7 @@ export async function openBoardFile(pcb: string, opts: { prefix?: string; cli?: 
     dir: opts.cleanupDir ?? dirname(pcb),
     pcb,
     socketPath,
+    transport,
     kicad,
     board,
     stderr: () => stderrChunks.join(""),

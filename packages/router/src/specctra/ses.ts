@@ -3,7 +3,7 @@
  * converted to `NewTrack`/`NewVia` in nm on the board's layers. Used by the Freerouting adapter's
  * built-in import path (servers without `ImportSpecctraSession`) and for statistics on any session.
  */
-import type { BoardLayer } from "@kicad-web/proto";
+import type { BoardLayer } from "@fp-pcb/proto";
 import type { NewTrack, NewVia, RouteInput } from "../types";
 import { atoms, child, children, head, isList, numbers, parseSExpr, type SExpr } from "./sexpr";
 

@@ -1,11 +1,11 @@
-# @kicad-web/router
+# @fp-pcb/router
 
-Autorouting for kicad-web (docs/06-routing.md, milestone M7). One interface, two routers:
+Autorouting for FabPlane PCB (docs/06-routing.md, milestone M7). One interface, two routers:
 
 ```ts
-import { extractRouteInput, applyRouteResult, JsRouter, FreeroutingRouter } from "@kicad-web/router";
+import { extractRouteInput, applyRouteResult, JsRouter, FreeroutingRouter } from "@fp-pcb/router";
 
-const input = await extractRouteInput(board); // Board from @kicad-web/client
+const input = await extractRouteInput(board); // Board from @fp-pcb/client
 const result = await new JsRouter().route(input, { maxTimeMs: 60_000 }, (p) => console.log(p.phase, p.percent));
 await applyRouteResult(board, result); // one commit: BeginCommit + CreateItems + EndCommit
 ```
@@ -16,11 +16,11 @@ src/
   extract.ts      extractRouteInput(board): outline, layers, pads, copper, keepouts, zones, rules, ratsnest
   apply.ts        applyRouteResult(board, result): tracks + vias in one CreateItems commit
   js-router.ts    JsRouter — @tscircuit/capacity-autorouter behind a SimpleRouteJson translation
-  freerouting.ts  FreeroutingRouter — java -jar freerouting.jar, DSN in / SES out, two I/O modes
+  freerouting.ts  FreeroutingRouter — java -jar freerouting.jar, DSN in / SES out, three I/O modes (kicad, kicad-dsn, builtin)
   specctra/       s-expression reader, DSN writer, SES reader (the builtin I/O mode + tests)
   bridge-job.ts   createRouteJobs(): a routing job the bridge can mount under /sessions/:id/route
 bench/
-  run.ts          the comparison harness -> bench/results/*.json + docs/router-comparison.md
+  run.ts          the comparison harness (runs the bridge job per board) -> bench/results/*.json + docs/router-comparison.md
   kicad.ts        spawn kicad-cli api-server on a fixture copy (shared with the integration test)
   fetch-freerouting.ts  downloads the jar (and, with --jdk, a Temurin 25) into vendor/
 vendor/           freerouting-<version>.jar and jdk/ — git-ignored, see "Freerouting"
@@ -66,7 +66,9 @@ What it costs us, measured on the practice boards and documented in `js-router.t
 - `seed` and `viaCost` have no equivalent; `effort` maps to its `effort` option.
 
 The alternative the plan allowed — a grid A\* router of our own — was not needed: the pick routed
-100 % of ecc83 in 0.4 s and 97.7 % of pic_programmer in 3.2 s, in-process.
+100 % of ecc83 in 0.4 s and 97.7 % of pic_programmer in about 5 s, in-process. What it cannot do
+is dense boards: on interf_u and stickhub the precheck/retry sequence ends with nothing routed
+(and a `maxTimeMs` timeout also yields nothing — the pipeline has no partial output).
 
 ## The common layer
 
@@ -89,7 +91,8 @@ removes the whole routing pass. Positions are rounded to integer nm.
 logs which of these it cannot honour. `signal` (an `AbortSignal`) cancels a run: the JS router stops
 at its next `step()`, Freerouting's process is killed, and `route()` rejects with `RouteCancelled`
 (`RouteCancelled.is(e)`), so nothing is applied. `RouteResult`: `tracks`, `vias`, `unrouted` (the router's own
-view; the bench re-measures with `GetRatsnest`), `totalConnections`, `timedOut`, `elapsedMs`, `log`.
+view — a net counts as routed once it got a wire; the bridge job and the app re-measure with `GetRatsnest`
+after the apply and show both counts), `totalConnections`, `timedOut`, `elapsedMs`, `log`.
 
 ## Freerouting
 
@@ -98,7 +101,7 @@ view; the bench re-measures with `GetRatsnest`), `totalConnections`, `timedOut`,
 `Auto-routing pass #n ... (x unrouted and y violations)` lines into progress, and gets the design in
 and out of KiCad in one of two ways:
 
-- **`kicad`** (default when available): `RunBoardJobExportSpecctra` (inline output; the headless
+- **`kicad`** (the adapter's `auto` default when the server has both commands): `RunBoardJobExportSpecctra` (inline output; the headless
   server plots from disk so the board is saved first) and `ImportSpecctraSession` (contents inline,
   `replace_existing_tracks: false`). This is KiCad's own exporter/importer — exact pad geometry,
   zones as planes, the importer's net/layer/padstack matching — and the items are created by KiCad,
@@ -126,7 +129,7 @@ downloaded from https://github.com/freerouting/freerouting/releases (v2.4.1, 64 
 sha256 `251101c3eeac22d7e7dfcf6796603279e5d1000283eb82d8f093780f7afc6aa9`) into `vendor/`, which is
 git-ignored, and executed as a separate process — nothing of it is linked or redistributed.
 Freerouting >= 2.2 is compiled for **Java 25**; the machine's Temurin 24 refuses it, so `--jdk`
-also unpacks a Temurin 25 into `vendor/jdk` (also ignored). `FREEROUTING_JAR` and `KICAD_WEB_JAVA`
+also unpacks a Temurin 25 into `vendor/jdk` (also ignored). `FREEROUTING_JAR` and `FP_PCB_JAVA`
 (or `FREEROUTING_JAVA`) override both paths; `resolveFreerouting(env)` is the one place that reads
 them and says, with the fix, why Freerouting cannot run (the bridge shows that in `/health`).
 
@@ -135,17 +138,17 @@ them and says, with the fix, why Freerouting cannot run (the bridge shows that i
 `src/bridge-job.ts` is a function the bridge can mount without this package touching the bridge:
 
 ```ts
-import { createRouteJobs, matchRouteJobPath } from "@kicad-web/router/bridge-job";
+import { createRouteJobs, matchRouteJobPath } from "@fp-pcb/router/bridge-job";
 const jobs = createRouteJobs();
 // in Bun.serve fetch(): const m = matchRouteJobPath(url.pathname); if (m) return jobs.handle(req, { id, transport: session.transport }, m.jobId);
 ```
 
-| Route                                                                                       | Effect                                                                                 |
-| ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Route                                                                                                     | Effect                                                                                                                                                                                                     |
+| --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `POST /sessions/:id/route` `{router:"js"\|"freerouting", options?, freerouting?, refillZones?, message?}` | `RefillZones` -> `SaveDocument` -> extract -> route -> apply (one commit, "Autoroute (<router>): n connections") on the session's open board; `202 {job}`; `400` when Freerouting is asked for but missing |
-| `GET /sessions/:id/route`                                                                   | list jobs of the session, plus the Freerouting paths                                   |
-| `GET /sessions/:id/route/:job`                                                              | `{job}`; with `Accept: text/event-stream`: `event: state`, `progress` (`{state, progress, log}`), `done`, `error`, `: keepalive` |
-| `DELETE /sessions/:id/route/:job`                                                           | cancel: aborts the router (`RouteOptions.signal`), Freerouting's java is killed; nothing applied |
+| `GET /sessions/:id/route`                                                                                 | list jobs of the session, plus the Freerouting paths                                                                                                                                                       |
+| `GET /sessions/:id/route/:job`                                                                            | `{job}`; with `Accept: text/event-stream`: `event: state`, `progress` (`{state, progress, log}`), `done`, `error`, `: keepalive`                                                                           |
+| `DELETE /sessions/:id/route/:job`                                                                         | cancel: aborts the router (`RouteOptions.signal`), Freerouting's java is killed; nothing applied                                                                                                           |
 
 `RouteJobInfo.summary` carries `tracks, vias, routed, routerRouted, total, trackLengthNm, elapsedMs,
 wallMs, timedOut, message, unrouted:[{net, from, to}], log` — `routed` and `unrouted` are re-measured
@@ -159,15 +162,23 @@ and vias, so a partially routed board is not doubled. The job uses the session's
 ## Benchmark
 
 ```bash
-bun run --filter @kicad-web/router bench                      # every fixture board, js + freerouting
-bun run bench/run.ts --boards ecc83,pic_programmer --routers js,freerouting,freerouting-builtin --time 600 --passes 100
+bun run --filter @fp-pcb/router bench                      # every fixture board, js + freerouting (kicad-dsn, 20 passes)
+bun run bench/run.ts --boards ecc83,pic_programmer --routers js,freerouting,freerouting-kicad,freerouting-builtin
+bun run bench/run.ts --passes 100 --effort 2                  # Freerouting -mp / JS router effort
+bun run bench/run.ts --time 300 --freerouting-time 600        # JS budget (default 600 s); Freerouting limit (default none — a limit kills it with nothing routed)
 bun run bench/run.ts --report                                 # regenerate docs/router-comparison.md from bench/results/*.json
 ```
 
 Per board and router: fresh `kicad-cli api-server` on a temp copy of `e2e/fixtures/boards/<name>/*.unrouted.kicad_pcb`,
-`RefillZones`, `GetUnroutedCount` + `RunBoardJobDrc` before; extract, route, apply; `RefillZones`,
-`GetUnroutedCount`, `GetNetLengths`, via count, `RunBoardJobDrc` after; `SaveDocument` +
-`RunBoardJobExportSvg`. JSON per run in `bench/results/`, the table in `docs/router-comparison.md`.
+`RefillZones`, `GetUnroutedCount` + `RunBoardJobDrc` before; then **the bridge job** (`createRouteJobs().start()`
+on the server's transport, followed over its SSE stream exactly as the browser does: refill, save, extract, route,
+apply as one commit, `GetRatsnest` re-measure); then `RefillZones`, `GetUnroutedCount`, `GetNetLengths`, via count,
+`RunBoardJobDrc` after; `SaveDocument` + `RunBoardJobExportSvg`. Router names: `js`; `freerouting` (the app's
+`kicad-dsn` mode); `freerouting-kicad` (KiCad's own importer — the first bench's path, `--passes 100` reproduces
+it); `freerouting-builtin`. Each JSON carries the job's own summary (`routerRouted` next to the ratsnest-measured
+`routed`), the options, and a `measuredWith` block (KiCad version and commit, Freerouting and Java, the
+capacity-autorouter version, Bun, CPU, memory, OS) that the report prints as its "Measured with" line. Results
+without a `harness: "job"` field are from the first, direct-adapter harness and are marked as such in the table.
 
 ## Tests
 

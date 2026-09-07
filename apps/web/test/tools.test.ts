@@ -1,6 +1,6 @@
 import './setup';
 import { beforeEach, describe, expect, test } from 'bun:test';
-import { BoardLayer, SchematicLineType } from '@kicad-web/proto';
+import { BoardLayer, SchematicLineType } from '@fp-pcb/proto';
 import { activeTool, bindTools, cancelTool, startTool, toolClick, toolFinish, toolKey, toolPreview, useToolStore } from '@/canvas/tools';
 import type { ItemStore, StoredItem } from '@/contracts';
 import { createMockServices, type Services } from '@/services';

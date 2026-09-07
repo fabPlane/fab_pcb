@@ -9,8 +9,8 @@
 // One subtlety: on the server path the client history is *not* rewound. KiCad's stack is the
 // authority, and its entries are what the history panel shows.
 
-import { DocumentUndo } from '@kicad-web/client/store';
-import type { Board, Schematic } from '@kicad-web/client';
+import { DocumentUndo } from '@fp-pcb/client/store';
+import type { Board, Schematic } from '@fp-pcb/client';
 import type { CommandService, ServerUndoService, ServerUndoStacks } from '../types';
 import type { KicadDocumentService } from './KicadDocumentService';
 

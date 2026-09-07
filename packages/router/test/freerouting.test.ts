@@ -85,18 +85,18 @@ describe("resolveFreerouting", () => {
     expect(r.reason).toMatch(/fetch-freerouting\.ts --jdk|FREEROUTING_JAR/);
     expect(resolveFreerouting({}).jar).toBe(DEFAULT_JAR);
   });
-  test("KICAD_WEB_JAVA wins over FREEROUTING_JAVA and must exist", () => {
+  test("FP_PCB_JAVA wins over FREEROUTING_JAVA and must exist", () => {
     const jar = existsSync(DEFAULT_JAR) ? DEFAULT_JAR : undefined;
-    const r = resolveFreerouting({ FREEROUTING_JAR: jar, KICAD_WEB_JAVA: "/nonexistent/java", FREEROUTING_JAVA: "/usr/bin/java" });
+    const r = resolveFreerouting({ FREEROUTING_JAR: jar, FP_PCB_JAVA: "/nonexistent/java", FREEROUTING_JAVA: "/usr/bin/java" });
     if (!jar) {
       expect(r.ok).toBe(false);
       return;
     }
     expect(r.ok).toBe(false);
     expect(r.java).toBeUndefined();
-    expect(r.reason).toMatch(/KICAD_WEB_JAVA/);
+    expect(r.reason).toMatch(/FP_PCB_JAVA/);
     const sys = Bun.which("java");
-    if (sys) expect(resolveFreerouting({ FREEROUTING_JAR: jar, KICAD_WEB_JAVA: sys })).toMatchObject({ ok: true, java: sys });
+    if (sys) expect(resolveFreerouting({ FREEROUTING_JAR: jar, FP_PCB_JAVA: sys })).toMatchObject({ ok: true, java: sys });
   });
 });
 
@@ -108,7 +108,7 @@ describe("runFreerouting cancellation", () => {
       const { mkdtemp, rm } = await import("node:fs/promises");
       const { tmpdir } = await import("node:os");
       const { join } = await import("node:path");
-      const dir = await mkdtemp(join(tmpdir(), "kicad-web-fr-cancel-"));
+      const dir = await mkdtemp(join(tmpdir(), "fp-pcb-fr-cancel-"));
       try {
         const router = new FreeroutingRouter({}, { mode: "builtin", jar: paths.jar, java: paths.java, workDir: dir, passes: 100 });
         const ac = new AbortController();

@@ -1,7 +1,7 @@
 /** Event frames over WebSocketTransport with a fake WebSocket: onEvent, eventsState, KiCadEvents.fromTransport. */
 import { describe, expect, test } from "bun:test";
 import { create, toBinary, type MessageInitShape } from "@bufbuild/protobuf";
-import { DocumentType, EventSchema } from "@kicad-web/proto";
+import { DocumentType, EventSchema } from "@fp-pcb/proto";
 import { KiCadEvents, TransportEventSubscriber } from "../src/events";
 import {
   WS_EVENT_FRAME_ID,

@@ -9,13 +9,13 @@ import {
   GetColorThemeSchema,
   ListColorThemesSchema,
   UnitSystem,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import { KiCadClient } from "../src/client";
 import { KiCad, toAppType, toThemeColor, unitSuffix } from "../src/model";
 import { FakeTransport, reply } from "./fake-transport";
 
 async function connect(t: FakeTransport): Promise<KiCad> {
-  return new KiCad(await KiCadClient.connect(t, { clientName: "kicad-web/test" }));
+  return new KiCad(await KiCadClient.connect(t, { clientName: "fp-pcb/test" }));
 }
 
 describe("settings conversions", () => {

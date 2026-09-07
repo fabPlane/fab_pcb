@@ -5,8 +5,8 @@
  * file knows about protobuf; lengths are plain `number` nanometres (the client's convention) and
  * angles are degrees, so a router can be unit-tested on hand-written inputs.
  */
-import type { BoardLayer } from "@kicad-web/proto";
-import type { Box, Vec2 } from "@kicad-web/client";
+import type { BoardLayer } from "@fp-pcb/proto";
+import type { Box, Vec2 } from "@fp-pcb/client";
 
 /** One copper layer the router may use. `index` counts from the top (F.Cu = 0, B.Cu = last). */
 export interface RouteLayer {

@@ -58,7 +58,7 @@ function TitleBar() {
     <div className="titlebar">
       <div className="brand" onClick={() => setActiveEditor('project')} style={{ cursor: 'pointer' }} title="Project screen">
         <span className="logo" />
-        <span>KiCad Web</span>
+        <span>FabPlane PCB</span>
       </div>
       <MenuBar />
       <div className="doc-tabs">

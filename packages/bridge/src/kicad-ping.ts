@@ -3,7 +3,7 @@
  * `kicad_token` and to detect readiness (AS_NOT_READY while a preloaded document loads).
  * Everything else is forwarded as opaque bytes.
  */
-import type { Transport } from "@kicad-web/client/transport";
+import type { Transport } from "@fp-pcb/client/transport";
 
 const enc = new TextEncoder();
 const dec = new TextDecoder();
@@ -37,7 +37,7 @@ export function encodeApiRequest(clientName: string, typeName: string, payload: 
   return concat(bytesField(1, header), bytesField(2, any));
 }
 
-export function encodePing(clientName = "kicad-web/bridge"): Uint8Array {
+export function encodePing(clientName = "fp-pcb/bridge"): Uint8Array {
   return encodeApiRequest(clientName, "kiapi.common.commands.Ping");
 }
 

@@ -6,7 +6,7 @@
  * data (or run the encoding on the bridge) — `hasZstd()` tells you which case you are in.
  */
 import { create, type MessageInitShape } from "@bufbuild/protobuf";
-import { EmbeddedFileSchema, EmbeddedFileType, type EmbeddedFile } from "@kicad-web/proto";
+import { EmbeddedFileSchema, EmbeddedFileType, type EmbeddedFile } from "@fp-pcb/proto";
 
 interface ZstdApi {
   compress(data: Uint8Array): Uint8Array;

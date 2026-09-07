@@ -5,7 +5,7 @@
 // `mockPalette` flattens a theme into the CSS colours the Canvas2D mock host and the
 // layer-panel swatches use.
 
-import { KICAD_CLASSIC_THEME, KICAD_DEFAULT_THEME, colorToCss, layerColor, mergeThemes, themeColor, uiColors, type Theme, type ThemeColor } from '@kicad-web/renderer';
+import { KICAD_CLASSIC_THEME, KICAD_DEFAULT_THEME, colorToCss, layerColor, mergeThemes, themeColor, uiColors, type Theme, type ThemeColor } from '@fp-pcb/renderer';
 import { useUiStore, type CanvasThemeId } from '@/state/uiStore';
 
 const c = (r: number, g: number, b: number, a = 1): ThemeColor => ({ r, g, b, a });

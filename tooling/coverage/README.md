@@ -1,4 +1,4 @@
-# @kicad-web/coverage
+# @fp-pcb/coverage
 
 Reproduces the IPC API coverage matrix: which `kiapi` request messages exist, which C++ handler
 registers each one, and whether it works under `kicad-cli api-server`.
@@ -14,7 +14,7 @@ Inputs (read from git HEAD of `$KICAD_SRC`, default `../kicad`, so they match `p
 
 - request messages: top-level messages of `common/commands/*.proto`, `board/board_commands.proto`,
   `board/board_jobs.proto`, `schematic/schematic_commands.proto`, `schematic/schematic_jobs.proto`,
-  taken from the descriptors in `@kicad-web/proto`. A message is a request if a handler registers it,
+  taken from the descriptors in `@fp-pcb/proto`. A message is a request if a handler registers it,
   or if its name has no `Response|Result|Status|Spec|Entry|Options|Settings` suffix and starts with an
   imperative verb (`Get`, `Set`, `Run`, `Check`, ...). Everything else is a payload type.
 - registrations: `registerHandler<Req, Res>( ... )` in `common/api/api_server.cpp` (API_HANDLER_SERVER,

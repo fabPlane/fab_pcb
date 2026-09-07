@@ -1,4 +1,4 @@
-# @kicad-web/proto
+# @fp-pcb/proto
 
 Layer 0 of the client stack: TypeScript types for every KiCad IPC API message, generated with
 [protobuf-es v2](https://github.com/bufbuild/protobuf-es) from the KiCad checkout pinned in
@@ -8,9 +8,9 @@ Layer 0 of the client stack: TypeScript types for every KiCad IPC API message, g
 
 ```ts
 import { create, toBinary, fromBinary } from "@bufbuild/protobuf";
-import { ApiRequestSchema, ApiResponseSchema, PingSchema, packAny, unpackAny, unpackAnyAs, typeUrlOf, kiapiRegistry } from "@kicad-web/proto";
+import { ApiRequestSchema, ApiResponseSchema, PingSchema, packAny, unpackAny, unpackAnyAs, typeUrlOf, kiapiRegistry } from "@fp-pcb/proto";
 
-const req = create(ApiRequestSchema, { header: { clientName: "kicad-web/x" }, message: packAny(PingSchema, create(PingSchema)) });
+const req = create(ApiRequestSchema, { header: { clientName: "fp-pcb/x" }, message: packAny(PingSchema, create(PingSchema)) });
 const bytes = toBinary(ApiRequestSchema, req);             // goes on the wire
 const res = fromBinary(ApiResponseSchema, replyBytes);
 const inner = unpackAny(res.message!);                      // Message | undefined, resolved via kiapiRegistry

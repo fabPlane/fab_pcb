@@ -1,4 +1,4 @@
-// Unit helpers. SWAP SEAM: `@kicad-web/client/units` will export the same names; when it
+// Unit helpers. SWAP SEAM: `@fp-pcb/client/units` will export the same names; when it
 // exists, re-export from there and delete the bodies below.
 
 export type Unit = 'mm' | 'mil' | 'in';

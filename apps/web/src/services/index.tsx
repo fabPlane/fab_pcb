@@ -3,7 +3,7 @@
 // SWAP SEAM: `createMockServices()` is the only place that knows about mocks. To use the
 // real bridge + KiCad, add `createKicadServices(bridgeUrl)` returning the same `Services`
 // shape (BridgeSessionService over fetch/WebSocket, a DocumentService that wraps
-// `@kicad-web/client`'s Project/Board/Schematic and exposes their ItemStores, a
+// `@fp-pcb/client`'s Project/Board/Schematic and exposes their ItemStores, a
 // CommandServiceImpl built with a KiCadCommitBackend) and pick it in main.tsx.
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';

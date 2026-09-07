@@ -24,14 +24,14 @@ import {
   ItemRequestStatus,
   TrackSchema,
   packAny,
-} from '@kicad-web/proto';
-import { KiCad, KiCadEvents } from '@kicad-web/client';
+} from '@fp-pcb/proto';
+import { KiCad, KiCadEvents } from '@fp-pcb/client';
 import { KicadDocumentService } from '@/services/kicad';
 import { FakeTransport, fail, reply } from './fakeTransport';
 
 const T1 = 'f0d13343-ad3f-4a47-aba7-e70711c71e3f';
 const T2 = '0b9cc5a8-6a75-47df-9617-9721c2785946';
-const OWN = 'kicad-web/test-tab';
+const OWN = 'fp-pcb/test-tab';
 const boardSpec = { type: DocumentType.DOCTYPE_PCB, identifier: { case: 'boardFilename' as const, value: 'api_kitchen_sink.kicad_pcb' }, project: { name: 'api_kitchen_sink', path: '/ws/pcbnew/' } };
 
 function eventBytes(sequence: bigint, kind: MessageInitShape<typeof EventSchema>['kind']): Uint8Array {

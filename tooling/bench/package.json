@@ -1,5 +1,5 @@
 {
-  "name": "@kicad-web/bench",
+  "name": "@fp-pcb/bench",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -8,8 +8,8 @@
     "latency": "bun run transport-latency.ts"
   },
   "dependencies": {
-    "@kicad-web/bridge": "workspace:*",
-    "@kicad-web/client": "workspace:*"
+    "@fp-pcb/bridge": "workspace:*",
+    "@fp-pcb/client": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "^1.2.0",

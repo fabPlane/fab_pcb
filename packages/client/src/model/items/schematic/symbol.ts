@@ -15,7 +15,7 @@ import {
   type SchematicSymbolInstance,
   type SheetPath,
   type TextAttributes,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import { nm, type Vec2 } from "../../../units";
 import { Item, registerItem, wrapAll } from "../base";
 

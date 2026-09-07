@@ -19,7 +19,7 @@ async function listFiles(dir: string): Promise<string[]> {
 }
 
 const src = kicadSrc();
-const tmp = await mkdtemp(join(tmpdir(), "kicad-web-proto-"));
+const tmp = await mkdtemp(join(tmpdir(), "fp-pcb-proto-"));
 let problems = 0;
 try {
   await generate(tmp, src);

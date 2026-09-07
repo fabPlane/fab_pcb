@@ -1,6 +1,6 @@
 // The service boundary. UI code only ever talks to these interfaces, obtained from the
 // `ServicesProvider`. `services/mock/*` implements them in memory; the real
-// implementations (wrapping `@kicad-web/client`) will live in `services/kicad/*`.
+// implementations (wrapping `@fp-pcb/client`) will live in `services/kicad/*`.
 
 import type { DocumentKind, ItemStore, StoredItem } from '@/contracts';
 import type { Patch } from '@/lib/patch';

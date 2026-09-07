@@ -2,8 +2,19 @@
   "board": "ecc83",
   "router": "js",
   "routerImpl": "js",
+  "harness": "job",
   "kicadVersion": "10.99.0-3711-g8cc9377988",
-  "date": "2026-09-06T23:46:38.442Z",
+  "date": "2026-09-07T02:46:45.782Z",
+  "measuredWith": {
+    "kicad": "10.99.0-3711-g8cc9377988",
+    "java": "n/a",
+    "freerouting": "2.4.1",
+    "capacityAutorouter": "0.0.885",
+    "bun": "1.4.0",
+    "os": "macOS 15.6.1",
+    "cpu": "Apple M2 Max",
+    "memoryGb": 96
+  },
   "connections": {
     "before": 14,
     "after": 0,
@@ -34,18 +45,52 @@
       "DRCET_SILK_EDGE_CLEARANCE": 2
     }
   },
-  "wallMs": 386,
-  "routeMs": 370,
+  "wallMs": 443,
+  "routeMs": 375,
   "timedOut": false,
   "svg": "packages/router/bench/results/ecc83-js.svg",
   "log": [
-    "extract: 33 pads, 14 connections, 2 copper layers, 1 zones, 0 copper graphics",
+    "job: route job 62c3c84d: js on session bench-ecc83",
+    "extract: 33 pads, 14 connections, 2 copper layers",
+    "start",
+    "preprocessSimpleRouteJsonSolver",
+    "componentDetectionSolver",
+    "escapeViaLocationSolver",
+    "netToPointPairsSolver",
+    "topologyPlanningSolver",
+    "topologyMergingSolver",
+    "nodeDimensionSubdivisionSolver",
+    "edgeSolver",
+    "availableSegmentPointSolver",
+    "necessaryCrampedPortPointSolver",
+    "portPointPathingSolver",
+    "uniformPortDistributionSolver",
+    "highDensityRouteSolver",
+    "highDensityForceImproveSolver",
+    "highDensityRepairSolver",
+    "highDensityStitchSolver",
+    "traceSimplificationSolver",
+    "traceWidthSolver",
+    "globalDrcForceImproveSolver",
+    "exactGeometryDrcForceImproveSolver",
+    "lengthMatchingPostProcessingSolver",
+    "powerTraceExpansionSolver",
+    "none",
+    "done",
+    "job: route job 62c3c84d: done, 14/14 in 443 ms",
     "note: 1 copper zones are not obstacles for the JS router",
     "srj: 2 layers, 33 obstacles, 8 nets to route",
-    "31 tracks, 0 vias, 8/8 nets in 370 ms (5818 iterations)"
+    "31 tracks, 0 vias, 8/8 nets in 375 ms (5818 iterations)"
   ],
   "options": {
-    "maxTimeMs": 600000,
-    "effort": 1
+    "effort": 1,
+    "maxTimeMs": 600000
+  },
+  "job": {
+    "state": "done",
+    "routed": 14,
+    "routerRouted": 14,
+    "total": 14,
+    "message": "Autoroute (js): 14 connections"
   }
 }

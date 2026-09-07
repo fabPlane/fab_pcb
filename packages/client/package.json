@@ -1,5 +1,5 @@
 {
-  "name": "@kicad-web/client",
+  "name": "@fp-pcb/client",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@bufbuild/protobuf": "2.14.1",
-    "@kicad-web/proto": "workspace:*"
+    "@fp-pcb/proto": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "^1.2.0",

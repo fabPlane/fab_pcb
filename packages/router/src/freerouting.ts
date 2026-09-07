@@ -29,8 +29,8 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { Board } from "@kicad-web/client";
-import { commands as generatedCommands, KiCadApiError } from "@kicad-web/client";
+import type { Board } from "@fp-pcb/client";
+import { commands as generatedCommands, KiCadApiError } from "@fp-pcb/client";
 import { writeDsn, dsnLayers } from "./specctra/dsn";
 import { parseSes, sesToItems } from "./specctra/ses";
 import {
@@ -50,9 +50,9 @@ export const FREEROUTING_VERSION = "2.4.1";
 export const DEFAULT_JAR = join(VENDOR_DIR, `freerouting-${FREEROUTING_VERSION}.jar`);
 /** Where `fetch-freerouting.ts --jdk` unpacks the Temurin (macOS bundle layout first, then the flat one). */
 export const VENDOR_JAVA_CANDIDATES = [join(VENDOR_DIR, "jdk", "Contents", "Home", "bin", "java"), join(VENDOR_DIR, "jdk", "bin", "java")];
-/** Freerouting 2.2+ needs Java 25; a local Temurin lives in vendor/jdk (`fetch-freerouting.ts --jdk`). Override with `KICAD_WEB_JAVA` (or `FREEROUTING_JAVA`). */
+/** Freerouting 2.2+ needs Java 25; a local Temurin lives in vendor/jdk (`fetch-freerouting.ts --jdk`). Override with `FP_PCB_JAVA` (or `FREEROUTING_JAVA`). */
 export const DEFAULT_JAVA_CANDIDATES = [
-  process.env.KICAD_WEB_JAVA,
+  process.env.FP_PCB_JAVA,
   process.env.FREEROUTING_JAVA,
   ...VENDOR_JAVA_CANDIDATES,
   "/usr/bin/java",
@@ -71,12 +71,12 @@ export interface FreeroutingPaths {
 
 /**
  * Resolves the jar and the Java from the environment: `FREEROUTING_JAR` (default: the vendored
- * `freerouting-<version>.jar`) and `KICAD_WEB_JAVA` / `FREEROUTING_JAVA` (default: the vendored
+ * `freerouting-<version>.jar`) and `FP_PCB_JAVA` / `FREEROUTING_JAVA` (default: the vendored
  * Temurin, then a system `java`). What the bridge reports in `/health` and checks before a job.
  */
 export function resolveFreerouting(env: Record<string, string | undefined> = process.env): FreeroutingPaths {
   const jar = env.FREEROUTING_JAR || DEFAULT_JAR;
-  const javaEnv = env.KICAD_WEB_JAVA || env.FREEROUTING_JAVA;
+  const javaEnv = env.FP_PCB_JAVA || env.FREEROUTING_JAVA;
   const java = javaEnv
     ? existsSync(javaEnv) || Bun.which(javaEnv)
       ? javaEnv
@@ -95,8 +95,8 @@ export function resolveFreerouting(env: Record<string, string | undefined> = pro
       java,
       ok: false,
       reason: javaEnv
-        ? `Java not found at ${javaEnv} (KICAD_WEB_JAVA / FREEROUTING_JAVA)`
-        : "no Java 25 found: run 'bun packages/router/bench/fetch-freerouting.ts --jdk' or set KICAD_WEB_JAVA",
+        ? `Java not found at ${javaEnv} (FP_PCB_JAVA / FREEROUTING_JAVA)`
+        : "no Java 25 found: run 'bun packages/router/bench/fetch-freerouting.ts --jdk' or set FP_PCB_JAVA",
     };
   return { jar, java, ok: true };
 }
@@ -403,7 +403,7 @@ export class FreeroutingRouter implements Autorouter {
     const mode = await this.resolveMode();
     const name = `freerouting-${mode}`;
     log.push(`mode: ${mode}; jar: ${this.jar}; java: ${this.java}`);
-    const workDir = this.fr.workDir ?? (await mkdtemp(join(tmpdir(), "kicad-web-freerouting-")));
+    const workDir = this.fr.workDir ?? (await mkdtemp(join(tmpdir(), "fp-pcb-freerouting-")));
     const dsnPath = join(workDir, "board.dsn");
     const sesPath = join(workDir, "board.ses");
     const layers = dsnLayers(input, opts);

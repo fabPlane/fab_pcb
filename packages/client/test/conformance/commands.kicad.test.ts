@@ -46,7 +46,7 @@ import {
   type ErcResultsResponse,
   type JobProgress,
   type KIID,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import { COMMANDS, KICAD_COMMIT } from "../../src/commands-data";
 import * as cmd from "../../src/commands";
 import { ActionError, KiCadApiError } from "../../src/errors";
@@ -254,7 +254,7 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
       join(tmp.dir, "sym-lib-table"),
       `(sym_lib_table\n  (version 7)\n  (lib (name "Device") (type "KiCad") (uri "${QA_DEVICE_LIB}") (options "") (descr "QA symbols"))\n)\n`,
     );
-    scratchDir = await mkdtemp(join(tmpdir(), "kicad-web-scratch-"));
+    scratchDir = await mkdtemp(join(tmpdir(), "fp-pcb-scratch-"));
     await openAll();
   }, 120_000);
 
@@ -284,7 +284,7 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     return `${paths.size} paths`;
   });
   cmdTest("GetPluginSettingsPath", async () => {
-    const p = await k().pluginSettingsPath("com.example.kicad-web");
+    const p = await k().pluginSettingsPath("com.example.fp-pcb");
     expect(p.length).toBeGreaterThan(0);
     return p;
   });
@@ -310,7 +310,7 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
   });
   cmdTest("GetTextExtents", async () => {
     const box = await k().textExtents({
-      text: "kicad-web",
+      text: "fp-pcb",
       attributes: { size: toVector2({ x: mm(1), y: mm(1) }), strokeWidth: toDistance(mm(0.15)) },
     });
     expect(box.w).toBeGreaterThan(0);
@@ -429,11 +429,11 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
   cmdTest("SetErcMarkerExcluded", async () => {
     const before = await sch.erc.markers();
     const target = activeMarkers(before.markers)[0]!;
-    await sch.erc.exclude([target], "kicad-web exclusion");
+    await sch.erc.exclude([target], "fp-pcb exclusion");
     const mid = await sch.erc.markers();
     const m = mid.markers.find((x) => x.id?.value === target.id!.value)!;
     expect(m.excluded).toBe(true);
-    expect(m.exclusionComment).toBe("kicad-web exclusion");
+    expect(m.exclusionComment).toBe("fp-pcb exclusion");
     expect(m.severity).toBe(RuleSeverity.RS_EXCLUSION);
     expect(mid.exclusionCount).toBe(before.exclusionCount + 1);
     expect(mid.errorCount + mid.warningCount).toBe(before.errorCount + before.warningCount - 1);
@@ -517,11 +517,11 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     async () => {
       const before = await board.drc.markers();
       const target = activeMarkers(before.markers)[0]!;
-      await board.drc.exclude([target], "kicad-web exclusion");
+      await board.drc.exclude([target], "fp-pcb exclusion");
       const mid = await board.drc.markers();
       const m = mid.markers.find((x) => x.id?.value === target.id!.value)!;
       expect(m.excluded).toBe(true);
-      expect(m.exclusionComment).toBe("kicad-web exclusion");
+      expect(m.exclusionComment).toBe("fp-pcb exclusion");
       expect(m.severity).toBe(RuleSeverity.RS_EXCLUSION);
       expect(mid.exclusionCount).toBe(before.exclusionCount + 1);
       expect(mid.errorCount + mid.warningCount).toBe(before.errorCount + before.warningCount - 1);
@@ -839,8 +839,8 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
   cmdTest("SetTitleBlockInfo", async () => {
     const roundTrip = async (doc: Board | Schematic) => {
       const orig = await doc.titleBlock();
-      await doc.setTitleBlock({ ...orig, title: "kicad-web conformance" });
-      expect((await doc.titleBlock()).title).toBe("kicad-web conformance");
+      await doc.setTitleBlock({ ...orig, title: "fp-pcb conformance" });
+      expect((await doc.titleBlock()).title).toBe("fp-pcb conformance");
       await doc.setTitleBlock(orig);
     };
     const b = await dispatchTolerant("board", () => roundTrip(board));
@@ -1186,7 +1186,7 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
       expect(await sync.supportsIncrementalSync()).toBe(true);
       const t2 = await NngIpcTransport.connect({ path: rt.server.socketPath, defaultTimeoutMs: 60_000 });
       try {
-        const k2 = await KiCad.connect(t2, { clientName: "kicad-web/conf-second" });
+        const k2 = await KiCad.connect(t2, { clientName: "fp-pcb/conf-second" });
         const b2 = k2.boardFrom(board.specifier);
         const fp = (await b2.getItemsById([firstFp.id]))[0] as Footprint;
         const orig = fp.position;
@@ -1697,7 +1697,7 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
   });
   cmdTest("SetCustomDesignRules", async () => {
     const r = await board.customRules();
-    const res = await board.setCustomRules([...r.rules, { name: "kicad_web_rule", condition: "A.NetClass == 'HV'", constraints: [] }]);
+    const res = await board.setCustomRules([...r.rules, { name: "fp_pcb_rule", condition: "A.NetClass == 'HV'", constraints: [] }]);
     expect(res.status).toBe(CustomRulesStatus.CRS_VALID);
     expect(res.rules.length).toBe(r.rules.length + 1);
   });
@@ -1779,9 +1779,9 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
   });
   cmdTest("AddEmbeddedFiles", async () => {
     // `EmbeddedFile.data` must be base64(zstd(raw)) — Board encodes raw bytes for us.
-    await board.addEmbeddedFiles([{ name: "kicad-web.txt", type: EmbeddedFileType.EFT_OTHER, data: new TextEncoder().encode("hello") }]);
+    await board.addEmbeddedFiles([{ name: "fp-pcb.txt", type: EmbeddedFileType.EFT_OTHER, data: new TextEncoder().encode("hello") }]);
     const files = await board.embeddedFiles();
-    const mine = files.find((f) => f.name === "kicad-web.txt");
+    const mine = files.find((f) => f.name === "fp-pcb.txt");
     expect(mine).toBeDefined();
     expect(new TextDecoder().decode(embeddedFileContent(mine!))).toBe("hello");
     return "data is base64(zstd(raw)); hash may be empty";
@@ -1792,7 +1792,7 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
   });
   cmdTest("InjectDrcError", async () => {
     const before = (await board.drc.markers()).markers.length;
-    const id = await board.injectDrcError("kicad-web injected", firstFp.position, {
+    const id = await board.injectDrcError("fp-pcb injected", firstFp.position, {
       severity: DrcSeverity.DRS_WARNING,
       items: [firstFp.id],
     });
@@ -1800,7 +1800,7 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     const after = await board.drc.markers();
     const mine = after.markers.find((m) => m.id?.value === id);
     expect(mine).toBeDefined();
-    expect(mine!.description).toContain("kicad-web injected");
+    expect(mine!.description).toContain("fp-pcb injected");
     expect(after.markers.length).toBe(before + 1);
     return `${id} appears in GetDrcMarkers (${before} -> ${after.markers.length} markers)`;
   });

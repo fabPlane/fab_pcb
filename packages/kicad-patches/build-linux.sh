@@ -8,7 +8,7 @@
 #               matching how packages/proto pins KICAD_COMMIT to a commit)
 #   KICAD_REPO  when set, the image clones this URL at KICAD_REF instead of using KICAD_SRC (CI)
 #   KICAD_REF   branch / tag / commit (default: HEAD of KICAD_SRC, or `web-api` with KICAD_REPO)
-#   IMAGE       image name (default kicad-web/kicad-cli); tagged :<short sha> and :latest
+#   IMAGE       image name (default fp-pcb/kicad-cli); tagged :<short sha> and :latest
 #   JOBS        ninja -j (default: nproc inside the container; see the memory note in the Dockerfile)
 #   BUILD_TYPE  Release (default) | RelWithDebInfo | Debug
 #   PLATFORM    e.g. linux/amd64 (default: the daemon's native platform)
@@ -23,7 +23,7 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOCKER_DIR="$HERE/docker"
-IMAGE="${IMAGE:-kicad-web/kicad-cli}"
+IMAGE="${IMAGE:-fp-pcb/kicad-cli}"
 BUILD_TYPE="${BUILD_TYPE:-Release}"
 SMOKE=0
 PUSH=0

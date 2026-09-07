@@ -41,7 +41,7 @@ async function worldAt(page: Page, canvas: Locator, x: number, y: number): Promi
 test.describe("shell smoke", () => {
   test("project screen lists the workspace and recent projects", async ({ page }) => {
     await page.goto("/");
-    await expect(page).toHaveTitle(/KiCad/i);
+    await expect(page).toHaveTitle(/FabPlane PCB/);
     await expect(page.getByText("Recent projects")).toBeVisible();
     await expect(page.locator(".recent-item").first()).toContainText("api_kitchen_sink");
     await expect(page.locator(".file-row", { hasText: "kicad" })).toBeVisible();

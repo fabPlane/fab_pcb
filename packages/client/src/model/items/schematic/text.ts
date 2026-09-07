@@ -19,7 +19,7 @@ import {
   type SchematicTextBox as SchematicTextBoxProto,
   type Text,
   type TextAttributes,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import { deg, nm, type Vec2 } from "../../../units";
 import { Item, registerItem } from "../base";
 import { SchematicField } from "./symbol";

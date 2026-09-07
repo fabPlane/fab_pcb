@@ -18,7 +18,7 @@ import {
   type GetServerInfoResponse,
   type KiCadVersion,
   type ProjectInfoResponse,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import { KiCadClient, type Capabilities, type KiCadClientOptions } from "../client";
 import { KiCadApiError } from "../errors";
 import * as cmd from "../commands";

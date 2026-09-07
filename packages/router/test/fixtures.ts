@@ -1,6 +1,6 @@
 /** Hand-written `RouteInput`s for the unit tests: a tiny two-layer board with two crossing nets. */
-import { BoardLayer } from "@kicad-web/proto";
-import { mm } from "@kicad-web/client";
+import { BoardLayer } from "@fp-pcb/proto";
+import { mm } from "@fp-pcb/client";
 import type { RouteConnection, RouteInput, RoutePad } from "../src/types";
 
 export const F = BoardLayer.BL_F_Cu;

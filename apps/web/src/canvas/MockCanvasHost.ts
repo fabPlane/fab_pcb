@@ -1,5 +1,5 @@
 // A plain Canvas2D CanvasHost that draws the mock stores (lines, rects, circles, text)
-// so the shell is usable before `@kicad-web/renderer` lands. Implements the full
+// so the shell is usable before `@fp-pcb/renderer` lands. Implements the full
 // CanvasHost contract; the extras (`setGrid`, `setBackgroundHint`) are opt-in.
 
 import type { Camera, CanvasHost, DocumentKind, ItemStore, PickResult, StoredItem, Theme } from '@/contracts';

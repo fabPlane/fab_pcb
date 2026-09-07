@@ -4,7 +4,7 @@
 // SaveItemsToString / ParseAndCreateItemsFromString), the 3D tab and the page-settings dialog. Registered after the
 // builtins so the placeholder entries with the same ids are replaced.
 
-import { BoardLayer, type SchematicSymbol as SchematicSymbolDefinition } from '@kicad-web/proto';
+import { BoardLayer, type SchematicSymbol as SchematicSymbolDefinition } from '@fp-pcb/proto';
 import type { StoredItem } from '@/contracts';
 import { getCanvasHost, isMoving } from '@/canvas/CanvasSlot';
 import { activeTool, cancelTool, startTool, toolFinish, toolKey, type ToolId } from '@/canvas/tools';

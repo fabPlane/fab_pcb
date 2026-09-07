@@ -7,7 +7,7 @@
 import { mkdir, readdir, rm, stat } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import type { ServerWebSocket } from "bun";
-import { KiCadClient, commands } from "@kicad-web/client";
+import { KiCadClient, commands } from "@fp-pcb/client";
 import {
   NngIpcSubscriber,
   NngIpcTransport,
@@ -16,7 +16,7 @@ import {
   type BridgeControlMessage,
   type BridgeEventsState,
   type KiCadServerState,
-} from "@kicad-web/client/transport";
+} from "@fp-pcb/client/transport";
 import type { BridgeConfig } from "./config";
 import { pingUntilReady } from "./kicad-ping";
 
@@ -168,7 +168,7 @@ export class Session {
     let path = eventsSocketPathFor(transport.path);
     try {
       const client = new KiCadClient(transport, {
-        clientName: `kicad-web/bridge/${this.id}`,
+        clientName: `fp-pcb/bridge/${this.id}`,
         kicadToken: this.kicadToken ?? undefined,
         waitForReady: false,
       });
@@ -291,7 +291,7 @@ export class Session {
       await transport.ready();
       this.kicadToken = await pingUntilReady(transport, {
         timeoutMs: Math.max(1000, deadline - Date.now()),
-        clientName: `kicad-web/bridge/${this.id}`,
+        clientName: `fp-pcb/bridge/${this.id}`,
         isCancelled: () => this.state !== "starting",
       });
       if (this.state !== "starting") throw new Error(this.error ?? `server ${this.state} during startup`);

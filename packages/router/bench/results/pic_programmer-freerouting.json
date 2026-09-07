@@ -1,9 +1,20 @@
 {
   "board": "pic_programmer",
   "router": "freerouting",
-  "routerImpl": "freerouting-kicad",
+  "routerImpl": "freerouting-kicad-dsn",
+  "harness": "job",
   "kicadVersion": "10.99.0-3711-g8cc9377988",
-  "date": "2026-09-06T23:46:53.047Z",
+  "date": "2026-09-07T02:56:18.649Z",
+  "measuredWith": {
+    "kicad": "10.99.0-3711-g8cc9377988",
+    "java": "openjdk version \"25.0.4.1\" 2026-08-18 LTS",
+    "freerouting": "2.4.1",
+    "capacityAutorouter": "0.0.885",
+    "bun": "1.4.0",
+    "os": "macOS 15.6.1",
+    "cpu": "Apple M2 Max",
+    "memoryGb": 96
+  },
   "connections": {
     "before": 86,
     "after": 2,
@@ -32,34 +43,48 @@
     "otherErrors": 8,
     "byType": {
       "DRCET_UNCONNECTED_ITEMS": 2,
-      "DRCET_SHORTING_ITEMS": 2,
       "DRCET_CLEARANCE": 6,
+      "DRCET_SHORTING_ITEMS": 2,
       "DRCET_LIB_FOOTPRINT_ISSUES": 58
     }
   },
-  "wallMs": 35633,
-  "routeMs": 35615,
+  "wallMs": 40351,
+  "routeMs": 40174,
   "timedOut": false,
   "svg": "packages/router/bench/results/pic_programmer-freerouting.svg",
   "log": [
-    "server has Specctra API: true",
-    "extract: 247 pads, 86 connections, 2 copper layers, 1 zones, 19 copper graphics",
-    "mode: kicad; jar: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/jdk/Contents/Home/bin/java",
+    "job: route job 9836b4f5: freerouting on session bench-pic_programmer",
+    "extract: 247 pads, 86 connections, 2 copper layers",
+    "export",
+    "freerouting",
+    "finished: COMPLETED",
+    "saved",
+    "done",
+    "job: route job 9836b4f5: done, 84/86 in 40351 ms",
+    "mode: kicad-dsn; jar: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/freerouting-2.4.1.jar; java: /Users/hyper/projects/tensorfleet/kicad-web/packages/router/vendor/jdk/Contents/Home/bin/java",
     "dsn: 288003 bytes, 2 layers",
     "freerouting: WARN   PolygonShape.DivisionPoint: projection not found for concave corner #11 at (860022.0, -1381100.0) in polygon with 16 corners: [(863600,-1384300), (1032000,-1384300), (1031040,-1383950), (1030530,-1383070), (1030510,-1382810), (1030510,-1353780), (862506,-1353780), (862506,-1379990), (862157,-1380950), (861275,-1381460), (860271,-1381280), (860022,-1381100), (743446,-1276790), (742965,-1275900), (742950,-1275680), (742950,-1276350)]",
-    "freerouting: INFO   [5F033C\\0F4A84] Auto-routing stage started on board '237d9cde9e195a825adcde22d16db732' for 126 unrouted items.",
-    "freerouting: WARN   PolygonShape.DivisionPoint: projection not found for concave corner #11 at (860022.0, -1381100.0) in polygon with 16 corners: [(863600,-1384300), (1032000,-1384300), (1031040,-1383950), (1030530,-1383070), (1030510,-1382810), (1030510,-1353780), (862506,-1353780), (862506,-1379990), (862157,-1380950), (861275,-1381460), (860271,-1381280), (860022,-1381100), (743446,-1276790), (742965,-1275900), (742950,-1275680), (742950,-1276350)]",
-    "freerouting: WARN   PolygonShape.DivisionPoint: projection not found for concave corner #11 at (860022.0, -1381100.0) in polygon with 16 corners: [(863600,-1384300), (1032000,-1384300), (1031040,-1383950), (1030530,-1383070), (1030510,-1382810), (1030510,-1353780), (862506,-1353780), (862506,-1379990), (862157,-1380950), (861275,-1381460), (860271,-1381280), (860022,-1381100), (743446,-1276790), (742965,-1275900), (742950,-1275680), (742950,-1276350)]",
-    "freerouting: INFO   [5F033C\\0F4A84] Auto-routing stage completed: started with 126 unrouted nets, completed in 25.85 seconds, final score: 974.60 (3 unrouted and 1 violation), using 25.01 total CPU seconds, 112.55 GB total allocated, and 963.0 MB peak heap usage.",
-    "freerouting: INFO   [5F033C\\0F4A84] Optimization stage started on board '03acdbe0240d7d859c6f183d17a3b61b' with score 974.60 (3 unrouted and 1 violation).",
-    "freerouting: INFO   [5F033C\\0F4A84] Optimization stage completed: started with score 974.60 (3 unrouted and 1 violation), completed in 6.65 seconds, final score: 974.60 (3 unrouted and 1 violation), using 6.62 total CPU seconds, 19.06 GB total allocated, and 723.6 MB peak heap usage.",
-    "freerouting: INFO   [5F033C\\0F4A84] Job '5F033C\\0F4A84' finished with state: COMPLETED (elapsed: 32.66 seconds, finished at UTC: 2026-09-06T23:47:27.790905Z).",
-    "freerouting: INFO   Successfully saved output file '/var/folders/w9/mc3tp89n3p70j5512_9s930h0000gn/T/kicad-web-freerouting-nSUcAI/board.ses' (325043 bytes).",
-    "imported: 349 tracks, 3 vias, 0 footprints moved",
-    "0 tracks, 0 vias to create; 86/86 connections in 35615 ms"
+    "freerouting: INFO   [379AB7\\B8D996] Auto-routing stage started on board '237d9cde9e195a825adcde22d16db732' for 126 unrouted items.",
+    "freerouting: INFO   [379AB7\\B8D996] Auto-routing stage completed: started with 126 unrouted nets, completed in 29.42 seconds, final score: 974.60 (3 unrouted and 1 violation), using 28.87 total CPU seconds, 116.13 GB total allocated, and 1026.7 MB peak heap usage.",
+    "freerouting: INFO   [379AB7\\B8D996] Optimization stage started on board '03acdbe0240d7d859c6f183d17a3b61b' with score 974.60 (3 unrouted and 1 violation).",
+    "freerouting: INFO   [379AB7\\B8D996] Optimization stage completed: started with score 974.60 (3 unrouted and 1 violation), completed in 7.79 seconds, final score: 974.60 (3 unrouted and 1 violation), using 7.76 total CPU seconds, 19.10 GB total allocated, and 931.0 MB peak heap usage.",
+    "freerouting: INFO   [379AB7\\B8D996] Job '379AB7\\B8D996' finished with state: COMPLETED (elapsed: 37.39 seconds, finished at UTC: 2026-09-07T02:56:58.349756Z).",
+    "freerouting: INFO   Successfully saved output file '/var/folders/w9/mc3tp89n3p70j5512_9s930h0000gn/T/kicad-web-freerouting-RgwLgm/board.ses' (325043 bytes).",
+    "349 tracks, 3 vias to create; 86/86 connections in 40174 ms",
+    "GetRatsnest after the apply: 2 connection(s) still unrouted (the router counted 0)"
   ],
   "options": {
-    "maxTimeMs": 600000,
-    "effort": 100
+    "effort": 20
+  },
+  "freerouting": {
+    "mode": "kicad-dsn",
+    "passes": 20
+  },
+  "job": {
+    "state": "done",
+    "routed": 84,
+    "routerRouted": 86,
+    "total": 86,
+    "message": "Autoroute (freerouting): 86 connections"
   }
 }

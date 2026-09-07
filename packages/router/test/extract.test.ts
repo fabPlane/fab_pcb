@@ -37,8 +37,8 @@ import {
   ZoneType,
   packAny,
   type Vector2,
-} from "@kicad-web/proto";
-import { KiCad, KiCadClient, mm, toDistance, toVector2 } from "@kicad-web/client";
+} from "@fp-pcb/proto";
+import { KiCad, KiCadClient, mm, toDistance, toVector2 } from "@fp-pcb/client";
 import { FakeTransport, reply } from "../../client/test/fake-transport";
 import { extractRouteInput, rulesForNet } from "../src/extract";
 

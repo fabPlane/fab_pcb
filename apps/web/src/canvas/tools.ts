@@ -36,7 +36,7 @@ import {
   type LibraryFootprint,
   type Pt,
 } from '@/lib/create';
-import type { SchematicSymbol as SchematicSymbolDefinition } from '@kicad-web/proto';
+import type { SchematicSymbol as SchematicSymbolDefinition } from '@fp-pcb/proto';
 
 export type ToolId =
   | 'route'

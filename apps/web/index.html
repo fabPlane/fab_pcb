@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark light" />
-    <title>KiCad Web</title>
+    <title>FabPlane PCB</title>
     <script>
       // Apply the persisted theme before the first paint so there is no flash of the wrong
       // theme. Mirrors readPersistedTheme / resolveThemeMode in src/theme/index.ts (which
@@ -12,7 +12,7 @@
       (function () {
         var mode = 'dark';
         try {
-          var raw = localStorage.getItem('kicad-web.ui');
+          var raw = localStorage.getItem('fp-pcb.ui');
           var t = raw && JSON.parse(raw).state.theme;
           if (t === 'dark' || t === 'light' || t === 'system') mode = t;
         } catch (e) {}

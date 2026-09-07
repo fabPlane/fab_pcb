@@ -6,8 +6,8 @@
  */
 import { stat } from "node:fs/promises";
 import { extname, resolve } from "node:path";
-import { decodeEvent, eventToJson } from "@kicad-web/client";
-import { createRouteJobs, matchRouteJobPath, type RouteJobs } from "@kicad-web/router/bridge-job";
+import { decodeEvent, eventToJson } from "@fp-pcb/client";
+import { createRouteJobs, matchRouteJobPath, type RouteJobs } from "@fp-pcb/router/bridge-job";
 import {
   TransportError,
   WS_BRIDGE_PROTOCOL_VERSION,
@@ -16,7 +16,7 @@ import {
   encodeWsFrame,
   parseControl,
   type BridgeErrorCode,
-} from "@kicad-web/client/transport";
+} from "@fp-pcb/client/transport";
 import type { BridgeConfig } from "./config";
 import { handleFiles } from "./files";
 import { SessionManager, type Session, type WsData } from "./session";
@@ -75,7 +75,7 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
       if (path === "/health") {
         return json({
           ok: true,
-          name: "@kicad-web/bridge",
+          name: "@fp-pcb/bridge",
           protocolVersion: WS_BRIDGE_PROTOCOL_VERSION,
           uptimeSec: Math.round((Date.now() - startedAt) / 1000),
           kicadCli: cfg.kicadCli,
@@ -118,7 +118,7 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
         session.touch();
         return routeJobs.handle(
           req,
-          { id: session.id, transport: session.transport, clientName: `kicad-web/bridge/${session.id}/router` },
+          { id: session.id, transport: session.transport, clientName: `fp-pcb/bridge/${session.id}/router` },
           route.jobId,
         );
       }

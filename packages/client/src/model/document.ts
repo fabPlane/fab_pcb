@@ -27,7 +27,7 @@ import {
   type SheetPath,
   type TitleBlockInfo,
   type UndoStackEntry,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import type { KiCadClient } from "../client";
 import * as cmd from "../commands";
 import { ActionError, KiCadApiError, KiCadItemError } from "../errors";

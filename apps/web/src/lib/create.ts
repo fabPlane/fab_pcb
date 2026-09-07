@@ -38,7 +38,7 @@ import {
   packAny,
   type FootprintInstance,
   type SchematicSymbol as SchematicSymbolDefinition,
-} from '@kicad-web/proto';
+} from '@fp-pcb/proto';
 import type { StoredItem } from '@/contracts';
 import { newKiid } from './id';
 import { structuredCloneSafe } from './patch';

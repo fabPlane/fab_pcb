@@ -17,7 +17,7 @@ import {
   type ProjectChangeKind,
   type ProjectChanged,
   type ServerShutdown,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import type { Subscriber, SubscriberState } from "./transport/nng-ipc-sub";
 import type { WebSocketTransport } from "./transport/websocket";
 
@@ -124,7 +124,7 @@ export class KiCadEvents {
     if (subscriber) this.off = subscriber.onMessage((b) => this.push(b));
   }
 
-  /** Events relayed by `@kicad-web/bridge` over a `WebSocketTransport` (browser or Bun). */
+  /** Events relayed by `@fp-pcb/bridge` over a `WebSocketTransport` (browser or Bun). */
   static fromTransport(transport: WebSocketTransport): KiCadEvents {
     return new KiCadEvents(new TransportEventSubscriber(transport));
   }

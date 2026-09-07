@@ -7,7 +7,7 @@
 # Usage: smoke.sh [IMAGE] [KICAD_SRC]
 #   PING_IMAGE  image with `bun` for the client side (default oven/bun:1)
 set -euo pipefail
-IMAGE="${1:-kicad-web/kicad-cli:latest}"
+IMAGE="${1:-fp-pcb/kicad-cli:latest}"
 PING_IMAGE="${PING_IMAGE:-oven/bun:1}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$HERE/../../.." && pwd)"

@@ -28,7 +28,7 @@ import {
   type LibraryTableRow,
   type WizardInfo,
   type WizardParameter,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import * as cmd from "../commands";
 import { toEntries, type EntryMapLike } from "./entries";
 import type { KiCadClient } from "../client";

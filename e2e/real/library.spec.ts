@@ -41,7 +41,7 @@ test.describe("real KiCad: library browser and annotate", () => {
       await waitRevisionAbove(page, r0);
       expect(await countType(page, "KOT_PCB_FOOTPRINT")).toBe(fps0 + 1);
       const placed = await page.evaluate((reference) => {
-        const f = [...(window as any).__kicadWeb.services.documents.board().byType("KOT_PCB_FOOTPRINT")].find((x: any) => x.proto.referenceField?.text?.text?.text === reference);
+        const f = [...(window as any).__fpPcb.services.documents.board().byType("KOT_PCB_FOOTPRINT")].find((x: any) => x.proto.referenceField?.text?.text?.text === reference);
         return f ? { lib: `${f.proto.definition?.id?.libraryNickname}:${f.proto.definition?.id?.entryName}`, items: f.proto.definition?.items?.length ?? 0 } : null;
       }, reference);
       expect(placed?.lib).toBe("Resistor_SMD:R_0603_1608Metric");
@@ -66,7 +66,7 @@ test.describe("real KiCad: library browser and annotate", () => {
     await page.waitForSelector('canvas[aria-label="schematic canvas"]', { timeout: 60_000 });
 
     const before = await page.evaluate(() => {
-      const d = (window as any).__kicadWeb.services.documents;
+      const d = (window as any).__fpPcb.services.documents;
       const sheet = d.sheet(d.sheets()[0].path);
       return [...sheet.byType("KOT_SCH_SYMBOL")].map((s: any) => s.proto.referenceField?.text?.text).filter(Boolean).sort();
     });
@@ -84,7 +84,7 @@ test.describe("real KiCad: library browser and annotate", () => {
 
     // KiCad re-numbered the placements and the store was re-read
     const after = await page.evaluate(() => {
-      const d = (window as any).__kicadWeb.services.documents;
+      const d = (window as any).__fpPcb.services.documents;
       const sheet = d.sheet(d.sheets()[0].path);
       return [...sheet.byType("KOT_SCH_SYMBOL")].map((s: any) => s.proto.referenceField?.text?.text).filter(Boolean).sort();
     });

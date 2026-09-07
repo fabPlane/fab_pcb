@@ -9,7 +9,7 @@
 #
 #   docker build -f Dockerfile --build-arg KICAD_SOURCE=git \
 #       --build-arg KICAD_REPO=https://gitlab.com/<fork>/kicad.git --build-arg KICAD_REF=web-api \
-#       -t kicad-web/kicad-cli .
+#       -t fp-pcb/kicad-cli .
 #
 # Dependency list: Debian trixie packages, mirroring KiCad's own qa/arm64/Dockerfile and
 # install-deps.sh (wxWidgets 3.2 GTK, nng, protobuf, OpenCascade, ngspice, boost, cairo, harfbuzz,

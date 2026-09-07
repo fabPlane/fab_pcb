@@ -1,4 +1,4 @@
-# @kicad-web/e2e
+# @fp-pcb/e2e
 
 Browser smoke tests for `apps/web`, run with Playwright against the app's **mock services**
 (`createMockServices()` in `apps/web/src/main.tsx`), so they need no bridge and no KiCad build.
@@ -7,11 +7,11 @@ edit a property → undo → command palette → theme switch → schematic edit
 
 ```bash
 bun install
-bun run --filter @kicad-web/e2e install-browsers   # once: chromium (+ OS deps on Linux)
+bun run --filter @fp-pcb/e2e install-browsers   # once: chromium (+ OS deps on Linux)
 bun run test:e2e                                   # from the repo root; starts the vite dev server itself
 E2E_SERVER=preview bun run test:e2e                # build apps/web and test the built dist (CI mode)
 E2E_BASE_URL=http://127.0.0.1:5173 bun run test:e2e   # against a server you started yourself
-bun run --filter @kicad-web/e2e test:ui            # Playwright UI mode
+bun run --filter @fp-pcb/e2e test:ui            # Playwright UI mode
 ```
 
 Reports and traces land in `e2e/output/` (git-ignored).
@@ -20,14 +20,16 @@ Reports and traces land in `e2e/output/` (git-ignored).
 
 `real/*.spec.ts` drive the same app against the bridge and a `kicad-cli api-server`; the whole
 suite is skipped unless `KICAD_CLI` is set. Each test copies the kitchen-sink project into the
-bridge workspace root with project-local library tables (`real/fixtures.ts`), so nothing under
-`qa/data` is modified. `real/global-setup.ts` starts the bridge when nothing answers on
-`BRIDGE_URL` (default `http://127.0.0.1:4020`); the app is served by vite on port 5174 with
-`VITE_BRIDGE_URL` pointing at the bridge.
+bridge workspace root with project-local library tables (`real/fixtures.ts`), so the QA fixtures
+are only read. `real/global-setup.ts` starts the bridge when nothing answers on `BRIDGE_URL`
+(default `http://127.0.0.1:4020`), rooted in a throw-away workspace under the system temp
+directory that it removes again in the teardown — the bridge's own default root is the KiCad
+checkout's `qa/data`, and a run must not leave scratch projects there. Set `WORKSPACE_ROOT`
+yourself to override it (a bridge that is already running is reused as it is). The app is served
+by vite on port 5174 with `VITE_BRIDGE_URL` pointing at the bridge.
 
 ```bash
-KICAD_CLI=/path/to/kicad-cli WORKSPACE_ROOT=/path/to/kicad/qa/data \
-  bun run --filter @kicad-web/e2e test:real
+KICAD_CLI=/path/to/kicad-cli bun run --filter @fp-pcb/e2e test:real
 ```
 
 Covered: open project → place a via → undo → run DRC → export SVG; route a track with a layer

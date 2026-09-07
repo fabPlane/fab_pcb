@@ -8,7 +8,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { equals } from "@bufbuild/protobuf";
-import { ApiStatusCode, KiCadObjectType } from "@kicad-web/proto";
+import { ApiStatusCode, KiCadObjectType } from "@fp-pcb/proto";
 import { KiCadApiError } from "../../src/errors";
 import { Board, Project, Schematic, SheetHandle, type Item } from "../../src/model";
 import { haveKicad, startKiCad, tempProject, type RunningKiCad, type TempProject } from "../kicad-server";
@@ -202,7 +202,7 @@ function printReport(title: string, report: RoundTripReport): string[] {
 
 describe.skipIf(!haveKicad())("conformance: lossless item round trip", () => {
   beforeAll(async () => {
-    tmp = await tempProject("kicad-web-rt-");
+    tmp = await tempProject("fp-pcb-rt-");
     rt = await startKiCad(null, "roundtrip");
     project = await rt.kicad.openProject(tmp.pro);
     board = await project.openBoard(tmp.pcb);

@@ -3,8 +3,9 @@
  * Ping request/response used before the protobuf codegen exists.
  */
 import { existsSync } from "node:fs";
-import { mkdir, rm, stat } from "node:fs/promises";
-import { resolve } from "node:path";
+import { cp, mkdir, mkdtemp, rm, stat } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 
 const KICAD_ROOT = resolve(import.meta.dir, "../../../../kicad");
 export const DEFAULT_KICAD_CLI = `${KICAD_ROOT}/build/release/kicad/KiCad.app/Contents/MacOS/kicad-cli`;
@@ -16,7 +17,29 @@ export function haveKicad(): boolean {
   return existsSync(KICAD_CLI);
 }
 
-/** `ApiRequest{ header{client_name:"kicad-web/m0-ping"}, message: Any(kiapi.common.commands.Ping) }` */
+export interface TempBoard {
+  dir: string;
+  pcb: string;
+  cleanup(): Promise<void>;
+}
+
+/**
+ * Copies the kitchen-sink board (with its project and DRU siblings) into a fresh temp directory.
+ * Opening a board makes KiCad write a `.kicad_prl` and a `~<project>.kicad_pro.lck` next to it, so
+ * tests open this copy rather than the fixture inside the KiCad checkout, which a run would
+ * otherwise leave dirty.
+ */
+export async function tempKitchenSinkBoard(prefix = "fp-pcb-board-"): Promise<TempBoard> {
+  const dir = await mkdtemp(join(tmpdir(), prefix));
+  const base = KITCHEN_SINK_PCB.replace(/\.kicad_pcb$/, "");
+  const pcb = join(dir, "api_kitchen_sink.kicad_pcb");
+  await cp(`${base}.kicad_pcb`, pcb);
+  await cp(`${base}.kicad_pro`, join(dir, "api_kitchen_sink.kicad_pro"));
+  await cp(`${base}.kicad_dru`, join(dir, "api_kitchen_sink.kicad_dru"));
+  return { dir, pcb, cleanup: () => rm(dir, { recursive: true, force: true }) };
+}
+
+/** `ApiRequest{ header{client_name:"fp-pcb/m0-ping"}, message: Any(kiapi.common.commands.Ping) }` */
 export const PING_REQUEST = hexToBytes(
   "0a1312116b696361642d7765622f6d302d70696e6712320a2e747970652e676f6f676c65617069732e636f6d2f6b696170692e636f6d6d6f6e2e636f6d6d616e64732e50696e671200",
 );

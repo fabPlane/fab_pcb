@@ -1,8 +1,8 @@
-# @kicad-web/client
+# @fp-pcb/client
 
 The KiCad IPC API client: transport-agnostic, isomorphic (Bun and browser), and generated from
 the fork's protos so it never drifts from the server. It talks to a `kicad-cli api-server`
-process — directly over its nng IPC socket in Bun, or through `@kicad-web/bridge` from a page.
+process — directly over its nng IPC socket in Bun, or through `@fp-pcb/bridge` from a page.
 
 ```
 src/
@@ -33,9 +33,9 @@ model and the model can be exercised against a fake transport in unit tests.
 ### Bun — over the IPC socket
 
 ```ts
-import { NngIpcTransport, NngIpcSubscriber } from "@kicad-web/client/transport";
-import { KiCad, Track, KiCadEvents, mm } from "@kicad-web/client";
-import { BoardLayer } from "@kicad-web/proto";
+import { NngIpcTransport, NngIpcSubscriber } from "@fp-pcb/client/transport";
+import { KiCad, Track, KiCadEvents, mm } from "@fp-pcb/client";
+import { BoardLayer } from "@fp-pcb/proto";
 
 // kicad-cli api-server board.kicad_pcb --socket /tmp/kicad/demo.sock
 const transport = await NngIpcTransport.connect({ path: "/tmp/kicad/demo.sock" });
@@ -74,15 +74,15 @@ await kicad.close();
 
 ### Browser — over the WebSocket bridge
 
-Identical from Layer 2 up; only the transport changes. `@kicad-web/bridge` owns the KiCad process
+Identical from Layer 2 up; only the transport changes. `@fp-pcb/bridge` owns the KiCad process
 and relays the same frames, adding a 4-byte correlation id so several tabs can pipeline.
 
 ```ts
-import { WebSocketTransport, bridgeWsUrl } from "@kicad-web/client/transport";
-import { KiCad, KiCadEvents } from "@kicad-web/client";
+import { WebSocketTransport, bridgeWsUrl } from "@fp-pcb/client/transport";
+import { KiCad, KiCadEvents } from "@fp-pcb/client";
 
 const transport = await WebSocketTransport.connect(bridgeWsUrl(location.origin, sessionId));
-const kicad = await KiCad.connect(transport, { clientName: "kicad-web/ui" });
+const kicad = await KiCad.connect(transport, { clientName: "fp-pcb/ui" });
 const events = KiCadEvents.fromTransport(transport); // events ride the same socket
 const board = await (await kicad.openProject(path)).openBoard();
 ```
@@ -90,7 +90,7 @@ const board = await (await kicad.openProject(path)).openBoard();
 ### Keeping a store in sync (Layer 4)
 
 ```ts
-import { DocumentSync } from "@kicad-web/client/store";
+import { DocumentSync } from "@fp-pcb/client/store";
 
 const sync = new DocumentSync(board);
 await sync.load(); // GetItems for every type of the document

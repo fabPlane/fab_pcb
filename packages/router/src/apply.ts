@@ -15,8 +15,8 @@ import {
   ViaType,
   type Track as TrackProto,
   type Via as ViaProto,
-} from "@kicad-web/proto";
-import { Track, Via, toDistance, toVector2, type Board, type CommitResult, type Item } from "@kicad-web/client";
+} from "@fp-pcb/proto";
+import { Track, Via, toDistance, toVector2, type Board, type CommitResult, type Item } from "@fp-pcb/client";
 import type { NewTrack, NewVia, RouteResult } from "./types";
 
 function net(name: string, code: number) {

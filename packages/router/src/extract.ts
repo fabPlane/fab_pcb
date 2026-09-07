@@ -3,7 +3,7 @@
  * (outline from Edge.Cuts shapes, copper layers, pads, existing tracks and vias, rule areas as
  * keepouts, copper zones, net classes and board minimums, and the ratsnest as the connection list).
  */
-import { BoardLayer, PadStackShape, PadType, ZoneType, type NetClass, type PolySet } from "@kicad-web/proto";
+import { BoardLayer, PadStackShape, PadType, ZoneType, type NetClass, type PolySet } from "@fp-pcb/proto";
 import {
   Arc,
   BoardField,
@@ -20,7 +20,7 @@ import {
   type Board,
   type Box,
   type Vec2,
-} from "@kicad-web/client";
+} from "@fp-pcb/client";
 import { arcPoints, chainOutline, circlePoints, type OutlinePiece } from "./geometry";
 import type {
   RouteConnection,

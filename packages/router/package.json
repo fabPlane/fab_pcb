@@ -1,9 +1,9 @@
 {
-  "name": "@kicad-web/router",
+  "name": "@fp-pcb/router",
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Autorouting for kicad-web: RouteInput from a Board, a JS router (tscircuit capacity-autorouter) and a Freerouting (Specctra DSN/SES) adapter, results applied with one CreateItems commit",
+  "description": "Autorouting for FabPlane PCB: RouteInput from a Board, a JS router (tscircuit capacity-autorouter) and a Freerouting (Specctra DSN/SES) adapter, results applied with one CreateItems commit",
   "exports": {
     ".": "./src/index.ts",
     "./apply": "./src/apply.ts",
@@ -21,8 +21,8 @@
   },
   "dependencies": {
     "@bufbuild/protobuf": "2.14.1",
-    "@kicad-web/client": "workspace:*",
-    "@kicad-web/proto": "workspace:*",
+    "@fp-pcb/client": "workspace:*",
+    "@fp-pcb/proto": "workspace:*",
     "@tscircuit/capacity-autorouter": "0.0.885"
   },
   "devDependencies": {

@@ -637,7 +637,7 @@ export function registerBuiltinCommands(services: Services): () => void {
       },
     },
     // ---------------------------------------------------------------- Help
-    { id: 'help.about', title: 'About kicad-web', group: 'Help', run: () => useUiStore.getState().openDialog('about') },
+    { id: 'help.about', title: 'About fp-pcb', group: 'Help', run: () => useUiStore.getState().openDialog('about') },
     { id: 'help.shortcuts', title: 'Show keyboard shortcuts', group: 'Help', shortcut: '?', run: () => useUiStore.getState().openDialog('keymap') },
   ];
   return registerCommands(list);

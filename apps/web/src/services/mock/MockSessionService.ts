@@ -4,11 +4,11 @@
 //   GET  /files/<path>         -> directory listing inside the workspace root
 //
 // SWAP SEAM: `services/kicad/BridgeSessionService.ts` does the same with fetch() and a
-// WebSocketTransport from `@kicad-web/client/transport`; the UI never sees the difference.
+// WebSocketTransport from `@fp-pcb/client/transport`; the UI never sees the difference.
 
 import type { FileEntry, RecentProject, SessionInfo, SessionService } from '../types';
 
-const RECENT_KEY = 'kicad-web.recent-projects';
+const RECENT_KEY = 'fp-pcb.recent-projects';
 
 interface MockNode {
   name: string;

@@ -2,7 +2,7 @@
  * Errors raised above the transport layer. `TransportError` (connection, timeout, framing) stays in
  * `./transport`; everything here is about what KiCad answered.
  */
-import { ApiStatusCode, ItemDeletionStatus, ItemRequestStatus, ItemStatusCode, RunActionStatus } from "@kicad-web/proto";
+import { ApiStatusCode, ItemDeletionStatus, ItemRequestStatus, ItemStatusCode, RunActionStatus } from "@fp-pcb/proto";
 
 export { ApiStatusCode, ItemStatusCode, ItemDeletionStatus, ItemRequestStatus, RunActionStatus };
 

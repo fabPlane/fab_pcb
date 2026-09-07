@@ -32,9 +32,9 @@ Facts that shape every decision below (all verified in the KiCad sources):
 ┌────────────────────────────────────────────────────────────────────┐
 │ Browser (apps/web)                                                 │
 │  React shell ─ panels ─ command palette ─ properties ─ DRC/ERC     │
-│  @kicad-web/renderer (WebGL2: board + schematic scene graphs)      │
-│  @kicad-web/client  (typed KiCad API, document model, commits)     │
-│  @kicad-web/proto   (protobuf-es codegen of api/proto)             │
+│  @fp-pcb/renderer (WebGL2: board + schematic scene graphs)      │
+│  @fp-pcb/client  (typed KiCad API, document model, commits)     │
+│  @fp-pcb/proto   (protobuf-es codegen of api/proto)             │
 └───────────────▲────────────────────────────────────────────────────┘
                 │ WebSocket, binary frames = ApiRequest / ApiResponse bytes
 ┌───────────────┴────────────────────────────────────────────────────┐
@@ -75,7 +75,7 @@ unix sockets. Two ways out, and we do both in order:
 - One bridge process serves many browser tabs; each **session** owns one
   `kicad-cli api-server` process (one project). Multi-project = multi-process.
   This sidesteps KiCad's one-project-per-server limit without touching KiCad.
-- The bridge tags every request with `client_name = "kicad-web/<session>/<tab>"`.
+- The bridge tags every request with `client_name = "fp-pcb/<session>/<tab>"`.
   KiCad keys in-flight commits by `client_name`, so one commit per tab is possible.
 - `kicad_token` from the first `GetVersion`/`Ping` is pinned; a mismatch means the
   server restarted and the UI reloads the document.
@@ -103,7 +103,7 @@ Snapshot fallback for big edits: `SaveDocumentToString` before, re-parse via
 ## Repo layout (Bun workspaces, dedicated repo)
 
 ```
-kicad-web/
+fp-pcb/
   apps/web/                 Vite + React SPA
   packages/proto/           buf.gen.yaml → generated protobuf-es TS from ../kicad/api/proto
   packages/client/          transport-agnostic KiCad client + document model
@@ -115,7 +115,7 @@ kicad-web/
   docs/                     this plan
 ```
 
-The KiCad fork lives in its own repo/branch (`kicad`, branch `web-api`); `kicad-web`
+The KiCad fork lives in its own repo/branch (`kicad`, branch `web-api`); `fp-pcb`
 pins the fork commit it was generated against in `packages/proto/KICAD_COMMIT`.
 
 ## Milestones

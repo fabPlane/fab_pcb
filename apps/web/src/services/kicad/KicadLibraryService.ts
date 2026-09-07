@@ -5,8 +5,8 @@
 // bridge session on the same project (so the project's fp-lib-table / sym-lib-table apply),
 // opened lazily on first use and closed with the project.
 
-import { FootprintMountingStyle, KiCadObjectType, LibraryTableScope, type SchematicSymbol as SchematicSymbolDefinition } from '@kicad-web/proto';
-import type { FootprintDocument, KiCad, LibSymbol } from '@kicad-web/client';
+import { FootprintMountingStyle, KiCadObjectType, LibraryTableScope, type SchematicSymbol as SchematicSymbolDefinition } from '@fp-pcb/proto';
+import type { FootprintDocument, KiCad, LibSymbol } from '@fp-pcb/client';
 import type { ItemStore } from '@/contracts';
 import { makeFootprintInstance, makeSymbolInstance, type LibraryFootprint } from '@/lib/create';
 import { MemoryItemStore } from '../MemoryItemStore';

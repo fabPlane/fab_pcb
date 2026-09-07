@@ -1,5 +1,5 @@
 /** Design variants (`variant_commands.proto`), addressed through a board or schematic document. */
-import type { DesignVariant } from "@kicad-web/proto";
+import type { DesignVariant } from "@fp-pcb/proto";
 import * as cmd from "../commands";
 import type { Document } from "./document";
 

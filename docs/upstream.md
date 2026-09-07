@@ -84,7 +84,7 @@ The 15 skips are the GUI-only commands (selection, visible layers, appearance,
 or `AS_UNHANDLED` cleanly rather than crashing or hanging. The suite fails the run if
 any command in the table has no test, catches server crashes, restarts the server and
 reports the incident instead of taking down the rest of the run. It lives in
-`packages/client/test/conformance/` in the kicad-web repo and is not part of what we
+`packages/client/test/conformance/` in the FabPlane PCB repo and is not part of what we
 propose to upstream — the C++ QA tests in `qa/tests/api/` are.
 
 ---
@@ -124,7 +124,7 @@ Ordered as they sit on the branch (oldest first). "Proto" says whether
 | 26 | `6033d9ef42` | API: Say why a drawing sheet cannot be opened as a document | G5 (scope note) | `base_types.proto` (comment), `kicad/cli/command_api_server.cpp` | comment only | **no** |
 | 27 | `bc8e733a20` | API: Name the client in ProjectChanged for library table edits | follow-up to #18 | `common/api/api_handler_library.cpp`, `include/api/api_handler_library.h` | none | **no** |
 | 28 | `ab6ac72d41` | API: Refuse Undo while any commit is open, as documented | follow-up to #21 | `editor_commands.proto` (comment), `common/api/api_handler_editor.cpp` | comment only; **behaviour change** (refusal widened) | yes — `test_api_undo.cpp` (+5) |
-| 29 | `19435eef53` | API: Fill in the net code of a ratsnest edge | follow-up to #20 (G20) | `board_commands.proto` (comment), `pcbnew/api/api_handler_pcb.cpp` (1 line) | comment only | yes — 1 assert. **Also adds 10067 lines of stray fixture data under `qa/data/.kicad-web-probe/`** |
+| 29 | `19435eef53` | API: Fill in the net code of a ratsnest edge | follow-up to #20 (G20) | `board_commands.proto` (comment), `pcbnew/api/api_handler_pcb.cpp` (1 line) | comment only | yes — 1 assert. **Also adds 10067 lines of stray fixture data under `qa/data/.fp-pcb-probe/`** |
 | 30 | `477c6922bb` | API: Count only changed items in SetTeardropsResponse | follow-up to #20 (G20) | `board_commands.proto`, `pcbnew/api/api_handler_pcb.cpp` | additive comment; **semantic change to `item_count`** | yes — `test_api_board_ops.cpp` (+4) |
 | 31 | `85d0dfa405` | API: Place GetTextAsShapes glyphs of a text box in the document | G19, pre-existing bug | `common/api/api_handler_common.cpp` | none | yes — `test_api_handler_pcb.cpp` (+159) |
 | 32 | `cb80f7e100` | API: Give Barcode the encoded symbol geometry | G19 | `board_types.proto`, `pcbnew/pcb_barcode.cpp` | additive (`Barcode.shapes`, read-only) | yes — `test_api_handler_pcb.cpp` (+40) |
@@ -347,7 +347,7 @@ request path; `--token` and `--no-events` are added to `kicad-cli api-server`.
 - `NetTieDefinition.group` carries the raw text and is used verbatim "when it still names
   the same pads". A reviewer will ask what happens when it does not — the answer is that
   the handler falls back to rejoining, but the proto comment should say so.
-- The commit currently also adds `qa/data/pcbnew/kicad-web-out/board-svg-run-1/api_kitchen_sink.svg`
+- The commit currently also adds `qa/data/pcbnew/fp-pcb-out/board-svg-run-1/api_kitchen_sink.svg`
   (7110 lines of generated output), deleted again two commits later. **Must be stripped.**
 
 ### MR2 — behaviour changes to existing commands
@@ -525,10 +525,10 @@ request path; `--token` and `--no-events` are added to `kicad-cli api-server`.
 ### Must fix — the series is not submittable as it stands
 
 1. **Strip the stray generated SVG.** `3571e8b6c8` adds
-   `qa/data/pcbnew/kicad-web-out/board-svg-run-1/api_kitchen_sink.svg` (7110 lines) and
+   `qa/data/pcbnew/fp-pcb-out/board-svg-run-1/api_kitchen_sink.svg` (7110 lines) and
    `bec9e423c2` deletes it. Both commits must be rewritten so the file never appears.
 2. **Strip the stray fixture directory.** `19435eef53` — a three-line bug fix — adds 14
-   files and 10067 lines under `qa/data/.kicad-web-probe/` (a hidden scratch project:
+   files and 10067 lines under `qa/data/.fp-pcb-probe/` (a hidden scratch project:
    `api_kitchen_sink.kicad_pcb/pro/sch/dru`, `fp-lib-table`, `sym-lib-table` and a
    six-footprint `Resistor_SMD.pretty`). Nothing in `qa/tests/` references that path; the
    tests use `KI_TEST::GetPcbnewTestDataDir()` and the fixtures already in
@@ -619,8 +619,8 @@ git checkout -b web-api-clean web-api
 
 # remove the two stray blobs from every commit that carries them
 git filter-repo --force --invert-paths \
-    --path qa/data/.kicad-web-probe \
-    --path qa/data/pcbnew/kicad-web-out \
+    --path qa/data/.fp-pcb-probe \
+    --path qa/data/pcbnew/fp-pcb-out \
     --refs cbd303d16b..web-api-clean
 # (or: git rebase -i cbd303d16b, editing 3571e8b6c8, bec9e423c2 and 19435eef53)
 
@@ -717,7 +717,7 @@ ctest --test-dir build/mr5 -R "api|kinng" --output-on-failure
 # client conformance against a live server built from this branch
 cd /Users/hyper/projects/tensorfleet/kicad-web
 KICAD_CLI=/Users/hyper/projects/tensorfleet/kicad/build/mr5/kicad/KiCad.app/Contents/MacOS/kicad-cli \
-  bun run --filter @kicad-web/client test:conformance
+  bun run --filter @fp-pcb/client test:conformance
 ```
 
 The suite spawns its own `kicad-cli api-server` on a unique socket with the kitchen-sink
@@ -745,7 +745,7 @@ expectations, and **six product bugs** the tests caught:
   pin edit in the symbol editor was broken too).
 - an empty commit advanced the document revision and published a change event naming no items.
 
-Fixture hygiene is also fixed: the accidentally committed `qa/data/.kicad-web-probe/` tree is
+Fixture hygiene is also fixed: the accidentally committed `qa/data/.fp-pcb-probe/` tree is
 untracked and ignored, and the tests no longer depend on a `.kicad_prl` that is gitignored repo-wide.
 The pre-existing failures in `qa_common`, `qa_pcbnew_other`, `qa_spice` and `qa_cli` are upstream or
 environmental and untouched by this series.

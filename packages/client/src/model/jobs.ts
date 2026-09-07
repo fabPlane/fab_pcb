@@ -33,7 +33,7 @@ import {
   type GetJobStatusResponse,
   type RunJobResponse,
   type RunJobSettings,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import type { KiCadClient } from "../client";
 import * as cmd from "../commands";
 import { JobError } from "../errors";

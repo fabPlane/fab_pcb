@@ -12,7 +12,7 @@ import { useUiStore, type ThemeMode } from '@/state/uiStore';
 export type ResolvedTheme = 'light' | 'dark';
 
 /** localStorage key of the persisted UI store (zustand persist, `{ state, version }`). */
-export const UI_STORAGE_KEY = 'kicad-web.ui';
+export const UI_STORAGE_KEY = 'fp-pcb.ui';
 
 /** What new users get. Only the persisted preference overrides it. */
 export const DEFAULT_THEME: ThemeMode = 'dark';

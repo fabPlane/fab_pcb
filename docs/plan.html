@@ -1,4 +1,4 @@
-<title>KiCad Web Plan</title>
+<title>FabPlane PCB Plan</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
@@ -106,7 +106,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 </nav>
 
 <main>
-<div class="eyebrow">kicad-web · plan · KiCad 10.99 @ cbd303d16b</div>
+<div class="eyebrow">FabPlane PCB · plan · KiCad 10.99 @ cbd303d16b</div>
 <h1 style="margin-top:.4rem">A headless KiCad, drawn in the browser</h1>
 <p class="lede">KiCad 10.99 ships <code>kicad-cli api-server</code>: the whole IPC API with no window. This plan turned that into a TypeScript web UI on Bun, a typed client covering every command, and a patch series that closed the gaps in the API itself. The board and schematic render in the browser, edits commit back to KiCad, and the whole thing is built by a roster of agents.</p>
 
@@ -129,9 +129,9 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
     <rect x="20" y="20" width="220" height="260" rx="6" fill="var(--surface-2)" stroke="var(--line)"/>
     <text x="34" y="44" font-weight="600" font-family="Sora,system-ui">Browser · apps/web</text>
     <rect x="34" y="60" width="192" height="40" rx="4" fill="var(--surface)" stroke="var(--line)"/><text x="44" y="85">React shell · panels · palette</text>
-    <rect x="34" y="110" width="192" height="40" rx="4" fill="var(--surface)" stroke="var(--line)"/><text x="44" y="135">@kicad-web/renderer · WebGL2</text>
-    <rect x="34" y="160" width="192" height="40" rx="4" fill="var(--surface)" stroke="var(--line)"/><text x="44" y="185">@kicad-web/client · typed API</text>
-    <rect x="34" y="210" width="192" height="40" rx="4" fill="var(--surface)" stroke="var(--line)"/><text x="44" y="235">@kicad-web/proto · protobuf-es</text>
+    <rect x="34" y="110" width="192" height="40" rx="4" fill="var(--surface)" stroke="var(--line)"/><text x="44" y="135">@fp-pcb/renderer · WebGL2</text>
+    <rect x="34" y="160" width="192" height="40" rx="4" fill="var(--surface)" stroke="var(--line)"/><text x="44" y="185">@fp-pcb/client · typed API</text>
+    <rect x="34" y="210" width="192" height="40" rx="4" fill="var(--surface)" stroke="var(--line)"/><text x="44" y="235">@fp-pcb/proto · protobuf-es</text>
 
     <line x1="240" y1="150" x2="290" y2="150" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arr)" marker-start="url(#arr)"/>
     <text x="243" y="140" font-size="11" fill="var(--muted)">WebSocket</text>
@@ -161,20 +161,20 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 </svg>
 </div>
 <p><b>Why a bridge.</b> Browsers cannot open unix sockets. nng’s IPC framing is small enough to implement in Bun without native modules: an 8-byte <code>\0SP\0</code> handshake carrying the protocol id (REQ0 = 0x30), then messages framed by a 9-byte header (type byte 0x01 plus an 8-byte big-endian length) whose body starts with a 4-byte request id. Once the fork accepts a full nng URL for <code>--socket</code> (G15), the browser can dial nng's built-in WebSocket transport directly and the bridge keeps only process supervision and file access.</p>
-<p><b>Sessions.</b> One bridge, many tabs, one <code>kicad-cli api-server</code> process per open project. This sidesteps KiCad's one-project-per-server limit without touching KiCad. Requests carry <code>client_name = kicad-web/&lt;session&gt;/&lt;tab&gt;</code>, which is also how KiCad keys in-flight commits.</p>
+<p><b>Sessions.</b> One bridge, many tabs, one <code>kicad-cli api-server</code> process per open project. This sidesteps KiCad's one-project-per-server limit without touching KiCad. Requests carry <code>client_name = fp-pcb/&lt;session&gt;/&lt;tab&gt;</code>, which is also how KiCad keys in-flight commits.</p>
 <p><b>Document model.</b> The page keeps a normalised item store by KIID, mutates it optimistically inside a commit, and replaces optimistic copies with the canonical items each <code>UpdateItems</code> returns. Undo is client-side (inverse operations replayed as new commits) until the fork gains server-side undo (G10).</p>
 
 <h2 id="ts">The TypeScript API</h2>
 <p>Four layers, each a package, each with one owner.</p>
 <div class="tbl"><table>
 <tr><th>Layer</th><th>Package</th><th>What it is</th></tr>
-<tr><td>0</td><td><code>@kicad-web/proto</code></td><td>protobuf-es codegen of <code>api/proto</code>; <code>Any</code> registry; int64 policy; pinned <code>KICAD_COMMIT</code> with a drift check in CI</td></tr>
+<tr><td>0</td><td><code>@fp-pcb/proto</code></td><td>protobuf-es codegen of <code>api/proto</code>; <code>Any</code> registry; int64 policy; pinned <code>KICAD_COMMIT</code> with a drift check in CI</td></tr>
 <tr><td>1</td><td><code>client/transport</code></td><td><code>Transport</code> interface over bytes: <code>NngIpcTransport</code> (Bun), <code>WebSocketTransport</code> (to the bridge), <code>NngWsTransport</code> (browser-direct after G15)</td></tr>
 <tr><td>2</td><td><code>KiCadClient</code></td><td>envelope, dispatch, typed errors, retry on <code>AS_BUSY</code>, restart detection on token mismatch; <code>commands.ts</code> generated from the coverage script so 100% coverage is mechanical</td></tr>
 <tr><td>3</td><td>object model</td><td><code>KiCad → Project → Board | Schematic | FootprintDocument</code>, item wrappers keeping the original message, <code>commit(msg, fn)</code> with automatic drop on throw; mirrors the official Python client <code>kipy</code></td></tr>
 <tr><td>4</td><td><code>client/store</code></td><td>browser-only item store, indexes by type/layer/net, optimistic commits, client undo; the renderer subscribes to store diffs</td></tr>
 </table></div>
-<pre><code>const kicad   = new KiCad(await KiCadClient.connect(transport, { clientName: 'kicad-web/abc' }));
+<pre><code>const kicad   = new KiCad(await KiCadClient.connect(transport, { clientName: 'fp-pcb/abc' }));
 const project = await kicad.openProject('/work/foo.kicad_pro');
 const board   = await project.openBoard();
 
@@ -424,7 +424,7 @@ await board.commit('Move R1', async (tx) =&gt; {
 <h3>Contracts that may block</h3>
 <div class="tbl"><table>
 <tr><th>Producer → consumer</th><th>Artifact</th><th>Ready by</th></tr>
-<tr><td>A2 → A4</td><td><code>@kicad-web/proto</code> build, <code>commands.json</code></td><td>end of wave 1</td></tr>
+<tr><td>A2 → A4</td><td><code>@fp-pcb/proto</code> build, <code>commands.json</code></td><td>end of wave 1</td></tr>
 <tr><td>A3 → A4, A8</td><td><code>Transport</code> interface, <code>WebSocketTransport</code></td><td>end of wave 1</td></tr>
 <tr><td>A4 → A5, A6, A8</td><td>item wrappers, <code>ItemStore</code> diff events</td><td>wave 2, week 1</td></tr>
 <tr><td>A5/A6 → A8</td><td><code>CanvasHost</code> contract</td><td>wave 2, week 1</td></tr>

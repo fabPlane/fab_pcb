@@ -53,7 +53,7 @@ async function workspaces(): Promise<Workspace[]> {
   const out: Workspace[] = [];
   for (const dir of dirs.sort()) {
     const pkg = JSON.parse(await readFile(join(dir, "package.json"), "utf8")) as { name: string };
-    if (pkg.name === "@kicad-web/e2e") continue; // Playwright, not bun test
+    if (pkg.name === "@fp-pcb/e2e") continue; // Playwright, not bun test
     const files = await collectTests(dir);
     if (files.length === 0) continue;
     out.push({

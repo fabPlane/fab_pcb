@@ -1,6 +1,6 @@
 /** Small geometry helpers shared by the extractor and the adapters. All lengths in nm. */
-import type { Box, Vec2 } from "@kicad-web/client";
-import { boxFromPoints, vecRotate } from "@kicad-web/client";
+import type { Box, Vec2 } from "@fp-pcb/client";
+import { boxFromPoints, vecRotate } from "@fp-pcb/client";
 import type { RoutePolygon } from "./types";
 
 /** An open polyline (segment or arc end points) on Edge.Cuts, before chaining. */

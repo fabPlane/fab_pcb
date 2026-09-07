@@ -18,7 +18,7 @@ import {
   type Ratio,
   type Vector2,
   type Vector3,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 
 export const NM_PER_MM = 1_000_000;
 export const NM_PER_MIL = 25_400;

@@ -4,7 +4,7 @@ import type { DocumentKind, ItemStore, StoredItem, StoreDiff } from '@/contracts
  * In-memory ItemStore with indexes by type, layer and net.
  *
  * `insert/replace/remove/batch` are NOT part of the ItemStore contract: only the
- * commit backend (services/CommandService.ts) calls them. When `@kicad-web/client/store`
+ * commit backend (services/CommandService.ts) calls them. When `@fp-pcb/client/store`
  * arrives, its store will be fed by `UpdateItemsResponse` instead and this class is only
  * kept for tests and the mock.
  */

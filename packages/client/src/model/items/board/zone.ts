@@ -9,7 +9,7 @@ import {
   type PolySet,
   type Zone as ZoneProto,
   type ZoneFilledPolygons,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import { nm, toDistance, vec2, type Vec2 } from "../../../units";
 import { Item, registerItem } from "../base";
 

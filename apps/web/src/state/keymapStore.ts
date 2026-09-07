@@ -21,6 +21,6 @@ export const useKeymapStore = create<KeymapState>()(
       },
       resetAll: () => set({ overrides: {} }),
     }),
-    { name: 'kicad-web.keymap', version: 1 },
+    { name: 'fp-pcb.keymap', version: 1 },
   ),
 );

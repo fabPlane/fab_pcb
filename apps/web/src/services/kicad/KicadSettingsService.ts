@@ -5,9 +5,9 @@
 // renderer's Theme uses, so a server theme drops straight into the canvas — only the colour
 // channels differ (KiCad sends 0..1 floats, the renderer wants 0..255).
 
-import { AppType, UnitSystem } from '@kicad-web/proto';
-import { commands as cmd } from '@kicad-web/client';
-import { KICAD_DEFAULT_THEME, mergeThemes, type Theme, type ThemeColor } from '@kicad-web/renderer';
+import { AppType, UnitSystem } from '@fp-pcb/proto';
+import { commands as cmd } from '@fp-pcb/client';
+import { KICAD_DEFAULT_THEME, mergeThemes, type Theme, type ThemeColor } from '@fp-pcb/renderer';
 import type { AppDefaults, ColorThemeInfo, ServerSettingsService } from '../extras';
 import type { KicadDocumentService } from './KicadDocumentService';
 

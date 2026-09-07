@@ -68,10 +68,10 @@ bindTools(services);
 installCrossProbe(services);
 bindHistory(services.commands);
 {
-  // Debug hook for the browser console and the proof / e2e harness (`__kicadWeb.services`,
-  // `__kicadWeb.host('board')`, `__kicadWeb.runCommand(id)`); kept in production builds too so
+  // Debug hook for the browser console and the proof / e2e harness (`__fpPcb.services`,
+  // `__fpPcb.host('board')`, `__fpPcb.runCommand(id)`); kept in production builds too so
   // `vite preview` can be driven the same way.
-  (window as unknown as { __kicadWeb?: unknown }).__kicadWeb = {
+  (window as unknown as { __fpPcb?: unknown }).__fpPcb = {
     services,
     host: getCanvasHost,
     mode: choice.mode,

@@ -20,7 +20,7 @@ import {
   type SheetInstance,
   type SheetPath,
   type SymbolFieldsRow,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import * as cmd from "../commands";
 import { DocumentSync } from "../store/document-sync";
 import type { ItemStore } from "../store/item-store";

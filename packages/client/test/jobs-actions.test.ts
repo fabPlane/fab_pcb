@@ -29,7 +29,7 @@ import {
   RunActionStatus,
   RunBoardJobExportGerbersSchema,
   RunJobResponseSchema,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import { KiCadClient } from "../src/client";
 import { ActionError, JobError } from "../src/errors";
 import { KiCadEvents } from "../src/events";
@@ -51,7 +51,7 @@ function track(id: string, layer = BoardLayer.BL_F_Cu): Track {
 }
 
 async function board(t: FakeTransport): Promise<Board> {
-  const c = await KiCadClient.connect(t, { clientName: "kicad-web/test" });
+  const c = await KiCadClient.connect(t, { clientName: "fp-pcb/test" });
   return new Board(new KiCad(c), DOC);
 }
 

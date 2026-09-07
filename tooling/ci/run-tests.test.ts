@@ -18,7 +18,7 @@ describe("integration test naming convention", () => {
     const proc = Bun.spawn(["bun", "run-tests.ts", "list"], { cwd: import.meta.dir, stdout: "pipe", stderr: "pipe" });
     const out = await new Response(proc.stdout).text();
     expect(await proc.exited).toBe(0);
-    expect(out).toContain("@kicad-web/bridge");
+    expect(out).toContain("@fp-pcb/bridge");
     expect(out).toMatch(/integration\s+test\/bridge\.kicad\.test\.ts/);
     expect(out).toMatch(/unit\s+test\/bridge\.test\.ts/);
     expect(out).toMatch(/integration\s+test\/conformance\/\S+\.test\.ts/);

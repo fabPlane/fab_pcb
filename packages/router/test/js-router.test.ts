@@ -1,7 +1,7 @@
 /** The JS router on the synthetic two-net board: input translation, routing, output conversion. */
 import { describe, expect, test } from "bun:test";
-import { BoardLayer } from "@kicad-web/proto";
-import { mm } from "@kicad-web/client";
+import { BoardLayer } from "@fp-pcb/proto";
+import { mm } from "@fp-pcb/client";
 import { segmentDistance } from "../src/geometry";
 import { JsRouter, LayerNames, buildSimpleRouteJson, tracesToItems } from "../src/js-router";
 import type { RouteProgress } from "../src/types";

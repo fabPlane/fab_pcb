@@ -15,7 +15,7 @@ import {
   type FootprintInstance,
   type Pad as PadProto,
   type PadStack,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import { deg, nm, toAngle, type Vec2 } from "../../../units";
 import { Item, registerItem, wrapAll } from "../base";
 

@@ -6,10 +6,10 @@ this file first.
 ## Units
 
 - World coordinates are KiCad nanometres as `number` (safe up to 2^53 nm ≈ 9000 km).
-  Angles in degrees. Conversions live in `@kicad-web/client/units` (`nm`, `mm`, `mil`).
+  Angles in degrees. Conversions live in `@fp-pcb/client/units` (`nm`, `mm`, `mil`).
 - KIIDs are strings (36-char UUID form, as in `kiapi.common.types.KIID.value`).
 
-## ItemStore (`@kicad-web/client/store`) — producer A4, consumers A5/A6/A8
+## ItemStore (`@fp-pcb/client/store`) — producer A4, consumers A5/A6/A8
 
 ```ts
 type DocumentKind = 'board' | 'schematic' | 'footprint' | 'symbol';   // 'symbol' = headless library symbol (DOCTYPE_SYMBOL)
@@ -47,7 +47,7 @@ interface ItemStore {
 
 Schematic stores are per sheet: `schematic.sheet(path).store`.
 
-## CanvasHost (`@kicad-web/renderer`) — producer A5/A6, consumer A8
+## CanvasHost (`@fp-pcb/renderer`) — producer A5/A6, consumer A8
 
 ```ts
 interface Theme { /* KiCad colour theme: per-layer colours + ui colours; see renderer/core/theme */ }
@@ -132,10 +132,10 @@ subscription; `SchematicCanvasHost` additionally remembers the camera per store,
 between `schematic.sheet(path).store` instances restores each sheet's view (first visit: zoom to
 fit). Selection ids are re-resolved against the new store; hover is cleared.
 
-## Render model (`@kicad-web/renderer/core`) — internal to A5/A6
+## Render model (`@fp-pcb/renderer/core`) — internal to A5/A6
 
 Adapters convert protobuf items into a neutral `RenderItem` set so the core never imports
-`@kicad-web/proto`:
+`@fp-pcb/proto`:
 
 ```ts
 type Primitive =
@@ -150,7 +150,7 @@ type Primitive =
 interface RenderItem { id: string; layer: string; net?: string; prims: Primitive[]; bbox: Box }
 ```
 
-## Bridge WebSocket protocol (`@kicad-web/client/transport/ws-bridge-protocol`) — producer A3
+## Bridge WebSocket protocol (`@fp-pcb/client/transport/ws-bridge-protocol`) — producer A3
 
 Binary frame: 4-byte big-endian correlation id + raw `ApiRequest`/`ApiResponse` bytes.
 Text frame: JSON control messages `{type:'hello', sessionId, kicadToken}`,

@@ -10,7 +10,7 @@ import {
   PingSchema,
   packAny,
   unpackAnyAs,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import { KiCadClient } from "../src/client";
 import { COMMANDS, KICAD_COMMIT } from "../src/commands-data";
 import * as commands from "../src/commands";
@@ -23,10 +23,10 @@ function versionTransport(): FakeTransport {
 
 describe("KiCadClient envelope", () => {
   test("encodeRequest packs header + Any with the kiapi type URL", () => {
-    const c = new KiCadClient(new FakeTransport(), { clientName: "kicad-web/test", kicadToken: "tok" });
+    const c = new KiCadClient(new FakeTransport(), { clientName: "fp-pcb/test", kicadToken: "tok" });
     const bytes = c.encodeRequest(PingSchema, {});
     const env = fromBinary(ApiRequestSchema, bytes);
-    expect(env.header?.clientName).toBe("kicad-web/test");
+    expect(env.header?.clientName).toBe("fp-pcb/test");
     expect(env.header?.kicadToken).toBe("tok");
     expect(env.message?.typeUrl).toBe("type.googleapis.com/kiapi.common.commands.Ping");
     expect(unpackAnyAs(env.message!, PingSchema)).toBeDefined();
@@ -34,7 +34,7 @@ describe("KiCadClient envelope", () => {
 
   test("connect() pings, learns the token, call() unpacks the typed response", async () => {
     const t = versionTransport();
-    const c = await KiCadClient.connect(t, { clientName: "kicad-web/test" });
+    const c = await KiCadClient.connect(t, { clientName: "fp-pcb/test" });
     expect(c.kicadToken).toBe(t.token);
     const v = await commands.getVersion(c);
     expect(v.version?.fullVersion).toBe("10.99.0-test");

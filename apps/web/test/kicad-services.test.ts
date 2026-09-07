@@ -32,8 +32,8 @@ import {
   unpackAny,
   type FootprintInstance,
   type Track,
-} from '@kicad-web/proto';
-import { KiCad, type KiCadClientOptions } from '@kicad-web/client';
+} from '@fp-pcb/proto';
+import { KiCad, type KiCadClientOptions } from '@fp-pcb/client';
 import { CommandServiceImpl } from '@/services/CommandService';
 import { KicadCommitBackend, KicadDocumentService, KicadSessionService } from '@/services/kicad';
 import { FakeTransport, fail, ok, reply } from './fakeTransport';
@@ -130,7 +130,7 @@ describe('KicadSessionService', () => {
     expect(info.kicadToken).toBe(transport.token);
     expect(connectedWith as KiCad | null).toBe(session.kicad as KiCad);
     expect(calls.find((c) => c.method === 'POST' && c.path === '/sessions')?.body).toEqual({ path: '/ws/pcbnew/api_kitchen_sink.kicad_pro' });
-    expect(transport.calls.map((c) => c.clientName)[0]).toMatch(/^kicad-web\/sess1\//);
+    expect(transport.calls.map((c) => c.clientName)[0]).toMatch(/^fp-pcb\/sess1\//);
     expect(states).toEqual(['connecting', 'connecting', 'connecting', 'open']);
 
     await session.disconnect();

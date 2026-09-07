@@ -5,8 +5,8 @@
 // the commit; CommandService then rolls the store back to the pre-states.
 
 import { create, type Message } from '@bufbuild/protobuf';
-import { kiapiRegistry } from '@kicad-web/proto';
-import { Item, toStoredItem, wrapMessage, type Commit } from '@kicad-web/client';
+import { kiapiRegistry } from '@fp-pcb/proto';
+import { Item, toStoredItem, wrapMessage, type Commit } from '@fp-pcb/client';
 import type { ItemStore, StoredItem } from '@/contracts';
 import type { CommitBackend } from '../CommandService';
 import type { ItemOp } from '../types';

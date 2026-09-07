@@ -20,8 +20,8 @@ import {
   SetErcMarkerExcludedSchema,
   type DrcMarker,
   type ErcMarker,
-} from '@kicad-web/proto';
-import { KiCadApiError, TransportError } from '@kicad-web/client';
+} from '@fp-pcb/proto';
+import { KiCadApiError, TransportError } from '@fp-pcb/client';
 import type { Marker, MarkerService, MarkerSeverity } from '../types';
 import type { KicadDocumentService } from './KicadDocumentService';
 

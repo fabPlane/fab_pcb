@@ -14,7 +14,7 @@ import {
   kiapiRegistry,
   packAny,
   type ApiRequest,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import { TransportError, type SendOptions, type Transport, type TransportState } from "../src/transport/types";
 
 export interface FakeReply {

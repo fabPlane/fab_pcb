@@ -2,8 +2,19 @@
   "board": "sonde_xilinx",
   "router": "js",
   "routerImpl": "js",
+  "harness": "job",
   "kicadVersion": "10.99.0-3711-g8cc9377988",
-  "date": "2026-09-07T00:02:31.334Z",
+  "date": "2026-09-07T02:47:49.520Z",
+  "measuredWith": {
+    "kicad": "10.99.0-3711-g8cc9377988",
+    "java": "n/a",
+    "freerouting": "2.4.1",
+    "capacityAutorouter": "0.0.885",
+    "bun": "1.4.0",
+    "os": "macOS 15.6.1",
+    "cpu": "Apple M2 Max",
+    "memoryGb": 96
+  },
   "connections": {
     "before": 48,
     "after": 0,
@@ -13,7 +24,7 @@
   "vias": 12,
   "trackLengthMm": 673.464156,
   "viaLengthMm": 18.96,
-  "tracksCreated": 385,
+  "tracksCreated": 386,
   "viasCreated": 12,
   "drcBefore": {
     "errors": 48,
@@ -26,29 +37,64 @@
     }
   },
   "drcAfter": {
-    "errors": 9,
+    "errors": 12,
     "warnings": 2,
     "unconnected": 0,
-    "otherErrors": 9,
+    "otherErrors": 12,
     "byType": {
-      "DRCET_TRACKS_CROSSING": 8,
-      "DRCET_SHORTING_ITEMS": 1,
+      "DRCET_TRACKS_CROSSING": 9,
+      "DRCET_CLEARANCE": 1,
+      "DRCET_SHORTING_ITEMS": 2,
       "DRCET_DRILLED_HOLES_COLOCATED": 1,
       "DRCET_LIB_FOOTPRINT_MISMATCH": 1
     }
   },
-  "wallMs": 34393,
-  "routeMs": 34372,
+  "wallMs": 36030,
+  "routeMs": 35936,
   "timedOut": false,
   "svg": "packages/router/bench/results/sonde_xilinx-js.svg",
   "log": [
-    "extract: 108 pads, 48 connections, 2 copper layers, 1 zones, 8 copper graphics",
+    "job: route job f95ae294: js on session bench-sonde_xilinx",
+    "extract: 108 pads, 48 connections, 2 copper layers",
+    "start",
+    "preprocessSimpleRouteJsonSolver",
+    "componentDetectionSolver",
+    "escapeViaLocationSolver",
+    "netToPointPairsSolver",
+    "topologyPlanningSolver",
+    "topologyMergingSolver",
+    "nodeDimensionSubdivisionSolver",
+    "edgeSolver",
+    "availableSegmentPointSolver",
+    "necessaryCrampedPortPointSolver",
+    "portPointPathingSolver",
+    "uniformPortDistributionSolver",
+    "highDensityRouteSolver",
+    "highDensityForceImproveSolver",
+    "highDensityRepairSolver",
+    "highDensityStitchSolver",
+    "traceSimplificationSolver",
+    "traceWidthSolver",
+    "globalDrcForceImproveSolver",
+    "exactGeometryDrcForceImproveSolver",
+    "lengthMatchingPostProcessingSolver",
+    "powerTraceExpansionSolver",
+    "none",
+    "done",
+    "job: route job f95ae294: done, 48/48 in 36030 ms",
     "note: 1 copper zones are not obstacles for the JS router",
     "srj: 2 layers, 116 obstacles, 26 nets to route",
-    "386 tracks, 12 vias, 26/26 nets in 34372 ms (2496058 iterations)"
+    "386 tracks, 12 vias, 26/26 nets in 35936 ms (2496058 iterations)"
   ],
   "options": {
-    "maxTimeMs": 600000,
-    "effort": 1
+    "effort": 1,
+    "maxTimeMs": 600000
+  },
+  "job": {
+    "state": "done",
+    "routed": 48,
+    "routerRouted": 48,
+    "total": 48,
+    "message": "Autoroute (js): 48 connections"
   }
 }

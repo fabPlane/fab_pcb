@@ -2,17 +2,17 @@
 /**
  * Generates `src/commands-data.ts` (the coverage table as typed data) and `src/commands.ts` (one typed
  * wrapper per command) from `tooling/coverage/commands.json` and the protobuf descriptors in
- * `@kicad-web/proto`. Run `bun run gen` in packages/client after `bun run coverage` at the root.
+ * `@fp-pcb/proto`. Run `bun run gen` in packages/client after `bun run coverage` at the root.
  *
  * Every request/response type name in commands.json is resolved against the flat exports of
- * `@kicad-web/proto`, so a schema drift (renamed message, missing export) fails generation rather
+ * `@fp-pcb/proto`, so a schema drift (renamed message, missing export) fails generation rather
  * than producing a wrapper that does not compile.
  */
 import { readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { DescMessage } from "@bufbuild/protobuf";
-import * as proto from "@kicad-web/proto";
+import * as proto from "@fp-pcb/proto";
 
 const PKG_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_DIR = resolve(PKG_DIR, "..", "..");
@@ -42,7 +42,7 @@ function schemaExportFor(typeName: string): string {
     const s = all[`${c}Schema`] as DescMessage | undefined;
     if (s && typeof s === "object" && "typeName" in s && s.typeName === typeName) return `${c}Schema`;
   }
-  throw new Error(`no exported schema for ${typeName} in @kicad-web/proto (tried ${candidates.join(", ")})`);
+  throw new Error(`no exported schema for ${typeName} in @fp-pcb/proto (tried ${candidates.join(", ")})`);
 }
 
 function lowerFirst(s: string): string {
@@ -135,7 +135,7 @@ export async function generate(): Promise<{ data: string; commands: string; rows
     header,
     "",
     'import type { DescMessage, MessageInitShape, MessageShape } from "@bufbuild/protobuf";',
-    `import { ${[...imports].sort().join(", ")} } from "@kicad-web/proto";`,
+    `import { ${[...imports].sort().join(", ")} } from "@fp-pcb/proto";`,
     'import type { CallOptions, KiCadClient } from "./client";',
     'import { COMMAND_BY_NAME, type CommandInfo } from "./commands-data";',
     "",

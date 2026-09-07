@@ -21,7 +21,7 @@
  * Cancelling before the apply leaves the board untouched; a failed router run (the JS router's
  * precheck, a Freerouting crash) applies nothing and reports the error.
  */
-import { KiCad, KiCadClient, type Transport } from "@kicad-web/client";
+import { KiCad, KiCadClient, type Transport } from "@fp-pcb/client";
 import { applyRouteResult } from "./apply";
 import { extractRouteInput } from "./extract";
 import { FreeroutingRouter, alreadyApplied, resolveFreerouting, type FreeroutingOptions, type FreeroutingPaths } from "./freerouting";
@@ -214,7 +214,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
       try {
         if (!session.transport) throw new Error("session has no KiCad transport");
         if (request.router === "freerouting" && !freerouting.ok) throw new Error(`Freerouting unavailable: ${freerouting.reason}`);
-        const client = new KiCadClient(session.transport, { clientName: session.clientName ?? `kicad-web/router-job-${id}` });
+        const client = new KiCadClient(session.transport, { clientName: session.clientName ?? `fp-pcb/router-job-${id}` });
         const kicad = new KiCad(client);
         const board = await kicad.currentBoard();
         if (!board) throw new Error("no board open in this session");

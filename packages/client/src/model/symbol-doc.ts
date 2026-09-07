@@ -3,7 +3,7 @@
  * KiCad >= web-api e118ed3f81). Items are the symbol's children (pins, shapes, text, text boxes,
  * fields); `libSymbol()` returns the library definition itself as a `LibSymbol` (`KOT_LIB_SYMBOL`). Commits apply to the in-memory symbol; `save()` writes it back to the library.
  */
-import { KiCadObjectType, type LibraryIdentifier } from "@kicad-web/proto";
+import { KiCadObjectType, type LibraryIdentifier } from "@fp-pcb/proto";
 import { DocumentSync } from "../store/document-sync";
 import type { ItemStore } from "../store/item-store";
 import { Document, type DocumentKind } from "./document";

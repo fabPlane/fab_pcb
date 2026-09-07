@@ -16,13 +16,13 @@ import {
   SetTextVariablesSchema,
   WizardGeneratedContentSchema,
   WizardGenerationStatus,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import { KiCadClient } from "../src/client";
 import { KiCad, Project, Schematic, toEntries, toRecord } from "../src/model";
 import { FakeTransport, ok, reply } from "./fake-transport";
 
 async function connect(t: FakeTransport): Promise<KiCad> {
-  return new KiCad(await KiCadClient.connect(t, { clientName: "kicad-web/test" }));
+  return new KiCad(await KiCadClient.connect(t, { clientName: "fp-pcb/test" }));
 }
 
 const SPEC = {

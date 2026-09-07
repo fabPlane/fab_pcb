@@ -9,14 +9,14 @@ StrictMode on).
 ```sh
 KICAD_CLI=<kicad>/build/release/kicad/KiCad.app/Contents/MacOS/kicad-cli \
 WORKSPACE_ROOT=<repo>/e2e/fixtures/boards KICAD10_FOOTPRINT_DIR=/Applications/KiCad/KiCad.app/Contents/SharedSupport/footprints ... \
-  bun run --filter @kicad-web/bridge start                              # 4020
-VITE_BRIDGE_URL=http://127.0.0.1:4020 bun run --filter @kicad-web/app dev  # 5173
+  bun run --filter @fp-pcb/bridge start                              # 4020
+VITE_BRIDGE_URL=http://127.0.0.1:4020 bun run --filter @fp-pcb/app dev  # 5173
 node apps/web/scripts/prove-kicad.mjs --board ecc83        # one of ecc83 sonde_xilinx interf_u pic_programmer stickhub
-KICAD_CLI=... E2E_BASE_URL=http://localhost:5173 bun run --filter @kicad-web/e2e test:real -- boards.spec.ts
+KICAD_CLI=... E2E_BASE_URL=http://localhost:5173 bun run --filter @fp-pcb/e2e test:real -- boards.spec.ts
 ```
 
 The driver is `apps/web/scripts/prove-board.mjs` (entered through `prove-kicad.mjs --board`); it
-copies the board into `<workspace root>/.kicad-web-practice-<name>/`, so the fixtures are never
+copies the board into `<workspace root>/.fp-pcb-practice-<name>/`, so the fixtures are never
 written, and leaves the JSON result in `e2e/output/board-practice/<name>.json`. Screenshots:
 `docs/screenshots/boards/<name>-{board,layers,selected,sheet-N,edited,moving,moved,unrouted,route-preview,routed,zones,drc,jobs,reopened}.png`.
 
@@ -39,7 +39,7 @@ there was approximate).
 ## Results
 
 Every step below went through the real UI (canvas clicks, keyboard, panels, prompts), read back
-through the app's debug hook (`__kicadWeb`) and, for save/export, on disk. `route` runs on the
+through the app's debug hook (`__fpPcb`) and, for save/export, on disk. `route` runs on the
 unrouted variant: the first click on a pad picks up the net, `V` places a via and switches layer
 (runs shorter than 4 mm are routed straight), `Enter` commits one transaction per net.
 

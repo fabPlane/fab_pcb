@@ -1,7 +1,7 @@
 /**
  * Shared bits for the real-server specs: skip without KICAD_CLI, a throwaway copy of the
  * kitchen-sink project inside the bridge workspace root (so `/files/*` and the project's
- * fp-lib-table apply), and the debug hook the app exposes in dev (`window.__kicadWeb`).
+ * fp-lib-table apply), and the debug hook the app exposes in dev (`window.__fpPcb`).
  */
 import { cpSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -19,11 +19,11 @@ export interface RealProject {
   cleanup(): void;
 }
 
-/** Copies the kitchen sink into `<workspace root>/.kicad-web-e2e-<tag>/` with local library tables. */
+/** Copies the kitchen sink into `<workspace root>/.fp-pcb-e2e-<tag>/` with local library tables. */
 export async function makeProject(tag: string): Promise<RealProject> {
   const health = (await (await fetch(`${BRIDGE_URL}/health`)).json()) as { workspaceRoot: string };
   const root = health.workspaceRoot.replace(/\/$/, "");
-  const dir = `${root}/.kicad-web-e2e-${tag}`;
+  const dir = `${root}/.fp-pcb-e2e-${tag}`;
   rmSync(dir, { recursive: true, force: true });
   mkdirSync(dir, { recursive: true });
   for (const ext of ["kicad_pro", "kicad_pcb", "kicad_dru"]) cpSync(`${QA}/pcbnew/api_kitchen_sink.${ext}`, `${dir}/api_kitchen_sink.${ext}`);
@@ -46,21 +46,21 @@ export async function openBoard(page: Page, pro: string): Promise<void> {
   await page.waitForSelector('canvas[aria-label="board canvas"]', { timeout: 90_000 });
   await page.waitForFunction(() => document.querySelector(".statusbar")?.textContent?.includes("open · KiCad"), null, { timeout: 60_000 });
   await page.waitForTimeout(1500);
-  await page.evaluate(() => (window as any).__kicadWeb.stores.ui.getState().setGrid(1_000_000));
+  await page.evaluate(() => (window as any).__fpPcb.stores.ui.getState().setGrid(1_000_000));
 }
 
-export const revision = (page: Page): Promise<number> => page.evaluate(async () => Number(await (window as any).__kicadWeb.services.documents.boardDoc.revision()));
-export const waitRevisionAbove = (page: Page, r: number) => page.waitForFunction((r) => (window as any).__kicadWeb.services.documents.boardDoc.revision().then((v: bigint) => Number(v) > r), r, { timeout: 30_000 });
-export const countType = (page: Page, type: string): Promise<number> => page.evaluate((type) => [...(window as any).__kicadWeb.services.documents.board().byType(type)].length, type);
+export const revision = (page: Page): Promise<number> => page.evaluate(async () => Number(await (window as any).__fpPcb.services.documents.boardDoc.revision()));
+export const waitRevisionAbove = (page: Page, r: number) => page.waitForFunction((r) => (window as any).__fpPcb.services.documents.boardDoc.revision().then((v: bigint) => Number(v) > r), r, { timeout: 30_000 });
+export const countType = (page: Page, type: string): Promise<number> => page.evaluate((type) => [...(window as any).__fpPcb.services.documents.board().byType(type)].length, type);
 /** Starts a command without awaiting it: commands that open a prompt only resolve once the dialog is answered. */
 export const runCommand = (page: Page, id: string) =>
   page.evaluate((id) => {
-    void (window as any).__kicadWeb.runCommand(id);
+    void (window as any).__fpPcb.runCommand(id);
   }, id);
 
 export async function clickWorld(page: Page, storeKey: string, label: string, x: number, y: number): Promise<void> {
   const box = (await page.locator(`canvas[aria-label="${label}"]`).boundingBox())!;
-  const p = await page.evaluate(({ storeKey, x, y }) => (window as any).__kicadWeb.host(storeKey).worldToScreen(x, y), { storeKey, x, y });
+  const p = await page.evaluate(({ storeKey, x, y }) => (window as any).__fpPcb.host(storeKey).worldToScreen(x, y), { storeKey, x, y });
   await page.mouse.move(box.x + p.x, box.y + p.y);
   await page.waitForTimeout(60);
   await page.mouse.click(box.x + p.x, box.y + p.y);

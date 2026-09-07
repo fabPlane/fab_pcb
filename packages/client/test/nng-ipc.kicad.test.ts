@@ -4,24 +4,36 @@
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { NngIpcTransport } from "../src/transport";
-import { KICAD_CLI, KITCHEN_SINK_PCB, PING_REQUEST, decodeApiResponse, haveKicad, startKicadServer, type KicadServer } from "./kicad-fixtures";
+import {
+  KICAD_CLI,
+  PING_REQUEST,
+  decodeApiResponse,
+  haveKicad,
+  startKicadServer,
+  tempKitchenSinkBoard,
+  type KicadServer,
+  type TempBoard,
+} from "./kicad-fixtures";
 
 if (!haveKicad()) {
   console.log(`[skip] kicad-cli not found at ${KICAD_CLI} (set KICAD_CLI to run the integration tests)`);
 }
 
 describe.skipIf(!haveKicad())("NngIpcTransport against kicad-cli api-server", () => {
+  let board: TempBoard;
   let server: KicadServer;
   let transport: NngIpcTransport;
 
   beforeAll(async () => {
-    server = await startKicadServer(KITCHEN_SINK_PCB, "client-it");
+    board = await tempKitchenSinkBoard("fp-pcb-ipc-it-");
+    server = await startKicadServer(board.pcb, "client-it");
     transport = await NngIpcTransport.connect({ path: server.socketPath, defaultTimeoutMs: 10_000 });
   }, 60_000);
 
   afterAll(async () => {
     await transport?.close();
     await server?.stop();
+    await board?.cleanup();
   });
 
   test("Ping answers AS_NOT_READY while the board loads, then AS_OK with a kicad token", async () => {

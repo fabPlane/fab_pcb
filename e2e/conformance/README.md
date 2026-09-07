@@ -18,10 +18,10 @@ It is an **integration** suite by the workspace convention (`*.kicad.test.ts`, o
 KICAD_CLI=../kicad/build/release/kicad/KiCad.app/Contents/MacOS/kicad-cli bun run test:integration
 
 # only the conformance directory
-KICAD_CLI=... bun run --filter @kicad-web/client test:conformance
+KICAD_CLI=... bun run --filter @fp-pcb/client test:conformance
 
 # Linux / CI, using the Docker image from packages/kicad-patches/build-linux.sh
-docker run --rm -d --name kicad -v /tmp/kicad:/tmp/kicad -v "$PWD/e2e/fixtures:/work" kicad-web/kicad-cli api-server --socket /tmp/kicad/api.sock
+docker run --rm -d --name kicad -v /tmp/kicad:/tmp/kicad -v "$PWD/e2e/fixtures:/work" fp-pcb/kicad-cli api-server --socket /tmp/kicad/api.sock
 ```
 
 `KICAD_CLI` is the only knob: when unset, the tests look for the macOS build tree at

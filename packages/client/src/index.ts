@@ -1,4 +1,4 @@
-// @kicad-web/client — public entry point.
+// @fp-pcb/client — public entry point.
 // Layer 1 (transports), Layer 2 (KiCadClient + generated commands), Layer 3 (object model) and
 // Layer 4 (ItemStore). Keep this file additive: append exports, do not restructure.
 export * from "./transport/index";

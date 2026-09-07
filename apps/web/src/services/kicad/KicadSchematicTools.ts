@@ -5,7 +5,7 @@
 // All of these change the document outside a client commit, so each one re-syncs the schematic
 // stores (and the board too, for `syncToBoard`) through `documents.afterCommit`.
 
-import type { SheetPath } from '@kicad-web/proto';
+import type { SheetPath } from '@fp-pcb/proto';
 import type { KicadDocumentService } from './KicadDocumentService';
 import type { AnnotateOptions, AnnotateReport, FieldEditInput, FieldsRow, FieldsTable, SchematicToolsService, SyncOptions, SyncReport } from '../extras';
 

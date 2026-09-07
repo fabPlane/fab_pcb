@@ -1,5 +1,5 @@
 /**
- * `WebSocketTransport` — talks to `@kicad-web/bridge` from a browser or from Bun.
+ * `WebSocketTransport` — talks to `@fp-pcb/bridge` from a browser or from Bun.
  *
  * Every request gets a 4-byte correlation id; many may be in flight at once on the WebSocket
  * (the bridge serialises them onto KiCad's single REQ/REP socket). Control messages from the

@@ -1,10 +1,10 @@
-# @kicad-web/app
+# @fp-pcb/app
 
-Browser UI for kicad-web: docked editor shell (React + Zustand), the PixiJS board and
-schematic canvases from `@kicad-web/renderer`, interactive placement tools, a schema-driven
+Browser UI for FabPlane PCB: docked editor shell (React + Zustand), the PixiJS board and
+schematic canvases from `@fp-pcb/renderer`, interactive placement tools, a schema-driven
 properties panel, undo through KiCad's own stack, jobs with async progress, DRC/ERC with canvas
 markers, a library browser, the schematic workflow (annotate / update PCB / fields table), a
-three.js 3D view and a footprint editor. It talks to KiCad through `@kicad-web/client` over the
+three.js 3D view and a footprint editor. It talks to KiCad through `@fp-pcb/client` over the
 bridge.
 
 ## Running
@@ -23,10 +23,10 @@ Real mode, step by step (macOS paths from this checkout):
 # 1. the bridge: spawns one `kicad-cli api-server` per session, default port 4020
 KICAD_CLI=/Users/hyper/projects/tensorfleet/kicad/build/release/kicad/KiCad.app/Contents/MacOS/kicad-cli \
 WORKSPACE_ROOT=/Users/hyper/projects/tensorfleet/kicad/qa/data \
-bun run --filter @kicad-web/bridge start
+bun run --filter @fp-pcb/bridge start
 
 # 2. the app, pointed at the bridge (or omit the variable and open http://localhost:5173/?bridge=http://127.0.0.1:4020)
-VITE_BRIDGE_URL=http://127.0.0.1:4020 bun run --filter @kicad-web/app dev
+VITE_BRIDGE_URL=http://127.0.0.1:4020 bun run --filter @fp-pcb/app dev
 ```
 
 `vite.config.ts` proxies `/sessions`, `/files`, `/health` and `/ws` to `BRIDGE_URL` (default
@@ -49,7 +49,7 @@ api-server itself and the bridge is out of the request path entirely:
   --socket ws://127.0.0.1:5599/kicad
 
 # 2. the app, dialling it directly (or open http://localhost:5173/?kicad-ws=ws://127.0.0.1:5599/kicad)
-VITE_KICAD_WS=ws://127.0.0.1:5599/kicad bun run --filter @kicad-web/app dev
+VITE_KICAD_WS=ws://127.0.0.1:5599/kicad bun run --filter @fp-pcb/app dev
 ```
 
 With no `--token`, the server mints one and the client picks it up from the first reply; pass
@@ -142,7 +142,7 @@ second process to run and supervise), not a speed-up.
 - **Theme**: dark by default, light and "system" (follows `prefers-color-scheme`) from
   Settings… (Mod+,) → Appearance. Tokens live in `src/theme/tokens.css` (dark on `:root`,
   light under `[data-theme="light"]`); `src/theme/index.ts` resolves the persisted preference
-  (`localStorage["kicad-web.ui"]`) and keeps `<html data-theme>` in sync, and an inline script
+  (`localStorage["fp-pcb.ui"]`) and keeps `<html data-theme>` in sync, and an inline script
   in `index.html` applies it before the first paint so there is no flash.
 - **Properties**: `fromDescriptor` / `schemaFor(..., desc)` read the protobuf-es descriptors
   (`kiapiRegistry`) so real items are editable — numeric enums show their value names, int64
@@ -150,7 +150,7 @@ second process to run and supervise), not a speed-up.
   fallback for the mock's plain objects.
 - **Jobs** (`KicadJobsService`): `RunBoardJobExport{Svg,Gerbers,Drill,Position,Pdf,Dxf,3D (STEP
   and GLB),Ipc2581,ODB}` and `RunSchematicJobExport{Svg,Pdf,BOM,Netlist}` write into
-  `<project dir>/kicad-web-out/<job>-<run>/` (created through `/files/mkdir`); outputs are listed
+  `<project dir>/fp-pcb-out/<job>-<run>/` (created through `/files/mkdir`); outputs are listed
   through `/files/list` and downloadable through `/files/read`. Every job is started with
   `RunJobSettings.async`: the server answers `JS_RUNNING` + a job id and `Job.wait` polls
   `GetJobStatus` (woken by `JobProgress` events) into the run's progress bar and log; a server
@@ -215,7 +215,7 @@ second process to run and supervise), not a speed-up.
   `KicadDocumentService.resyncDocument()`: the `DocumentChanged` relay skips them, because it sees
   our own client name and assumes the commit backend already applied the diff.
 - **Autoroute** (`KicadAutorouteService`, `Route → Autoroute…`, toolbar "Auto", `Shift+X`): the
-  dialog picks a router — the JS router (`@kicad-web/router`'s `JsRouter`, `@tscircuit/capacity-autorouter`)
+  dialog picks a router — the JS router (`@fp-pcb/router`'s `JsRouter`, `@tscircuit/capacity-autorouter`)
   **in this tab**, whose `step()` loop yields to the UI every 30 ms so the dialog stays live and
   Cancel works; the same router **on the bridge**; or **Freerouting** (Java) on the bridge — plus
   which nets (all unrouted / the selected items' nets), the copper layers, via cost, passes
@@ -239,7 +239,9 @@ second process to run and supervise), not a speed-up.
 
 `scripts/prove-kicad.mjs` drives the app in headless Chromium (Playwright from `e2e/`) against
 a throwaway copy of the kitchen-sink project inside the bridge workspace root (project-local
-library tables). Steps (`node apps/web/scripts/prove-kicad.mjs [step,...]`): `board` (open,
+library tables). Start the bridge for a proof run with `WORKSPACE_ROOT` pointing at a scratch
+directory: the copy is made inside that root, and the default root is the KiCad checkout's
+`qa/data`, which a run should not write into. Steps (`node apps/web/scripts/prove-kicad.mjs [step,...]`): `board` (open,
 pick R1), `edit` (properties X, undo through `SaveDocumentToString`), `route` (track + via +
 layer switch, undo / redo, via tool), `draw` (line / rect / circle / arc / polygon / text /
 filled zone), `footprint` (place `Resistor_SMD:R_0603_1608Metric`, pads verified in the file),
@@ -265,7 +267,7 @@ GAP rather than hiding it).
 `node apps/web/scripts/prove-kicad.mjs --board <name> [step,...]` hands over to
 `scripts/prove-board.mjs`, the same kind of headless drive on one of the five demo boards under
 `e2e/fixtures/boards/` (`ecc83`, `sonde_xilinx`, `interf_u`, `pic_programmer`, `stickhub`). The
-board is copied into `<workspace root>/.kicad-web-practice-<name>/` (the fixture is never
+board is copied into `<workspace root>/.fp-pcb-practice-<name>/` (the fixture is never
 written) and the steps are `open` (timings: canvas, session open, store items, first content
 draw, server shapes), `view` (zoom to fit, layers panel toggle, hover, pad pick), `schematic`
 (every sheet), `edit` (property edit → revision bump → undo), `move` (the M tool), `route` on
@@ -295,7 +297,7 @@ bun test            # unit tests, incl. test/kicad-canvas.test.ts (per-store pad
                     # test/autoroute.test.ts (the autoroute service on fakes: job body, SSE parsing, the
                     # in-tab run and its cancel, the bridge run and its cancel)
 bunx tsc -b
-bun run --filter @kicad-web/app build
+bun run --filter @fp-pcb/app build
 cd e2e && bun run test          # mock smoke (E2E_PORT=5175 when a dev server holds 5173)
 KICAD_CLI=... bun run test:real # e2e/real: real KiCad through the bridge (skipped without KICAD_CLI)
 ```

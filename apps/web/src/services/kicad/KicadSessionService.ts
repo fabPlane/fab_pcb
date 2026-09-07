@@ -15,11 +15,11 @@
 // second server the library/footprint editor needs; with no bridge those features report that they
 // need one, and the session adopts whatever project the running server already has open.
 
-import { KiCad, KiCadEvents, NngWsSubscriber, NngWsTransport, TransportError, WebSocketTransport, bridgeWsUrl, type Transport } from '@kicad-web/client';
-import { DocumentType } from '@kicad-web/proto';
+import { KiCad, KiCadEvents, NngWsSubscriber, NngWsTransport, TransportError, WebSocketTransport, bridgeWsUrl, type Transport } from '@fp-pcb/client';
+import { DocumentType } from '@fp-pcb/proto';
 import type { FileEntry, RecentProject, SessionInfo, SessionService } from '../types';
 
-const RECENT_KEY = 'kicad-web.recent-projects';
+const RECENT_KEY = 'fp-pcb.recent-projects';
 
 export interface BridgeSessionRecord {
   id: string;
@@ -319,7 +319,7 @@ export class KicadSessionService implements SessionService {
         else if (m.state === 'running' && this.session?.state === 'error') this.patch({ state: 'open', error: undefined });
       });
     }
-    const kicad = await KiCad.connect(transport, { clientName: `kicad-web/${sessionId}/${clientTab}`, log: (m) => this.log(m) });
+    const kicad = await KiCad.connect(transport, { clientName: `fp-pcb/${sessionId}/${clientTab}`, log: (m) => this.log(m) });
     if (direct) await this.subscribeEvents(kicad);
     return kicad;
   }
@@ -531,7 +531,7 @@ export class KicadSessionService implements SessionService {
     try {
       const wsUrl = this.opts.bridgeUrl ? bridgeWsUrl(this.opts.bridgeUrl, id) : bridgeWsUrl(location.origin, id);
       const transport = this.opts.createTransport ? await this.opts.createTransport(wsUrl) : await WebSocketTransport.connect(wsUrl, { log: (m) => this.log(`${label}: ${m}`) });
-      const kicad = await KiCad.connect(transport, { clientName: `kicad-web/${id}/${clientTab}-${label}`, log: (m) => this.log(`${label}: ${m}`) });
+      const kicad = await KiCad.connect(transport, { clientName: `fp-pcb/${id}/${clientTab}-${label}`, log: (m) => this.log(`${label}: ${m}`) });
       this.log(`${label} session ${id} open${path ? ` on ${path.split('/').pop()}` : ''}`);
       const close = async () => {
         try {

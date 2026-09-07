@@ -1,7 +1,7 @@
 // Editing schema for an object shaped like a kiapi message. Two sources, same output:
 //
 //   - `fromDescriptor(desc)` reads the protobuf-es descriptor (`kiapiRegistry` from
-//     `@kicad-web/proto`) so real items are editable: enums get their value names, int64
+//     `@fp-pcb/proto`) so real items are editable: enums get their value names, int64
 //     distances stay bigint, `Distance` / `Angle` / `Vector2` / `KIID` / `Color` / `Ratio`
 //     messages become the dedicated field kinds, oneofs expose their `case` / `value`.
 //   - `inferKind(value)` guesses from the value shape (the mock's plain objects, or fields
@@ -11,7 +11,7 @@
 // as the fallback, then per-path overrides.
 
 import { ScalarType, type DescEnum, type DescField, type DescMessage, type DescOneof } from '@bufbuild/protobuf';
-import { kiapiRegistry } from '@kicad-web/proto';
+import { kiapiRegistry } from '@fp-pcb/proto';
 import { enumOptionsFor } from '@/lib/enums';
 
 export type FieldKind =

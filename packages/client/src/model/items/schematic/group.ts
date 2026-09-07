@@ -1,6 +1,6 @@
 /** `SchematicGroup`. */
 import { create } from "@bufbuild/protobuf";
-import { KIIDSchema, KiCadObjectType, SchematicGroupSchema, type SchematicGroup as SchematicGroupProto } from "@kicad-web/proto";
+import { KIIDSchema, KiCadObjectType, SchematicGroupSchema, type SchematicGroup as SchematicGroupProto } from "@fp-pcb/proto";
 import { Item, registerItem } from "../base";
 
 export class SchematicGroup extends Item<SchematicGroupProto> {

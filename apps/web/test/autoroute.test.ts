@@ -6,8 +6,8 @@
 
 import './setup';
 import { describe, expect, test } from 'bun:test';
-import { BoardLayer } from '@kicad-web/proto';
-import { RouteCancelled, type RouteInput, type RouteResult } from '@kicad-web/router/types';
+import { BoardLayer } from '@fp-pcb/proto';
+import { RouteCancelled, type RouteInput, type RouteResult } from '@fp-pcb/router/types';
 import { SseParser, airlineCamera, applyBridgeEvent, autorouteMessage, buildJobRequest, formatDuration, parseSseBlock } from '@/services/autoroute-run';
 import type { AutorouteRun } from '@/services/types';
 import { KicadAutorouteService } from '@/services/kicad/KicadAutorouteService';

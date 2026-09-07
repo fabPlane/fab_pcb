@@ -9,7 +9,7 @@ import {
   type SheetPin as SheetPinProto,
   type SheetSide,
   type SheetSymbol,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import type { Vec2 } from "../../../units";
 import { Item, registerItem } from "../base";
 import { SchematicField } from "./symbol";

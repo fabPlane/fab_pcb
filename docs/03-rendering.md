@@ -26,7 +26,7 @@ Not available and therefore drawn or computed client-side: ratsnest / unrouted
 connections (gap G9, computed from `GetNets` + `GetConnectedItems` until then),
 DRC markers (gap G4), selection (owned by the UI anyway).
 
-## Renderer design (`@kicad-web/renderer`)
+## Renderer design (`@fp-pcb/renderer`)
 
 **Choice: WebGL2 via PixiJS v8** (WebGPU when available). Pixi gives batching,
 containers, hit testing and text-free primitives out of the box, and its `Graphics`

@@ -4,7 +4,7 @@
 // `scripts/prove-kicad.mjs` and `e2e/real`.
 
 import { describe, expect, test } from 'bun:test';
-import { RuleSeverity } from '@kicad-web/proto';
+import { RuleSeverity } from '@fp-pcb/proto';
 import { KicadLibraryService } from '@/services/kicad/KicadLibraryService';
 import { GLOBAL_DELETE_TYPES, boardLayer, objectType, ruleLabel } from '@/services/kicad/KicadBoardTools';
 import { gridToNm, toThemeColor } from '@/services/kicad/KicadSettingsService';
@@ -214,7 +214,7 @@ function fakeUndo(supportsServer: boolean, stack: string[] = []) {
       return { applied: 1, undoCount: stack.length, redoCount: 0 };
     },
     redo: async () => ({ applied: 1, undoCount: stack.length, redoCount: 0 }),
-    undoStack: async () => ({ undo: stack.map((description) => ({ description, clientName: 'kicad-web', itemCount: 1 })), redo: [] }),
+    undoStack: async () => ({ undo: stack.map((description) => ({ description, clientName: 'fp-pcb', itemCount: 1 })), redo: [] }),
   };
   const docs = { boardDoc: doc, schematicDoc: null, beginActivity: () => () => undefined, resyncDocument: async () => undefined };
   const clientCalls: string[] = [];

@@ -3,7 +3,7 @@
  * IPC API coverage analysis.
  *
  * Enumerates every request message in the kiapi command protos (from the generated descriptors in
- * @kicad-web/proto), scans the KiCad C++ API handlers for `registerHandler<Req, Res>` calls and
+ * @fp-pcb/proto), scans the KiCad C++ API handlers for `registerHandler<Req, Res>` calls and
  * `checkForHeadless( "Req" )` gates, and writes:
  *
  *   tooling/coverage/commands.json   machine-readable table consumed by the client generator
@@ -24,7 +24,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { DescFile, DescMessage } from "@bufbuild/protobuf";
-import { kiapiFiles, kiapiRegistry, wellKnownFiles } from "@kicad-web/proto";
+import { kiapiFiles, kiapiRegistry, wellKnownFiles } from "@fp-pcb/proto";
 
 export const TOOL_DIR = dirname(fileURLToPath(import.meta.url));
 export const REPO_DIR = resolve(TOOL_DIR, "..", "..");

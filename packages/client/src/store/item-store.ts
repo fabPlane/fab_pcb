@@ -3,7 +3,7 @@
  * subscribe to. The interface is the contract in docs/contracts.md; `MemoryItemStore` is the
  * implementation `DocumentSync` fills and mutates. Consumers never mutate a store directly.
  */
-import type { DocumentSpecifier } from "@kicad-web/proto";
+import type { DocumentSpecifier } from "@fp-pcb/proto";
 import type { DocumentKind } from "../model/document";
 import type { Item } from "../model/items/base";
 

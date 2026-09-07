@@ -1,7 +1,7 @@
 import { resolve } from "node:path";
-import { resolveFreerouting, type FreeroutingPaths } from "@kicad-web/router/freerouting";
+import { resolveFreerouting, type FreeroutingPaths } from "@fp-pcb/router/freerouting";
 
-/** `<repo>/../kicad` — the KiCad checkout that sits next to kicad-web. */
+/** `<repo>/../kicad` — the KiCad checkout that sits next to fp-pcb. */
 export const KICAD_CHECKOUT = resolve(import.meta.dir, "../../../../kicad");
 export const DEFAULT_KICAD_CLI = `${KICAD_CHECKOUT}/build/release/kicad/KiCad.app/Contents/MacOS/kicad-cli`;
 export const DEFAULT_WORKSPACE_ROOT = `${KICAD_CHECKOUT}/qa/data`;
@@ -39,7 +39,7 @@ export interface BridgeConfig {
   /**
    * Freerouting jar and Java for `POST /sessions/:id/route {router:"freerouting"}`: env
    * `FREEROUTING_JAR` (default `packages/router/vendor/freerouting-<version>.jar`) and
-   * `KICAD_WEB_JAVA` / `FREEROUTING_JAVA` (default the vendored Temurin 25, then a system `java`).
+   * `FP_PCB_JAVA` / `FREEROUTING_JAVA` (default the vendored Temurin 25, then a system `java`).
    * `ok: false` carries the reason; the route is then refused with it.
    */
   freerouting: FreeroutingPaths;

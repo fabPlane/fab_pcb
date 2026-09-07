@@ -13,7 +13,7 @@ import {
   type NoConnectMarker,
   type SchematicLine as SchematicLineProto,
   type StrokeAttributes,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import { nm, toDistance, type Vec2 } from "../../../units";
 import { Item, registerItem } from "../base";
 

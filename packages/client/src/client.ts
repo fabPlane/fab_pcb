@@ -20,7 +20,7 @@ import {
   packAny,
   type ApiResponse,
   type KiCadVersion,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import { COMMANDS, KICAD_COMMIT, type CommandInfo } from "./commands-data";
 import { KiCadApiError, statusName } from "./errors";
 import { TransportError, type Transport } from "./transport/types";

@@ -1,5 +1,5 @@
 /**
- * Framing shared by `WebSocketTransport` (browser/Bun) and `@kicad-web/bridge` (Bun).
+ * Framing shared by `WebSocketTransport` (browser/Bun) and `@fp-pcb/bridge` (Bun).
  *
  * Binary frame (both directions): 4-byte big-endian correlation id + raw ApiRequest/ApiResponse
  * bytes. Several requests may be in flight on one WebSocket; the bridge serialises them onto

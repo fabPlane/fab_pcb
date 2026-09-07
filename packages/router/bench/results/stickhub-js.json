@@ -2,8 +2,19 @@
   "board": "stickhub",
   "router": "js",
   "routerImpl": "js",
+  "harness": "job",
   "kicadVersion": "10.99.0-3711-g8cc9377988",
-  "date": "2026-09-07T00:11:24.732Z",
+  "date": "2026-09-07T02:52:30.347Z",
+  "measuredWith": {
+    "kicad": "10.99.0-3711-g8cc9377988",
+    "java": "n/a",
+    "freerouting": "2.4.1",
+    "capacityAutorouter": "0.0.885",
+    "bun": "1.4.0",
+    "os": "macOS 15.6.1",
+    "cpu": "Apple M2 Max",
+    "memoryGb": 96
+  },
   "connections": {
     "before": 128,
     "after": 128,
@@ -35,12 +46,27 @@
       "DRCET_LIB_FOOTPRINT_MISMATCH": 36
     }
   },
-  "wallMs": 65475,
-  "routeMs": 65446,
+  "wallMs": 67669,
+  "routeMs": 0,
   "timedOut": false,
   "svg": "packages/router/bench/results/stickhub-js.svg",
   "log": [
-    "extract: 278 pads, 128 connections, 2 copper layers, 5 zones, 0 copper graphics",
+    "job: route job d6856101: js on session bench-stickhub",
+    "extract: 278 pads, 128 connections, 2 copper layers",
+    "start",
+    "preprocessSimpleRouteJsonSolver",
+    "componentDetectionSolver",
+    "escapeViaLocationSolver",
+    "netToPointPairsSolver",
+    "topologyPlanningSolver",
+    "topologyMergingSolver",
+    "nodeDimensionSubdivisionSolver",
+    "edgeSolver",
+    "availableSegmentPointSolver",
+    "necessaryCrampedPortPointSolver",
+    "portPointPathingSolver",
+    "job: route job d6856101: failed: the router routed nothing: solver failed (attempt 3): HB ran out of iterations",
+    "done",
     "note: 130 pads at non-90° rotations are modelled by their bounding box",
     "note: 5 copper zones are not obstacles for the JS router",
     "srj: 2 layers, 274 obstacles, 45 nets to route",
@@ -50,10 +76,18 @@
     "retrying without +3.3V, Net-(U1-VBUS_SENSE)",
     "solver failed (attempt 3): HB ran out of iterations",
     "nets left unrouted after solver failures: GND, +3.3V, Net-(U1-VBUS_SENSE)",
-    "0 tracks, 0 vias, 0/45 nets in 65446 ms (2017561 iterations)"
+    "0 tracks, 0 vias, 0/45 nets in 67514 ms (2017561 iterations)"
   ],
   "options": {
-    "maxTimeMs": 600000,
-    "effort": 1
+    "effort": 1,
+    "maxTimeMs": 600000
+  },
+  "job": {
+    "state": "failed",
+    "error": "the router routed nothing: solver failed (attempt 3): HB ran out of iterations",
+    "routed": 0,
+    "routerRouted": 0,
+    "total": 128,
+    "message": ""
   }
 }

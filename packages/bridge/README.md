@@ -1,17 +1,17 @@
-# @kicad-web/bridge
+# @fp-pcb/bridge
 
 Bun process that sits between browser tabs and `kicad-cli api-server`:
 
-- speaks nng SP framing on KiCad's unix socket (`NngIpcTransport` from `@kicad-web/client/transport`, no native deps);
+- speaks nng SP framing on KiCad's unix socket (`NngIpcTransport` from `@fp-pcb/client/transport`, no native deps);
 - spawns and supervises one `kicad-cli api-server` per **session**, reports its state to clients;
 - forwards WebSocket binary frames byte-for-byte, serialising them onto KiCad's one-request-at-a-time REQ/REP socket;
 - subscribes to KiCad's events socket (nng PUB/SUB, `GetServerInfo.events_socket_url`) and relays every `kiapi.common.events.Event` to the session's WebSocket clients, plus a JSON mirror over SSE;
 - exposes a file API confined to a workspace root and optional static hosting for `apps/web`.
 
 ```
-bun run --filter @kicad-web/bridge start                 # or: bun packages/bridge/src/main.ts
-bun run --filter @kicad-web/bridge events                # list sessions
-bun run --filter @kicad-web/bridge events <session-id>   # print that session's KiCad events, decoded, one JSON line each (--sse: via the SSE route)
+bun run --filter @fp-pcb/bridge start                 # or: bun packages/bridge/src/main.ts
+bun run --filter @fp-pcb/bridge events                # list sessions
+bun run --filter @fp-pcb/bridge events <session-id>   # print that session's KiCad events, decoded, one JSON line each (--sse: via the SSE route)
 ```
 
 ## Configuration (environment)
@@ -32,7 +32,7 @@ bun run --filter @kicad-web/bridge events <session-id>   # print that session's 
 | `KICAD_EVENTS`             | `1`                                                               | `0` disables the events relay (clients then poll `GetDocumentRevision`)                                                                      |
 | `BRIDGE_URL`               | `http://127.0.0.1:4020`                                           | used by the `events` CLI only                                                                                                                |
 | `FREEROUTING_JAR`          | `packages/router/vendor/freerouting-2.4.1.jar`                    | Freerouting jar for the autorouting job (`bun packages/router/bench/fetch-freerouting.ts --jdk` downloads it)                                |
-| `KICAD_WEB_JAVA`           | `packages/router/vendor/jdk/…/bin/java`, then a system `java`     | Java 25 for Freerouting (`FREEROUTING_JAVA` is accepted too). A missing jar or Java is reported in `/health.freerouting.reason` and refuses the job with that message |
+| `FP_PCB_JAVA`           | `packages/router/vendor/jdk/…/bin/java`, then a system `java`     | Java 25 for Freerouting (`FREEROUTING_JAVA` is accepted too). A missing jar or Java is reported in `/health.freerouting.reason` and refuses the job with that message |
 
 ## HTTP API
 
@@ -43,7 +43,7 @@ bun run --filter @kicad-web/bridge events <session-id>   # print that session's 
 | `POST /sessions` `{path?, socket?, id?}`                                                                                           | spawn `kicad-cli api-server [path] --socket <sock>`, wait until `Ping` is `AS_OK`, then subscribe to its events socket; `201 {session, wsUrl}`. `path` may be a `.kicad_pro`, `.kicad_pcb` or `.kicad_sch` (relative paths resolve against the workspace root; a `.kicad_pro` loads only the project, not the board). `400` bad input, `502` the server failed to start (message includes the last kicad-cli output lines).     |
 | `GET /sessions/:id` / `GET /sessions/:id/log`                                                                                      | one session / its last 200 stdout+stderr lines                                                                                                                                                                                                                                                                                                                                                                                  |
 | `GET /sessions/:id/events`                                                                                                         | Server-Sent Events: `event: state` `{sessionId, state:'connected'\|'disconnected', message?}` on open and on change, `event: event` with the proto3 JSON of each KiCad event (`{"sequence":"12","documentChanged":{...}}`), `event: error` for an undecodable frame, `: keepalive` every 15 s. Same events as the WebSocket relay, for `curl -N` / `EventSource` debugging; an open stream counts as a client for idle reaping. |
-| `POST /sessions/:id/route` `{router:'js'\|'freerouting', options?, freerouting?:{passes}, refillZones?, message?}`                 | starts an autorouting job on the session's open board (`@kicad-web/router/bridge-job`): `RefillZones`, `SaveDocument`, `extractRouteInput`, the router, `applyRouteResult` as **one** commit ("Autoroute (<router>): n connections"); `202 {job}`. `400` for an unknown router or when Freerouting is missing (with the fix), `409` when the session has no running KiCad. `options` is the router package's `RouteOptions` (`layers` as BoardLayer values, `nets`, `viaCost`, `effort`, `maxTimeMs`). |
+| `POST /sessions/:id/route` `{router:'js'\|'freerouting', options?, freerouting?:{passes}, refillZones?, message?}`                 | starts an autorouting job on the session's open board (`@fp-pcb/router/bridge-job`): `RefillZones`, `SaveDocument`, `extractRouteInput`, the router, `applyRouteResult` as **one** commit ("Autoroute (<router>): n connections"); `202 {job}`. `400` for an unknown router or when Freerouting is missing (with the fix), `409` when the session has no running KiCad. `options` is the router package's `RouteOptions` (`layers` as BoardLayer values, `nets`, `viaCost`, `effort`, `maxTimeMs`). |
 | `GET /sessions/:id/route` · `GET /sessions/:id/route/:job`                                                                         | the session's jobs (+ the Freerouting paths) / one job `{id, router, state, progress, log, summary?, error?}`; with `Accept: text/event-stream` the job streams `event: state` (its current record), `progress` `{state, progress, log}`, then `done` or `error` (the record), `: keepalive` every 15 s. `summary`: `tracks, vias, routed, routerRouted, total, trackLengthNm, elapsedMs, wallMs, timedOut, message, unrouted:[{net, from, to}], log` (`routed` / `unrouted` re-measured with `GetRatsnest` after the apply; a run that routed nothing ends `failed` with the router's reason). |
 | `DELETE /sessions/:id/route/:job`                                                                                                  | cancels: the JS router stops at its next step, Freerouting's `java` gets SIGTERM (SIGKILL after 5 s); nothing is applied and the job ends `cancelled`                                                                                                                                                                                                                                                                         |
 | `DELETE /sessions/:id`                                                                                                             | SIGTERM (SIGKILL after 5 s), unlink socket, close its WebSockets                                                                                                                                                                                                                                                                                                                                                                |
@@ -54,7 +54,7 @@ All responses carry permissive CORS headers so a Vite dev server on another port
 
 ## WebSocket protocol
 
-Defined in `@kicad-web/client/transport/ws-bridge-protocol.ts`; `WebSocketTransport` implements the client side.
+Defined in `@fp-pcb/client/transport/ws-bridge-protocol.ts`; `WebSocketTransport` implements the client side.
 
 Protocol version 2 (`WS_BRIDGE_PROTOCOL_VERSION`).
 

@@ -6,9 +6,9 @@
 import { clickWorld, expect, haveKicad, openBoard, runCommand, test } from "./fixtures";
 
 const schRevision = (page: import("@playwright/test").Page): Promise<number> =>
-  page.evaluate(async () => Number(await (window as any).__kicadWeb.services.documents.schematicDoc.revision()));
+  page.evaluate(async () => Number(await (window as any).__fpPcb.services.documents.schematicDoc.revision()));
 const waitSchRevisionAbove = (page: import("@playwright/test").Page, r: number) =>
-  page.waitForFunction((r) => (window as any).__kicadWeb.services.documents.schematicDoc.revision().then((v: bigint) => Number(v) > r), r, { timeout: 30_000 });
+  page.waitForFunction((r) => (window as any).__fpPcb.services.documents.schematicDoc.revision().then((v: bigint) => Number(v) > r), r, { timeout: 30_000 });
 
 test.describe("real KiCad: schematic", () => {
   test.skip(!haveKicad, "set KICAD_CLI to run against a real kicad-cli api-server");
@@ -18,13 +18,13 @@ test.describe("real KiCad: schematic", () => {
     await runCommand(page, "window.schematic");
     await page.waitForSelector('canvas[aria-label="schematic canvas"]', { timeout: 60_000 });
     await page.waitForTimeout(1500);
-    await page.evaluate(() => (window as any).__kicadWeb.stores.ui.getState().setGrid(1_270_000));
-    const rootKey: string = await page.evaluate(() => `schematic:${(window as any).__kicadWeb.stores.app.getState().activeSheet}`);
+    await page.evaluate(() => (window as any).__fpPcb.stores.ui.getState().setGrid(1_270_000));
+    const rootKey: string = await page.evaluate(() => `schematic:${(window as any).__fpPcb.stores.app.getState().activeSheet}`);
     // frame the region the clicks use; zoom-to-fit leaves y > ~137 mm under the bottom panel
-    await page.evaluate((k) => (window as any).__kicadWeb.host(k).setCamera({ x: 80e6, y: 140e6, zoom: 4e-6 }), rootKey);
+    await page.evaluate((k) => (window as any).__fpPcb.host(k).setCamera({ x: 80e6, y: 140e6, zoom: 4e-6 }), rootKey);
     await page.waitForTimeout(300);
     const sheetPath = rootKey.slice("schematic:".length);
-    const count = (type: string) => page.evaluate(({ sheetPath, type }) => [...(window as any).__kicadWeb.services.documents.sheet(sheetPath).byType(type)].length, { sheetPath, type });
+    const count = (type: string) => page.evaluate(({ sheetPath, type }) => [...(window as any).__fpPcb.services.documents.sheet(sheetPath).byType(type)].length, { sheetPath, type });
 
     await test.step("wire with a 90° bend", async () => {
       const lines0 = await count("KOT_SCH_LINE");
@@ -37,7 +37,7 @@ test.describe("real KiCad: schematic", () => {
       await page.keyboard.press("Enter");
       await waitSchRevisionAbove(page, r0);
       expect(await count("KOT_SCH_LINE")).toBe(lines0 + 2);
-      const saved: string = await page.evaluate(() => (window as any).__kicadWeb.services.documents.schematicDoc.saveToString());
+      const saved: string = await page.evaluate(() => (window as any).__fpPcb.services.documents.schematicDoc.saveToString());
       expect(saved).toMatch(/\(wire[\s\S]{0,80}?\(pts[\s\S]{0,40}?\(xy 38\.1 127\)/);
     });
 
@@ -66,15 +66,15 @@ test.describe("real KiCad: schematic", () => {
       await clickWorld(page, "board", "board canvas", 125_200_000, 90_900_000);
       await page.waitForTimeout(300);
       const ref: string = await page.evaluate(() => {
-        const s = (window as any).__kicadWeb.stores.editor.getState().docs.board.selection[0];
-        return (window as any).__kicadWeb.services.documents.board().get(s)?.proto.referenceField?.text?.text?.text ?? "";
+        const s = (window as any).__fpPcb.stores.editor.getState().docs.board.selection[0];
+        return (window as any).__fpPcb.services.documents.board().get(s)?.proto.referenceField?.text?.text?.text ?? "";
       });
       expect(ref).toBe("R1");
       await runCommand(page, "inspect.crossProbe");
       await page.waitForSelector('canvas[aria-label="schematic canvas"]', { timeout: 30_000 });
       const symbolRefs: string[] = await page.evaluate((rootKey) => {
-        const sel: string[] = (window as any).__kicadWeb.stores.editor.getState().docs[rootKey]?.selection ?? [];
-        const store = (window as any).__kicadWeb.services.documents.sheet(rootKey.slice("schematic:".length));
+        const sel: string[] = (window as any).__fpPcb.stores.editor.getState().docs[rootKey]?.selection ?? [];
+        const store = (window as any).__fpPcb.services.documents.sheet(rootKey.slice("schematic:".length));
         return sel.map((id) => store.get(id)?.proto.referenceField?.text?.text ?? "");
       }, rootKey);
       expect(symbolRefs).toContain("R1");

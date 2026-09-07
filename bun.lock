@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "kicad-web",
+      "name": "fp-pcb",
       "devDependencies": {
         "@types/bun": "^1.2.0",
         "prettier": "3.6.2",
@@ -11,14 +11,14 @@
       },
     },
     "apps/web": {
-      "name": "@kicad-web/app",
+      "name": "@fp-pcb/app",
       "version": "0.0.1",
       "dependencies": {
         "@bufbuild/protobuf": "2.14.1",
-        "@kicad-web/client": "workspace:*",
-        "@kicad-web/proto": "workspace:*",
-        "@kicad-web/renderer": "workspace:*",
-        "@kicad-web/router": "workspace:*",
+        "@fp-pcb/client": "workspace:*",
+        "@fp-pcb/proto": "workspace:*",
+        "@fp-pcb/renderer": "workspace:*",
+        "@fp-pcb/router": "workspace:*",
         "@radix-ui/react-dialog": "1.1.15",
         "@radix-ui/react-dropdown-menu": "2.1.16",
         "@radix-ui/react-menubar": "1.1.16",
@@ -41,7 +41,7 @@
       },
     },
     "e2e": {
-      "name": "@kicad-web/e2e",
+      "name": "@fp-pcb/e2e",
       "version": "0.0.1",
       "devDependencies": {
         "@playwright/test": "1.63.0",
@@ -50,11 +50,11 @@
       },
     },
     "packages/bridge": {
-      "name": "@kicad-web/bridge",
+      "name": "@fp-pcb/bridge",
       "version": "0.0.1",
       "dependencies": {
-        "@kicad-web/client": "workspace:*",
-        "@kicad-web/router": "workspace:*",
+        "@fp-pcb/client": "workspace:*",
+        "@fp-pcb/router": "workspace:*",
       },
       "devDependencies": {
         "@types/bun": "^1.2.0",
@@ -62,11 +62,11 @@
       },
     },
     "packages/client": {
-      "name": "@kicad-web/client",
+      "name": "@fp-pcb/client",
       "version": "0.0.1",
       "dependencies": {
         "@bufbuild/protobuf": "2.14.1",
-        "@kicad-web/proto": "workspace:*",
+        "@fp-pcb/proto": "workspace:*",
       },
       "devDependencies": {
         "@types/bun": "^1.2.0",
@@ -74,7 +74,7 @@
       },
     },
     "packages/proto": {
-      "name": "@kicad-web/proto",
+      "name": "@fp-pcb/proto",
       "version": "0.0.1",
       "dependencies": {
         "@bufbuild/protobuf": "2.14.1",
@@ -85,15 +85,15 @@
       },
     },
     "packages/renderer": {
-      "name": "@kicad-web/renderer",
+      "name": "@fp-pcb/renderer",
       "version": "0.0.1",
       "dependencies": {
         "flatbush": "4.6.2",
         "pixi.js": "8.20.1",
       },
       "devDependencies": {
-        "@kicad-web/client": "workspace:*",
-        "@kicad-web/proto": "workspace:*",
+        "@fp-pcb/client": "workspace:*",
+        "@fp-pcb/proto": "workspace:*",
         "@types/bun": "^1.2.0",
         "happy-dom": "20.14.0",
         "playwright": "1.63.0",
@@ -101,12 +101,12 @@
       },
     },
     "packages/router": {
-      "name": "@kicad-web/router",
+      "name": "@fp-pcb/router",
       "version": "0.0.1",
       "dependencies": {
         "@bufbuild/protobuf": "2.14.1",
-        "@kicad-web/client": "workspace:*",
-        "@kicad-web/proto": "workspace:*",
+        "@fp-pcb/client": "workspace:*",
+        "@fp-pcb/proto": "workspace:*",
         "@tscircuit/capacity-autorouter": "0.0.885",
       },
       "devDependencies": {
@@ -115,11 +115,11 @@
       },
     },
     "tooling/bench": {
-      "name": "@kicad-web/bench",
+      "name": "@fp-pcb/bench",
       "version": "0.0.1",
       "dependencies": {
-        "@kicad-web/bridge": "workspace:*",
-        "@kicad-web/client": "workspace:*",
+        "@fp-pcb/bridge": "workspace:*",
+        "@fp-pcb/client": "workspace:*",
       },
       "devDependencies": {
         "@types/bun": "^1.2.0",
@@ -127,18 +127,18 @@
       },
     },
     "tooling/ci": {
-      "name": "@kicad-web/ci",
+      "name": "@fp-pcb/ci",
       "version": "0.0.1",
       "devDependencies": {
         "@types/bun": "^1.2.0",
       },
     },
     "tooling/coverage": {
-      "name": "@kicad-web/coverage",
+      "name": "@fp-pcb/coverage",
       "version": "0.0.1",
       "dependencies": {
         "@bufbuild/protobuf": "2.14.1",
-        "@kicad-web/proto": "workspace:*",
+        "@fp-pcb/proto": "workspace:*",
       },
     },
   },
@@ -275,25 +275,25 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
 
-    "@kicad-web/app": ["@kicad-web/app@workspace:apps/web"],
+    "@fp-pcb/app": ["@fp-pcb/app@workspace:apps/web"],
 
-    "@kicad-web/bench": ["@kicad-web/bench@workspace:tooling/bench"],
+    "@fp-pcb/bench": ["@fp-pcb/bench@workspace:tooling/bench"],
 
-    "@kicad-web/bridge": ["@kicad-web/bridge@workspace:packages/bridge"],
+    "@fp-pcb/bridge": ["@fp-pcb/bridge@workspace:packages/bridge"],
 
-    "@kicad-web/ci": ["@kicad-web/ci@workspace:tooling/ci"],
+    "@fp-pcb/ci": ["@fp-pcb/ci@workspace:tooling/ci"],
 
-    "@kicad-web/client": ["@kicad-web/client@workspace:packages/client"],
+    "@fp-pcb/client": ["@fp-pcb/client@workspace:packages/client"],
 
-    "@kicad-web/coverage": ["@kicad-web/coverage@workspace:tooling/coverage"],
+    "@fp-pcb/coverage": ["@fp-pcb/coverage@workspace:tooling/coverage"],
 
-    "@kicad-web/e2e": ["@kicad-web/e2e@workspace:e2e"],
+    "@fp-pcb/e2e": ["@fp-pcb/e2e@workspace:e2e"],
 
-    "@kicad-web/proto": ["@kicad-web/proto@workspace:packages/proto"],
+    "@fp-pcb/proto": ["@fp-pcb/proto@workspace:packages/proto"],
 
-    "@kicad-web/renderer": ["@kicad-web/renderer@workspace:packages/renderer"],
+    "@fp-pcb/renderer": ["@fp-pcb/renderer@workspace:packages/renderer"],
 
-    "@kicad-web/router": ["@kicad-web/router@workspace:packages/router"],
+    "@fp-pcb/router": ["@fp-pcb/router@workspace:packages/router"],
 
     "@napi-rs/lzma-linux-x64-gnu": ["@napi-rs/lzma-linux-x64-gnu@1.5.1", "", { "os": "linux", "cpu": "x64" }, "sha512-oTXEIha4SsuXdTA4Iyskj0kpdx2yVXdhd75c2v3xGrHFfVMsbhTPZU/nMPL4sWKo4pBHm3aucLaqGlF696dTyQ=="],
 

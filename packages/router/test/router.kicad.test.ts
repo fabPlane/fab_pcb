@@ -5,7 +5,7 @@
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { existsSync } from "node:fs";
-import { DrcErrorType, RuleSeverity } from "@kicad-web/proto";
+import { DrcErrorType, RuleSeverity } from "@fp-pcb/proto";
 import { KICAD_CLI, fixtureBoards, haveKicad, openFixture, type FixtureBoard, type RunningBoard } from "../bench/kicad";
 import {
   DEFAULT_JAR,

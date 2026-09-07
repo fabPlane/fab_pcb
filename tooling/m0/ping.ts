@@ -64,7 +64,7 @@ const sub = (m: Map<number, Field[]>, n: number) => decode(first(m, n)?.bytes ??
 
 // ---------- kiapi envelope ----------
 function apiRequest(typeName: string, payload: Uint8Array = new Uint8Array()): Uint8Array {
-  const header = stringField(2, "kicad-web/m0-ping");                                   // ApiRequestHeader.client_name
+  const header = stringField(2, "fp-pcb/m0-ping");                                   // ApiRequestHeader.client_name
   const any = concat(stringField(1, `type.googleapis.com/${typeName}`), bytesField(2, payload)); // google.protobuf.Any
   return concat(bytesField(1, header), bytesField(2, any));                             // ApiRequest
 }

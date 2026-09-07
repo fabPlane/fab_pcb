@@ -2,7 +2,7 @@
  * Item wrappers for every board and schematic item type the IPC API serves. Importing this module
  * registers all classes with `wrapAny()`.
  */
-import { KiCadObjectType } from "@kicad-web/proto";
+import { KiCadObjectType } from "@fp-pcb/proto";
 
 export * from "./base";
 export * from "./board/tracks";

@@ -1,4 +1,4 @@
-// DocumentService over `@kicad-web/client`'s object model. Owns the open Project / Board /
+// DocumentService over `@fp-pcb/client`'s object model. Owns the open Project / Board /
 // Schematic / FootprintDocuments of the session, their ItemStores (filled by the client's
 // DocumentSync), and the derived read models the panels want (layers, nets, board setup,
 // net classes, text variables, variants). Dirty flags and foreign changes come from KiCad's
@@ -19,7 +19,7 @@ import {
   type DocumentSaved,
   type DocumentSpecifier,
   type NetClass,
-} from '@kicad-web/proto';
+} from '@fp-pcb/proto';
 import {
   Board,
   FootprintDocument,
@@ -36,8 +36,8 @@ import {
   type Commit,
   type DocumentSync,
   type Item,
-} from '@kicad-web/client';
-import { NetClassSchema } from '@kicad-web/proto';
+} from '@fp-pcb/client';
+import { NetClassSchema } from '@fp-pcb/proto';
 import type { DocumentKind, ItemStore, StoredItem } from '@/contracts';
 import { layerDisplayName } from '@/lib/enums';
 import type { BoardSetup, CustomRuleInfo, DesignRules, DocumentService, LayerInfo, NetInfo, NetclassInfo, SheetInfo, StackupLayer, TextVariable, VariantInfo } from '../types';

@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties } from 'react';
-import { colorToCss, layerColor, themeColor, type Theme } from '@kicad-web/renderer';
+import { colorToCss, layerColor, themeColor, type Theme } from '@fp-pcb/renderer';
 import { getCanvasHost } from '@/canvas/CanvasSlot';
 import { CANVAS_THEMES, registerServerTheme, serverThemeName, themeFor } from '@/canvas/theme';
 import { useServices } from '@/services';

@@ -1,7 +1,7 @@
 /** ItemStore: diffs, indexes, undo inverse, and DocumentSync's optimistic/canonical pipeline. */
 import { describe, expect, test } from "bun:test";
 import { create } from "@bufbuild/protobuf";
-import { BoardLayer, DocumentSpecifierSchema, DocumentType, PadSchema } from "@kicad-web/proto";
+import { BoardLayer, DocumentSpecifierSchema, DocumentType, PadSchema } from "@fp-pcb/proto";
 import { Pad, Track, type Item } from "../src/model/items";
 import type { DocumentChange } from "../src/model/document";
 import { DocumentSync, MemoryItemStore, UndoStack, inversePatch, toStoredItem, type StoreDiff } from "../src/store";

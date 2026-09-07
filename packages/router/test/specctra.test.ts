@@ -1,7 +1,7 @@
 /** DSN writer, SES reader and the s-expression helpers, on the synthetic two-net board. */
 import { describe, expect, test } from "bun:test";
-import { BoardLayer } from "@kicad-web/proto";
-import { mm } from "@kicad-web/client";
+import { BoardLayer } from "@fp-pcb/proto";
+import { mm } from "@fp-pcb/client";
 import { parseSExpr, quote, child, children, head } from "../src/specctra/sexpr";
 import { writeDsn, viaPadstackName } from "../src/specctra/dsn";
 import { parseSes, sesToItems, resolutionToNm } from "../src/specctra/ses";

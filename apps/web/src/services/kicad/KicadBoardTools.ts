@@ -6,7 +6,7 @@
 // caller re-syncs the store afterwards (`documents.resyncDocument`) and the history panel's
 // server-undo mode is what can take them back.
 
-import { BoardLayer, DrcErrorType, ErcErrorType, KiCadObjectType, RuleSeverity } from '@kicad-web/proto';
+import { BoardLayer, DrcErrorType, ErcErrorType, KiCadObjectType, RuleSeverity } from '@fp-pcb/proto';
 import type { KicadDocumentService } from './KicadDocumentService';
 import type { BoardToolsService, FootprintUpdateReport, GlobalDeleteOptions, NetLengthRow, RuleSeverityName, TeardropOptions, UnroutedInfo } from '../extras';
 

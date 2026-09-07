@@ -2,8 +2,19 @@
   "board": "pic_programmer",
   "router": "js",
   "routerImpl": "js",
+  "harness": "job",
   "kicadVersion": "10.99.0-3711-g8cc9377988",
-  "date": "2026-09-06T23:46:47.951Z",
+  "date": "2026-09-07T02:46:56.701Z",
+  "measuredWith": {
+    "kicad": "10.99.0-3711-g8cc9377988",
+    "java": "n/a",
+    "freerouting": "2.4.1",
+    "capacityAutorouter": "0.0.885",
+    "bun": "1.4.0",
+    "os": "macOS 15.6.1",
+    "cpu": "Apple M2 Max",
+    "memoryGb": 96
+  },
   "connections": {
     "before": 86,
     "after": 2,
@@ -36,18 +47,52 @@
       "DRCET_LIB_FOOTPRINT_ISSUES": 58
     }
   },
-  "wallMs": 3168,
-  "routeMs": 3136,
+  "wallMs": 5440,
+  "routeMs": 5267,
   "timedOut": false,
   "svg": "packages/router/bench/results/pic_programmer-js.svg",
   "log": [
-    "extract: 247 pads, 86 connections, 2 copper layers, 1 zones, 19 copper graphics",
+    "job: route job 4ad7c481: js on session bench-pic_programmer",
+    "extract: 247 pads, 86 connections, 2 copper layers",
+    "start",
+    "preprocessSimpleRouteJsonSolver",
+    "componentDetectionSolver",
+    "escapeViaLocationSolver",
+    "netToPointPairsSolver",
+    "topologyPlanningSolver",
+    "topologyMergingSolver",
+    "nodeDimensionSubdivisionSolver",
+    "edgeSolver",
+    "availableSegmentPointSolver",
+    "necessaryCrampedPortPointSolver",
+    "portPointPathingSolver",
+    "uniformPortDistributionSolver",
+    "highDensityRouteSolver",
+    "highDensityForceImproveSolver",
+    "highDensityRepairSolver",
+    "highDensityStitchSolver",
+    "traceSimplificationSolver",
+    "traceWidthSolver",
+    "globalDrcForceImproveSolver",
+    "exactGeometryDrcForceImproveSolver",
+    "lengthMatchingPostProcessingSolver",
+    "powerTraceExpansionSolver",
+    "none",
+    "done",
+    "job: route job 4ad7c481: done, 86/86 in 5440 ms",
     "note: 1 copper zones are not obstacles for the JS router",
     "srj: 2 layers, 266 obstacles, 33 nets to route",
-    "441 tracks, 16 vias, 33/33 nets in 3136 ms (122719 iterations)"
+    "441 tracks, 16 vias, 33/33 nets in 5267 ms (122719 iterations)"
   ],
   "options": {
-    "maxTimeMs": 600000,
-    "effort": 1
+    "effort": 1,
+    "maxTimeMs": 600000
+  },
+  "job": {
+    "state": "done",
+    "routed": 86,
+    "routerRouted": 86,
+    "total": 86,
+    "message": "Autoroute (js): 86 connections"
   }
 }

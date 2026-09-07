@@ -2,8 +2,8 @@
 // a bridge or a `kicad-cli` process (a trimmed copy of packages/client/test/fake-transport.ts).
 import { create, fromBinary, toBinary, type DescMessage, type MessageShape } from '@bufbuild/protobuf';
 import { anyUnpack, type Any } from '@bufbuild/protobuf/wkt';
-import { ApiRequestSchema, ApiResponseSchema, ApiStatusCode, EmptySchema, PingSchema, kiapiRegistry, packAny, type ApiRequest } from '@kicad-web/proto';
-import { TransportError, type SendOptions, type Transport, type TransportState } from '@kicad-web/client';
+import { ApiRequestSchema, ApiResponseSchema, ApiStatusCode, EmptySchema, PingSchema, kiapiRegistry, packAny, type ApiRequest } from '@fp-pcb/proto';
+import { TransportError, type SendOptions, type Transport, type TransportState } from '@fp-pcb/client';
 
 export interface FakeReply {
   status?: ApiStatusCode;

@@ -1,11 +1,11 @@
 # Linux image: `kicad-cli api-server` from the fork
 
 ```bash
-packages/kicad-patches/build-linux.sh --smoke          # git archive of ../kicad HEAD -> kicad-web/kicad-cli:<sha>
+packages/kicad-patches/build-linux.sh --smoke          # git archive of ../kicad HEAD -> fp-pcb/kicad-cli:<sha>
 JOBS=3 packages/kicad-patches/build-linux.sh           # Docker Desktop with < 8 GB: ~1.5 GB per pcbnew TU with PCH
 KICAD_REF=web-api packages/kicad-patches/build-linux.sh
 KICAD_REPO=https://gitlab.com/<fork>/kicad.git KICAD_REF=<sha> packages/kicad-patches/build-linux.sh   # CI: clone inside the build
-packages/kicad-patches/docker/smoke.sh kicad-web/kicad-cli:latest
+packages/kicad-patches/docker/smoke.sh fp-pcb/kicad-cli:latest
 ```
 
 - `Dockerfile` — multi-stage: `src-context` / `src-git` → `build` (Debian trixie, the package list from
@@ -39,7 +39,7 @@ Build time on a 6-CPU / 8 GB Docker Desktop VM (arm64): about 65 minutes for a c
 compile layer is cached per commit, so a change to the staging or runtime stages rebuilds in minutes.
 
 ```bash
-docker run --rm -d -v /tmp/kicad:/tmp/kicad -v "$PWD:/work" kicad-web/kicad-cli \
+docker run --rm -d -v /tmp/kicad:/tmp/kicad -v "$PWD:/work" fp-pcb/kicad-cli \
     api-server /work/board.kicad_pcb --socket /tmp/kicad/api.sock
 ```
 

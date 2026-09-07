@@ -198,7 +198,7 @@ export interface ServerSettingsService {
   /** `ListColorThemes`. */
   colorThemes(): Promise<ColorThemeInfo[]>;
   /** `GetColorTheme` turned into a renderer `Theme` (nulls when the server has no such theme). */
-  colorTheme(name: string): Promise<import('@kicad-web/renderer').Theme | null>;
+  colorTheme(name: string): Promise<import('@fp-pcb/renderer').Theme | null>;
   /** `GetAppSettings` for the PCB or schematic editor. */
   appSettings(app: 'board' | 'schematic'): Promise<AppDefaults | null>;
 }
@@ -208,7 +208,7 @@ export interface ServerSettingsService {
 /**
  * Where the router runs: the JS router in this tab (the solver's step loop yields to the UI),
  * the JS router on the bridge, or Freerouting (Java) on the bridge. The bridge job is
- * `POST /sessions/:id/route` from `@kicad-web/router/bridge-job`.
+ * `POST /sessions/:id/route` from `@fp-pcb/router/bridge-job`.
  */
 export type AutorouterChoice = 'js-tab' | 'js-server' | 'freerouting';
 

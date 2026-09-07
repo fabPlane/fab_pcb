@@ -31,7 +31,7 @@ export interface TempProject {
 }
 
 /** Copies the kitchen-sink board (+ project + DRU) and schematic into one temp project directory. */
-export async function tempProject(prefix = "kicad-web-conf-"): Promise<TempProject> {
+export async function tempProject(prefix = "fp-pcb-conf-"): Promise<TempProject> {
   const dir = await mkdtemp(join(tmpdir(), prefix));
   const base = KITCHEN_SINK_PCB.replace(/\.kicad_pcb$/, "");
   const pro = join(dir, "api_kitchen_sink.kicad_pro");
@@ -61,7 +61,7 @@ export interface RunningKiCad {
 export async function startKiCad(file: string | null = null, prefix = "conf", cli?: string): Promise<RunningKiCad> {
   const server = await startKicadServer(file, prefix, cli);
   const transport = await NngIpcTransport.connect({ path: server.socketPath, defaultTimeoutMs: 60_000 });
-  const kicad = await KiCad.connect(transport, { clientName: `kicad-web/${prefix}-${process.pid}`, readyTimeoutMs: 60_000 });
+  const kicad = await KiCad.connect(transport, { clientName: `fp-pcb/${prefix}-${process.pid}`, readyTimeoutMs: 60_000 });
   return {
     server,
     transport,

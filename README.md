@@ -1,4 +1,4 @@
-# kicad-web
+# FabPlane PCB
 
 A headless, browser-based UI for KiCad 10.99+ built entirely on the KiCad IPC API
 (`kicad-cli api-server`). TypeScript end to end; KiCad runs as a server process and

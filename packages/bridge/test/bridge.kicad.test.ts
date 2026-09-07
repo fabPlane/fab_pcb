@@ -7,15 +7,15 @@ import { existsSync } from "node:fs";
 import { mkdtemp, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Footprint, KiCad, KiCadEvents } from "@kicad-web/client";
-import { WebSocketTransport, bridgeWsUrl, type BridgeControlMessage } from "@kicad-web/client/transport";
+import { Footprint, KiCad, KiCadEvents } from "@fp-pcb/client";
+import { WebSocketTransport, bridgeWsUrl, type BridgeControlMessage } from "@fp-pcb/client/transport";
 import { configFromEnv, KICAD_CHECKOUT, eventsSocketPathFor, startBridge, type BridgeServer } from "../src/index";
 import { decodeApiResponse, encodePing } from "../src/kicad-ping";
 
 const cfg = configFromEnv(process.env, { port: 0, log: () => {} });
 const haveKicad = existsSync(cfg.kicadCli);
 const PCB = `${KICAD_CHECKOUT}/qa/data/pcbnew/api_kitchen_sink.kicad_pcb`;
-const PING = encodePing("kicad-web/bridge-test");
+const PING = encodePing("fp-pcb/bridge-test");
 
 if (!haveKicad) console.log(`[skip] kicad-cli not found at ${cfg.kicadCli} (set KICAD_CLI to run the bridge integration tests)`);
 
@@ -27,7 +27,7 @@ describe.skipIf(!haveKicad)("bridge + kicad-cli api-server + WebSocketTransport"
   let ws: WebSocketTransport;
 
   beforeAll(async () => {
-    workspace = await mkdtemp(join(tmpdir(), "kicad-web-bridge-"));
+    workspace = await mkdtemp(join(tmpdir(), "fp-pcb-bridge-"));
     bridge = await startBridge({ ...cfg, workspaceRoot: workspace });
   }, 30_000);
 
@@ -127,7 +127,7 @@ describe.skipIf(!haveKicad)("bridge + kicad-cli api-server + WebSocketTransport"
     expect(sseText).toContain('"state":"connected"');
     expect(bridge.sessions.get(sessionId)!.info().listeners).toBe(1);
 
-    const kicad = await KiCad.connect(ws, { clientName: "kicad-web/bridge-test/sdk" });
+    const kicad = await KiCad.connect(ws, { clientName: "fp-pcb/bridge-test/sdk" });
     const board = (await kicad.currentBoard())!;
     const fp = (await board.getAllItems()).find((i): i is Footprint => i instanceof Footprint)!;
     const orig = fp.position;
@@ -147,7 +147,7 @@ describe.skipIf(!haveKicad)("bridge + kicad-cli api-server + WebSocketTransport"
     expect(touched).toEqual([fp.id]);
     expect(ev.deleted.map((k) => k.value).every((id) => id === fp.id)).toBe(true);
     expect(ev.message).toBe("bridge-test move");
-    expect(ev.clientName).toBe("kicad-web/bridge-test/sdk");
+    expect(ev.clientName).toBe("fp-pcb/bridge-test/sdk");
     expect(ev.document?.type).toBe(board.documentType);
     expect(ev.revision).toBe((await board.revision())!);
     expect(gaps).toEqual([]);
@@ -160,7 +160,7 @@ describe.skipIf(!haveKicad)("bridge + kicad-cli api-server + WebSocketTransport"
       documentChanged: { created?: { value: string }[]; updated?: { value: string }[]; clientName: string };
     };
     expect([...(json.documentChanged.created ?? []), ...(json.documentChanged.updated ?? [])]).toEqual([{ value: fp.id }]);
-    expect(json.documentChanged.clientName).toBe("kicad-web/bridge-test/sdk");
+    expect(json.documentChanged.clientName).toBe("fp-pcb/bridge-test/sdk");
     expect(BigInt(json.sequence)).toBe(events.lastSequence!);
 
     // put the footprint back so the checked-in fixture is not left modified in memory

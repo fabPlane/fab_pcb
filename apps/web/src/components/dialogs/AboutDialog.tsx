@@ -7,13 +7,13 @@ export function AboutDialog() {
   const openDialog = useUiStore((s) => s.openDialog);
   const session = useAppStore((s) => s.session);
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && openDialog(null)} title="About kicad-web" size="narrow">
+    <Dialog open={open} onOpenChange={(o) => !o && openDialog(null)} title="About fp-pcb" size="narrow">
       <p style={{ marginTop: 0 }}>
         A browser front end for KiCad 10.99 running headless as <span className="mono">kicad-cli api-server</span>. Everything on screen comes from the IPC API; there is no desktop KiCad window behind it.
       </p>
       <div className="form-grid">
         <label>App</label>
-        <span className="mono">@kicad-web/app 0.0.1</span>
+        <span className="mono">@fp-pcb/app 0.0.1</span>
         <label>Services</label>
         <span className="mono">mock (in-memory kitchen sink)</span>
         <label>Renderer</label>

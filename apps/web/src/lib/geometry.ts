@@ -4,7 +4,7 @@
 
 import { create } from '@bufbuild/protobuf';
 import type { Any } from '@bufbuild/protobuf/wkt';
-import { BoardLayer, SchematicSymbolOrientation, kiapiRegistry, packAny, unpackAny } from '@kicad-web/proto';
+import { BoardLayer, SchematicSymbolOrientation, kiapiRegistry, packAny, unpackAny } from '@fp-pcb/proto';
 import type { StoredItem } from '@/contracts';
 import { structuredCloneSafe } from './patch';
 

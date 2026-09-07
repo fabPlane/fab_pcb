@@ -5,7 +5,7 @@ import { resolve } from "node:path";
  * Real-server suite (`e2e/real/`): apps/web against the bridge and a `kicad-cli api-server`.
  * Skipped entirely unless `KICAD_CLI` is set (see e2e/real/fixtures.ts).
  *
- *   KICAD_CLI=/path/to/kicad-cli bun run --filter @kicad-web/e2e test:real
+ *   KICAD_CLI=/path/to/kicad-cli bun run --filter @fp-pcb/e2e test:real
  *
  * The bridge is started by the global setup when nothing answers on BRIDGE_URL
  * (default http://127.0.0.1:4020); the app is served by the usual webServer (vite dev) with

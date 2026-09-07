@@ -15,8 +15,8 @@
  * point at it. Exits 2 when the binary is missing.
  */
 import { existsSync } from "node:fs";
-import { NngIpcTransport, NngWsTransport, WebSocketTransport, bridgeWsUrl, type Transport } from "@kicad-web/client/transport";
-import { startBridge, configFromEnv, type BridgeServer } from "@kicad-web/bridge";
+import { NngIpcTransport, NngWsTransport, WebSocketTransport, bridgeWsUrl, type Transport } from "@fp-pcb/client/transport";
+import { startBridge, configFromEnv, type BridgeServer } from "@fp-pcb/bridge";
 import {
   KICAD_CLI,
   KITCHEN_SINK_PCB,

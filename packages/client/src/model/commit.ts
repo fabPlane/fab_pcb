@@ -6,7 +6,7 @@
  */
 import type { Message } from "@bufbuild/protobuf";
 import type { Any } from "@bufbuild/protobuf/wkt";
-import { CommitAction, ItemDeletionStatus, ItemRequestStatus, ItemStatusCode, KiCadObjectType, type ItemStatus } from "@kicad-web/proto";
+import { CommitAction, ItemDeletionStatus, ItemRequestStatus, ItemStatusCode, KiCadObjectType, type ItemStatus } from "@fp-pcb/proto";
 import * as cmd from "../commands";
 import { CommitDroppedError, KiCadItemError, type ItemFailure } from "../errors";
 import type { Document, ItemScope, UndoRedoResult } from "./document";

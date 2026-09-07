@@ -1,5 +1,5 @@
 // JobsService over the RunBoardJobExport* / RunSchematicJobExport* commands. Every run
-// writes into `<project dir>/kicad-web-out/<job>-<n>/` (inside the bridge workspace root, so
+// writes into `<project dir>/fp-pcb-out/<job>-<n>/` (inside the bridge workspace root, so
 // `/files/list` can enumerate the outputs and `/files/read` can serve them) and reports the
 // files KiCad returned in `RunJobResponse.output_path` plus whatever appeared in the folder.
 //
@@ -8,8 +8,8 @@
 // server that runs jobs synchronously just returns the finished result. `RunSchematicJobExportNetlist`
 // used to wedge the headless server; that is fixed in web-api 022e45f6d2+.
 
-import { BoardLayer, Board3DFormat, DrillFormat, DrillMapFormat, DrillOrigin, GerberPrecision, Ipc2581Version, JobStatus, OdbCompression, PositionSide, SchematicNetlistFormat, Units } from '@kicad-web/proto';
-import { JobError, type JobOptions, type JobResult } from '@kicad-web/client';
+import { BoardLayer, Board3DFormat, DrillFormat, DrillMapFormat, DrillOrigin, GerberPrecision, Ipc2581Version, JobStatus, OdbCompression, PositionSide, SchematicNetlistFormat, Units } from '@fp-pcb/proto';
+import { JobError, type JobOptions, type JobResult } from '@fp-pcb/client';
 
 /** Every job runs async when the server supports it; see the header. */
 const JOB: JobOptions = { async: true };
@@ -248,7 +248,7 @@ export class KicadJobsService implements JobsService {
   /** Output folder for a run: inside the project directory so the bridge can list it. */
   private outputDir(jobId: string, runId: string): string {
     const projectDir = (this.docs.project?.path || this.session.session?.projectPath.replace(/\/[^/]*$/, '') || this.session.workspaceRoot()).replace(/\/$/, '');
-    return `${projectDir}/kicad-web-out/${jobId.replace('.', '-')}-${runId}`;
+    return `${projectDir}/fp-pcb-out/${jobId.replace('.', '-')}-${runId}`;
   }
 
   async run(jobId: string, options: Record<string, unknown>): Promise<JobRun> {

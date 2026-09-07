@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { create, toBinary, type MessageInitShape } from "@bufbuild/protobuf";
-import { DocumentType, EventSchema } from "@kicad-web/proto";
+import { DocumentType, EventSchema } from "@fp-pcb/proto";
 import { KiCadEvents, decodeEvent } from "../src/events";
 import { NngIpcSubscriber } from "../src/transport";
 import { startFakePubServer } from "./fake-pub-server";

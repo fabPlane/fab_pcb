@@ -15,8 +15,8 @@
  *   between two inner layers.
  * Every approximation is conservative (blocks more than it should) except the zone one.
  */
-import { BoardLayer } from "@kicad-web/proto";
-import { mm, toMm, type Vec2 } from "@kicad-web/client";
+import { BoardLayer } from "@fp-pcb/proto";
+import { mm, toMm, type Vec2 } from "@fp-pcb/client";
 import { AutoroutingPipelineSolver } from "@tscircuit/capacity-autorouter";
 import { isAxisAligned, polygonBounds, rotatedRectBounds } from "./geometry";
 import { copperLayersInOrder, rulesForNet } from "./extract";

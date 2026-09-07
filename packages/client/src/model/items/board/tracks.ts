@@ -12,7 +12,7 @@ import {
   type PadStack,
   type Track as TrackProto,
   type Via as ViaProto,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import { nm, toDistance, type Vec2 } from "../../../units";
 import { Item, registerItem } from "../base";
 

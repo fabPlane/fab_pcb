@@ -29,7 +29,7 @@ import {
   kiapiRegistry,
   packAny,
   type Track as TrackProto,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import { KiCadClient } from "../src/client";
 import { CommitDroppedError, KiCadItemError } from "../src/errors";
 import { Board, KiCad, Pad, Track, wrapAny, type Item } from "../src/model";

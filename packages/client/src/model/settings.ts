@@ -7,13 +7,13 @@
  * `board.graphicsDefaults()` / `board.setGraphicsDefaults()`. `AppSettings.defaults` carries the
  * equivalent for the schematic editor (whose defaults are application-wide).
  */
-import { AppType, UnitSystem, type AppSettings, type Color } from "@kicad-web/proto";
+import { AppType, UnitSystem, type AppSettings, type Color } from "@fp-pcb/proto";
 import * as cmd from "../commands";
 import type { KiCad } from "./kicad";
 
 /**
  * One colour of a theme. `r`/`g`/`b` are 0..255 integers and `a` is 0..1 — the same shape as
- * `@kicad-web/renderer`'s `ThemeColor` (KiCad's `COLOR4D` on the wire is 0..1 per channel).
+ * `@fp-pcb/renderer`'s `ThemeColor` (KiCad's `COLOR4D` on the wire is 0..1 per channel).
  */
 export interface ThemeColor {
   /** 0..255 */

@@ -5,7 +5,7 @@
  * Re-syncs after changes made elsewhere prefer `GetItems.since_revision` (KiCad >= 11.0) over a
  * full reload when the server supports it; `syncIds()` re-reads the items an event named.
  */
-import type { DocumentSpecifier } from "@kicad-web/proto";
+import type { DocumentSpecifier } from "@fp-pcb/proto";
 import type { DocumentChange, DocumentKind, ItemsSince } from "../model/document";
 import type { Item } from "../model/items/base";
 import { MemoryItemStore, toStoredItem, type StorePatch } from "./item-store";

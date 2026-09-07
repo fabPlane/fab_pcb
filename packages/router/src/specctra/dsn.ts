@@ -13,8 +13,8 @@
  * - copper text and graphics are exported as keepouts (KiCad's exporter drops them);
  * - copper zones become `plane`s (like KiCad), rule areas become `keepout`s.
  */
-import { BoardLayer } from "@kicad-web/proto";
-import type { Vec2 } from "@kicad-web/client";
+import { BoardLayer } from "@fp-pcb/proto";
+import type { Vec2 } from "@fp-pcb/client";
 import { copperLayersInOrder, rulesForNet } from "../extract";
 import type { RouteInput, RouteLayer, RouteOptions, RoutePad } from "../types";
 import { num, quote } from "./sexpr";

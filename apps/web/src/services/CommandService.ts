@@ -6,12 +6,12 @@
 // replayed on redo. Nothing here knows about the wire protocol: the `CommitBackend`
 // abstracts BeginCommit / Create|Update|DeleteItems / EndCommit.
 //
-// `services/kicad/KicadCommitBackend` implements `CommitBackend` over `@kicad-web/client`
+// `services/kicad/KicadCommitBackend` implements `CommitBackend` over `@fp-pcb/client`
 // (BeginCommit / UpdateItems / EndCommit); the store in that world is the client's own
 // `MemoryItemStore` (mutated through `apply()`), while `MockCommitBackend` writes straight
 // into the app's `MemoryItemStore`. `mutatorFor()` hides the difference.
 
-import { BoardLayer } from '@kicad-web/proto';
+import { BoardLayer } from '@fp-pcb/proto';
 import type { ItemStore, StoredItem } from '@/contracts';
 import { applyPatches, structuredCloneSafe, type Patch } from '@/lib/patch';
 import { refreshBbox } from '@/lib/geometry';

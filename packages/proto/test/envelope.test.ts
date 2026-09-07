@@ -49,12 +49,12 @@ describe("ApiRequest round trip", () => {
   for (const schema of [PingSchema, GetVersionSchema]) {
     test(`wraps ${schema.typeName} in an Any and decodes it back`, () => {
       const req = create(ApiRequestSchema, {
-        header: { clientName: "kicad-web/test" },
+        header: { clientName: "fp-pcb/test" },
         message: packAny(schema, create(schema)),
       });
       const bytes = toBinary(ApiRequestSchema, req);
       const back = fromBinary(ApiRequestSchema, bytes);
-      expect(back.header?.clientName).toBe("kicad-web/test");
+      expect(back.header?.clientName).toBe("fp-pcb/test");
       expect(back.message?.typeUrl).toBe(typeUrlOf(schema));
       expect(anyHolds(back.message!, schema)).toBe(true);
       const inner = unpackAny(back.message!);
@@ -66,7 +66,7 @@ describe("ApiRequest round trip", () => {
 
   test("encodes what the M0 client sent for Ping (modulo the empty Any.value field)", () => {
     const req = create(ApiRequestSchema, {
-      header: { clientName: "kicad-web/m0-ping" },
+      header: { clientName: "kicad-web/m0-ping" }, // the M0 byte capture predates the FabPlane PCB rename
       message: packAny(PingSchema, create(PingSchema)),
     });
     const ours = toBinary(ApiRequestSchema, req);
@@ -82,7 +82,7 @@ describe("ApiRequest round trip", () => {
 describe("real byte captures", () => {
   test("decodes the captured Ping request", () => {
     const req = fromBinary(ApiRequestSchema, PING_REQUEST);
-    expect(req.header?.clientName).toBe("kicad-web/m0-ping");
+    expect(req.header?.clientName).toBe("kicad-web/m0-ping"); // historical capture, see above
     expect(req.header?.kicadToken).toBe("");
     expect(req.message?.typeUrl).toBe("type.googleapis.com/kiapi.common.commands.Ping");
     expect(req.message?.value.length).toBe(0);

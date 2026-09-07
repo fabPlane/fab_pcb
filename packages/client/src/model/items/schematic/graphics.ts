@@ -13,7 +13,7 @@ import {
   type SchematicRuleArea as SchematicRuleAreaProto,
   type SchematicTable as SchematicTableProto,
   type SchematicTableCell as SchematicTableCellProto,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import { nm, toDistance, type Vec2 } from "../../../units";
 import { shapeKind, type ShapeKind } from "../board/graphics";
 import { Item, registerItem } from "../base";

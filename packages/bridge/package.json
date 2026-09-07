@@ -1,5 +1,5 @@
 {
-  "name": "@kicad-web/bridge",
+  "name": "@fp-pcb/bridge",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -15,8 +15,8 @@
     "typecheck": "tsc -b"
   },
   "dependencies": {
-    "@kicad-web/client": "workspace:*",
-    "@kicad-web/router": "workspace:*"
+    "@fp-pcb/client": "workspace:*",
+    "@fp-pcb/router": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "^1.2.0",

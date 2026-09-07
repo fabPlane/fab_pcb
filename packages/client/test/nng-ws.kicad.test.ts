@@ -12,17 +12,18 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { KiCadEvents } from "../src/events";
 import { KiCad } from "../src/model";
 import { NngIpcTransport, NngWsSubscriber, NngWsTransport, SP_WS_SUBPROTOCOL_PUB0, SP_WS_SUBPROTOCOL_REP0 } from "../src/transport";
-import { KiCadObjectType } from "@kicad-web/proto";
+import { KiCadObjectType } from "@fp-pcb/proto";
 import {
   KICAD_CLI,
-  KITCHEN_SINK_PCB,
   PING_REQUEST,
   decodeApiResponse,
   haveKicad,
   startKicadServer,
   startKicadWsServer,
+  tempKitchenSinkBoard,
   type KicadServer,
   type KicadWsServer,
+  type TempBoard,
 } from "./kicad-fixtures";
 
 if (!haveKicad()) {
@@ -30,19 +31,22 @@ if (!haveKicad()) {
 }
 
 describe.skipIf(!haveKicad())("NngWsTransport against kicad-cli api-server --socket ws://", () => {
+  let board: TempBoard;
   let server: KicadWsServer;
   let transport: NngWsTransport;
   let kicad: KiCad;
 
   beforeAll(async () => {
-    server = await startKicadWsServer(KITCHEN_SINK_PCB, { token: "kicad-web-ws-it" });
+    board = await tempKitchenSinkBoard("fp-pcb-ws-it-");
+    server = await startKicadWsServer(board.pcb, { token: "fp-pcb-ws-it" });
     transport = await NngWsTransport.connect({ url: server.url, defaultTimeoutMs: 60_000 });
-    kicad = await KiCad.connect(transport, { clientName: "kicad-web/ws-it", readyTimeoutMs: 60_000 });
+    kicad = await KiCad.connect(transport, { clientName: "fp-pcb/ws-it", readyTimeoutMs: 60_000 });
   }, 90_000);
 
   afterAll(async () => {
     await transport?.close().catch(() => {});
     await server?.stop();
+    await board?.cleanup();
   });
 
   test("the upgrade negotiates rep.sp.nanomsg.org and there is no SP handshake frame", async () => {
@@ -173,11 +177,14 @@ describe.skipIf(!haveKicad())("NngWsTransport against kicad-cli api-server --soc
     const wsMs = performance.now() - t0;
     console.log(`  [timing] NngWsTransport (direct ws): ${N} sequential Pings in ${wsMs.toFixed(1)} ms (${(wsMs / N).toFixed(2)} ms/req)`);
 
-    // Same board, a second server on ipc, for a like-for-like comparison in the same run.
+    // Same board, a second server on ipc, for a like-for-like comparison in the same run. Its own
+    // copy: two servers on one project directory would fight over the project lock file.
+    let ipcBoard: TempBoard | undefined;
     let ipc: KicadServer | undefined;
     let ipcTransport: NngIpcTransport | undefined;
     try {
-      ipc = await startKicadServer(KITCHEN_SINK_PCB, "ws-it-ipc");
+      ipcBoard = await tempKitchenSinkBoard("fp-pcb-ws-it-ipc-");
+      ipc = await startKicadServer(ipcBoard.pcb, "ws-it-ipc");
       ipcTransport = await NngIpcTransport.connect({ path: ipc.socketPath, defaultTimeoutMs: 60_000 });
       const deadline = Date.now() + 40_000;
       while (decodeApiResponse(await ipcTransport.send(PING_REQUEST)).status !== 1 && Date.now() < deadline) await Bun.sleep(25);
@@ -188,6 +195,7 @@ describe.skipIf(!haveKicad())("NngWsTransport against kicad-cli api-server --soc
     } finally {
       await ipcTransport?.close().catch(() => {});
       await ipc?.stop();
+      await ipcBoard?.cleanup();
     }
   }, 180_000);
 

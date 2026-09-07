@@ -15,7 +15,7 @@ import {
   type Any,
   type FootprintInstance,
   type Pad,
-} from '@kicad-web/proto';
+} from '@fp-pcb/proto';
 import type { StoredItem } from '@/contracts';
 import {
   cloneForPaste,

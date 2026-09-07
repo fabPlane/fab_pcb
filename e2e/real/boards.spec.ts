@@ -4,7 +4,7 @@
  * pads are drawn and pickable with their nets (the footprint-children regression), the unrouted
  * variant opens too, and DRC runs to completion. Skipped unless KICAD_CLI is set.
  *
- * Each board is copied into `<workspace root>/.kicad-web-e2e-board-<name>/` so the fixture is
+ * Each board is copied into `<workspace root>/.fp-pcb-e2e-board-<name>/` so the fixture is
  * never written (DRC leaves no files, but a later save would).
  */
 import { cpSync, rmSync } from "node:fs";
@@ -24,14 +24,14 @@ const BOARDS = [
 
 async function copyBoard(dir: string, name: string): Promise<{ root: string; cleanup(): void }> {
   const health = (await (await fetch(`${BRIDGE_URL}/health`)).json()) as { workspaceRoot: string };
-  const root = `${health.workspaceRoot.replace(/\/$/, "")}/.kicad-web-e2e-board-${name}`;
+  const root = `${health.workspaceRoot.replace(/\/$/, "")}/.fp-pcb-e2e-board-${name}`;
   rmSync(root, { recursive: true, force: true });
   cpSync(`${FIXTURES}/${dir}`, root, { recursive: true });
   return { root, cleanup: () => rmSync(root, { recursive: true, force: true }) };
 }
 
 const countType = (page: import("@playwright/test").Page, type: string): Promise<number> =>
-  page.evaluate((type) => [...(window as any).__kicadWeb.services.documents.board().byType(type)].length, type);
+  page.evaluate((type) => [...(window as any).__fpPcb.services.documents.board().byType(type)].length, type);
 
 test.describe("real KiCad: practice boards", () => {
   test.skip(!haveKicad, "set KICAD_CLI to run against a real kicad-cli api-server");
@@ -49,7 +49,7 @@ test.describe("real KiCad: practice boards", () => {
           expect(await countType(page, "KOT_PCB_TRACE")).toBe(b.tracks);
           expect(await countType(page, "KOT_PCB_VIA")).toBe(b.vias);
           const counts = await page.evaluate(async () => {
-            const c = await (window as any).__kicadWeb.services.documents.boardDoc.itemCounts();
+            const c = await (window as any).__fpPcb.services.documents.boardDoc.itemCounts();
             return { total: c.total, footprints: c.counts.get(1) ?? 0 };
           });
           expect(counts.footprints).toBe(b.footprints);
@@ -58,8 +58,8 @@ test.describe("real KiCad: practice boards", () => {
 
         await test.step("every footprint's pads are drawn from the store and pick with their net", async () => {
           const probe = await page.evaluate(() => {
-            const d = (window as any).__kicadWeb.services.documents;
-            const h = (window as any).__kicadWeb.host("board");
+            const d = (window as any).__fpPcb.services.documents;
+            const h = (window as any).__fpPcb.host("board");
             const pads = [...d.board().byType("KOT_PCB_PAD")];
             let drawn = 0;
             const missing: string[] = [];
@@ -75,7 +75,7 @@ test.describe("real KiCad: practice boards", () => {
             const candidates = pads.filter((p: any) => p.net && !routed.has(p.net) && (p.proto.padStack?.layers ?? []).some((l: number) => l === 3 || l === 34));
             const pad = candidates.find((p: any) => p.proto.padStack.layers.includes(3)) ?? candidates[0] ?? pads.find((p: any) => p.net) ?? pads[0];
             const side = pad.proto.padStack?.layers?.includes(3) ? "BL_F_Cu" : "BL_B_Cu";
-            (window as any).__kicadWeb.stores.editor.getState().setActiveLayer("board", side);
+            (window as any).__fpPcb.stores.editor.getState().setActiveLayer("board", side);
             h.setActiveLayer(side);
             h.setCamera({ x: Number(pad.proto.position.xNm), y: Number(pad.proto.position.yNm), zoom: 50e-6 });
             h.renderNow();
@@ -87,7 +87,7 @@ test.describe("real KiCad: practice boards", () => {
           expect(probe.top?.ref).toBe(probe.pad.id);
           expect(probe.top?.owner).toBe(probe.pad.parent);
           if (probe.pad.net) expect(probe.top?.net).toBe(probe.pad.net);
-          await page.evaluate(() => (window as any).__kicadWeb.host("board").zoomToFit());
+          await page.evaluate(() => (window as any).__fpPcb.host("board").zoomToFit());
         });
 
         await test.step("DRC runs to completion", async () => {
@@ -96,7 +96,7 @@ test.describe("real KiCad: practice boards", () => {
           // board (no rows, no alert) from one that is still running
           const t0 = Date.now();
           const result = await page.evaluate(async () => {
-            const m = (window as any).__kicadWeb.services.markers;
+            const m = (window as any).__fpPcb.services.markers;
             try {
               const markers = await m.run("drc");
               return { markers: markers.length };
@@ -117,7 +117,7 @@ test.describe("real KiCad: practice boards", () => {
           expect(await countType(page, "KOT_PCB_PAD")).toBe(b.pads);
           expect(await countType(page, "KOT_PCB_TRACE")).toBe(0);
           expect(await countType(page, "KOT_PCB_VIA")).toBe(0);
-          const unrouted = await page.evaluate(() => (window as any).__kicadWeb.services.board.unrouted());
+          const unrouted = await page.evaluate(() => (window as any).__fpPcb.services.board.unrouted());
           expect(unrouted.unroutedCount).toBeGreaterThan(0);
         });
       } finally {

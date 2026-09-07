@@ -9,7 +9,7 @@ import {
   type BoardGroup as BoardGroupProto,
   type Constraint as ConstraintProto,
   type ConstraintMember,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import { Item, registerItem } from "../base";
 
 export class BoardGroup extends Item<BoardGroupProto> {

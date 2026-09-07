@@ -113,7 +113,7 @@ export const useUiStore = create<UiState>()(
       resetLayout: () => set({ panels: DEFAULT_PANELS }),
     }),
     {
-      name: 'kicad-web.ui',
+      name: 'fp-pcb.ui',
       version: 1,
       partialize: (s) => ({ theme: s.theme, canvasTheme: s.canvasTheme, units: s.units, gridNm: s.gridNm, showGrid: s.showGrid, showRatsnest: s.showRatsnest, panels: s.panels, bottomTab: s.bottomTab, leftTab: s.leftTab }),
     },

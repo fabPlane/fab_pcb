@@ -9,7 +9,7 @@ import {
   type NetClass,
   type ProjectFile,
   type ProjectInfoResponse,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import * as cmd from "../commands";
 import type { Board } from "./board";
 import type { KiCad } from "./kicad";

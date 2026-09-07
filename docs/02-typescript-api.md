@@ -4,7 +4,7 @@ Goal: a typed client that covers 100% of what the server can do, works in the
 browser and in Bun, and mirrors the ergonomics of the official Python client
 (`kicad-python`, package `kipy`) so that examples and mental models transfer.
 
-## Layer 0 — `@kicad-web/proto` (generated)
+## Layer 0 — `@fp-pcb/proto` (generated)
 
 - Generator: **protobuf-es** (`@bufbuild/protobuf` v2) via `buf generate`, pointed at
   `../kicad/api/proto`. Reasons: ES modules, tree-shakeable, first-class
@@ -20,7 +20,7 @@ browser and in Bun, and mirrors the ergonomics of the official Python client
 - The package records `KICAD_COMMIT` (the fork commit the protos came from). CI
   regenerates and fails if `git diff` is non-empty, so schema drift is visible.
 
-## Layer 1 — transport (`@kicad-web/client/transport`)
+## Layer 1 — transport (`@fp-pcb/client/transport`)
 
 ```ts
 interface Transport {
@@ -44,7 +44,7 @@ The transport only moves bytes. Everything protobuf lives above it.
 ## Layer 2 — `KiCadClient` (envelope + dispatch)
 
 ```ts
-const kicad = await KiCadClient.connect(transport, { clientName: "kicad-web/abc" });
+const kicad = await KiCadClient.connect(transport, { clientName: "fp-pcb/abc" });
 const v = await kicad.call(GetVersionSchema, {}, GetVersionResponseSchema);
 ```
 
@@ -112,7 +112,7 @@ Design rules for the object model:
 - Sheet paths for schematics are explicit: `schematic.sheet(path)` returns a handle
   whose `getItems()` sets `document.sheet_path`.
 
-## Layer 4 — `@kicad-web/client/store` (browser only)
+## Layer 4 — `@fp-pcb/client/store` (browser only)
 
 A normalised item store (`Map<KIID, Item>` per document, indexes by type, layer, net)
 with an optimistic-mutation commit pipeline and undo (see 01). The renderer

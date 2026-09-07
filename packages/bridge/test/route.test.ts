@@ -8,7 +8,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createRouteJobs, matchRouteJobPath } from "@kicad-web/router/bridge-job";
+import { createRouteJobs, matchRouteJobPath } from "@fp-pcb/router/bridge-job";
 import { configFromEnv, startBridge, type BridgeServer } from "../src/index";
 
 describe("matchRouteJobPath", () => {
@@ -22,8 +22,8 @@ describe("matchRouteJobPath", () => {
 });
 
 describe("configFromEnv: Freerouting paths", () => {
-  test("FREEROUTING_JAR and KICAD_WEB_JAVA are honoured and a missing jar carries the fix", () => {
-    const c = configFromEnv({ FREEROUTING_JAR: "/nonexistent/fr.jar", KICAD_WEB_JAVA: "/nonexistent/java" });
+  test("FREEROUTING_JAR and FP_PCB_JAVA are honoured and a missing jar carries the fix", () => {
+    const c = configFromEnv({ FREEROUTING_JAR: "/nonexistent/fr.jar", FP_PCB_JAVA: "/nonexistent/java" });
     expect(c.freerouting.ok).toBe(false);
     expect(c.freerouting.jar).toBe("/nonexistent/fr.jar");
     expect(c.freerouting.reason).toMatch(/fetch-freerouting\.ts --jdk|FREEROUTING_JAR/);
@@ -34,7 +34,7 @@ describe("route jobs without KiCad", () => {
   let bridge: BridgeServer;
   let dir: string;
   beforeAll(async () => {
-    dir = await mkdtemp(join(tmpdir(), "kicad-web-route-"));
+    dir = await mkdtemp(join(tmpdir(), "fp-pcb-route-"));
     bridge = await startBridge(
       configFromEnv(
         { FREEROUTING_JAR: "/nonexistent/fr.jar" },

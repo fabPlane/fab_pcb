@@ -1,7 +1,7 @@
 import './setup';
 import { describe, expect, test } from 'bun:test';
 import { create } from '@bufbuild/protobuf';
-import { BoardLayer, FootprintInstanceSchema, PadSchema, PadStackShape, PadStackType, packAny, unpackAny, type Any, type FootprintInstance, type Pad } from '@kicad-web/proto';
+import { BoardLayer, FootprintInstanceSchema, PadSchema, PadStackShape, PadStackType, packAny, unpackAny, type Any, type FootprintInstance, type Pad } from '@fp-pcb/proto';
 import type { StoredItem } from '@/contracts';
 import { flipItem, mapDefinitionItems, rotateItem, translateItem } from '@/lib/geometry';
 

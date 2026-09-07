@@ -1,5 +1,5 @@
 {
-  "name": "@kicad-web/proto",
+  "name": "@fp-pcb/proto",
   "version": "0.0.1",
   "private": true,
   "description": "Generated protobuf-es types for the KiCad IPC API (kiapi.*) plus an Any registry",

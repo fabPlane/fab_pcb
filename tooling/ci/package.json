@@ -1,5 +1,5 @@
 {
-  "name": "@kicad-web/ci",
+  "name": "@fp-pcb/ci",
   "version": "0.0.1",
   "private": true,
   "type": "module",

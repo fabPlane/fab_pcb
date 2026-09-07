@@ -2,7 +2,7 @@
 //
 // Mock services draw with the Canvas2D `MockCanvasHost` (the e2e smoke tests depend on it);
 // the KiCad services install a factory (`setCanvasHostFactory`) that returns the PixiJS
-// `BoardCanvasHost` / `SchematicCanvasHost` from `@kicad-web/renderer` with the adapter
+// `BoardCanvasHost` / `SchematicCanvasHost` from `@fp-pcb/renderer` with the adapter
 // contexts (pad polygons, text shapes, copper layers) wired to the live document.
 
 import type { CanvasHost, DocumentKind, ItemStore } from '@/contracts';

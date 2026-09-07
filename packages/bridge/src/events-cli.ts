@@ -2,13 +2,13 @@
 /**
  * Prints the KiCad events of a bridge session as they arrive, decoded to JSON — one line each.
  *
- *   bun run --filter @kicad-web/bridge events <session-id>     # or: bun packages/bridge/src/events-cli.ts <id>
- *   bun run --filter @kicad-web/bridge events                  # lists sessions
+ *   bun run --filter @fp-pcb/bridge events <session-id>     # or: bun packages/bridge/src/events-cli.ts <id>
+ *   bun run --filter @fp-pcb/bridge events                  # lists sessions
  *
  * Options: `--bridge <url>` (default env `BRIDGE_URL` or http://127.0.0.1:4020); `--sse` reads the
  * `GET /sessions/:id/events` stream instead of the WebSocket relay (both carry the same events).
  */
-import { KiCadEvents, WebSocketTransport, bridgeWsUrl, eventToJson } from "@kicad-web/client";
+import { KiCadEvents, WebSocketTransport, bridgeWsUrl, eventToJson } from "@fp-pcb/client";
 
 const args = process.argv.slice(2);
 let bridgeUrl = process.env.BRIDGE_URL ?? "http://127.0.0.1:4020";

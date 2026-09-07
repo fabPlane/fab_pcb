@@ -33,7 +33,7 @@ import {
   type NetLength,
   type PadstackPresence,
   type PolygonWithHoles,
-} from "@kicad-web/proto";
+} from "@fp-pcb/proto";
 import * as cmd from "../commands";
 import { KiCadItemError, type ItemFailure } from "../errors";
 import { nm, toVector2, vec2, type Vec2 } from "../units";
