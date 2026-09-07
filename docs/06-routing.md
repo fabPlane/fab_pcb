@@ -232,3 +232,8 @@ tables measure the same code. Notes from the app run:
   off by the new tracks once the zones are refilled, which is why DRC then counts 15
   `unconnected_items` where the dialog listed 5 airlines; the 11 solder-mask bridges are vias too
   close to pads on this fine-pitch board.
+
+Note on the in-tab JavaScript router: it yields between solver steps, but a single step on a
+dense board can take up to about a second (measured 0.7 s on sonde_xilinx, 1.2 s on stickhub), so
+the tab stutters rather than freezes. For boards past a few hundred connections, run it on the
+server from the same dialog; a Web Worker for the in-tab path is the proper fix.

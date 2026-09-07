@@ -14,6 +14,7 @@
 // "Autoroute (<router>): <n> connections" — in KiCad's stack, and in the app's own history
 // (recorded from the created items) when the server has no undo.
 
+import { KiCadObjectType } from '@fp-pcb/proto';
 import { BoardLayer } from '@fp-pcb/proto';
 import type { Board } from '@fp-pcb/client';
 import { applyRouteResult } from '@fp-pcb/router/apply';
@@ -29,7 +30,7 @@ import type { KicadSessionService } from './KicadSessionService';
 /** Injection points for the unit tests; the defaults are the router package. */
 export interface AutorouteDeps {
   extract: (board: Board, opts: { nets?: readonly string[]; warn?: (m: string) => void }) => Promise<RouteInput>;
-  apply: (board: Board, result: RouteResult, opts: { message: string }) => Promise<{ created: { id: string }[] }>;
+  apply: (board: Board, result: RouteResult, opts: { message: string }) => Promise<{ created: { id: string; type?: KiCadObjectType }[] }>;
   createRouter: () => Autorouter;
   now: () => number;
 }
@@ -187,8 +188,10 @@ export class KicadAutorouteService implements AutorouteService {
     const message = autorouteMessage('js', routed);
     this.setState('applying');
     let created: string[] = [];
+    let createdItems: { id: string; type?: KiCadObjectType }[] = [];
     if (result.tracks.length || result.vias.length) {
       const r = await this.deps.apply(board, result, { message });
+      createdItems = r.created;
       created = r.created.map((i) => i.id);
       await this.docs.resyncDocument('board');
       this.recordHistory(message, created);
@@ -210,10 +213,16 @@ export class KicadAutorouteService implements AutorouteService {
       .unroutedCount()
       .then((u) => u.unroutedCount)
       .catch(() => undefined);
+    // Count what KiCad actually created, not what the router produced: applyRouteResult drops
+    // zero-length tracks, so the two can differ by a few items and the history entry must agree
+    // with the board.
+    const typed = createdItems.some((it) => it.type !== undefined);
+    const createdTracks = createdItems.filter((it) => it.type === KiCadObjectType.KOT_PCB_TRACE || it.type === KiCadObjectType.KOT_PCB_ARC).length;
+    const createdVias = createdItems.filter((it) => it.type === KiCadObjectType.KOT_PCB_VIA).length;
     const summary: AutorouteSummary = {
       router: result.router,
-      tracks: result.tracks.length,
-      vias: result.vias.length,
+      tracks: typed ? createdTracks : result.tracks.length,
+      vias: typed ? createdVias : result.vias.length,
       routed: measured,
       routerRouted: routed,
       total: result.totalConnections,
@@ -228,7 +237,7 @@ export class KicadAutorouteService implements AutorouteService {
     };
     this.patch({ state: 'done', finishedAt: this.deps.now(), summary, log: result.log });
     this.log(
-      `Autoroute (js, in tab): ${measured}/${result.totalConnections} connections, ${result.tracks.length} tracks, ${result.vias.length} vias in ${summary.wallMs} ms${result.timedOut ? ' (timed out)' : ''}`,
+      `Autoroute (js, in tab): ${measured}/${result.totalConnections} connections, ${summary.tracks} tracks, ${summary.vias} vias in ${summary.wallMs} ms${result.timedOut ? ' (timed out)' : ''}`,
     );
   }
 
