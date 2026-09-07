@@ -17,6 +17,9 @@
       "path": "packages/router"
     },
     {
+      "path": "packages/compile"
+    },
+    {
       "path": "tooling/coverage"
     },
     {
