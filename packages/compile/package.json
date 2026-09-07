@@ -8,7 +8,9 @@
     ".": "./src/index.ts",
     "./netlist": "./src/netlist.ts",
     "./apply": "./src/apply.ts",
-    "./frontends/netlist-json": "./src/frontends/netlist-json.ts"
+    "./frontends/netlist-json": "./src/frontends/netlist-json.ts",
+    "./bridge-job": "./src/bridge-job.ts",
+    "./libraries": "./src/libraries.ts"
   },
   "scripts": {
     "test": "bun test",

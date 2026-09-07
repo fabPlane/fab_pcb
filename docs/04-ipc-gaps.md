@@ -41,6 +41,28 @@ plotter use the LIB_SYMBOL's offset, and the definition message has no such fiel
 place pin names where KiCad draws them without guessing (the harness assumes 0.508 mm). One-line
 fix in the serializer. Related: text variables in shown text are not expanded on the wire.
 
+### G28 · Found by the compile job (`packages/compile`)
+**Status:** open. Three API behaviours the netlist compile ran into, each verified live against
+`280274cc3d` (`packages/compile/bench/experiment.ts`, `test/apply.kicad.test.ts`):
+
+1. **`ImportNetlist` does not publish `DocumentChanged`.** `handleImportNetlist` calls
+   `bumpRevision()` but not `publishDocumentChanged`, so a tab on the session never learns about
+   the footprints the import added. The job reports `revision` in its `done` event as a stopgap.
+   Fix: publish with the updater's commit, as every other commit does.
+2. **`AddLibraryTableRow` saves the row disabled unless `enabled` is set.** The handler does
+   `SetDisabled( !in.enabled() )` and the proto field defaults to false, so a row added without
+   `enabled: true` lands as `(disabled)` and `ListLibraryEntries` / the netlist importer answer
+   "no enabled footprint library". The client now sends `enabled: true`; the API should default
+   to enabled (or the proto should use `optional bool disabled`).
+3. **`UpdateItems` on a footprint moves only the anchor.** `FOOTPRINT::Deserialize` calls
+   `SetPosition` (which moves the children) and then deserializes the fields and every
+   `definition.items` Any from the proto at their *old* absolute coordinates, snapping pads and
+   text back. Any client that sets `position` and updates gets a footprint whose anchor moved and
+   whose copper did not (`GetPads`, DRC and the saved file all agree). Either the handler should
+   apply a position delta to the children when only `position` changed, or the client must
+   translate the whole proto (a `Footprint.translate` is planned in `packages/client`). The
+   compile job sidesteps it by moving the outline it drew instead of the footprints.
+
 ### G26 · Found by the five-board practice pass
 `GetDocumentRevision` reads non-monotonically right after `EndCommit` (1, then 0, 1, 1, 1 within
 600 ms on pic_programmer and stickhub), so a client cannot use it as a strict change counter

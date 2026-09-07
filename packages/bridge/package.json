@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@fp-pcb/client": "workspace:*",
+    "@fp-pcb/compile": "workspace:*",
     "@fp-pcb/router": "workspace:*"
   },
   "devDependencies": {

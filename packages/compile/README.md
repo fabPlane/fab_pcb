@@ -12,20 +12,22 @@ schematic to a board. Footprint matching, field updates and net assignment are K
 
 ## What is here
 
-| file                            | role                                                                                        |
-| ------------------------------- | ------------------------------------------------------------------------------------------- |
-| `src/types.ts`                  | the contract: `Netlist` IR, `Frontend`, `LibrarySpec`, `Diagnostic`, `CompileResult`        |
-| `src/netlist.ts`                | `emitKicadNetlist` (IR → KiCad `.net`) and `validateNetlist`                                |
-| `src/apply.ts`                  | `applyNetlist`: write → `ImportNetlist` (dry run) → outline → `ImportNetlist` → `Autoplace` |
-| `src/compile.ts`                | orchestration                                                                               |
-| `src/frontends/netlist-json.ts` | the first frontend: `circuit.netlist.json` = `{ netlist, board? }`, the IR as a file        |
+| file                            | role                                                                                             |
+| ------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `src/types.ts`                  | the contract: `Netlist` IR, `Frontend`, `LibrarySpec`, `Diagnostic`, `CompileResult`             |
+| `src/netlist.ts`                | `emitKicadNetlist` (IR → KiCad `.net`) and `validateNetlist`                                     |
+| `src/apply.ts`                  | `applyNetlist`: write → dry-run `ImportNetlist` → outline → `ImportNetlist` → autoplace → inset  |
+| `src/compile.ts`                | orchestration, with the stage and `beforeApply` hooks the job uses                               |
+| `src/frontends/netlist-json.ts` | the first frontend: `circuit.netlist.json` = `{ netlist, board?, libraries? }`, the IR as a file |
+| `src/libraries.ts`              | `LibrarySpec` → project `fp-lib-table` / `sym-lib-table` rows (`AddLibraryTableRow`)             |
+| `src/bridge-job.ts`             | the job the bridge mounts at `/sessions/:id/compile` (see `packages/bridge/README.md`)           |
 
 The emitter, the validator, the frontend and the outline geometry are pure, so the package is
 unit-tested without a KiCad server (`bun test`).
 
 ## The apply order, and why
 
-Each step was checked against the fork at `280274cc3d`:
+Each step was checked against the fork at `280274cc3d` and run live (`bench/experiment.ts`):
 
 1. **`ImportNetlist` with `dryRun`** — the only check that sees the server's `fp-lib-table`.
    An error here stops the compile with the board untouched.
@@ -35,34 +37,52 @@ Each step was checked against the fork at `280274cc3d`:
    the rectangle step 2 drew.
 4. **`AutoplaceFootprints` on the footprints step 3 added**, with `includeOffboard` — an empty
    id list means "offboard only" to KiCad, which would skip everything the spread put inside.
+5. **The edge-clearance inset.** The legacy autoplacer packs into the outline's top-left corner
+   and ignores the copper-to-edge rule, so a fresh compile failed DRC every time. With
+   `edgeMarginNm` (the job passes `edgeClearanceNm(board)`), the outline step 2 drew is moved so
+   its corner sits that far outside the placed group — one `UpdateItems` commit on four segments.
+   The footprints are not moved on purpose: `UpdateItems` on a footprint re-sends its pads, fields
+   and graphics at their old absolute coordinates (`FOOTPRINT::Deserialize` calls `SetPosition`,
+   then overwrites the children), so a real move needs a full translate that `@fp-pcb/client`
+   does not offer yet. A user-drawn outline is left alone and `edge_clearance_unchecked` is
+   emitted instead.
 
 KiCad's import report has no severity per line (`WX_STRING_REPORTER` drops it), so results are
 graded by the response's `errorCount` / `warningCount`; the text rides along as detail.
 
-A compile is **three undo entries** (outline, KiCad's "Update Netlist", autoplace). The library
-never saves the document; that is a job's decision.
+A compile is **three or four undo entries** (outline, KiCad's "Update Netlist", autoplace, the
+inset when it had to move anything). The library never saves the document; the job does.
+
+## The job
+
+`createCompileJobs()` returns what the bridge mounts: `POST /sessions/:id/compile` takes a
+`CompileSource` inline (no file staging), creates the project at `project.path` when the session
+was started bare, registers the frontend's `libraries` in the project tables, runs `compile()`
+with the stages above as job states, saves, and reports the board `revision` — because
+`ImportNetlist` does not publish `DocumentChanged` on the fork today. `done` carries `result`
+whether or not it is `ok`; `error` is an infrastructure failure. `DELETE` cancels between stages.
+
+## Tests
+
+`bun test` runs the unit suites (no server). `test/apply.kicad.test.ts` and
+`packages/bridge/test/compile.kicad.test.ts` run against a fork `kicad-cli api-server` and its
+`qa/data/libraries` (`KICAD_CLI` / `KICAD_SRC`), skipping with a message when either is missing.
+`bun run experiment` is the exploratory version with timings and verbatim reports; its findings
+are in fabdesk's `docs/fab-pcb-migration.md` §6.1.
 
 ## What is not here yet
 
-- **No bridge job.** `POST /sessions/:id/compile` follows the router's `bridge-job.ts` pattern
-  and lands with the integration test, not before.
-- **`LibrarySpec` is declared, not consumed.** Headless servers ship no footprint libraries;
-  registering a frontend's project-local `.pretty` in the project `fp-lib-table` before the dry
-  run is the next `apply.ts` step.
 - **`libparts` is not emitted.** `BOARD_NETLIST_UPDATER` does not read it, so `ImportNetlist` is
   happy — but the output is not a drop-in for an eeschema netlist in tools that want library
   detail.
 - **Board-only.** Nothing creates a schematic. A netlist carries no geometry, so a design compiled
   this way has no drawn schematic, hence no ERC and no BOM-from-schematic.
-- **`bench/experiment.ts` is the seed of the integration test.** `bun run experiment` drives every
-  step against a fork `kicad-cli api-server` with timings, the library-provisioning matrix, the
-  package path, and a stock-`kicad-cli` compatibility check. Results: fabdesk `docs/fab-pcb-migration.md` §6.1.
-- **No integration test.** The format expectations are pinned literally but have not been
-  round-tripped through a live `kicad-cli api-server`. That is `apply.kicad.test.ts`, gated on
-  the fork build (`KICAD_CLI`), and it must land before anything depends on this.
 - **`ImportNetlist` does not publish `DocumentChanged`** on the fork today (it only bumps the
-  revision), so a browser tab on the same session will not see imported footprints until the
-  job reports its revision or the fork is patched.
+  revision); the job's `done` event carries `revision` so a tab can re-read. A one-line fork patch
+  would make the event flow like every other commit.
+- **Only the near edges are inset**, and only when this compile drew the outline. A board so
+  full that the far edges bind has a placement problem the inset cannot fix; a footprint
+  translate in the client would let a user-drawn outline be honoured too.
 
 ## Notes for callers
 
@@ -71,4 +91,6 @@ never saves the document; that is a job's decision.
 - Defaults are compile defaults, not "update PCB from schematic" defaults: `updateFootprints` and
   `deleteExtraFootprints` are **on**, because the source is the truth. `matchMode` is `reference`
   — a compiled design has no schematic UUIDs.
+- `NewProject` wants the `.kicad_pro` path (an extension-less path becomes a directory to
+  create), and `currentBoard()` is empty afterwards — open the board explicitly.
 - A compile that fails never touches the board.

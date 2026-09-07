@@ -8,6 +8,7 @@ import { stat } from "node:fs/promises";
 import { extname, resolve } from "node:path";
 import { decodeEvent, eventToJson } from "@fp-pcb/client";
 import { createRouteJobs, matchRouteJobPath, type RouteJobs } from "@fp-pcb/router/bridge-job";
+import { createCompileJobs, matchCompileJobPath, type CompileJobs } from "@fp-pcb/compile/bridge-job";
 import {
   TransportError,
   WS_BRIDGE_PROTOCOL_VERSION,
@@ -29,6 +30,8 @@ export interface BridgeServer {
   readonly sessions: SessionManager;
   /** The autorouting jobs mounted under `/sessions/:id/route`. */
   readonly routeJobs: RouteJobs;
+  /** The compile jobs mounted under `/sessions/:id/compile`. */
+  readonly compileJobs: CompileJobs;
   stop(): Promise<void>;
 }
 
@@ -53,6 +56,7 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
     .catch(() => false);
   if (!kicadCliExists) cfg.log(`warning: kicad-cli not found at ${cfg.kicadCli} (set KICAD_CLI)`);
   const routeJobs = createRouteJobs({ freerouting: cfg.freerouting, log: cfg.log });
+  const compileJobs = createCompileJobs({ log: cfg.log });
   if (!cfg.freerouting.ok) cfg.log(`warning: ${cfg.freerouting.reason}`);
 
   const server = Bun.serve<WsData>({
@@ -83,6 +87,7 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
           workspaceRoot: cfg.workspaceRoot,
           staticDir: cfg.staticDir,
           freerouting: cfg.freerouting,
+          compile: { frontends: compileJobs.frontends },
           sessions: sessions.list().map((s) => ({ id: s.id, state: s.state, path: s.path, clients: s.clients })),
         });
       }
@@ -120,6 +125,18 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
           req,
           { id: session.id, transport: session.transport, clientName: `fp-pcb/bridge/${session.id}/router` },
           route.jobId,
+        );
+      }
+
+      const compileRoute = matchCompileJobPath(path);
+      if (compileRoute) {
+        const session = sessions.get(compileRoute.sessionId);
+        if (!session) return json({ error: `unknown session "${compileRoute.sessionId}"` }, 404);
+        session.touch();
+        return compileJobs.handle(
+          req,
+          { id: session.id, transport: session.transport, clientName: `fp-pcb/bridge/${session.id}/compile` },
+          compileRoute.jobId,
         );
       }
 
@@ -231,6 +248,7 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
     config: cfg,
     sessions,
     routeJobs,
+    compileJobs,
     async stop() {
       await sessions.destroyAll();
       await server.stop(true);
