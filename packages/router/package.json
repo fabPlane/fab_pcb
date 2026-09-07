@@ -6,10 +6,13 @@
   "description": "Autorouting for kicad-web: RouteInput from a Board, a JS router (tscircuit capacity-autorouter) and a Freerouting (Specctra DSN/SES) adapter, results applied with one CreateItems commit",
   "exports": {
     ".": "./src/index.ts",
+    "./apply": "./src/apply.ts",
     "./bridge-job": "./src/bridge-job.ts",
+    "./extract": "./src/extract.ts",
     "./freerouting": "./src/freerouting.ts",
     "./js-router": "./src/js-router.ts",
-    "./specctra": "./src/specctra/index.ts"
+    "./specctra": "./src/specctra/index.ts",
+    "./types": "./src/types.ts"
   },
   "scripts": {
     "test": "bun test",

@@ -214,6 +214,22 @@ second process to run and supervise), not a speed-up.
   is live and lists the active stack. Server-side operations re-read the document through
   `KicadDocumentService.resyncDocument()`: the `DocumentChanged` relay skips them, because it sees
   our own client name and assumes the commit backend already applied the diff.
+- **Autoroute** (`KicadAutorouteService`, `Route → Autoroute…`, toolbar "Auto", `Shift+X`): the
+  dialog picks a router — the JS router (`@kicad-web/router`'s `JsRouter`, `@tscircuit/capacity-autorouter`)
+  **in this tab**, whose `step()` loop yields to the UI every 30 ms so the dialog stays live and
+  Cancel works; the same router **on the bridge**; or **Freerouting** (Java) on the bridge — plus
+  which nets (all unrouted / the selected items' nets), the copper layers, via cost, passes
+  (Freerouting `-mp`) / effort and a time limit. In-tab: `RefillZones`, `extractRouteInput` over
+  the session, the router, `applyRouteResult` as one commit, a store re-sync. On the bridge:
+  `POST /sessions/:id/route` and the job's SSE stream (`services/autoroute-run.ts` folds its
+  events into the `AutorouteRun` the dialog renders: state, routed/total, elapsed, the log tail,
+  Cancel = `DELETE` the job, which kills Freerouting). Either way the result is one undo entry —
+  History shows "Autoroute (js): 86 connections" / "Autoroute (freerouting): 113 connections" —
+  and the summary lists routed/total, tracks, vias, track length, wall time, a "Refill zones + run
+  DRC" shortcut and the unrouted connections (a click frames the airline and highlights its net).
+  A failed run (the JS router's reachability precheck on dense boards) or a cancelled one says so
+  and applies nothing. The status bar's unrouted count and the ratsnest refresh from the store
+  re-sync. Numbers per board: [docs/06-routing.md](../../docs/06-routing.md#in-the-app).
 - **Server settings** (`KicadSettingsService`): `ListColorThemes` / `GetColorTheme` put KiCad's own
   colour themes in Settings → Appearance (they use the same flat theme keys the renderer does, so
   a server theme drops straight onto the canvas as `server:<name>`), and `GetAppSettings` shows the
@@ -252,10 +268,14 @@ GAP rather than hiding it).
 board is copied into `<workspace root>/.kicad-web-practice-<name>/` (the fixture is never
 written) and the steps are `open` (timings: canvas, session open, store items, first content
 draw, server shapes), `view` (zoom to fit, layers panel toggle, hover, pad pick), `schematic`
-(every sheet), `edit` (property edit → revision bump → undo), `move` (the M tool) and `route` on
+(every sheet), `edit` (property edit → revision bump → undo), `move` (the M tool), `route` on
 the `<name>.unrouted` variant: five nets by hand with the route tool (V switches layer on runs
 over 4 mm), `RefillZones`, DRC, three undos, save, gerbers + drill, then the saved board reopened
-in a fresh `kicad-cli` session. Screenshots go to `docs/screenshots/boards/<name>-*.png`, the
+in a fresh `kicad-cli` session, and `autoroute` on a fresh unrouted copy through `Route → Autoroute…`:
+the JS router in the tab (every board but `interf_u`), then Freerouting on the bridge where the
+board asks for it (`stickhub`, `interf_u`) and `FREEROUTING_JAR` is set (`AUTOROUTE_PASSES`
+overrides `-mp`, default 20) — summary, `Refill zones + run DRC` from the dialog, undo, with the
+tab's responsiveness measured during the in-tab run. Screenshots go to `docs/screenshots/boards/<name>-*.png`, the
 JSON result to `e2e/output/board-practice/<name>.json`; the per-board table is
 `docs/board-practice.md`.
 
@@ -271,7 +291,9 @@ bun test            # unit tests, incl. test/kicad-canvas.test.ts (per-store pad
                     # caches shared across remounts), test/kicad-services.test.ts (fake transport: session
                     # lifecycle, store population from canned GetItems, commit backend) and
                     # test/batch3-services.test.ts (library caching, board-tool enums, settings
-                    # translation, fields-table batching, the server/client undo picker)
+                    # translation, fields-table batching, the server/client undo picker) and
+                    # test/autoroute.test.ts (the autoroute service on fakes: job body, SSE parsing, the
+                    # in-tab run and its cancel, the bridge run and its cancel)
 bunx tsc -b
 bun run --filter @kicad-web/app build
 cd e2e && bun run test          # mock smoke (E2E_PORT=5175 when a dev server holds 5173)

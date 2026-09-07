@@ -14,6 +14,11 @@
  *   by `specctra/ses.ts` into tracks and vias for `applyRouteResult()`. Works on any server; pads
  *   are approximated (see dsn.ts).
  *
+ * - `"kicad-dsn"` — KiCad's exporter for the DSN (exact geometry), but the session is parsed here
+ *   and the items created by `applyRouteResult()` under the caller's own commit message. What the
+ *   app uses: the History panel then reads "Autoroute (freerouting): n connections" rather than
+ *   KiCad's fixed "Import Specctra Session", and the tracks are known client-side.
+ *
  * Default: `"auto"` — `"kicad"` when the server supports it, else `"builtin"`.
  *
  * `RouteResult` for the kicad mode carries no tracks (KiCad already created them) and reports the
@@ -28,23 +33,73 @@ import type { Board } from "@kicad-web/client";
 import { commands as generatedCommands, KiCadApiError } from "@kicad-web/client";
 import { writeDsn, dsnLayers } from "./specctra/dsn";
 import { parseSes, sesToItems } from "./specctra/ses";
-import type { Autorouter, RouteConnection, RouteInput, RouteOptions, RouteProgress, RouteResult } from "./types";
+import {
+  RouteCancelled,
+  type Autorouter,
+  type RouteConnection,
+  type RouteInput,
+  type RouteOptions,
+  type RouteProgress,
+  type RouteResult,
+} from "./types";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const VENDOR_DIR = resolve(HERE, "..", "vendor");
 export const FREEROUTING_VERSION = "2.4.1";
 /** Where `bench/fetch-freerouting.ts` puts the jar; override with `FREEROUTING_JAR`. */
 export const DEFAULT_JAR = join(VENDOR_DIR, `freerouting-${FREEROUTING_VERSION}.jar`);
-/** Freerouting 2.2+ needs Java 25; a local Temurin lives in vendor/jdk (`fetch-freerouting.ts --jdk`). Override with `FREEROUTING_JAVA`. */
+/** Where `fetch-freerouting.ts --jdk` unpacks the Temurin (macOS bundle layout first, then the flat one). */
+export const VENDOR_JAVA_CANDIDATES = [join(VENDOR_DIR, "jdk", "Contents", "Home", "bin", "java"), join(VENDOR_DIR, "jdk", "bin", "java")];
+/** Freerouting 2.2+ needs Java 25; a local Temurin lives in vendor/jdk (`fetch-freerouting.ts --jdk`). Override with `KICAD_WEB_JAVA` (or `FREEROUTING_JAVA`). */
 export const DEFAULT_JAVA_CANDIDATES = [
+  process.env.KICAD_WEB_JAVA,
   process.env.FREEROUTING_JAVA,
-  join(VENDOR_DIR, "jdk", "Contents", "Home", "bin", "java"),
-  join(VENDOR_DIR, "jdk", "bin", "java"),
+  ...VENDOR_JAVA_CANDIDATES,
   "/usr/bin/java",
   "java",
 ].filter((x): x is string => !!x);
 
-export type FreeroutingMode = "auto" | "kicad" | "builtin";
+export type FreeroutingMode = "auto" | "kicad" | "builtin" | "kicad-dsn";
+
+export interface FreeroutingPaths {
+  jar: string;
+  java: string | undefined;
+  ok: boolean;
+  /** Why Freerouting cannot run (jar or java missing), with the fix. */
+  reason?: string;
+}
+
+/**
+ * Resolves the jar and the Java from the environment: `FREEROUTING_JAR` (default: the vendored
+ * `freerouting-<version>.jar`) and `KICAD_WEB_JAVA` / `FREEROUTING_JAVA` (default: the vendored
+ * Temurin, then a system `java`). What the bridge reports in `/health` and checks before a job.
+ */
+export function resolveFreerouting(env: Record<string, string | undefined> = process.env): FreeroutingPaths {
+  const jar = env.FREEROUTING_JAR || DEFAULT_JAR;
+  const javaEnv = env.KICAD_WEB_JAVA || env.FREEROUTING_JAVA;
+  const java = javaEnv
+    ? existsSync(javaEnv) || Bun.which(javaEnv)
+      ? javaEnv
+      : undefined
+    : findJava([...VENDOR_JAVA_CANDIDATES, "/usr/bin/java", "java"]);
+  if (!existsSync(jar))
+    return {
+      jar,
+      java,
+      ok: false,
+      reason: `Freerouting jar not found at ${jar}: run 'bun packages/router/bench/fetch-freerouting.ts --jdk' or set FREEROUTING_JAR`,
+    };
+  if (!java)
+    return {
+      jar,
+      java,
+      ok: false,
+      reason: javaEnv
+        ? `Java not found at ${javaEnv} (KICAD_WEB_JAVA / FREEROUTING_JAVA)`
+        : "no Java 25 found: run 'bun packages/router/bench/fetch-freerouting.ts --jdk' or set KICAD_WEB_JAVA",
+    };
+  return { jar, java, ok: true };
+}
 
 export interface FreeroutingOptions {
   jar?: string;
@@ -184,6 +239,8 @@ export interface FreeroutingRunResult {
   log: string[];
   exitCode: number;
   timedOut: boolean;
+  /** The process was killed because `signal` fired. */
+  cancelled: boolean;
   lastEvent?: FreeroutingEvent;
 }
 
@@ -191,7 +248,17 @@ export interface FreeroutingRunResult {
 export async function runFreerouting(
   dsnPath: string,
   sesPath: string,
-  opts: { jar: string; java: string; passes: number; jvmArgs?: string[]; extraArgs?: string[]; maxTimeMs?: number; threads?: number },
+  opts: {
+    jar: string;
+    java: string;
+    passes: number;
+    jvmArgs?: string[];
+    extraArgs?: string[];
+    maxTimeMs?: number;
+    threads?: number;
+    /** Kills the process (SIGTERM, SIGKILL after 5 s) when it fires. */
+    signal?: AbortSignal;
+  },
   progress?: (p: RouteProgress) => void,
 ): Promise<FreeroutingRunResult> {
   const args = [
@@ -213,7 +280,20 @@ export async function runFreerouting(
   const log: string[] = [];
   let lastEvent: FreeroutingEvent | undefined;
   let timedOut = false;
+  let cancelled = false;
   const total = { unrouted: 0 };
+  const kill = () => {
+    proc.kill("SIGTERM");
+    setTimeout(() => {
+      if (proc.exitCode === null && proc.signalCode === null) proc.kill("SIGKILL");
+    }, 5_000).unref?.();
+  };
+  const onAbort = () => {
+    cancelled = true;
+    kill();
+  };
+  if (opts.signal?.aborted) onAbort();
+  else opts.signal?.addEventListener("abort", onAbort, { once: true });
   const consume = async (stream: ReadableStream<Uint8Array> | null | number | undefined) => {
     if (!stream || typeof stream === "number") return;
     const reader = stream.getReader();
@@ -255,15 +335,16 @@ export async function runFreerouting(
           // Freerouting has no "stop and save" signal on the CLI; SIGTERM ends the run without a
           // session, so a timeout means "nothing routed". The bench passes -mp instead.
           timedOut = true;
-          proc.kill("SIGTERM");
+          kill();
         }, opts.maxTimeMs)
       : undefined;
   await Promise.all([consume(proc.stdout), consume(proc.stderr)]);
   const exitCode = await proc.exited;
   if (timer) clearTimeout(timer);
+  opts.signal?.removeEventListener("abort", onAbort);
   let ses = "";
-  if (existsSync(sesPath)) ses = await readFile(sesPath, "utf8");
-  return { ses, log, exitCode, timedOut, lastEvent };
+  if (!cancelled && existsSync(sesPath)) ses = await readFile(sesPath, "utf8");
+  return { ses, log, exitCode, timedOut, cancelled, lastEvent };
 }
 
 export class FreeroutingRouter implements Autorouter {
@@ -287,20 +368,27 @@ export class FreeroutingRouter implements Autorouter {
       return { ok: false, reason: `Freerouting jar not found at ${this.jar} (bun run bench/fetch-freerouting.ts, or set FREEROUTING_JAR)` };
     if (!this.java) return { ok: false, reason: "no java found (set FREEROUTING_JAVA or run bench/fetch-freerouting.ts --jdk)" };
     const mode = await this.resolveMode();
-    if (mode === "kicad" && !this.ctx.board) return { ok: false, reason: "kicad mode needs a Board in the context" };
+    if (mode !== "builtin" && !this.ctx.board) return { ok: false, reason: `${mode} mode needs a Board in the context` };
     if (this.mode === "kicad" && this.ctx.board && !(await serverHasSpecctra(this.ctx.board)))
       return { ok: false, reason: `server lacks ${SPECCTRA_COMMANDS.export}/${SPECCTRA_COMMANDS.import}` };
+    if (this.mode === "kicad-dsn" && this.ctx.board && !(await this.ctx.board.client.supports(SPECCTRA_COMMANDS.export)))
+      return { ok: false, reason: `server lacks ${SPECCTRA_COMMANDS.export}` };
     return { ok: true };
   }
 
-  /** `auto` -> `kicad` when the server advertises both commands and the bindings have them, else `builtin`. */
-  async resolveMode(): Promise<"kicad" | "builtin"> {
-    if (this.mode !== "auto") return this.mode;
+  /**
+   * `auto` -> `kicad` when the server advertises both commands and the bindings have them, else
+   * `builtin`; `kicad-dsn` degrades to `builtin` when the server has no exporter.
+   */
+  async resolveMode(): Promise<"kicad" | "builtin" | "kicad-dsn"> {
+    if (this.mode === "kicad" || this.mode === "builtin") return this.mode;
     const board = this.ctx.board;
     if (!board) return "builtin";
     const cmds = generatedCommands as unknown as AnyCommands;
-    if (!cmds["runBoardJobExportSpecctra"] || !cmds["importSpecctraSession"]) return "builtin";
     try {
+      if (this.mode === "kicad-dsn")
+        return cmds["runBoardJobExportSpecctra"] && (await board.client.supports(SPECCTRA_COMMANDS.export)) ? "kicad-dsn" : "builtin";
+      if (!cmds["runBoardJobExportSpecctra"] || !cmds["importSpecctraSession"]) return "builtin";
       return (await serverHasSpecctra(board)) ? "kicad" : "builtin";
     } catch {
       return "builtin";
@@ -319,7 +407,7 @@ export class FreeroutingRouter implements Autorouter {
     const dsnPath = join(workDir, "board.dsn");
     const sesPath = join(workDir, "board.ses");
     const layers = dsnLayers(input, opts);
-    if (opts.layers && layers.length !== input.copperLayers.length && mode === "kicad")
+    if (opts.layers && layers.length !== input.copperLayers.length && mode !== "builtin")
       log.push("note: kicad mode exports every enabled copper layer; the `layers` option is ignored");
     if (opts.viaCost !== undefined) log.push("note: Freerouting's via costs are set in its GUI/profile, not on the CLI; `viaCost` ignored");
     if (opts.seed !== undefined) log.push("note: Freerouting is not seedable from the CLI; `seed` ignored");
@@ -328,7 +416,8 @@ export class FreeroutingRouter implements Autorouter {
 
     progress?.({ phase: "export", percent: 0 });
     let dsn: string;
-    if (mode === "kicad") {
+    if (opts.signal?.aborted) throw new RouteCancelled();
+    if (mode !== "builtin") {
       dsn = await exportDsnViaKicad(this.ctx.board!, dsnPath);
     } else {
       dsn = writeDsn(input, { layers });
@@ -341,9 +430,21 @@ export class FreeroutingRouter implements Autorouter {
     const run = await runFreerouting(
       dsnPath,
       sesPath,
-      { jar: this.jar, java: this.java!, passes, jvmArgs: this.fr.jvmArgs, extraArgs: this.fr.extraArgs, maxTimeMs: opts.maxTimeMs },
+      {
+        jar: this.jar,
+        java: this.java!,
+        passes,
+        jvmArgs: this.fr.jvmArgs,
+        extraArgs: this.fr.extraArgs,
+        maxTimeMs: opts.maxTimeMs,
+        signal: opts.signal,
+      },
       progress,
     );
+    if (run.cancelled) {
+      if (!(this.fr.keepFiles || this.fr.workDir)) await rm(workDir, { recursive: true, force: true }).catch(() => {});
+      throw new RouteCancelled(`Freerouting killed after ${Math.round(performance.now() - t0)} ms (${run.log.length} log lines)`);
+    }
     log.push(
       ...run.log
         .filter((l) => parseFreeroutingLine(l).kind !== "other" || /WARN|ERROR/.test(l))

@@ -1949,3 +1949,66 @@ h3.section:first-child {
 .chip.undo-mode {
   cursor: default;
 }
+
+/* ------------------------------------------------------------------ autoroute dialog */
+.autoroute-layers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+.chip-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+}
+.autoroute-run {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 160px;
+}
+.autoroute-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-sm);
+}
+.autoroute-status .chip.state-failed,
+.autoroute-status .chip.state-cancelled {
+  color: var(--danger, #f66);
+}
+.autoroute-status .chip.state-done {
+  color: var(--success, #6c6);
+}
+.autoroute-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px 16px;
+  margin-bottom: 6px;
+}
+.autoroute-unrouted {
+  margin-top: 6px;
+}
+.autoroute-unrouted-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-height: 140px;
+  overflow: auto;
+  margin-top: 4px;
+}
+.autoroute-unrouted-row {
+  display: inline-flex;
+  gap: 6px;
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+}
+.autoroute-unrouted-row .net {
+  color: var(--accent);
+}
+.autoroute-log {
+  max-height: 140px;
+}

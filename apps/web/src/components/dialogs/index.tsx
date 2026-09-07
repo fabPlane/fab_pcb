@@ -12,6 +12,7 @@ import { AnnotateDialog } from './AnnotateDialog';
 import { UpdatePcbDialog } from './UpdatePcbDialog';
 import { FieldsTableDialog } from './FieldsTableDialog';
 import { SeveritiesDialog } from './SeveritiesDialog';
+import { AutorouteDialog } from './AutorouteDialog';
 
 export function Dialogs({ onProjectCreated }: { onProjectCreated(path: string): void }) {
   return (
@@ -29,6 +30,7 @@ export function Dialogs({ onProjectCreated }: { onProjectCreated(path: string): 
       <UpdatePcbDialog />
       <FieldsTableDialog />
       <SeveritiesDialog />
+      <AutorouteDialog />
       <PromptDialog />
     </>
   );

@@ -8,8 +8,11 @@
 // Steps (default all): open (timings, counts), view (zoom to fit, layers panel, hover, select),
 // schematic (every sheet), edit (property edit → revision bump, undo), move (M tool), route (the
 // unrouted variant: five nets by hand with V layer switches, RefillZones, DRC, undo, save, gerbers +
-// drill, reopen in a fresh server session). Screenshots go to docs/screenshots/boards/<name>-*.png,
-// the machine-readable result to e2e/output/board-practice/<name>.json.
+// drill, reopen in a fresh server session), autoroute (a fresh unrouted copy through Route ->
+// Autoroute...: the JS router in the tab on every board that allows it, then Freerouting on the
+// bridge where the board asks for it and FREEROUTING_JAR is set — summary, RefillZones + DRC, undo;
+// AUTOROUTE_PASSES overrides Freerouting's -mp, default 20). Screenshots go to
+// docs/screenshots/boards/<name>-*.png, the machine-readable result to e2e/output/board-practice/<name>.json.
 import { chromium } from '../../../e2e/node_modules/@playwright/test/index.mjs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -25,11 +28,13 @@ const fixtures = resolve(repo, 'e2e/fixtures/boards');
 
 /** The five practice boards: fixture directory and project base name. */
 export const BOARDS = {
-  ecc83: { dir: 'ecc83', project: 'ecc83-pp' },
-  sonde_xilinx: { dir: 'sonde_xilinx', project: 'sonde xilinx' },
-  interf_u: { dir: 'interf_u', project: 'interf_u' },
-  pic_programmer: { dir: 'pic_programmer', project: 'pic_programmer' },
-  stickhub: { dir: 'stickhub', project: 'StickHub' },
+  ecc83: { dir: 'ecc83', project: 'ecc83-pp', autoroute: { js: true, freerouting: false } },
+  sonde_xilinx: { dir: 'sonde_xilinx', project: 'sonde xilinx', autoroute: { js: true, freerouting: false } },
+  // the JS router times out after 800 s on interf_u (docs/router-comparison.md): not worth a practice run
+  interf_u: { dir: 'interf_u', project: 'interf_u', autoroute: { js: false, freerouting: true } },
+  pic_programmer: { dir: 'pic_programmer', project: 'pic_programmer', autoroute: { js: true, freerouting: false } },
+  // the JS router fails its precheck on stickhub; Freerouting reached 113/128 in the bench
+  stickhub: { dir: 'stickhub', project: 'StickHub', autoroute: { js: true, freerouting: true } },
 };
 
 const argv = process.argv.slice(2);
@@ -486,6 +491,131 @@ try {
     const sessionsNow = (await (await fetch(`${bridge}/sessions`)).json()).sessions;
     log(`reopened (${sessionsBefore} sessions before, ${sessionsNow.length} now): ${JSON.stringify(again)}; segments per routed net ${JSON.stringify(routedNets)}`);
     record('reopen', again.tracks === storeT && again.vias === storeV, `fresh kicad-cli session: ${again.tracks} tracks / ${again.vias} vias persisted (${Object.entries(routedNets).map(([n, c]) => `${n}: ${c}`).join(', ')})`);
+  }
+  // ---------------------------------------------------------------- autoroute (Route -> Autoroute...)
+  if (want('autoroute')) {
+    // a fresh unrouted copy: the route step saved its hand routes into the practice copy
+    for (const f of [`${board.project}.unrouted.kicad_pcb`, `${board.project}.unrouted.kicad_pro`]) cpSync(`${fixtures}/${board.dir}/${f}`, `${proj}/${f}`);
+    const list0 = await (await fetch(`${bridge}/sessions`)).json();
+    for (const s of list0.sessions) await fetch(`${bridge}/sessions/${s.id}`, { method: 'DELETE' });
+    await page.waitForTimeout(300);
+    await openProject(unroutedPro, 'open-autoroute');
+    const unroutedCell = () => textOf('[data-testid="unrouted-count"]').then((t) => t.replace(/\s+/g, ' ').trim());
+    const currentRun = () => kw(() => { const r = window.__kicadWeb.services.autoroute?.current(); return r ? { state: r.state, error: r.error, summary: r.summary, progress: r.progress, log: r.log.slice(-6) } : null; });
+    const historyTop = () => kw(async () => { const s = await window.__kicadWeb.services.undo.stacks(); return s.undo[s.undo.length - 1]?.description ?? null; });
+    const availability = await kw(() => window.__kicadWeb.services.autoroute.available());
+    log('autoroute availability', JSON.stringify(availability));
+    // AUTOROUTE_ROUTERS=js|freerouting|js,freerouting narrows the run (default: both the board allows)
+    const only = new Set((process.env.AUTOROUTE_ROUTERS ?? 'js,freerouting').split(','));
+    const jsWanted = board.autoroute.js && only.has('js');
+    const freeroutingWanted = board.autoroute.freerouting && only.has('freerouting') && !!process.env.FREEROUTING_JAR;
+    if (board.autoroute.freerouting && !process.env.FREEROUTING_JAR) log('Freerouting run skipped: set FREEROUTING_JAR (the bridge reports', availability.freerouting.ok ? 'it available' : `"${availability.freerouting.reason}"`, ')');
+
+    /** Runs one router through the dialog; returns the finished run and the timings. */
+    const runRouter = async (router, opts) => {
+      const before = await counts();
+      const unrouted0 = await unroutedCell();
+      await run('board.autoroute');
+      await page.waitForSelector('[data-testid="autoroute-router"]', { timeout: 10000 });
+      await page.waitForTimeout(400);
+      if (opts.shotDialog) await shot('autoroute-dialog');
+      await page.locator('[data-testid="autoroute-router"]').selectOption(router);
+      if (opts.passes) await page.locator('[data-testid="autoroute-passes"]').fill(String(opts.passes));
+      if (opts.timeLimitS !== undefined) await page.locator('[data-testid="autoroute-time"]').fill(String(opts.timeLimitS));
+      const tStart = Date.now();
+      await page.locator('[data-testid="autoroute-run"]').click();
+      await page.waitForSelector('[data-testid="autoroute-progress"]', { timeout: 10000 });
+      // the tab must stay responsive while the in-tab router steps: time a trivial evaluate every second
+      const lags = [];
+      let shotTaken = false;
+      let lastState = '';
+      for (;;) {
+        const t = Date.now();
+        const r = await currentRun();
+        lags.push(Date.now() - t);
+        if (r && r.state !== lastState) { lastState = r.state; log(`  ${router}: ${r.state}${r.progress?.phase ? ` (${r.progress.phase}${r.progress.routed !== undefined ? `, ${r.progress.routed}/${r.progress.total}` : ''})` : ''}`); }
+        if (!shotTaken && r && r.state === 'routing' && Date.now() - tStart > (opts.progressShotAfterMs ?? 3000)) { await shot(`autoroute-${opts.tag}-progress`); shotTaken = true; }
+        if (r && ['done', 'failed', 'cancelled'].includes(r.state)) break;
+        if (Date.now() - tStart > (opts.maxWaitMs ?? 900000)) { log('  giving up on the run; cancelling'); await page.locator('[data-testid="autoroute-cancel"]').click().catch(() => undefined); }
+        await page.waitForTimeout(1000);
+      }
+      const wallMs = Date.now() - tStart;
+      const r = await currentRun();
+      await page.waitForTimeout(800);
+      const after = await counts();
+      const unrouted1 = await unroutedCell();
+      const top = await historyTop();
+      await shot(`autoroute-${opts.tag}-${r.state === 'done' ? 'done' : 'failed'}`);
+      const maxLag = Math.max(...lags);
+      log(`${router}: ${r.state} in ${wallMs} ms; summary ${JSON.stringify(r.summary ? { routed: r.summary.routed, total: r.summary.total, tracks: r.summary.tracks, vias: r.summary.vias, lengthMm: +(r.summary.trackLengthNm / 1e6).toFixed(1), wallMs: r.summary.wallMs, message: r.summary.message, unroutedAfter: r.summary.unroutedAfter } : null)}; error ${r.error ?? '-'}; tracks ${before.tracks} -> ${after.tracks}, vias ${before.vias} -> ${after.vias}; status bar "${unrouted0}" -> "${unrouted1}"; history top "${top}"; max evaluate lag ${maxLag} ms`);
+      if (r.log?.length) for (const l of r.log) log('   |', l.slice(0, 200));
+      return { run: r, wallMs, before, after, unrouted0, unrouted1, top, maxLag };
+    };
+
+    /** The dialog's "Refill zones + run DRC", then the markers by rule. */
+    const drcFromDialog = async (tag) => {
+      const tD = Date.now();
+      await page.locator('[data-testid="autoroute-drc"]').click();
+      await page.waitForFunction(() => /DRC:|DRC failed/.test(document.querySelector('[data-testid="autoroute-summary"]')?.textContent ?? ''), null, { timeout: 600000 });
+      const markers = await kw(() => window.__kicadWeb.services.markers.markers('drc').filter((m) => !m.excluded).map((m) => ({ severity: m.severity, rule: m.rule })));
+      const byRule = {};
+      for (const m of markers) byRule[`${m.severity}:${m.rule}`] = (byRule[`${m.severity}:${m.rule}`] ?? 0) + 1;
+      await shot(`autoroute-${tag}-drc`);
+      log(`${tag}: RefillZones + DRC in ${Date.now() - tD} ms: ${JSON.stringify(byRule)}`);
+      return { ms: Date.now() - tD, byRule, errors: markers.filter((m) => m.severity === 'error' && !/unconnected/i.test(m.rule)).length, unconnected: markers.filter((m) => /unconnected/i.test(m.rule)).length, warnings: markers.filter((m) => m.severity === 'warning').length };
+    };
+
+    /** Closes the dialog and undoes the autoroute commit; returns the counts afterwards. */
+    const undoAutoroute = async () => {
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(300);
+      await focusCanvas();
+      const r0 = await rev();
+      await page.keyboard.press('ControlOrMeta+z');
+      await waitRev(r0, 60000).catch(() => undefined);
+      await page.waitForTimeout(800);
+      return counts();
+    };
+
+    if (jsWanted) {
+      const js = await runRouter('js-tab', { tag: 'js', shotDialog: true, timeLimitS: 240, maxWaitMs: 300000 });
+      timings.autorouteJs = { wallMs: js.wallMs, state: js.run.state, maxEvaluateLagMs: js.maxLag };
+      const s = js.run.summary;
+      if (js.run.state === 'done' && s && s.routed > 0) {
+        const drc = await drcFromDialog('js');
+        const undone = await undoAutoroute();
+        const okUndo = undone.tracks === js.before.tracks && undone.vias === js.before.vias;
+        log(`js undo: tracks ${js.after.tracks} -> ${undone.tracks}, vias ${js.after.vias} -> ${undone.vias}${okUndo ? '' : ' !! unexpected'}`);
+        record('autoroute-js', js.after.tracks === js.before.tracks + s.tracks && js.top === s.message && okUndo && js.maxLag < 2000,
+          `JS router in the tab: ${s.routed}/${s.total} connections, ${s.tracks} tracks, ${s.vias} vias, ${(s.trackLengthNm / 1e6).toFixed(1)} mm in ${(s.wallMs / 1000).toFixed(1)} s (dialog ${(js.wallMs / 1000).toFixed(1)} s, tab stayed responsive: max ${js.maxLag} ms per evaluate); status bar "${js.unrouted0}" -> "${js.unrouted1}"; history "${js.top}"; RefillZones + DRC: ${drc.errors} errors, ${drc.unconnected} unconnected, ${drc.warnings} warnings; undo removed it (tracks ${js.after.tracks} -> ${undone.tracks})`);
+      } else {
+        // the dialog must report the failure and leave the board alone
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(300);
+        const untouched = js.after.tracks === js.before.tracks && js.after.vias === js.before.vias;
+        const reported = !!(await textOf('[data-testid="autoroute-error"]').catch(() => '')) || js.run.state !== 'done';
+        record('autoroute-js', untouched && (js.run.state === 'failed' || js.run.state === 'cancelled' || (s && s.routed === 0)) && js.maxLag < 2000,
+          `JS router in the tab ${js.run.state} after ${(js.wallMs / 1000).toFixed(1)} s: ${js.run.error ?? (s ? `${s.routed}/${s.total} routed` : 'no summary')}; board untouched (tracks ${js.before.tracks} -> ${js.after.tracks}), dialog ${reported ? 'reported it' : 'did NOT report it'}, tab stayed responsive (max ${js.maxLag} ms per evaluate)`, { knownGap: false });
+      }
+    }
+
+    if (freeroutingWanted) {
+      const passes = Number(process.env.AUTOROUTE_PASSES ?? 20);
+      const fr = await runRouter('freerouting', { tag: 'freerouting', shotDialog: !jsWanted, passes, timeLimitS: 0, progressShotAfterMs: 20000, maxWaitMs: 1800000 });
+      timings.autorouteFreerouting = { wallMs: fr.wallMs, state: fr.run.state, passes };
+      const s = fr.run.summary;
+      if (fr.run.state === 'done' && s) {
+        const drc = await drcFromDialog('freerouting');
+        const undone = await undoAutoroute();
+        const okUndo = undone.tracks === fr.before.tracks && undone.vias === fr.before.vias;
+        log(`freerouting undo: tracks ${fr.after.tracks} -> ${undone.tracks}, vias ${fr.after.vias} -> ${undone.vias}${okUndo ? '' : ' !! unexpected'}`);
+        record('autoroute-freerouting', s.routed > 0 && fr.after.tracks === fr.before.tracks + s.tracks && fr.top === s.message && okUndo,
+          `Freerouting on the bridge (-mp ${passes}): ${s.routed}/${s.total} connections, ${s.tracks} tracks, ${s.vias} vias, ${(s.trackLengthNm / 1e6).toFixed(1)} mm in ${(s.wallMs / 1000).toFixed(1)} s (dialog ${(fr.wallMs / 1000).toFixed(1)} s); status bar "${fr.unrouted0}" -> "${fr.unrouted1}"; history "${fr.top}"; RefillZones + DRC: ${drc.errors} errors, ${drc.unconnected} unconnected, ${drc.warnings} warnings; undo removed it (tracks ${fr.after.tracks} -> ${undone.tracks})`);
+      } else {
+        await page.keyboard.press('Escape');
+        record('autoroute-freerouting', false, `Freerouting ${fr.run.state}: ${fr.run.error ?? 'no summary'}`);
+      }
+    }
   }
 } catch (e) {
   console.error('!! practice aborted:', e);

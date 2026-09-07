@@ -2,39 +2,79 @@
  * A routing job the bridge can mount: `POST /sessions/:id/route` starts a run on the session's
  * KiCad, `GET /sessions/:id/route/:job` polls it (or streams progress over SSE with
  * `Accept: text/event-stream`), `DELETE` cancels. Nothing here imports the bridge — the bridge
- * imports this and calls `mountRouteJobs(sessions)` from its `fetch` handler:
+ * imports this and calls `jobs.handle(...)` from its `fetch` handler:
  *
- *   const jobs = createRouteJobs();
- *   // in fetch(): if (path starts with /sessions/<id>/route)
- *   const res = await jobs.handle(req, { id, transport: session.transport });
+ *   const jobs = createRouteJobs({ freerouting: resolveFreerouting(process.env) });
+ *   // in fetch(): const m = matchRouteJobPath(path); if (m) return jobs.handle(req, { id, transport }, m.jobId);
  *
  * The HTTP contract (JSON unless noted):
  *
- *   POST   /sessions/:id/route            body RouteJobRequest        -> 202 { job: RouteJobInfo }
- *   GET    /sessions/:id/route            -> { jobs: RouteJobInfo[] }
- *   GET    /sessions/:id/route/:job       -> { job: RouteJobInfo }   (SSE: `event: progress`, `event: done`, `event: error`)
- *   DELETE /sessions/:id/route/:job       -> { ok, job }             (cancels; Freerouting gets SIGTERM)
+ *   POST   /sessions/:id/route            body RouteJobRequest        -> 202 { job: RouteJobInfo }  (400 when Freerouting is asked for but missing)
+ *   GET    /sessions/:id/route            -> { jobs: RouteJobInfo[], freerouting }
+ *   GET    /sessions/:id/route/:job       -> { job: RouteJobInfo }   (SSE: `event: state`, `progress`, `done`, `error`, `: keepalive` every 15 s)
+ *   DELETE /sessions/:id/route/:job       -> { ok, job }             (cancels: the JS router stops at its next step, Freerouting's java is killed)
  *
- * The job runs `extractRouteInput` -> router.route -> `applyRouteResult` against the session's
- * open board, so the browser only has to refresh (a `DocumentChanged` event arrives as usual).
+ * The job refills the zones (unless `refillZones: false`), saves the board (`SaveDocument`, so
+ * KiCad's exporter reads the current state), runs `extractRouteInput` -> router.route ->
+ * `applyRouteResult` (one commit, message "Autoroute (<router>): <n> connections") against the
+ * session's open board, so the browser only has to pick up the `DocumentChanged` event as usual.
+ * Cancelling before the apply leaves the board untouched; a failed router run (the JS router's
+ * precheck, a Freerouting crash) applies nothing and reports the error.
  */
 import { KiCad, KiCadClient, type Transport } from "@kicad-web/client";
 import { applyRouteResult } from "./apply";
 import { extractRouteInput } from "./extract";
-import { FreeroutingRouter, alreadyApplied, type FreeroutingOptions } from "./freerouting";
+import { FreeroutingRouter, alreadyApplied, resolveFreerouting, type FreeroutingOptions, type FreeroutingPaths } from "./freerouting";
 import { JsRouter } from "./js-router";
-import type { Autorouter, RouteOptions, RouteProgress, RouteResult } from "./types";
+import { RouteCancelled, type Autorouter, type RouteConnection, type RouteOptions, type RouteProgress, type RouteResult } from "./types";
 
-export type RouteJobState = "queued" | "extracting" | "routing" | "applying" | "done" | "failed" | "cancelled";
+export type RouteJobState = "queued" | "saving" | "filling" | "extracting" | "routing" | "applying" | "done" | "failed" | "cancelled";
 
 export interface RouteJobRequest {
   /** `"js"` or `"freerouting"`. */
   router: "js" | "freerouting";
-  options?: RouteOptions;
-  /** Freerouting only. */
+  options?: Omit<RouteOptions, "signal">;
+  /** Freerouting only. Default mode: `kicad-dsn` (KiCad's exporter, our own commit). */
   freerouting?: Pick<FreeroutingOptions, "mode" | "passes" | "jvmArgs" | "extraArgs">;
-  /** Commit message. */
+  /** Commit message; default `Autoroute (<router>): <routed> connections`. */
   message?: string;
+  /**
+   * `RefillZones` before extracting (default true), so pads a copper pour already connects are not
+   * in the ratsnest the router gets. Not repeated after the apply: that would be a second undo
+   * entry, and DRC wants the fill anyway (the app's "Refill + DRC" button does both).
+   */
+  refillZones?: boolean;
+}
+
+/** An unrouted connection as reported to the browser (positions in nm). */
+export interface RouteJobUnrouted {
+  net: string;
+  from: { x: number; y: number };
+  to: { x: number; y: number };
+}
+
+export interface RouteJobSummary {
+  tracks: number;
+  vias: number;
+  /**
+   * Connections routed as KiCad sees it after the apply: `total` minus the airlines `GetRatsnest`
+   * still reports (the router's own count, `routerRouted`, calls a net routed as soon as it got a
+   * wire, which overstates on multi-pad nets).
+   */
+  routed: number;
+  routerRouted: number;
+  total: number;
+  /** Sum of the created tracks' lengths, nm (0 when KiCad's importer created them). */
+  trackLengthNm: number;
+  elapsedMs: number;
+  /** Whole job, saving and applying included. */
+  wallMs: number;
+  timedOut: boolean;
+  /** The commit message used (empty when nothing was applied). */
+  message: string;
+  /** The airlines left after the apply (`GetRatsnest`, filtered to the requested nets). */
+  unrouted: RouteJobUnrouted[];
+  log: string[];
 }
 
 export interface RouteJobInfo {
@@ -45,16 +85,10 @@ export interface RouteJobInfo {
   startedAt: string;
   finishedAt?: string;
   progress?: RouteProgress;
+  /** Tail of the router's output (last `LOG_TAIL` lines) while it runs. */
+  log: string[];
   /** Set when `state` is `done`. */
-  summary?: {
-    tracks: number;
-    vias: number;
-    routed: number;
-    total: number;
-    elapsedMs: number;
-    timedOut: boolean;
-    log: string[];
-  };
+  summary?: RouteJobSummary;
   error?: string;
 }
 
@@ -71,6 +105,9 @@ const CORS = {
   "access-control-allow-methods": "GET,POST,DELETE,OPTIONS",
 };
 
+const LOG_TAIL = 40;
+const MAX_UNROUTED = 2000;
+
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", ...CORS } });
 }
@@ -78,7 +115,7 @@ function json(body: unknown, status = 200): Response {
 interface Job {
   info: RouteJobInfo;
   listeners: Set<(ev: string, data: unknown) => void>;
-  cancel: () => void;
+  abort: AbortController;
 }
 
 export interface RouteJobs {
@@ -89,65 +126,190 @@ export interface RouteJobs {
   get(id: string): RouteJobInfo | undefined;
   list(sessionId?: string): RouteJobInfo[];
   cancel(id: string): boolean;
+  /** Resolves when the job has finished (done, failed or cancelled). */
+  wait(id: string): Promise<RouteJobInfo>;
+  /** Jar / Java the Freerouting jobs will use. */
+  readonly freerouting: FreeroutingPaths;
 }
 
-export function createRouteJobs(
-  deps: { routers?: (req: RouteJobRequest, kicad: KiCad, board: Awaited<ReturnType<KiCad["currentBoard"]>>) => Autorouter } = {},
-): RouteJobs {
+export interface RouteJobDeps {
+  /** Replaces the router choice (tests). */
+  routers?: (req: RouteJobRequest, kicad: KiCad, board: Awaited<ReturnType<KiCad["currentBoard"]>>) => Autorouter;
+  /** Jar and Java for Freerouting; default `resolveFreerouting(process.env)`. */
+  freerouting?: FreeroutingPaths;
+  log?: (message: string) => void;
+}
+
+export function unroutedOf(result: Pick<RouteResult, "unrouted">): RouteJobUnrouted[] {
+  return result.unrouted.slice(0, MAX_UNROUTED).map((c: RouteConnection) => ({
+    net: c.net,
+    from: { x: c.from.position.x, y: c.from.position.y },
+    to: { x: c.to.position.x, y: c.to.position.y },
+  }));
+}
+
+export function trackLength(result: Pick<RouteResult, "tracks">): number {
+  let sum = 0;
+  for (const t of result.tracks) sum += Math.hypot(t.end.x - t.start.x, t.end.y - t.start.y);
+  return Math.round(sum);
+}
+
+/**
+ * A run that routed nothing is reported as failed, with the router's own reason: the JS router's
+ * retries swallow its precheck errors into `log` and hand back an empty result, and a killed
+ * Freerouting writes no session. Null when something was routed or there was nothing to route.
+ */
+export function emptyResultReason(
+  r: Pick<RouteResult, "totalConnections" | "tracks" | "vias" | "unrouted" | "timedOut" | "log">,
+): string | null {
+  if (r.totalConnections === 0 || r.tracks.length || r.vias.length || r.unrouted.length < r.totalConnections) return null;
+  const why = [...r.log].reverse().find((l) => /solver failed|precheck|timed out|exited with|no session|ran out of/i.test(l));
+  if (r.timedOut) return `timed out with nothing routed${why ? ` (${why})` : ""}`;
+  return why ? `the router routed nothing: ${why}` : "the router returned no tracks or vias";
+}
+
+/** The commit message for a finished run; what the History panel shows. */
+export function autorouteMessage(router: "js" | "freerouting", routed: number): string {
+  return `Autoroute (${router}): ${routed} connection${routed === 1 ? "" : "s"}`;
+}
+
+export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
   const jobs = new Map<string, Job>();
+  const freerouting = deps.freerouting ?? resolveFreerouting();
+  const log = deps.log ?? (() => {});
 
   const emit = (job: Job, ev: string, data: unknown) => {
-    for (const l of job.listeners) l(ev, data);
+    for (const l of [...job.listeners]) l(ev, data);
   };
+  const finished = (s: RouteJobState) => s === "done" || s === "failed" || s === "cancelled";
 
   const start = (session: RouteJobSession, request: RouteJobRequest): RouteJobInfo => {
     const id = crypto.randomUUID().slice(0, 8);
-    const info: RouteJobInfo = { id, sessionId: session.id, router: request.router, state: "queued", startedAt: new Date().toISOString() };
-    let cancelled = false;
-    const job: Job = { info, listeners: new Set(), cancel: () => (cancelled = true) };
+    const info: RouteJobInfo = {
+      id,
+      sessionId: session.id,
+      router: request.router,
+      state: "queued",
+      startedAt: new Date().toISOString(),
+      log: [],
+    };
+    const abort = new AbortController();
+    const job: Job = { info, listeners: new Set(), abort };
     jobs.set(id, job);
+    const t0 = performance.now();
+    const setState = (state: RouteJobState) => {
+      info.state = state;
+      emit(job, "progress", { state, progress: info.progress, log: info.log });
+    };
+    const pushLog = (line: string) => {
+      info.log.push(line);
+      if (info.log.length > LOG_TAIL) info.log.splice(0, info.log.length - LOG_TAIL);
+    };
+    const checkCancelled = () => {
+      if (abort.signal.aborted) throw new RouteCancelled();
+    };
+    log(`route job ${id}: ${request.router} on session ${session.id}`);
 
     void (async () => {
       try {
         if (!session.transport) throw new Error("session has no KiCad transport");
+        if (request.router === "freerouting" && !freerouting.ok) throw new Error(`Freerouting unavailable: ${freerouting.reason}`);
         const client = new KiCadClient(session.transport, { clientName: session.clientName ?? `kicad-web/router-job-${id}` });
         const kicad = new KiCad(client);
         const board = await kicad.currentBoard();
         if (!board) throw new Error("no board open in this session");
-        info.state = "extracting";
-        emit(job, "progress", { state: info.state });
-        const input = await extractRouteInput(board, { nets: request.options?.nets });
-        if (cancelled) throw new Error("cancelled");
+        checkCancelled();
+        if (request.refillZones ?? true) {
+          setState("filling");
+          await board.refillZones();
+          checkCancelled();
+        }
+        setState("saving");
+        await board.save();
+        checkCancelled();
+        setState("extracting");
+        const input = await extractRouteInput(board, { nets: request.options?.nets, warn: pushLog });
+        pushLog(`extract: ${input.pads.length} pads, ${input.connections.length} connections, ${input.copperLayers.length} copper layers`);
+        checkCancelled();
         const router: Autorouter =
           deps.routers?.(request, kicad, board) ??
-          (request.router === "freerouting" ? new FreeroutingRouter({ board }, { ...request.freerouting }) : new JsRouter());
+          (request.router === "freerouting"
+            ? new FreeroutingRouter({ board }, { mode: "kicad-dsn", jar: freerouting.jar, java: freerouting.java, ...request.freerouting })
+            : new JsRouter());
         info.router = router.name;
-        info.state = "routing";
-        const result: RouteResult = await router.route(input, request.options ?? {}, (p) => {
+        setState("routing");
+        const result: RouteResult = await router.route(input, { ...request.options, signal: abort.signal }, (p) => {
           info.progress = p;
-          emit(job, "progress", { state: info.state, progress: p });
+          if (p.message) pushLog(`${p.phase}: ${p.message}`);
+          else if (p.phase && p.phase !== info.log[info.log.length - 1]) pushLog(p.phase);
+          emit(job, "progress", { state: info.state, progress: p, log: info.log });
         });
-        if (cancelled) throw new Error("cancelled");
-        info.state = "applying";
-        emit(job, "progress", { state: info.state });
-        if (!alreadyApplied(result) && (result.tracks.length || result.vias.length))
-          await applyRouteResult(board, result, { message: request.message });
+        checkCancelled();
+        const empty = emptyResultReason(result);
+        if (empty) {
+          info.log = result.log.slice(-LOG_TAIL);
+          throw new Error(empty);
+        }
+        const routed = result.totalConnections - result.unrouted.length;
+        const message = request.message ?? autorouteMessage(request.router, routed);
+        setState("applying");
+        let applied = false;
+        if (!alreadyApplied(result) && (result.tracks.length || result.vias.length)) {
+          await applyRouteResult(board, result, { message });
+          applied = true;
+        }
+        const appliedByKicad = (result as RouteResult & { applied?: { tracksAdded: number; viasAdded: number } }).applied;
+        // Re-measure with KiCad's connectivity: what is still an airline after the apply.
+        let unrouted = unroutedOf(result);
+        let measured = routed;
+        try {
+          const nets = new Set(request.options?.nets ?? []);
+          const rats = await board.ratsnest(request.options?.nets ?? []);
+          const edges = rats.edges.filter((e) => !nets.size || nets.has(e.net));
+          unrouted = edges.slice(0, MAX_UNROUTED).map((e) => ({
+            net: e.net,
+            from: { x: e.sourcePosition.x, y: e.sourcePosition.y },
+            to: { x: e.targetPosition.x, y: e.targetPosition.y },
+          }));
+          measured = Math.max(0, result.totalConnections - edges.length);
+          if (measured !== routed)
+            result.log.push(
+              `GetRatsnest after the apply: ${edges.length} connection(s) still unrouted (the router counted ${result.unrouted.length})`,
+            );
+        } catch (e) {
+          result.log.push(
+            `GetRatsnest after the apply failed: ${e instanceof Error ? e.message : String(e)}; using the router's own count`,
+          );
+        }
         info.state = "done";
         info.finishedAt = new Date().toISOString();
+        info.log = result.log.slice(-LOG_TAIL);
         info.summary = {
-          tracks: result.tracks.length,
-          vias: result.vias.length,
-          routed: result.totalConnections - result.unrouted.length,
+          tracks: appliedByKicad?.tracksAdded ?? result.tracks.length,
+          vias: appliedByKicad?.viasAdded ?? result.vias.length,
+          routed: measured,
+          routerRouted: routed,
           total: result.totalConnections,
+          trackLengthNm: trackLength(result),
           elapsedMs: result.elapsedMs,
+          wallMs: Math.round(performance.now() - t0),
           timedOut: result.timedOut,
+          message: applied || appliedByKicad ? message : "",
+          unrouted,
           log: result.log,
         };
+        log(`route job ${id}: done, ${measured}/${result.totalConnections} in ${info.summary.wallMs} ms`);
         emit(job, "done", info);
       } catch (e) {
+        const cancelled = abort.signal.aborted || RouteCancelled.is(e);
         info.state = cancelled ? "cancelled" : "failed";
         info.finishedAt = new Date().toISOString();
-        info.error = e instanceof Error ? e.message : String(e);
+        info.error = cancelled
+          ? `cancelled${e instanceof Error && e.message !== "routing cancelled" ? `: ${e.message}` : ""}`
+          : e instanceof Error
+            ? e.message
+            : String(e);
+        log(`route job ${id}: ${info.state}: ${info.error}`);
         emit(job, "error", info);
       }
     })();
@@ -156,41 +318,81 @@ export function createRouteJobs(
 
   const stream = (job: Job): Response => {
     const enc = new TextEncoder();
+    let cleanup: (() => void) | undefined;
     const body = new ReadableStream<Uint8Array>({
       start(controller) {
-        const send = (ev: string, data: unknown) => controller.enqueue(enc.encode(`event: ${ev}\ndata: ${JSON.stringify(data)}\n\n`));
+        const send = (ev: string, data: unknown) => {
+          try {
+            controller.enqueue(enc.encode(`event: ${ev}\ndata: ${JSON.stringify(data)}\n\n`));
+          } catch {
+            cleanup?.();
+          }
+        };
         send("state", job.info);
-        if (job.info.state === "done" || job.info.state === "failed" || job.info.state === "cancelled") {
+        if (finished(job.info.state)) {
           controller.close();
           return;
         }
         const listener = (ev: string, data: unknown) => {
           send(ev, data);
-          if (ev === "done" || ev === "error") {
-            job.listeners.delete(listener);
+          if (ev === "done" || ev === "error") cleanup?.();
+        };
+        const keepalive = setInterval(() => {
+          try {
+            controller.enqueue(enc.encode(": keepalive\n\n"));
+          } catch {
+            cleanup?.();
+          }
+        }, 15_000);
+        cleanup = () => {
+          cleanup = undefined;
+          clearInterval(keepalive);
+          job.listeners.delete(listener);
+          try {
             controller.close();
+          } catch {
+            /* already closed */
           }
         };
         job.listeners.add(listener);
+      },
+      cancel() {
+        cleanup?.();
       },
     });
     return new Response(body, { headers: { "content-type": "text/event-stream", "cache-control": "no-cache", ...CORS } });
   };
 
+  const cancel = (id: string): boolean => {
+    const j = jobs.get(id);
+    if (!j) return false;
+    if (!finished(j.info.state)) j.abort.abort();
+    return true;
+  };
+
   return {
+    freerouting,
     start,
     get: (id) => jobs.get(id)?.info,
     list: (sessionId) => [...jobs.values()].map((j) => j.info).filter((i) => !sessionId || i.sessionId === sessionId),
-    cancel: (id) => {
-      const j = jobs.get(id);
-      if (!j) return false;
-      j.cancel();
-      return true;
-    },
+    cancel,
+    wait: (id) =>
+      new Promise((resolve, reject) => {
+        const j = jobs.get(id);
+        if (!j) return reject(new Error(`unknown job "${id}"`));
+        if (finished(j.info.state)) return resolve(j.info);
+        const l = (ev: string) => {
+          if (ev === "done" || ev === "error") {
+            j.listeners.delete(l);
+            resolve(j.info);
+          }
+        };
+        j.listeners.add(l);
+      }),
     async handle(req, session, jobId) {
       if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
       if (!jobId) {
-        if (req.method === "GET") return json({ jobs: this.list(session.id) });
+        if (req.method === "GET") return json({ jobs: this.list(session.id), freerouting });
         if (req.method === "POST") {
           let body: RouteJobRequest;
           try {
@@ -199,6 +401,9 @@ export function createRouteJobs(
             return json({ error: "body must be JSON" }, 400);
           }
           if (body.router !== "js" && body.router !== "freerouting") return json({ error: 'router must be "js" or "freerouting"' }, 400);
+          if (body.router === "freerouting" && !freerouting.ok)
+            return json({ error: `Freerouting unavailable: ${freerouting.reason}` }, 400);
+          if (!session.transport) return json({ error: "session has no running KiCad" }, 409);
           return json({ job: start(session, body) }, 202);
         }
         return json({ error: "method not allowed" }, 405);
@@ -207,7 +412,7 @@ export function createRouteJobs(
       if (!job || job.info.sessionId !== session.id) return json({ error: `unknown job "${jobId}"` }, 404);
       if (req.method === "GET") return req.headers.get("accept")?.includes("text/event-stream") ? stream(job) : json({ job: job.info });
       if (req.method === "DELETE") {
-        job.cancel();
+        cancel(jobId);
         return json({ ok: true, job: job.info });
       }
       return json({ error: "method not allowed" }, 405);

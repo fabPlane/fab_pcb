@@ -30,6 +30,7 @@ export type DialogId =
   | 'update-pcb'
   | 'fields-table'
   | 'severities'
+  | 'autoroute'
   | null;
 
 interface UiState {

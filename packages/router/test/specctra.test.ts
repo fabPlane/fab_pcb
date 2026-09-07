@@ -194,6 +194,27 @@ describe("parseSes / sesToItems", () => {
     });
   });
 
+  test("sesToItems: the session's echo of the board's existing tracks and vias is not created again", () => {
+    const input = twoNetBoard();
+    // net A's first segment already exists on the board (10 µm off, as KiCad's export/import rounding leaves it)
+    input.tracks.push({
+      id: "t-a",
+      net: "A",
+      netCode: 1,
+      start: { x: 5_000_000, y: 5_005_000 },
+      end: { x: 10_000_000, y: 5_000_000 },
+      width: 250_000,
+      layer: BoardLayer.BL_F_Cu,
+    });
+    const items = sesToItems(parseSes(SES), input);
+    expect(items.tracks.length).toBe(2);
+    expect(items.tracks.find((t) => t.start.x === 5_000_000 && t.end.x === 10_000_000)).toBeUndefined();
+    expect(items.echoed).toEqual({ tracks: 1, vias: 0 });
+    expect(items.warnings.some((w) => /1 existing track\(s\)/.test(w))).toBe(true);
+    // the same net's other segments still count it as routed
+    expect(items.routedNets.has("A")).toBe(true);
+  });
+
   test("sesToItems: tracks per polyline segment, vias sized from the padstack, unknown layers warned and skipped", () => {
     const items = sesToItems(parseSes(SES), twoNetBoard());
     expect(items.tracks.length).toBe(3);

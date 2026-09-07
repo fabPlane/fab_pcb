@@ -189,6 +189,22 @@ export interface RouteOptions {
   effort?: number;
   /** Anything router-specific; each adapter documents what it reads. */
   extra?: Record<string, unknown>;
+  /**
+   * Cancels the run: the JS router stops at its next step, Freerouting's process is killed. The
+   * adapter rejects with a `RouteCancelled` error and nothing is applied.
+   */
+  signal?: AbortSignal;
+}
+
+/** Thrown by `Autorouter.route` when `RouteOptions.signal` fires. */
+export class RouteCancelled extends Error {
+  constructor(message = "routing cancelled") {
+    super(message);
+    this.name = "RouteCancelled";
+  }
+  static is(e: unknown): e is RouteCancelled {
+    return e instanceof Error && e.name === "RouteCancelled";
+  }
 }
 
 export interface RouteProgress {

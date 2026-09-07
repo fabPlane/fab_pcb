@@ -142,6 +142,21 @@ export class KicadSessionService implements SessionService {
     return body as T;
   }
 
+  /**
+   * A JSON call on the bridge's REST API for the other services (the autorouting job under
+   * `/sessions/:id/route`). Throws with the bridge's `error` on a non-2xx answer.
+   */
+  bridgeJson<T>(path: string, init?: RequestInit): Promise<T> {
+    this.requireBridge(`${init?.method ?? 'GET'} ${path}`);
+    return this.json<T>(path, init);
+  }
+
+  /** A raw fetch on the bridge (streaming responses such as the route job's SSE). */
+  bridgeFetch(path: string, init?: RequestInit): Promise<Response> {
+    this.requireBridge(`${init?.method ?? 'GET'} ${path}`);
+    return this.fetchImpl(this.url(path), init);
+  }
+
   /** `GET /health`: learns the workspace root. Safe to call more than once. */
   async init(): Promise<BridgeHealth> {
     if (this.bridgeless) {

@@ -1,4 +1,5 @@
 import { resolve } from "node:path";
+import { resolveFreerouting, type FreeroutingPaths } from "@kicad-web/router/freerouting";
 
 /** `<repo>/../kicad` — the KiCad checkout that sits next to kicad-web. */
 export const KICAD_CHECKOUT = resolve(import.meta.dir, "../../../../kicad");
@@ -35,6 +36,13 @@ export interface BridgeConfig {
   relayEvents: boolean;
   /** Extra environment for the KiCad child processes. */
   kicadEnv: Record<string, string>;
+  /**
+   * Freerouting jar and Java for `POST /sessions/:id/route {router:"freerouting"}`: env
+   * `FREEROUTING_JAR` (default `packages/router/vendor/freerouting-<version>.jar`) and
+   * `KICAD_WEB_JAVA` / `FREEROUTING_JAVA` (default the vendored Temurin 25, then a system `java`).
+   * `ok: false` carries the reason; the route is then refused with it.
+   */
+  freerouting: FreeroutingPaths;
   log: (message: string) => void;
 }
 
@@ -60,6 +68,7 @@ export function configFromEnv(env: Record<string, string | undefined> = process.
     sessionIdleTimeoutSec: int(env.SESSION_IDLE_TIMEOUT_SEC, 0),
     relayEvents: !["0", "false", "off", "no"].includes((env.KICAD_EVENTS ?? "1").toLowerCase()),
     kicadEnv: {},
+    freerouting: resolveFreerouting(env),
     log: (m) => console.log(`[bridge ${new Date().toISOString()}] ${m}`),
   };
   return { ...base, ...overrides };

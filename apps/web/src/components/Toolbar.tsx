@@ -83,6 +83,7 @@ export function Toolbar({ kind, storeKey, layers }: { kind: DocumentKind; storeK
           {kind === 'board' && <ToolButton id="board.placeFootprint" glyph="A" label="Footprint" active={doc.tool === 'footprint'} />}
           {kind === 'board' && <ToolButton id="tools.libraryBrowser" glyph="▦" label="Libraries" />}
           {kind === 'board' && <ToolButton id="board.route" glyph="X" label="Route" active={doc.tool === 'route'} />}
+          {kind === 'board' && <ToolButton id="board.autoroute" glyph="⟿" label="Auto" />}
           {kind === 'board' && <ToolButton id="board.placeVia" glyph="◎" label="Via" active={doc.tool === 'via'} />}
           <ToolButton id="board.drawLine" glyph="╱" active={doc.tool === 'line'} />
           <ToolButton id="board.drawRect" glyph="▭" active={doc.tool === 'rect'} />

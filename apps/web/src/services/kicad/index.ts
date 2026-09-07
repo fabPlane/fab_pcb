@@ -18,6 +18,7 @@ import { resolveTheme, useUiStore } from '@/state/uiStore';
 import { log as appLog } from '@/state/logStore';
 import { useAppStore } from '@/state/appStore';
 import { createKicadCanvasFactory } from './KicadCanvas';
+import { KicadAutorouteService } from './KicadAutorouteService';
 import { KicadBoardTools } from './KicadBoardTools';
 import { KicadCommitBackend } from './KicadCommitBackend';
 import { KicadDocumentService } from './KicadDocumentService';
@@ -30,7 +31,7 @@ import { KicadSettingsService } from './KicadSettingsService';
 import { KicadUndoService } from './KicadUndoService';
 
 export { KicadSessionService, KicadDocumentService, KicadCommitBackend, KicadJobsService, KicadMarkerService, KicadLibraryService };
-export { KicadBoardTools, KicadSchematicTools, KicadSettingsService, KicadUndoService };
+export { KicadBoardTools, KicadSchematicTools, KicadSettingsService, KicadUndoService, KicadAutorouteService };
 export { toItem } from './KicadCommitBackend';
 
 export interface KicadServicesOptions {
@@ -61,6 +62,7 @@ export interface KicadServices extends Services {
   schematic: KicadSchematicTools;
   settings: KicadSettingsService;
   undo: KicadUndoService;
+  autoroute: KicadAutorouteService;
 }
 
 /** Builds the service graph; resolves once the bridge answered `/health` (workspace root known). */
@@ -104,6 +106,7 @@ export async function createKicadServices(opts: KicadServicesOptions): Promise<K
     },
     log,
   );
+  const autoroute = new KicadAutorouteService(documents, session, commands, log);
   if (!opts.mockCanvas) {
     setCanvasHostFactory(createKicadCanvasFactory({ docs: documents, theme: () => themeFor(resolveTheme(useUiStore.getState().theme)), log }));
   }
@@ -120,5 +123,5 @@ export async function createKicadServices(opts: KicadServicesOptions): Promise<K
       }
     }
   }
-  return { session, documents, commands, jobs, markers, library, board, schematic, settings, undo };
+  return { session, documents, commands, jobs, markers, library, board, schematic, settings, undo, autoroute };
 }

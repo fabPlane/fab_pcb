@@ -75,7 +75,14 @@ export function registerBuiltinCommands(services: Services): () => void {
 
   const list: Command[] = [
     // ---------------------------------------------------------------- File
-    { id: 'file.openProject', title: 'Open project…', group: 'File', shortcut: 'Mod+O', description: 'Browse the workspace for a .kicad_pro', run: () => useAppStore.getState().setActiveEditor('project') },
+    {
+      id: 'file.openProject',
+      title: 'Open project…',
+      group: 'File',
+      shortcut: 'Mod+O',
+      description: 'Browse the workspace for a .kicad_pro',
+      run: () => useAppStore.getState().setActiveEditor('project'),
+    },
     { id: 'file.newProject', title: 'New project…', group: 'File', shortcut: 'Mod+N', run: () => useUiStore.getState().openDialog('new-project') },
     {
       id: 'file.save',
@@ -90,11 +97,25 @@ export function registerBuiltinCommands(services: Services): () => void {
         useAppStore.getState().notify(`${ctx.editor === 'board' ? 'Board' : ctx.editor === 'schematic' ? 'Schematic' : 'Footprint'} saved`);
       },
     },
-    { id: 'file.saveAll', title: 'Save all', group: 'File', shortcut: 'Mod+Shift+S', when: inEditor, run: async () => {
-      await Promise.all((['board', 'schematic', 'footprint'] as const).filter((k) => documents.isDirty(k)).map((k) => documents.save(k)));
-      useAppStore.getState().notify('All documents saved');
-    } },
-    { id: 'file.exportJobs', title: 'Export / fabrication outputs…', group: 'File', when: inEditor, keywords: ['gerber', 'drill', 'step', 'bom', 'pdf'], run: () => useUiStore.getState().setBottomTab('jobs') },
+    {
+      id: 'file.saveAll',
+      title: 'Save all',
+      group: 'File',
+      shortcut: 'Mod+Shift+S',
+      when: inEditor,
+      run: async () => {
+        await Promise.all((['board', 'schematic', 'footprint'] as const).filter((k) => documents.isDirty(k)).map((k) => documents.save(k)));
+        useAppStore.getState().notify('All documents saved');
+      },
+    },
+    {
+      id: 'file.exportJobs',
+      title: 'Export / fabrication outputs…',
+      group: 'File',
+      when: inEditor,
+      keywords: ['gerber', 'drill', 'step', 'bom', 'pdf'],
+      run: () => useUiStore.getState().setBottomTab('jobs'),
+    },
     {
       id: 'file.closeProject',
       title: 'Close project',
@@ -157,7 +178,10 @@ export function registerBuiltinCommands(services: Services): () => void {
         const doc = activeDocument(services);
         if (!doc) return;
         const hidden = new Set(useEditorStore.getState().docs[doc.key]?.hiddenLayers ?? []);
-        useEditorStore.getState().setSelection(doc.key, [...doc.store.all()].filter((i) => !i.parent && !(i.layer && hidden.has(i.layer))).map((i) => i.id));
+        useEditorStore.getState().setSelection(
+          doc.key,
+          [...doc.store.all()].filter((i) => !i.parent && !(i.layer && hidden.has(i.layer))).map((i) => i.id),
+        );
       },
     },
     {
@@ -193,7 +217,13 @@ export function registerBuiltinCommands(services: Services): () => void {
         if (!cursor) return;
         const all = withChildren(sel.store, sel.items);
         const tx = commands.begin(sel.store, `Move ${sel.items.length} item${sel.items.length === 1 ? '' : 's'}`);
-        beginMove(sel.key, sel.store, tx, all.map((i) => i.id), cursor);
+        beginMove(
+          sel.key,
+          sel.store,
+          tx,
+          all.map((i) => i.id),
+          cursor,
+        );
       },
     },
     { id: 'edit.rotateCcw', title: 'Rotate 90° counter-clockwise', group: 'Edit', shortcut: 'R', when: inEditor, run: () => rotateSelection(90) },
@@ -342,7 +372,10 @@ export function registerBuiltinCommands(services: Services): () => void {
       run: () => {
         const doc = activeDocument(services);
         if (!doc) return;
-        const copper = documents.layers().filter((l) => l.kind === 'copper').map((l) => l.id);
+        const copper = documents
+          .layers()
+          .filter((l) => l.kind === 'copper')
+          .map((l) => l.id);
         const cur = useEditorStore.getState().docs[doc.key]?.activeLayer ?? 'BL_F_Cu';
         const i = copper.indexOf(cur);
         setActiveLayer(copper[(i + 1) % copper.length]!);
@@ -357,7 +390,10 @@ export function registerBuiltinCommands(services: Services): () => void {
       run: () => {
         const doc = activeDocument(services);
         if (!doc) return;
-        const copper = documents.layers().filter((l) => l.kind === 'copper').map((l) => l.id);
+        const copper = documents
+          .layers()
+          .filter((l) => l.kind === 'copper')
+          .map((l) => l.id);
         const cur = useEditorStore.getState().docs[doc.key]?.activeLayer ?? 'BL_F_Cu';
         const i = copper.indexOf(cur);
         setActiveLayer(copper[(i - 1 + copper.length) % copper.length]!);
@@ -387,76 +423,219 @@ export function registerBuiltinCommands(services: Services): () => void {
         if (doc) useEditorStore.getState().setHighlightNets(doc.key, []);
       },
     },
-    { id: 'inspect.runDrc', title: 'Run DRC', group: 'Inspect', when: inBoard, keywords: ['design rules check'], run: async () => {
-      useUiStore.getState().setBottomTab('markers');
-      const list = await markers.run('drc');
-      log(`DRC finished: ${list.filter((m) => m.severity === 'error' && !m.excluded).length} errors, ${list.filter((m) => m.severity === 'warning' && !m.excluded).length} warnings`);
-    } },
-    { id: 'inspect.runErc', title: 'Run ERC', group: 'Inspect', when: inSchematic, keywords: ['electrical rules check'], run: async () => {
-      useUiStore.getState().setBottomTab('markers');
-      const list = await markers.run('erc');
-      log(`ERC finished: ${list.filter((m) => m.severity === 'error' && !m.excluded).length} errors, ${list.filter((m) => m.severity === 'warning' && !m.excluded).length} warnings`);
-    } },
+    {
+      id: 'inspect.runDrc',
+      title: 'Run DRC',
+      group: 'Inspect',
+      when: inBoard,
+      keywords: ['design rules check'],
+      run: async () => {
+        useUiStore.getState().setBottomTab('markers');
+        const list = await markers.run('drc');
+        log(`DRC finished: ${list.filter((m) => m.severity === 'error' && !m.excluded).length} errors, ${list.filter((m) => m.severity === 'warning' && !m.excluded).length} warnings`);
+      },
+    },
+    {
+      id: 'inspect.runErc',
+      title: 'Run ERC',
+      group: 'Inspect',
+      when: inSchematic,
+      keywords: ['electrical rules check'],
+      run: async () => {
+        useUiStore.getState().setBottomTab('markers');
+        const list = await markers.run('erc');
+        log(`ERC finished: ${list.filter((m) => m.severity === 'error' && !m.excluded).length} errors, ${list.filter((m) => m.severity === 'warning' && !m.excluded).length} warnings`);
+      },
+    },
     { id: 'inspect.nets', title: 'Net inspector', group: 'Inspect', when: inBoard, run: () => useUiStore.getState().setLeftTab('nets') },
     // --------------------------------------------------------------- Tools
     { id: 'tools.commandPalette', title: 'Command palette', group: 'Tools', shortcut: 'Mod+K', run: () => usePaletteStore.getState().toggle() },
     { id: 'tools.commandPaletteAlt', title: 'Command palette', group: 'Tools', shortcut: 'Mod+Shift+P', hidden: true, run: () => usePaletteStore.getState().toggle() },
-    { id: 'tools.settings', title: 'Settings…', group: 'Tools', shortcut: 'Mod+,', keywords: ['preferences', 'theme', 'dark', 'light', 'appearance', 'open settings'], run: () => useUiStore.getState().openDialog('settings') },
+    {
+      id: 'tools.settings',
+      title: 'Settings…',
+      group: 'Tools',
+      shortcut: 'Mod+,',
+      keywords: ['preferences', 'theme', 'dark', 'light', 'appearance', 'open settings'],
+      run: () => useUiStore.getState().openDialog('settings'),
+    },
     { id: 'tools.keymap', title: 'Keyboard shortcuts…', group: 'Tools', keywords: ['hotkeys', 'settings', 'preferences'], run: () => useUiStore.getState().openDialog('keymap') },
     { id: 'tools.boardSetup', title: 'Board setup…', group: 'Board', when: inBoard, keywords: ['stackup', 'design rules', 'constraints'], run: () => useUiStore.getState().openDialog('board-setup') },
     { id: 'tools.netclasses', title: 'Net classes…', group: 'Tools', when: inEditor, run: () => useUiStore.getState().openDialog('netclasses') },
     { id: 'tools.textVariables', title: 'Text variables…', group: 'Tools', when: inEditor, run: () => useUiStore.getState().openDialog('text-variables') },
     { id: 'tools.variants', title: 'Variants…', group: 'Tools', when: inEditor, keywords: ['dnp', 'assembly'], run: () => useUiStore.getState().openDialog('variants') },
     // --------------------------------------------------------------- Board
-    { id: 'board.refillZones', title: 'Refill all zones', group: 'Board', shortcut: 'B', when: inBoard, run: async () => {
-      const refill = (documents as { refillZones?: () => Promise<void> }).refillZones;
-      if (refill) {
-        await refill.call(documents);
-        log('RefillZones: all zones refilled');
-      } else log('RefillZones: 1 zone filled (GND pour, B.Cu) [mock]');
-      useAppStore.getState().notify('Zones refilled');
-    } },
+    {
+      id: 'board.refillZones',
+      title: 'Refill all zones',
+      group: 'Board',
+      shortcut: 'B',
+      when: inBoard,
+      run: async () => {
+        const refill = (documents as { refillZones?: () => Promise<void> }).refillZones;
+        if (refill) {
+          await refill.call(documents);
+          log('RefillZones: all zones refilled');
+        } else log('RefillZones: 1 zone filled (GND pour, B.Cu) [mock]');
+        useAppStore.getState().notify('Zones refilled');
+      },
+    },
     { id: 'board.unfillZones', title: 'Unfill all zones', group: 'Board', shortcut: 'Mod+B', when: inBoard, run: () => log('Zones unfilled') },
-    { id: 'board.updateFromSchematic', title: 'Update PCB from schematic…', group: 'Board', shortcut: 'F8', when: inBoard, keywords: ['netlist', 'import'], run: () => useAppStore.getState().notify('GetSchematicNetlist → ImportNetlist runs once the client SDK lands (M3)') },
-    { id: 'board.route', title: 'Route single track', group: 'Route', shortcut: 'X', when: inBoard, run: () => useAppStore.getState().notify('Interactive routing needs gap G9 (headless router); manual track placement arrives in M3') },
-    { id: 'board.placeVia', title: 'Place via', group: 'Place', shortcut: 'Mod+Shift+V', when: inBoard, run: () => useAppStore.getState().notify('Via placement arrives with the create-items flow in M3') },
-    { id: 'board.placeFootprint', title: 'Place footprint…', group: 'Place', shortcut: 'A', when: inBoard, keywords: ['add component', 'library'], run: () => useAppStore.getState().notify('Footprint browser needs gap G7 (library access)') },
+    {
+      id: 'board.updateFromSchematic',
+      title: 'Update PCB from schematic…',
+      group: 'Board',
+      shortcut: 'F8',
+      when: inBoard,
+      keywords: ['netlist', 'import'],
+      run: () => useAppStore.getState().notify('GetSchematicNetlist → ImportNetlist runs once the client SDK lands (M3)'),
+    },
+    {
+      id: 'board.route',
+      title: 'Route single track',
+      group: 'Route',
+      shortcut: 'X',
+      when: inBoard,
+      run: () => useAppStore.getState().notify('Interactive routing needs gap G9 (headless router); manual track placement arrives in M3'),
+    },
+    {
+      id: 'board.autoroute',
+      title: 'Autoroute…',
+      group: 'Route',
+      shortcut: 'Shift+X',
+      when: (ctx) => ctx.editor === 'board',
+      keywords: ['autorouter', 'freerouting', 'route all', 'ratsnest'],
+      description: 'Route the unrouted connections with the JS router (in this tab or on the server) or Freerouting',
+      run: () => useUiStore.getState().openDialog('autoroute'),
+    },
+    {
+      id: 'board.placeVia',
+      title: 'Place via',
+      group: 'Place',
+      shortcut: 'Mod+Shift+V',
+      when: inBoard,
+      run: () => useAppStore.getState().notify('Via placement arrives with the create-items flow in M3'),
+    },
+    {
+      id: 'board.placeFootprint',
+      title: 'Place footprint…',
+      group: 'Place',
+      shortcut: 'A',
+      when: inBoard,
+      keywords: ['add component', 'library'],
+      run: () => useAppStore.getState().notify('Footprint browser needs gap G7 (library access)'),
+    },
     { id: 'board.drawZone', title: 'Draw filled zone', group: 'Place', when: inBoard, hidden: true, run: () => undefined }, // no default chord: Mod+Shift+Z is redo (edit.redoAlt); the real tool is registered in commands/editing.ts
-    { id: 'board.openFootprintEditor', title: 'Open footprint editor', group: 'Window', when: inBoard, run: () => {
-      const sel = selectedItems();
-      const fp = sel?.items.find((i) => i.type === 'KOT_PCB_FOOTPRINT');
-      const libId = fp ? `${(fp.proto as any).definition?.id?.libraryNickname}:${(fp.proto as any).definition?.id?.entryName}` : 'Resistor_SMD:R_0603_1608Metric';
-      documents.footprint(libId);
-      useAppStore.getState().openDoc({ kind: 'footprint', id: libId, title: libId });
-    } },
+    {
+      id: 'board.openFootprintEditor',
+      title: 'Open footprint editor',
+      group: 'Window',
+      when: inBoard,
+      run: () => {
+        const sel = selectedItems();
+        const fp = sel?.items.find((i) => i.type === 'KOT_PCB_FOOTPRINT');
+        const libId = fp ? `${(fp.proto as any).definition?.id?.libraryNickname}:${(fp.proto as any).definition?.id?.entryName}` : 'Resistor_SMD:R_0603_1608Metric';
+        documents.footprint(libId);
+        useAppStore.getState().openDoc({ kind: 'footprint', id: libId, title: libId });
+      },
+    },
     // ----------------------------------------------------------- Schematic
     { id: 'schematic.wire', title: 'Draw wire', group: 'Place', shortcut: 'W', when: inSchematic, run: () => useAppStore.getState().notify('Wire tool arrives with schematic create-items in M3') },
     { id: 'schematic.bus', title: 'Draw bus', group: 'Place', shortcut: 'Shift+B', when: inSchematic, hidden: true, run: () => undefined },
-    { id: 'schematic.label', title: 'Place net label', group: 'Place', shortcut: 'L', when: inSchematic, run: () => useAppStore.getState().notify('Label tool arrives with schematic create-items in M3') },
-    { id: 'schematic.globalLabel', title: 'Place global label', group: 'Place', shortcut: 'Mod+L', when: inSchematic, run: () => useAppStore.getState().notify('Label tool arrives with schematic create-items in M3') },
-    { id: 'schematic.hierLabel', title: 'Place hierarchical label', group: 'Place', shortcut: 'H', when: inSchematic, run: () => useAppStore.getState().notify('Label tool arrives with schematic create-items in M3') },
-    { id: 'schematic.placeSymbol', title: 'Place symbol…', group: 'Place', shortcut: 'A', when: inSchematic, keywords: ['add component', 'library'], run: () => useAppStore.getState().notify('Symbol browser needs gap G7 (library access)') },
-    { id: 'schematic.junction', title: 'Place junction', group: 'Place', shortcut: 'J', when: inSchematic, run: () => useAppStore.getState().notify('Junction tool arrives with schematic create-items in M3') },
-    { id: 'schematic.noConnect', title: 'Place no-connect flag', group: 'Place', shortcut: 'Q', when: inSchematic, run: () => useAppStore.getState().notify('No-connect tool arrives with schematic create-items in M3') },
+    {
+      id: 'schematic.label',
+      title: 'Place net label',
+      group: 'Place',
+      shortcut: 'L',
+      when: inSchematic,
+      run: () => useAppStore.getState().notify('Label tool arrives with schematic create-items in M3'),
+    },
+    {
+      id: 'schematic.globalLabel',
+      title: 'Place global label',
+      group: 'Place',
+      shortcut: 'Mod+L',
+      when: inSchematic,
+      run: () => useAppStore.getState().notify('Label tool arrives with schematic create-items in M3'),
+    },
+    {
+      id: 'schematic.hierLabel',
+      title: 'Place hierarchical label',
+      group: 'Place',
+      shortcut: 'H',
+      when: inSchematic,
+      run: () => useAppStore.getState().notify('Label tool arrives with schematic create-items in M3'),
+    },
+    {
+      id: 'schematic.placeSymbol',
+      title: 'Place symbol…',
+      group: 'Place',
+      shortcut: 'A',
+      when: inSchematic,
+      keywords: ['add component', 'library'],
+      run: () => useAppStore.getState().notify('Symbol browser needs gap G7 (library access)'),
+    },
+    {
+      id: 'schematic.junction',
+      title: 'Place junction',
+      group: 'Place',
+      shortcut: 'J',
+      when: inSchematic,
+      run: () => useAppStore.getState().notify('Junction tool arrives with schematic create-items in M3'),
+    },
+    {
+      id: 'schematic.noConnect',
+      title: 'Place no-connect flag',
+      group: 'Place',
+      shortcut: 'Q',
+      when: inSchematic,
+      run: () => useAppStore.getState().notify('No-connect tool arrives with schematic create-items in M3'),
+    },
     { id: 'schematic.annotate', title: 'Annotate schematic…', group: 'Schematic', when: inSchematic, run: () => useAppStore.getState().notify('Annotate needs gap G8 (headless schematic ops)') },
-    { id: 'schematic.updatePcb', title: 'Update PCB from schematic…', group: 'Schematic', shortcut: 'F8', when: inSchematic, run: () => useAppStore.getState().notify('GetSchematicNetlist → ImportNetlist runs once the client SDK lands (M3)') },
-    { id: 'schematic.leaveSheet', title: 'Leave sheet', group: 'Schematic', shortcut: 'Alt+Backspace', when: inSchematic, run: () => {
-      const app = useAppStore.getState();
-      const parts = app.activeSheet.split('/').filter(Boolean);
-      parts.pop();
-      app.setActiveSheet(parts.length ? `/${parts.join('/')}/` : '/');
-    } },
+    {
+      id: 'schematic.updatePcb',
+      title: 'Update PCB from schematic…',
+      group: 'Schematic',
+      shortcut: 'F8',
+      when: inSchematic,
+      run: () => useAppStore.getState().notify('GetSchematicNetlist → ImportNetlist runs once the client SDK lands (M3)'),
+    },
+    {
+      id: 'schematic.leaveSheet',
+      title: 'Leave sheet',
+      group: 'Schematic',
+      shortcut: 'Alt+Backspace',
+      when: inSchematic,
+      run: () => {
+        const app = useAppStore.getState();
+        const parts = app.activeSheet.split('/').filter(Boolean);
+        parts.pop();
+        app.setActiveSheet(parts.length ? `/${parts.join('/')}/` : '/');
+      },
+    },
     { id: 'schematic.rootSheet', title: 'Go to root sheet', group: 'Schematic', shortcut: 'Mod+Alt+Home', when: inSchematic, hidden: true, run: () => useAppStore.getState().setActiveSheet('/') },
     // -------------------------------------------------------------- Window
     { id: 'window.project', title: 'Show project screen', group: 'Window', run: () => useAppStore.getState().setActiveEditor('project') },
-    { id: 'window.board', title: 'Open board editor', group: 'Window', shortcut: 'Mod+Shift+B', run: () => {
-      const s = documents.board();
-      if (s) useAppStore.getState().openDoc({ kind: 'board', id: 'board', title: `${useAppStore.getState().session?.projectName ?? 'board'}.kicad_pcb` });
-    } },
-    { id: 'window.schematic', title: 'Open schematic editor', group: 'Window', shortcut: 'Mod+Shift+E', run: () => {
-      const root = documents.sheets()[0];
-      if (root) useAppStore.getState().openDoc({ kind: 'schematic', id: root.path, title: root.file });
-    } },
+    {
+      id: 'window.board',
+      title: 'Open board editor',
+      group: 'Window',
+      shortcut: 'Mod+Shift+B',
+      run: () => {
+        const s = documents.board();
+        if (s) useAppStore.getState().openDoc({ kind: 'board', id: 'board', title: `${useAppStore.getState().session?.projectName ?? 'board'}.kicad_pcb` });
+      },
+    },
+    {
+      id: 'window.schematic',
+      title: 'Open schematic editor',
+      group: 'Window',
+      shortcut: 'Mod+Shift+E',
+      run: () => {
+        const root = documents.sheets()[0];
+        if (root) useAppStore.getState().openDoc({ kind: 'schematic', id: root.path, title: root.file });
+      },
+    },
     // ---------------------------------------------------------------- Help
     { id: 'help.about', title: 'About kicad-web', group: 'Help', run: () => useUiStore.getState().openDialog('about') },
     { id: 'help.shortcuts', title: 'Show keyboard shortcuts', group: 'Help', shortcut: '?', run: () => useUiStore.getState().openDialog('keymap') },

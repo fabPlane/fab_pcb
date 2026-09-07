@@ -141,3 +141,22 @@ describe("JsRouter", () => {
     for (const t of res.tracks) expect(t.net).toBe("A");
   }, 60_000);
 });
+
+describe("JsRouter cancellation", () => {
+  test("an already-aborted signal rejects with RouteCancelled before any solving", async () => {
+    const ac = new AbortController();
+    ac.abort();
+    await expect(new JsRouter().route(twoNetBoard(), { signal: ac.signal })).rejects.toMatchObject({ name: "RouteCancelled" });
+  });
+
+  test("aborting from a progress callback stops the step loop", async () => {
+    const ac = new AbortController();
+    let calls = 0;
+    const p = new JsRouter({ yieldEveryMs: 1 }).route(twoNetBoard(), { signal: ac.signal }, () => {
+      if (++calls === 2) ac.abort();
+    });
+    await expect(p).rejects.toMatchObject({ name: "RouteCancelled" });
+    expect(calls).toBeGreaterThanOrEqual(2);
+    expect(calls).toBeLessThan(20);
+  }, 60_000);
+});

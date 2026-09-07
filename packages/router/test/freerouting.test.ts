@@ -4,7 +4,7 @@
  */
 import { describe, expect, test } from "bun:test";
 import { existsSync } from "node:fs";
-import { DEFAULT_JAR, FreeroutingRouter, findJava, parseFreeroutingLine } from "../src/freerouting";
+import { DEFAULT_JAR, FreeroutingRouter, findJava, parseFreeroutingLine, resolveFreerouting } from "../src/freerouting";
 import type { RouteProgress } from "../src/types";
 import { twoNetBoard, F, B } from "./fixtures";
 
@@ -75,4 +75,54 @@ describe.skipIf(!haveJar)("FreeroutingRouter builtin round trip", () => {
     expect(progress[progress.length - 1]).toMatchObject({ phase: "done", routed: 2, total: 2 });
     expect(res.log.some((l) => /^freerouting: .*finished with state: COMPLETED/.test(l))).toBe(true);
   }, 120_000);
+});
+
+describe("resolveFreerouting", () => {
+  test("defaults to the vendored jar and reports a missing one with the fetch command", () => {
+    const r = resolveFreerouting({ FREEROUTING_JAR: "/nonexistent/fr.jar" });
+    expect(r.ok).toBe(false);
+    expect(r.jar).toBe("/nonexistent/fr.jar");
+    expect(r.reason).toMatch(/fetch-freerouting\.ts --jdk|FREEROUTING_JAR/);
+    expect(resolveFreerouting({}).jar).toBe(DEFAULT_JAR);
+  });
+  test("KICAD_WEB_JAVA wins over FREEROUTING_JAVA and must exist", () => {
+    const jar = existsSync(DEFAULT_JAR) ? DEFAULT_JAR : undefined;
+    const r = resolveFreerouting({ FREEROUTING_JAR: jar, KICAD_WEB_JAVA: "/nonexistent/java", FREEROUTING_JAVA: "/usr/bin/java" });
+    if (!jar) {
+      expect(r.ok).toBe(false);
+      return;
+    }
+    expect(r.ok).toBe(false);
+    expect(r.java).toBeUndefined();
+    expect(r.reason).toMatch(/KICAD_WEB_JAVA/);
+    const sys = Bun.which("java");
+    if (sys) expect(resolveFreerouting({ FREEROUTING_JAR: jar, KICAD_WEB_JAVA: sys })).toMatchObject({ ok: true, java: sys });
+  });
+});
+
+describe("runFreerouting cancellation", () => {
+  const paths = resolveFreerouting();
+  test.skipIf(!paths.ok)(
+    "an abort kills the java process and the adapter rejects with RouteCancelled",
+    async () => {
+      const { mkdtemp, rm } = await import("node:fs/promises");
+      const { tmpdir } = await import("node:os");
+      const { join } = await import("node:path");
+      const dir = await mkdtemp(join(tmpdir(), "kicad-web-fr-cancel-"));
+      try {
+        const router = new FreeroutingRouter({}, { mode: "builtin", jar: paths.jar, java: paths.java, workDir: dir, passes: 100 });
+        const ac = new AbortController();
+        const t0 = performance.now();
+        // abort as soon as the jar is started (the JVM is still coming up): the process must go
+        const p = router.route(twoNetBoard(), { signal: ac.signal }, (pr) => {
+          if (pr.phase === "freerouting") setTimeout(() => ac.abort(), 300);
+        });
+        await expect(p).rejects.toMatchObject({ name: "RouteCancelled" });
+        expect(performance.now() - t0).toBeLessThan(20_000);
+      } finally {
+        await rm(dir, { recursive: true, force: true });
+      }
+    },
+    30_000,
+  );
 });

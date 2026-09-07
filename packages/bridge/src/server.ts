@@ -7,6 +7,7 @@
 import { stat } from "node:fs/promises";
 import { extname, resolve } from "node:path";
 import { decodeEvent, eventToJson } from "@kicad-web/client";
+import { createRouteJobs, matchRouteJobPath, type RouteJobs } from "@kicad-web/router/bridge-job";
 import {
   TransportError,
   WS_BRIDGE_PROTOCOL_VERSION,
@@ -26,6 +27,8 @@ export interface BridgeServer {
   readonly url: string;
   readonly config: BridgeConfig;
   readonly sessions: SessionManager;
+  /** The autorouting jobs mounted under `/sessions/:id/route`. */
+  readonly routeJobs: RouteJobs;
   stop(): Promise<void>;
 }
 
@@ -49,6 +52,8 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
     .then((s) => s.isFile())
     .catch(() => false);
   if (!kicadCliExists) cfg.log(`warning: kicad-cli not found at ${cfg.kicadCli} (set KICAD_CLI)`);
+  const routeJobs = createRouteJobs({ freerouting: cfg.freerouting, log: cfg.log });
+  if (!cfg.freerouting.ok) cfg.log(`warning: ${cfg.freerouting.reason}`);
 
   const server = Bun.serve<WsData>({
     port: cfg.port,
@@ -77,6 +82,7 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
           kicadCliExists,
           workspaceRoot: cfg.workspaceRoot,
           staticDir: cfg.staticDir,
+          freerouting: cfg.freerouting,
           sessions: sessions.list().map((s) => ({ id: s.id, state: s.state, path: s.path, clients: s.clients })),
         });
       }
@@ -103,6 +109,18 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
           }
         }
         return json({ error: "method not allowed" }, 405);
+      }
+
+      const route = matchRouteJobPath(path);
+      if (route) {
+        const session = sessions.get(route.sessionId);
+        if (!session) return json({ error: `unknown session "${route.sessionId}"` }, 404);
+        session.touch();
+        return routeJobs.handle(
+          req,
+          { id: session.id, transport: session.transport, clientName: `kicad-web/bridge/${session.id}/router` },
+          route.jobId,
+        );
       }
 
       const m = /^\/sessions\/([^/]+)(?:\/(log|events))?$/.exec(path);
@@ -203,7 +221,7 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
 
   const url = `http://${server.hostname}:${server.port}`;
   cfg.log(
-    `listening on ${url} (kicad-cli: ${cfg.kicadCli}, workspace: ${cfg.workspaceRoot}${cfg.staticDir ? `, static: ${cfg.staticDir}` : ""})`,
+    `listening on ${url} (kicad-cli: ${cfg.kicadCli}, workspace: ${cfg.workspaceRoot}${cfg.staticDir ? `, static: ${cfg.staticDir}` : ""}, freerouting: ${cfg.freerouting.ok ? `${cfg.freerouting.jar} with ${cfg.freerouting.java}` : "unavailable"})`,
   );
 
   return {
@@ -212,6 +230,7 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
     url,
     config: cfg,
     sessions,
+    routeJobs,
     async stop() {
       await sessions.destroyAll();
       await server.stop(true);

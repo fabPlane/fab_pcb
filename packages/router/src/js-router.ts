@@ -20,7 +20,17 @@ import { mm, toMm, type Vec2 } from "@kicad-web/client";
 import { AutoroutingPipelineSolver } from "@tscircuit/capacity-autorouter";
 import { isAxisAligned, polygonBounds, rotatedRectBounds } from "./geometry";
 import { copperLayersInOrder, rulesForNet } from "./extract";
-import type { Autorouter, NewTrack, NewVia, RouteConnection, RouteInput, RouteOptions, RouteProgress, RouteResult } from "./types";
+import {
+  RouteCancelled,
+  type Autorouter,
+  type NewTrack,
+  type NewVia,
+  type RouteConnection,
+  type RouteInput,
+  type RouteOptions,
+  type RouteProgress,
+  type RouteResult,
+} from "./types";
 
 /** The parts of `SimpleRouteJson` we produce (mirrors the solver's type; kept local so the contract is visible here). */
 export interface SimpleRouteJson {
@@ -330,6 +340,10 @@ export class JsRouter implements Autorouter {
     let lastPhase = "";
     let lastPercent = -1;
     progress?.({ phase: "start", percent: 0, total: input.connections.length });
+    const checkCancelled = () => {
+      if (opts.signal?.aborted) throw new RouteCancelled();
+    };
+    checkCancelled();
 
     /** Steps one solver to completion, failure or the deadline; returns its traces (empty on failure). */
     const solve = async (srjIn: SimpleRouteJson): Promise<{ traces: SrjTrace[]; error?: string; iterations: number }> => {
@@ -341,6 +355,7 @@ export class JsRouter implements Autorouter {
       }
       let lastYield = performance.now();
       while (!solver.solved && !solver.failed) {
+        checkCancelled();
         try {
           solver.step();
         } catch (e) {

@@ -85,8 +85,10 @@ The alternative the plan allowed — a grid A\* router of our own — was not ne
 NORMAL pad stack's copper entry is keyed on `F_Cu`) and creates them in **one** commit, so `Undo`
 removes the whole routing pass. Positions are rounded to integer nm.
 
-`RouteOptions`: `layers`, `viaCost`, `maxTimeMs`, `nets`, `seed`, `effort`, `extra` — each adapter
-logs which of these it cannot honour. `RouteResult`: `tracks`, `vias`, `unrouted` (the router's own
+`RouteOptions`: `layers`, `viaCost`, `maxTimeMs`, `nets`, `seed`, `effort`, `extra`, `signal` — each adapter
+logs which of these it cannot honour. `signal` (an `AbortSignal`) cancels a run: the JS router stops
+at its next `step()`, Freerouting's process is killed, and `route()` rejects with `RouteCancelled`
+(`RouteCancelled.is(e)`), so nothing is applied. `RouteResult`: `tracks`, `vias`, `unrouted` (the router's own
 view; the bench re-measures with `GetRatsnest`), `totalConnections`, `timedOut`, `elapsedMs`, `log`.
 
 ## Freerouting
@@ -104,6 +106,12 @@ and out of KiCad in one of two ways:
   the fork on 2026-09-07 (`8cc9377988`, `1f6937d5e5`); `available()` / `resolveMode()` check
   `GetSupportedCommands` and the generated bindings, so the adapter degrades to `builtin` on older
   servers or clients.
+- **`kicad-dsn`** (what the app and the bridge job use): KiCad's exporter for the DSN, but the
+  session is parsed by `specctra/ses.ts` and the items go through `applyRouteResult()` under the
+  caller's own commit message — the History panel then reads "Autoroute (freerouting): 113
+  connections" instead of KiCad's fixed "Import Specctra Session", and the tracks are known
+  client-side (track length, client-side undo). Degrades to `builtin` on a server without the
+  exporter.
 - **`builtin`**: `specctra/dsn.ts` writes the DSN from `RouteInput` (each pad its own one-pin
   component so footprint transforms never need undoing; KiCad-style padstack names; zones as planes,
   rule areas and copper graphics as keepouts; existing copper as protected wiring) and
@@ -118,8 +126,9 @@ downloaded from https://github.com/freerouting/freerouting/releases (v2.4.1, 64 
 sha256 `251101c3eeac22d7e7dfcf6796603279e5d1000283eb82d8f093780f7afc6aa9`) into `vendor/`, which is
 git-ignored, and executed as a separate process — nothing of it is linked or redistributed.
 Freerouting >= 2.2 is compiled for **Java 25**; the machine's Temurin 24 refuses it, so `--jdk`
-also unpacks a Temurin 25 into `vendor/jdk` (also ignored). `FREEROUTING_JAR` / `FREEROUTING_JAVA`
-override both paths.
+also unpacks a Temurin 25 into `vendor/jdk` (also ignored). `FREEROUTING_JAR` and `KICAD_WEB_JAVA`
+(or `FREEROUTING_JAVA`) override both paths; `resolveFreerouting(env)` is the one place that reads
+them and says, with the fix, why Freerouting cannot run (the bridge shows that in `/health`).
 
 ## Bridge job
 
@@ -133,13 +142,19 @@ const jobs = createRouteJobs();
 
 | Route                                                                                       | Effect                                                                                 |
 | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `POST /sessions/:id/route` `{router:"js"\|"freerouting", options?, freerouting?, message?}` | starts extract -> route -> apply on the session's open board; `202 {job}`              |
-| `GET /sessions/:id/route`                                                                   | list jobs of the session                                                               |
-| `GET /sessions/:id/route/:job`                                                              | `{job}`; with `Accept: text/event-stream`: `event: state`, `progress`, `done`, `error` |
-| `DELETE /sessions/:id/route/:job`                                                           | cancel (Freerouting gets SIGTERM)                                                      |
+| `POST /sessions/:id/route` `{router:"js"\|"freerouting", options?, freerouting?, refillZones?, message?}` | `RefillZones` -> `SaveDocument` -> extract -> route -> apply (one commit, "Autoroute (<router>): n connections") on the session's open board; `202 {job}`; `400` when Freerouting is asked for but missing |
+| `GET /sessions/:id/route`                                                                   | list jobs of the session, plus the Freerouting paths                                   |
+| `GET /sessions/:id/route/:job`                                                              | `{job}`; with `Accept: text/event-stream`: `event: state`, `progress` (`{state, progress, log}`), `done`, `error`, `: keepalive` |
+| `DELETE /sessions/:id/route/:job`                                                           | cancel: aborts the router (`RouteOptions.signal`), Freerouting's java is killed; nothing applied |
 
-The job uses the session's own `NngIpcTransport`; the browser sees the result through the usual
-`DocumentChanged` event and a store re-sync.
+`RouteJobInfo.summary` carries `tracks, vias, routed, routerRouted, total, trackLengthNm, elapsedMs,
+wallMs, timedOut, message, unrouted:[{net, from, to}], log` — `routed` and `unrouted` are re-measured
+with `GetRatsnest` after the apply (the router's own `routerRouted` calls a net routed once it got a
+wire, which overstates on multi-pad nets); a run that routes nothing ends `failed` with the router's
+reason (`emptyResultReason`). `sesToItems` skips the session's echo of the board's existing tracks
+and vias, so a partially routed board is not doubled. The job uses the session's own
+`NngIpcTransport` with its own client name, so the browser sees the result through the usual
+`DocumentChanged` event and a store re-sync. Freerouting runs in `kicad-dsn` mode.
 
 ## Benchmark
 

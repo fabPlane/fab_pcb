@@ -304,7 +304,7 @@ export interface MarkerService {
 }
 
 export * from './extras';
-import type { BoardToolsService, LibraryService, SchematicToolsService, ServerSettingsService, ServerUndoService } from './extras';
+import type { AutorouteService, BoardToolsService, LibraryService, SchematicToolsService, ServerSettingsService, ServerUndoService } from './extras';
 
 export interface Services {
   session: SessionService;
@@ -321,4 +321,6 @@ export interface Services {
   schematic?: SchematicToolsService;
   settings?: ServerSettingsService;
   undo?: ServerUndoService;
+  /** Autorouting (Route -> Autoroute...): JS router in the tab or on the bridge, Freerouting on the bridge. */
+  autoroute?: AutorouteService;
 }

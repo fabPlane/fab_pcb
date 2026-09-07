@@ -15,7 +15,8 @@
     "typecheck": "tsc -b"
   },
   "dependencies": {
-    "@kicad-web/client": "workspace:*"
+    "@kicad-web/client": "workspace:*",
+    "@kicad-web/router": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "^1.2.0",

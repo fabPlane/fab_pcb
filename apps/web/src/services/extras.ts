@@ -203,6 +203,104 @@ export interface ServerSettingsService {
   appSettings(app: 'board' | 'schematic'): Promise<AppDefaults | null>;
 }
 
+// ---------------------------------------------------------------------------- autoroute
+
+/**
+ * Where the router runs: the JS router in this tab (the solver's step loop yields to the UI),
+ * the JS router on the bridge, or Freerouting (Java) on the bridge. The bridge job is
+ * `POST /sessions/:id/route` from `@kicad-web/router/bridge-job`.
+ */
+export type AutorouterChoice = 'js-tab' | 'js-server' | 'freerouting';
+
+export interface AutorouteRequest {
+  router: AutorouterChoice;
+  /** Only these nets (names); undefined = every unrouted connection. */
+  nets?: string[];
+  /** Copper layer ids (`BL_F_Cu`) the router may use; undefined = every enabled copper layer. */
+  layers?: string[];
+  /** Relative via cost (1 = neutral). Logged as ignored by routers without the knob. */
+  viaCost?: number;
+  /** Freerouting `-mp` (max passes) / the JS router's effort. */
+  passes?: number;
+  /** Give up after this long; 0 / undefined = no limit. Freerouting yields nothing when killed. */
+  timeLimitMs?: number;
+  /** `RefillZones` before extracting the ratsnest (default true). */
+  refillZones?: boolean;
+}
+
+export type AutorouteState = 'starting' | 'filling' | 'saving' | 'extracting' | 'routing' | 'applying' | 'done' | 'failed' | 'cancelled';
+
+export interface AutorouteProgress {
+  phase: string;
+  percent?: number;
+  routed?: number;
+  total?: number;
+  message?: string;
+}
+
+/** One connection the router left unrouted (airline end points in nm), for the result list. */
+export interface AutorouteUnrouted {
+  net: string;
+  from: { x: number; y: number };
+  to: { x: number; y: number };
+}
+
+export interface AutorouteSummary {
+  /** The adapter's name (`js`, `freerouting-kicad-dsn`, ...). */
+  router: string;
+  tracks: number;
+  vias: number;
+  /** Connections routed as KiCad sees it after the apply (`total` minus the airlines `GetRatsnest` still reports). */
+  routed: number;
+  /** The router's own count (a net counts as routed once it got a wire; overstates on multi-pad nets). */
+  routerRouted?: number;
+  total: number;
+  trackLengthNm: number;
+  /** Router time and whole-run wall time, ms. */
+  elapsedMs: number;
+  wallMs: number;
+  timedOut: boolean;
+  /** The commit message (what the History panel shows); empty when nothing was applied. */
+  message: string;
+  /** The airlines left after the apply (`GetRatsnest`, the requested nets only). */
+  unrouted: AutorouteUnrouted[];
+  /** `GetUnroutedCount` for the whole board after the apply, when measured. */
+  unroutedAfter?: number;
+  log: string[];
+}
+
+export interface AutorouteRun {
+  id: string;
+  request: AutorouteRequest;
+  state: AutorouteState;
+  startedAt: number;
+  finishedAt?: number;
+  progress?: AutorouteProgress;
+  /** Tail of the router's output while it runs, the full log when done. */
+  log: string[];
+  summary?: AutorouteSummary;
+  error?: string;
+}
+
+export interface AutorouteAvailability {
+  /** The bridge job route is reachable (false in direct-WebSocket mode without a bridge). */
+  server: boolean;
+  freerouting: { ok: boolean; reason?: string };
+}
+
+export interface AutorouteService {
+  /** The latest run of this tab (running or finished), null before the first. */
+  current(): AutorouteRun | null;
+  onChange(cb: () => void): () => void;
+  available(): Promise<AutorouteAvailability>;
+  /** Starts a run; resolves with the finished run (done, failed or cancelled). One run at a time. */
+  start(request: AutorouteRequest): Promise<AutorouteRun>;
+  /** Cancels the running job (kills Freerouting on the bridge, stops the in-tab solver). */
+  cancel(): Promise<void>;
+  /** True while a run is in flight. */
+  running(): boolean;
+}
+
 // -------------------------------------------------------------------------- server undo
 
 /** One entry of KiCad's own undo stack (`GetUndoStack`), oldest first. */

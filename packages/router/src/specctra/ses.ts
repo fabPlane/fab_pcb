@@ -137,12 +137,20 @@ export interface SesItems {
   warnings: string[];
   /** Nets that received at least one wire or via. */
   routedNets: Set<string>;
+  /** Wires and vias the session echoed back from the board's existing copper (not created again). */
+  echoed: { tracks: number; vias: number };
 }
+
+/** Existing copper is matched to the session's echo of it within this distance, nm. */
+const ECHO_TOLERANCE = 10_000;
 
 /**
  * Turns a parsed session into board items for `input`'s layers and nets. Layer names are matched
  * by user name (`F.Cu`), then enum name (`BL_F_Cu`); via sizes come from the session's padstack
- * (`Via[0-1]_1200:600_um`), falling back to the net class.
+ * (`Via[0-1]_1200:600_um`), falling back to the net class. Freerouting writes the board's existing
+ * (fixed) wires and vias into the session as well; those are recognised by layer, net and end
+ * points against `input.tracks` / `input.vias` and skipped, so a partially routed board does not
+ * get its tracks doubled.
  */
 export function sesToItems(session: Session, input: RouteInput): SesItems {
   const layerByName = new Map<string, BoardLayer>();
@@ -163,6 +171,22 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
   const vias: NewVia[] = [];
   const routedNets = new Set<string>();
   const rulesFor = (net: string) => input.rules.perNet.get(net) ?? input.rules.default;
+  const echoed = { tracks: 0, vias: 0 };
+  const near = (a: { x: number; y: number }, b: { x: number; y: number }) =>
+    Math.abs(a.x - b.x) <= ECHO_TOLERANCE && Math.abs(a.y - b.y) <= ECHO_TOLERANCE;
+  const existingTracks = new Map<string, { start: { x: number; y: number }; end: { x: number; y: number } }[]>();
+  for (const t of input.tracks) {
+    const key = `${t.layer}\u0000${t.net}`;
+    let list = existingTracks.get(key);
+    if (!list) existingTracks.set(key, (list = []));
+    list.push({ start: t.start, end: t.end });
+  }
+  const isEchoedTrack = (layer: BoardLayer, net: string, start: { x: number; y: number }, end: { x: number; y: number }) =>
+    (existingTracks.get(`${layer}\u0000${net}`) ?? []).some(
+      (t) => (near(t.start, start) && near(t.end, end)) || (near(t.start, end) && near(t.end, start)),
+    );
+  const isEchoedVia = (net: string, position: { x: number; y: number }) =>
+    input.vias.some((v) => v.net === net && near(v.position, position));
 
   for (const w of session.wires) {
     const layer = layerByName.get(w.layer);
@@ -176,12 +200,20 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
       const start = w.points[i - 1]!;
       const end = w.points[i]!;
       if (start.x === end.x && start.y === end.y) continue;
+      if (isEchoedTrack(layer, w.net, start, end)) {
+        echoed.tracks++;
+        continue;
+      }
       tracks.push({ net: w.net, netCode, start, end, width, layer });
       routedNets.add(w.net);
     }
   }
   const allLayers = input.copperLayers.map((l) => l.id);
   for (const v of session.vias) {
+    if (isEchoedVia(v.net, { x: v.x, y: v.y })) {
+      echoed.vias++;
+      continue;
+    }
     const ps = session.padstacks.get(v.padstack);
     const rules = rulesFor(v.net);
     const m = /_(\d+):(\d+)_um$/.exec(v.padstack);
@@ -193,5 +225,7 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
     vias.push({ net: v.net, netCode: codes.get(v.net) ?? 0, position: { x: v.x, y: v.y }, diameter, drill, layers });
     routedNets.add(v.net);
   }
-  return { tracks, vias, warnings, routedNets };
+  if (echoed.tracks || echoed.vias)
+    warnings.push(`${echoed.tracks} existing track(s) and ${echoed.vias} via(s) echoed by the session were not created again`);
+  return { tracks, vias, warnings, routedNets, echoed };
 }
