@@ -1859,6 +1859,26 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
   boardJob("RunBoardJobExportIpcD356", (out) => board.jobs.exportIpcD356(out), ".d356");
   boardJob("RunBoardJobExportODB", (out) => board.jobs.exportOdb(out), ".zip");
   boardJob("RunBoardJobExportStats", (out) => board.jobs.exportStats(out, { format: StatsOutputFormat.SOF_JSON }), ".json");
+  boardJob("RunBoardJobExportSpecctra", (out) => board.jobs.exportSpecctra(out), ".dsn");
+  cmdTest("ImportSpecctraSession", async () => {
+    // Garbage must be refused with the parser's message, not swallowed or wedged.
+    const bad = await board.importSpecctraSession({ contents: "this is not a session" }).then(
+      () => "accepted garbage",
+      (e: unknown) => (e instanceof KiCadApiError ? e.codeName : String(e)),
+    );
+    expect(bad).toBe("AS_BAD_REQUEST");
+    // A session with no routes is the smallest valid input the importer knows; it must apply
+    // cleanly and change nothing. The DSN exported above proves the pair works end to end in the
+    // router package's integration test, which runs a real Freerouting session through it.
+    const empty = `(session "conf" (base_design "conf.dsn")
+  (placement (resolution um 10))
+  (was_is)
+  (routes (resolution um 10) (parser (host_cad "KiCad")) (library_out) (network_out)))`;
+    const r = await board.importSpecctraSession({ contents: empty });
+    expect(r.tracksAdded).toBe(0);
+    expect(r.viasAdded).toBe(0);
+    return `garbage -> AS_BAD_REQUEST; empty session applied: ${r.tracksAdded} tracks, ${r.footprintsMoved} footprints moved, ${r.warnings.length} warning(s)`;
+  });
   boardJob("RunBoardJobExport3D", (out) => board.jobs.export3D(out, { format: Board3DFormat.B3D_GLB, overwrite: true }), ".glb", 300_000);
   boardJob(
     "RunBoardJobExportRender",

@@ -12,6 +12,7 @@ import {
   RunBoardJobExport3DSchema,
   RunBoardJobExportDrillSchema,
   RunBoardJobExportDxfSchema,
+  RunBoardJobExportSpecctraSchema,
   RunBoardJobExportGencadSchema,
   RunBoardJobExportGerbersSchema,
   RunBoardJobExportIpc2581Schema,
@@ -228,6 +229,16 @@ export class BoardJobs extends Jobs {
   exportDxf(outputPath: string, args: Args<typeof RunBoardJobExportDxfSchema> = {}, opts?: JobOptions): Promise<JobResult> {
     return this.run("RunBoardJobExportDxf", outputPath, opts, (jobSettings) =>
       cmd.runBoardJobExportDxf(this.doc.client, { ...args, jobSettings }),
+    );
+  }
+  /**
+   * `RunBoardJobExportSpecctra`: the board as a Specctra DSN for an external autorouter such as
+   * Freerouting. Like every export job it reads the board file, so save first; pair with
+   * `board.importSpecctraSession` to bring the routed session back in one undoable commit.
+   */
+  exportSpecctra(outputPath: string, args: Args<typeof RunBoardJobExportSpecctraSchema> = {}, opts?: JobOptions): Promise<JobResult> {
+    return this.run("RunBoardJobExportSpecctra", outputPath, opts, (jobSettings) =>
+      cmd.runBoardJobExportSpecctra(this.doc.client, { ...args, jobSettings }),
     );
   }
   exportPdf(outputPath: string, args: Args<typeof RunBoardJobExportPdfSchema> = {}, opts?: JobOptions): Promise<JobResult> {

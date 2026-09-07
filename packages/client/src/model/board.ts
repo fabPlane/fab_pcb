@@ -72,6 +72,14 @@ export interface CustomRules {
   errorText: string;
 }
 
+export interface SpecctraImportResult {
+  tracksAdded: number;
+  viasAdded: number;
+  tracksRemoved: number;
+  footprintsMoved: number;
+  warnings: string[];
+}
+
 export interface NetlistImportResult {
   errorCount: number;
   warningCount: number;
@@ -371,6 +379,39 @@ export class Board extends Document {
       overrideLocks: opts.overrideLocks ?? false,
     });
     return { errorCount: res.errorCount, warningCount: res.warningCount, newFootprintCount: res.newFootprintCount, report: res.report };
+  }
+
+  /**
+   * `ImportSpecctraSession`: apply a routed Specctra session (`.ses`, as produced by Freerouting
+   * from a DSN exported with `board.jobs.exportSpecctra`) in one undoable commit. Pass either the
+   * file `path` or the session `contents`. The importer matches nets and pads by name, so the
+   * session must come from a DSN exported from this same board.
+   */
+  async importSpecctraSession(
+    source: { path: string } | { contents: Uint8Array | string },
+    opts: { replaceExistingTracks?: boolean } = {},
+  ): Promise<SpecctraImportResult> {
+    const contents =
+      "contents" in source
+        ? typeof source.contents === "string"
+          ? new TextEncoder().encode(source.contents)
+          : source.contents
+        : new Uint8Array();
+    const res = await cmd.importSpecctraSession(this.client, {
+      board: this.specifier,
+      path: "path" in source ? source.path : "",
+      contents,
+      replaceExistingTracks: opts.replaceExistingTracks ?? false,
+    });
+    // Like importNetlist, this is a server-side mutation: consumers learn of it through the
+    // DocumentChanged event or the revision counter, not a local change notification.
+    return {
+      tracksAdded: res.tracksAdded,
+      viasAdded: res.viasAdded,
+      tracksRemoved: res.tracksRemoved,
+      footprintsMoved: res.footprintsMoved,
+      warnings: [...res.warnings],
+    };
   }
 
   /**
