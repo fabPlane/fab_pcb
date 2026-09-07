@@ -37,7 +37,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file common/commands/editor_commands.proto.
  */
 export const file_common_commands_editor_commands: GenFile = /*@__PURE__*/
-  fileDesc("CiVjb21tb24vY29tbWFuZHMvZWRpdG9yX2NvbW1hbmRzLnByb3RvEhVraWFwaS5jb21tb24uY29tbWFuZHMiPQoNUmVmcmVzaEVkaXRvchIsCgVmcmFtZRgBIAEoDjIdLmtpYXBpLmNvbW1vbi50eXBlcy5GcmFtZVR5cGUifAoPT3BlbkxpYnJhcnlJdGVtEi4KBHR5cGUYASABKA4yIC5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRUeXBlEjkKCmlkZW50aWZpZXIYAiABKAsyJS5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeUlkZW50aWZpZXIiQgoQR2V0T3BlbkRvY3VtZW50cxIuCgR0eXBlGAEgASgOMiAua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50VHlwZSJUChhHZXRPcGVuRG9jdW1lbnRzUmVzcG9uc2USOAoJZG9jdW1lbnRzGAEgAygLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIjkKC1NhdmVPcHRpb25zEhEKCW92ZXJ3cml0ZRgBIAEoCBIXCg9pbmNsdWRlX3Byb2plY3QYAiABKAgikAEKElNhdmVDb3B5T2ZEb2N1bWVudBI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchIMCgRwYXRoGAIgASgJEjMKB29wdGlvbnMYAyABKAsyIi5raWFwaS5jb21tb24uY29tbWFuZHMuU2F2ZU9wdGlvbnMiSQoOUmV2ZXJ0RG9jdW1lbnQSNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIiGwoJUnVuQWN0aW9uEg4KBmFjdGlvbhgBIAEoCSJLChFSdW5BY3Rpb25SZXNwb25zZRI2CgZzdGF0dXMYASABKA4yJi5raWFwaS5jb21tb24uY29tbWFuZHMuUnVuQWN0aW9uU3RhdHVzIkUKCkdldEFjdGlvbnMSNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIiWAoKQWN0aW9uSW5mbxIMCgRuYW1lGAEgASgJEg0KBWxhYmVsGAIgASgJEhMKC2Rlc2NyaXB0aW9uGAMgASgJEhgKEGhlYWRsZXNzX2NhcGFibGUYBCABKAgiSAoSR2V0QWN0aW9uc1Jlc3BvbnNlEjIKB2FjdGlvbnMYASADKAsyIS5raWFwaS5jb21tb24uY29tbWFuZHMuQWN0aW9uSW5mbyI9CgtCZWdpbkNvbW1pdBIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlciI7ChNCZWdpbkNvbW1pdFJlc3BvbnNlEiQKAmlkGAEgASgLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQipwEKCUVuZENvbW1pdBIkCgJpZBgBIAEoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEjMKBmFjdGlvbhgCIAEoDjIjLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5Db21taXRBY3Rpb24SDwoHbWVzc2FnZRgDIAEoCRIuCgZoZWFkZXIYBCABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlciITChFFbmRDb21taXRSZXNwb25zZSKPAQoLQ3JlYXRlSXRlbXMSLgoGaGVhZGVyGAEgASgLMh4ua2lhcGkuY29tbW9uLnR5cGVzLkl0ZW1IZWFkZXISIwoFaXRlbXMYAiADKAsyFC5nb29nbGUucHJvdG9idWYuQW55EisKCWNvbnRhaW5lchgDIAEoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEIlgKCkl0ZW1TdGF0dXMSMwoEY29kZRgBIAEoDjIlLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5JdGVtU3RhdHVzQ29kZRIVCg1lcnJvcl9tZXNzYWdlGAIgASgJImsKEkl0ZW1DcmVhdGlvblJlc3VsdBIxCgZzdGF0dXMYASABKAsyIS5raWFwaS5jb21tb24uY29tbWFuZHMuSXRlbVN0YXR1cxIiCgRpdGVtGAIgASgLMhQuZ29vZ2xlLnByb3RvYnVmLkFueSK+AQoTQ3JlYXRlSXRlbXNSZXNwb25zZRIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchI1CgZzdGF0dXMYAiABKA4yJS5raWFwaS5jb21tb24udHlwZXMuSXRlbVJlcXVlc3RTdGF0dXMSQAoNY3JlYXRlZF9pdGVtcxgDIAMoCzIpLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5JdGVtQ3JlYXRpb25SZXN1bHQiKQoISXRlbVBhZ2USDgoGb2Zmc2V0GAEgASgNEg0KBWxpbWl0GAIgASgNIs0BCghHZXRJdGVtcxIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchIyCgV0eXBlcxgCIAMoDjIjLmtpYXBpLmNvbW1vbi50eXBlcy5LaUNhZE9iamVjdFR5cGUSLQoEcGFnZRgDIAEoCzIfLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5JdGVtUGFnZRIbCg5zaW5jZV9yZXZpc2lvbhgEIAEoBEgAiAEBQhEKD19zaW5jZV9yZXZpc2lvbiJICg1HZXRJdGVtQ291bnRzEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIk0KCUl0ZW1Db3VudBIxCgR0eXBlGAEgASgOMiMua2lhcGkuY29tbW9uLnR5cGVzLktpQ2FkT2JqZWN0VHlwZRINCgVjb3VudBgCIAEoDSJbChVHZXRJdGVtQ291bnRzUmVzcG9uc2USMAoGY291bnRzGAEgAygLMiAua2lhcGkuY29tbW9uLmNvbW1hbmRzLkl0ZW1Db3VudBIQCghyZXZpc2lvbhgCIAEoBCJnCgxHZXRJdGVtc0J5SWQSLgoGaGVhZGVyGAEgASgLMh4ua2lhcGkuY29tbW9uLnR5cGVzLkl0ZW1IZWFkZXISJwoFaXRlbXMYAiADKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRCLuAQoQR2V0SXRlbXNSZXNwb25zZRIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchI1CgZzdGF0dXMYAiABKA4yJS5raWFwaS5jb21tb24udHlwZXMuSXRlbVJlcXVlc3RTdGF0dXMSIwoFaXRlbXMYAyADKAsyFC5nb29nbGUucHJvdG9idWYuQW55Eg0KBXRvdGFsGAQgASgNEhAKCHJldmlzaW9uGAUgASgEEi0KC2RlbGV0ZWRfaWRzGAYgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQiYgoLVXBkYXRlSXRlbXMSLgoGaGVhZGVyGAEgASgLMh4ua2lhcGkuY29tbW9uLnR5cGVzLkl0ZW1IZWFkZXISIwoFaXRlbXMYAiADKAsyFC5nb29nbGUucHJvdG9idWYuQW55ImkKEEl0ZW1VcGRhdGVSZXN1bHQSMQoGc3RhdHVzGAEgASgLMiEua2lhcGkuY29tbW9uLmNvbW1hbmRzLkl0ZW1TdGF0dXMSIgoEaXRlbRgCIAEoCzIULmdvb2dsZS5wcm90b2J1Zi5BbnkivAEKE1VwZGF0ZUl0ZW1zUmVzcG9uc2USLgoGaGVhZGVyGAEgASgLMh4ua2lhcGkuY29tbW9uLnR5cGVzLkl0ZW1IZWFkZXISNQoGc3RhdHVzGAIgASgOMiUua2lhcGkuY29tbW9uLnR5cGVzLkl0ZW1SZXF1ZXN0U3RhdHVzEj4KDXVwZGF0ZWRfaXRlbXMYAyADKAsyJy5raWFwaS5jb21tb24uY29tbWFuZHMuSXRlbVVwZGF0ZVJlc3VsdCJpCgtEZWxldGVJdGVtcxIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchIqCghpdGVtX2lkcxgCIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEInUKEkl0ZW1EZWxldGlvblJlc3VsdBIkCgJpZBgBIAEoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEjkKBnN0YXR1cxgCIAEoDjIpLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5JdGVtRGVsZXRpb25TdGF0dXMivgEKE0RlbGV0ZUl0ZW1zUmVzcG9uc2USLgoGaGVhZGVyGAEgASgLMh4ua2lhcGkuY29tbW9uLnR5cGVzLkl0ZW1IZWFkZXISNQoGc3RhdHVzGAIgASgOMiUua2lhcGkuY29tbW9uLnR5cGVzLkl0ZW1SZXF1ZXN0U3RhdHVzEkAKDWRlbGV0ZWRfaXRlbXMYAyADKAsyKS5raWFwaS5jb21tb24uY29tbWFuZHMuSXRlbURlbGV0aW9uUmVzdWx0Ip8BCg5HZXRCb3VuZGluZ0JveBIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchInCgVpdGVtcxgCIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEjQKBG1vZGUYAyABKA4yJi5raWFwaS5jb21tb24uY29tbWFuZHMuQm91bmRpbmdCb3hNb2RlImoKFkdldEJvdW5kaW5nQm94UmVzcG9uc2USJwoFaXRlbXMYASADKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRBInCgVib3hlcxgCIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5Cb3gyInIKDEdldFNlbGVjdGlvbhIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchIyCgV0eXBlcxgCIAMoDjIjLmtpYXBpLmNvbW1vbi50eXBlcy5LaUNhZE9iamVjdFR5cGUiOAoRU2VsZWN0aW9uUmVzcG9uc2USIwoFaXRlbXMYASADKAsyFC5nb29nbGUucHJvdG9idWYuQW55ImkKDkFkZFRvU2VsZWN0aW9uEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEicKBWl0ZW1zGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQibgoTUmVtb3ZlRnJvbVNlbGVjdGlvbhIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchInCgVpdGVtcxgCIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEIkAKDkNsZWFyU2VsZWN0aW9uEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyIqEBCgdIaXRUZXN0Ei4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEiQKAmlkGAIgASgLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSLQoIcG9zaXRpb24YAyABKAsyGy5raWFwaS5jb21tb24udHlwZXMuVmVjdG9yMhIRCgl0b2xlcmFuY2UYBCABKAUiRwoPSGl0VGVzdFJlc3BvbnNlEjQKBnJlc3VsdBgBIAEoDjIkLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5IaXRUZXN0UmVzdWx0IkwKEUdldFRpdGxlQmxvY2tJbmZvEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIoUBChFTZXRUaXRsZUJsb2NrSW5mbxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchI3Cgt0aXRsZV9ibG9jaxgCIAEoCzIiLmtpYXBpLmNvbW1vbi50eXBlcy5UaXRsZUJsb2NrSW5mbyJKCg9HZXRQYWdlU2V0dGluZ3MSNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIigwEKD1NldFBhZ2VTZXR0aW5ncxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchI3Cg1wYWdlX3NldHRpbmdzGAIgASgLMiAua2lhcGkuY29tbW9uLnR5cGVzLlBhZ2VTZXR0aW5ncyJOChNHZXREb2N1bWVudFJldmlzaW9uEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIiwKGERvY3VtZW50UmV2aXNpb25SZXNwb25zZRIQCghyZXZpc2lvbhgBIAEoBCJPChRTYXZlRG9jdW1lbnRUb1N0cmluZxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciJiChVTYXZlZERvY3VtZW50UmVzcG9uc2USNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISEAoIY29udGVudHMYAiABKAkiFwoVU2F2ZVNlbGVjdGlvblRvU3RyaW5nIlEKFlNhdmVkU2VsZWN0aW9uUmVzcG9uc2USJQoDaWRzGAEgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSEAoIY29udGVudHMYAiABKAkibAoRU2F2ZUl0ZW1zVG9TdHJpbmcSLgoGaGVhZGVyGAEgASgLMh4ua2lhcGkuY29tbW9uLnR5cGVzLkl0ZW1IZWFkZXISJwoFaXRlbXMYAiADKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRCJqCh1QYXJzZUFuZENyZWF0ZUl0ZW1zRnJvbVN0cmluZxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchIQCghjb250ZW50cxgCIAEoCSJOCgRVbmRvEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEg0KBWNvdW50GAIgASgNIk4KBFJlZG8SNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISDQoFY291bnQYAiABKA0iSwoQVW5kb1JlZG9SZXNwb25zZRIPCgdhcHBsaWVkGAEgASgNEhIKCnVuZG9fY291bnQYAiABKA0SEgoKcmVkb19jb3VudBgDIAEoDSJ7Cg5VbmRvU3RhY2tFbnRyeRITCgtkZXNjcmlwdGlvbhgBIAEoCRITCgtjbGllbnRfbmFtZRgCIAEoCRIrCgljb21taXRfaWQYAyABKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRBISCgppdGVtX2NvdW50GAQgASgNIkcKDEdldFVuZG9TdGFjaxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciJ9ChFVbmRvU3RhY2tSZXNwb25zZRIzCgR1bmRvGAEgAygLMiUua2lhcGkuY29tbW9uLmNvbW1hbmRzLlVuZG9TdGFja0VudHJ5EjMKBHJlZG8YAiADKAsyJS5raWFwaS5jb21tb24uY29tbWFuZHMuVW5kb1N0YWNrRW50cnkqVwoPUnVuQWN0aW9uU3RhdHVzEg8KC1JBU19VTktOT1dOEAASCgoGUkFTX09LEAESDwoLUkFTX0lOVkFMSUQQAhIWChJSQVNfRlJBTUVfTk9UX09QRU4QAyo9CgxDb21taXRBY3Rpb24SDwoLQ01BX1VOS05PV04QABIOCgpDTUFfQ09NTUlUEAESDAoIQ01BX0RST1AQAiqTAQoOSXRlbVN0YXR1c0NvZGUSDwoLSVNDX1VOS05PV04QABIKCgZJU0NfT0sQARIUChBJU0NfSU5WQUxJRF9UWVBFEAISEAoMSVNDX0VYSVNUSU5HEAMSEwoPSVNDX05PTkVYSVNURU5UEAQSEQoNSVNDX0lNTVVUQUJMRRAFEhQKEElTQ19JTlZBTElEX0RBVEEQBypZChJJdGVtRGVsZXRpb25TdGF0dXMSDwoLSURTX1VOS05PV04QABIKCgZJRFNfT0sQARITCg9JRFNfTk9ORVhJU1RFTlQQAhIRCg1JRFNfSU1NVVRBQkxFEAMqUgoPQm91bmRpbmdCb3hNb2RlEg8KC0JCTV9VTktOT1dOEAASEQoNQkJNX0lURU1fT05MWRABEhsKF0JCTV9JVEVNX0FORF9DSElMRF9URVhUEAIqPQoNSGl0VGVzdFJlc3VsdBIPCgtIVFJfVU5LTk9XThAAEg4KCkhUUl9OT19ISVQQARILCgdIVFJfSElUEAJiBnByb3RvMw", [file_google_protobuf_any, file_common_types_base_types, file_common_types_enums]);
+  fileDesc("CiVjb21tb24vY29tbWFuZHMvZWRpdG9yX2NvbW1hbmRzLnByb3RvEhVraWFwaS5jb21tb24uY29tbWFuZHMiPQoNUmVmcmVzaEVkaXRvchIsCgVmcmFtZRgBIAEoDjIdLmtpYXBpLmNvbW1vbi50eXBlcy5GcmFtZVR5cGUifAoPT3BlbkxpYnJhcnlJdGVtEi4KBHR5cGUYASABKA4yIC5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRUeXBlEjkKCmlkZW50aWZpZXIYAiABKAsyJS5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeUlkZW50aWZpZXIiQgoQR2V0T3BlbkRvY3VtZW50cxIuCgR0eXBlGAEgASgOMiAua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50VHlwZSJUChhHZXRPcGVuRG9jdW1lbnRzUmVzcG9uc2USOAoJZG9jdW1lbnRzGAEgAygLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIlMKGEdldERvY3VtZW50TW9kaWZpZWRTdGF0ZRI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciJfCiBHZXREb2N1bWVudE1vZGlmaWVkU3RhdGVSZXNwb25zZRI7CgVzdGF0ZRgBIAEoDjIsLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5Eb2N1bWVudE1vZGlmaWVkU3RhdGUiOQoLU2F2ZU9wdGlvbnMSEQoJb3ZlcndyaXRlGAEgASgIEhcKD2luY2x1ZGVfcHJvamVjdBgCIAEoCCKQAQoSU2F2ZUNvcHlPZkRvY3VtZW50EjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEgwKBHBhdGgYAiABKAkSMwoHb3B0aW9ucxgDIAEoCzIiLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5TYXZlT3B0aW9ucyJJCg5SZXZlcnREb2N1bWVudBI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciIbCglSdW5BY3Rpb24SDgoGYWN0aW9uGAEgASgJIksKEVJ1bkFjdGlvblJlc3BvbnNlEjYKBnN0YXR1cxgBIAEoDjImLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5SdW5BY3Rpb25TdGF0dXMiRQoKR2V0QWN0aW9ucxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciJYCgpBY3Rpb25JbmZvEgwKBG5hbWUYASABKAkSDQoFbGFiZWwYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSGAoQaGVhZGxlc3NfY2FwYWJsZRgEIAEoCCJIChJHZXRBY3Rpb25zUmVzcG9uc2USMgoHYWN0aW9ucxgBIAMoCzIhLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5BY3Rpb25JbmZvIj0KC0JlZ2luQ29tbWl0Ei4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyIjsKE0JlZ2luQ29tbWl0UmVzcG9uc2USJAoCaWQYASABKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRCKnAQoJRW5kQ29tbWl0EiQKAmlkGAEgASgLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSMwoGYWN0aW9uGAIgASgOMiMua2lhcGkuY29tbW9uLmNvbW1hbmRzLkNvbW1pdEFjdGlvbhIPCgdtZXNzYWdlGAMgASgJEi4KBmhlYWRlchgEIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyIhMKEUVuZENvbW1pdFJlc3BvbnNlIo8BCgtDcmVhdGVJdGVtcxIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchIjCgVpdGVtcxgCIAMoCzIULmdvb2dsZS5wcm90b2J1Zi5BbnkSKwoJY29udGFpbmVyGAMgASgLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQiWAoKSXRlbVN0YXR1cxIzCgRjb2RlGAEgASgOMiUua2lhcGkuY29tbW9uLmNvbW1hbmRzLkl0ZW1TdGF0dXNDb2RlEhUKDWVycm9yX21lc3NhZ2UYAiABKAkiawoSSXRlbUNyZWF0aW9uUmVzdWx0EjEKBnN0YXR1cxgBIAEoCzIhLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5JdGVtU3RhdHVzEiIKBGl0ZW0YAiABKAsyFC5nb29nbGUucHJvdG9idWYuQW55Ir4BChNDcmVhdGVJdGVtc1Jlc3BvbnNlEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEjUKBnN0YXR1cxgCIAEoDjIlLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtUmVxdWVzdFN0YXR1cxJACg1jcmVhdGVkX2l0ZW1zGAMgAygLMikua2lhcGkuY29tbW9uLmNvbW1hbmRzLkl0ZW1DcmVhdGlvblJlc3VsdCIpCghJdGVtUGFnZRIOCgZvZmZzZXQYASABKA0SDQoFbGltaXQYAiABKA0izQEKCEdldEl0ZW1zEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEjIKBXR5cGVzGAIgAygOMiMua2lhcGkuY29tbW9uLnR5cGVzLktpQ2FkT2JqZWN0VHlwZRItCgRwYWdlGAMgASgLMh8ua2lhcGkuY29tbW9uLmNvbW1hbmRzLkl0ZW1QYWdlEhsKDnNpbmNlX3JldmlzaW9uGAQgASgESACIAQFCEQoPX3NpbmNlX3JldmlzaW9uIkgKDUdldEl0ZW1Db3VudHMSNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIiTQoJSXRlbUNvdW50EjEKBHR5cGUYASABKA4yIy5raWFwaS5jb21tb24udHlwZXMuS2lDYWRPYmplY3RUeXBlEg0KBWNvdW50GAIgASgNIlsKFUdldEl0ZW1Db3VudHNSZXNwb25zZRIwCgZjb3VudHMYASADKAsyIC5raWFwaS5jb21tb24uY29tbWFuZHMuSXRlbUNvdW50EhAKCHJldmlzaW9uGAIgASgEImcKDEdldEl0ZW1zQnlJZBIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchInCgVpdGVtcxgCIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEIu4BChBHZXRJdGVtc1Jlc3BvbnNlEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEjUKBnN0YXR1cxgCIAEoDjIlLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtUmVxdWVzdFN0YXR1cxIjCgVpdGVtcxgDIAMoCzIULmdvb2dsZS5wcm90b2J1Zi5BbnkSDQoFdG90YWwYBCABKA0SEAoIcmV2aXNpb24YBSABKAQSLQoLZGVsZXRlZF9pZHMYBiADKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRCJiCgtVcGRhdGVJdGVtcxIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchIjCgVpdGVtcxgCIAMoCzIULmdvb2dsZS5wcm90b2J1Zi5BbnkiaQoQSXRlbVVwZGF0ZVJlc3VsdBIxCgZzdGF0dXMYASABKAsyIS5raWFwaS5jb21tb24uY29tbWFuZHMuSXRlbVN0YXR1cxIiCgRpdGVtGAIgASgLMhQuZ29vZ2xlLnByb3RvYnVmLkFueSK8AQoTVXBkYXRlSXRlbXNSZXNwb25zZRIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchI1CgZzdGF0dXMYAiABKA4yJS5raWFwaS5jb21tb24udHlwZXMuSXRlbVJlcXVlc3RTdGF0dXMSPgoNdXBkYXRlZF9pdGVtcxgDIAMoCzInLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5JdGVtVXBkYXRlUmVzdWx0ImkKC0RlbGV0ZUl0ZW1zEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEioKCGl0ZW1faWRzGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQidQoSSXRlbURlbGV0aW9uUmVzdWx0EiQKAmlkGAEgASgLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSOQoGc3RhdHVzGAIgASgOMikua2lhcGkuY29tbW9uLmNvbW1hbmRzLkl0ZW1EZWxldGlvblN0YXR1cyK+AQoTRGVsZXRlSXRlbXNSZXNwb25zZRIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchI1CgZzdGF0dXMYAiABKA4yJS5raWFwaS5jb21tb24udHlwZXMuSXRlbVJlcXVlc3RTdGF0dXMSQAoNZGVsZXRlZF9pdGVtcxgDIAMoCzIpLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5JdGVtRGVsZXRpb25SZXN1bHQinwEKDkdldEJvdW5kaW5nQm94Ei4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEicKBWl0ZW1zGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSNAoEbW9kZRgDIAEoDjImLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5Cb3VuZGluZ0JveE1vZGUiagoWR2V0Qm91bmRpbmdCb3hSZXNwb25zZRInCgVpdGVtcxgBIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEicKBWJveGVzGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLkJveDIicgoMR2V0U2VsZWN0aW9uEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEjIKBXR5cGVzGAIgAygOMiMua2lhcGkuY29tbW9uLnR5cGVzLktpQ2FkT2JqZWN0VHlwZSI4ChFTZWxlY3Rpb25SZXNwb25zZRIjCgVpdGVtcxgBIAMoCzIULmdvb2dsZS5wcm90b2J1Zi5BbnkiaQoOQWRkVG9TZWxlY3Rpb24SLgoGaGVhZGVyGAEgASgLMh4ua2lhcGkuY29tbW9uLnR5cGVzLkl0ZW1IZWFkZXISJwoFaXRlbXMYAiADKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRCJuChNSZW1vdmVGcm9tU2VsZWN0aW9uEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEicKBWl0ZW1zGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQiQAoOQ2xlYXJTZWxlY3Rpb24SLgoGaGVhZGVyGAEgASgLMh4ua2lhcGkuY29tbW9uLnR5cGVzLkl0ZW1IZWFkZXIioQEKB0hpdFRlc3QSLgoGaGVhZGVyGAEgASgLMh4ua2lhcGkuY29tbW9uLnR5cGVzLkl0ZW1IZWFkZXISJAoCaWQYAiABKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRBItCghwb3NpdGlvbhgDIAEoCzIbLmtpYXBpLmNvbW1vbi50eXBlcy5WZWN0b3IyEhEKCXRvbGVyYW5jZRgEIAEoBSJHCg9IaXRUZXN0UmVzcG9uc2USNAoGcmVzdWx0GAEgASgOMiQua2lhcGkuY29tbW9uLmNvbW1hbmRzLkhpdFRlc3RSZXN1bHQiTAoRR2V0VGl0bGVCbG9ja0luZm8SNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIihQEKEVNldFRpdGxlQmxvY2tJbmZvEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEjcKC3RpdGxlX2Jsb2NrGAIgASgLMiIua2lhcGkuY29tbW9uLnR5cGVzLlRpdGxlQmxvY2tJbmZvIkoKD0dldFBhZ2VTZXR0aW5ncxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciKDAQoPU2V0UGFnZVNldHRpbmdzEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEjcKDXBhZ2Vfc2V0dGluZ3MYAiABKAsyIC5raWFwaS5jb21tb24udHlwZXMuUGFnZVNldHRpbmdzIk4KE0dldERvY3VtZW50UmV2aXNpb24SNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIiLAoYRG9jdW1lbnRSZXZpc2lvblJlc3BvbnNlEhAKCHJldmlzaW9uGAEgASgEIk8KFFNhdmVEb2N1bWVudFRvU3RyaW5nEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyImIKFVNhdmVkRG9jdW1lbnRSZXNwb25zZRI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchIQCghjb250ZW50cxgCIAEoCSIXChVTYXZlU2VsZWN0aW9uVG9TdHJpbmciUQoWU2F2ZWRTZWxlY3Rpb25SZXNwb25zZRIlCgNpZHMYASADKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRBIQCghjb250ZW50cxgCIAEoCSJsChFTYXZlSXRlbXNUb1N0cmluZxIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchInCgVpdGVtcxgCIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEImoKHVBhcnNlQW5kQ3JlYXRlSXRlbXNGcm9tU3RyaW5nEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEhAKCGNvbnRlbnRzGAIgASgJIk4KBFVuZG8SNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISDQoFY291bnQYAiABKA0iTgoEUmVkbxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchINCgVjb3VudBgCIAEoDSJLChBVbmRvUmVkb1Jlc3BvbnNlEg8KB2FwcGxpZWQYASABKA0SEgoKdW5kb19jb3VudBgCIAEoDRISCgpyZWRvX2NvdW50GAMgASgNInsKDlVuZG9TdGFja0VudHJ5EhMKC2Rlc2NyaXB0aW9uGAEgASgJEhMKC2NsaWVudF9uYW1lGAIgASgJEisKCWNvbW1pdF9pZBgDIAEoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEhIKCml0ZW1fY291bnQYBCABKA0iRwoMR2V0VW5kb1N0YWNrEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIn0KEVVuZG9TdGFja1Jlc3BvbnNlEjMKBHVuZG8YASADKAsyJS5raWFwaS5jb21tb24uY29tbWFuZHMuVW5kb1N0YWNrRW50cnkSMwoEcmVkbxgCIAMoCzIlLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5VbmRvU3RhY2tFbnRyeSpOChVEb2N1bWVudE1vZGlmaWVkU3RhdGUSDwoLRE1TX1VOS05PV04QABISCg5ETVNfVU5NT0RJRklFRBABEhAKDERNU19NT0RJRklFRBACKlcKD1J1bkFjdGlvblN0YXR1cxIPCgtSQVNfVU5LTk9XThAAEgoKBlJBU19PSxABEg8KC1JBU19JTlZBTElEEAISFgoSUkFTX0ZSQU1FX05PVF9PUEVOEAMqPQoMQ29tbWl0QWN0aW9uEg8KC0NNQV9VTktOT1dOEAASDgoKQ01BX0NPTU1JVBABEgwKCENNQV9EUk9QEAIqkwEKDkl0ZW1TdGF0dXNDb2RlEg8KC0lTQ19VTktOT1dOEAASCgoGSVNDX09LEAESFAoQSVNDX0lOVkFMSURfVFlQRRACEhAKDElTQ19FWElTVElORxADEhMKD0lTQ19OT05FWElTVEVOVBAEEhEKDUlTQ19JTU1VVEFCTEUQBRIUChBJU0NfSU5WQUxJRF9EQVRBEAcqWQoSSXRlbURlbGV0aW9uU3RhdHVzEg8KC0lEU19VTktOT1dOEAASCgoGSURTX09LEAESEwoPSURTX05PTkVYSVNURU5UEAISEQoNSURTX0lNTVVUQUJMRRADKlIKD0JvdW5kaW5nQm94TW9kZRIPCgtCQk1fVU5LTk9XThAAEhEKDUJCTV9JVEVNX09OTFkQARIbChdCQk1fSVRFTV9BTkRfQ0hJTERfVEVYVBACKj0KDUhpdFRlc3RSZXN1bHQSDwoLSFRSX1VOS05PV04QABIOCgpIVFJfTk9fSElUEAESCwoHSFRSX0hJVBACYgZwcm90bzM", [file_google_protobuf_any, file_common_types_base_types, file_common_types_enums]);
 
 /**
  * Refreshes the given frame, if that frame is open.  Returns google.protobuf.Empty.
@@ -176,6 +176,64 @@ export const GetOpenDocumentsResponseSchema: GenMessage<GetOpenDocumentsResponse
   messageDesc(file_common_commands_editor_commands, 3);
 
 /**
+ * Checks whether a document currently open in an editor or headless context has unsaved changes
+ *
+ * @generated from message kiapi.common.commands.GetDocumentModifiedState
+ */
+export type GetDocumentModifiedState = Message<"kiapi.common.commands.GetDocumentModifiedState"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier document = 1;
+   */
+  document?: DocumentSpecifier | undefined;
+};
+
+/**
+ * Checks whether a document currently open in an editor or headless context has unsaved changes
+ *
+ * @generated from message kiapi.common.commands.GetDocumentModifiedState
+ */
+export type GetDocumentModifiedStateJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentSpecifier document = 1;
+   */
+  document?: DocumentSpecifierJson;
+};
+
+/**
+ * Describes the message kiapi.common.commands.GetDocumentModifiedState.
+ * Use `create(GetDocumentModifiedStateSchema)` to create a new message.
+ */
+export const GetDocumentModifiedStateSchema: GenMessage<GetDocumentModifiedState, {jsonType: GetDocumentModifiedStateJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_editor_commands, 4);
+
+/**
+ * @generated from message kiapi.common.commands.GetDocumentModifiedStateResponse
+ */
+export type GetDocumentModifiedStateResponse = Message<"kiapi.common.commands.GetDocumentModifiedStateResponse"> & {
+  /**
+   * @generated from field: kiapi.common.commands.DocumentModifiedState state = 1;
+   */
+  state: DocumentModifiedState;
+};
+
+/**
+ * @generated from message kiapi.common.commands.GetDocumentModifiedStateResponse
+ */
+export type GetDocumentModifiedStateResponseJson = {
+  /**
+   * @generated from field: kiapi.common.commands.DocumentModifiedState state = 1;
+   */
+  state?: DocumentModifiedStateJson;
+};
+
+/**
+ * Describes the message kiapi.common.commands.GetDocumentModifiedStateResponse.
+ * Use `create(GetDocumentModifiedStateResponseSchema)` to create a new message.
+ */
+export const GetDocumentModifiedStateResponseSchema: GenMessage<GetDocumentModifiedStateResponse, {jsonType: GetDocumentModifiedStateResponseJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_editor_commands, 5);
+
+/**
  * @generated from message kiapi.common.commands.SaveOptions
  */
 export type SaveOptions = Message<"kiapi.common.commands.SaveOptions"> & {
@@ -220,7 +278,7 @@ export type SaveOptionsJson = {
  * Use `create(SaveOptionsSchema)` to create a new message.
  */
 export const SaveOptionsSchema: GenMessage<SaveOptions, {jsonType: SaveOptionsJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 4);
+  messageDesc(file_common_commands_editor_commands, 6);
 
 /**
  * Saves the given document to a new location and does not open the new copy
@@ -271,7 +329,7 @@ export type SaveCopyOfDocumentJson = {
  * Use `create(SaveCopyOfDocumentSchema)` to create a new message.
  */
 export const SaveCopyOfDocumentSchema: GenMessage<SaveCopyOfDocument, {jsonType: SaveCopyOfDocumentJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 5);
+  messageDesc(file_common_commands_editor_commands, 7);
 
 /**
  * @generated from message kiapi.common.commands.RevertDocument
@@ -298,7 +356,7 @@ export type RevertDocumentJson = {
  * Use `create(RevertDocumentSchema)` to create a new message.
  */
 export const RevertDocumentSchema: GenMessage<RevertDocument, {jsonType: RevertDocumentJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 6);
+  messageDesc(file_common_commands_editor_commands, 8);
 
 /**
  *
@@ -341,7 +399,7 @@ export type RunActionJson = {
  * Use `create(RunActionSchema)` to create a new message.
  */
 export const RunActionSchema: GenMessage<RunAction, {jsonType: RunActionJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 7);
+  messageDesc(file_common_commands_editor_commands, 9);
 
 /**
  *
@@ -374,7 +432,7 @@ export type RunActionResponseJson = {
  * Use `create(RunActionResponseSchema)` to create a new message.
  */
 export const RunActionResponseSchema: GenMessage<RunActionResponse, {jsonType: RunActionResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 8);
+  messageDesc(file_common_commands_editor_commands, 10);
 
 /**
  * Lists the tool actions of the editor serving the given document (the names RunAction accepts).
@@ -409,7 +467,7 @@ export type GetActionsJson = {
  * Use `create(GetActionsSchema)` to create a new message.
  */
 export const GetActionsSchema: GenMessage<GetActions, {jsonType: GetActionsJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 9);
+  messageDesc(file_common_commands_editor_commands, 11);
 
 /**
  * Since 11.0
@@ -484,7 +542,7 @@ export type ActionInfoJson = {
  * Use `create(ActionInfoSchema)` to create a new message.
  */
 export const ActionInfoSchema: GenMessage<ActionInfo, {jsonType: ActionInfoJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 10);
+  messageDesc(file_common_commands_editor_commands, 12);
 
 /**
  * Since 11.0
@@ -515,7 +573,7 @@ export type GetActionsResponseJson = {
  * Use `create(GetActionsResponseSchema)` to create a new message.
  */
 export const GetActionsResponseSchema: GenMessage<GetActionsResponse, {jsonType: GetActionsResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 11);
+  messageDesc(file_common_commands_editor_commands, 13);
 
 /**
  *
@@ -556,7 +614,7 @@ export type BeginCommitJson = {
  * Use `create(BeginCommitSchema)` to create a new message.
  */
 export const BeginCommitSchema: GenMessage<BeginCommit, {jsonType: BeginCommitJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 12);
+  messageDesc(file_common_commands_editor_commands, 14);
 
 /**
  * @generated from message kiapi.common.commands.BeginCommitResponse
@@ -587,7 +645,7 @@ export type BeginCommitResponseJson = {
  * Use `create(BeginCommitResponseSchema)` to create a new message.
  */
 export const BeginCommitResponseSchema: GenMessage<BeginCommitResponse, {jsonType: BeginCommitResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 13);
+  messageDesc(file_common_commands_editor_commands, 15);
 
 /**
  * @generated from message kiapi.common.commands.EndCommit
@@ -660,7 +718,7 @@ export type EndCommitJson = {
  * Use `create(EndCommitSchema)` to create a new message.
  */
 export const EndCommitSchema: GenMessage<EndCommit, {jsonType: EndCommitJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 14);
+  messageDesc(file_common_commands_editor_commands, 16);
 
 /**
  * @generated from message kiapi.common.commands.EndCommitResponse
@@ -679,7 +737,7 @@ export type EndCommitResponseJson = {
  * Use `create(EndCommitResponseSchema)` to create a new message.
  */
 export const EndCommitResponseSchema: GenMessage<EndCommitResponse, {jsonType: EndCommitResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 15);
+  messageDesc(file_common_commands_editor_commands, 17);
 
 /**
  * Creates new items on a given document
@@ -750,7 +808,7 @@ export type CreateItemsJson = {
  * Use `create(CreateItemsSchema)` to create a new message.
  */
 export const CreateItemsSchema: GenMessage<CreateItems, {jsonType: CreateItemsJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 16);
+  messageDesc(file_common_commands_editor_commands, 18);
 
 /**
  * Per-item status feedback for creation and update calls
@@ -791,7 +849,7 @@ export type ItemStatusJson = {
  * Use `create(ItemStatusSchema)` to create a new message.
  */
 export const ItemStatusSchema: GenMessage<ItemStatus, {jsonType: ItemStatusJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 17);
+  messageDesc(file_common_commands_editor_commands, 19);
 
 /**
  * @generated from message kiapi.common.commands.ItemCreationResult
@@ -832,7 +890,7 @@ export type ItemCreationResultJson = {
  * Use `create(ItemCreationResultSchema)` to create a new message.
  */
 export const ItemCreationResultSchema: GenMessage<ItemCreationResult, {jsonType: ItemCreationResultJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 18);
+  messageDesc(file_common_commands_editor_commands, 20);
 
 /**
  * @generated from message kiapi.common.commands.CreateItemsResponse
@@ -891,7 +949,7 @@ export type CreateItemsResponseJson = {
  * Use `create(CreateItemsResponseSchema)` to create a new message.
  */
 export const CreateItemsResponseSchema: GenMessage<CreateItemsResponse, {jsonType: CreateItemsResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 19);
+  messageDesc(file_common_commands_editor_commands, 21);
 
 /**
  * A window into a list of items; see GetItems.page
@@ -942,7 +1000,7 @@ export type ItemPageJson = {
  * Use `create(ItemPageSchema)` to create a new message.
  */
 export const ItemPageSchema: GenMessage<ItemPage, {jsonType: ItemPageJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 20);
+  messageDesc(file_common_commands_editor_commands, 22);
 
 /**
  * @generated from message kiapi.common.commands.GetItems
@@ -1027,7 +1085,7 @@ export type GetItemsJson = {
  * Use `create(GetItemsSchema)` to create a new message.
  */
 export const GetItemsSchema: GenMessage<GetItems, {jsonType: GetItemsJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 21);
+  messageDesc(file_common_commands_editor_commands, 23);
 
 /**
  * Counts the items of each type in a document without serializing them.
@@ -1062,7 +1120,7 @@ export type GetItemCountsJson = {
  * Use `create(GetItemCountsSchema)` to create a new message.
  */
 export const GetItemCountsSchema: GenMessage<GetItemCounts, {jsonType: GetItemCountsJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 22);
+  messageDesc(file_common_commands_editor_commands, 24);
 
 /**
  * Since 11.0
@@ -1103,7 +1161,7 @@ export type ItemCountJson = {
  * Use `create(ItemCountSchema)` to create a new message.
  */
 export const ItemCountSchema: GenMessage<ItemCount, {jsonType: ItemCountJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 23);
+  messageDesc(file_common_commands_editor_commands, 25);
 
 /**
  * Since 11.0
@@ -1148,7 +1206,7 @@ export type GetItemCountsResponseJson = {
  * Use `create(GetItemCountsResponseSchema)` to create a new message.
  */
 export const GetItemCountsResponseSchema: GenMessage<GetItemCountsResponse, {jsonType: GetItemCountsResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 24);
+  messageDesc(file_common_commands_editor_commands, 26);
 
 /**
  * @generated from message kiapi.common.commands.GetItemsById
@@ -1189,7 +1247,7 @@ export type GetItemsByIdJson = {
  * Use `create(GetItemsByIdSchema)` to create a new message.
  */
 export const GetItemsByIdSchema: GenMessage<GetItemsById, {jsonType: GetItemsByIdJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 25);
+  messageDesc(file_common_commands_editor_commands, 27);
 
 /**
  * @generated from message kiapi.common.commands.GetItemsResponse
@@ -1292,7 +1350,7 @@ export type GetItemsResponseJson = {
  * Use `create(GetItemsResponseSchema)` to create a new message.
  */
 export const GetItemsResponseSchema: GenMessage<GetItemsResponse, {jsonType: GetItemsResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 26);
+  messageDesc(file_common_commands_editor_commands, 28);
 
 /**
  * Updates items in a given document
@@ -1341,7 +1399,7 @@ export type UpdateItemsJson = {
  * Use `create(UpdateItemsSchema)` to create a new message.
  */
 export const UpdateItemsSchema: GenMessage<UpdateItems, {jsonType: UpdateItemsJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 27);
+  messageDesc(file_common_commands_editor_commands, 29);
 
 /**
  * @generated from message kiapi.common.commands.ItemUpdateResult
@@ -1382,7 +1440,7 @@ export type ItemUpdateResultJson = {
  * Use `create(ItemUpdateResultSchema)` to create a new message.
  */
 export const ItemUpdateResultSchema: GenMessage<ItemUpdateResult, {jsonType: ItemUpdateResultJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 28);
+  messageDesc(file_common_commands_editor_commands, 30);
 
 /**
  * @generated from message kiapi.common.commands.UpdateItemsResponse
@@ -1441,7 +1499,7 @@ export type UpdateItemsResponseJson = {
  * Use `create(UpdateItemsResponseSchema)` to create a new message.
  */
 export const UpdateItemsResponseSchema: GenMessage<UpdateItemsResponse, {jsonType: UpdateItemsResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 29);
+  messageDesc(file_common_commands_editor_commands, 31);
 
 /**
  * Deletes items in a given document
@@ -1490,7 +1548,7 @@ export type DeleteItemsJson = {
  * Use `create(DeleteItemsSchema)` to create a new message.
  */
 export const DeleteItemsSchema: GenMessage<DeleteItems, {jsonType: DeleteItemsJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 30);
+  messageDesc(file_common_commands_editor_commands, 32);
 
 /**
  * @generated from message kiapi.common.commands.ItemDeletionResult
@@ -1527,7 +1585,7 @@ export type ItemDeletionResultJson = {
  * Use `create(ItemDeletionResultSchema)` to create a new message.
  */
 export const ItemDeletionResultSchema: GenMessage<ItemDeletionResult, {jsonType: ItemDeletionResultJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 31);
+  messageDesc(file_common_commands_editor_commands, 33);
 
 /**
  * @generated from message kiapi.common.commands.DeleteItemsResponse
@@ -1586,7 +1644,7 @@ export type DeleteItemsResponseJson = {
  * Use `create(DeleteItemsResponseSchema)` to create a new message.
  */
 export const DeleteItemsResponseSchema: GenMessage<DeleteItemsResponse, {jsonType: DeleteItemsResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 32);
+  messageDesc(file_common_commands_editor_commands, 34);
 
 /**
  * @generated from message kiapi.common.commands.GetBoundingBox
@@ -1639,7 +1697,7 @@ export type GetBoundingBoxJson = {
  * Use `create(GetBoundingBoxSchema)` to create a new message.
  */
 export const GetBoundingBoxSchema: GenMessage<GetBoundingBox, {jsonType: GetBoundingBoxJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 33);
+  messageDesc(file_common_commands_editor_commands, 35);
 
 /**
  * @generated from message kiapi.common.commands.GetBoundingBoxResponse
@@ -1676,7 +1734,7 @@ export type GetBoundingBoxResponseJson = {
  * Use `create(GetBoundingBoxResponseSchema)` to create a new message.
  */
 export const GetBoundingBoxResponseSchema: GenMessage<GetBoundingBoxResponse, {jsonType: GetBoundingBoxResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 34);
+  messageDesc(file_common_commands_editor_commands, 36);
 
 /**
  * Retrieves a list of items.  Returns SelectionResponse
@@ -1727,7 +1785,7 @@ export type GetSelectionJson = {
  * Use `create(GetSelectionSchema)` to create a new message.
  */
 export const GetSelectionSchema: GenMessage<GetSelection, {jsonType: GetSelectionJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 35);
+  messageDesc(file_common_commands_editor_commands, 37);
 
 /**
  * The set of currently selected items
@@ -1758,7 +1816,7 @@ export type SelectionResponseJson = {
  * Use `create(SelectionResponseSchema)` to create a new message.
  */
 export const SelectionResponseSchema: GenMessage<SelectionResponse, {jsonType: SelectionResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 36);
+  messageDesc(file_common_commands_editor_commands, 38);
 
 /**
  * Adds the given items to the selection.  Returns SelectionResponse
@@ -1803,7 +1861,7 @@ export type AddToSelectionJson = {
  * Use `create(AddToSelectionSchema)` to create a new message.
  */
 export const AddToSelectionSchema: GenMessage<AddToSelection, {jsonType: AddToSelectionJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 37);
+  messageDesc(file_common_commands_editor_commands, 39);
 
 /**
  * Removes the given items to the selection.  Returns SelectionResponse
@@ -1848,7 +1906,7 @@ export type RemoveFromSelectionJson = {
  * Use `create(RemoveFromSelectionSchema)` to create a new message.
  */
 export const RemoveFromSelectionSchema: GenMessage<RemoveFromSelection, {jsonType: RemoveFromSelectionJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 38);
+  messageDesc(file_common_commands_editor_commands, 40);
 
 /**
  * Removes all items from selection
@@ -1879,7 +1937,7 @@ export type ClearSelectionJson = {
  * Use `create(ClearSelectionSchema)` to create a new message.
  */
 export const ClearSelectionSchema: GenMessage<ClearSelection, {jsonType: ClearSelectionJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 39);
+  messageDesc(file_common_commands_editor_commands, 41);
 
 /**
  * Tests if a certain point falls within tolerance of an item's geometry
@@ -1940,7 +1998,7 @@ export type HitTestJson = {
  * Use `create(HitTestSchema)` to create a new message.
  */
 export const HitTestSchema: GenMessage<HitTest, {jsonType: HitTestJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 40);
+  messageDesc(file_common_commands_editor_commands, 42);
 
 /**
  * @generated from message kiapi.common.commands.HitTestResponse
@@ -1967,7 +2025,7 @@ export type HitTestResponseJson = {
  * Use `create(HitTestResponseSchema)` to create a new message.
  */
 export const HitTestResponseSchema: GenMessage<HitTestResponse, {jsonType: HitTestResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 41);
+  messageDesc(file_common_commands_editor_commands, 43);
 
 /**
  * returns common.types.TitleBlockInfo
@@ -1998,7 +2056,7 @@ export type GetTitleBlockInfoJson = {
  * Use `create(GetTitleBlockInfoSchema)` to create a new message.
  */
 export const GetTitleBlockInfoSchema: GenMessage<GetTitleBlockInfo, {jsonType: GetTitleBlockInfoJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 42);
+  messageDesc(file_common_commands_editor_commands, 44);
 
 /**
  * @generated from message kiapi.common.commands.SetTitleBlockInfo
@@ -2035,7 +2093,7 @@ export type SetTitleBlockInfoJson = {
  * Use `create(SetTitleBlockInfoSchema)` to create a new message.
  */
 export const SetTitleBlockInfoSchema: GenMessage<SetTitleBlockInfo, {jsonType: SetTitleBlockInfoJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 43);
+  messageDesc(file_common_commands_editor_commands, 45);
 
 /**
  * returns common.types.PageSettings
@@ -2066,7 +2124,7 @@ export type GetPageSettingsJson = {
  * Use `create(GetPageSettingsSchema)` to create a new message.
  */
 export const GetPageSettingsSchema: GenMessage<GetPageSettings, {jsonType: GetPageSettingsJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 44);
+  messageDesc(file_common_commands_editor_commands, 46);
 
 /**
  * @generated from message kiapi.common.commands.SetPageSettings
@@ -2103,7 +2161,7 @@ export type SetPageSettingsJson = {
  * Use `create(SetPageSettingsSchema)` to create a new message.
  */
 export const SetPageSettingsSchema: GenMessage<SetPageSettings, {jsonType: SetPageSettingsJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 45);
+  messageDesc(file_common_commands_editor_commands, 47);
 
 /**
  * Returns the document's revision counter.  The counter starts at 0 when the document is opened
@@ -2148,7 +2206,7 @@ export type GetDocumentRevisionJson = {
  * Use `create(GetDocumentRevisionSchema)` to create a new message.
  */
 export const GetDocumentRevisionSchema: GenMessage<GetDocumentRevision, {jsonType: GetDocumentRevisionJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 46);
+  messageDesc(file_common_commands_editor_commands, 48);
 
 /**
  * Since 11.0
@@ -2183,7 +2241,7 @@ export type DocumentRevisionResponseJson = {
  * Use `create(DocumentRevisionResponseSchema)` to create a new message.
  */
 export const DocumentRevisionResponseSchema: GenMessage<DocumentRevisionResponse, {jsonType: DocumentRevisionResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 47);
+  messageDesc(file_common_commands_editor_commands, 49);
 
 /**
  * @generated from message kiapi.common.commands.SaveDocumentToString
@@ -2210,7 +2268,7 @@ export type SaveDocumentToStringJson = {
  * Use `create(SaveDocumentToStringSchema)` to create a new message.
  */
 export const SaveDocumentToStringSchema: GenMessage<SaveDocumentToString, {jsonType: SaveDocumentToStringJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 48);
+  messageDesc(file_common_commands_editor_commands, 50);
 
 /**
  * @generated from message kiapi.common.commands.SavedDocumentResponse
@@ -2247,7 +2305,7 @@ export type SavedDocumentResponseJson = {
  * Use `create(SavedDocumentResponseSchema)` to create a new message.
  */
 export const SavedDocumentResponseSchema: GenMessage<SavedDocumentResponse, {jsonType: SavedDocumentResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 49);
+  messageDesc(file_common_commands_editor_commands, 51);
 
 /**
  * @generated from message kiapi.common.commands.SaveSelectionToString
@@ -2266,7 +2324,7 @@ export type SaveSelectionToStringJson = {
  * Use `create(SaveSelectionToStringSchema)` to create a new message.
  */
 export const SaveSelectionToStringSchema: GenMessage<SaveSelectionToString, {jsonType: SaveSelectionToStringJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 50);
+  messageDesc(file_common_commands_editor_commands, 52);
 
 /**
  * @generated from message kiapi.common.commands.SavedSelectionResponse
@@ -2303,7 +2361,7 @@ export type SavedSelectionResponseJson = {
  * Use `create(SavedSelectionResponseSchema)` to create a new message.
  */
 export const SavedSelectionResponseSchema: GenMessage<SavedSelectionResponse, {jsonType: SavedSelectionResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 51);
+  messageDesc(file_common_commands_editor_commands, 53);
 
 /**
  * Serializes the given items in the same clipboard format as SaveSelectionToString, without
@@ -2358,7 +2416,7 @@ export type SaveItemsToStringJson = {
  * Use `create(SaveItemsToStringSchema)` to create a new message.
  */
 export const SaveItemsToStringSchema: GenMessage<SaveItemsToString, {jsonType: SaveItemsToStringJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 52);
+  messageDesc(file_common_commands_editor_commands, 54);
 
 /**
  * Attempts to parse the given string as a s-expression formatted container with items,
@@ -2405,7 +2463,7 @@ export type ParseAndCreateItemsFromStringJson = {
  * Use `create(ParseAndCreateItemsFromStringSchema)` to create a new message.
  */
 export const ParseAndCreateItemsFromStringSchema: GenMessage<ParseAndCreateItemsFromString, {jsonType: ParseAndCreateItemsFromStringJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 53);
+  messageDesc(file_common_commands_editor_commands, 55);
 
 /**
  * Undoes the most recent commands of the document (API commits, actions, and in the editor the
@@ -2456,7 +2514,7 @@ export type UndoJson = {
  * Use `create(UndoSchema)` to create a new message.
  */
 export const UndoSchema: GenMessage<Undo, {jsonType: UndoJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 54);
+  messageDesc(file_common_commands_editor_commands, 56);
 
 /**
  * Redoes commands undone by Undo.  Returns UndoRedoResponse
@@ -2499,7 +2557,7 @@ export type RedoJson = {
  * Use `create(RedoSchema)` to create a new message.
  */
 export const RedoSchema: GenMessage<Redo, {jsonType: RedoJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 55);
+  messageDesc(file_common_commands_editor_commands, 57);
 
 /**
  * Since 11.0
@@ -2554,7 +2612,7 @@ export type UndoRedoResponseJson = {
  * Use `create(UndoRedoResponseSchema)` to create a new message.
  */
 export const UndoRedoResponseSchema: GenMessage<UndoRedoResponse, {jsonType: UndoRedoResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 56);
+  messageDesc(file_common_commands_editor_commands, 58);
 
 /**
  * Since 11.0
@@ -2627,7 +2685,7 @@ export type UndoStackEntryJson = {
  * Use `create(UndoStackEntrySchema)` to create a new message.
  */
 export const UndoStackEntrySchema: GenMessage<UndoStackEntry, {jsonType: UndoStackEntryJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 57);
+  messageDesc(file_common_commands_editor_commands, 59);
 
 /**
  * Lists the undo and redo stacks of a document.  Returns UndoStackResponse
@@ -2660,7 +2718,7 @@ export type GetUndoStackJson = {
  * Use `create(GetUndoStackSchema)` to create a new message.
  */
 export const GetUndoStackSchema: GenMessage<GetUndoStack, {jsonType: GetUndoStackJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 58);
+  messageDesc(file_common_commands_editor_commands, 60);
 
 /**
  * Since 11.0
@@ -2709,7 +2767,38 @@ export type UndoStackResponseJson = {
  * Use `create(UndoStackResponseSchema)` to create a new message.
  */
 export const UndoStackResponseSchema: GenMessage<UndoStackResponse, {jsonType: UndoStackResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 59);
+  messageDesc(file_common_commands_editor_commands, 61);
+
+/**
+ * @generated from enum kiapi.common.commands.DocumentModifiedState
+ */
+export enum DocumentModifiedState {
+  /**
+   * @generated from enum value: DMS_UNKNOWN = 0;
+   */
+  DMS_UNKNOWN = 0,
+
+  /**
+   * @generated from enum value: DMS_UNMODIFIED = 1;
+   */
+  DMS_UNMODIFIED = 1,
+
+  /**
+   * @generated from enum value: DMS_MODIFIED = 2;
+   */
+  DMS_MODIFIED = 2,
+}
+
+/**
+ * @generated from enum kiapi.common.commands.DocumentModifiedState
+ */
+export type DocumentModifiedStateJson = "DMS_UNKNOWN" | "DMS_UNMODIFIED" | "DMS_MODIFIED";
+
+/**
+ * Describes the enum kiapi.common.commands.DocumentModifiedState.
+ */
+export const DocumentModifiedStateSchema: GenEnum<DocumentModifiedState, DocumentModifiedStateJson> = /*@__PURE__*/
+  enumDesc(file_common_commands_editor_commands, 0);
 
 /**
  * @generated from enum kiapi.common.commands.RunActionStatus
@@ -2751,7 +2840,7 @@ export type RunActionStatusJson = "RAS_UNKNOWN" | "RAS_OK" | "RAS_INVALID" | "RA
  * Describes the enum kiapi.common.commands.RunActionStatus.
  */
 export const RunActionStatusSchema: GenEnum<RunActionStatus, RunActionStatusJson> = /*@__PURE__*/
-  enumDesc(file_common_commands_editor_commands, 0);
+  enumDesc(file_common_commands_editor_commands, 1);
 
 /**
  * @generated from enum kiapi.common.commands.CommitAction
@@ -2786,7 +2875,7 @@ export type CommitActionJson = "CMA_UNKNOWN" | "CMA_COMMIT" | "CMA_DROP";
  * Describes the enum kiapi.common.commands.CommitAction.
  */
 export const CommitActionSchema: GenEnum<CommitAction, CommitActionJson> = /*@__PURE__*/
-  enumDesc(file_common_commands_editor_commands, 1);
+  enumDesc(file_common_commands_editor_commands, 2);
 
 /**
  * @generated from enum kiapi.common.commands.ItemStatusCode
@@ -2849,7 +2938,7 @@ export type ItemStatusCodeJson = "ISC_UNKNOWN" | "ISC_OK" | "ISC_INVALID_TYPE" |
  * Describes the enum kiapi.common.commands.ItemStatusCode.
  */
 export const ItemStatusCodeSchema: GenEnum<ItemStatusCode, ItemStatusCodeJson> = /*@__PURE__*/
-  enumDesc(file_common_commands_editor_commands, 2);
+  enumDesc(file_common_commands_editor_commands, 3);
 
 /**
  * @generated from enum kiapi.common.commands.ItemDeletionStatus
@@ -2889,7 +2978,7 @@ export type ItemDeletionStatusJson = "IDS_UNKNOWN" | "IDS_OK" | "IDS_NONEXISTENT
  * Describes the enum kiapi.common.commands.ItemDeletionStatus.
  */
 export const ItemDeletionStatusSchema: GenEnum<ItemDeletionStatus, ItemDeletionStatusJson> = /*@__PURE__*/
-  enumDesc(file_common_commands_editor_commands, 3);
+  enumDesc(file_common_commands_editor_commands, 4);
 
 /**
  * @generated from enum kiapi.common.commands.BoundingBoxMode
@@ -2920,7 +3009,7 @@ export type BoundingBoxModeJson = "BBM_UNKNOWN" | "BBM_ITEM_ONLY" | "BBM_ITEM_AN
  * Describes the enum kiapi.common.commands.BoundingBoxMode.
  */
 export const BoundingBoxModeSchema: GenEnum<BoundingBoxMode, BoundingBoxModeJson> = /*@__PURE__*/
-  enumDesc(file_common_commands_editor_commands, 4);
+  enumDesc(file_common_commands_editor_commands, 5);
 
 /**
  * @generated from enum kiapi.common.commands.HitTestResult
@@ -2951,5 +3040,5 @@ export type HitTestResultJson = "HTR_UNKNOWN" | "HTR_NO_HIT" | "HTR_HIT";
  * Describes the enum kiapi.common.commands.HitTestResult.
  */
 export const HitTestResultSchema: GenEnum<HitTestResult, HitTestResultJson> = /*@__PURE__*/
-  enumDesc(file_common_commands_editor_commands, 5);
+  enumDesc(file_common_commands_editor_commands, 6);
 

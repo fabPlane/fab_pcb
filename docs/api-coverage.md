@@ -1,14 +1,14 @@
-# IPC API coverage matrix (KiCad 10.99, commit 8cc9377988)
+# IPC API coverage matrix (KiCad 10.99, commit 280274cc3d)
 
 Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the KiCad sources. "Handlers" names the C++ handler class that serves the command: server = API_HANDLER_SERVER (inside the API server, always loaded), common = API_HANDLER_COMMON (always loaded), editor = API_HANDLER_EDITOR, library = API_HANDLER_LIBRARY (base of the footprint and symbol library handlers), board = API_HANDLER_BOARD, pcb = API_HANDLER_PCB, footprint = API_HANDLER_FOOTPRINT, fplib = API_HANDLER_FOOTPRINT_LIBRARY, symlib = API_HANDLER_SYMBOL_LIBRARY, sch = API_HANDLER_SCH.
 
 | Status | Count | Meaning |
 |---|---:|---|
-| OK | 152 | works in `kicad-cli api-server` |
+| OK | 153 | works in `kicad-cli api-server` |
 | GUI-ONLY | 15 | handler returns "not available in headless mode" |
 | PARTIAL | 0 | headless in some handlers only |
 | UNREGISTERED | 0 | defined in .proto, no handler anywhere |
-| **Total** | **167** | request messages defined in the command protos |
+| **Total** | **168** | request messages defined in the command protos |
 
 
 ## common/base
@@ -55,6 +55,7 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `EndCommit` | editor | yes |  |
 | `GetActions` | editor | yes |  |
 | `GetBoundingBox` | board | yes |  |
+| `GetDocumentModifiedState` | editor | yes |  |
 | `GetDocumentRevision` | editor | yes |  |
 | `GetItemCounts` | editor | yes |  |
 | `GetItems` | pcb, footprint, sch | yes |  |

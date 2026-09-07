@@ -8,6 +8,7 @@ import { create, type MessageInitShape } from "@bufbuild/protobuf";
 import type { Any } from "@bufbuild/protobuf/wkt";
 import {
   BoundingBoxMode,
+  DocumentModifiedState,
   DocumentSpecifierSchema,
   DocumentType,
   FrameType,
@@ -367,6 +368,22 @@ export abstract class Document {
     try {
       const res = await cmd.getDocumentRevision(this.client, { document: this.specifier });
       return res.revision;
+    } catch (e) {
+      if (KiCadApiError.is(e) && e.isUnsupported) return undefined;
+      throw e;
+    }
+  }
+
+  /**
+   * Whether the document has unsaved changes (`GetDocumentModifiedState`); `undefined` when the
+   * server predates the command or reports a state it does not know.
+   */
+  async modified(): Promise<boolean | undefined> {
+    try {
+      const res = await cmd.getDocumentModifiedState(this.client, { document: this.specifier });
+      if (res.state === DocumentModifiedState.DMS_MODIFIED) return true;
+      if (res.state === DocumentModifiedState.DMS_UNMODIFIED) return false;
+      return undefined;
     } catch (e) {
       if (KiCadApiError.is(e) && e.isUnsupported) return undefined;
       throw e;

@@ -306,6 +306,16 @@
     "headless": "ok"
   },
   {
+    "command": "GetDocumentModifiedState",
+    "group": "common/editor",
+    "requestType": "kiapi.common.commands.GetDocumentModifiedState",
+    "responseType": "kiapi.common.commands.GetDocumentModifiedStateResponse",
+    "handlers": [
+      "editor"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "GetDocumentRevision",
     "group": "common/editor",
     "requestType": "kiapi.common.commands.GetDocumentRevision",

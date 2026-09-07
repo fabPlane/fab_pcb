@@ -861,6 +861,18 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     expect(s1).toBeDefined();
     return `board ${r1} -> ${r2}; schematic ${s1}`;
   });
+  cmdTest("GetDocumentModifiedState", async () => {
+    const before = await board.modified();
+    expect(typeof before).toBe("boolean");
+    await board.commit("touch", async (tx) => {
+      const fp = (await board.getItemsById([firstFp.id]))[0]!;
+      await tx.update([fp]);
+    });
+    expect(await board.modified()).toBe(true);
+    const s = await sch.modified();
+    expect(typeof s).toBe("boolean");
+    return `board ${before} -> true; schematic ${s}`;
+  });
   cmdTest("BeginCommit", async () => {
     const tx = await board.beginCommit();
     expect(tx.id).toMatch(UUID);
