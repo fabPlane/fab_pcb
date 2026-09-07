@@ -432,7 +432,11 @@ export abstract class BaseCanvasHost implements CanvasHost {
     this.requestRender();
   }
 
-  setActiveLayer(_layer: string): void {
+  /** Active layer id, when the document has one (boards); pick() prefers items on it. */
+  protected activeLayerId: string | null = null;
+
+  setActiveLayer(layer: string): void {
+    this.activeLayerId = layer;
     this.scene.setDrawOrder(this.drawOrder());
     this.requestRender();
   }
@@ -490,7 +494,25 @@ export abstract class BaseCanvasHost implements CanvasHost {
     const hits = this.picker
       .pick(w, tol, { layers: (l) => this.scene.isLayerVisible(l) })
       .map((h) => ({ id: h.id, owner: h.owner, ref: h.ref, layer: h.layer, net: h.net, distance: h.distance * zoom }));
-    return markerHits.length ? [...markerHits, ...hits] : hits;
+    return markerHits.length ? [...markerHits, ...this.preferActiveLayer(hits)] : this.preferActiveLayer(hits);
+  }
+
+  /**
+   * KiCad's last disambiguation rule (PCB_SELECTION_TOOL::GuessSelectionCandidates): among the
+   * exact hits (within a pixel of the nearest), items on the active layer come first. Clicking a
+   * through-hole pad with F.Cu active yields the pad, not the footprint's fab outline crossing it
+   * or the B.Cu track ending in it; the nearest-then-smallest order is kept within each group.
+   */
+  private preferActiveLayer(hits: PickResult[]): PickResult[] {
+    const active = this.activeLayerId;
+    if (!active || hits.length < 2) return hits;
+    const limit = hits[0]!.distance + 1;
+    let exact = 0;
+    while (exact < hits.length && hits[exact]!.distance <= limit) exact++;
+    if (exact < 2) return hits;
+    const onActive = hits.slice(0, exact).filter((h) => h.layer === active);
+    if (!onActive.length || onActive.length === exact) return hits;
+    return [...onActive, ...hits.slice(0, exact).filter((h) => h.layer !== active), ...hits.slice(exact)];
   }
 
   // ------------------------------------------------------------------ ratsnest / markers
@@ -682,14 +704,20 @@ export abstract class BaseCanvasHost implements CanvasHost {
     for (const cb of this.pickCbs) cb(hits, e);
   }
 
-  private updateHover(e: PointerEvent): void {
+  /**
+   * Runs once per frame with the latest pointer position. The hover callbacks fire on every
+   * move — they carry the cursor position (status bar, move tool), not only the hovered id —
+   * while the overlay is only touched when the hovered item changes.
+   */
+  protected updateHover(e: PointerEvent): void {
     const p = this.local(e);
     const hits = this.pick(p.x, p.y, this.options.hoverTolerancePx ?? this.options.pickTolerancePx ?? 6);
     const top = hits[0] ?? null;
     const id = top?.id ?? null;
-    if (id === this.hoverId) return;
-    this.hoverId = id;
-    this.overlays.setHover(id ? (this.scene.getItem(id) ?? null) : null);
+    if (id !== this.hoverId) {
+      this.hoverId = id;
+      this.overlays.setHover(id ? (this.scene.getItem(id) ?? null) : null);
+    }
     for (const cb of this.hoverCbs) cb(top, e);
   }
 }

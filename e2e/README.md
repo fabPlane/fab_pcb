@@ -31,7 +31,20 @@ KICAD_CLI=/path/to/kicad-cli WORKSPACE_ROOT=/path/to/kicad/qa/data \
 ```
 
 Covered: open project → place a via → undo → run DRC → export SVG; route a track with a layer
-change; schematic wire → net label through the prompt → undo → cross-probe R1 → ERC.
+change; schematic wire → net label through the prompt → undo → cross-probe R1 → ERC;
+`real/boards.spec.ts` opens each of the five practice boards under `fixtures/boards/` (and its
+`.unrouted` variant), checks the item counts against `GetItemCounts`, that every pad is drawn and
+picks with its net, and that DRC runs to completion.
+
+## Practice boards (`fixtures/boards/`)
+
+Five KiCad demo projects (`ecc83`, `sonde_xilinx`, `interf_u`, `pic_programmer`, `stickhub`;
+licences in `fixtures/boards/NOTICE`) with a generated `<name>.unrouted.kicad_pcb` each —
+tracks, track arcs and vias removed, zone fills dropped, outlines kept — made by
+`fixtures/boards/strip-routes.ts` (`bun e2e/fixtures/boards/strip-routes.ts`, `--check` for
+staleness; `bun test fixtures/boards` from this directory runs its tests). The board practice
+pass (`node apps/web/scripts/prove-kicad.mjs --board <name>`) and the router comparison
+(docs/06-routing.md) use them.
 
 ## Layout
 

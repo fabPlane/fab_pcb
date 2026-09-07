@@ -2,7 +2,8 @@ import { describe, expect, test } from 'bun:test';
 import { boardItemToRenderItems, dimensionText, graphicShapeToPrims, imageInfo, renderIdToKiid, textFallbackPolygon } from '../src/board/boardAdapter.js';
 import { BOARD_LAYER_ENUM, boardDrawOrder, boardLayerName, copperLayerList, flipLayer } from '../src/board/boardLayers.js';
 import { boxContains } from '../src/core/model.js';
-import { MM, arc, barcode, circle, dimension, footprint, graphic, polySet, rect, seg, syntheticBoard, table, text, textBox, track, v, via, zone } from './fixtures.js';
+import { MM, arc, barcode, circle, d, dimension, footprint, graphic, pad, polySet, rect, seg, syntheticBoard, table, text, textBox, track, v, via, zone } from './fixtures.js';
+import type { StoredItemLike } from '../src/core/host.js';
 
 const L = BOARD_LAYER_ENUM;
 
@@ -78,6 +79,28 @@ describe('board adapter', () => {
     expect(body.prims).toEqual([]);
     expect(boxContains(body.bbox, { x: 9.2 * MM, y: 10 * MM })).toBe(true);
     expect(boxContains(body.bbox, { x: 11.5 * MM, y: 10.8 * MM })).toBe(true);
+  });
+
+  test('custom-shape pad (PSS_CUSTOM) with bigint geometry converts: anchor plus the custom polygon, on the back side too', () => {
+    // pic_programmer's SolderJumper-2 TrianglePad: a 0.3 mm anchor with a 2 mm wide custom polygon, B.Cu + B.Mask only
+    const p = pad('JP1-1', '1', 5, 5, 0.3, 0.3, { shape: 7, net: 'JUMPER' });
+    (p.padStack as { layers: number[] }).layers = [34, 41];
+    (p.padStack.copperLayers[0] as Record<string, unknown>).customShapes = [
+      { $typeName: 'kiapi.board.types.BoardGraphicShape', layer: 3, shape: { geometry: { case: 'polygon', value: polySet([[-1, -0.75, 1, 0]]) }, attributes: { stroke: { width: d(0) }, fill: { fillType: 2 } } } },
+    ];
+    const item: StoredItemLike = { id: 'JP1-1', type: 'KOT_PCB_PAD', layer: 'BL_B_Cu', net: 'JUMPER', proto: p };
+    const items = boardItemToRenderItems(item, { copperLayers: ['BL_F_Cu', 'BL_B_Cu'] });
+    const cu = items.find((i) => i.id === 'JP1-1@BL_B_Cu')!;
+    expect(cu).toBeDefined();
+    expect(cu.prims.length).toBe(2); // anchor + custom polygon
+    expect(cu.net).toBe('JUMPER');
+    expect(cu.bbox.w).toBeCloseTo(2 * MM, -3); // the custom polygon, 2 mm wide, not the 0.3 mm anchor
+    expect(items.find((i) => i.id === 'JP1-1@BL_B_Mask')).toBeDefined();
+    expect(items.find((i) => /BL_F_Cu/.test(i.id))).toBeUndefined();
+    // a footprint carrying such a pad in its definition converts as a whole
+    const fp = footprint('JP1', 'JP1', 5, 5, 0);
+    (fp.proto as { definition: { items: unknown[] } }).definition.items.push(p);
+    expect(boardItemToRenderItems(fp).some((i) => i.id === 'JP1-1@BL_B_Cu')).toBe(true);
   });
 
   test('rotated pads follow KiCad rotation (positive = CCW on screen)', () => {

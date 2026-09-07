@@ -124,18 +124,24 @@ type TextCollector = (it: StoredItem) => TextRef[];
  * Keeps GetTextAsShapes results for one store, re-fetching changed texts on store diffs.
  * `get(key)` is what the adapter context calls.
  */
-class TextShapeCache {
+export class TextShapeCache {
   private shapes = new Map<string, GraphicShape[]>();
   private hashes = new Map<string, string>();
   private inflight: Promise<void> | null = null;
   private queued = new Map<string, TextRef>();
+  /** Called with the keys that arrived; re-targeted to whichever host currently shows the store. */
+  onReady: (keys: string[], initial: boolean) => void = () => {};
 
   constructor(
     private readonly docs: KicadDocumentService,
     private readonly collect: TextCollector,
-    private readonly onReady: (keys: string[], initial: boolean) => void,
     private readonly log: (m: string, level?: 'info' | 'warn' | 'error') => void,
   ) {}
+
+  /** Text keys with shapes so far. */
+  get size(): number {
+    return this.shapes.size;
+  }
 
   get = (key: string): GraphicShape[] | undefined => this.shapes.get(key);
 
@@ -176,9 +182,12 @@ class TextShapeCache {
 }
 
 /** GetPadShapeAsPolygon results per (pad, copper layer). */
-class PadPolygonCache {
+export class PadPolygonCache {
   private polys = new Map<string, PolygonWithHoles[]>();
+  /** (pad, layer) keys fetched or in flight — a second host mounting the same store asks for nothing */
   private known = new Set<string>();
+  /** Called after each batch that brought polygons; re-targeted to the host currently showing the store. */
+  onReady: (fetched: number) => void = () => {};
 
   constructor(
     private readonly docs: KicadDocumentService,
@@ -186,6 +195,11 @@ class PadPolygonCache {
   ) {}
 
   get = (padId: string, layer: string): PolygonWithHoles[] | undefined => this.polys.get(`${padId}/${layer}`);
+
+  /** Pad/layer pairs with a polygon so far. */
+  get size(): number {
+    return this.polys.size;
+  }
 
   /** Fetches polygons for every pad in `items` (top-level pads and footprint children) on every copper layer. */
   async request(items: Iterable<StoredItem>, layers: readonly string[]): Promise<number> {
@@ -207,21 +221,22 @@ class PadPolygonCache {
       if (typeof enumValue !== 'number') continue;
       const want = list.filter((id) => !this.known.has(`${id}/${layer}`));
       if (!want.length) continue;
+      for (const id of want) this.known.add(`${id}/${layer}`);
       try {
         const res = await board.padShapesAsPolygons(want, enumValue);
         for (const id of want) {
-          const key = `${id}/${layer}`;
-          this.known.add(key);
           const poly = res.get(id);
           if (poly) {
-            this.polys.set(key, [poly]);
+            this.polys.set(`${id}/${layer}`, [poly]);
             fetched++;
           }
         }
       } catch (e) {
+        for (const id of want) this.known.delete(`${id}/${layer}`);
         this.log(`GetPadShapeAsPolygon(${layer}) failed: ${e instanceof Error ? e.message : String(e)}`, 'warn');
       }
     }
+    if (fetched) this.onReady(fetched);
     return fetched;
   }
 
@@ -240,6 +255,26 @@ export interface KicadCanvasOptions {
 /** Store item types whose edits can change the ratsnest. */
 const COPPER_TYPES = new Set(['KOT_PCB_TRACE', 'KOT_PCB_ARC', 'KOT_PCB_VIA', 'KOT_PCB_PAD', 'KOT_PCB_ZONE', 'KOT_PCB_FOOTPRINT']);
 
+export interface BoardShapeCaches {
+  pads: PadPolygonCache;
+  texts: TextShapeCache;
+}
+
+/**
+ * The server-shape caches belong to the store, not to the host: a canvas is mounted more than
+ * once per store (React StrictMode mounts twice in dev, and every switch back to the board tab
+ * remounts it), and each mount used to ask KiCad for every pad polygon and text shape again.
+ */
+const boardCaches = new WeakMap<ItemStore, BoardShapeCaches>();
+export function boardCachesFor(store: ItemStore, docs: KicadDocumentService, log: (m: string, level?: 'info' | 'warn' | 'error') => void = () => {}): BoardShapeCaches {
+  let c = boardCaches.get(store);
+  if (!c) {
+    c = { pads: new PadPolygonCache(docs, log), texts: new TextShapeCache(docs, boardTexts, log) };
+    boardCaches.set(store, c);
+  }
+  return c;
+}
+
 /** Builds renderer hosts wired to the document service. Install with `setCanvasHostFactory`. */
 export function createKicadCanvasFactory({ docs, theme, log = () => {} }: KicadCanvasOptions) {
   return (kind: DocumentKind, _storeKey: string, store: ItemStore): CanvasHost => {
@@ -249,24 +284,25 @@ export function createKicadCanvasFactory({ docs, theme, log = () => {} }: KicadC
 
   function boardHost(store: ItemStore, kind: DocumentKind): CanvasHost {
     const copperLayers = kind === 'board' ? docs.copperLayers : ['BL_F_Cu', 'BL_B_Cu'];
-    const pads = new PadPolygonCache(docs, log);
+    const { pads, texts } = boardCachesFor(store, docs, log);
     let host!: BoardCanvasHost;
     let upgraded = false;
-    const texts = new TextShapeCache(
-      docs,
-      boardTexts,
-      (keys, initial) => {
-        if (initial && !upgraded) {
-          upgraded = true;
-          host.setAdapterContext({ padPolygons: pads.get, textShapes: texts.get });
-          log(`renderer: ${keys.length} text shapes from GetTextAsShapes`);
-        } else host.rebuildItems(ownersOf(store, keys));
-      },
-      log,
-    );
+    // this host is the one showing the store now: server shapes that arrive go to it
+    texts.onReady = (keys, initial) => {
+      if (initial && !upgraded) {
+        upgraded = true;
+        host.setAdapterContext({ padPolygons: pads.get, textShapes: texts.get });
+        log(`renderer: ${keys.length} text shapes from GetTextAsShapes`);
+      } else host.rebuildItems(ownersOf(store, keys));
+    };
+    pads.onReady = (n) => {
+      host.setAdapterContext({ padPolygons: pads.get, textShapes: texts.get });
+      log(`renderer: ${n} pad polygons from GetPadShapeAsPolygon`);
+    };
     host = new BoardCanvasHost(theme(), {
       copperLayers,
-      adapter: { padPolygons: pads.get, textShapes: texts.get, footprintChildrenAbsolute: true },
+      // caches already filled by an earlier mount of this store feed the first paint directly
+      adapter: { padPolygons: pads.get, textShapes: texts.get, footprintChildrenAbsolute: true, decodeAny: (any) => unpackAny(any as never) },
       pickTolerancePx: 5,
     });
     // Ratsnest overlay: GetRatsnest -> host.setRatsnest, coalesced so a burst of edits
@@ -289,15 +325,9 @@ export function createKicadCanvasFactory({ docs, theme, log = () => {} }: KicadC
     host.mount = (el, s, th) => {
       origMount(el, s, th);
       void host.ready.then(() => el.querySelector('canvas')?.setAttribute('aria-label', `${kind} canvas`));
-      // Server shapes: pads per copper layer first (cheap, big visual win), then texts.
-      void (async () => {
-        const n = await pads.request(store.all(), copperLayers);
-        if (n) {
-          host.setAdapterContext({ padPolygons: pads.get, textShapes: texts.get });
-          log(`renderer: ${n} pad polygons from GetPadShapeAsPolygon`);
-        }
-        texts.request(store.all(), true);
-      })();
+      // Server shapes: pads per copper layer first (cheap, big visual win), then texts. Both
+      // are no-ops for what an earlier mount already fetched.
+      void pads.request(store.all(), copperLayers).then(() => texts.request(store.all(), true));
       refreshRatsnest();
     };
     const off = store.subscribe((diff) => {
@@ -305,7 +335,7 @@ export function createKicadCanvasFactory({ docs, theme, log = () => {} }: KicadC
       if (changed.some((i) => COPPER_TYPES.has(i.type)) || diff.removed.length) refreshRatsnest(150);
       if (!changed.length) return;
       pads.invalidate(changed.map((i) => i.id));
-      void pads.request(changed, copperLayers).then((n) => n && host.rebuildItems(changed.map((i) => i.id)));
+      void pads.request(changed, copperLayers);
       texts.request(changed);
     });
     const origUnmount = host.unmount.bind(host);
@@ -321,18 +351,14 @@ export function createKicadCanvasFactory({ docs, theme, log = () => {} }: KicadC
   function schematicHost(store: ItemStore): CanvasHost {
     let host!: SchematicCanvasHost;
     let upgraded = false;
-    const texts = new TextShapeCache(
-      docs,
-      schematicTexts,
-      (keys, initial) => {
-        if (initial && !upgraded) {
-          upgraded = true;
-          host.setAdapterContext({ textShapes: texts.get });
-          log(`renderer: ${keys.length} schematic text shapes from GetTextAsShapes`);
-        } else host.rebuildItems(ownersOf(host.currentStore as ItemStore, keys));
-      },
-      log,
-    );
+    const texts = new TextShapeCache(docs, schematicTexts, log);
+    texts.onReady = (keys, initial) => {
+      if (initial && !upgraded) {
+        upgraded = true;
+        host.setAdapterContext({ textShapes: texts.get });
+        log(`renderer: ${keys.length} schematic text shapes from GetTextAsShapes`);
+      } else host.rebuildItems(ownersOf(host.currentStore as ItemStore, keys));
+    };
     host = new SchematicCanvasHost(theme(), {
       adapter: { textShapes: texts.get, decodeAny: (any) => unpackAny(any as never), symbolPinsAbsolute: true },
       pickTolerancePx: 5,

@@ -150,6 +150,18 @@ export interface BoardAdapterContext {
    * KiCad API). Set false for library footprints whose children are relative to the anchor.
    */
   footprintChildrenAbsolute?: boolean;
+  /**
+   * Decodes a `google.protobuf.Any`: the KiCad API serialises a footprint's `definition.items`
+   * as Any messages, which the renderer cannot read on its own. Without it those children (pads,
+   * silk, courtyard) are not drawn from the definition.
+   */
+  decodeAny?: (any: unknown) => unknown;
+  /**
+   * True when the store holds this definition child (by KIID) as an item of its own — it then
+   * renders itself, and only its extent counts towards the footprint's pickable body, so the
+   * pad is neither drawn twice nor drawn from a definition that may lag behind the store.
+   */
+  storeChild?: (kiid: string) => boolean;
   /** nm per reference-image pixel (KiCad: 25.4e6 / 300 ppi) */
   imagePixelNm?: number;
   /** arc approximation tolerance (nm) for polygon arcs */
@@ -508,11 +520,14 @@ function padStackEntryFor(ps: PadStackLike, layer: string, copper: readonly stri
 
 const padShapeCache = new Map<string, Vec2[]>();
 
+/** JSON for cache keys: protobuf-es int64 fields are bigint, which JSON.stringify refuses. */
+const keyJson = (v: unknown): string => JSON.stringify(v, (_k, x: unknown) => (typeof x === 'bigint' ? x.toString() : x));
+
 /** Local (unrotated, centred) polygon for a padstack layer entry. Cached by shape parameters. */
 export function padStackLayerPolygon(e: PadStackLayerLike, ctx: BoardAdapterContext = {}): Vec2[] {
   const shape = enumName('PadStackShape', e.shape);
   const size = vec(e.size);
-  const key = `${shape}|${size.x}|${size.y}|${e.cornerRoundingRatio ?? 0}|${e.chamferRatio ?? 0}|${JSON.stringify(e.chamferedCorners ?? {})}|${nm(e.trapezoidDelta?.xNm)}|${nm(e.trapezoidDelta?.yNm)}`;
+  const key = `${shape}|${size.x}|${size.y}|${e.cornerRoundingRatio ?? 0}|${e.chamferRatio ?? 0}|${keyJson(e.chamferedCorners ?? {})}|${nm(e.trapezoidDelta?.xNm)}|${nm(e.trapezoidDelta?.yNm)}`;
   if (shape !== 'PSS_CUSTOM') {
     const cached = padShapeCache.get(key);
     if (cached) return cached;
@@ -591,13 +606,15 @@ function padPrims(pad: Record<string, unknown>, ps: PadStackLike, layer: string,
   const prims: Primitive[] = [];
   const world = transformPoly(local, angle, pos).map((p) => vAdd(p, vRotate(offset, angle)));
   prims.push({ kind: 'polygon', outline: world, holes: [], fill: true, width: 0 });
-  let key = `${shape}|${nm(entry.size?.xNm)}|${nm(entry.size?.yNm)}|${entry.cornerRoundingRatio ?? 0}|${entry.chamferRatio ?? 0}|${JSON.stringify(entry.chamferedCorners ?? {})}|${offset.x}|${offset.y}|${nm(entry.trapezoidDelta?.xNm)}|${nm(entry.trapezoidDelta?.yNm)}|${angle}`;
+  let key = `${shape}|${nm(entry.size?.xNm)}|${nm(entry.size?.yNm)}|${entry.cornerRoundingRatio ?? 0}|${entry.chamferRatio ?? 0}|${keyJson(entry.chamferedCorners ?? {})}|${offset.x}|${offset.y}|${nm(entry.trapezoidDelta?.xNm)}|${nm(entry.trapezoidDelta?.yNm)}|${angle}`;
   if (shape === 'PSS_CUSTOM') {
     for (const cs of entry.customShapes ?? []) {
       const sp = graphicShapeToPrims(cs.shape, ctx).map((pr) => transformPrim(pr, angle, pos, false));
       prims.push(...sp);
     }
-    key += '|' + JSON.stringify(entry.customShapes ?? []);
+    // the custom shapes carry bigint coordinates: a plain JSON.stringify threw here and took the
+    // whole footprint (every solder-jumper on pic_programmer / stickhub) out of the scene
+    key += '|' + keyJson(entry.customShapes ?? []);
   }
   return { prims, key };
 }
@@ -964,6 +981,8 @@ function convertPad(p: Record<string, unknown>, id: string, o: ConvertOpts, ctx:
   if (type === 'PT_PTH' || type === 'PT_NPTH') {
     for (const c of copper) if (!layers.includes(c) && (layers.includes('BL_F_Cu') || layers.includes('BL_B_Cu'))) layers.push(c);
   }
+  // a `*.Cu` padstack lists every inner layer KiCad knows; only the board's copper layers draw
+  layers = layers.filter((l) => !isCopperLayer(l) || copper.includes(l));
   const out: RenderItem[] = [];
   let labelBox: Box | undefined;
   let labelRound = false;
@@ -1064,11 +1083,18 @@ function convertFootprint(p: Record<string, unknown>, id: string, o: ConvertOpts
   const def = (p.definition ?? {}) as Record<string, unknown>;
   const childOpts: ConvertOpts = absolute ? { owner: id } : { owner: id, xf: { angle, offset: pos, mirrorY: back, flipLayers: back } };
   const out: RenderItem[] = [];
+  // extent of the children the store renders itself (see BoardAdapterContext.storeChild)
+  let ownBox = EMPTY_BOX;
   for (const raw of (def.items as unknown[]) ?? []) {
-    const child = itemTypeOf(raw);
+    const child = itemTypeOf(raw) ?? decodedChild(raw, ctx);
     if (!child) continue;
     const cid = kiid(child.proto.id as KiidLike) || `${id}:${out.length}`;
-    out.push(...convert(child.type, child.proto, cid, childOpts, ctx));
+    const items = convert(child.type, child.proto, cid, childOpts, ctx);
+    if (cid && ctx.storeChild?.(cid)) {
+      for (const it of items) if (it.pickable !== false) ownBox = boxUnion(ownBox, it.bbox);
+      continue;
+    }
+    out.push(...items);
   }
   for (const key of ['referenceField', 'valueField', 'datasheetField', 'descriptionField'] as const) {
     const f = (p[key] ?? def[key]) as Record<string, unknown> | undefined;
@@ -1089,11 +1115,22 @@ function convertFootprint(p: Record<string, unknown>, id: string, o: ConvertOpts
     ),
   );
   // footprint body: no geometry, picked by bbox (after its own children, which are smaller)
-  let bbox = EMPTY_BOX;
+  let bbox = ownBox;
   for (const it of out) if (it.pickable !== false) bbox = boxUnion(bbox, it.bbox);
   if (bbox === EMPTY_BOX) bbox = boxFromPoints([pos], s);
   out.push({ id, layer, prims: [], bbox, owner: id });
   return out;
+}
+
+/** An undecoded `google.protobuf.Any` child, decoded through the context's registry. */
+function decodedChild(raw: unknown, ctx: BoardAdapterContext): { type: string; proto: Record<string, unknown> } | undefined {
+  const o = raw as Record<string, unknown> | null;
+  if (!o || o.$typeName !== 'google.protobuf.Any' || !ctx.decodeAny) return undefined;
+  try {
+    return itemTypeOf(ctx.decodeAny(raw));
+  } catch {
+    return undefined;
+  }
 }
 
 /** `s_arrowAngle` (pcb_dimension.cpp) */
@@ -1504,11 +1541,11 @@ function convert(type: string, proto: Record<string, unknown>, id: string, o: Co
  * Convert one store item (or a plain `{ id, type, proto }`) into render items.
  * `item.type` is the KOT_* name; when absent it is derived from `proto.$typeName`.
  */
-export function boardItemToRenderItems(item: StoredItemLike, ctx: BoardAdapterContext = {}): RenderItem[] {
+export function boardItemToRenderItems(item: StoredItemLike, ctx: BoardAdapterContext = {}, owner?: string): RenderItem[] {
   const proto = (item.proto ?? {}) as Record<string, unknown>;
   const type = item.type || itemTypeOf(proto)?.type || '';
   const id = item.id || kiid(proto.id as KiidLike);
-  return convert(type, proto, id, { owner: id }, ctx);
+  return convert(type, proto, id, { owner: owner ?? id }, ctx);
 }
 
 /** KIID of a render item / pick result id (strips the `@layer` / `@hole` suffixes). */

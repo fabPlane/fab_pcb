@@ -3,6 +3,7 @@
 //   1. bridge:  KICAD_CLI=... WORKSPACE_ROOT=<kicad>/qa/data bun run --filter @kicad-web/bridge start
 //   2. app:     VITE_BRIDGE_URL=http://127.0.0.1:4020 bun run --filter @kicad-web/app dev
 //   3. node apps/web/scripts/prove-kicad.mjs [step,step,...]   (Playwright comes from e2e/node_modules)
+//      node apps/web/scripts/prove-kicad.mjs --board <name>       (board practice, see prove-board.mjs)
 //
 // The kitchen-sink board + schematic are copied into `<workspace root>/.kicad-web-proof/` with a
 // project-local fp-lib-table / sym-lib-table (Resistor_SMD from qa/data/libraries, writable copy,
@@ -13,6 +14,12 @@
 // serverundo, settings, boardtools, setup, page, 3d, jobs, fpeditor, schematic, annotate, fields,
 // updatepcb, crossprobe, erc. The DRC-driven steps run before `jobs` on purpose: once the async
 // export jobs have run, RunBoardJobDrc stops answering on this server.
+// `--board <name> [step,...]` runs the board-practice pass (prove-board.mjs) on one of the demo
+// boards under e2e/fixtures/boards instead of the kitchen-sink steps below.
+if (process.argv.includes('--board')) {
+  await import('./prove-board.mjs');
+  process.exit(process.exitCode ?? 0);
+}
 import { chromium } from '../../../e2e/node_modules/@playwright/test/index.mjs';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

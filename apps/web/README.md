@@ -244,6 +244,21 @@ The DRC-driven steps deliberately run **before** `jobs`: measured on 10.99.0-368
 `RunBoardJobDrc` stops answering once the async export jobs have run (the proof records that as a
 GAP rather than hiding it).
 
+### Board practice (`--board`)
+
+`node apps/web/scripts/prove-kicad.mjs --board <name> [step,...]` hands over to
+`scripts/prove-board.mjs`, the same kind of headless drive on one of the five demo boards under
+`e2e/fixtures/boards/` (`ecc83`, `sonde_xilinx`, `interf_u`, `pic_programmer`, `stickhub`). The
+board is copied into `<workspace root>/.kicad-web-practice-<name>/` (the fixture is never
+written) and the steps are `open` (timings: canvas, session open, store items, first content
+draw, server shapes), `view` (zoom to fit, layers panel toggle, hover, pad pick), `schematic`
+(every sheet), `edit` (property edit → revision bump → undo), `move` (the M tool) and `route` on
+the `<name>.unrouted` variant: five nets by hand with the route tool (V switches layer on runs
+over 4 mm), `RefillZones`, DRC, three undos, save, gerbers + drill, then the saved board reopened
+in a fresh `kicad-cli` session. Screenshots go to `docs/screenshots/boards/<name>-*.png`, the
+JSON result to `e2e/output/board-practice/<name>.json`; the per-board table is
+`docs/board-practice.md`.
+
 `docs/screenshots/direct-ws.png` is the same app with no bridge running at all
 (`VITE_KICAD_WS=ws://127.0.0.1:5599/kicad`, KiCad 10.99.0-3708-g163dec0e39): the board renders,
 the status bar reports the session open, and every request in the page went straight to KiCad over
@@ -252,7 +267,8 @@ the status bar reports the session open, and every request in the page went stra
 ## Tests
 
 ```sh
-bun test            # unit tests, incl. test/kicad-services.test.ts (fake transport: session
+bun test            # unit tests, incl. test/kicad-canvas.test.ts (per-store pad polygon / text shape
+                    # caches shared across remounts), test/kicad-services.test.ts (fake transport: session
                     # lifecycle, store population from canned GetItems, commit backend) and
                     # test/batch3-services.test.ts (library caching, board-tool enums, settings
                     # translation, fields-table batching, the server/client undo picker)

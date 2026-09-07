@@ -1,0 +1,28 @@
+Practice boards
+===============
+
+Five projects copied from the KiCad source tree, demos/ (KiCad 10.99, fork branch web-api),
+for the board-practice pass and the router comparison (docs/06-routing.md):
+
+  ecc83/          demos/ecc83          two projects (ecc83-pp, ecc83-pp_v2), 3d_shapes/ dropped
+  sonde_xilinx/   demos/sonde xilinx   directory renamed (no space); the files keep their names
+  interf_u/       demos/interf_u       includes the tux legacy symbol lib, the .kicad_wks and tux.bmp
+  pic_programmer/ demos/pic_programmer libs/3d_shapes/ dropped
+  stickhub/       demos/stickhub       3dmodels/ dropped, LICENSE.md and README.md kept
+
+Dropped everywhere: *-backups/, *.kicad_prl, fp-info-cache, 3D model directories. The
+footprint tables that point at ${KICAD10_FOOTPRINT_DIR} (pic_programmer) need that variable
+set to a KiCad footprint library install.
+
+Every `<name>.unrouted.kicad_pcb` (with its `<name>.unrouted.kicad_pro`) is generated from
+the board next to it by `strip-routes.ts` (this directory): tracks, track arcs and vias
+removed, zone fills dropped, zone outlines and settings kept. Regenerate with
+`bun e2e/fixtures/boards/strip-routes.ts`; `--check` reports stale variants.
+
+License: the KiCad demo projects are distributed under the Creative Commons
+Attribution-ShareAlike 4.0 International license (CC-BY-SA-4.0); see LICENSE.README in the
+KiCad tree ("All the demo files provided in demos/*") and LICENSE.CC-BY-SA-4.0 there.
+Copyright the KiCad Developers. Exception: stickhub is by Stefan Hamminga (https://rbts.co)
+under CC BY-NC-SA 4.0 with the commercial-use exemption in stickhub/LICENSE.md.
+Modifications here: only the files dropped above and the generated *.unrouted.* variants.
+The KiCad source code itself is GPL-3.0-or-later; nothing from it is included here.

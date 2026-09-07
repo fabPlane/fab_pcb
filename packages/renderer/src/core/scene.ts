@@ -60,7 +60,7 @@ export class Scene {
   readonly root = new Container();
   private layers = new Map<string, LayerEntry>();
   private order: string[] = [];
-  private entries = new Map<string, { objs: ItemObject[]; ids: string[] }>();
+  private entries = new Map<string, { objs: ItemObject[]; items: RenderItem[] }>();
   private byId = new Map<string, RenderItem>();
   private contextCache = new Map<string, { ctx: GraphicsContext; refs: number }>();
   private originX = 0;
@@ -104,10 +104,7 @@ export class Scene {
     const e = this.entries.get(owner);
     if (!e) return [];
     const out: RenderItem[] = [];
-    for (const id of e.ids) {
-      const it = this.byId.get(id);
-      if (it) out.push(it);
-    }
+    for (const it of e.items) if (this.byId.get(it.id) === it) out.push(it);
     return out;
   }
 
@@ -232,17 +229,15 @@ export class Scene {
         this.removeOwner(owner);
         if (!items.length) continue;
         const objs: ItemObject[] = [];
-        const ids: string[] = [];
         for (const item of items) {
           if (item.owner === undefined) item.owner = owner;
           this.byId.set(item.id, item);
-          ids.push(item.id);
           if (!item.prims.length) continue; // bbox-only items (footprint bodies, groups) are pick-only
           const obj = this.build(item);
           objs.push(obj);
           this.layer(item.layer).container.addChild(obj);
         }
-        this.entries.set(owner, { objs, ids });
+        this.entries.set(owner, { objs, items: [...items] });
       }
     }
     this.revision++;
@@ -256,7 +251,9 @@ export class Scene {
   private removeOwner(owner: string): void {
     const e = this.entries.get(owner);
     if (!e) return;
-    for (const id of e.ids) this.byId.delete(id);
+    // Only forget ids this entry still owns: a footprint child's id moves between the footprint
+    // entry (drawn from the definition) and the child's own entry (drawn from the store item).
+    for (const it of e.items) if (this.byId.get(it.id) === it) this.byId.delete(it.id);
     for (const o of e.objs) {
       this.releaseContext(o.cacheKey);
       o.removeFromParent();

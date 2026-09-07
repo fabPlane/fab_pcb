@@ -125,7 +125,9 @@ export function CanvasSlot({ kind, storeKey, store, layers }: CanvasSlotProps) {
       if (activeTool(storeKey)) {
         const rect = el.getBoundingClientRect();
         const world = host.screenToWorld(ev.clientX - rect.left, ev.clientY - rect.top);
-        void toolClick(storeKey, world, hits[0] ?? null);
+        // tools want the copper under the cursor (net pickup): a footprint's silk or fab line
+        // crossing a pad centre would otherwise win the pick by its smaller bounding box
+        void toolClick(storeKey, world, hits.find((h) => h.net) ?? hits[0] ?? null);
         return;
       }
       const top = hits[0];
