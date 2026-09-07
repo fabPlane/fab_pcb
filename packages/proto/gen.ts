@@ -176,5 +176,12 @@ if (import.meta.main) {
   await generate(PKG_DIR, src);
   await writeIndex(PKG_DIR);
   await writeFile(join(PKG_DIR, "KICAD_COMMIT"), commit + "\n");
+  // Alignment tag: every major change set on the fork is tagged fp-pcb/<date>-<name>, and the same
+  // tag is put on this repo at the commit whose bindings were generated from it. Record which one
+  // (or "untagged") so a reader of the repo knows where it aligns without consulting the fork.
+  const tagged = Bun.spawnSync(["git", "-C", src, "describe", "--tags", "--exact-match", "--match", "fp-pcb/*", commit]);
+  const tag = tagged.exitCode === 0 ? tagged.stdout.toString().trim() : "untagged";
+  await writeFile(join(PKG_DIR, "KICAD_TAG"), tag + "\n");
+  console.log(`fork alignment tag: ${tag}`);
   console.log("wrote src/gen/index.ts and KICAD_COMMIT");
 }

@@ -118,6 +118,28 @@ fp-pcb/
 The KiCad fork lives in its own repo/branch (`kicad`, branch `web-api`); `fp-pcb`
 pins the fork commit it was generated against in `packages/proto/KICAD_COMMIT`.
 
+### Alignment tags (rule)
+
+Every major change set on the fork gets an annotated tag `fp-pcb/<yyyy-mm-dd>-<name>`, and the
+same tag goes on this repo at the commit whose bindings were regenerated from it. `bun run gen`
+records the tag in `packages/proto/KICAD_TAG` (or `untagged`), so the alignment point is visible
+from either side without cross-referencing hashes. Procedure after landing a batch on the fork:
+
+```bash
+git -C ../kicad tag -a fp-pcb/2026-09-07-name <commit> -m "what the batch adds"
+cd packages/proto && bun run gen && cd ../.. && bun run coverage && (cd packages/client && bun run gen)
+git commit -am "Regenerate bindings at fp-pcb/2026-09-07-name" && git tag -a fp-pcb/2026-09-07-name -m "aligned with the fork tag"
+```
+
+| Fork tag | Fork commit | What it marks |
+|---|---|---|
+| `fp-pcb/2026-09-06-p0` | 1ca7f148a5 | P0 gaps: discovery, wake-up loop, events, lifecycle, DRC/ERC |
+| `fp-pcb/2026-09-06-p1` | 022e45f6d2 | conformance fixes, headless actions, paging, async jobs, clipboard |
+| `fp-pcb/2026-09-07-parity` | 163dec0e39 | libraries, schematic/board ops, undo, settings, transports, render data |
+| `fp-pcb/2026-09-07-qa` | ab43ac2538 | QA suite compiled and run; six product bugs |
+| `fp-pcb/2026-09-07-drc` | a99a1a803e | DRC provider fix, async DRC, theme keys |
+| `fp-pcb/2026-09-07-routing` | 8cc9377988 | Specctra export/import for autorouters |
+
 ## Milestones
 
 | # | Milestone | Exit criterion |

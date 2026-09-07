@@ -40,5 +40,6 @@ Ownership of every path is in [docs/ownership.md](docs/ownership.md). Start with
 
 `docs/plan.html` is the same plan as a single shareable page.
 
-Companion repo: the KiCad fork (branch `web-api`) that carries the API patches.
-This repo pins the fork commit it was generated against in `packages/proto/KICAD_COMMIT`.
+Companion repo: the KiCad fork (branch `web-api`) that carries the API patches. This repo pins the
+fork commit in `packages/proto/KICAD_COMMIT` and the alignment tag in `packages/proto/KICAD_TAG`;
+every major change set is tagged `fp-pcb/<date>-<name>` on both repos (rule in docs/01-architecture.md).
