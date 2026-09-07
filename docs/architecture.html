@@ -1,0 +1,334 @@
+<title>FabPlane PCB Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F3F5F7; --surface:#FFFFFF; --surface-2:#E9EDF1; --line:#D3DAE1;
+  --ink:#1B2430; --muted:#5B6673; --accent:#B5541C; --accent-ink:#FFFFFF; --blue:#2F5D9E;
+  --ok:#2E8B57; --warn:#A87A0B; --bad:#B0413E; --ok-bg:#E4F3EA; --warn-bg:#FBF1D6; --bad-bg:#F8E3E2;
+  --code-bg:#EEF1F4;
+  --font-display:"Sora",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-body:"Source Sans 3","Source Sans Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12171D; --surface:#1A2128; --surface-2:#232B34; --line:#2F3944;
+    --ink:#E6EAEE; --muted:#A3AEB9; --accent:#E07A3A; --accent-ink:#12171D; --blue:#6FA0E8;
+    --ok:#4CC38A; --warn:#E0B33C; --bad:#E06C6A; --ok-bg:#16332A; --warn-bg:#3A2F12; --bad-bg:#3B1F1F;
+    --code-bg:#0E1216;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12171D; --surface:#1A2128; --surface-2:#232B34; --line:#2F3944;
+  --ink:#E6EAEE; --muted:#A3AEB9; --accent:#E07A3A; --accent-ink:#12171D; --blue:#6FA0E8;
+  --ok:#4CC38A; --warn:#E0B33C; --bad:#E06C6A; --ok-bg:#16332A; --warn-bg:#3A2F12; --bad-bg:#3B1F1F;
+  --code-bg:#0E1216;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:17px;line-height:1.55}
+a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
+code,pre{font-family:var(--font-mono);font-size:.86em}
+code{background:var(--code-bg);padding:.1em .35em;border-radius:3px}
+pre{background:var(--code-bg);padding:14px 16px;border-radius:6px;overflow-x:auto;line-height:1.45;border:1px solid var(--line)}
+pre code{background:none;padding:0}
+h1,h2,h3{font-family:var(--font-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:2.3rem;font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.45rem;font-weight:600;margin-top:3rem;padding-top:1.2rem;border-top:1px solid var(--line)}
+h3{font-size:1.08rem;font-weight:600;margin-top:1.6rem}
+p{margin:.7rem 0;max-width:70ch}
+ul,ol{max-width:72ch;padding-left:1.3rem}li{margin:.3rem 0}
+.eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.lede{font-size:1.15rem;color:var(--muted);max-width:64ch}
+.page{display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px;max-width:1180px;margin:0 auto;padding:48px 28px 96px}
+nav.toc{position:sticky;top:24px;align-self:start;font-size:.9rem}
+nav.toc ol{list-style:none;padding:0;margin:.6rem 0 0}nav.toc li{margin:.35rem 0}nav.toc a{color:var(--muted)}nav.toc a:hover{color:var(--ink)}
+@media (max-width:900px){.page{grid-template-columns:1fr;gap:24px}nav.toc{position:static}}
+.diagram{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px;overflow-x:auto;margin:1rem 0}
+.diagram pre.mermaid{background:transparent;border:0;padding:0;margin:0;font-family:var(--font-body);color:var(--ink)}
+.diagram .cap{font-size:.86rem;color:var(--muted);margin:8px 2px 0}
+table{border-collapse:collapse;width:100%;font-size:.93rem}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface);margin:1rem 0}
+th,td{padding:8px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--surface-2)}
+tr:last-child td{border-bottom:none}
+td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip{display:inline-block;font-family:var(--font-mono);font-size:.7rem;letter-spacing:.04em;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.chip.ok{color:var(--ok);background:var(--ok-bg)}.chip.warn{color:var(--warn);background:var(--warn-bg)}.chip.bad{color:var(--bad);background:var(--bad-bg)}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin:1rem 0}
+.opt{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px 18px}
+.opt h3{margin-top:0;font-size:1rem}
+.opt .for{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.opt ul{padding-left:1.1rem;font-size:.95rem}
+.note{background:var(--surface-2);border-radius:6px;padding:12px 16px;max-width:72ch;color:var(--muted);font-size:.95rem}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:6px 18px;max-width:72ch;font-size:.95rem}
+.kv b{font-family:var(--font-mono);font-weight:500;font-size:.85rem;color:var(--muted)}
+</style>
+
+<div class="page">
+<nav class="toc" aria-label="Contents">
+  <div class="eyebrow">Contents</div>
+  <ol>
+    <li><a href="#parts">The parts</a></li>
+    <li><a href="#request">A request, end to end</a></li>
+    <li><a href="#edit">Editing and undo</a></li>
+    <li><a href="#render">Rendering</a></li>
+    <li><a href="#route">Autorouting</a></li>
+    <li><a href="#fork">What the fork adds</a></li>
+    <li><a href="#hosting">Hosting for many users</a></li>
+    <li><a href="#collab">Two people, one board</a></li>
+    <li><a href="#sizing">Sizing</a></li>
+    <li><a href="#build">What exists, what to build</a></li>
+  </ol>
+</nav>
+
+<main>
+<div class="eyebrow">FabPlane PCB · architecture and hosting</div>
+<h1 style="margin-top:.4rem">How FabPlane PCB fits together</h1>
+<p class="lede">FabPlane PCB is a browser front end for KiCad. KiCad itself runs headless, one process per open project, and speaks protobuf over a socket. Everything a user sees is a browser page that renders what that process reports and sends edits back through KiCad's own commit machinery. This page explains each hop, then what it takes to put the whole thing in front of many users.</p>
+
+<h2 id="parts">The parts</h2>
+<div class="diagram">
+<pre class="mermaid">
+flowchart LR
+  subgraph browser["Browser tab"]
+    app["FabPlane PCB app<br/>React shell, tools, dialogs"]
+    renderer["@fp-pcb/renderer<br/>PixiJS board + schematic"]
+    client["@fp-pcb/client<br/>typed API, item store, commits"]
+    proto["@fp-pcb/proto<br/>generated protobuf-es"]
+    app --> renderer
+    app --> client
+    client --> proto
+  end
+  subgraph bridge["Bridge · Bun"]
+    sessions["sessions<br/>one kicad-cli per project"]
+    relay["request relay<br/>WebSocket ⇄ nng"]
+    events["event relay<br/>PUB ⇄ WebSocket / SSE"]
+    files["file API<br/>confined to a workspace root"]
+    jobs["route jobs<br/>Freerouting · JS router"]
+  end
+  subgraph kicad["kicad-cli api-server · per project"]
+    handlers["API handlers<br/>167 commands"]
+    doc["board · schematic<br/>libraries · DRC engine"]
+    handlers --> doc
+  end
+  client -- "ApiRequest bytes" --> relay -- "ipc://" --> handlers
+  handlers -- "PUB events" --> events --> client
+  app --> files
+  app --> jobs
+  jobs -- "DSN / SES" --> handlers
+  client -. "direct ws:// (no bridge)" .-> handlers
+</pre>
+<div class="cap">Five packages in the browser and one Bun process on the server side. The dotted path is the bridgeless mode, where the tab dials KiCad's own WebSocket listener.</div>
+</div>
+
+<p>Three things make this work at all, and each was verified against the source rather than assumed.</p>
+<ul>
+  <li><b>KiCad has a headless server.</b> <code>kicad-cli api-server</code> loads a project without a window and answers every API command from the same handlers the desktop app uses. One process holds one project: one schematic, one board, any number of library items.</li>
+  <li><b>The wire format is small.</b> nng's REQ/REP over a unix socket: an 8‑byte handshake, then frames of a 9‑byte header and a protobuf <code>ApiRequest</code> whose payload is a <code>google.protobuf.Any</code>. Bun speaks it in about 150 lines, no native modules.</li>
+  <li><b>Edits go through KiCad's commit API.</b> <code>BeginCommit</code>, <code>CreateItems</code>/<code>UpdateItems</code>/<code>DeleteItems</code>, <code>EndCommit</code>. KiCad validates, serialises, and keeps the undo stack. The page never writes a file.</li>
+</ul>
+
+<h2 id="request">A request, end to end</h2>
+<div class="diagram">
+<pre class="mermaid">
+sequenceDiagram
+  participant T as Browser tab
+  participant B as Bridge
+  participant K as kicad-cli api-server
+  T->>B: POST /sessions { path: foo.kicad_pro }
+  B->>K: spawn with --socket ipc:///tmp/kicad/api-&lt;id&gt;.sock
+  B->>K: Ping until AS_OK, then GetServerInfo
+  K-->>B: kicad_token, events_socket_url
+  B->>K: subscribe SUB0 to the events socket
+  B-->>T: { sessionId, kicadToken }
+  T->>B: WebSocket /ws?session=id
+  T->>B: binary frame: 4-byte id + ApiRequest(Any: GetItems)
+  B->>K: same bytes, framed for nng
+  K-->>B: ApiResponse(Any: GetItemsResponse)
+  B-->>T: 4-byte id + response bytes
+  K-->>B: Event(DocumentChanged) on PUB socket
+  B-->>T: reserved id 0xFFFFFFFF + Event bytes
+</pre>
+<div class="cap">The bridge never parses a request; it only adds a correlation id so several tabs can pipeline on one socket, and copies event frames to every tab of the session.</div>
+</div>
+<p>Latency is not the reason for the bridge. Measured over 500 pings on one machine: 0.035 ms straight to the unix socket, 0.081 ms through the bridge, 0.091 ms on KiCad's own WebSocket transport. The bridge exists because a browser cannot open a unix socket or spawn a process, and because someone has to own file access and cleanup.</p>
+
+<h2 id="edit">Editing and undo</h2>
+<div class="diagram">
+<pre class="mermaid">
+sequenceDiagram
+  participant U as User
+  participant S as Item store (tab)
+  participant K as KiCad
+  U->>S: drag R1 to a new position
+  S->>S: patch R1 optimistically, redraw
+  S->>K: BeginCommit
+  S->>K: UpdateItems [R1 with new position]
+  K-->>S: canonical R1 (KiCad re-read the fields)
+  S->>K: EndCommit "Move R1"
+  K-->>S: DocumentChanged { updated: [R1], revision: n+1 }
+  U->>S: Ctrl+Z
+  S->>K: Undo
+  K-->>S: DocumentChanged { updated: [R1], revision: n+2 }
+  S->>K: GetItemsById [R1]
+</pre>
+<div class="cap">The page keeps a normalised store keyed by KIID and applies its own edit immediately; the canonical item from KiCad replaces it. Undo is KiCad's own stack; a client-side inverse-patch stack remains as the fallback for old servers.</div>
+</div>
+<p>Selection, hover, visible layers and the active layer never leave the page. Those are the 15 commands the API marks GUI-only, and in a web UI that state belongs to the tab, not to the process.</p>
+
+<h2 id="render">Rendering</h2>
+<div class="diagram">
+<pre class="mermaid">
+flowchart LR
+  gi["GetItems per type<br/>(protobuf messages)"] --> adapter["board / schematic adapter<br/>proto → RenderItem primitives"]
+  gp["GetPadShapeAsPolygon<br/>batched per copper layer"] --> adapter
+  gt["GetTextAsShapes<br/>batched, cached by text hash"] --> adapter
+  ks["knockout_shapes · Barcode.shapes<br/>resolved_text (fork)"] --> adapter
+  adapter --> scene["Pixi scene<br/>one container per layer<br/>per-item rebuild on store diffs"]
+  theme["KiCad colour theme<br/>ported from builtin_color_themes.h"] --> scene
+  scene --> overlays["overlays<br/>selection · ratsnest · DRC markers · grid"]
+</pre>
+<div class="cap">The renderer never ships a font engine or a pad tessellator: KiCad computes glyph outlines and pad polygons, so the page draws exactly what the plotter draws.</div>
+</div>
+<p>This is measurable. A pixel-diff harness renders the board headlessly and compares it against KiCad's own SVG export at the same scale. The board differs in 0.27% of pixels, 0.05% within a one-pixel tolerance. Getting there required three additions to the API itself: barcode geometry, knockout-text polygons and the composed dimension string, because a client cannot recompute those from the data KiCad used to send.</p>
+
+<h2 id="route">Autorouting</h2>
+<div class="diagram">
+<pre class="mermaid">
+flowchart TB
+  dlg["Autoroute dialog<br/>router · nets · layers · via cost · passes · time limit"]
+  dlg -->|in tab| js1["JS router in the page<br/>yields every 50 ms, cancellable"]
+  dlg -->|on server| job["bridge route job<br/>POST /sessions/:id/route · SSE progress"]
+  job --> js2["JS router in Bun"]
+  job --> fr["Freerouting (Java 25)<br/>DSN export → jar → SES import"]
+  js1 --> apply
+  js2 --> apply
+  fr --> apply["apply as one commit<br/>re-measure with GetRatsnest"]
+  apply --> ui["summary · unrouted airlines · one undo step"]
+</pre>
+<div class="cap">One interface, two very different routers. The JS router is instant on small boards and fails outright on dense or four-layer ones; Freerouting routes those but takes minutes and needs Java.</div>
+</div>
+
+<h2 id="fork">What the fork adds</h2>
+<p>Upstream KiCad 10.99 had 111 API commands, 92 of them headless, and no events. The <code>web-api</code> branch carries 53 commits that leave it at 167 commands, 152 headless, every one of them exercised by a conformance suite against a live server. Grouped:</p>
+<div class="tbl"><table>
+<tr><th>Area</th><th>Added</th></tr>
+<tr><td>Plumbing</td><td>capability discovery, registration-order dispatch, exceptions reported instead of wedging the socket, a wake-up instead of a 10 ms poll (12 ms → 0.05 ms per request), <code>ipc://</code>/<code>tcp://</code>/<code>ws://</code> listeners, a preset token</td></tr>
+<tr><td>Change tracking</td><td>a PUB events socket (document opened/changed/saved, project changed, job progress), a revision counter, paging and since-revision reads</td></tr>
+<tr><td>Lifecycle</td><td>new project, new board or schematic, project info, headless symbol and footprint documents</td></tr>
+<tr><td>Checks and jobs</td><td>DRC and ERC with markers, exclusions and severities; async jobs with progress and inline outputs; Specctra export and session import</td></tr>
+<tr><td>Editing</td><td>headless actions, undo/redo, libraries, annotate, sync to board, fields table, ratsnest, net lengths, teardrops, autoplace, global deletion, clipboard formats for both editors</td></tr>
+<tr><td>Fidelity</td><td>text-box glyphs placed correctly, barcode and knockout geometry, resolved dimension text, colour themes and app settings</td></tr>
+<tr><td>Bugs found on the way</td><td>DRC test providers were process-wide singletons (a background job stole them from the open document), <code>SCH_PIN::swapData</code> was unimplemented, six serialisation losses on unchanged updates, and one regression this series introduced and its own tests caught</td></tr>
+</table></div>
+
+<h2 id="hosting">Hosting for many users</h2>
+<p>The unit of isolation is already right: one KiCad process per open project, owned by a session, reaped when idle. Multi-user hosting is a question of who spawns those processes, where the files live, and who is allowed to talk to which session. Three shapes, in order of effort.</p>
+
+<div class="opts">
+  <div class="opt"><div class="for">smallest · a team on one box</div><h3>One bridge, one machine</h3>
+    <ul>
+      <li>Reverse proxy in front (Caddy, nginx) terminating TLS and doing login with OIDC or basic auth; the bridge stays on loopback.</li>
+      <li>One <code>WORKSPACE_ROOT</code> per user, chosen from the proxy's identity header; the bridge already confines the file API to a root.</li>
+      <li><code>SESSION_IDLE_TIMEOUT_SEC</code> reaps servers nobody has open. Freerouting runs in the same box; cap concurrent jobs.</li>
+      <li>Fits until CPU spikes from DRC and routing start colliding: roughly 10 to 20 active users on a modern 8‑core.</li>
+    </ul>
+  </div>
+  <div class="opt"><div class="for">medium · a company</div><h3>Container per session</h3>
+    <ul>
+      <li>The Linux image in <code>packages/kicad-patches/docker</code> already runs <code>kicad-cli api-server</code> headless; add the bridge as the entrypoint and you have a session pod.</li>
+      <li>A small session controller (or the bridge itself in "scheduler" mode) creates a container per opened project, routes <code>/ws?session=</code> to it, and stops it on idle.</li>
+      <li>Files on a per-user volume or synced from object storage at open and save; the project stays on local disk while a session is live because KiCad reads its own files for jobs.</li>
+      <li>Resource limits per pod: memory and CPU quotas make one person's autoroute invisible to everyone else.</li>
+    </ul>
+  </div>
+  <div class="opt"><div class="for">largest · a product</div><h3>Kubernetes with a scheduler</h3>
+    <ul>
+      <li>Same pod, plus a control plane: an API that maps user → project → session, with presence, and a queue for heavy jobs (Freerouting, gerbers on large boards) on separate nodes.</li>
+      <li>Autoscale on session count, not requests; sessions are long-lived and stateful.</li>
+      <li>Warm pool of started servers to hide the 0.6–1.1 s cold start; the first launch on a fresh node is slower while the binary is scanned.</li>
+      <li>Object storage as the source of truth, versioned per save, so a crashed pod loses nothing past the last save.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="diagram">
+<pre class="mermaid">
+flowchart LR
+  users["Users"] --> proxy["Reverse proxy<br/>TLS · login · identity header"]
+  proxy --> ctl["Session controller<br/>user → project → session"]
+  ctl --> p1
+  ctl --> p2
+  ctl --> pn
+  subgraph p1["session pod · alice/foo"]
+    b1["bridge"] --> k1["kicad-cli api-server"]
+  end
+  subgraph p2["session pod · alice/bar"]
+    b2["bridge"] --> k2["kicad-cli api-server"]
+  end
+  subgraph pn["session pod · bob/baz"]
+    bn["bridge"] --> kn["kicad-cli api-server"]
+  end
+  store[("Object storage<br/>projects, versioned per save")]
+  p1 <--> store
+  p2 <--> store
+  pn <--> store
+  q["Job runners<br/>Freerouting · big exports"] <--> store
+  ctl --> q
+</pre>
+<div class="cap">The medium and large shapes share this topology; the difference is whether the session controller is a script on one host or a Kubernetes operator.</div>
+</div>
+
+<h3>What must stay private</h3>
+<p>KiCad's listener has no origin check and its only credential is a shared token. That is fine on loopback and inside a pod, and not fine on a network. Keep <code>kicad-cli</code> reachable only from its own bridge; let the bridge, behind the proxy, be the thing that decides who may attach to a session. The bridgeless <code>ws://</code> mode is for a single trusted user on their own machine, or for a future where KiCad gains origin and per-connection auth.</p>
+
+<h2 id="collab">Two people, one board</h2>
+<p>Nothing in the stack forbids two tabs on one session, and most of it already works: KiCad keys in-flight commits by <code>client_name</code>, so each tab can have its own open commit, and every commit's <code>DocumentChanged</code> reaches every tab, which re-reads exactly the changed items. What is missing is the human layer.</p>
+<div class="diagram">
+<pre class="mermaid">
+sequenceDiagram
+  participant A as Alice's tab
+  participant B as Bob's tab
+  participant K as kicad-cli (one process)
+  A->>K: BeginCommit (client alice)
+  B->>K: BeginCommit (client bob)
+  A->>K: UpdateItems [R1]
+  B->>K: UpdateItems [C3]
+  A->>K: EndCommit
+  K-->>A: DocumentChanged updated:[R1]
+  K-->>B: DocumentChanged updated:[R1]
+  B->>K: EndCommit
+  K-->>A: DocumentChanged updated:[C3]
+  K-->>B: DocumentChanged updated:[C3]
+</pre>
+<div class="cap">Independent items merge naturally. Two edits to the same item are last-writer-wins, which is what desktop KiCad does too, only there it is one person.</div>
+</div>
+<ul>
+  <li><b>Presence and cursors</b> are a bridge feature: broadcast selection and camera per client over the same WebSocket as a text control message.</li>
+  <li><b>Soft locks</b> on selected items, held in the bridge, prevent two people dragging the same footprint. KiCad does not need to know.</li>
+  <li><b>Undo</b> is the hard part: KiCad has one undo stack per document, so Bob's Ctrl+Z can undo Alice's move. Either scope undo to "your own last commit" in the bridge, or accept shared undo and show whose step it is; the history panel already labels commits by client.</li>
+</ul>
+
+<h2 id="sizing">Sizing</h2>
+<p>Measured on one Apple Silicon machine against the fork; treat as orders of magnitude.</p>
+<div class="tbl"><table>
+<tr><th>Thing</th><th>Measured</th><th>Consequence</th></tr>
+<tr><td>Server start to ready</td><td class="num">0.6–1.1 s (30 s on a fresh macOS binary)</td><td>warm pool for a product; fine on demand for a team</td></tr>
+<tr><td>Idle server memory</td><td class="num">≈ 40 MB, hundreds with a large board loaded</td><td>a session pod at 512 MB to 1 GB is realistic</td></tr>
+<tr><td>Request latency</td><td class="num">0.035–0.09 ms</td><td>never the bottleneck; the UI is chatty and that is fine</td></tr>
+<tr><td>Open stickhub (94 footprints, 4 layers) to first paint</td><td class="num">2.3–3.4 s</td><td>dominated by item fetch and shape batching; cache per session</td></tr>
+<tr><td>DRC on stickhub</td><td class="num">2.4–4.0 s, one core</td><td>runs inside the session; acceptable</td></tr>
+<tr><td>Freerouting on stickhub, 20 passes</td><td class="num">5 min, one core</td><td>separate job runners so routing never starves editing</td></tr>
+<tr><td>Freerouting on interf_u, 100 passes</td><td class="num">8 min</td><td>same; queue and cap</td></tr>
+</table></div>
+
+<h2 id="build">What exists, what to build</h2>
+<div class="kv">
+  <b>exists</b><span>sessions with one process per project, idle reaping, a confined file API, event relay, SSE, a Linux image that runs headless, route jobs with cancel, a token on the listener</span>
+  <b>to build</b><span>login and per-user workspace roots at the proxy or bridge, a session controller for containers, object storage sync at open and save, per-session quotas, a job queue for routers and big exports, presence and soft locks, a policy for shared undo</span>
+  <b>to leave alone</b><span>KiCad's process model: one project per process is the isolation boundary you want, and it is what the whole API assumes</span>
+</div>
+<p class="note">A good first milestone for hosting is the smallest shape with real login: a reverse proxy, per-user roots, and idle reaping. It changes nothing in the code, exercises everything that matters, and tells you the actual per-user cost before you build a scheduler.</p>
+</main>
+</div>
