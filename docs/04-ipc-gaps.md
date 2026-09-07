@@ -35,6 +35,12 @@ has staged changes. `RatsnestEdge.net.code` is always 0 (the handler packs only 
 `SetTeardropsResponse.item_count` counts pads and vias processed rather than changed, so
 `RemoveTeardrops` always reports the same number instead of dropping to zero.
 
+### G26 · Found by the five-board practice pass
+`GetDocumentRevision` reads non-monotonically right after `EndCommit` (1, then 0, 1, 1, 1 within
+600 ms on pic_programmer and stickhub), so a client cannot use it as a strict change counter
+without smoothing. `PadStack.layers` lists all 30 inner copper layers for a `*.Cu` through-hole
+pad regardless of the board's copper count; clients must intersect with the enabled layers.
+
 ### G25 · Autorouting through the API
 **Status:** done (487ce9d827, 1f6937d5e5, 8cc9377988): a Specctra DSN export job (also
 `kicad-cli pcb export specctra`) and `ImportSpecctraSession` running in an undoable commit. Found
