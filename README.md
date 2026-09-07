@@ -6,7 +6,7 @@ never opens a window.
 
 ## Status
 
-![IPC API headless](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftensorfleet%2Fkicad-web%2Fmaster%2Fdocs%2Fcoverage-badge.json)
+![IPC API headless](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FTensorFleet%2Ffab_pcb%2Fmain%2Fdocs%2Fcoverage-badge.json)
 
 IPC API coverage: **152/167** commands headless (91.0%) · 15 GUI-only · 0 unregistered — KiCad 8cc9377988
 (`bun run coverage:summary` prints this line from `tooling/coverage/commands.json`; `--badge` rewrites
