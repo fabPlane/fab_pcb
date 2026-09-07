@@ -54,6 +54,9 @@ never saves the document; that is a job's decision.
   detail.
 - **Board-only.** Nothing creates a schematic. A netlist carries no geometry, so a design compiled
   this way has no drawn schematic, hence no ERC and no BOM-from-schematic.
+- **`bench/experiment.ts` is the seed of the integration test.** `bun run experiment` drives every
+  step against a fork `kicad-cli api-server` with timings, the library-provisioning matrix, the
+  package path, and a stock-`kicad-cli` compatibility check. Results: fabdesk `docs/fab-pcb-migration.md` §6.1.
 - **No integration test.** The format expectations are pinned literally but have not been
   round-tripped through a live `kicad-cli api-server`. That is `apply.kicad.test.ts`, gated on
   the fork build (`KICAD_CLI`), and it must land before anything depends on this.
