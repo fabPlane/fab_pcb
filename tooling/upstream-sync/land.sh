@@ -4,6 +4,8 @@
 # `master` mirroring `web-api`, and clean up the sync branches and worktree.
 #
 # Usage: tooling/upstream-sync/land.sh [YYYY-MM-DD]   (default: today)
+# Env:   KICAD_SRC (default ../kicad), FP_PCB_WEB_HEAD (the merged bindings commit, when neither
+#        the remote nor the local sync branch survives)
 # Exit:  0 tagged · 1 a PR is not merged yet · 2 bad state
 set -uo pipefail
 
@@ -22,13 +24,23 @@ kg fetch -q origin --prune && wg fetch -q origin --prune || die "fetch failed"
 [ -z "$(kg status --porcelain)" ] || die "the fork's working tree is dirty"
 [ -z "$(wg status --porcelain)" ] || die "the web working tree is dirty"
 
-# The bindings PR is the source of truth for what was synced.
-wg rev-parse -q --verify "origin/$WEB_BRANCH" >/dev/null || die "origin/$WEB_BRANCH does not exist; was sync.sh run on $DATE?"
-WEB_HEAD="$(wg rev-parse "origin/$WEB_BRANCH")"
-wg merge-base --is-ancestor "$WEB_HEAD" origin/main || die "the bindings PR ($WEB_BRANCH) is not merged into main yet" 1
+# The bindings PR is the source of truth for what was synced.  Merging it is usually followed by
+# deleting its branch, on the forge and sometimes locally too, so take the first ref that still
+# resolves rather than insisting on the remote one.  Whichever it is has to be an ancestor of
+# origin/main just below, and that ancestry -- not the ref it was found under -- is what proves it
+# is the commit that landed.
+WEB_HEAD=""
+WEB_HEAD_REF=""
+for ref in "${FP_PCB_WEB_HEAD:-}" "origin/$WEB_BRANCH" "$WEB_BRANCH"; do
+  [ -n "$ref" ] || continue
+  if WEB_HEAD="$(wg rev-parse -q --verify "$ref^{commit}" 2>/dev/null)"; then WEB_HEAD_REF="$ref"; break; fi
+  WEB_HEAD=""
+done
+[ -n "$WEB_HEAD" ] || die "nothing resolves for $WEB_BRANCH: neither origin/$WEB_BRANCH nor a local $WEB_BRANCH is left (both go when a merged PR is tidied up), and FP_PCB_WEB_HEAD is unset. Was sync.sh run on $DATE? If it was and the branches are gone, re-run with FP_PCB_WEB_HEAD=<the merged bindings commit>."
+wg merge-base --is-ancestor "$WEB_HEAD" origin/main || die "the bindings commit $(wg rev-parse --short "$WEB_HEAD") (from $WEB_HEAD_REF) is not merged into main yet" 1
 TAG="$(wg show "$WEB_HEAD:packages/proto/KICAD_TAG" | tr -d '[:space:]')"
 FORK_COMMIT="$(wg show "$WEB_HEAD:packages/proto/KICAD_COMMIT" | tr -d '[:space:]')"
-case "$TAG" in fp-pcb/*) ;; *) die "KICAD_TAG on $WEB_BRANCH is '$TAG', not an fp-pcb/ tag" ;; esac
+case "$TAG" in fp-pcb/*) ;; *) die "KICAD_TAG at $WEB_HEAD_REF is '$TAG', not an fp-pcb/ tag" ;; esac
 
 kg cat-file -e "$FORK_COMMIT^{commit}" 2>/dev/null || die "fork commit $FORK_COMMIT (from KICAD_COMMIT) is not in the fork checkout"
 if kg rev-parse -q --verify "origin/$SYNC_BRANCH" >/dev/null; then
