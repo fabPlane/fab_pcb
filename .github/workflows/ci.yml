@@ -19,8 +19,9 @@ env:
   BUN_VERSION: "1.4.0"
   # Image with kicad-cli + kifaces built from the fork (packages/kicad-patches/docker). Until the
   # first image is published to GHCR the kicad-integration job builds it from KICAD_REPO/KICAD_REF.
+  # KICAD_REPO is the fork, not upstream KiCad: KICAD_COMMIT pins a commit that only exists there.
   KICAD_IMAGE: ghcr.io/${{ github.repository_owner }}/kicad-cli
-  KICAD_REPO: https://gitlab.com/kicad/code/kicad.git
+  KICAD_REPO: https://github.com/${{ github.repository_owner }}/kicad.git
   KICAD_REF: web-api
 
 jobs:
@@ -143,15 +144,21 @@ jobs:
   # Builds (or pulls) the Linux image with `kicad-cli api-server` from the fork and runs the
   # *.kicad.test.ts suites with KICAD_CLI pointing at a wrapper that execs into the container.
   #
-  # continue-on-error is set ON PURPOSE until the image exists on GHCR and the fork remote is
-  # public: a full KiCad build is ~1 h on a hosted runner and the fork URL above is a placeholder.
-  # Once `docker pull $KICAD_IMAGE:<KICAD_COMMIT>` succeeds, remove `continue-on-error` so the job
-  # gates PRs like the other two.
+  # continue-on-error is set ON PURPOSE until the image exists on GHCR: a full KiCad build is ~1 h
+  # on a hosted runner, and nothing has been published yet.  The first run on the default branch
+  # after this builds the image and pushes it, and every later run whose KICAD_COMMIT is unchanged
+  # pulls it in seconds.  Once `docker pull $KICAD_IMAGE:<KICAD_COMMIT>` succeeds, remove
+  # `continue-on-error` so the job gates PRs like the other two.
   kicad-integration:
     name: kicad-integration (Docker kicad-cli)
     runs-on: ubuntu-24.04
     timeout-minutes: 120
     continue-on-error: true
+    # The repository default is read-only, which is enough to pull a public image but not to push
+    # one, so the push below needs the scope requested explicitly.
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
 
@@ -181,8 +188,10 @@ jobs:
         id: tag
         run: |
           commit="$(cat packages/proto/KICAD_COMMIT)"
+          # GHCR rejects a tag whose repository name is not all lowercase, and the owner is not.
+          image="$(printf '%s' "$KICAD_IMAGE" | tr '[:upper:]' '[:lower:]')"
           echo "commit=$commit" >> "$GITHUB_OUTPUT"
-          echo "tag=${KICAD_IMAGE}:${commit:0:10}" >> "$GITHUB_OUTPUT"
+          echo "tag=${image}:${commit:0:10}" >> "$GITHUB_OUTPUT"
 
       - name: Pull the prebuilt image
         id: pull
@@ -212,7 +221,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Push the image (default branch only)
-        if: steps.pull.outcome != 'success' && github.ref == 'refs/heads/master'
+        if: steps.pull.outcome != 'success' && github.ref_name == github.event.repository.default_branch
         run: docker push "${{ steps.tag.outputs.tag }}"
 
       - name: kicad-cli version
