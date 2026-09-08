@@ -135,7 +135,12 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
         session.touch();
         return compileJobs.handle(
           req,
-          { id: session.id, transport: session.transport, clientName: `fp-pcb/bridge/${session.id}/compile` },
+          {
+            id: session.id,
+            transport: session.transport,
+            clientName: `fp-pcb/bridge/${session.id}/compile`,
+            updateProjectPath: (path) => session.updateProjectPath(path),
+          },
           compileRoute.jobId,
         );
       }

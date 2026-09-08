@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { FilesError, configFromEnv, resolveInRoot, startBridge, type BridgeServer } from "../src/index";
+import { FilesError, Session, configFromEnv, resolveInRoot, startBridge, type BridgeServer } from "../src/index";
 import { decodeApiResponse, encodeApiRequest, encodePing } from "../src/kicad-ping";
 
 describe("configFromEnv", () => {
@@ -67,6 +67,14 @@ describe("resolveInRoot", () => {
     const { realpath } = await import("node:fs/promises");
     return realpath(root);
   }
+});
+
+describe("session discovery metadata", () => {
+  test("a bare session adopts the project path created by a job", () => {
+    const session = new Session(configFromEnv({}, { log: () => {} }), "bare", null, "/tmp/api-bare.sock");
+    session.updateProjectPath("/tmp/demo/../demo/demo.kicad_pro");
+    expect(session.info().path).toBe("/tmp/demo/demo.kicad_pro");
+  });
 });
 
 describe("bridge HTTP without KiCad", () => {

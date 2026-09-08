@@ -91,6 +91,8 @@ export interface CompileJobSession {
   /** The session's transport to KiCad (the bridge's `Session.transport`). */
   transport: Transport | null;
   clientName?: string;
+  /** Lets the bridge keep its session discovery metadata authoritative after project creation. */
+  updateProjectPath?(path: string): void;
 }
 
 export interface CompileJobDeps {
@@ -151,11 +153,17 @@ export function checkRequest(
 }
 
 /** The board of the session, or a new project's board when the session was started bare. */
-export async function boardFor(kicad: KiCad, request: Pick<CompileJobRequest, "project">, log: (l: string) => void): Promise<Board> {
+export async function boardFor(
+  kicad: KiCad,
+  request: Pick<CompileJobRequest, "project">,
+  log: (l: string) => void,
+  onProjectCreated?: (path: string) => void,
+): Promise<Board> {
   const open = await kicad.currentBoard();
   if (open) return open;
   if (!request.project?.path) throw new Error("no board is open in this session and the request names no project.path to create one");
   const project = await kicad.newProject(request.project.path);
+  onProjectCreated?.((await project.info()).kicadProPath);
   log(`created project ${request.project.path}`);
   return (await kicad.currentBoard()) ?? (await project.openBoard());
 }
@@ -201,10 +209,11 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
         if (!frontend) throw new Error(`unknown frontend "${request.source.kind}"`);
         const client = new KiCadClient(session.transport, { clientName: session.clientName ?? `fp-pcb/compile-job-${id}` });
         const kicad = new KiCad(client);
-        const board = await boardFor(kicad, request, pushLog);
+        const board = await boardFor(kicad, request, pushLog, session.updateProjectPath);
         abort.signal.throwIfAborted();
 
-        const projectDir = dirname((await kicad.projectInfo()).kicadProPath);
+        const projectInfo = await kicad.projectInfo();
+        const projectDir = dirname(projectInfo.kicadProPath);
         const rel = request.netlistPath ?? DEFAULT_NETLIST_PATH;
         const netlistPath = isAbsolute(rel) ? rel : resolve(projectDir, rel);
         await mkdir(dirname(netlistPath), { recursive: true });

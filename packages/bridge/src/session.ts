@@ -69,7 +69,7 @@ const SESSION_ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
 
 export class Session {
   readonly id: string;
-  readonly path: string | null;
+  path: string | null;
   readonly socketPath: string;
   readonly startedAt = new Date();
   readyAt: Date | null = null;
@@ -104,6 +104,11 @@ export class Session {
 
   get pid(): number | null {
     return this.proc?.pid ?? null;
+  }
+
+  /** Refresh discovery metadata after a job creates a project in a previously bare session. */
+  updateProjectPath(path: string): void {
+    this.path = resolve(path);
   }
 
   info(): SessionInfo {

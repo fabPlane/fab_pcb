@@ -122,6 +122,10 @@ describe.skipIf(!haveKicad)("compile jobs + kicad-cli api-server", () => {
     expect(existsSync(projectPath)).toBe(true);
     expect(existsSync(join(workspace, "demo", "demo.kicad_pcb"))).toBe(true);
     expect(existsSync(join(workspace, "demo", ".fabdesk", "compile.net"))).toBe(true);
+    const discovered = (await (await api(`/sessions/${sessionId}`)).json()) as {
+      session: { path: string | null };
+    };
+    expect(discovered.session.path).toBe(projectPath);
     const polled = (await (await api(`/sessions/${sessionId}/compile/${job.id}`)).json()) as { job: CompileJobInfo };
     expect(polled.job.state).toBe("done");
     const list = (await (await api(`/sessions/${sessionId}/compile`)).json()) as { jobs: CompileJobInfo[]; frontends: string[] };
