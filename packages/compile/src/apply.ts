@@ -13,16 +13,16 @@
  *   3. `ImportNetlist` for real. Headless KiCad spreads the new footprints from the origin
  *      (`HEADLESS_PCB_CONTEXT::OnNetlistChanged` → `SpreadFootprints(…, {0,0})`), i.e. inside
  *      the rectangle `outlinePoints` draws.
- *   4. `AutoplaceFootprints` on exactly the footprints step 3 added, with `includeOffboard`. An
- *      empty id list means "offboard only" in the handler, so footprints spread inside the outline
- *      would otherwise never move.
- *   5. The edge-clearance inset. The legacy autoplacer packs into the outline's top-left corner
+ *   4. `AutoplaceFootprints` on exactly the footprints step 3 added that have no explicit source
+ *      placement, with `includeOffboard`.
+ *   5. The edge-clearance inset for those autoplaced additions. The legacy autoplacer packs into the outline's top-left corner
  *      and ignores the copper-to-edge rule, so a fresh compile failed DRC every time. When the
  *      outline is the one step 2 drew, it is moved instead of the footprints: `UpdateItems` on a
  *      footprint re-sends its pads, fields and graphics at their old absolute coordinates
- *      (`FOOTPRINT::Deserialize` calls `SetPosition` and then overwrites the children), so moving
- *      the parts needs a full translate the client does not offer yet, while a segment has no
- *      children. A user-drawn outline is left alone and the gap is reported as a warning.
+ *      (`FOOTPRINT::Deserialize` calls `SetPosition` and then overwrites the children), while a
+ *      segment has no children. A user-drawn outline is left alone and the gap is reported as a warning.
+ *   6. `BoardSpec.placements`, in the fixed outline/blank frame, using `Footprint.translate` so
+ *      the anchor and every absolute child coordinate move together.
  *
  * KiCad's import report is free text with no severity (`WX_STRING_REPORTER::Report` drops it;
  * the failures read `Cannot add R1 (footprint 'X' not found).`), so outcomes are graded by the
@@ -38,7 +38,7 @@
  */
 import { create } from "@bufbuild/protobuf";
 import { BoardGraphicShapeSchema, BoardLayer, DrillShape, KiCadObjectType, PadStackShape, PadStackType, ViaSchema, ViaType } from "@fp-pcb/proto";
-import { BoardShape, Via, mm, toVector2, vec2, type Board, type Item, type Vec2 } from "@fp-pcb/client";
+import { BoardShape, Footprint, Via, mm, toVector2, vec2, type Board, type Item, type Vec2 } from "@fp-pcb/client";
 import { CompileCancelled } from "./compile";
 import { emitKicadNetlist, type EmitOptions } from "./netlist";
 import { hasErrors, type BoardSpec, type Diagnostic, type MatchMode, type Netlist } from "./types";
@@ -309,6 +309,27 @@ export async function footprintIds(board: Board): Promise<string[]> {
   return (await board.getItems(KiCadObjectType.KOT_PCB_FOOTPRINT)).map((i) => i.id);
 }
 
+/** Apply explicit board-frame positions as one commit, returning the references that actually moved. */
+export async function placeFootprints(
+  board: Board,
+  placements: NonNullable<BoardSpec["placements"]>,
+  message = "Compile: source placement",
+): Promise<string[]> {
+  if (!placements.length) return [];
+  const byReference = new Map((await board.getFootprints()).map((footprint) => [footprint.reference, footprint]));
+  const moved: Footprint[] = [];
+  for (const placement of placements) {
+    const footprint = byReference.get(placement.ref);
+    if (!footprint) continue;
+    const target = { x: Math.round(mm(placement.position.x)), y: Math.round(mm(placement.position.y)) };
+    const delta = { x: target.x - footprint.position.x, y: target.y - footprint.position.y };
+    if (!delta.x && !delta.y) continue;
+    moved.push(footprint.translate(delta));
+  }
+  if (moved.length) await board.commit(message, (tx) => tx.update(moved));
+  return moved.map((footprint) => footprint.reference);
+}
+
 export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOptions): Promise<ApplyOutcome> {
   const serverPath = opts.serverNetlistPath ?? opts.netlistPath;
   const untouched = (diagnostics: Diagnostic[], report: string): ApplyOutcome => ({
@@ -354,16 +375,25 @@ export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOp
   diagnostics.push(...reportDiagnostics(imported.report, imported.errorCount, imported.warningCount));
   const added = (await footprintIds(board)).filter((id) => !before.has(id));
 
-  // 4. Place what was added; an empty list would mean "offboard only" to KiCad.
+  // 4. Autoplace newly added footprints that have no source placement. An empty id list would
+  // mean "offboard only" to KiCad, so do not call it when every addition is explicitly placed.
   let footprintsPlaced = 0;
   let edgeInsetNm: Vec2 | null = null;
-  if (opts.autoplace && added.length) {
+  const placements = opts.board?.placements ?? [];
+  const footprints = placements.length ? await board.getFootprints() : [];
+  const explicitlyPlacedIds = new Set(
+    footprints.filter((footprint) => placements.some((placement) => placement.ref === footprint.reference)).map((footprint) => footprint.id),
+  );
+  const autoIds = added.filter((id) => !explicitlyPlacedIds.has(id));
+  if ((opts.autoplace && autoIds.length) || placements.length) {
     cancelled();
     opts.onStage?.("placing");
+  }
+  if (opts.autoplace && autoIds.length) {
     // The request itself can fail: after `SetNetClasses` in the session the fork answers
     // `basic_string` for newly imported footprints (G29). The footprints then stay where the
     // import spread them, inside the outline, and the compile goes on.
-    const outcome = await board.autoplace(added, { includeOffboard: true }).catch((e: unknown) => ({
+    const outcome = await board.autoplace(autoIds, { includeOffboard: true }).catch((e: unknown) => ({
       ok: false,
       placedCount: 0,
       error: e instanceof Error ? e.message : String(e),
@@ -379,7 +409,7 @@ export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOp
     } else if (opts.edgeMarginNm) {
       // 5. Keep the placed group off the edge — by moving the outline we drew, or by saying we could not.
       if (outline.drew && !outline.fixed) {
-        edgeInsetNm = await insetOutline(board, added, opts.edgeMarginNm);
+        edgeInsetNm = await insetOutline(board, autoIds, opts.edgeMarginNm);
       } else if (outline.fixed) {
         // The outline is a blank's: its vias and holes are where the copper says they are.
         diagnostics.push(
@@ -399,6 +429,14 @@ export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOp
         );
       }
     }
+  }
+
+  // 5. Source positions are absolute in the outline/blank frame. They are applied after import
+  // (and after autoplace of unnamed additions), using Footprint.translate so KiCad cannot restore
+  // child pads/text/graphics at their previous board coordinates during UpdateItems.
+  if (placements.length) {
+    cancelled();
+    footprintsPlaced += (await placeFootprints(board, placements)).length;
   }
 
   return {

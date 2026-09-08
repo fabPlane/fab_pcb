@@ -1,5 +1,5 @@
 export * from "./types";
-export { compile, CompileCancelled, type CompileOptions, type CompileStageName } from "./compile";
+export { compile, CompileCancelled, validatePlacements, type CompileOptions, type CompileStageName } from "./compile";
 export { emitKicadNetlist, validateNetlist, NETLIST_VERSION, TOOL_NAME, type EmitOptions } from "./netlist";
 export {
   applyNetlist,
@@ -13,6 +13,7 @@ export {
   outlineItems,
   outlineOrigin,
   outlinePoints,
+  placeFootprints,
   prefabItems,
   reportDiagnostics,
   shiftedSegment,

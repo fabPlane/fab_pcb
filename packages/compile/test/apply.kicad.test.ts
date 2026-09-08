@@ -118,6 +118,44 @@ describe.skipIf(!haveKicad())("applyNetlist + kicad-cli api-server", () => {
     expect(fps[0]!.libraryId).toContain("R_0603_1608Metric");
   }, 60_000);
 
+  test("explicit positions use a prefab blank's fixed frame and omission preserves a manual move", async () => {
+    const { board, projectDir } = await newProjectWithLibraries(server.kicad, root, "placed-blank");
+    const netlistPath = join(projectDir, ".fp-pcb", "compile.net");
+    const outcome = await applyNetlist(board, NETLIST, {
+      netlistPath,
+      board: {
+        widthMm: 30,
+        heightMm: 20,
+        vias: [{ x: 5, y: 5 }],
+        holes: [{ x: 27, y: 3, diameterMm: 2.5 }],
+        placements: [
+          { ref: "R1", position: { x: 10, y: 8 } },
+          { ref: "R2", position: { x: 20, y: 12 } },
+        ],
+      },
+      autoplace: true,
+    });
+    expect(outcome.diagnostics).toEqual([]);
+    expect(outcome.footprintsPlaced).toBe(2);
+    expect(await outlineOrigin(board)).toEqual({ x: 0, y: 0 });
+    expect(
+      Object.fromEntries((await board.getFootprints()).map((footprint) => [footprint.reference, footprint.position])),
+    ).toEqual({ R1: { x: 10_000_000, y: 8_000_000 }, R2: { x: 20_000_000, y: 12_000_000 } });
+    expect((await board.getTracks()).filter((track) => track instanceof Via).map((via) => via.position)).toEqual([
+      { x: 5_000_000, y: 5_000_000 },
+    ]);
+
+    const r1 = (await board.getFootprints()).find((footprint) => footprint.reference === "R1")!;
+    r1.translate({ x: 750_000, y: 500_000 });
+    await board.commit("manual move", (tx) => tx.update([r1]));
+    const rebuilt = await applyNetlist(board, NETLIST, { netlistPath, autoplace: true });
+    expect(rebuilt.footprintsPlaced).toBe(0);
+    expect((await board.getFootprints()).find((footprint) => footprint.reference === "R1")!.position).toEqual({
+      x: 10_750_000,
+      y: 8_500_000,
+    });
+  }, 120_000);
+
   test("a blank: free vias and holes are drawn with the outline, which then stays put; rules reach the net class", async () => {
     const { board, projectDir } = await newProjectWithLibraries(server.kicad, root, "blank");
     const spec = { clearanceMm: 0.25, trackWidthMm: 0.3, viaDiameterMm: 1, viaDrillMm: 0.2 };

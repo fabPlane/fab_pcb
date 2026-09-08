@@ -61,4 +61,32 @@ describe("netlistJsonFrontend", () => {
     const { diagnostics } = checkNetlistJson({ netlist: { components: [], nets: [] }, board: { outline: [{ x: "1", y: 2 }] } }, "f.json");
     expect(diagnostics.map((d) => d.message)).toEqual(["/board/outline/0/x: must be a finite number"]);
   });
+
+  test("accepts per-component positions in the board coordinate frame", async () => {
+    const placed = { ...GOOD, board: { ...GOOD.board, placements: [{ ref: "R1", position: { x: 6.5, y: 4 } }] } };
+    const res = await netlistJsonFrontend.build(source(JSON.stringify(placed)));
+    expect(res.diagnostics).toEqual([]);
+    expect(res.board?.placements).toEqual([{ ref: "R1", position: { x: 6.5, y: 4 } }]);
+  });
+
+  test("reports malformed positions and unknown placement references precisely", () => {
+    const value = {
+      ...GOOD,
+      board: {
+        ...GOOD.board,
+        placements: [
+          { ref: "R1", position: { x: "left", y: 4 } },
+          { ref: "U99", position: { x: 1, y: 2 } },
+        ],
+      },
+    };
+    const { file, diagnostics } = checkNetlistJson(value, "f.json");
+    expect(file).toBeNull();
+    expect(diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: "bad_placement_position", message: "/board/placements/0/position/x: must be a finite number" }),
+        expect.objectContaining({ code: "unknown_placement_reference", message: '/board/placements/1/ref: unknown component reference "U99"' }),
+      ]),
+    );
+  });
 });

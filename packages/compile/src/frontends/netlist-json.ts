@@ -24,8 +24,8 @@ type Check = (value: unknown, path: string) => void;
 class ShapeErrors {
   readonly diagnostics: Diagnostic[] = [];
   constructor(private readonly file: string) {}
-  error(path: string, message: string): void {
-    this.diagnostics.push({ severity: "error", stage: "frontend", code: "bad_shape", file: this.file, message: `${path}: ${message}` });
+  error(path: string, message: string, code = "bad_shape"): void {
+    this.diagnostics.push({ severity: "error", stage: "frontend", code, file: this.file, message: `${path}: ${message}` });
   }
   get ok(): boolean {
     return this.diagnostics.length === 0;
@@ -80,6 +80,14 @@ export function checkNetlistJson(value: unknown, file: string): { file: NetlistJ
   const node = obj({ ref: str(true), pin: str(true), pinFunction: str(false), pinType: str(false) });
   const net = obj({ name: str(true), code: num(), nodes: arr(node) });
   const point = obj({ x: num(), y: num() });
+  const position = (v: unknown, path: string) => {
+    if (!isRecord(v)) return errs.error(path, "must be an object", "bad_placement_position");
+    for (const axis of ["x", "y"] as const) {
+      if (typeof v[axis] !== "number" || !Number.isFinite(v[axis]))
+        errs.error(`${path}/${axis}`, "must be a finite number", "bad_placement_position");
+    }
+  };
+  const placement = obj({ ref: str(true), position });
   const library = obj({
     kind: (v, path) => {
       if (v !== "footprint" && v !== "symbol") errs.error(path, 'must be "footprint" or "symbol"');
@@ -104,11 +112,26 @@ export function checkNetlistJson(value: unknown, file: string): { file: NetlistJ
         rules: obj({ clearanceMm: num(), trackWidthMm: num(), viaDiameterMm: num(), viaDrillMm: num() }, false),
         vias: (v, path) => v !== undefined && arr(obj({ x: num(true), y: num(true), diameterMm: num(), drillMm: num() }))(v, path),
         holes: (v, path) => v !== undefined && arr(obj({ x: num(true), y: num(true), diameterMm: num(true) }))(v, path),
+        placements: (v, path) => v !== undefined && arr(placement)(v, path),
       },
       false,
     ),
     libraries: (v, path) => v !== undefined && arr(library)(v, path),
   })(value, "");
+
+  if (isRecord(value) && isRecord(value.netlist) && Array.isArray(value.netlist.components) && isRecord(value.board) && Array.isArray(value.board.placements)) {
+    const refs = new Set(
+      value.netlist.components.flatMap((component) => (isRecord(component) && typeof component.ref === "string" ? [component.ref] : [])),
+    );
+    value.board.placements.forEach((candidate, index) => {
+      if (isRecord(candidate) && typeof candidate.ref === "string" && !refs.has(candidate.ref))
+        errs.error(
+          `/board/placements/${index}/ref`,
+          `unknown component reference ${JSON.stringify(candidate.ref)}`,
+          "unknown_placement_reference",
+        );
+    });
+  }
 
   return { file: errs.ok ? (value as NetlistJsonFile) : null, diagnostics: errs.diagnostics };
 }

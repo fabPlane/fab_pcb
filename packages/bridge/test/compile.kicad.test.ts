@@ -10,6 +10,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import type { CompileJobInfo } from "@fp-pcb/compile/bridge-job";
+import { KiCad } from "@fp-pcb/client";
 import { configFromEnv, startBridge, type BridgeServer } from "../src/index";
 
 const cfg = configFromEnv(process.env, { port: 0, log: () => {} });
@@ -44,7 +45,14 @@ const NETLIST_JSON = {
       },
     ],
   },
-  board: { widthMm: 20, heightMm: 10 },
+  board: {
+    widthMm: 20,
+    heightMm: 10,
+    placements: [
+      { ref: "R1", position: { x: 5, y: 4 } },
+      { ref: "R2", position: { x: 15, y: 6 } },
+    ],
+  },
   libraries: [{ kind: "footprint", nickname: "Resistor_SMD", uri: join(QA_LIBRARIES, "Resistor_SMD.pretty") }],
 };
 
@@ -126,6 +134,10 @@ describe.skipIf(!haveKicad)("compile jobs + kicad-cli api-server", () => {
       session: { path: string | null };
     };
     expect(discovered.session.path).toBe(projectPath);
+    const kicad = await KiCad.connect(bridge.sessions.get(sessionId)!.transport!, { clientName: "fp-pcb/bridge-placement-test" });
+    expect(
+      Object.fromEntries((await (await kicad.currentBoard())!.getFootprints()).map((footprint) => [footprint.reference, footprint.position])),
+    ).toEqual({ R1: { x: 5_000_000, y: 4_000_000 }, R2: { x: 15_000_000, y: 6_000_000 } });
     const polled = (await (await api(`/sessions/${sessionId}/compile/${job.id}`)).json()) as { job: CompileJobInfo };
     expect(polled.job.state).toBe("done");
     const list = (await (await api(`/sessions/${sessionId}/compile`)).json()) as { jobs: CompileJobInfo[]; frontends: string[] };

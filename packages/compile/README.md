@@ -16,7 +16,7 @@ schematic to a board. Footprint matching, field updates and net assignment are K
 | ------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `src/types.ts`                  | the contract: `Netlist` IR, `Frontend`, `LibrarySpec`, `Diagnostic`, `CompileResult`             |
 | `src/netlist.ts`                | `emitKicadNetlist` (IR → KiCad `.net`) and `validateNetlist`                                     |
-| `src/apply.ts`                  | `applyNetlist`: write → dry-run `ImportNetlist` → outline (+ a blank's vias and holes) → `ImportNetlist` → autoplace → inset |
+| `src/apply.ts`                  | `applyNetlist`: write → dry-run `ImportNetlist` → outline (+ a blank's vias and holes) → `ImportNetlist` → autoplace unspecified additions → source placement |
 | `src/rules.ts`                  | `applyBoardRules`: `BoardSpec.rules` → `SetBoardDesignRules` + the `Default` net class (`SetNetClasses`) |
 | `src/compile.ts`                | orchestration, with the stage and `beforeApply` hooks the job uses                               |
 | `src/frontends/netlist-json.ts` | the first frontend: `circuit.netlist.json` = `{ netlist, board?, libraries? }`, the IR as a file |
@@ -44,15 +44,36 @@ Each step was checked against the fork at `280274cc3d` and run live (`bench/expe
    the rectangle step 2 drew.
 4. **`AutoplaceFootprints` on the footprints step 3 added**, with `includeOffboard` — an empty
    id list means "offboard only" to KiCad, which would skip everything the spread put inside.
-5. **The edge-clearance inset.** The legacy autoplacer packs into the outline's top-left corner
+5. **The edge-clearance inset for autoplaced additions.** The legacy autoplacer packs into the outline's top-left corner
    and ignores the copper-to-edge rule, so a fresh compile failed DRC every time. With
    `edgeMarginNm` (the job passes `edgeClearanceNm(board)`), the outline step 2 drew is moved so
    its corner sits that far outside the placed group — one `UpdateItems` commit on four segments.
-   The footprints are not moved on purpose: `UpdateItems` on a footprint re-sends its pads, fields
-   and graphics at their old absolute coordinates (`FOOTPRINT::Deserialize` calls `SetPosition`,
-   then overwrites the children), so a real move needs a full translate that `@fp-pcb/client`
-   does not offer yet. A user-drawn outline is left alone and `edge_clearance_unchecked` is
-   emitted instead.
+   A user-drawn outline is left alone and `edge_clearance_unchecked` is emitted instead.
+6. **Explicit source placement.** Each `board.placements` entry moves its named footprint with
+   `Footprint.translate`, including the pads, fields, text, and graphics KiCad serializes at
+   absolute board coordinates. Positions are in millimetres in the same fixed frame as the
+   outline, prefab vias, and holes, so placing parts never moves or distorts a prefab blank.
+
+The optional JSON shape is:
+
+```json
+{
+  "board": {
+    "widthMm": 30,
+    "heightMm": 20,
+    "placements": [
+      { "ref": "R1", "position": { "x": 10, "y": 8 } },
+      { "ref": "U1", "position": { "x": 20.5, "y": 12 } }
+    ]
+  }
+}
+```
+
+Only references explicitly present in `placements` are moved on rebuild. Existing components
+without an entry retain their manual KiCad placement; newly imported components without an entry
+still use the legacy autoplacer when `autoplace` is enabled. With no `placements` property, build
+behaviour is unchanged. Non-finite/missing coordinates, duplicate entries, and references absent
+from `netlist.components` are validation errors before the board is touched.
 
 `BoardSpec.rules` (mm) is applied by the job before the apply, through `applyBoardRules`: the
 board's minimum constraints (`SetBoardDesignRules`, merged field by field) and the `Default` net
@@ -62,8 +83,9 @@ what `@fp-pcb/router` reads track width, clearance and via sizes from.
 KiCad's import report has no severity per line (`WX_STRING_REPORTER` drops it), so results are
 graded by the response's `errorCount` / `warningCount`; the text rides along as detail.
 
-A compile is **three or four undo entries** (outline, KiCad's "Update Netlist", autoplace, the
-inset when it had to move anything). The library never saves the document; the job does.
+A compile creates separate undo entries for the operations it actually performs: outline,
+KiCad's "Update Netlist", autoplace, edge inset, and explicit source placement. The library never
+saves the document; the job does.
 
 ## The job
 
@@ -92,9 +114,8 @@ are in fabdesk's `docs/fab-pcb-migration.md` §6.1.
 - **`ImportNetlist` does not publish `DocumentChanged`** on the fork today (it only bumps the
   revision); the job's `done` event carries `revision` so a tab can re-read. A one-line fork patch
   would make the event flow like every other commit.
-- **Only the near edges are inset**, and only when this compile drew the outline. A board so
-  full that the far edges bind has a placement problem the inset cannot fix; a footprint
-  translate in the client would let a user-drawn outline be honoured too.
+- **Only the near edges are inset**, and only for autoplaced additions when this compile drew the
+  outline. A board so full that the far edges bind needs explicit placement.
 
 ## Notes for callers
 

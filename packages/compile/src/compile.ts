@@ -16,6 +16,8 @@ import {
   type Diagnostic,
   type Frontend,
   type FrontendResult,
+  type BoardSpec,
+  type Netlist,
 } from "./types";
 import type { Board } from "@fp-pcb/client";
 
@@ -56,6 +58,54 @@ function done(diagnostics: Diagnostic[], counts: CompileCounts, started: number,
   };
 }
 
+/** Validate optional author placement even when `BoardSpec` came from a bridge override. */
+export function validatePlacements(netlist: Netlist, board: BoardSpec | undefined): Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
+  const refs = new Set(netlist.components.map((component) => component.ref));
+  const seen = new Set<string>();
+  for (const [index, placement] of (board?.placements ?? []).entries()) {
+    const prefix = `/board/placements/${index}`;
+    if (!placement || typeof placement !== "object" || typeof placement.ref !== "string") {
+      diagnostics.push({ severity: "error", stage: "netlist", code: "bad_placement", message: `${prefix}: ref must be a string.` });
+      continue;
+    }
+    const position = placement.position;
+    if (
+      !position ||
+      typeof position !== "object" ||
+      typeof position.x !== "number" ||
+      !Number.isFinite(position.x) ||
+      typeof position.y !== "number" ||
+      !Number.isFinite(position.y)
+    ) {
+      diagnostics.push({
+        severity: "error",
+        stage: "netlist",
+        code: "bad_placement_position",
+        message: `${prefix}/position: x and y must be finite numbers in millimetres.`,
+      });
+    }
+    if (!refs.has(placement.ref)) {
+      diagnostics.push({
+        severity: "error",
+        stage: "netlist",
+        code: "unknown_placement_reference",
+        message: `${prefix}/ref: unknown component reference ${JSON.stringify(placement.ref)}.`,
+      });
+    }
+    if (seen.has(placement.ref)) {
+      diagnostics.push({
+        severity: "error",
+        stage: "netlist",
+        code: "duplicate_placement_reference",
+        message: `${prefix}/ref: ${JSON.stringify(placement.ref)} is placed more than once.`,
+      });
+    }
+    seen.add(placement.ref);
+  }
+  return diagnostics;
+}
+
 export async function compile(source: CompileSource, board: Board, opts: CompileOptions): Promise<CompileResult> {
   const started = performance.now();
   const diagnostics: Diagnostic[] = [];
@@ -83,7 +133,8 @@ export async function compile(source: CompileSource, board: Board, opts: Compile
   const counts: CompileCounts = { ...ZERO, components: netlist.components.length, nets: netlist.nets.length };
 
   opts.onStage?.("validating");
-  diagnostics.push(...validateNetlist(netlist));
+  const boardSpec = opts.board ?? built.board;
+  diagnostics.push(...validateNetlist(netlist), ...validatePlacements(netlist, boardSpec));
   if (hasErrors(diagnostics)) return done(diagnostics, counts, started);
 
   cancelled();
@@ -91,7 +142,7 @@ export async function compile(source: CompileSource, board: Board, opts: Compile
   cancelled();
   const applied = await applyNetlist(board, netlist, {
     ...opts,
-    ...((opts.board ?? built.board) ? { board: opts.board ?? built.board } : {}),
+    ...(boardSpec ? { board: boardSpec } : {}),
   });
   diagnostics.push(...applied.diagnostics);
 
