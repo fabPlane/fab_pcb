@@ -105,6 +105,38 @@ export interface BoardSpec {
   heightMm?: number;
   /** Copper layer count, when the frontend has an opinion. */
   copperLayers?: number;
+  /** Design rules to establish on the board (minimum constraints and the `Default` net class). */
+  rules?: BoardRules;
+  /**
+   * Vias a prefabricated blank already has (Opulo's Viagrid, say). Drawn with the outline as free
+   * vias on no net; a router may claim them (`RouteOptions.preset: "laser-prefab"`) instead of
+   * drilling its own. Same frame as the outline, mm.
+   */
+  vias?: PrefabVia[];
+  /** Holes through the blank (mounting holes), drawn as circles on `Edge.Cuts` so DRC keeps copper clear of them. */
+  holes?: PrefabHole[];
+}
+
+/** Rules in mm. Only the fields given change; the rest keep KiCad's project defaults. */
+export interface BoardRules {
+  clearanceMm?: number;
+  trackWidthMm?: number;
+  viaDiameterMm?: number;
+  viaDrillMm?: number;
+}
+
+export interface PrefabVia {
+  x: number;
+  y: number;
+  /** Annular pad diameter; default the `Default` net class via size. */
+  diameterMm?: number;
+  drillMm?: number;
+}
+
+export interface PrefabHole {
+  x: number;
+  y: number;
+  diameterMm: number;
 }
 
 /** The project's source files, as the frontend sees them. */
@@ -163,6 +195,10 @@ export interface CompileCounts {
   footprintsAdded: number;
   /** Footprints the autoplacer moved; `0` when `autoplace` is off. */
   footprintsPlaced: number;
+  /** Free vias drawn for a prefabricated blank (`BoardSpec.vias`), with the outline. */
+  viasAdded: number;
+  /** Cutouts drawn for `BoardSpec.holes`. */
+  holesAdded: number;
 }
 
 export interface CompileResult {

@@ -187,6 +187,12 @@ export interface RouteOptions {
   seed?: number;
   /** Router effort / passes (JS router: `effort`, Freerouting: `-mp` max passes). */
   effort?: number;
+  /**
+   * JS router solver preset. `laser-prefab` changes layers only through the board's free vias
+   * (vias on no net, e.g. a Viagrid blank's factory vias) and claims them for the net; `default`
+   * drills vias anywhere. Unset: `laser-prefab` when the board has free vias, else `default`.
+   */
+  preset?: RoutePreset;
   /** Anything router-specific; each adapter documents what it reads. */
   extra?: Record<string, unknown>;
   /**
@@ -229,6 +235,17 @@ export interface NewTrack {
 }
 
 /** A via to create (through via from `layers[0]` to `layers[layers.length-1]`). */
+export type RoutePreset = "default" | "laser-prefab";
+
+/** An existing free via a route passes through: the apply assigns it the net instead of creating a via. */
+export interface ClaimedVia {
+  /** Id of the via on the board (`RouteVia.id`). */
+  id: string;
+  net: string;
+  netCode: number;
+  position: Vec2;
+}
+
 export interface NewVia {
   net: string;
   netCode: number;
@@ -242,6 +259,10 @@ export interface RouteResult {
   router: string;
   tracks: NewTrack[];
   vias: NewVia[];
+  /** Free vias the routing runs through; `applyRouteResult` puts them on the net (JS router only). */
+  claimedVias?: ClaimedVia[];
+  /** Solver preset the JS router used. */
+  preset?: RoutePreset;
   /** Connections the router did not route (as it reports them; the bench re-measures with `GetRatsnest`). */
   unrouted: RouteConnection[];
   /** Connections given to the router (after the `nets` filter). */

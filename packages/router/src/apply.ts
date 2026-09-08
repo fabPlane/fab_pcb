@@ -1,7 +1,8 @@
 /**
  * `applyRouteResult(board, result)`: creates the routed tracks and vias in **one** commit
- * (`BeginCommit` + one batched `CreateItems` + `EndCommit`), so a single `Undo` removes the whole
- * routing pass. Also the proto builders (`trackProto`, `viaProto`) the adapters and tests share.
+ * (`BeginCommit` + one batched `CreateItems`, plus one `UpdateItems` when the result claims free
+ * vias, + `EndCommit`), so a single `Undo` removes the whole routing pass. Also the proto builders
+ * (`trackProto`, `viaProto`) the adapters and tests share.
  */
 import { create } from "@bufbuild/protobuf";
 import {
@@ -73,9 +74,36 @@ export interface ApplyOptions {
   strict?: boolean;
 }
 
-/** One commit with every track and via of `result`; resolves to the canonical items KiCad created. */
+/** The board's vias named by `result.claimedVias`, with the claiming net set on each (nothing sent yet). */
+export async function claimedViaItems(board: Board, result: Pick<RouteResult, "claimedVias">): Promise<Via[]> {
+  const claims = new Map((result.claimedVias ?? []).map((c) => [c.id, c]));
+  if (!claims.size) return [];
+  const vias = (await board.getTracks()).filter((t): t is Via => t instanceof Via && claims.has(t.id));
+  for (const v of vias) {
+    const c = claims.get(v.id)!;
+    v.setNet(c.net, c.netCode || undefined);
+  }
+  return vias;
+}
+
+/**
+ * One commit with every track and via of `result`, and the claimed free vias moved onto their
+ * nets; resolves to the canonical items KiCad created.
+ */
 export async function applyRouteResult(board: Board, result: RouteResult, opts: ApplyOptions = {}): Promise<CommitResult<Item[]>> {
   const items = itemsFor(result);
-  const message = opts.message ?? `Autoroute (${result.router}): ${result.tracks.length} tracks, ${result.vias.length} vias`;
-  return board.commit(message, (tx) => (items.length ? tx.create(items) : Promise.resolve([])), undefined, { strict: opts.strict ?? true });
+  const claimed = await claimedViaItems(board, result);
+  const message =
+    opts.message ??
+    `Autoroute (${result.router}): ${result.tracks.length} tracks, ${result.vias.length} vias${claimed.length ? `, ${claimed.length} claimed` : ""}`;
+  return board.commit(
+    message,
+    async (tx) => {
+      const created = items.length ? await tx.create(items) : [];
+      if (claimed.length) await tx.update(claimed);
+      return created;
+    },
+    undefined,
+    { strict: opts.strict ?? true },
+  );
 }

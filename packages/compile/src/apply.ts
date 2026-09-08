@@ -37,8 +37,8 @@
  * that, so the library stays free of persistence the way the router's `applyRouteResult` is.
  */
 import { create } from "@bufbuild/protobuf";
-import { BoardGraphicShapeSchema, BoardLayer, KiCadObjectType } from "@fp-pcb/proto";
-import { BoardShape, mm, toVector2, vec2, type Board, type Vec2 } from "@fp-pcb/client";
+import { BoardGraphicShapeSchema, BoardLayer, DrillShape, KiCadObjectType, PadStackShape, PadStackType, ViaSchema, ViaType } from "@fp-pcb/proto";
+import { BoardShape, Via, mm, toVector2, vec2, type Board, type Item, type Vec2 } from "@fp-pcb/client";
 import { CompileCancelled } from "./compile";
 import { emitKicadNetlist, type EmitOptions } from "./netlist";
 import { hasErrors, type BoardSpec, type Diagnostic, type MatchMode, type Netlist } from "./types";
@@ -67,7 +67,7 @@ export interface ApplyOptions extends EmitOptions {
   deleteExtraFootprints?: boolean;
   /** Re-pull a footprint from the library when the netlist names a different one. Default **true**, same reasoning. */
   updateFootprints?: boolean;
-  /** Board setup to establish before placing. Only the outline is used today. */
+  /** Board setup to establish before placing: the outline, and a blank's vias and holes. `rules` are the job's business (`applyBoardRules`). */
   board?: BoardSpec;
   /** Run `AutoplaceFootprints` on the footprints the import added. Off by default in the library; the job turns it on. */
   autoplace?: boolean;
@@ -93,6 +93,9 @@ export interface ApplyOutcome {
   footprintsPlaced: number;
   /** How far the compile-drawn outline was moved to keep the placed footprints inside the edge clearance; null when nothing moved. */
   edgeInsetNm: Vec2 | null;
+  /** Free vias and cutouts drawn for a blank (`BoardSpec.vias` / `holes`), with the outline. */
+  viasAdded: number;
+  holesAdded: number;
 }
 
 const diag = (severity: Diagnostic["severity"], message: string, code: string): Diagnostic => ({ severity, stage: "apply", code, message });
@@ -131,22 +134,88 @@ export function outlineItems(points: readonly Vec2[]): BoardShape[] {
   });
 }
 
+/** KiCad's own defaults for a new project, used for a blank's vias when neither the via nor the rules say. */
+const DEFAULT_VIA = { diameterMm: 0.6, drillMm: 0.3 };
+
+/** A through via on no net (`net 0`), the way a prefabricated blank's factory vias exist before routing. */
+export function freeViaItem(position: Vec2, diameterNm: number, drillNm: number): Via {
+  const size = toVector2({ x: Math.round(diameterNm), y: Math.round(diameterNm) });
+  const hole = toVector2({ x: Math.round(drillNm), y: Math.round(drillNm) });
+  return new Via(
+    create(ViaSchema, {
+      position: toVector2({ x: Math.round(position.x), y: Math.round(position.y) }),
+      type: ViaType.VT_THROUGH,
+      padStack: {
+        type: PadStackType.PST_NORMAL,
+        layers: [BoardLayer.BL_F_Cu, BoardLayer.BL_B_Cu],
+        drill: { startLayer: BoardLayer.BL_F_Cu, endLayer: BoardLayer.BL_B_Cu, diameter: hole, shape: DrillShape.DS_CIRCLE },
+        // `PADSTACK::Deserialize` keys the copper entry of a NORMAL stack on F_Cu (its ALL_LAYERS marker).
+        copperLayers: [{ layer: BoardLayer.BL_F_Cu, shape: PadStackShape.PSS_CIRCLE, size }],
+      },
+    }),
+  );
+}
+
+/** A circular cutout on `Edge.Cuts`: what a mounting hole is to DRC (copper keeps the edge clearance from it). */
+export function holeItem(center: Vec2, diameterNm: number): BoardShape {
+  const c = { x: Math.round(center.x), y: Math.round(center.y) };
+  return new BoardShape(
+    create(BoardGraphicShapeSchema, {
+      layer: BoardLayer.BL_Edge_Cuts,
+      shape: { geometry: { case: "circle", value: { center: toVector2(c), radiusPoint: toVector2({ x: c.x + Math.round(diameterNm / 2), y: c.y }) } } },
+    }),
+  );
+}
+
+/** The blank's vias and holes as board items (nm), in the outline's frame. */
+export function prefabItems(spec: BoardSpec | undefined): { vias: Via[]; holes: BoardShape[] } {
+  const viaDiameter = spec?.rules?.viaDiameterMm ?? DEFAULT_VIA.diameterMm;
+  const viaDrill = spec?.rules?.viaDrillMm ?? DEFAULT_VIA.drillMm;
+  return {
+    vias: (spec?.vias ?? []).map((v) => freeViaItem({ x: mm(v.x), y: mm(v.y) }, mm(v.diameterMm ?? viaDiameter), mm(v.drillMm ?? viaDrill))),
+    holes: (spec?.holes ?? []).map((h) => holeItem({ x: mm(h.x), y: mm(h.y) }, mm(h.diameterMm))),
+  };
+}
+
+export interface OutlineOutcome {
+  diagnostics: Diagnostic[];
+  /** The outline was drawn by this call (so the inset may move it). */
+  drew: boolean;
+  /** A blank's vias or holes were drawn with it: the outline is the blank's and must stay put. */
+  fixed: boolean;
+  viasAdded: number;
+  holesAdded: number;
+}
+
 /**
- * Draws the outline when the board has none. A board that already has one is left alone — the
+ * Draws the outline when the board has none, and with it a blank's vias and holes. A board that
+ * already has an outline is left alone (a warning says so when the spec has a blank but the board
+ * has no vias at all) — the
  * author may have shaped it by hand, and a compile should not flatten that. `drew` says which.
  */
-export async function ensureOutline(
-  board: Board,
-  spec: BoardSpec | undefined,
-  message = "Compile: board outline",
-): Promise<{ diagnostics: Diagnostic[]; drew: boolean }> {
+export async function ensureOutline(board: Board, spec: BoardSpec | undefined, message = "Compile: board outline"): Promise<OutlineOutcome> {
+  const none: OutlineOutcome = { diagnostics: [], drew: false, fixed: false, viasAdded: 0, holesAdded: 0 };
   const points = outlinePoints(spec);
-  if (!points) return { diagnostics: [], drew: false };
-  if (await hasOutline(board)) return { diagnostics: [], drew: false };
-  if (points.length < 3)
-    return { diagnostics: [diag("error", `Board outline needs at least 3 points, got ${points.length}.`, "bad_outline")], drew: false };
-  await board.commit(message, (tx) => tx.create(outlineItems(points)));
-  return { diagnostics: [], drew: true };
+  if (!points) return none;
+  const blank = prefabItems(spec);
+  if (await hasOutline(board)) {
+    if (blank.vias.length && !(await board.getTracks()).some((t) => t instanceof Via))
+      return {
+        ...none,
+        diagnostics: [
+          diag(
+            "warning",
+            `The board already has an outline, so the blank's ${blank.vias.length} vias were not drawn; delete the outline and build again to draw the blank.`,
+            "blank_not_drawn",
+          ),
+        ],
+      };
+    return none;
+  }
+  if (points.length < 3) return { ...none, diagnostics: [diag("error", `Board outline needs at least 3 points, got ${points.length}.`, "bad_outline")] };
+  const items: Item[] = [...outlineItems(points), ...blank.holes, ...blank.vias];
+  await board.commit(message, (tx) => tx.create(items));
+  return { diagnostics: [], drew: true, fixed: blank.vias.length > 0 || blank.holes.length > 0, viasAdded: blank.vias.length, holesAdded: blank.holes.length };
 }
 
 /**
@@ -154,11 +223,20 @@ export async function ensureOutline(
  * detail on a single diagnostic rather than a line each, because its lines cannot be told apart.
  * A clean import yields nothing — "Added footprint R1" is a log line, not a problem.
  */
+/** The importer's warning for a via on no net — one per free via of a blank, by design. */
+const FREE_VIA_WARNING = /^Via connected to unknown net \(\)\.?$/;
+
 export function reportDiagnostics(report: string, errorCount: number, warningCount: number): Diagnostic[] {
-  const detail = report.trim();
+  const lines = report.split(/\r?\n/);
+  const freeVias = lines.filter((l) => FREE_VIA_WARNING.test(l.trim())).length;
+  const detail = lines
+    .filter((l) => !FREE_VIA_WARNING.test(l.trim()))
+    .join("\n")
+    .trim();
+  const warnings = Math.max(0, warningCount - freeVias);
   const withDetail = (head: string) => (detail ? `${head}\n${detail}` : head);
   if (errorCount > 0) return [diag("error", withDetail(`ImportNetlist reported ${errorCount} error(s).`), "import_failed")];
-  if (warningCount > 0) return [diag("warning", withDetail(`ImportNetlist reported ${warningCount} warning(s).`), "import_warnings")];
+  if (warnings > 0) return [diag("warning", withDetail(`ImportNetlist reported ${warnings} warning(s).`), "import_warnings")];
   return [];
 }
 
@@ -241,6 +319,8 @@ export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOp
     footprintsAdded: 0,
     footprintsPlaced: 0,
     edgeInsetNm: null,
+    viasAdded: 0,
+    holesAdded: 0,
   });
   const cancelled = () => {
     if (opts.signal?.aborted) throw new CompileCancelled();
@@ -280,17 +360,35 @@ export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOp
   if (opts.autoplace && added.length) {
     cancelled();
     opts.onStage?.("placing");
-    const outcome = await board.autoplace(added, { includeOffboard: true });
+    // The request itself can fail: after `SetNetClasses` in the session the fork answers
+    // `basic_string` for newly imported footprints (G29). The footprints then stay where the
+    // import spread them, inside the outline, and the compile goes on.
+    const outcome = await board.autoplace(added, { includeOffboard: true }).catch((e: unknown) => ({
+      ok: false,
+      placedCount: 0,
+      error: e instanceof Error ? e.message : String(e),
+    }));
     footprintsPlaced = outcome.placedCount;
-    if (!outcome.ok) {
+    if ("error" in outcome) {
+      diagnostics.push(diag("warning", `Autoplace failed (${outcome.error}); the imported footprints were left where the import put them.`, "autoplace_failed"));
+    } else if (!outcome.ok) {
       // Every non-completed result comes back as APR_NO_BOARD_OUTLINE, so the wording stays broad.
       diagnostics.push(
         diag("warning", "Autoplace did not complete (KiCad reports no board outline or a placement failure).", "autoplace_failed"),
       );
     } else if (opts.edgeMarginNm) {
       // 5. Keep the placed group off the edge — by moving the outline we drew, or by saying we could not.
-      if (outline.drew) {
+      if (outline.drew && !outline.fixed) {
         edgeInsetNm = await insetOutline(board, added, opts.edgeMarginNm);
+      } else if (outline.fixed) {
+        // The outline is a blank's: its vias and holes are where the copper says they are.
+        diagnostics.push(
+          diag(
+            "warning",
+            "Autoplaced footprints are packed into the outline's corner and may sit on the blank's vias or holes; place them before routing.",
+            "prefab_placement",
+          ),
+        );
       } else {
         diagnostics.push(
           diag(
@@ -311,5 +409,7 @@ export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOp
     footprintsAdded: added.length,
     footprintsPlaced,
     edgeInsetNm,
+    viasAdded: outline.viasAdded,
+    holesAdded: outline.holesAdded,
   };
 }

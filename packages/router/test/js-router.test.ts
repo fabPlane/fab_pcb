@@ -1,10 +1,10 @@
 /** The JS router on the synthetic two-net board: input translation, routing, output conversion. */
 import { describe, expect, test } from "bun:test";
 import { BoardLayer } from "@fp-pcb/proto";
-import { mm } from "@fp-pcb/client";
+import { mm, toMm } from "@fp-pcb/client";
 import { segmentDistance } from "../src/geometry";
-import { JsRouter, LayerNames, buildSimpleRouteJson, tracesToItems } from "../src/js-router";
-import type { RouteProgress } from "../src/types";
+import { JsRouter, LayerNames, buildSimpleRouteJson, tracesToItems, type SrjTrace, type SrjWire } from "../src/js-router";
+import type { RouteProgress, RouteVia } from "../src/types";
 import { twoNetBoard, F, B } from "./fixtures";
 
 describe("buildSimpleRouteJson", () => {
@@ -159,4 +159,112 @@ describe("JsRouter cancellation", () => {
     expect(calls).toBeGreaterThanOrEqual(2);
     expect(calls).toBeLessThan(20);
   }, 60_000);
+});
+
+describe("prefab blanks: free vias, the laser-prefab preset and claiming", () => {
+  const freeVia = (id: string, x: number, y: number): RouteVia => ({
+    id,
+    net: "",
+    netCode: 0,
+    position: { x: Math.round(mm(x)), y: Math.round(mm(y)) },
+    diameter: mm(1),
+    drill: mm(0.2),
+    layers: [F, B],
+  });
+  const wire = (x: number, y: number, layer: string): SrjWire => ({ route_type: "wire", x, y, width: 0.25, layer });
+
+  test("free vias become netIsAssignable obstacles; netted vias stay plain obstacles", () => {
+    const input = twoNetBoard();
+    input.vias.push(freeVia("v0", 10, 15), { ...freeVia("v1", 20, 15), net: "A", netCode: 1 });
+    const { srj, assignable } = buildSimpleRouteJson(input);
+    expect(assignable).toBe(1);
+    expect(srj.obstacles.find((o) => o.obstacleId === "v0")).toMatchObject({ netIsAssignable: true, connectedTo: [] });
+    expect(srj.obstacles.find((o) => o.obstacleId === "v1")).toMatchObject({ connectedTo: ["A"] });
+    expect(srj.obstacles.find((o) => o.obstacleId === "v1")!.netIsAssignable).toBeUndefined();
+  });
+
+  test("tracesToItems claims the free via under a route via and snaps the tracks to its centre", () => {
+    const input = twoNetBoard();
+    input.vias.push(freeVia("v0", 10, 15.02));
+    const layers = new LayerNames([F, B]);
+    const traces: SrjTrace[] = [
+      {
+        connection_name: "A",
+        route: [wire(5, 5, "top"), wire(10, 15, "top"), { route_type: "via", x: 10, y: 15, from_layer: "top", to_layer: "bottom" }, wire(10, 15, "bottom"), wire(25, 25, "bottom")],
+      },
+      {
+        connection_name: "B",
+        route: [wire(25, 5, "top"), wire(20, 20, "top"), { route_type: "via", x: 20, y: 20, from_layer: "top", to_layer: "bottom" }, wire(20, 20, "bottom"), wire(5, 25, "bottom")],
+      },
+    ];
+    const r = tracesToItems(traces, input, layers);
+    expect(r.claimedVias).toEqual([{ id: "v0", net: "A", netCode: 1, position: { x: mm(10), y: Math.round(mm(15.02)) } }]);
+    expect(r.vias.length).toBe(1); // B's via is nowhere near a free via and is added as usual
+    expect(r.vias[0]!.position).toEqual({ x: mm(20), y: mm(20) });
+    expect(r.conflicts).toBe(0);
+    const a = r.tracks.filter((t) => t.net === "A");
+    expect(a[0]!.end).toEqual({ x: mm(10), y: Math.round(mm(15.02)) });
+    expect(a[1]!.start).toEqual({ x: mm(10), y: Math.round(mm(15.02)) });
+    expect(r.routedNets).toEqual(new Set(["A", "B"]));
+  });
+
+  test("a free via two nets land on is claimed once and counted as a conflict", () => {
+    const input = twoNetBoard();
+    input.vias.push(freeVia("v0", 15, 10));
+    const layers = new LayerNames([F, B]);
+    const via = { route_type: "via", x: 15, y: 10, from_layer: "top", to_layer: "bottom" } as const;
+    const r = tracesToItems(
+      [
+        { connection_name: "A", route: [wire(5, 5, "top"), wire(15, 10, "top"), via, wire(15, 10, "bottom"), wire(25, 25, "bottom")] },
+        { connection_name: "B", route: [wire(25, 5, "top"), wire(15, 10, "top"), via, wire(15, 10, "bottom"), wire(5, 25, "bottom")] },
+      ],
+      input,
+      layers,
+    );
+    expect(r.claimedVias.map((c) => c.net)).toEqual(["A"]);
+    expect(r.vias).toEqual([]);
+    expect(r.conflicts).toBe(1);
+  });
+
+  test("with free vias the laser-prefab preset is chosen and no via is added off them", async () => {
+    const input = twoNetBoard();
+    // SMD pads on top only, on the middle of each edge: A left-right, B top-bottom. Neither net can
+    // go around the other along the edge, so one of them has to change layers through the blank's vias.
+    const at: Record<string, [number, number]> = { a1: [1, 15], a2: [29, 15], b1: [15, 1], b2: [15, 29] };
+    for (const pad of input.pads) {
+      const [x, y] = at[pad.id] ?? [toMm(pad.position.x), toMm(pad.position.y)];
+      Object.assign(pad, { layers: [F], through: false, drill: 0, position: { x: mm(x), y: mm(y) } });
+    }
+    const byId = new Map(input.pads.map((p) => [p.id, p]));
+    for (const c of input.connections) {
+      c.from = { ...c.from, layers: [F], position: byId.get(c.from.itemId)!.position };
+      c.to = { ...c.to, layers: [F], position: byId.get(c.to.itemId)!.position };
+    }
+    for (const [i, [x, y]] of [
+      [10, 10],
+      [20, 10],
+      [10, 20],
+      [20, 20],
+      [15, 7],
+      [15, 23],
+    ].entries())
+      input.vias.push(freeVia(`v${i}`, x!, y!));
+    const result = await new JsRouter().route(input, { maxTimeMs: 60_000 });
+    expect(result.preset).toBe("laser-prefab");
+    expect(result.timedOut).toBe(false);
+    expect(result.vias).toEqual([]);
+    for (const c of result.claimedVias ?? []) expect(input.vias.some((v) => v.id === c.id)).toBe(true);
+    expect(result.log.some((l) => l.startsWith("laser-prefab:"))).toBe(true);
+    // Two crossing nets between top-only pads: one of them claimed vias, or stayed unrouted.
+    expect((result.claimedVias ?? []).length + result.unrouted.length).toBeGreaterThan(0);
+    console.log(`laser-prefab on the two-net board: ${result.claimedVias?.length ?? 0} claimed, ${result.unrouted.length} unrouted, ${result.elapsedMs} ms`);
+  }, 120_000);
+
+  test("preset default treats free vias as obstacles and says so", async () => {
+    const input = twoNetBoard();
+    input.vias.push(freeVia("v0", 10, 10));
+    const result = await new JsRouter().route(input, { maxTimeMs: 60_000, preset: "default" });
+    expect(result.preset).toBe("default");
+    expect(result.log.some((l) => l.includes("free via(s) are obstacles to the default preset"))).toBe(true);
+  }, 120_000);
 });

@@ -10,8 +10,10 @@ import { existsSync } from "node:fs";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { toMm } from "@fp-pcb/client";
+import { BoardLayer } from "@fp-pcb/proto";
+import { Via, toMm } from "@fp-pcb/client";
 import { applyNetlist, edgeClearanceNm, footprintIds, hasOutline, outlineOrigin, type ApplyStage } from "../src/apply";
+import { applyBoardConstraints, applyDefaultNetClass, defaultNetClass } from "../src/rules";
 import { haveKicad, KICAD_CLI, NETLIST, newProjectWithLibraries, startBareServer, type RunningServer } from "./kicad-server";
 
 if (!haveKicad())
@@ -115,4 +117,74 @@ describe.skipIf(!haveKicad())("applyNetlist + kicad-cli api-server", () => {
     expect(fps.map((f) => f.reference)).toEqual(["R1"]);
     expect(fps[0]!.libraryId).toContain("R_0603_1608Metric");
   }, 60_000);
+
+  test("a blank: free vias and holes are drawn with the outline, which then stays put; rules reach the net class", async () => {
+    const { board, projectDir } = await newProjectWithLibraries(server.kicad, root, "blank");
+    const spec = { clearanceMm: 0.25, trackWidthMm: 0.3, viaDiameterMm: 1, viaDrillMm: 0.2 };
+    // The job's order: constraints before the apply, the net class after it (G29).
+    const before = (await board.designRules()).rules.constraints?.copperEdgeClearance?.valueNm;
+    expect(await applyBoardConstraints(board, spec)).toHaveLength(4);
+    const rules = await board.designRules();
+    expect(toMm(Number(rules.rules.constraints?.minTrackWidth?.valueNm ?? 0))).toBeCloseTo(0.3, 6);
+    // Constraints the spec does not name keep their values (a partial message would zero them).
+    expect(rules.rules.constraints?.copperEdgeClearance?.valueNm).toBe(before);
+
+    const margin = await edgeClearanceNm(board);
+    const outcome = await applyNetlist(board, NETLIST, {
+      netlistPath: join(projectDir, ".fp-pcb", "compile.net"),
+      board: {
+        widthMm: 30,
+        heightMm: 20,
+        rules: { viaDiameterMm: 1, viaDrillMm: 0.2 },
+        vias: [
+          { x: 5, y: 5 },
+          { x: 25, y: 15, diameterMm: 0.8, drillMm: 0.3 },
+        ],
+        holes: [{ x: 27, y: 3, diameterMm: 2.5 }],
+      },
+      autoplace: true,
+      edgeMarginNm: margin,
+    });
+    expect(outcome.viasAdded).toBe(2);
+    expect(outcome.holesAdded).toBe(1);
+    expect(outcome.edgeInsetNm).toBeNull();
+    expect(outcome.diagnostics.map((d) => d.code)).toEqual(["prefab_placement"]);
+    expect(await outlineOrigin(board)).toEqual({ x: 0, y: 0 });
+    const vias = (await board.getTracks()).filter((t): t is Via => t instanceof Via);
+    expect(vias).toHaveLength(2);
+    expect(vias.every((v) => !v.net)).toBe(true);
+    const small = vias.find((v) => toMm(v.position.x) === 25)!;
+    expect(toMm(small.diameter)).toBeCloseTo(0.8, 6);
+    expect(toMm(small.drillDiameter)).toBeCloseTo(0.3, 6);
+    const big = vias.find((v) => toMm(v.position.x) === 5)!;
+    expect(toMm(big.diameter)).toBeCloseTo(1, 6);
+    const edges = (await board.getShapes()).filter((s) => s.proto.layer === BoardLayer.BL_Edge_Cuts);
+    expect(edges).toHaveLength(5);
+    expect(edges.filter((s) => s.proto.shape?.geometry.case === "circle")).toHaveLength(1);
+
+    // A second compile sees the outline and leaves the blank alone.
+    const again = await applyNetlist(board, NETLIST, { netlistPath: join(projectDir, ".fp-pcb", "compile.net"), board: { widthMm: 30, heightMm: 20, vias: [{ x: 5, y: 5 }] }, autoplace: false });
+    expect(again.viasAdded).toBe(0);
+    expect(again.diagnostics).toEqual([]);
+    expect((await board.getTracks()).filter((t) => t instanceof Via)).toHaveLength(2);
+
+    expect(await applyDefaultNetClass(server.kicad, spec)).toHaveLength(4);
+    const cls = await defaultNetClass(server.kicad);
+    expect(toMm(Number(cls?.board?.trackWidth?.valueNm ?? 0))).toBeCloseTo(0.3, 6);
+    expect(toMm(Number(cls?.board?.clearance?.valueNm ?? 0))).toBeCloseTo(0.25, 6);
+    expect(toMm(Number(cls?.board?.viaStack?.copperLayers[0]?.size?.xNm ?? 0))).toBeCloseTo(1, 6);
+    expect(toMm(Number(cls?.board?.viaStack?.drill?.diameter?.xNm ?? 0))).toBeCloseTo(0.2, 6);
+    // G29: a footprint imported after SetNetClasses cannot be autoplaced; the compile warns and goes on.
+    const later = await applyNetlist(
+      board,
+      {
+        components: [...NETLIST.components, { ref: "R3", value: "3k3", footprint: "Resistor_SMD:R_0603_1608Metric" }],
+        nets: NETLIST.nets.map((n, i) => ({ ...n, nodes: [...n.nodes, { ref: "R3", pin: String(i + 1) }] })),
+      },
+      { netlistPath: join(projectDir, ".fp-pcb", "compile.net"), autoplace: true },
+    );
+    expect(later.footprintsAdded).toBe(1);
+    expect(later.diagnostics.map((d) => d.code)).toEqual(["autoplace_failed"]);
+    expect((await board.getFootprints()).map((f) => f.reference).sort()).toEqual(["R1", "R2", "R3"]);
+  }, 120_000);
 });
