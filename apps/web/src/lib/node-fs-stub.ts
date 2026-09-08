@@ -19,5 +19,6 @@ export const writeFile = unavailable('writeFile');
 export const readdir = unavailable('readdir');
 export const mkdir = unavailable('mkdir');
 export const stat = unavailable('stat');
+export const rm = unavailable('rm');
 
-export default { readFile, writeFile, readdir, mkdir, stat };
+export default { readFile, writeFile, readdir, mkdir, stat, rm };

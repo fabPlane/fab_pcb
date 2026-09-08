@@ -117,8 +117,14 @@ export class KicadSessionService implements SessionService {
   private subscriber: { close(): Promise<void> } | null = null;
   /** The loaded module in wasm mode; owns MEMFS and is shut down with the transport. */
   private instance: KiCadWasm | null = null;
-  /** Files imported before the module existed, written into MEMFS as soon as it does. */
+  /**
+   * Every file imported in wasm mode, kept for the life of the service. MEMFS dies with the module
+   * and `connect()` loads a fresh one, so the import has to be replayed into each new instance --
+   * otherwise the project the user just picked is gone by the time KiCad is asked to open it.
+   */
   private staged: { path: string; bytes: Uint8Array }[] = [];
+  /** How many of `staged` the current instance already has. */
+  private stagedWritten = 0;
 
   constructor(private readonly opts: KicadSessionOptions) {
     this.fetchImpl = opts.fetch ?? ((input, init) => fetch(input, init));
@@ -437,6 +443,7 @@ export class KicadSessionService implements SessionService {
           printErr: (line) => this.log(line, 'warn'),
         });
     this.instance = instance;
+    this.stagedWritten = 0; // a new module means a new (empty) MEMFS: replay every import
     this.log(`KiCad wasm module loaded in ${Math.round(performance.now() - t0)} ms`);
     this.flushStaged();
     return new WasmTransport(instance, { defaultTimeoutMs: 120_000, log: (m) => this.log(m) });
@@ -467,14 +474,14 @@ export class KicadSessionService implements SessionService {
     return `${root}/${main}`;
   }
 
-  /** Write everything staged so far; a no-op until the module exists. */
+  /** Write everything the current instance is missing; a no-op until the module exists. */
   private flushStaged(): void {
     const instance = this.instance;
-    if (!instance || this.staged.length === 0) return;
-    const staged = this.staged;
-    this.staged = [];
-    for (const f of staged) memfsWrite(instance, f.path, f.bytes);
-    this.log(`wrote ${staged.length} file(s) into the wasm module's file system`);
+    if (!instance || this.staged.length === this.stagedWritten) return;
+    const pending = this.staged.slice(this.stagedWritten);
+    for (const f of pending) memfsWrite(instance, f.path, f.bytes);
+    this.stagedWritten = this.staged.length;
+    this.log(`wrote ${pending.length} file(s) into the wasm module's file system`);
   }
 
   private async closeEvents(): Promise<void> {
