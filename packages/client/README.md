@@ -54,6 +54,9 @@ const board = await project.openBoard();
 // --- read items (Layer 3 wrappers; positions are plain numbers in nm) ---
 const footprints = await board.getFootprints();
 console.log(footprints[0]!.reference, footprints[0]!.position); // "R1" { x: 12000000, y: 8000000 }
+// Moves the anchor plus pads, fields, text, and graphics; send the returned wrapper in one commit.
+footprints[0]!.translate({ x: mm(1), y: 0 });
+await board.commit("move R1", (tx) => tx.update([footprints[0]!]));
 
 // --- write: one commit = BeginCommit + batched Create/Update/Delete + EndCommit ---
 const track = new Track();

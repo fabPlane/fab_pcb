@@ -9,14 +9,21 @@ import {
   NetSchema,
   PadSchema,
   PadType,
+  kiapiRegistry,
+  packAny,
+  unpackAny,
+  type BoardGraphicShape,
+  type BoardText,
+  type BoardTextBox,
   type Field as FieldProto,
   type Footprint as FootprintDefinition,
   type FootprintAttributes,
   type FootprintInstance,
   type Pad as PadProto,
   type PadStack,
+  type Vector2,
 } from "@fp-pcb/proto";
-import { deg, nm, toAngle, type Vec2 } from "../../../units";
+import { deg, nm, toAngle, toVector2, vec2, type Vec2 } from "../../../units";
 import { Item, registerItem, wrapAll } from "../base";
 
 export class BoardField extends Item<FieldProto> {
@@ -146,6 +153,26 @@ export class Footprint extends Item<FootprintInstance> {
   set position(v: Vec2) {
     this.setVec((x) => (this.proto.position = x), v);
   }
+  /**
+   * Move the footprint and every child coordinate KiCad serializes in the board frame. Merely
+   * changing `position` is insufficient: footprint deserialization restores pads, fields, text,
+   * and graphics from their absolute child coordinates after setting the anchor.
+   */
+  translate(delta: Vec2): this {
+    if (!delta.x && !delta.y) return this;
+    this.proto.position = shifted(this.proto.position, delta);
+    for (const field of mandatoryFields(this.proto)) translateField(field, delta);
+    const definition = this.proto.definition;
+    if (definition) {
+      for (const field of mandatoryFields(definition)) translateField(field, delta);
+      definition.items = definition.items.map((any) => {
+        const item = unpackAny(any);
+        if (!item || !translateFootprintChild(item, delta)) return any;
+        return packAny(itemSchema(item.$typeName), item);
+      });
+    }
+    return this;
+  }
   /** Rotation in degrees. */
   get orientation(): number {
     return deg(this.proto.orientation);
@@ -230,6 +257,116 @@ export class Footprint extends Item<FootprintInstance> {
   }
 }
 registerItem(Footprint);
+
+function shifted(value: Vector2 | undefined, delta: Vec2): Vector2 {
+  const p = vec2(value);
+  return toVector2({ x: p.x + delta.x, y: p.y + delta.y });
+}
+
+function mandatoryFields(container: {
+  referenceField?: FieldProto;
+  valueField?: FieldProto;
+  datasheetField?: FieldProto;
+  descriptionField?: FieldProto;
+}): FieldProto[] {
+  return [container.referenceField, container.valueField, container.datasheetField, container.descriptionField].filter(
+    (field): field is FieldProto => field !== undefined,
+  );
+}
+
+function translateField(field: FieldProto, delta: Vec2): void {
+  const text = field.text?.text;
+  if (text) text.position = shifted(text.position, delta);
+}
+
+function translateShape(shape: BoardGraphicShape["shape"], delta: Vec2): void {
+  const geometry = shape?.geometry;
+  if (!geometry?.case) return;
+  const shift = (owner: Record<string, unknown>, key: string) => {
+    owner[key] = shifted(owner[key] as Vector2 | undefined, delta);
+  };
+  const value = geometry.value as unknown as Record<string, unknown>;
+  switch (geometry.case) {
+    case "segment":
+      shift(value, "start");
+      shift(value, "end");
+      break;
+    case "rectangle":
+      shift(value, "topLeft");
+      shift(value, "bottomRight");
+      break;
+    case "arc":
+      shift(value, "start");
+      shift(value, "mid");
+      shift(value, "end");
+      break;
+    case "circle":
+      shift(value, "center");
+      shift(value, "radiusPoint");
+      break;
+    case "bezier":
+      for (const key of ["start", "control1", "control2", "end"]) shift(value, key);
+      break;
+    case "ellipse":
+    case "ellipseArc":
+      shift(value, "center");
+      break;
+    case "polygon": {
+      const polygons = value.polygons as Array<{ outline?: { nodes: unknown[] }; holes: Array<{ nodes: unknown[] }> }>;
+      for (const polygon of polygons) {
+        for (const line of [polygon.outline, ...polygon.holes]) {
+          for (const node of line?.nodes ?? []) {
+            const nodeGeometry = (node as { geometry: { case?: string; value: unknown } }).geometry;
+            if (nodeGeometry.case === "point") nodeGeometry.value = shifted(nodeGeometry.value as Vector2, delta);
+            if (nodeGeometry.case === "arc") {
+              const arc = nodeGeometry.value as unknown as Record<string, unknown>;
+              for (const key of ["start", "mid", "end"]) shift(arc, key);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/** Translate the coordinate-bearing item kinds a footprint definition may embed. */
+function translateFootprintChild(item: { $typeName: string } & Record<string, unknown>, delta: Vec2): boolean {
+  switch (item.$typeName) {
+    case "kiapi.board.types.Pad":
+    case "kiapi.board.types.ReferenceImage":
+    case "kiapi.board.types.ReferencePoint":
+    case "kiapi.board.types.Barcode":
+      item.position = shifted(item.position as Vector2 | undefined, delta);
+      return true;
+    case "kiapi.board.types.Field":
+      translateField(item as unknown as FieldProto, delta);
+      return true;
+    case "kiapi.board.types.BoardText": {
+      const text = (item as unknown as BoardText).text;
+      if (text) text.position = shifted(text.position, delta);
+      return true;
+    }
+    case "kiapi.board.types.BoardTextBox": {
+      const box = (item as unknown as BoardTextBox).textbox;
+      if (box) {
+        box.topLeft = shifted(box.topLeft, delta);
+        box.bottomRight = shifted(box.bottomRight, delta);
+      }
+      return true;
+    }
+    case "kiapi.board.types.BoardGraphicShape":
+      translateShape((item as unknown as BoardGraphicShape).shape, delta);
+      return true;
+    default:
+      return false;
+  }
+}
+
+function itemSchema(typeName: string) {
+  const schema = kiapiRegistry.getMessage(typeName);
+  if (!schema) throw new Error(`unknown footprint child type ${typeName}`);
+  return schema;
+}
 
 /**
  * The *library* definition of a footprint (`kiapi.board.types.Footprint`), as
