@@ -16,17 +16,62 @@ import {
   type BridgeControlMessage,
   type BridgeEventsState,
   type KiCadServerState,
+  type Transport,
 } from "@fp-pcb/client/transport";
 import type { BridgeConfig } from "./config";
 import { pingUntilReady } from "./kicad-ping";
+import { isSessionBackend, type SessionBackend } from "./wasm-protocol";
+import { WasmSession } from "./session-wasm";
 
 export interface WsData {
-  session: Session;
+  session: SessionLike;
   clientId: number;
+}
+
+/**
+ * What the server (and `SessionManager`) needs from a session, whatever runs KiCad behind it: the
+ * process-backed `Session` in this file and the worker-backed `WasmSession` in `./session-wasm`.
+ * The WebSocket frame pass-through only ever touches `state` and `transport`, so it has no idea
+ * which backend answered.
+ */
+export interface SessionLike {
+  readonly id: string;
+  readonly backend: SessionBackend;
+  readonly path: string | null;
+  /** The nng socket for the process backend; an `inproc://` label for the wasm one. */
+  readonly socketPath: string;
+  readonly eventsSocketPath: string | null;
+  readonly state: KiCadServerState;
+  readonly error: string | null;
+  readonly kicadToken: string | null;
+  readonly eventsState: BridgeEventsState;
+  /** Event frames relayed to clients so far. */
+  readonly eventsRelayed: number;
+  readonly startedAt: Date;
+  readonly readyAt: Date | null;
+  /** How the backend ended: the process exit code, or null (the wasm worker has neither). */
+  readonly exitCode: number | null;
+  readonly signal: string | null;
+  readonly transport: Transport | null;
+  readonly clients: Set<ServerWebSocket<WsData>>;
+  readonly logLines: string[];
+  /** No WebSocket client and no SSE listener attached. */
+  readonly idle: boolean;
+  readonly lastClientAt: Date;
+  info(): SessionInfo;
+  touch(): void;
+  onEvent(cb: (event: Uint8Array) => void): () => void;
+  onEventsState(cb: (state: BridgeEventsState, message?: string) => void): () => void;
+  broadcast(msg: BridgeControlMessage): void;
+  tailLog(lines?: number): string;
+  start(): Promise<void>;
+  stop(): Promise<void>;
 }
 
 export interface SessionInfo {
   id: string;
+  /** Which implementation runs KiCad: a `kicad-cli` process, or a wasm module in a Worker. */
+  backend: SessionBackend;
   state: KiCadServerState;
   path: string | null;
   socketPath: string;
@@ -62,12 +107,15 @@ export interface CreateSessionOptions {
   socket?: string;
   /** Explicit session id (must be `[A-Za-z0-9_-]{1,64}`); default random. */
   id?: string;
+  /** Override `SESSION_BACKEND` for this session only. */
+  backend?: SessionBackend;
 }
 
 const LOG_RING = 200;
 const SESSION_ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
 
-export class Session {
+export class Session implements SessionLike {
+  readonly backend = "process" as const;
   readonly id: string;
   readonly path: string | null;
   readonly socketPath: string;
@@ -109,6 +157,7 @@ export class Session {
   info(): SessionInfo {
     return {
       id: this.id,
+      backend: this.backend,
       state: this.state,
       path: this.path,
       socketPath: this.socketPath,
@@ -430,7 +479,7 @@ export class Session {
 }
 
 export class SessionManager {
-  private readonly sessions = new Map<string, Session>();
+  private readonly sessions = new Map<string, SessionLike>();
   private reaper: ReturnType<typeof setInterval> | null = null;
 
   constructor(private readonly cfg: BridgeConfig) {
@@ -467,7 +516,7 @@ export class SessionManager {
     return [...this.sessions.values()].map((s) => s.info());
   }
 
-  get(id: string): Session | undefined {
+  get(id: string): SessionLike | undefined {
     return this.sessions.get(id);
   }
 
@@ -475,11 +524,13 @@ export class SessionManager {
     return this.sessions.size;
   }
 
-  /** Spawn a server and resolve once it answers Ping with AS_OK. */
-  async create(opts: CreateSessionOptions = {}): Promise<Session> {
+  /** Start a backend (spawn a process, or load the module in a Worker) and resolve once it answers Ping with AS_OK. */
+  async create(opts: CreateSessionOptions = {}): Promise<SessionLike> {
     const id = opts.id ?? randomId();
     if (!SESSION_ID_RE.test(id)) throw new Error(`invalid session id "${id}"`);
     if (this.sessions.has(id)) throw new Error(`session "${id}" already exists`);
+    const backend = opts.backend ?? this.cfg.sessionBackend;
+    if (!isSessionBackend(backend)) throw new Error(`invalid session backend "${String(backend)}" (expected "process" or "wasm")`);
     const path = opts.path ? resolve(this.cfg.workspaceRoot, opts.path) : null;
     if (path) {
       try {
@@ -489,7 +540,7 @@ export class SessionManager {
       }
     }
     const socketPath = opts.socket ? resolve(opts.socket) : join(this.cfg.socketDir, `api-${id}.sock`);
-    const session = new Session(this.cfg, id, path, socketPath);
+    const session: SessionLike = backend === "wasm" ? new WasmSession(this.cfg, id, path) : new Session(this.cfg, id, path, socketPath);
     this.sessions.set(id, session);
     try {
       await session.start();
