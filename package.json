@@ -23,7 +23,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "ci": "bun install --frozen-lockfile && bun run gen:check && bun run coverage:check && bun tooling/coverage/summary.ts --check && bun run typecheck && bun run test:unit",
-    "bundle:backend": "bun packages/kicad-patches/bundle.ts"
+    "bundle:backend": "bun packages/kicad-patches/bundle.ts",
+    "bundle:check": "bun packages/kicad-patches/check-bridge-targets.ts"
   },
   "devDependencies": {
     "@types/bun": "^1.2.0",

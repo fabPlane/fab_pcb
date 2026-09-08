@@ -71,6 +71,9 @@ jobs:
       - name: Unit tests
         run: bun run test:unit
 
+      - name: Cross-compile bridge entrypoint for desktop targets
+        run: bun run bundle:check
+
       - name: Coverage summary
         run: |
           bun tooling/coverage/summary.ts | tee coverage-summary.md
