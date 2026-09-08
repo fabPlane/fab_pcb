@@ -265,4 +265,27 @@ build lands.
 
 ## Status
 
-`docs/wasm-status.md` tracks what works and what is still missing.
+Conformance is 168 commands (153 headless + 15 gui-only, skipped by every headless backend) plus 6
+extra checks. Measured on an idle machine, 2026-09-09:
+
+|                                | `ipc` (kicad-cli)              | `stdio` (native host)           | `wasm`                                                                 |
+| ------------------------------ | ------------------------------ | ------------------------------- | ---------------------------------------------------------------------- |
+| Conformance                    | **177/177** (153/153 headless) | **150/153** headless, 6/6 extra | **150/153** headless, 6/6 extra                                        |
+| Conformance wall time          | ~5 min                         | ~2 min                          | **63 s** (both files)                                                  |
+| Open project + board           | 392 ms                         | 65 ms                           | **115 ms**                                                             |
+| DRC, kitchen sink (11 markers) | 69 ms                          | 65 ms                           | **77 ms** (first run 108 ms)                                           |
+| Ping, mean of 200              | 0.052 ms                       | 0.031 ms                        | **0.006 ms** raw dispatch (0.19 ms through the harness's MEMFS mirror) |
+
+|                                                 |                                                             |
+| ----------------------------------------------- | ----------------------------------------------------------- |
+| `kicad_api.wasm` / `kicad_api.js`               | **37.4 MB** / 224 KB, no `.data` bundle                     |
+| `createKiCadWasm()`                             | **104 ms** under Bun; 143 ms in a warm browser tab          |
+| First browser load                              | 37 MB fetched and instantiated in **564 ms** over localhost |
+| Mounting KiCad's share tree (185 files, 5.6 MB) | 16 ms                                                       |
+| Bridge `POST /sessions` → running and pinged    | **255 ms**                                                  |
+| RSS per instance                                | +346 MB for the first, +209 MB for the second               |
+
+The same three commands fail on `stdio` and `wasm`: `RunSchematicJobExportBOM`
+(`FIELDS_TABLE_DATA_MODEL_BASE` derives from `wxGridTableBase`), `RunBoardJobExport3D` (no
+OpenCascade) and `RunBoardJobExportRender` (no 3D viewer). `bun packages/client/test/bench-drc.ts`
+reproduces the timing rows; `docs/wasm-status.md` is the full report.
