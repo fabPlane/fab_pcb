@@ -1,12 +1,12 @@
 /**
- * `netlist-json`: the IR itself as a file, `circuit.netlist.json` = `{ netlist, board? }`.
+ * `netlist-json`: the IR itself as a file, `circuit.netlist.json` = `{ netlist, board?, libraries? }`.
  *
  * The simplest possible frontend — parse, shape-check, hand over — and the one that exercises the
  * whole apply path with no other dependency, which is why it ships first. Diagnostics name the
  * file and a JSON pointer (`/netlist/components/2/ref`); line numbers wait for a positional
  * parser, if one ever earns its keep.
  */
-import type { BoardSpec, CompileSource, Diagnostic, Frontend, FrontendResult, Netlist } from "../types";
+import type { BoardSpec, CompileSource, Diagnostic, Frontend, FrontendResult, LibrarySpec, Netlist } from "../types";
 
 export const NETLIST_JSON_KIND = "netlist-json";
 export const NETLIST_JSON_ENTRYPOINT = "circuit.netlist.json";
@@ -15,6 +15,8 @@ export const NETLIST_JSON_ENTRYPOINT = "circuit.netlist.json";
 export interface NetlistJsonFile {
   netlist: Netlist;
   board?: BoardSpec;
+  /** Libraries the footprints resolve against; registered in the project tables before the import. */
+  libraries?: LibrarySpec[];
 }
 
 type Check = (value: unknown, path: string) => void;
@@ -74,6 +76,14 @@ export function checkNetlistJson(value: unknown, file: string): { file: NetlistJ
   const node = obj({ ref: str(true), pin: str(true), pinFunction: str(false), pinType: str(false) });
   const net = obj({ name: str(true), code: num(), nodes: arr(node) });
   const point = obj({ x: num(), y: num() });
+  const library = obj({
+    kind: (v, path) => {
+      if (v !== "footprint" && v !== "symbol") errs.error(path, 'must be "footprint" or "symbol"');
+    },
+    nickname: str(true),
+    uri: str(true),
+    description: str(false),
+  });
 
   obj({
     netlist: obj({
@@ -90,6 +100,7 @@ export function checkNetlistJson(value: unknown, file: string): { file: NetlistJ
       },
       false,
     ),
+    libraries: (v, path) => v !== undefined && arr(library)(v, path),
   })(value, "");
 
   return { file: errs.ok ? (value as NetlistJsonFile) : null, diagnostics: errs.diagnostics };
@@ -115,7 +126,12 @@ async function build(source: CompileSource): Promise<FrontendResult> {
   }
   const { file: checked, diagnostics } = checkNetlistJson(parsed, file);
   if (!checked) return { netlist: null, diagnostics };
-  return { netlist: checked.netlist, ...(checked.board ? { board: checked.board } : {}), diagnostics };
+  return {
+    netlist: checked.netlist,
+    ...(checked.board ? { board: checked.board } : {}),
+    ...(checked.libraries ? { libraries: checked.libraries } : {}),
+    diagnostics,
+  };
 }
 
 export const netlistJsonFrontend: Frontend = { kind: NETLIST_JSON_KIND, build };

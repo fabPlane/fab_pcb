@@ -16,6 +16,9 @@
     },
     {
       "path": "../router"
+    },
+    {
+      "path": "../compile"
     }
   ]
 }
