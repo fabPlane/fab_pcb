@@ -7,7 +7,7 @@
  * `.kicad_pro`, an `fp-lib-table` or a test fixture valid without rewriting it, which is what the
  * conformance suite relies on.
  */
-import { readdir, readFile as hostReadFile, stat } from "node:fs/promises";
+import { readdir, readFile as hostReadFile, rm as hostRm, stat } from "node:fs/promises";
 import { mkdir, writeFile as hostWriteFile } from "node:fs/promises";
 import { dirname, join, posix } from "node:path";
 import type { KiCadWasmFS } from "./index";
@@ -174,4 +174,196 @@ export async function exportDir(instance: HasFS, memfsDir: string, hostDir: stri
     files++;
   }
   return files;
+}
+
+// ---------------------------------------------------------------------------- two-way mirroring
+
+/**
+ * Keeps one directory identical on the host and inside MEMFS.
+ *
+ * The wasm module has no host file system, so a caller that wants to *drive* KiCad the way a test
+ * or a bridge session does — write a file on the host, ask KiCad to open it, then look at what
+ * KiCad wrote — has to move the bytes across in both directions at every request boundary.
+ * `DirMirror` does that with a signature (size + mtime) per file, so a request that changes
+ * nothing costs one directory walk on each side and no copying. Directories are mirrored as
+ * entries in their own right: `CreateLibrary` makes an empty `foo.pretty/`, and a caller that only
+ * copied files would never see it appear.
+ *
+ * The two directions are deliberately asymmetric in who wins: `pushToMemfs()` treats the host as
+ * the truth (it is what the test just wrote), `pullToHost()` treats MEMFS as the truth (it is what
+ * KiCad just wrote). Both mirror deletions. That is only consistent because they are called in
+ * that order around every request, which leaves the two sides equal at each boundary.
+ */
+/** Signature standing for "this entry is a directory". */
+const DIR = "dir";
+
+/** Entries that were in `known` and are not in `now`, children before their parents. */
+function deepestFirst(known: Map<string, string>, now: Map<string, string>): string[] {
+  return [...known.keys()].filter((rel) => !now.has(rel)).sort((a, b) => b.split("/").length - a.split("/").length);
+}
+
+export class DirMirror {
+  /** Signature of every entry as last seen on the host, keyed by path relative to `dir`; a
+   * directory's signature is the constant `DIR`. */
+  private readonly host = new Map<string, string>();
+  /** Same, as last seen in MEMFS. */
+  private readonly mem = new Map<string, string>();
+
+  constructor(
+    private readonly instance: HasFS,
+    readonly dir: string,
+    private readonly memfsDir: string = dir,
+  ) {}
+
+  /** Record both sides as they are, copying nothing — call it right after the initial mount. */
+  async prime(): Promise<void> {
+    for (const [rel, sig] of await this.hostFiles()) this.host.set(rel, sig);
+    for (const [rel, sig] of this.memfsFiles()) this.mem.set(rel, sig);
+  }
+
+  /** Host → MEMFS, including deletions. Returns how many entries were written and removed. */
+  async pushToMemfs(): Promise<{ written: number; removed: number }> {
+    const fs = this.instance.FS;
+    const now = await this.hostFiles();
+    let written = 0;
+    let removed = 0;
+    for (const [rel, sig] of now) {
+      if (this.host.get(rel) === sig) continue;
+      const memfsPath = posix.join(this.memfsDir, rel);
+      if (sig === DIR) {
+        mkdirTree(fs, memfsPath);
+        this.host.set(rel, sig);
+        this.mem.set(rel, sig);
+        written++;
+        continue;
+      }
+      const data = await hostReadFile(join(this.dir, rel));
+      mkdirTree(fs, posix.dirname(memfsPath));
+      fs.writeFile(memfsPath, new Uint8Array(data));
+      this.host.set(rel, sig);
+      this.mem.set(rel, this.memfsSig(memfsPath) ?? sig);
+      written++;
+    }
+    for (const rel of deepestFirst(this.host, now)) {
+      const wasDir = this.host.get(rel) === DIR;
+      this.host.delete(rel);
+      this.mem.delete(rel);
+      try {
+        if (wasDir) fs.rmdir?.(posix.join(this.memfsDir, rel));
+        else fs.unlink(posix.join(this.memfsDir, rel));
+        removed++;
+      } catch {
+        /* already gone, or a directory the module still has entries in */
+      }
+    }
+    return { written, removed };
+  }
+
+  /** MEMFS → host, including deletions. Returns how many entries were written and removed. */
+  async pullToHost(): Promise<{ written: number; removed: number }> {
+    const now = this.memfsFiles();
+    let written = 0;
+    let removed = 0;
+    for (const [rel, sig] of now) {
+      if (this.mem.get(rel) === sig) continue;
+      const hostPath = join(this.dir, rel);
+      if (sig === DIR) {
+        await mkdir(hostPath, { recursive: true });
+        this.mem.set(rel, sig);
+        this.host.set(rel, sig);
+        written++;
+        continue;
+      }
+      await mkdir(dirname(hostPath), { recursive: true });
+      await hostWriteFile(hostPath, readFile(this.instance, posix.join(this.memfsDir, rel)));
+      this.mem.set(rel, sig);
+      this.host.set(rel, (await this.hostSig(hostPath)) ?? sig);
+      written++;
+    }
+    for (const rel of deepestFirst(this.mem, now)) {
+      const wasDir = this.mem.get(rel) === DIR;
+      this.mem.delete(rel);
+      this.host.delete(rel);
+      try {
+        await hostRm(join(this.dir, rel), { force: true, recursive: wasDir });
+        removed++;
+      } catch {
+        /* already gone */
+      }
+    }
+    return { written, removed };
+  }
+
+  private async hostFiles(): Promise<Map<string, string>> {
+    const out = new Map<string, string>();
+    const walk = async (dir: string, rel: string): Promise<void> => {
+      // A directory removed under us just contributes nothing.
+      const entries = await readdir(dir, { withFileTypes: true }).catch(() => []);
+      for (const entry of entries) {
+        const childRel = rel ? `${rel}/${entry.name}` : entry.name;
+        const child = join(dir, entry.name);
+        if (entry.isDirectory()) {
+          out.set(childRel, DIR);
+          await walk(child, childRel);
+        } else if (entry.isFile() || entry.isSymbolicLink()) {
+          const sig = await this.hostSig(child);
+          if (sig) out.set(childRel, sig);
+        }
+      }
+    };
+    await walk(this.dir, "");
+    return out;
+  }
+
+  private async hostSig(path: string): Promise<string | null> {
+    try {
+      const st = await stat(path);
+      return `${st.size}:${st.mtimeMs}`;
+    } catch {
+      return null;
+    }
+  }
+
+  private memfsFiles(): Map<string, string> {
+    const fs = this.instance.FS;
+    const out = new Map<string, string>();
+    const walk = (dir: string, rel: string): void => {
+      let entries: string[];
+      try {
+        entries = fs.readdir(dir);
+      } catch {
+        return;
+      }
+      for (const name of entries) {
+        if (name === "." || name === "..") continue;
+        const childRel = rel ? `${rel}/${name}` : name;
+        const child = posix.join(dir, name);
+        let mode: number;
+        try {
+          mode = fs.stat(child).mode;
+        } catch {
+          continue;
+        }
+        if (fs.isDir(mode)) {
+          out.set(childRel, DIR);
+          walk(child, childRel);
+        } else {
+          const sig = this.memfsSig(child);
+          if (sig) out.set(childRel, sig);
+        }
+      }
+    };
+    walk(this.memfsDir, "");
+    return out;
+  }
+
+  private memfsSig(path: string): string | null {
+    try {
+      const st = this.instance.FS.stat(path) as { size: number; mtime?: Date | number };
+      const mtime = st.mtime instanceof Date ? st.mtime.getTime() : (st.mtime ?? 0);
+      return `${st.size}:${mtime}`;
+    } catch {
+      return null;
+    }
+  }
 }
