@@ -14,12 +14,11 @@ TypeScript side (branch `wasm`, agent `ts-side`), 2026-09-09.
   suites use `RunningKiCad` only (`subscribe()`, `secondTransport()`, `server.eventsUrl`). A missing
   backend binary skips with the variable to set. Contract for the C++ side: `docs/08-wasm.md`.
 - **Verified** — `bun run test:unit` 10/10 packages green; `KICAD_TRANSPORT=ipc` conformance with the
-  dev `kicad-cli`: **176/177** (153/153 headless commands, 15 gui-only skips). The one failure,
-  `Events: DocumentChanged/DocumentSaved`, reports 3 event-sequence gaps and was recorded while
-  another agent was building KiCad at load 100+ (nng pub/sub drops frames behind a stalled
-  subscriber); re-check on an idle machine before calling it a regression. The `stdio` and `wasm`
-  paths of the harness were smoke-tested against fake hosts that answer a canned `AS_OK`: both load,
-  mount, connect and run until the fixtures' real content is needed.
+  dev `kicad-cli`: **177/177**, 153/153 headless commands, 15 gui-only skips, 6/6 extra checks (a
+  first run scored 176/177 with 3 event-sequence gaps while another agent was building KiCad at load
+  100+ — nng pub/sub drops frames behind a stalled subscriber; it is green on an idle machine). The
+  `stdio` and `wasm` paths of the harness were smoke-tested against fake hosts answering a canned
+  `AS_OK`: both load, mount, connect and run until the fixtures' real content is needed.
 - **Blocked on the C++ side** — nothing exists yet at `kicad/build/native-host/kicad-api-host-native`
   or `kicad/build/wasm/host/kicad_api.js`, so neither backend has run against real KiCad. Change
   `docs/08-wasm.md` if the build lands with different names, paths, or an `--events-fd` fallback.
