@@ -70,6 +70,7 @@
         "@fp-pcb/proto": "workspace:*",
       },
       "devDependencies": {
+        "@fp-pcb/kicad-wasm": "workspace:*",
         "@types/bun": "^1.2.0",
         "typescript": "^5.6.0",
       },

@@ -56,6 +56,7 @@ Ownership of every path is in [docs/ownership.md](docs/ownership.md). Start with
 4. [docs/04-ipc-gaps.md](docs/04-ipc-gaps.md) — what the IPC layer cannot do yet and the patch plan for the KiCad fork
 5. [docs/05-agents.md](docs/05-agents.md) — the agent roster, waves, contracts and exit tests
 6. [docs/api-coverage.md](docs/api-coverage.md) — generated per-command coverage matrix (111 commands)
+7. [docs/08-wasm.md](docs/08-wasm.md) — KiCad in WebAssembly and the native stdio host: the C ABI, the framing, how to run the suites against each backend
 
 `docs/plan.html` is the same plan as a single shareable page.
 

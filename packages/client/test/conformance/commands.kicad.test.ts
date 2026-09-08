@@ -67,7 +67,6 @@ import {
   embeddedFileContent,
   type Pad,
 } from "../../src/model";
-import { NngIpcSubscriber, NngIpcTransport } from "../../src/transport";
 import { DocumentUndo, MemoryItemStore, UndoStack, toStoredItem } from "../../src/store";
 import { mm, toDistance, toVector2 } from "../../src/units";
 import {
@@ -75,7 +74,9 @@ import {
   QA_DEVICE_LIB,
   QA_NETLIST,
   QA_RESISTOR_LIB,
+  KICAD_TRANSPORT,
   haveKicad,
+  registerWasmMount,
   startKiCad,
   tempProject,
   type RunningKiCad,
@@ -116,8 +117,9 @@ async function openAll(): Promise<void> {
   eventsError = "";
   try {
     const info = await rt.kicad.serverInfo();
-    if (info?.eventsSocketUrl) {
-      events = new KiCadEvents(await NngIpcSubscriber.connect({ path: info.eventsSocketUrl }));
+    const subscriber = await rt.subscribe(info?.eventsSocketUrl);
+    if (subscriber) {
+      events = new KiCadEvents(subscriber);
       events.onGap((g) => eventGaps.push(`${g.expected}->${g.received}`));
     } else eventsError = "server reports no events socket";
   } catch (e) {
@@ -255,6 +257,7 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
       `(sym_lib_table\n  (version 7)\n  (lib (name "Device") (type "KiCad") (uri "${QA_DEVICE_LIB}") (options "") (descr "QA symbols"))\n)\n`,
     );
     scratchDir = await mkdtemp(join(tmpdir(), "fp-pcb-scratch-"));
+    registerWasmMount(scratchDir); // the wasm backend has no host file system
     await openAll();
   }, 120_000);
 
@@ -304,7 +307,7 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     expect(info).toBeDefined();
     expect(info.socketUrl).toContain(rt.server.socketPath);
     expect(info.kicadToken).toBe(c().kicadToken!);
-    expect(info.eventsSocketUrl).toMatch(/-events\.sock$/);
+    expect(info.eventsSocketUrl).toContain(rt.server.eventsUrl);
     expect(events?.state).toBe("open");
     return `events socket ${info.eventsSocketUrl} (subscribed)`;
   });
@@ -1196,7 +1199,7 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
       await sync.load(); // a fresh full load so the store's revision is current
       expect(sync.revision).toBeDefined();
       expect(await sync.supportsIncrementalSync()).toBe(true);
-      const t2 = await NngIpcTransport.connect({ path: rt.server.socketPath, defaultTimeoutMs: 60_000 });
+      const t2 = await rt.secondTransport();
       try {
         const k2 = await KiCad.connect(t2, { clientName: "fp-pcb/conf-second" });
         const b2 = k2.boardFrom(board.specifier);
@@ -2504,7 +2507,7 @@ async function printSummary(): Promise<void> {
   const bugNotes = rows.filter((r) => r.note.includes("KICAD-BUG")).length + extras.filter((r) => r.note.includes("KICAD-BUG")).length;
   const lines = [
     "",
-    `=== IPC conformance (KiCad ${KICAD_COMMIT.slice(0, 10)}) ===`,
+    `=== ${KICAD_TRANSPORT} conformance (KiCad ${KICAD_COMMIT.slice(0, 10)}) ===`,
     `${rows.length} commands: ${count(rows, "pass")} pass, ${count(rows, "skip")} skip (gui-only), ${count(rows, "fail")} fail; headless ${headlessPass}/${headlessTotal} green; ${extras.length} extra checks: ${count(extras, "pass")} pass, ${count(extras, "skip")} skip, ${count(extras, "fail")} fail; ${bugNotes} with KICAD-BUG notes`,
     ...restarts.map((r) => `  server restarted ${r}`),
     ...rows.map((r) => `  ${r.status.padEnd(4)} ${r.command.padEnd(34)} ${r.group.padEnd(17)} ${r.note}`),
