@@ -13,13 +13,15 @@
  * the module's MEMFS *at the same absolute paths*, which keeps every path inside the `.kicad_pro`
  * and the library tables valid. See docs/08-wasm.md.
  */
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import { cp, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { NngIpcSubscriber, NngIpcTransport, StdioSubscriber, StdioTransport, WasmSubscriber, WasmTransport } from "../src/transport";
+import type { KiCadWasmInstance, WasmTransportOptions } from "../src/transport/wasm";
 import type { Subscriber } from "../src/transport/nng-ipc-sub";
 import type { SendOptions, Transport, TransportState } from "../src/transport/types";
+import type { DirMirror, HasFS } from "@fp-pcb/kicad-wasm/fs";
 import { KiCad } from "../src/model";
 import {
   KICAD_CLI,
@@ -281,6 +283,58 @@ async function startStdio(file: string | null, prefix: string): Promise<RunningK
   };
 }
 
+/**
+ * A `WasmTransport` that keeps the test's temp directories identical on the host and in MEMFS.
+ *
+ * The other two backends are processes with a real file system, so a test can write a file and ask
+ * KiCad to open it, or `existsSync()` a job output KiCad has just written. The wasm module can do
+ * neither: everything it reads and writes lives in its own MEMFS. Rather than teaching 2500 lines
+ * of conformance suite about that, every request is bracketed by a two-way mirror of the
+ * directories the suite owns — host wins going in (it is what the test just wrote), MEMFS wins
+ * coming out (it is what KiCad just wrote). Requests are serialised so the two halves cannot
+ * interleave; the module dispatches one at a time anyway.
+ *
+ * Only directories under the OS temp dir are mirrored. KiCad's QA data is mounted read-only: a
+ * test that writes there would otherwise have its bytes copied back over the source tree.
+ */
+class MirroringWasmTransport extends WasmTransport {
+  /** Mirrors, in mount order. `mountHostPath()` appends to this after the transport is up. */
+  readonly mirrors: DirMirror[] = [];
+  private chain: Promise<unknown> = Promise.resolve();
+
+  constructor(instance: KiCadWasmInstance, opts: WasmTransportOptions = {}) {
+    super(instance, opts);
+  }
+
+  override send(request: Uint8Array, opts: SendOptions = {}): Promise<Uint8Array> {
+    const run = async (): Promise<Uint8Array> => {
+      for (const m of this.mirrors) await m.pushToMemfs();
+      try {
+        return await super.send(request, opts);
+      } finally {
+        for (const m of this.mirrors) await m.pullToHost();
+      }
+    };
+    const p = this.chain.then(run, run);
+    this.chain = p.then(
+      () => undefined,
+      () => undefined,
+    );
+    return p;
+  }
+}
+
+/** True for a directory the suite owns and may therefore be written back to from MEMFS. */
+function isMirrorable(hostPath: string): boolean {
+  const tmp = tmpdir();
+  if (!(hostPath.startsWith(`${tmp}/`) || hostPath.startsWith(`/private${tmp}/`))) return false;
+  try {
+    return statSync(hostPath).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
 async function startWasm(file: string | null, prefix: string, extraMounts: string[]): Promise<RunningKiCad> {
   // Imported lazily so the ipc and stdio backends never load the wasm package.
   const { createKiCadWasm, mountPath } = await import("@fp-pcb/kicad-wasm");
@@ -303,11 +357,12 @@ async function startWasm(file: string | null, prefix: string, extraMounts: strin
     },
   });
   if (KICAD_WASM_SHARE) await mountPath(wasm, KICAD_WASM_SHARE, WASM_SHARE);
+  const transport = new MirroringWasmTransport(wasm, { defaultTimeoutMs: 60_000 });
   for (const hostPath of [...wasmMounts, ...extraMounts]) {
     if (existsSync(hostPath)) await mountPath(wasm, hostPath);
+    await addMirror(transport, wasm as unknown as HasFS, hostPath);
   }
 
-  const transport = new WasmTransport(wasm, { defaultTimeoutMs: 60_000 });
   const kicad = await connect(transport, prefix);
   let stopping = false;
   const server: ServerHandle = {
@@ -346,7 +401,21 @@ export async function mountHostPath(rt: RunningKiCad, hostPath: string, memfsPat
   registerWasmMount(hostPath);
   if (rt.backend !== "wasm") return;
   const { mountPath } = await import("@fp-pcb/kicad-wasm");
-  await mountPath((rt.transport as WasmTransport).instance as unknown as Parameters<typeof mountPath>[0], hostPath, memfsPath);
+  const instance = (rt.transport as WasmTransport).instance as unknown as Parameters<typeof mountPath>[0];
+  await mountPath(instance, hostPath, memfsPath);
+  if (rt.transport instanceof MirroringWasmTransport && memfsPath === hostPath) {
+    await addMirror(rt.transport, instance as unknown as HasFS, hostPath);
+  }
+}
+
+/** Start mirroring `hostPath` on `transport`, if it is a directory the suite owns. */
+async function addMirror(transport: MirroringWasmTransport, instance: HasFS, hostPath: string): Promise<void> {
+  if (!isMirrorable(hostPath)) return;
+  if (transport.mirrors.some((m) => m.dir === hostPath)) return;
+  const { DirMirror } = await import("@fp-pcb/kicad-wasm/fs");
+  const mirror = new DirMirror(instance, hostPath);
+  await mirror.prime();
+  transport.mirrors.push(mirror);
 }
 
 /**
