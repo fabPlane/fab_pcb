@@ -64,6 +64,7 @@ describe("StdioTransport", () => {
     const seen: string[] = [];
     sub.onMessage((b) => seen.push(text(b)));
     try {
+      expect(sub.state).toBe("open"); // open as soon as fd 3 exists, before any event arrives
       // a request round trip is enough of a barrier for the startup events to have been read
       await t.send(bytes("ping"));
       for (let i = 0; i < 50 && seen.length < 3; i++) await Bun.sleep(10);
@@ -127,6 +128,19 @@ describe("StdioTransport", () => {
     expect(t.state).toBe("closed");
     const err = await t.send(bytes("y")).catch((e: unknown) => e);
     expect(TransportError.is(err, "closed")).toBe(true);
+  });
+
+  test("a host started without the events channel never opens a subscriber", async () => {
+    const t = new StdioTransport({ command: process.execPath, args: [HOST, "--no-events"], events: false });
+    const sub = new StdioSubscriber(t);
+    try {
+      expect(t.eventsOpen).toBe(false);
+      expect(sub.state).toBe("connecting");
+      expect(text(await t.send(bytes("ab")))).toBe("ba");
+    } finally {
+      await t.close();
+    }
+    expect(sub.state).toBe("closed");
   });
 
   test("connect() rejects when the executable does not exist", async () => {

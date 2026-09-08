@@ -139,9 +139,16 @@ export class StdioTransport implements Transport {
         stdio: stdio as unknown as ["pipe", "pipe", "pipe"],
       }) as Bun.Subprocess<"pipe", "pipe", "pipe">;
       this.proc = proc;
+      // Resolve the events descriptor synchronously so a `StdioSubscriber` built right after the
+      // constructor already reports `open`, the way `NngIpcSubscriber.connect()` does.
+      const eventsFd = wantEvents ? (proc as unknown as { stdio?: unknown[] }).stdio?.[STDIO_EVENTS_FD] : undefined;
+      if (wantEvents && typeof eventsFd !== "number") {
+        this.log(`events fd ${STDIO_EVENTS_FD} is not available on this Bun build; events are off`);
+      }
+      this._eventsOpen = typeof eventsFd === "number";
       void this.pumpStdout(proc, maxFrameBytes);
       void this.pumpStderr(proc);
-      if (wantEvents) void this.pumpEvents(proc, maxFrameBytes);
+      if (typeof eventsFd === "number") void this.pumpEvents(eventsFd, maxFrameBytes);
       void proc.exited.then((code) => this.onExit(code));
       this.setState("open");
     } catch (e) {
@@ -263,14 +270,8 @@ export class StdioTransport implements Transport {
     }
   }
 
-  private async pumpEvents(proc: Bun.Subprocess<"pipe", "pipe", "pipe">, maxFrameBytes: number): Promise<void> {
-    const fd = (proc as unknown as { stdio?: unknown[] }).stdio?.[STDIO_EVENTS_FD];
-    if (typeof fd !== "number") {
-      this.log(`events fd ${STDIO_EVENTS_FD} is not available on this Bun build; events are off`);
-      return;
-    }
+  private async pumpEvents(fd: number, maxFrameBytes: number): Promise<void> {
     const parser = new StdioFrameParser(maxFrameBytes);
-    this._eventsOpen = true;
     const reader = Bun.file(fd).stream().getReader();
     try {
       for (;;) {
