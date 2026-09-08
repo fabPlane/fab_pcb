@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo",
+    "emitDeclarationOnly": true
+  },
+  "include": ["src", "test", "bench/*.ts"],
+  "references": [
+    {
+      "path": "../proto"
+    },
+    {
+      "path": "../client"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "name": "@fp-pcb/compile",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Design source -> KiCad project: a netlist IR, a KiCad .net emitter, and the dry-run/import/outline/place pipeline behind a pluggable frontend (netlist-json ships first)",
+  "exports": {
+    ".": "./src/index.ts",
+    "./netlist": "./src/netlist.ts",
+    "./apply": "./src/apply.ts",
+    "./frontends/netlist-json": "./src/frontends/netlist-json.ts"
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc -b",
+    "experiment": "bun run bench/experiment.ts"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "2.14.1",
+    "@fp-pcb/client": "workspace:*",
+    "@fp-pcb/proto": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.0",
+    "typescript": "^5.6.0"
+  }
+}
