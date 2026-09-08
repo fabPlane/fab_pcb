@@ -22,8 +22,8 @@
  * `failed` with `error` and no `result`. Cancelling before the import leaves the board with at
  * most the outline commit; after it, KiCad's own "Update Netlist" commit stays.
  *
- * `done` events carry `revision` because `ImportNetlist` does not publish `DocumentChanged` on
- * the fork today; a browser tab on the same session should re-read on it.
+ * `done` events carry `revision` as a compatibility fallback for older fork builds that do not
+ * publish `DocumentChanged` from `ImportNetlist`.
  */
 import { mkdir } from "node:fs/promises";
 import { dirname, isAbsolute, resolve } from "node:path";

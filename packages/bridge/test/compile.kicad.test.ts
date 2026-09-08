@@ -10,7 +10,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import type { CompileJobInfo } from "@fp-pcb/compile/bridge-job";
-import { KiCad } from "@fp-pcb/client";
+import { KiCad, decodeEvent } from "@fp-pcb/client";
 import { configFromEnv, startBridge, type BridgeServer } from "../src/index";
 
 const cfg = configFromEnv(process.env, { port: 0, log: () => {} });
@@ -100,6 +100,8 @@ describe.skipIf(!haveKicad)("compile jobs + kicad-cli api-server", () => {
 
   test("compiles a netlist-json source on a bare session, creating the project", async () => {
     const projectPath = join(workspace, "demo", "demo.kicad_pro");
+    const events: ReturnType<typeof decodeEvent>[] = [];
+    const off = bridge.sessions.get(sessionId)!.onEvent((bytes) => events.push(decodeEvent(bytes)));
     const res = await api(`/sessions/${sessionId}/compile`, {
       method: "POST",
       body: JSON.stringify({
@@ -117,6 +119,7 @@ describe.skipIf(!haveKicad)("compile jobs + kicad-cli api-server", () => {
     expect(job.state).toBe("queued");
     const states: string[] = [];
     const done = await follow(job.id, (ev, d) => states.push(`${ev}:${d.state}`));
+    off();
     expect(done.state).toBe("done");
     expect(done.error).toBeUndefined();
     expect(done.result).toMatchObject({
@@ -134,6 +137,18 @@ describe.skipIf(!haveKicad)("compile jobs + kicad-cli api-server", () => {
       session: { path: string | null };
     };
     expect(discovered.session.path).toBe(projectPath);
+    const imported = events.find(
+      (event) =>
+        event.kind.case === "documentChanged" &&
+        event.kind.value.clientName === `fp-pcb/bridge/${sessionId}/compile` &&
+        event.kind.value.message === "Update Netlist",
+    );
+    expect(imported?.kind.case).toBe("documentChanged");
+    if (imported?.kind.case === "documentChanged") {
+      expect(imported.kind.value.document?.identifier).toEqual({ case: "boardFilename", value: "demo.kicad_pcb" });
+      expect(Number(imported.kind.value.revision)).toBeGreaterThan(0);
+      expect(Number(imported.kind.value.revision)).toBeLessThanOrEqual(done.revision!);
+    }
     const kicad = await KiCad.connect(bridge.sessions.get(sessionId)!.transport!, { clientName: "fp-pcb/bridge-placement-test" });
     expect(
       Object.fromEntries((await (await kicad.currentBoard())!.getFootprints()).map((footprint) => [footprint.reference, footprint.position])),

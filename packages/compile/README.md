@@ -92,9 +92,10 @@ saves the document; the job does.
 `createCompileJobs()` returns what the bridge mounts: `POST /sessions/:id/compile` takes a
 `CompileSource` inline (no file staging), creates the project at `project.path` when the session
 was started bare, registers the frontend's `libraries` in the project tables, runs `compile()`
-with the stages above as job states, saves, and reports the board `revision` — because
-`ImportNetlist` does not publish `DocumentChanged` on the fork today. `done` carries `result`
-whether or not it is `ok`; `error` is an infrastructure failure. `DELETE` cancels between stages.
+with the stages above as job states, saves, and reports the board `revision` as a compatibility
+fallback for older fork builds. Current fork builds also publish `DocumentChanged` for the real
+`ImportNetlist`. `done` carries `result` whether or not it is `ok`; `error` is an infrastructure
+failure. `DELETE` cancels between stages.
 
 ## Tests
 
@@ -111,9 +112,6 @@ are in fabdesk's `docs/fab-pcb-migration.md` §6.1.
   detail.
 - **Board-only.** Nothing creates a schematic. A netlist carries no geometry, so a design compiled
   this way has no drawn schematic, hence no ERC and no BOM-from-schematic.
-- **`ImportNetlist` does not publish `DocumentChanged`** on the fork today (it only bumps the
-  revision); the job's `done` event carries `revision` so a tab can re-read. A one-line fork patch
-  would make the event flow like every other commit.
 - **Only the near edges are inset**, and only for autoplaced additions when this compile drew the
   outline. A board so full that the far edges bind needs explicit placement.
 

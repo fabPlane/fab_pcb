@@ -42,13 +42,15 @@ place pin names where KiCad draws them without guessing (the harness assumes 0.5
 fix in the serializer. Related: text variables in shown text are not expanded on the wire.
 
 ### G28 · Found by the compile job (`packages/compile`)
-**Status:** open. Three API behaviours the netlist compile ran into, each verified live against
+**Status:** client/fork follow-ups implemented for 1 and 3; API default in 2 remains open. Three API behaviours the netlist compile ran into, each verified live against
 `280274cc3d` (`packages/compile/bench/experiment.ts`, `test/apply.kicad.test.ts`):
 
-1. **`ImportNetlist` does not publish `DocumentChanged`.** `handleImportNetlist` calls
+1. **`ImportNetlist` did not publish `DocumentChanged`.** `handleImportNetlist` called
    `bumpRevision()` but not `publishDocumentChanged`, so a tab on the session never learns about
-   the footprints the import added. The job reports `revision` in its `done` event as a stopgap.
-   Fix: publish with the updater's commit, as every other commit does.
+   the footprints the import added. The sibling fork branch
+   `feature/import-netlist-document-events` now publishes `DocumentChanged` after a successful
+   non-dry import with the board document, new revision, API client name, and "Update Netlist"
+   message. The job continues to report `revision` for compatibility with older fork builds.
 2. **`AddLibraryTableRow` saves the row disabled unless `enabled` is set.** The handler does
    `SetDisabled( !in.enabled() )` and the proto field defaults to false, so a row added without
    `enabled: true` lands as `(disabled)` and `ListLibraryEntries` / the netlist importer answer
@@ -60,8 +62,8 @@ fix in the serializer. Related: text variables in shown text are not expanded on
    text back. Any client that sets `position` and updates gets a footprint whose anchor moved and
    whose copper did not (`GetPads`, DRC and the saved file all agree). Either the handler should
    apply a position delta to the children when only `position` changed, or the client must
-   translate the whole proto (a `Footprint.translate` is planned in `packages/client`). The
-   compile job sidesteps it by moving the outline it drew instead of the footprints.
+   translate the whole proto. `Footprint.translate` now does that in `packages/client`, and the
+   compiler uses it for explicit source placement.
 
 ### G29 · `SetNetClasses` breaks `AutoplaceFootprints` for footprints imported afterwards
 
