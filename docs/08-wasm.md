@@ -119,6 +119,89 @@ Known divergence: files KiCad writes (saves, job outputs, `.kicad_prl`, lock fil
 and are invisible to `existsSync` on the host, so conformance checks that assert on host files will
 fail under `wasm` until they export the directory first.
 
+## The bridge's wasm backend
+
+`SESSION_BACKEND=wasm` makes the bridge answer a session with `kicad_api.wasm` instead of a
+`kicad-cli api-server` process. `POST /sessions {"path": "...", "backend": "wasm"}` overrides it for
+one session, so both backends can run side by side in the same bridge.
+
+```
+browser  --ws /ws?session=id-->  bridge main thread  --{id, req}-->  Worker
+                                                     <--{id, res}--   createKiCadWasm()
+                                                     <--{event}---     MEMFS
+```
+
+Everything above the session is unchanged: `Session` and `WasmSession` both satisfy `SessionLike`,
+so the WebSocket frame pass-through, the SSE stream at `/sessions/:id/events`, the route and compile
+jobs and the idle reaper never learn which one answered. `GET /sessions/:id` reports `backend`, a
+`pid` of `null` and `socketPath: "inproc://kicad-<id>"`.
+
+**One Worker per session, always.** `kiapi_dispatch` is a synchronous call into a single-threaded
+module: on the bridge's own thread, one KiCad operation that never returns would freeze every other
+session with it. In a Worker it freezes one thread, and `worker.terminate()` ends that thread whether
+or not the module cooperates — the wasm answer to `SIGKILL`, and the only reason a wedged session can
+be reaped at all. What it does _not_ buy is a real process boundary: the module shares the bridge's
+address space and a hard Emscripten `abort()` still takes the process down.
+
+**The message protocol** (`src/wasm-protocol.ts`), structured clone with the byte buffers
+transferred:
+
+| main → worker                                         | worker → main                                                        |
+| ----------------------------------------------------- | -------------------------------------------------------------------- |
+| `{start}` once, then `{id, req}`, `{flush}`, `{stop}` | `{state}`, `{id, res}`, `{id, error}`, `{event}`, `{log}`, `{error}` |
+
+**MEMFS.** The worker copies the session's project directory (the parent of `path`, resolved inside
+`WORKSPACE_ROOT`) into MEMFS _at the same absolute path_, from inside the module factory — i.e. after
+the Emscripten module exists but before the loader calls `kiapi_init`, so the document named in
+`preload` is there when KiCad opens it.
+
+It copies the tree back out again after:
+
+- a request whose message name starts with `Save` (`SaveDocument`, `SaveCopyOfDocument`, …) or is
+  `CloseDocument` — the envelope's `type_url` is sniffed, nothing is decoded;
+- a `DocumentSaved` event, which covers saves KiCad starts by itself (a job, an action);
+- an explicit `{flush}` message;
+- `{stop}`, before `kiapi_shutdown`.
+
+`EndCommit` is deliberately **not** a trigger: a commit changes the in-memory document and leaves the
+file alone, so flushing there would rewrite every file in the project on every edit. A caller that
+needs the workspace up to date without a save asks for a flush.
+
+**Timeouts.** `KICAD_REQUEST_TIMEOUT_MS` is a real deadline here, not just a rejection: when it
+passes, the bridge terminates the worker, fails everything in flight and marks the session `failed`
+with a `server-state` broadcast — the same end state a crashed `kicad-cli` produces, minus the exit
+code.
+
+## In the browser
+
+`?wasm=1` (or `?kicad-wasm=<url of kicad_api.js>`, `VITE_KICAD_WASM=1`, `VITE_KICAD_WASM_URL`) runs
+KiCad inside the tab: no bridge, no server, no socket. `KicadSessionService` loads the module,
+wraps it in `WasmTransport`, and builds a `WasmSubscriber` for the events the module publishes
+in-process. That subscriber is passed to `KicadDocumentService.open()` as the explicit `events`
+option — the service's default only recognises a `WebSocketTransport`, and that check stays narrow.
+The session is `direct` (nothing spawns anything) and `bridgeless` unless `?bridge=` is given too,
+in which case the bridge is still used for `/files/*` and the library's second server.
+
+**Opening a project.** The tab cannot read the user's disk and neither can the module, so the project
+screen shows a file picker and a drop target instead of the workspace browser: the chosen files (a
+directory picker's `webkitRelativePath` is preserved) are written into MEMFS under `/project` and the
+`.kicad_pro` — else the `.kicad_pcb`, else the `.kicad_sch` — is opened. `stat()` and `listFiles()`
+answer from MEMFS in this mode, so a `.kicad_pro` still finds the board sitting next to it. There is
+no export path yet: a save lands in MEMFS and stays there until someone downloads it.
+
+**Main thread, for now.** The module runs on the tab's main thread, so a slow `kiapi_dispatch` blocks
+paint. A Worker needs the loader's `import()` and all of MEMFS behind a message protocol, which is
+exactly what the bridge backend already implements; moving the browser to the same shape is the
+follow-up, and `WasmModeOptions.createInstance` is the seam it goes behind.
+
+**Vite.** `kicad_api.js` is loaded by URL at runtime and fetches its own `.wasm` / `.data`, so it is
+not bundled: `vite.config.ts` serves `packages/kicad-wasm/dist` under `/kicad-wasm/` in dev and
+copies it into `dist/` on build (`KICAD_WASM_DIR` overrides the source). `node:path` and
+`node:fs/promises` are aliased to browser stubs, because the loader's entry point re-exports
+host-disk helpers the tab never calls but whose imports still have to resolve — the `node:path` stub
+is a real POSIX implementation, since MEMFS paths are built with it. No COOP/COEP headers and no
+`SharedArrayBuffer` are needed: the module is single-threaded.
+
 ## Environment variables
 
 | Variable           | Backend | Meaning                                                                     |
@@ -130,7 +213,32 @@ fail under `wasm` until they export the directory first.
 | `KICAD_WASM_SHARE` | wasm    | host share tree to mount at `/kicad/share` (when the build has no `.data`)  |
 | `KICAD_SRC`        | all     | the KiCad checkout (defaults to `../kicad`)                                 |
 
+Bridge-only (`packages/bridge`):
+
+| Variable                     | Meaning                                                                        |
+| ---------------------------- | ------------------------------------------------------------------------------ |
+| `SESSION_BACKEND`            | `process` (default) or `wasm`; `POST /sessions {backend}` overrides it         |
+| `KICAD_WASM_MODULE`          | the `kicad_api.js` to load (default `<KICAD_WASM_DIR>`, else the package dist) |
+| `KICAD_WASM_HOME`            | MEMFS home for KiCad's settings (default `/home/kicad`)                        |
+| `KICAD_WASM_SHARE_PATH`      | MEMFS path of the share tree (default `/kicad/share`)                          |
+| `KICAD_WASM_STOP_TIMEOUT_MS` | how long `stop()` waits for the worker to flush before `terminate()` (5000)    |
+
+Browser-only (`apps/web`, Vite):
+
+| Variable              | Meaning                                                     |
+| --------------------- | ----------------------------------------------------------- |
+| `VITE_KICAD_WASM`     | `1` runs KiCad in the tab (same as `?wasm=1`)               |
+| `VITE_KICAD_WASM_URL` | the `kicad_api.js` URL (default `/kicad-wasm/kicad_api.js`) |
+
 ## Running the suites
+
+```sh
+# the bridge, with every session as a wasm module in its own worker
+SESSION_BACKEND=wasm KICAD_WASM_DIR=../kicad/build/wasm/host bun run --filter @fp-pcb/bridge start
+
+# the app, with KiCad in the tab (open http://localhost:5173/?wasm=1)
+bun run --filter @fp-pcb/kicad-wasm fetch && bun run --filter @fp-pcb/app dev
+```
 
 ```sh
 # the default: kicad-cli over the nng ipc socket

@@ -9,13 +9,14 @@ bridge.
 
 ## Running
 
-Three service graphs implement the same `Services` interface (`src/services/types.ts`):
+Four service graphs implement the same `Services` interface (`src/services/types.ts`):
 
 | mode | when | what |
 |---|---|---|
 | **mock** (default) | `bun run dev` with nothing set, or `?mock=1`, or `VITE_SERVICES=mock` | in-memory kitchen-sink board/schematic, Canvas2D mock host; what the e2e smoke tests run against |
 | **kicad via bridge** (the default for real work) | `VITE_BRIDGE_URL=<bridge origin>` or `?bridge=<origin>` (`proxy` / `1` = same origin), or `VITE_SERVICES=kicad` | real KiCad through the bridge: `KicadSessionService`, `KicadDocumentService`, `KicadCommitBackend`, `KicadJobsService`, `KicadMarkerService` (`src/services/kicad/`) and the real `BoardCanvasHost` / `SchematicCanvasHost` |
 | **kicad direct ws** | `VITE_KICAD_WS=ws://host:port/path` or `?kicad-ws=<url>` | the same services, but `NngWsTransport` dials `kicad-cli api-server --socket ws://…` itself: **no bridge in the request path** ([below](#direct-websocket-mode-vite_kicad_ws)) |
+| **kicad in the tab (wasm)** | `VITE_KICAD_WASM=1` / `VITE_KICAD_WASM_URL=<kicad_api.js>`, or `?wasm=1` / `?kicad-wasm=<url>` | the same services over `WasmTransport`: KiCad *is* the page, compiled to WebAssembly. No bridge, no server, no socket; the project is imported into the module's file system ([below](#in-browser-wasm-mode-vite_kicad_wasm)) |
 
 Real mode, step by step (macOS paths from this checkout):
 
@@ -35,6 +36,32 @@ VITE_BRIDGE_URL=http://127.0.0.1:4020 bun run --filter @fp-pcb/app dev
 
 `?project=<path>` opens a file straight away (a `.kicad_pro`, `.kicad_pcb` or `.kicad_sch`
 inside the bridge workspace root). The project screen's file browser is `GET /files/list`.
+
+### In-browser wasm mode (`VITE_KICAD_WASM`)
+
+KiCad's headless API core also compiles to WebAssembly, and `@fp-pcb/kicad-wasm` loads it straight
+into the page. There is nothing to start and nothing to dial:
+
+```sh
+# 1. the wasm build, into packages/kicad-wasm/dist (vite serves it at /kicad-wasm/)
+bun run --filter @fp-pcb/kicad-wasm fetch
+
+# 2. the app (or open http://localhost:5173/?wasm=1)
+VITE_KICAD_WASM=1 bun run --filter @fp-pcb/app dev
+```
+
+The module runs on the main thread, so a long command blocks paint; that is the known cost of the
+mode today. Events are the ones the module publishes in-process (`WasmSubscriber`), not a relay.
+
+**Opening a project.** The tab cannot read your disk and neither can the module, so the project
+screen offers a file picker and a drop target instead of the workspace browser: pick a `.kicad_pro`
+together with its `.kicad_pcb` / `.kicad_sch` and they are copied into the module's file system
+under `/project` before `OpenDocument`. Saves land there too and stay there — there is no export
+path yet. Adding `?bridge=…` brings the workspace browser and the library session back while KiCad
+still runs in the page.
+
+See `docs/08-wasm.md` for the C ABI, the file system rules and the bridge's own wasm backend
+(`SESSION_BACKEND=wasm`), which runs the same module server-side in a worker per session.
 
 ### Direct WebSocket mode (`VITE_KICAD_WS`)
 

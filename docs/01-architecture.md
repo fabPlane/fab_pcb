@@ -79,6 +79,11 @@ unix sockets. Two ways out, and we do both in order:
   KiCad keys in-flight commits by `client_name`, so one commit per tab is possible.
 - `kicad_token` from the first `GetVersion`/`Ping` is pinned; a mismatch means the
   server restarted and the UI reloads the document.
+- A session's KiCad does not have to be a process. `SESSION_BACKEND=wasm` gives it
+  one `kicad_api.wasm` instance in a worker thread instead, and `?wasm=1` puts the
+  same module in the browser tab with no bridge at all. Both keep the shape above —
+  one session, one project, one token — and trade the OS process boundary for a
+  sandbox with no sockets, no host disk and no `exec`. See `docs/08-wasm.md`.
 
 ## Document model in the browser
 
