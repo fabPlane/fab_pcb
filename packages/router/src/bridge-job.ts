@@ -24,7 +24,7 @@
  * error. A failure of the final save reports the job as failed but leaves the applied route in
  * KiCad memory, where the caller can retry saving it.
  */
-import { KiCad, KiCadClient, type Transport } from "@fp-pcb/client";
+import { Arc, KiCad, KiCadClient, Track, Via, type Transport } from "@fp-pcb/client";
 import { applyRouteResult } from "./apply";
 import { extractRouteInput } from "./extract";
 import { FreeroutingRouter, alreadyApplied, resolveFreerouting, type FreeroutingOptions, type FreeroutingPaths } from "./freerouting";
@@ -82,7 +82,22 @@ export interface RouteJobSummary {
   message: string;
   /** The airlines left after the apply (`GetRatsnest`, filtered to the requested nets). */
   unrouted: RouteJobUnrouted[];
+  /** Copper added or claimed by this run, in nm, for clients such as Route Cinema. */
+  geometry: RouteJobGeometry[];
   log: string[];
+}
+
+export interface RouteJobGeometry {
+  kind: "trace" | "via";
+  /** KiCad KIID; stable across progress consumers and later board queries. */
+  id: string;
+  /** KiCad BoardLayer enum. Through vias use -1. */
+  layer: number;
+  net: number;
+  /** Trace centreline points, or a via bounding box. */
+  points: number[];
+  /** Trace width in nm. */
+  width?: number;
 }
 
 export interface RouteJobInfo {
@@ -160,6 +175,26 @@ export function trackLength(result: Pick<RouteResult, "tracks">): number {
   let sum = 0;
   for (const t of result.tracks) sum += Math.hypot(t.end.x - t.start.x, t.end.y - t.start.y);
   return Math.round(sum);
+}
+
+/** Compact, renderer-neutral copper geometry for a completed routing run. */
+export function routeGeometry(items: readonly (Track | Arc | Via)[]): RouteJobGeometry[] {
+  return items.map((item) => {
+    if (item instanceof Via) {
+      const r = item.diameter / 2;
+      return {
+        kind: "via",
+        id: item.id,
+        layer: -1,
+        net: item.netCode ?? 0,
+        points: [item.position.x - r, item.position.y - r, item.position.x + r, item.position.y + r],
+      };
+    }
+    const points = item instanceof Arc
+      ? [item.start.x, item.start.y, item.mid.x, item.mid.y, item.end.x, item.end.y]
+      : [item.start.x, item.start.y, item.end.x, item.end.y];
+    return { kind: "trace", id: item.id, layer: item.layerId, net: item.netCode ?? 0, points, width: item.width };
+  });
 }
 
 /**
@@ -249,6 +284,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         await board.save();
         checkCancelled();
         setState("extracting");
+        const copperBefore = new Set((await board.getTracks()).map((item) => item.id));
         const input = await extractRouteInput(board, { nets: request.options?.nets, warn: pushLog });
         pushLog(`extract: ${input.pads.length} pads, ${input.connections.length} connections, ${input.copperLayers.length} copper layers`);
         checkCancelled();
@@ -309,6 +345,8 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         info.state = "done";
         info.finishedAt = new Date().toISOString();
         info.log = result.log.slice(-LOG_TAIL);
+        const claimedIds = new Set(result.claimedVias?.map((via) => via.id) ?? []);
+        const geometry = routeGeometry((await board.getTracks()).filter((item) => !copperBefore.has(item.id) || claimedIds.has(item.id)));
         info.summary = {
           tracks: appliedByKicad?.tracksAdded ?? result.tracks.length,
           vias: appliedByKicad?.viasAdded ?? result.vias.length,
@@ -323,6 +361,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           timedOut: result.timedOut,
           message: applied || appliedByKicad ? message : "",
           unrouted,
+          geometry,
           log: result.log,
         };
         log(`route job ${id}: done, ${measured}/${result.totalConnections} in ${info.summary.wallMs} ms`);
