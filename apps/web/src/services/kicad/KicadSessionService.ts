@@ -14,12 +14,22 @@
 // then used only for `/health` and `/files/*` (the project browser, file streaming) and for the
 // second server the library/footprint editor needs; with no bridge those features report that they
 // need one, and the session adopts whatever project the running server already has open.
+//
+// **In-browser wasm (`wasm`, from `VITE_KICAD_WASM` / `VITE_KICAD_WASM_URL`).** There is no server
+// and no socket at all: `@fp-pcb/kicad-wasm` loads `kicad_api.js` into this tab and `WasmTransport`
+// calls `kiapi_dispatch` directly, with `WasmSubscriber` carrying the events the module publishes
+// in-process. The project lives in the module's MEMFS, so it is put there by hand
+// (`importProjectFiles`) instead of being read off a disk the tab cannot see. This is `direct` too
+// — nothing here spawns a process — and `bridgeless` unless a bridge was asked for explicitly.
 
-import { KiCad, KiCadEvents, NngWsSubscriber, NngWsTransport, TransportError, WebSocketTransport, bridgeWsUrl, type Transport } from '@fp-pcb/client';
+import { KiCad, KiCadEvents, NngWsSubscriber, NngWsTransport, TransportError, WasmSubscriber, WasmTransport, WebSocketTransport, bridgeWsUrl, type Transport } from '@fp-pcb/client';
+import { createKiCadWasm, exists as memfsExists, listFiles as memfsList, writeFile as memfsWrite, type KiCadWasm } from '@fp-pcb/kicad-wasm';
 import { DocumentType } from '@fp-pcb/proto';
 import type { FileEntry, RecentProject, SessionInfo, SessionService } from '../types';
 
 const RECENT_KEY = 'fp-pcb.recent-projects';
+/** Where imported files land inside MEMFS. Absolute, because every KiCad path is. */
+export const MEMFS_PROJECT_DIR = '/project';
 
 export interface BridgeSessionRecord {
   id: string;
@@ -30,6 +40,19 @@ export interface BridgeSessionRecord {
   exitCode?: number | null;
 }
 
+/** Browser wasm mode: what to load and, for tests, how. */
+export interface WasmModeOptions {
+  /** `kicad_api.js`. Default: `dist/kicad_api.js` inside `@fp-pcb/kicad-wasm`. */
+  moduleUrl?: string;
+  /** `kicad_api.wasm`, when it does not sit next to `kicad_api.js` (Emscripten `locateFile`). */
+  wasmUrl?: string;
+  /**
+   * Injection point for tests, and the seam a Web Worker would go behind: today the module runs on
+   * the main thread, so a long `kiapi_dispatch` blocks paint. See docs/08-wasm.md.
+   */
+  createInstance?: () => Promise<KiCadWasm>;
+}
+
 export interface KicadSessionOptions {
   /** Bridge origin (`http://127.0.0.1:4020`) or `''` for same-origin (Vite proxy / static hosting). */
   bridgeUrl: string;
@@ -38,6 +61,8 @@ export interface KicadSessionOptions {
    * `--socket ws://...`. When set, requests bypass the bridge entirely (`NngWsTransport`).
    */
   directWsUrl?: string;
+  /** Run KiCad in this tab as WebAssembly; no bridge and no server in the request path. */
+  wasm?: WasmModeOptions;
   /** True when no bridge is reachable at all (`bridgeUrl` empty and `directWsUrl` set). */
   bridgeless?: boolean;
   /** Injection points for tests. */
@@ -89,7 +114,11 @@ export class KicadSessionService implements SessionService {
   private offControl: (() => void) | null = null;
   private offState: (() => void) | null = null;
   private reconnecting = false;
-  private subscriber: NngWsSubscriber | null = null;
+  private subscriber: { close(): Promise<void> } | null = null;
+  /** The loaded module in wasm mode; owns MEMFS and is shut down with the transport. */
+  private instance: KiCadWasm | null = null;
+  /** Files imported before the module existed, written into MEMFS as soon as it does. */
+  private staged: { path: string; bytes: Uint8Array }[] = [];
 
   constructor(private readonly opts: KicadSessionOptions) {
     this.fetchImpl = opts.fetch ?? ((input, init) => fetch(input, init));
@@ -103,9 +132,19 @@ export class KicadSessionService implements SessionService {
     }
   }
 
-  /** True when ApiRequests go straight to KiCad over `NngWsTransport` (no bridge in the path). */
+  /** True when ApiRequests reach KiCad without a bridge in the path: direct ws, or wasm in-tab. */
   get direct(): boolean {
-    return Boolean(this.opts.directWsUrl);
+    return Boolean(this.opts.directWsUrl) || this.wasm;
+  }
+
+  /** True when KiCad is `kicad_api.wasm` running in this tab. */
+  get wasm(): boolean {
+    return Boolean(this.opts.wasm);
+  }
+
+  /** The loaded module, once `connect()` has run — for MEMFS access from the UI. */
+  get wasmInstance(): KiCadWasm | null {
+    return this.instance;
   }
 
   /** True when there is no bridge at all: no project browser, no second server, no spawning. */
@@ -122,7 +161,8 @@ export class KicadSessionService implements SessionService {
   /** Throws a clear error for the bridge-only features when the app runs against a bare server. */
   private requireBridge(what: string): void {
     if (this.bridgeless) {
-      throw new Error(`${what} needs the bridge; this tab talks to ${this.opts.directWsUrl} directly (set VITE_BRIDGE_URL as well to get it back)`);
+      const how = this.wasm ? 'runs KiCad as WebAssembly in this tab' : `talks to ${this.opts.directWsUrl} directly`;
+      throw new Error(`${what} needs the bridge; this tab ${how} (set VITE_BRIDGE_URL as well to get it back)`);
     }
   }
 
@@ -161,7 +201,12 @@ export class KicadSessionService implements SessionService {
   async init(): Promise<BridgeHealth> {
     if (this.bridgeless) {
       // Nothing to ask: the workspace root is learned from the project we connect to.
-      const h: BridgeHealth = { ok: true, workspaceRoot: this.root, kicadCli: `direct ${this.opts.directWsUrl}`, kicadCliExists: true };
+      const h: BridgeHealth = {
+        ok: true,
+        workspaceRoot: this.root || (this.wasm ? MEMFS_PROJECT_DIR : ''),
+        kicadCli: this.wasm ? 'kicad_api.wasm (in this tab)' : `direct ${this.opts.directWsUrl}`,
+        kicadCliExists: true,
+      };
       this.health = h;
       return h;
     }
@@ -217,13 +262,17 @@ export class KicadSessionService implements SessionService {
 
   private async doConnect(projectPath: string): Promise<SessionInfo> {
     if (this.session) await this.disconnect();
-    let name = projectPath.split('/').pop()?.replace(/\.kicad_(pro|pcb|sch)$/, '') ?? 'project';
+    let name =
+      projectPath
+        .split('/')
+        .pop()
+        ?.replace(/\.kicad_(pro|pcb|sch)$/, '') ?? 'project';
     this.set({ id: '', projectPath, projectName: name, kicadVersion: '', kicadToken: '', state: 'connecting' });
     try {
       // Direct mode: the server is already running, so there is no session to create. Its id is
       // the URL, which is what the reconnect path and the log lines want to show.
       const rec: BridgeSessionRecord = this.direct
-        ? { id: this.opts.directWsUrl!, state: 'running', path: projectPath, kicadToken: null }
+        ? { id: this.opts.directWsUrl ?? 'wasm', state: 'running', path: projectPath, kicadToken: null }
         : (
             await this.json<{ session: BridgeSessionRecord; wsUrl: string }>('/sessions', {
               method: 'POST',
@@ -240,7 +289,11 @@ export class KicadSessionService implements SessionService {
       // already-running server has open, so `?kicad-ws=...` alone is enough to see the board.
       if (this.direct && !projectPath) {
         projectPath = await this.openProjectPath(kicad);
-        name = projectPath.split('/').pop()?.replace(/\.kicad_(pro|pcb|sch)$/, '') ?? 'project';
+        name =
+          projectPath
+            .split('/')
+            .pop()
+            ?.replace(/\.kicad_(pro|pcb|sch)$/, '') ?? 'project';
         if (!this.root && projectPath) this.root = projectPath.slice(0, projectPath.lastIndexOf('/'));
         this.patch({ projectPath, projectName: name });
       }
@@ -293,18 +346,16 @@ export class KicadSessionService implements SessionService {
    */
   private async dial(sessionId: string): Promise<KiCad> {
     const direct = this.direct;
-    const wsUrl = direct
-      ? this.opts.directWsUrl!
-      : this.opts.bridgeUrl
-        ? bridgeWsUrl(this.opts.bridgeUrl, sessionId)
-        : bridgeWsUrl(location.origin, sessionId);
-    const transport = direct
-      ? this.opts.createDirectTransport
-        ? await this.opts.createDirectTransport(wsUrl)
-        : await NngWsTransport.connect({ url: wsUrl, defaultTimeoutMs: 120_000, log: (m) => this.log(m) })
-      : this.opts.createTransport
-        ? await this.opts.createTransport(wsUrl)
-        : await WebSocketTransport.connect(wsUrl, { log: (m) => this.log(m) });
+    const wsUrl = this.wasm ? '' : direct ? this.opts.directWsUrl! : this.opts.bridgeUrl ? bridgeWsUrl(this.opts.bridgeUrl, sessionId) : bridgeWsUrl(location.origin, sessionId);
+    const transport = this.wasm
+      ? await this.loadWasm()
+      : direct
+        ? this.opts.createDirectTransport
+          ? await this.opts.createDirectTransport(wsUrl)
+          : await NngWsTransport.connect({ url: wsUrl, defaultTimeoutMs: 120_000, log: (m) => this.log(m) })
+        : this.opts.createTransport
+          ? await this.opts.createTransport(wsUrl)
+          : await WebSocketTransport.connect(wsUrl, { log: (m) => this.log(m) });
     this.transport = transport;
     this.offState?.();
     this.offControl?.();
@@ -332,6 +383,17 @@ export class KicadSessionService implements SessionService {
    */
   private async subscribeEvents(kicad: KiCad): Promise<void> {
     await this.closeEvents();
+    if (this.transport instanceof WasmTransport) {
+      // The module publishes synchronously through `Module.__kiapiEvent`; `WasmTransport` already
+      // buffers frames raised during a dispatch until after that reply, so there is nothing to dial
+      // and nothing to reconnect. The subscriber is handed to the document service explicitly
+      // because its default only recognises a `WebSocketTransport`.
+      const sub = new WasmSubscriber(this.transport);
+      this.subscriber = sub;
+      this.events = new KiCadEvents(sub);
+      this.log('KiCad events: in-process (wasm)');
+      return;
+    }
     let url = '';
     try {
       url = (await kicad.serverInfo())?.eventsSocketUrl ?? '';
@@ -352,6 +414,67 @@ export class KicadSessionService implements SessionService {
       this.log(`events socket ${url}: ${e instanceof Error ? e.message : String(e)}`, 'warn');
       await this.closeEvents();
     }
+  }
+
+  // ------------------------------------------------------------------ wasm mode
+
+  /**
+   * Load `kicad_api.js` into this tab and wrap it in a `WasmTransport`. The module runs on the
+   * **main thread** for now: a Worker would need the loader's `import()` and MEMFS behind a message
+   * protocol (which is what the bridge's wasm backend does), and the browser gains nothing from it
+   * until long-running commands land. Until then a slow `kiapi_dispatch` blocks paint — noted in
+   * docs/08-wasm.md.
+   */
+  private async loadWasm(): Promise<Transport> {
+    const opts = this.opts.wasm!;
+    const t0 = performance.now();
+    const instance = opts.createInstance
+      ? await opts.createInstance()
+      : await createKiCadWasm({
+          moduleUrl: opts.moduleUrl,
+          wasmUrl: opts.wasmUrl,
+          print: (line) => this.log(line),
+          printErr: (line) => this.log(line, 'warn'),
+        });
+    this.instance = instance;
+    this.log(`KiCad wasm module loaded in ${Math.round(performance.now() - t0)} ms`);
+    this.flushStaged();
+    return new WasmTransport(instance, { defaultTimeoutMs: 120_000, log: (m) => this.log(m) });
+  }
+
+  /**
+   * Put files the user picked (a file input, a dropped folder) into the module's MEMFS under
+   * `/project` and return the document to open with. The tab cannot read the user's disk and the
+   * module cannot either, so this is the whole "open a project" story in wasm mode. Files imported
+   * before the module is loaded are staged and written the moment it is.
+   *
+   * A `.kicad_pro` wins over a `.kicad_pcb` over a `.kicad_sch`, matching what the project browser
+   * would have handed to `connect()`.
+   */
+  async importProjectFiles(files: { name: string; bytes: Uint8Array }[], dir = MEMFS_PROJECT_DIR): Promise<string> {
+    if (!this.wasm) throw new Error('importing files into MEMFS needs the in-browser wasm mode');
+    const root = dir.replace(/\/$/, '');
+    for (const f of files) {
+      // Keep any relative directories a directory picker reported (`webkitRelativePath`).
+      const rel = f.name.replace(/^\/+/, '');
+      this.staged.push({ path: `${root}/${rel}`, bytes: f.bytes });
+    }
+    this.flushStaged();
+    const names = files.map((f) => f.name.replace(/^\/+/, ''));
+    const main = names.find((n) => n.endsWith('.kicad_pro')) ?? names.find((n) => n.endsWith('.kicad_pcb')) ?? names.find((n) => n.endsWith('.kicad_sch'));
+    if (!main) throw new Error('no .kicad_pro, .kicad_pcb or .kicad_sch among the files');
+    this.root = root;
+    return `${root}/${main}`;
+  }
+
+  /** Write everything staged so far; a no-op until the module exists. */
+  private flushStaged(): void {
+    const instance = this.instance;
+    if (!instance || this.staged.length === 0) return;
+    const staged = this.staged;
+    this.staged = [];
+    for (const f of staged) memfsWrite(instance, f.path, f.bytes);
+    this.log(`wrote ${staged.length} file(s) into the wasm module's file system`);
   }
 
   private async closeEvents(): Promise<void> {
@@ -420,6 +543,8 @@ export class KicadSessionService implements SessionService {
     const t = this.transport;
     this.kicad = null;
     this.transport = null;
+    // `WasmTransport` owns the instance, so closing it runs `kiapi_shutdown` and drops MEMFS.
+    this.instance = null;
     try {
       if (k) await k.close();
       else if (t) await t.close();
@@ -442,11 +567,10 @@ export class KicadSessionService implements SessionService {
   }
 
   async listFiles(path: string): Promise<FileEntry[]> {
+    if (this.wasm) return this.listMemfs(path || this.root || MEMFS_PROJECT_DIR);
     this.requireBridge('the project browser');
     const dir = path || this.root;
-    const res = await this.json<{ path: string; absolutePath: string; entries: { name: string; kind: 'dir' | 'file'; size: number; mtime: string }[] }>(
-      `/files/list?path=${encodeURIComponent(dir)}`,
-    );
+    const res = await this.json<{ path: string; absolutePath: string; entries: { name: string; kind: 'dir' | 'file'; size: number; mtime: string }[] }>(`/files/list?path=${encodeURIComponent(dir)}`);
     const base = (res.absolutePath || dir).replace(/\/$/, '');
     return res.entries
       .map<FileEntry>((e) => ({
@@ -460,8 +584,25 @@ export class KicadSessionService implements SessionService {
       .sort((a, b) => (a.kind === b.kind ? a.name.localeCompare(b.name) : a.kind === 'dir' ? -1 : 1));
   }
 
-  /** `GET /files/stat`; null when the path does not exist. */
+  /** Everything imported into MEMFS under `dir`, flat, so the browser can show what was loaded. */
+  private listMemfs(dir: string): FileEntry[] {
+    const instance = this.instance;
+    if (!instance) return [];
+    const base = dir.replace(/\/$/, '');
+    return memfsList(instance, base)
+      .filter((p) => p.startsWith(`${base}/`))
+      .map<FileEntry>((p) => ({ name: p.slice(base.length + 1), path: p, kind: 'file', fileType: fileTypeOf(p) }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  /** `GET /files/stat`; in wasm mode a MEMFS lookup, so `<name>.kicad_pcb` next to a `.kicad_pro` is found. */
   async stat(path: string): Promise<{ kind: 'dir' | 'file'; size: number } | null> {
+    if (this.wasm) {
+      const instance = this.instance;
+      if (!instance || !memfsExists(instance, path)) return null;
+      const st = instance.FS.stat(path);
+      return { kind: instance.FS.isDir(st.mode) ? 'dir' : 'file', size: st.size };
+    }
     if (this.bridgeless) return null;
     try {
       const r = await this.json<{ kind: 'dir' | 'file'; size: number }>(`/files/stat?path=${encodeURIComponent(path)}`);
