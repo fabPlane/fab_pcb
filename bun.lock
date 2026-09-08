@@ -87,6 +87,16 @@
         "typescript": "^5.6.0",
       },
     },
+    "packages/kicad-wasm": {
+      "name": "@fp-pcb/kicad-wasm",
+      "version": "0.0.1",
+      "devDependencies": {
+        "@bufbuild/protobuf": "2.14.1",
+        "@fp-pcb/proto": "workspace:*",
+        "@types/bun": "^1.2.0",
+        "typescript": "^5.6.0",
+      },
+    },
     "packages/proto": {
       "name": "@fp-pcb/proto",
       "version": "0.0.1",
@@ -301,6 +311,8 @@
     "@fp-pcb/e2e": ["@fp-pcb/e2e@workspace:e2e"],
 
     "@fp-pcb/kicad-cli": ["@fp-pcb/kicad-cli@workspace:tooling/kicad-cli"],
+
+    "@fp-pcb/kicad-wasm": ["@fp-pcb/kicad-wasm@workspace:packages/kicad-wasm"],
 
     "@fp-pcb/proto": ["@fp-pcb/proto@workspace:packages/proto"],
 
