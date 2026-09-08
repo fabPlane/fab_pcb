@@ -78,11 +78,22 @@ describe("KiCadEvents", () => {
     const pub = await startFakePubServer();
     const sub = await NngIpcSubscriber.connect({ path: pub.path, reconnect: { initialDelayMs: 20, maxDelayMs: 50 } });
     const states: string[] = [];
+    // The peer going away reaches us on the socket's close event, so the subscriber is still
+    // "open" for a moment after pub.stop() resolves.  ready() answers immediately in that state,
+    // which would sample `states` before the reconnect had begun, so wait to be told the drop was
+    // noticed before asking whether we are back up.
+    const noticedDrop = new Promise<void>((r) => sub.onStateChange((state) => state === "connecting" && r()));
     sub.onStateChange((s) => states.push(s));
     await pub.stop();
     const pub2 = await startFakePubServer({ path: pub.path });
+    await noticedDrop;
     await sub.ready();
-    expect(states).toEqual(["connecting", "open"]);
+    // A redial that lands before pub2 is listening costs an extra "connecting", so assert the
+    // shape of the sequence rather than one exact pair: it starts by noticing the drop, it ends
+    // open, and it never gives up.
+    expect(states[0]).toBe("connecting");
+    expect(states.at(-1)).toBe("open");
+    expect(states).not.toContain("closed");
     const ev = new KiCadEvents(sub);
     const next = ev.next("jobProgress", { timeoutMs: 2000 });
     pub2.publish(eventBytes(1n, { case: "jobProgress", value: { percent: 100, finished: true } }));
