@@ -22,7 +22,8 @@
     "test:e2e": "bun run --filter @fp-pcb/e2e test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "ci": "bun install --frozen-lockfile && bun run gen:check && bun run coverage:check && bun tooling/coverage/summary.ts --check && bun run typecheck && bun run test:unit"
+    "ci": "bun install --frozen-lockfile && bun run gen:check && bun run coverage:check && bun tooling/coverage/summary.ts --check && bun run typecheck && bun run test:unit",
+    "bundle:backend": "bun packages/kicad-patches/bundle.ts"
   },
   "devDependencies": {
     "@types/bun": "^1.2.0",

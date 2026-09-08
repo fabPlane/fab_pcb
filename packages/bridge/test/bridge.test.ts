@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { FilesError, Session, configFromEnv, resolveInRoot, startBridge, type BridgeServer } from "../src/index";
+import { FilesError, Session, configFromEnv, eventsSocketPathFor, resolveInRoot, startBridge, type BridgeServer } from "../src/index";
 import { decodeApiResponse, encodeApiRequest, encodePing } from "../src/kicad-ping";
 
 describe("configFromEnv", () => {
@@ -12,6 +12,7 @@ describe("configFromEnv", () => {
     expect(c.port).toBe(4020);
     expect(c.hostname).toBe("127.0.0.1");
     expect(c.socketDir).toBe("/tmp/kicad");
+    expect(c.socketTransport).toBe(process.platform === "win32" ? "ws" : "ipc");
     expect(c.staticDir).toBeNull();
     const d = configFromEnv({ PORT: "0", HOST: "0.0.0.0", KICAD_CLI: "/x/kicad-cli", STATIC_DIR: "/srv", WS_MAX_PAYLOAD_BYTES: "1024" });
     expect(d.port).toBe(0);
@@ -19,6 +20,8 @@ describe("configFromEnv", () => {
     expect(d.kicadCli).toBe("/x/kicad-cli");
     expect(d.staticDir).toBe("/srv");
     expect(d.maxPayloadBytes).toBe(1024);
+    expect(configFromEnv({ KICAD_SOCKET_TRANSPORT: "ws", KICAD_WS_HOST: "localhost" })).toMatchObject({ socketTransport: "ws", wsHostname: "localhost" });
+    expect(() => configFromEnv({ KICAD_SOCKET_TRANSPORT: "tcp" })).toThrow(/ipc.*ws/);
     expect(() => configFromEnv({ PORT: "abc" })).toThrow();
   });
 });
@@ -70,6 +73,10 @@ describe("resolveInRoot", () => {
 });
 
 describe("session discovery metadata", () => {
+  test("derives event endpoints for IPC and WebSocket sessions", () => {
+    expect(eventsSocketPathFor("/tmp/api.sock")).toBe("/tmp/api-events.sock");
+    expect(eventsSocketPathFor("ws://127.0.0.1:5000/kicad")).toBe("ws://127.0.0.1:5000/kicad/events");
+  });
   test("a bare session adopts the project path created by a job", () => {
     const session = new Session(configFromEnv({}, { log: () => {} }), "bare", null, "/tmp/api-bare.sock");
     session.updateProjectPath("/tmp/demo/../demo/demo.kicad_pro");

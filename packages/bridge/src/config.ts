@@ -15,6 +15,13 @@ export interface BridgeConfig {
   kicadCli: string;
   /** Directory for `api-<session>.sock`. Env `KICAD_SOCKET_DIR`, default `/tmp/kicad`. */
   socketDir: string;
+  /** KiCad child transport. `ws` is the Windows default because Bun has no nng named-pipe dialer. */
+  socketTransport: "ipc" | "ws";
+  /** Loopback interface used by per-session KiCad WebSocket listeners. */
+  wsHostname: string;
+  /** Bundled standard KiCad libraries registered into every compiled project. */
+  footprintDir: string | null;
+  symbolDir: string | null;
   /** Root the `/files` API is confined to. Env `WORKSPACE_ROOT`, default the KiCad `qa/data` dir. */
   workspaceRoot: string;
   /** Directory served for unmatched GET requests (SPA). Env `STATIC_DIR`; unset disables. */
@@ -54,11 +61,18 @@ function int(v: string | undefined, dflt: number): number {
 }
 
 export function configFromEnv(env: Record<string, string | undefined> = process.env, overrides: Partial<BridgeConfig> = {}): BridgeConfig {
+  const socketTransport = env.KICAD_SOCKET_TRANSPORT ?? (process.platform === "win32" ? "ws" : "ipc");
+  if (socketTransport !== "ipc" && socketTransport !== "ws")
+    throw new Error(`KICAD_SOCKET_TRANSPORT must be "ipc" or "ws", got ${JSON.stringify(socketTransport)}`);
   const base: BridgeConfig = {
     port: int(env.PORT, 4020),
     hostname: env.HOST ?? "127.0.0.1",
     kicadCli: env.KICAD_CLI ?? DEFAULT_KICAD_CLI,
     socketDir: env.KICAD_SOCKET_DIR ?? "/tmp/kicad",
+    socketTransport,
+    wsHostname: env.KICAD_WS_HOST ?? "127.0.0.1",
+    footprintDir: env.KICAD_FOOTPRINT_DIR ? resolve(env.KICAD_FOOTPRINT_DIR) : null,
+    symbolDir: env.KICAD_SYMBOL_DIR ? resolve(env.KICAD_SYMBOL_DIR) : null,
     workspaceRoot: resolve(env.WORKSPACE_ROOT ?? DEFAULT_WORKSPACE_ROOT),
     staticDir: env.STATIC_DIR ? resolve(env.STATIC_DIR) : null,
     requestTimeoutMs: int(env.KICAD_REQUEST_TIMEOUT_MS, 120_000),
