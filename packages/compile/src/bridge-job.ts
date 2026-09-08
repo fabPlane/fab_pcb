@@ -245,8 +245,10 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
             const uniqueLibraries = [...new Map(libraries.map((library) => [`${library.kind}:${library.nickname}`, library])).values()];
             if (uniqueLibraries.length) {
               await registerLibraries(kicad, uniqueLibraries);
+              const names = uniqueLibraries.map((library) => library.nickname);
+              const shown = names.slice(0, 12).join(", ") + (names.length > 12 ? `, … +${names.length - 12}` : "");
               pushLog(
-                `registered ${uniqueLibraries.length} project librar${uniqueLibraries.length === 1 ? "y" : "ies"}: ${uniqueLibraries.map((l) => l.nickname).join(", ")}`,
+                `registered ${uniqueLibraries.length} project librar${uniqueLibraries.length === 1 ? "y" : "ies"}: ${shown}`,
               );
             }
           },

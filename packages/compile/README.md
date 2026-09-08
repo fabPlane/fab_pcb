@@ -3,7 +3,7 @@
 Turns a **design source** into a **KiCad project**.
 
 ```
-source --[Frontend]--> Netlist --[emit + apply]--> KiCad board
+source --[Frontend]--> Netlist --[emit + apply]--> KiCad board + generated schematic
 ```
 
 The split is the point. The left half changes with whatever authoring format you want; the right
@@ -21,9 +21,10 @@ schematic to a board. Footprint matching, field updates and net assignment are K
 | `src/compile.ts`                | orchestration, with the stage and `beforeApply` hooks the job uses                               |
 | `src/frontends/netlist-json.ts` | the first frontend: `circuit.netlist.json` = `{ netlist, board?, libraries? }`, the IR as a file |
 | `src/libraries.ts`              | `LibrarySpec` → project `fp-lib-table` / `sym-lib-table` rows (`AddLibraryTableRow`)             |
+| `src/schematic.ts`              | symbol lookup and owned generated symbols, wires, and labels on the root sheet                  |
 | `src/bridge-job.ts`             | the job the bridge mounts at `/sessions/:id/compile` (see `packages/bridge/README.md`)           |
 
-The emitter, the validator, the frontend and the outline geometry are pure, so the package is
+The emitter, validator, frontend, outline geometry and generated-schematic geometry are pure, so the package is
 unit-tested without a KiCad server (`bun test`).
 
 ## The apply order, and why
@@ -85,13 +86,37 @@ graded by the response's `errorCount` / `warningCount`; the text rides along as 
 
 A compile creates separate undo entries for the operations it actually performs: outline,
 KiCad's "Update Netlist", autoplace, edge inset, and explicit source placement. The library never
-saves the document; the job does.
+saves the document; the job saves both the board and schematic.
+
+## Generated schematic
+
+A component names its KiCad symbol independently of its footprint:
+
+```json
+{
+  "ref": "R1",
+  "value": "10k",
+  "footprint": "Resistor_SMD:R_0402_1005Metric",
+  "libSource": { "lib": "Device", "part": "R", "description": "optional override" }
+}
+```
+
+After a successful `ImportNetlist`, the bridge embeds each `lib:part` definition in a searchable
+schematic symbol and draws a short wire plus a same-name local label at every connected pin. Equal
+labels create real KiCad connectivity without routing long generated wires through other symbols.
+Generated items carry `fp-pcb.generated=circuit.netlist.json`; rebuild replaces only those items,
+preserving anything a person added or explicitly adopted in KiCad.
+
+Missing `libSource`, an unavailable symbol, or a pin absent from its symbol produces a `schematic`
+warning while leaving the successful board compile intact. This preserves old netlists, but ERC and
+schematic rendering are complete only when every component supplies a valid symbol. Project and
+bundled symbol libraries are registered before lookup.
 
 ## The job
 
 `createCompileJobs()` returns what the bridge mounts: `POST /sessions/:id/compile` takes a
 `CompileSource` inline (no file staging), creates the project at `project.path` when the session
-was started bare, registers the frontend's `libraries` in the project tables, runs `compile()`
+was started bare, registers source and bundled libraries in the project tables, runs `compile()`
 with the stages above as job states, saves, and reports the board `revision` as a compatibility
 fallback for older fork builds. Current fork builds also publish `DocumentChanged` for the real
 `ImportNetlist`. `done` carries `result` whether or not it is `ok`; `error` is an infrastructure
@@ -105,13 +130,13 @@ failure. `DELETE` cancels between stages.
 `bun run experiment` is the exploratory version with timings and verbatim reports; its findings
 are in fabdesk's `docs/fab-pcb-migration.md` §6.1.
 
-## What is not here yet
+## Deliberate limitations
 
 - **`libparts` is not emitted.** `BOARD_NETLIST_UPDATER` does not read it, so `ImportNetlist` is
   happy — but the output is not a drop-in for an eeschema netlist in tools that want library
   detail.
-- **Board-only.** Nothing creates a schematic. A netlist carries no geometry, so a design compiled
-  this way has no drawn schematic, hence no ERC and no BOM-from-schematic.
+- The generated schematic uses a deterministic grid and labelled pin stubs, not a human-style
+  functional block layout. Manual items survive rebuilds, but generated symbol positions do not.
 - **Only the near edges are inset**, and only for autoplaced additions when this compile drew the
   outline. A board so full that the far edges bind needs explicit placement.
 

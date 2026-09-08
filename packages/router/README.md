@@ -46,6 +46,19 @@ generic input, multilayer vias, an incremental `step()` API (so a page can yield
 show progress) and a DRC-repair pipeline. Its input is built from `RouteInput` in
 `buildSimpleRouteJson()`; nothing in this package is written per board.
 
+### Why `js_autorouter` cannot replace it yet
+
+The sibling `TensorFleet/js_autorouter` currently exposes a batch `routeSrj(input, options)` API,
+but not the incremental `step()`/phase/progress and cancellation contract this bridge streams. It
+also lacks the Solver8 `netIsAssignable` behavior used by `preset: laser-prefab` to change layers
+only through and claim prefabricated free vias, and has no proven adapter for preserving existing
+copper. Its repository is marked private/GPL-derived and non-redistributable pending a licensing or
+clean-room decision, while the bridge executable is intended for distribution. The smallest viable
+migration is: expose an incremental cancellable solver; port fixed-via eligibility and claim
+semantics plus existing-copper tests; confirm Bun/browser packaging; and resolve redistribution
+licensing. Until all four exist, `@tscircuit/capacity-autorouter` remains a direct dependency and
+tscircuit has not been completely removed from fab_pcb.
+
 What it costs us, measured on the practice boards and documented in `js-router.ts`:
 
 - It only knows axis-aligned rectangles, so pads are bounding boxes (a circle becomes its square),
@@ -151,7 +164,9 @@ const jobs = createRouteJobs();
 | `DELETE /sessions/:id/route/:job`                                                                         | cancel: aborts the router (`RouteOptions.signal`), Freerouting's java is killed; nothing applied                                                                                                           |
 
 `RouteJobInfo.summary` carries `tracks, vias, routed, routerRouted, total, trackLengthNm, elapsedMs,
-wallMs, timedOut, message, unrouted:[{net, from, to}], log` — `routed` and `unrouted` are re-measured
+wallMs, timedOut, message, unrouted:[{net, from, to}], geometry, log` — `geometry` is newly created
+or claimed KiCad trace/arc/via geometry after apply, so even a route that finishes before progress
+polling produces a useful final Route Cinema frame. `routed` and `unrouted` are re-measured
 with `GetRatsnest` after the apply (the router's own `routerRouted` calls a net routed once it got a
 wire, which overstates on multi-pad nets); a run that routes nothing ends `failed` with the router's
 reason (`emptyResultReason`). `sesToItems` skips the session's echo of the board's existing tracks
