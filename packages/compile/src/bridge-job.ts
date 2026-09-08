@@ -27,13 +27,14 @@
  */
 import { mkdir } from "node:fs/promises";
 import { dirname, isAbsolute, resolve } from "node:path";
-import { KiCad, KiCadClient, type Board, type Transport } from "@fp-pcb/client";
+import { KiCad, KiCadClient, type Board, type Schematic, type Transport } from "@fp-pcb/client";
 import { edgeClearanceNm } from "./apply";
 import { compile, CompileCancelled } from "./compile";
 import { netlistJsonFrontend } from "./frontends/netlist-json";
 import { registerLibraries } from "./libraries";
 import { applyBoardConstraints, applyDefaultNetClass, hasRules } from "./rules";
-import type { BoardRules, BoardSpec, CompileResult, CompileSource, Frontend, MatchMode } from "./types";
+import { generateSchematic } from "./schematic";
+import type { BoardRules, BoardSpec, CompileResult, CompileSource, Frontend, LibrarySpec, MatchMode } from "./types";
 
 export type CompileJobState =
   | "queued"
@@ -43,6 +44,7 @@ export type CompileJobState =
   | "outlining"
   | "importing"
   | "placing"
+  | "schematic"
   | "saving"
   | "done"
   | "failed"
@@ -101,6 +103,8 @@ export interface CompileJobDeps {
   /** Placement margin from the board edge in nm; default the board's copper-to-edge clearance rule. */
   edgeMargin?: (board: Board) => Promise<number>;
   log?: (message: string) => void;
+  /** Standard libraries bundled with the bridge, registered together with frontend-local rows. */
+  libraries?: readonly LibrarySpec[];
 }
 
 export interface CompileJobs {
@@ -219,6 +223,7 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
         await mkdir(dirname(netlistPath), { recursive: true });
         const autoplace = request.autoplace ?? true;
         let rules: BoardRules | undefined;
+        let schematic: Schematic | undefined;
         const edgeMarginNm = autoplace ? await (deps.edgeMargin ?? edgeClearanceNm)(board) : 0;
 
         const result = await compile(request.source, board, {
@@ -236,12 +241,22 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
           beforeApply: async (built) => {
             rules = (request.board ?? built.board)?.rules;
             if (hasRules(rules)) pushLog(`rules: ${(await applyBoardConstraints(board, rules)).join(", ")}`);
-            if (built.libraries?.length) {
-              await registerLibraries(kicad, built.libraries);
+            const libraries = [...(deps.libraries ?? []), ...(built.libraries ?? [])];
+            const uniqueLibraries = [...new Map(libraries.map((library) => [`${library.kind}:${library.nickname}`, library])).values()];
+            if (uniqueLibraries.length) {
+              await registerLibraries(kicad, uniqueLibraries);
               pushLog(
-                `registered ${built.libraries.length} project librar${built.libraries.length === 1 ? "y" : "ies"}: ${built.libraries.map((l) => l.nickname).join(", ")}`,
+                `registered ${uniqueLibraries.length} project librar${uniqueLibraries.length === 1 ? "y" : "ies"}: ${uniqueLibraries.map((l) => l.nickname).join(", ")}`,
               );
             }
+          },
+          afterApply: async (built) => {
+            const generated = await generateSchematic(kicad, built.netlist!);
+            schematic = generated.schematic;
+            pushLog(
+              `schematic: ${generated.symbolsCreated} symbols, ${generated.wiresCreated} wires, ${generated.labelsCreated} labels`,
+            );
+            return generated.diagnostics;
           },
         });
         for (const d of result.diagnostics) pushLog(`${d.severity} [${d.stage}${d.code ? `/${d.code}` : ""}] ${d.message.split("\n")[0]}`);
@@ -251,6 +266,7 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
         if (result.ok && request.save !== false) {
           setState("saving");
           await board.save();
+          await schematic?.save();
         }
         const rev = await board.revision().catch(() => undefined);
         if (rev !== undefined) info.revision = Number(rev);

@@ -19,7 +19,7 @@
  */
 
 /** Where a diagnostic came from, so a UI can group them and a tool can decide what to retry. */
-export type CompileStage = "frontend" | "netlist" | "apply";
+export type CompileStage = "frontend" | "netlist" | "apply" | "schematic";
 
 /**
  * One problem, placed in the source when the frontend knows where. Shaped for an editor squiggle

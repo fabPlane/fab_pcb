@@ -21,7 +21,7 @@ import {
 } from "./types";
 import type { Board } from "@fp-pcb/client";
 
-export type CompileStageName = "frontend" | "validating" | ApplyStage;
+export type CompileStageName = "frontend" | "validating" | ApplyStage | "schematic";
 
 export interface CompileOptions extends ApplyOptions {
   /** Turns `source` into a netlist. See `Frontend` in `types.ts`. */
@@ -33,6 +33,8 @@ export interface CompileOptions extends ApplyOptions {
    * registers the frontend's libraries so the dry run can resolve them.
    */
   beforeApply?: (built: FrontendResult) => Promise<void>;
+  /** Runs after a successful board import; the bridge uses it to rebuild generated schematic items. */
+  afterApply?: (built: FrontendResult) => Promise<Diagnostic[]>;
 }
 
 /** Thrown when `signal` aborts between stages; `CompileCancelled.is(e)` for callers that rethrow. */
@@ -145,6 +147,11 @@ export async function compile(source: CompileSource, board: Board, opts: Compile
     ...(boardSpec ? { board: boardSpec } : {}),
   });
   diagnostics.push(...applied.diagnostics);
+  if (!hasErrors(diagnostics) && opts.afterApply) {
+    cancelled();
+    opts.onStage?.("schematic");
+    diagnostics.push(...(await opts.afterApply(built)));
+  }
 
   return done(
     diagnostics,

@@ -25,8 +25,8 @@ if (!haveKicad)
 const NETLIST_JSON = {
   netlist: {
     components: [
-      { ref: "R1", value: "1k", footprint: "Resistor_SMD:R_0402_1005Metric" },
-      { ref: "R2", value: "2k2", footprint: "Resistor_SMD:R_0603_1608Metric" },
+      { ref: "R1", value: "1k", footprint: "Resistor_SMD:R_0402_1005Metric", libSource: { lib: "Device", part: "R" } },
+      { ref: "R2", value: "2k2", footprint: "Resistor_SMD:R_0603_1608Metric", libSource: { lib: "Device", part: "R" } },
     ],
     nets: [
       {
@@ -53,13 +53,17 @@ const NETLIST_JSON = {
       { ref: "R2", position: { x: 15, y: 6 } },
     ],
   },
-  libraries: [{ kind: "footprint", nickname: "Resistor_SMD", uri: join(QA_LIBRARIES, "Resistor_SMD.pretty") }],
+  libraries: [
+    { kind: "footprint", nickname: "Resistor_SMD", uri: join(QA_LIBRARIES, "Resistor_SMD.pretty") },
+    { kind: "symbol", nickname: "Device", uri: join(QA_LIBRARIES, "Device.kicad_sym") },
+  ],
 };
 
 describe.skipIf(!haveKicad)("compile jobs + kicad-cli api-server", () => {
   let bridge: BridgeServer;
   let workspace: string;
   let sessionId: string;
+  let preservedWireId: string;
 
   beforeAll(async () => {
     workspace = await mkdtemp(join(tmpdir(), "fp-pcb-compile-kicad-"));
@@ -128,8 +132,9 @@ describe.skipIf(!haveKicad)("compile jobs + kicad-cli api-server", () => {
       counts: { components: 2, nets: 2, footprintsAdded: 2, footprintsPlaced: 2 },
     });
     expect(typeof done.revision).toBe("number");
-    for (const s of ["checking", "outlining", "importing", "placing", "saving"]) expect(states).toContain(`progress:${s}`);
-    expect(done.log.some((l) => l.includes("registered 1 project library: Resistor_SMD"))).toBe(true);
+    for (const s of ["checking", "outlining", "importing", "placing", "schematic", "saving"]) expect(states).toContain(`progress:${s}`);
+    expect(done.log.some((l) => l.includes("registered 2 project libraries: Resistor_SMD, Device"))).toBe(true);
+    expect(done.log.some((l) => l.includes("schematic: 2 symbols, 4 wires, 4 labels"))).toBe(true);
     expect(existsSync(projectPath)).toBe(true);
     expect(existsSync(join(workspace, "demo", "demo.kicad_pcb"))).toBe(true);
     expect(existsSync(join(workspace, "demo", ".fabdesk", "compile.net"))).toBe(true);
@@ -153,6 +158,14 @@ describe.skipIf(!haveKicad)("compile jobs + kicad-cli api-server", () => {
     expect(
       Object.fromEntries((await (await kicad.currentBoard())!.getFootprints()).map((footprint) => [footprint.reference, footprint.position])),
     ).toEqual({ R1: { x: 5_000_000, y: 4_000_000 }, R2: { x: 15_000_000, y: 6_000_000 } });
+    const schematic = (await kicad.currentSchematic())!;
+    const root = await schematic.rootSheet();
+    expect((await root.getSymbols()).map((symbol) => symbol.reference).sort()).toEqual(["R1", "R2"]);
+    const wires = await schematic.getWires(root.scope);
+    expect(wires.length).toBe(4);
+    const preserved = wires[0]!;
+    preserved.setCustomProperty("fp-pcb.generated", undefined);
+    preservedWireId = (await root.commit("adopt generated wire as manual", (tx) => tx.update([preserved]))).updated[0]!.id;
     const polled = (await (await api(`/sessions/${sessionId}/compile/${job.id}`)).json()) as { job: CompileJobInfo };
     expect(polled.job.state).toBe("done");
     const list = (await (await api(`/sessions/${sessionId}/compile`)).json()) as { jobs: CompileJobInfo[]; frontends: string[] };
@@ -180,6 +193,11 @@ describe.skipIf(!haveKicad)("compile jobs + kicad-cli api-server", () => {
     expect(done.state).toBe("done");
     expect(done.result?.counts.footprintsAdded).toBe(0);
     expect(done.result?.diagnostics.map((d) => d.code)).toContain("single_node_net");
+    const kicad = await KiCad.connect(bridge.sessions.get(sessionId)!.transport!, { clientName: "fp-pcb/schematic-rebuild-test" });
+    const root = await (await kicad.currentSchematic())!.rootSheet();
+    expect((await root.getSymbols()).map((symbol) => symbol.reference).sort()).toEqual(["R1", "R2"]);
+    expect((await root.getAllItems()).some((item) => item.id === preservedWireId)).toBe(true);
+    expect((await (await kicad.currentSchematic())!.getWires(root.scope)).length).toBe(6);
   }, 60_000);
 
   test("a frontend error ends failed with diagnostics and no infrastructure error", async () => {

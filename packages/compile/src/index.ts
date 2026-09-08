@@ -38,6 +38,13 @@ export {
 } from "./bridge-job";
 export { libraryRow, registerLibraries } from "./libraries";
 export {
+  GENERATED_SCHEMATIC_PROPERTY,
+  buildGeneratedSchematic,
+  generateSchematic,
+  type GeneratedSchematic,
+  type GenerateSchematicResult,
+} from "./schematic";
+export {
   NETLIST_JSON_ENTRYPOINT,
   NETLIST_JSON_KIND,
   checkNetlistJson,
