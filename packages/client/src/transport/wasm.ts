@@ -181,6 +181,15 @@ export class WasmTransport implements Transport {
       this.dispatching = false;
       this.log(err.message);
       p.reject(err);
+      if (isRuntimeAbort(e)) {
+        // The module called abort(): a headless GUI stub reached ___trap(), or the runtime ran
+        // out of memory. Everything in it is gone -- later dispatches trap again or return
+        // nothing, and the caller waits out its whole timeout instead of failing. The stdio
+        // transport gets this for free from the process exiting; do the same here so the owner
+        // sees a closed transport and can restart the module.
+        this.close();
+        return;
+      }
       this.afterDispatch();
       return;
     }
@@ -308,4 +317,16 @@ export class WasmSubscriber implements Subscriber {
 
 function errorMessage(e: unknown): string {
   return e instanceof Error ? e.message : String(e);
+}
+
+/**
+ * Did the module abort, as opposed to failing one request?
+ *
+ * Emscripten's `abort()` compiles to an `unreachable` instruction, which surfaces in JavaScript
+ * as a `WebAssembly.RuntimeError`. Every KiCad-level failure comes back as a well-formed
+ * `ApiResponse` with a non-OK status instead, so a RuntimeError out of `dispatch` always means
+ * the instance is unusable.
+ */
+function isRuntimeAbort(e: unknown): boolean {
+  return typeof WebAssembly !== "undefined" && e instanceof WebAssembly.RuntimeError;
 }
