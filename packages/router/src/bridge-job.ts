@@ -17,10 +17,12 @@
  *
  * The job refills the zones (unless `refillZones: false`), saves the board (`SaveDocument`, so
  * KiCad's exporter reads the current state), runs `extractRouteInput` -> router.route ->
- * `applyRouteResult` (one commit, message "Autoroute (<router>): <n> connections") against the
- * session's open board, so the browser only has to pick up the `DocumentChanged` event as usual.
- * Cancelling before the apply leaves the board untouched; a failed router run (the JS router's
- * precheck, a Freerouting crash) applies nothing and reports the error.
+ * `applyRouteResult` (one commit, message "Autoroute (<router>): <n> connections"), then saves
+ * again so the routed board is durable on disk. The browser only has to pick up the
+ * `DocumentChanged` event as usual. Cancelling before the apply leaves the board untouched; a
+ * failed router run (the JS router's precheck, a Freerouting crash) applies nothing and reports the
+ * error. A failure of the final save reports the job as failed but leaves the applied route in
+ * KiCad memory, where the caller can retry saving it.
  */
 import { KiCad, KiCadClient, type Transport } from "@fp-pcb/client";
 import { applyRouteResult } from "./apply";
@@ -179,6 +181,19 @@ export function autorouteMessage(router: "js" | "freerouting", routed: number): 
   return `Autoroute (${router}): ${routed} connection${routed === 1 ? "" : "s"}`;
 }
 
+/** Persist a route that has already been committed to KiCad's in-memory board. */
+export async function persistAppliedRoute(board: { save(): Promise<void> }): Promise<void> {
+  try {
+    await board.save();
+  } catch (e) {
+    const detail = e instanceof Error ? e.message : String(e);
+    throw new Error(
+      `route was applied in KiCad memory but SaveDocument failed; retry saving before closing the session: ${detail}`,
+      { cause: e },
+    );
+  }
+}
+
 export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
   const jobs = new Map<string, Job>();
   const freerouting = deps.freerouting ?? resolveFreerouting();
@@ -265,6 +280,10 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           applied = true;
         }
         const appliedByKicad = (result as RouteResult & { applied?: { tracksAdded: number; viasAdded: number } }).applied;
+        if (applied || appliedByKicad) {
+          setState("saving");
+          await persistAppliedRoute(board);
+        }
         // Re-measure with KiCad's connectivity: what is still an airline after the apply.
         let unrouted = unroutedOf(result);
         let measured = routed;
