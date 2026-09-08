@@ -44,7 +44,7 @@ export class CompileCancelled extends Error {
   }
 }
 
-const ZERO: CompileCounts = { components: 0, nets: 0, footprintsAdded: 0, footprintsPlaced: 0 };
+const ZERO: CompileCounts = { components: 0, nets: 0, footprintsAdded: 0, footprintsPlaced: 0, viasAdded: 0, holesAdded: 0 };
 
 function done(diagnostics: Diagnostic[], counts: CompileCounts, started: number, netlistPath?: string): CompileResult {
   return {
@@ -97,7 +97,7 @@ export async function compile(source: CompileSource, board: Board, opts: Compile
 
   return done(
     diagnostics,
-    { ...counts, footprintsAdded: applied.footprintsAdded, footprintsPlaced: applied.footprintsPlaced },
+    { ...counts, footprintsAdded: applied.footprintsAdded, footprintsPlaced: applied.footprintsPlaced, viasAdded: applied.viasAdded, holesAdded: applied.holesAdded },
     started,
     applied.netlistPath,
   );

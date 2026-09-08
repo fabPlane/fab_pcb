@@ -44,9 +44,13 @@ export function checkNetlistJson(value: unknown, file: string): { file: NetlistJ
         if (required) errs.error(path, "is required");
       } else if (typeof v !== "string") errs.error(path, "must be a string");
     };
-  const num = (): Check => (v, path) => {
-    if (v !== undefined && (typeof v !== "number" || !Number.isFinite(v))) errs.error(path, "must be a finite number");
-  };
+  const num =
+    (required = false): Check =>
+    (v, path) => {
+      if (v === undefined) {
+        if (required) errs.error(path, "is required");
+      } else if (typeof v !== "number" || !Number.isFinite(v)) errs.error(path, "must be a finite number");
+    };
   const arr =
     (each: Check): Check =>
     (v, path) => {
@@ -97,6 +101,9 @@ export function checkNetlistJson(value: unknown, file: string): { file: NetlistJ
         widthMm: num(),
         heightMm: num(),
         copperLayers: num(),
+        rules: obj({ clearanceMm: num(), trackWidthMm: num(), viaDiameterMm: num(), viaDrillMm: num() }, false),
+        vias: (v, path) => v !== undefined && arr(obj({ x: num(true), y: num(true), diameterMm: num(), drillMm: num() }))(v, path),
+        holes: (v, path) => v !== undefined && arr(obj({ x: num(true), y: num(true), diameterMm: num(true) }))(v, path),
       },
       false,
     ),

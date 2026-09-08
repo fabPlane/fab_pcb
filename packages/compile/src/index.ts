@@ -6,17 +6,22 @@ export {
   edgeClearanceNm,
   ensureOutline,
   footprintIds,
+  freeViaItem,
   hasOutline,
+  holeItem,
   insetOutline,
   outlineItems,
   outlineOrigin,
   outlinePoints,
+  prefabItems,
   reportDiagnostics,
   shiftedSegment,
   type ApplyOptions,
   type ApplyOutcome,
   type ApplyStage,
+  type OutlineOutcome,
 } from "./apply";
+export { applyBoardConstraints, applyBoardRules, applyDefaultNetClass, defaultNetClass, hasRules } from "./rules";
 export {
   DEFAULT_NETLIST_PATH,
   boardFor,

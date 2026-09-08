@@ -63,6 +63,23 @@ fix in the serializer. Related: text variables in shown text are not expanded on
    translate the whole proto (a `Footprint.translate` is planned in `packages/client`). The
    compile job sidesteps it by moving the outline it drew instead of the footprints.
 
+### G29 · `SetNetClasses` breaks `AutoplaceFootprints` for footprints imported afterwards
+
+Seen on `280274cc3d` from `@fp-pcb/compile` (`bench/blank-probe.ts`, 2026-09-08): once `SetNetClasses`
+has run in a session (merge or replace mode, any field, the `Default` class alone), every later
+`AutoplaceFootprints` that names a footprint added by a later `ImportNetlist` answers
+`AS_BAD_REQUEST: request failed: basic_string` — a `std::string` built from a null pointer somewhere in
+the net-class lookup for nets/footprints created after the call. Footprints that existed before the
+call still place; `SaveDocument`, `RefillZones`, `GetRatsnest`, `GetNetClassForNets` and DRC are fine;
+setting the classes again or saving before the autoplace does not help. `SetBoardDesignRules`
+(minimum constraints) has no such effect.
+
+Workaround in the compile job: constraints before the apply, the `Default` net class **after**
+autoplace, and `applyNetlist` turns a failed autoplace into the `autoplace_failed` warning (the
+imported footprints keep the import's spread positions) so a rebuild in the same session still
+compiles. Fix belongs in the fork's `SetNetClasses` handler (resynchronise nets and the effective
+net-class cache after replacing the classes).
+
 ### G26 · Found by the five-board practice pass
 `GetDocumentRevision` reads non-monotonically right after `EndCommit` (1, then 0, 1, 1, 1 within
 600 ms on pic_programmer and stickhub), so a client cannot use it as a strict change counter

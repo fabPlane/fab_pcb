@@ -16,7 +16,8 @@ schematic to a board. Footprint matching, field updates and net assignment are K
 | ------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `src/types.ts`                  | the contract: `Netlist` IR, `Frontend`, `LibrarySpec`, `Diagnostic`, `CompileResult`             |
 | `src/netlist.ts`                | `emitKicadNetlist` (IR → KiCad `.net`) and `validateNetlist`                                     |
-| `src/apply.ts`                  | `applyNetlist`: write → dry-run `ImportNetlist` → outline → `ImportNetlist` → autoplace → inset  |
+| `src/apply.ts`                  | `applyNetlist`: write → dry-run `ImportNetlist` → outline (+ a blank's vias and holes) → `ImportNetlist` → autoplace → inset |
+| `src/rules.ts`                  | `applyBoardRules`: `BoardSpec.rules` → `SetBoardDesignRules` + the `Default` net class (`SetNetClasses`) |
 | `src/compile.ts`                | orchestration, with the stage and `beforeApply` hooks the job uses                               |
 | `src/frontends/netlist-json.ts` | the first frontend: `circuit.netlist.json` = `{ netlist, board?, libraries? }`, the IR as a file |
 | `src/libraries.ts`              | `LibrarySpec` → project `fp-lib-table` / `sym-lib-table` rows (`AddLibraryTableRow`)             |
@@ -32,7 +33,13 @@ Each step was checked against the fork at `280274cc3d` and run live (`bench/expe
 1. **`ImportNetlist` with `dryRun`** — the only check that sees the server's `fp-lib-table`.
    An error here stops the compile with the board untouched.
 2. **Outline commit**, when the board has none. `AutoplaceFootprints` answers
-   `APR_NO_BOARD_OUTLINE` without one; the outline _is_ the placement box.
+   `APR_NO_BOARD_OUTLINE` without one; the outline _is_ the placement box. A prefabricated
+   blank's features go into the same commit: `BoardSpec.vias` as through vias on no net (free
+   vias, which the router's `laser-prefab` preset routes through and claims) and `BoardSpec.holes`
+   as circles on `Edge.Cuts` (a mounting hole is a cutout to DRC). Such an outline is the blank's
+   and step 5 never moves it; `prefab_placement` warns that the autoplacer may have put parts on
+   the vias. A board that already has an outline keeps it, blank included (`blank_not_drawn` says
+   so when the spec has vias but the board has none).
 3. **`ImportNetlist` for real.** Headless KiCad spreads new footprints from the origin, inside
    the rectangle step 2 drew.
 4. **`AutoplaceFootprints` on the footprints step 3 added**, with `includeOffboard` — an empty
@@ -46,6 +53,11 @@ Each step was checked against the fork at `280274cc3d` and run live (`bench/expe
    then overwrites the children), so a real move needs a full translate that `@fp-pcb/client`
    does not offer yet. A user-drawn outline is left alone and `edge_clearance_unchecked` is
    emitted instead.
+
+`BoardSpec.rules` (mm) is applied by the job before the apply, through `applyBoardRules`: the
+board's minimum constraints (`SetBoardDesignRules`, merged field by field) and the `Default` net
+class (`SetNetClasses` in merge mode, keeping the fields the spec leaves out). The net class is
+what `@fp-pcb/router` reads track width, clearance and via sizes from.
 
 KiCad's import report has no severity per line (`WX_STRING_REPORTER` drops it), so results are
 graded by the response's `errorCount` / `warningCount`; the text rides along as detail.

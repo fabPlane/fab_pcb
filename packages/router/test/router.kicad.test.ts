@@ -5,7 +5,8 @@
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { existsSync } from "node:fs";
-import { DrcErrorType, RuleSeverity } from "@fp-pcb/proto";
+import { BoardLayer, DrcErrorType, RuleSeverity } from "@fp-pcb/proto";
+import { Via, mm } from "@fp-pcb/client";
 import { KICAD_CLI, fixtureBoards, haveKicad, openFixture, type FixtureBoard, type RunningBoard } from "../bench/kicad";
 import {
   DEFAULT_JAR,
@@ -16,6 +17,8 @@ import {
   extractRouteInput,
   findJava,
   serverHasSpecctra,
+  viaProto,
+  type RouteResult,
 } from "../src/index";
 
 const boards = haveKicad() ? await fixtureBoards() : [];
@@ -77,6 +80,32 @@ describe.skipIf(!ecc83)("router pipeline on ecc83 (real KiCad)", () => {
     expect(undone.applied).toBe(stack.undo.length - idx);
     expect((await board.getTracks()).length).toBe(0);
   }, 300_000);
+
+  test("applyRouteResult claims a free via: UpdateItems puts it on the net in the same commit", async () => {
+    const board = run.board;
+    const net = (await board.nets()).find((n) => n.name && (n.code?.value ?? 0) > 0)!;
+    const created = await board.commit("free via", (tx) =>
+      tx.create([new Via(viaProto({ net: "", netCode: 0, position: { x: mm(120), y: mm(80) }, diameter: mm(1), drill: mm(0.3), layers: [BoardLayer.BL_F_Cu, BoardLayer.BL_B_Cu] }))]),
+    );
+    const free = created.created[0] as Via;
+    expect(free.net ?? "").toBe("");
+    const result: RouteResult = {
+      router: "test",
+      tracks: [],
+      vias: [],
+      claimedVias: [{ id: free.id, net: net.name, netCode: net.code?.value ?? 0, position: free.position }],
+      unrouted: [],
+      totalConnections: 0,
+      timedOut: false,
+      elapsedMs: 0,
+      log: [],
+    };
+    await applyRouteResult(board, result);
+    // GetItems carries the net name; the code is not always echoed back (see extract.ts), so the name is the check.
+    const after = (await board.getTracks()).find((t) => t.id === free.id) as Via;
+    expect(after.net).toBe(net.name);
+    expect((await board.itemsByNet([net.name])).some((i) => i.id === free.id)).toBe(true);
+  }, 60_000);
 
   test("Freerouting through the KiCad Specctra commands (or the builtin DSN/SES path) routes the board", async () => {
     const board = run.board;

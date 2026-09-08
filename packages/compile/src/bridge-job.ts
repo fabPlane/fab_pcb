@@ -32,7 +32,8 @@ import { edgeClearanceNm } from "./apply";
 import { compile, CompileCancelled } from "./compile";
 import { netlistJsonFrontend } from "./frontends/netlist-json";
 import { registerLibraries } from "./libraries";
-import type { BoardSpec, CompileResult, CompileSource, Frontend, MatchMode } from "./types";
+import { applyBoardConstraints, applyDefaultNetClass, hasRules } from "./rules";
+import type { BoardRules, BoardSpec, CompileResult, CompileSource, Frontend, MatchMode } from "./types";
 
 export type CompileJobState =
   | "queued"
@@ -208,6 +209,7 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
         const netlistPath = isAbsolute(rel) ? rel : resolve(projectDir, rel);
         await mkdir(dirname(netlistPath), { recursive: true });
         const autoplace = request.autoplace ?? true;
+        let rules: BoardRules | undefined;
         const edgeMarginNm = autoplace ? await (deps.edgeMargin ?? edgeClearanceNm)(board) : 0;
 
         const result = await compile(request.source, board, {
@@ -223,6 +225,8 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
           signal: abort.signal,
           onStage: setState,
           beforeApply: async (built) => {
+            rules = (request.board ?? built.board)?.rules;
+            if (hasRules(rules)) pushLog(`rules: ${(await applyBoardConstraints(board, rules)).join(", ")}`);
             if (built.libraries?.length) {
               await registerLibraries(kicad, built.libraries);
               pushLog(
@@ -233,6 +237,8 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
         });
         for (const d of result.diagnostics) pushLog(`${d.severity} [${d.stage}${d.code ? `/${d.code}` : ""}] ${d.message.split("\n")[0]}`);
         abort.signal.throwIfAborted();
+        // The net class goes last: SetNetClasses breaks the autoplacer for later imports (G29).
+        if (result.ok && hasRules(rules)) pushLog(`net class: ${(await applyDefaultNetClass(kicad, rules)).join(", ")}`);
         if (result.ok && request.save !== false) {
           setState("saving");
           await board.save();
@@ -243,7 +249,7 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
         info.state = result.ok ? "done" : "failed";
         info.finishedAt = new Date().toISOString();
         log(
-          `compile job ${id}: ${info.state} in ${result.durationMs} ms (${result.counts.components} components, ${result.counts.footprintsAdded} added, ${result.counts.footprintsPlaced} placed)`,
+          `compile job ${id}: ${info.state} in ${result.durationMs} ms (${result.counts.components} components, ${result.counts.footprintsAdded} added, ${result.counts.footprintsPlaced} placed${result.counts.viasAdded ? `, ${result.counts.viasAdded} blank vias` : ""})`,
         );
         emit(job, "done", info);
       } catch (e) {

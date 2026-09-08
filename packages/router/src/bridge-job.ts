@@ -10,6 +10,7 @@
  * The HTTP contract (JSON unless noted):
  *
  *   POST   /sessions/:id/route            body RouteJobRequest        -> 202 { job: RouteJobInfo }  (400 when Freerouting is asked for but missing)
+ *                                          `options.preset: "laser-prefab"` routes through the board's free vias only (prefab blanks)
  *   GET    /sessions/:id/route            -> { jobs: RouteJobInfo[], freerouting }
  *   GET    /sessions/:id/route/:job       -> { job: RouteJobInfo }   (SSE: `event: state`, `progress`, `done`, `error`, `: keepalive` every 15 s)
  *   DELETE /sessions/:id/route/:job       -> { ok, job }             (cancels: the JS router stops at its next step, Freerouting's java is killed)
@@ -55,7 +56,12 @@ export interface RouteJobUnrouted {
 
 export interface RouteJobSummary {
   tracks: number;
+  /** Vias the router added. */
   vias: number;
+  /** Free vias (on no net before the run) the routing claimed; see `RouteOptions.preset`. */
+  claimedVias: number;
+  /** Solver preset the JS router used (`default` or `laser-prefab`). */
+  preset?: string;
   /**
    * Connections routed as KiCad sees it after the apply: `total` minus the airlines `GetRatsnest`
    * still reports (the router's own count, `routerRouted`, calls a net routed as soon as it got a
@@ -254,7 +260,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         const message = request.message ?? autorouteMessage(request.router, routed);
         setState("applying");
         let applied = false;
-        if (!alreadyApplied(result) && (result.tracks.length || result.vias.length)) {
+        if (!alreadyApplied(result) && (result.tracks.length || result.vias.length || result.claimedVias?.length)) {
           await applyRouteResult(board, result, { message });
           applied = true;
         }
@@ -287,6 +293,8 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         info.summary = {
           tracks: appliedByKicad?.tracksAdded ?? result.tracks.length,
           vias: appliedByKicad?.viasAdded ?? result.vias.length,
+          claimedVias: result.claimedVias?.length ?? 0,
+          ...(result.preset ? { preset: result.preset } : {}),
           routed: measured,
           routerRouted: routed,
           total: result.totalConnections,

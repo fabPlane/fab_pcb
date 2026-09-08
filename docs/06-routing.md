@@ -237,3 +237,27 @@ Note on the in-tab JavaScript router: it yields between solver steps, but a sing
 dense board can take up to about a second (measured 0.7 s on sonde_xilinx, 1.2 s on stickhub), so
 the tab stutters rather than freezes. For boards past a few hundred connections, run it on the
 server from the same dialog; a Web Worker for the in-tab path is the proper fix.
+
+## Prefab blanks: free vias and the `laser-prefab` preset
+
+A prefabricated blank (Opulo's Viagrid 9055: a 90 × 55 mm two-layer board with 180 factory vias
+and four mounting holes, finished by removing copper with a laser or CNC) fixes where a design may
+change layers. The compile job draws the blank from `BoardSpec.vias` / `holes` (free vias on no
+net, `Edge.Cuts` circles); the JS router then:
+
+- passes every free via to the solver as a `netIsAssignable` obstacle (`buildSimpleRouteJson`
+  reports the count as `assignable`);
+- picks `AutoroutingPipelineSolver8`, tscircuit's "laser prefab" pipeline, when the board has free
+  vias or `RouteOptions.preset` is `"laser-prefab"` (`"default"` forces the ordinary pipeline, which
+  treats the free vias as obstacles and says so in the log);
+- **claims** a free via whenever a route via lands within 0.05 mm of it, whatever the preset: no
+  `NewVia`, a `ClaimedVia` instead, the adjoining tracks snapped to the via's centre.
+  `applyRouteResult` sets the net on the claimed vias with one `UpdateItems` inside the same
+  commit as the `CreateItems` of the tracks, so undo still takes the whole pass back. A free via
+  two nets wanted is claimed by the first and counted in the log as a conflict.
+
+The job summary carries `claimedVias` and `preset`; `vias` stays the count of vias the router
+added, so on a blank `vias: 0, claimedVias: n` is the good outcome and any `vias > 0` under
+`laser-prefab` means a via off the blank ("added OFF the free positions" in the log). Tests:
+`test/js-router.test.ts` (obstacles, claiming, snapping, conflicts, both presets on the two-net
+board) and `test/router.kicad.test.ts` (the claim through a real `UpdateItems`).

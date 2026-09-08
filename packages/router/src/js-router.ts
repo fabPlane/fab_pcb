@@ -14,23 +14,34 @@
  * - a via always spans every routed layer (a through via), even when the solver only changed
  *   between two inner layers.
  * Every approximation is conservative (blocks more than it should) except the zone one.
+ *
+ * Free vias (vias on no net, e.g. the factory vias of a prefabricated blank such as Opulo's
+ * Viagrid) are passed to the solver as `netIsAssignable` obstacles. The `laser-prefab` preset
+ * (`AutoroutingPipelineSolver8`) changes layers only through those; whichever preset ran, a
+ * route via that lands on a free via *claims* it (`RouteResult.claimedVias`) instead of adding
+ * a via on top of it, and the tracks snap to the via's real centre.
  */
 import { BoardLayer } from "@fp-pcb/proto";
 import { mm, toMm, type Vec2 } from "@fp-pcb/client";
-import { AutoroutingPipelineSolver } from "@tscircuit/capacity-autorouter";
+import { AutoroutingPipelineSolver, AutoroutingPipelineSolver8 } from "@tscircuit/capacity-autorouter";
 import { isAxisAligned, polygonBounds, rotatedRectBounds } from "./geometry";
 import { copperLayersInOrder, rulesForNet } from "./extract";
 import {
   RouteCancelled,
   type Autorouter,
+  type ClaimedVia,
   type NewTrack,
   type NewVia,
   type RouteConnection,
   type RouteInput,
   type RouteOptions,
+  type RoutePreset,
   type RouteProgress,
   type RouteResult,
 } from "./types";
+
+/** A route via this close (nm) to a free via claims it rather than adding a via. */
+export const CLAIM_TOLERANCE_NM = 50_000;
 
 /** The parts of `SimpleRouteJson` we produce (mirrors the solver's type; kept local so the contract is visible here). */
 export interface SimpleRouteJson {
@@ -56,6 +67,8 @@ export interface SrjObstacle {
   width: number;
   height: number;
   connectedTo: string[];
+  /** A free via: the laser-prefab solver may route through it and assign it the net. */
+  netIsAssignable?: boolean;
 }
 
 export type SrjPoint =
@@ -121,7 +134,7 @@ const p = (v: Vec2) => ({ x: toMm(v.x), y: toMm(v.y) });
 export function buildSimpleRouteJson(
   input: RouteInput,
   opts: RouteOptions = {},
-): { srj: SimpleRouteJson; layers: LayerNames; notes: string[] } {
+): { srj: SimpleRouteJson; layers: LayerNames; notes: string[]; assignable: number } {
   const notes: string[] = [];
   const layers = new LayerNames(opts.layers ?? input.copperLayers.map((l) => l.id));
   if (layers.count === 0) throw new Error("no copper layers to route on");
@@ -196,10 +209,16 @@ export function buildSimpleRouteJson(
   }
   if (diagonal) notes.push(`${diagonal} existing diagonal tracks are modelled by their bounding box`);
 
+  let assignable = 0;
   for (const v of input.vias) {
     const box = { x: v.position.x - v.diameter / 2, y: v.position.y - v.diameter / 2, w: v.diameter, h: v.diameter };
     const o = rect(v.id, box, layers.names(v.layers), v.net);
-    if (o) obstacles.push(o);
+    if (!o) continue;
+    if (!v.net) {
+      o.netIsAssignable = true;
+      assignable++;
+    }
+    obstacles.push(o);
   }
 
   for (const k of input.keepouts) {
@@ -258,18 +277,31 @@ export function buildSimpleRouteJson(
     bounds: { minX: toMm(b.x - pad), maxX: toMm(b.x + b.w + pad), minY: toMm(b.y - pad), maxY: toMm(b.y + b.h + pad) },
     outline: input.outline[0]?.map(p),
   };
-  return { srj, layers, notes };
+  return { srj, layers, notes, assignable };
 }
 
-/** Converts the solver's traces back to board items (nm). */
+/**
+ * Converts the solver's traces back to board items (nm). A via within `claimToleranceNm` of a
+ * free via claims it: no `NewVia`, a `ClaimedVia` instead, and the adjoining tracks end on the
+ * free via's centre. `conflicts` counts free vias two nets tried to claim (the second net gets no
+ * via there; DRC will show the open connection).
+ */
 export function tracesToItems(
   traces: readonly SrjTrace[],
   input: RouteInput,
   layers: LayerNames,
-): { tracks: NewTrack[]; vias: NewVia[]; routedNets: Set<string> } {
+  opts: { claimToleranceNm?: number } = {},
+): { tracks: NewTrack[]; vias: NewVia[]; claimedVias: ClaimedVia[]; conflicts: number; routedNets: Set<string> } {
   const codes = new Map(input.nets.map((n) => [n.name, n.code]));
   const tracks: NewTrack[] = [];
   const vias: NewVia[] = [];
+  const claimedVias: ClaimedVia[] = [];
+  const claimedById = new Map<string, ClaimedVia>();
+  const snaps: { from: Vec2; to: Vec2 }[] = [];
+  let conflicts = 0;
+  const tolerance = opts.claimToleranceNm ?? CLAIM_TOLERANCE_NM;
+  const free = input.vias.filter((v) => !v.net);
+  const near = (a: Vec2, b: Vec2) => Math.hypot(a.x - b.x, a.y - b.y) <= tolerance;
   const routedNets = new Set<string>();
   for (const trace of traces) {
     const net = trace.connection_name;
@@ -292,14 +324,19 @@ export function tracesToItems(
         prev = w;
       } else if (step.route_type === "via") {
         const v = step as SrjVia;
-        vias.push({
-          net,
-          netCode,
-          position: { x: mm(v.x), y: mm(v.y) },
-          diameter: rules.viaDiameter,
-          drill: rules.viaDrill,
-          layers: [...layers.layers],
-        });
+        const position = { x: mm(v.x), y: mm(v.y) };
+        const existing = free.find((f) => near(f.position, position));
+        if (existing) {
+          const prior = claimedById.get(existing.id);
+          if (!prior) {
+            const claim: ClaimedVia = { id: existing.id, net, netCode, position: existing.position };
+            claimedById.set(existing.id, claim);
+            claimedVias.push(claim);
+          } else if (prior.net !== net) conflicts++;
+          if (existing.position.x !== position.x || existing.position.y !== position.y) snaps.push({ from: position, to: existing.position });
+        } else {
+          vias.push({ net, netCode, position, diameter: rules.viaDiameter, drill: rules.viaDrill, layers: [...layers.layers] });
+        }
         any = true;
         prev = undefined;
       } else {
@@ -308,7 +345,13 @@ export function tracesToItems(
     }
     if (any) routedNets.add(net);
   }
-  return { tracks, vias, routedNets };
+  for (const s of snaps) {
+    for (const t of tracks) {
+      if (near(t.start, s.from)) t.start = { ...s.to };
+      if (near(t.end, s.from)) t.end = { ...s.to };
+    }
+  }
+  return { tracks, vias, claimedVias, conflicts, routedNets };
 }
 
 export interface JsRouterOptions {
@@ -328,11 +371,16 @@ export class JsRouter implements Autorouter {
   async route(input: RouteInput, opts: RouteOptions = {}, progress?: (p: RouteProgress) => void): Promise<RouteResult> {
     const t0 = performance.now();
     const log: string[] = [];
-    const { srj, layers, notes } = buildSimpleRouteJson(input, opts);
+    const { srj, layers, notes, assignable } = buildSimpleRouteJson(input, opts);
     log.push(...notes.map((n) => `note: ${n}`));
     if (opts.seed !== undefined) log.push("note: the capacity autorouter is deterministic; `seed` is ignored");
     if (opts.viaCost !== undefined) log.push("note: `viaCost` is not a capacity-autorouter parameter; ignored");
-    log.push(`srj: ${srj.layerCount} layers, ${srj.obstacles.length} obstacles, ${srj.connections.length} nets to route`);
+    const preset: RoutePreset = opts.preset ?? (assignable > 0 ? "laser-prefab" : "default");
+    log.push(
+      `srj: ${srj.layerCount} layers, ${srj.obstacles.length} obstacles, ${srj.connections.length} nets to route, preset ${preset}${assignable ? ` (${assignable} free vias)` : ""}`,
+    );
+    if (preset === "default" && assignable)
+      log.push(`note: ${assignable} free via(s) are obstacles to the default preset; preset "laser-prefab" routes through them`);
 
     const deadline = opts.maxTimeMs ? t0 + opts.maxTimeMs : Infinity;
     const yieldEvery = this.jsOpts.yieldEveryMs ?? 50;
@@ -349,7 +397,11 @@ export class JsRouter implements Autorouter {
     const solve = async (srjIn: SimpleRouteJson): Promise<{ traces: SrjTrace[]; error?: string; iterations: number }> => {
       let solver: InstanceType<typeof AutoroutingPipelineSolver>;
       try {
-        solver = new AutoroutingPipelineSolver(srjIn as never, { effort: opts.effort ?? 1 });
+        // Solver8 is the "laser prefab" pipeline: vias only where an obstacle is `netIsAssignable`.
+        solver =
+          preset === "laser-prefab"
+            ? (new AutoroutingPipelineSolver8(srjIn as never, { effort: opts.effort ?? 1 } as never) as unknown as InstanceType<typeof AutoroutingPipelineSolver>)
+            : new AutoroutingPipelineSolver(srjIn as never, { effort: opts.effort ?? 1 });
       } catch (e) {
         return { traces: [], error: e instanceof Error ? e.message : String(e), iterations: 0 };
       }
@@ -424,13 +476,20 @@ export class JsRouter implements Autorouter {
     }
     if (dropped.size) log.push(`nets left unrouted after solver failures: ${[...dropped].join(", ")}`);
 
-    const { tracks, vias, routedNets } = tracesToItems(traces, input, attempt.layers);
+    const { tracks, vias, claimedVias, conflicts, routedNets } = tracesToItems(traces, input, attempt.layers);
     const unrouted: RouteConnection[] = input.connections.filter((c) => !routedNets.has(c.net));
     const elapsedMs = Math.round(performance.now() - t0);
     log.push(
-      `${tracks.length} tracks, ${vias.length} vias, ${routedNets.size}/${srj.connections.length} nets in ${elapsedMs} ms (${iterations} iterations)`,
+      `${tracks.length} tracks, ${vias.length} vias, ${claimedVias.length} claimed, ${routedNets.size}/${srj.connections.length} nets in ${elapsedMs} ms (${iterations} iterations)`,
     );
+    if (assignable)
+      log.push(
+        preset === "laser-prefab"
+          ? `laser-prefab: ${claimedVias.length} of the ${assignable} free via(s) claimed${vias.length ? `; ${vias.length} via(s) added OFF the free positions` : ""}`
+          : `${claimedVias.length} free via(s) claimed by routes that landed on them`,
+      );
+    if (conflicts) log.push(`warning: ${conflicts} free via(s) wanted by more than one net; only the first net got each`);
     progress?.({ phase: "done", percent: 100, routed: input.connections.length - unrouted.length, total: input.connections.length });
-    return { router: this.name, tracks, vias, unrouted, totalConnections: input.connections.length, timedOut, elapsedMs, log };
+    return { router: this.name, tracks, vias, claimedVias, preset, unrouted, totalConnections: input.connections.length, timedOut, elapsedMs, log };
   }
 }
