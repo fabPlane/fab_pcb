@@ -15,13 +15,16 @@ import {
   type BoardGraphicShape,
   type BoardText,
   type BoardTextBox,
+  type Dimension,
   type Field as FieldProto,
   type Footprint as FootprintDefinition,
   type FootprintAttributes,
   type FootprintInstance,
   type Pad as PadProto,
   type PadStack,
+  type PolySet,
   type Vector2,
+  type Zone,
 } from "@fp-pcb/proto";
 import { deg, nm, toAngle, toVector2, vec2, type Vec2 } from "../../../units";
 import { Item, registerItem, wrapAll } from "../base";
@@ -312,17 +315,20 @@ function translateShape(shape: BoardGraphicShape["shape"], delta: Vec2): void {
       shift(value, "center");
       break;
     case "polygon": {
-      const polygons = value.polygons as Array<{ outline?: { nodes: unknown[] }; holes: Array<{ nodes: unknown[] }> }>;
-      for (const polygon of polygons) {
-        for (const line of [polygon.outline, ...polygon.holes]) {
-          for (const node of line?.nodes ?? []) {
-            const nodeGeometry = (node as { geometry: { case?: string; value: unknown } }).geometry;
-            if (nodeGeometry.case === "point") nodeGeometry.value = shifted(nodeGeometry.value as Vector2, delta);
-            if (nodeGeometry.case === "arc") {
-              const arc = nodeGeometry.value as unknown as Record<string, unknown>;
-              for (const key of ["start", "mid", "end"]) shift(arc, key);
-            }
-          }
+      translatePolySet(geometry.value, delta);
+    }
+  }
+}
+
+function translatePolySet(polySet: PolySet | undefined, delta: Vec2): void {
+  for (const polygon of polySet?.polygons ?? []) {
+    for (const line of [polygon.outline, ...polygon.holes]) {
+      for (const node of line?.nodes ?? []) {
+        if (node.geometry.case === "point") node.geometry.value = shifted(node.geometry.value, delta);
+        if (node.geometry.case === "arc") {
+          node.geometry.value.start = shifted(node.geometry.value.start, delta);
+          node.geometry.value.mid = shifted(node.geometry.value.mid, delta);
+          node.geometry.value.end = shifted(node.geometry.value.end, delta);
         }
       }
     }
@@ -357,6 +363,23 @@ function translateFootprintChild(item: { $typeName: string } & Record<string, un
     case "kiapi.board.types.BoardGraphicShape":
       translateShape((item as unknown as BoardGraphicShape).shape, delta);
       return true;
+    case "kiapi.board.types.Dimension": {
+      const dimension = item as unknown as Dimension;
+      if (dimension.text) dimension.text.position = shifted(dimension.text.position, delta);
+      const style = dimension.dimensionStyle;
+      if (style.case) {
+        const geometry = style.value as unknown as Record<string, unknown>;
+        for (const key of ["start", "end", "center", "radiusPoint"])
+          if (geometry[key]) geometry[key] = shifted(geometry[key] as Vector2, delta);
+      }
+      return true;
+    }
+    case "kiapi.board.types.Zone": {
+      const zone = item as unknown as Zone;
+      translatePolySet(zone.outline, delta);
+      for (const filled of zone.filledPolygons) translatePolySet(filled.shapes, delta);
+      return true;
+    }
     default:
       return false;
   }

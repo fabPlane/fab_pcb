@@ -4,12 +4,14 @@ import {
   BoardGraphicShapeSchema,
   BoardLayer,
   BoardTextSchema,
+  DimensionSchema,
   FieldSchema,
   FootprintInstanceSchema,
   PadSchema,
+  ZoneSchema,
   packAny,
 } from "@fp-pcb/proto";
-import { BoardField, BoardShape, BoardText, Footprint, Pad } from "../src/model";
+import { BoardField, BoardShape, BoardText, Dimension, Footprint, Pad, Zone } from "../src/model";
 
 const point = (x: number, y: number) => ({ xNm: BigInt(x), yNm: BigInt(y) });
 const text = (value: string, x: number, y: number) =>
@@ -35,6 +37,24 @@ function fixture(): Footprint {
     layer: BoardLayer.BL_F_Fab,
     shape: { geometry: { case: "segment", value: { start: point(140, 250), end: point(150, 260) } } },
   });
+  const dimension = create(DimensionSchema, {
+    id: { value: "dimension-id" },
+    text: { position: point(160, 270), text: "10" },
+    dimensionStyle: { case: "aligned", value: { start: point(160, 270), end: point(170, 280) } },
+  });
+  const zone = create(ZoneSchema, {
+    id: { value: "zone-id" },
+    outline: {
+      polygons: [
+        {
+          outline: {
+            closed: true,
+            nodes: [{ geometry: { case: "point", value: point(180, 290) } }],
+          },
+        },
+      ],
+    },
+  });
   return new Footprint(
     create(FootprintInstanceSchema, {
       id: { value: "footprint-id" },
@@ -47,7 +67,14 @@ function fixture(): Footprint {
       definition: {
         id: { libraryNickname: "Test", entryName: "Part" },
         anchor: point(7, 8),
-        items: [packAny(PadSchema, pad), packAny(BoardTextSchema, label), packAny(FieldSchema, userField), packAny(BoardGraphicShapeSchema, shape)],
+        items: [
+          packAny(PadSchema, pad),
+          packAny(BoardTextSchema, label),
+          packAny(FieldSchema, userField),
+          packAny(BoardGraphicShapeSchema, shape),
+          packAny(DimensionSchema, dimension),
+          packAny(ZoneSchema, zone),
+        ],
       },
     }),
   );
@@ -67,11 +94,16 @@ describe("Footprint.translate", () => {
     const childText = footprint.items.find((item): item is BoardText => item instanceof BoardText)!;
     const userField = footprint.items.find((item): item is BoardField => item instanceof BoardField)!;
     const shape = footprint.items.find((item): item is BoardShape => item instanceof BoardShape)!;
+    const dimension = footprint.items.find((item): item is Dimension => item instanceof Dimension)!;
+    const zone = footprint.items.find((item): item is Zone => item instanceof Zone)!;
     expect(pad.position).toEqual({ x: 1_110, y: -1_780 });
     expect(childText.position).toEqual({ x: 1_120, y: -1_770 });
     expect(userField.position).toEqual({ x: 1_130, y: -1_760 });
     expect(shape.start).toEqual({ x: 1_140, y: -1_750 });
     expect(shape.end).toEqual({ x: 1_150, y: -1_740 });
+    expect(dimension.start).toEqual({ x: 1_160, y: -1_730 });
+    expect(dimension.end).toEqual({ x: 1_170, y: -1_720 });
+    expect(zone.outlinePoints).toEqual([{ x: 1_180, y: -1_710 }]);
   });
 
   test("preserves rotation, layer, identity, definition anchor, and unrelated properties", () => {
