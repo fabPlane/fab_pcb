@@ -19,8 +19,9 @@ env:
   BUN_VERSION: "1.4.0"
   # Image with kicad-cli + kifaces built from the fork (packages/kicad-patches/docker). Until the
   # first image is published to GHCR the kicad-integration job builds it from KICAD_REPO/KICAD_REF.
+  # KICAD_REPO is the fork, not upstream KiCad: KICAD_COMMIT pins a commit that only exists there.
   KICAD_IMAGE: ghcr.io/${{ github.repository_owner }}/kicad-cli
-  KICAD_REPO: https://gitlab.com/kicad/code/kicad.git
+  KICAD_REPO: https://github.com/${{ github.repository_owner }}/kicad.git
   KICAD_REF: web-api
 
 jobs:
@@ -181,8 +182,10 @@ jobs:
         id: tag
         run: |
           commit="$(cat packages/proto/KICAD_COMMIT)"
+          # GHCR rejects a tag whose repository name is not all lowercase, and the owner is not.
+          image="$(printf '%s' "$KICAD_IMAGE" | tr '[:upper:]' '[:lower:]')"
           echo "commit=$commit" >> "$GITHUB_OUTPUT"
-          echo "tag=${KICAD_IMAGE}:${commit:0:10}" >> "$GITHUB_OUTPUT"
+          echo "tag=${image}:${commit:0:10}" >> "$GITHUB_OUTPUT"
 
       - name: Pull the prebuilt image
         id: pull
