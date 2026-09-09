@@ -57,6 +57,7 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
     .catch(() => false);
   if (!kicadCliExists) cfg.log(`warning: kicad-cli not found at ${cfg.kicadCli} (set KICAD_CLI)`);
   const routeJobs = createRouteJobs({ freerouting: cfg.freerouting, log: cfg.log });
+  const jsAutorouter = await routeJobs.jsAutorouter();
   const bundledLibraries = [
     ...(cfg.footprintDir ? await discoverLibraries("footprint", cfg.footprintDir) : []),
     ...(cfg.symbolDir ? await discoverLibraries("symbol", cfg.symbolDir) : []),
@@ -64,6 +65,7 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
   if (bundledLibraries.length) cfg.log(`bundled libraries: ${bundledLibraries.length} rows`);
   const compileJobs = createCompileJobs({ log: cfg.log, libraries: bundledLibraries });
   if (!cfg.freerouting.ok) cfg.log(`warning: ${cfg.freerouting.reason}`);
+  if (!jsAutorouter.ok) cfg.log(`warning: ${jsAutorouter.reason}`);
 
   const server = Bun.serve<WsData>({
     port: cfg.port,
@@ -92,6 +94,7 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
           kicadCliExists,
           workspaceRoot: cfg.workspaceRoot,
           staticDir: cfg.staticDir,
+          jsAutorouter,
           freerouting: cfg.freerouting,
           compile: { frontends: compileJobs.frontends },
           sessions: sessions.list().map((s) => ({ id: s.id, state: s.state, path: s.path, clients: s.clients })),

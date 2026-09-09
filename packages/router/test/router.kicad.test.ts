@@ -1,6 +1,6 @@
 /**
  * Integration: the whole pipeline against a real `kicad-cli api-server` on the ecc83 practice board
- * (extract -> JS router -> one commit -> ratsnest empty -> DRC clean), plus Freerouting through
+ * (extract -> js_autorouter -> one commit -> ratsnest empty -> DRC clean), plus Freerouting through
  * KiCad's Specctra commands when the server has them. Skips without KiCad (see bench/kicad.ts).
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
@@ -11,7 +11,7 @@ import { KICAD_CLI, fixtureBoards, haveKicad, openFixture, type FixtureBoard, ty
 import {
   DEFAULT_JAR,
   FreeroutingRouter,
-  JsRouter,
+  JsAutorouter,
   alreadyApplied,
   applyRouteResult,
   extractRouteInput,
@@ -41,7 +41,13 @@ describe.skipIf(!ecc83)("router pipeline on ecc83 (real KiCad)", () => {
     await run?.stop();
   });
 
-  test("extract -> JsRouter -> one commit routes every connection without DRC errors", async () => {
+  test("extract -> js_autorouter -> one commit routes every connection without DRC errors", async () => {
+    const router = new JsAutorouter();
+    const available = await router.available();
+    if (!available.ok) {
+      console.log(`[skip] ${available.reason}`);
+      return;
+    }
     const board = run.board;
     await board.refillZones();
     const before = await board.unroutedCount();
@@ -53,7 +59,7 @@ describe.skipIf(!ecc83)("router pipeline on ecc83 (real KiCad)", () => {
     expect(input.pads.length).toBeGreaterThan(20);
     expect(input.connections.length).toBe(before.unroutedCount);
 
-    const res = await new JsRouter().route(input, { maxTimeMs: 120_000 });
+    const res = await router.route(input, { maxTimeMs: 120_000 });
     expect(res.unrouted).toEqual([]);
     const applied = await applyRouteResult(board, res);
     expect(applied.created.length).toBe(res.tracks.length + res.vias.length);

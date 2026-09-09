@@ -9,7 +9,7 @@
 // schematic (every sheet), edit (property edit → revision bump, undo), move (M tool), route (the
 // unrouted variant: five nets by hand with V layer switches, RefillZones, DRC, undo, save, gerbers +
 // drill, reopen in a fresh server session), autoroute (a fresh unrouted copy through Route ->
-// Autoroute...: the JS router in the tab on every board that allows it, then Freerouting on the
+// Autoroute...: js_autorouter on the bridge on every board that allows it, then Freerouting on the
 // bridge where the board asks for it and FREEROUTING_JAR is set — summary, RefillZones + DRC, undo;
 // AUTOROUTE_PASSES overrides Freerouting's -mp, default 20). Screenshots go to
 // docs/screenshots/boards/<name>-*.png, the machine-readable result to e2e/output/board-practice/<name>.json.
@@ -578,7 +578,7 @@ try {
     };
 
     if (jsWanted) {
-      const js = await runRouter('js-tab', { tag: 'js', shotDialog: true, timeLimitS: 240, maxWaitMs: 300000 });
+      const js = await runRouter('js-server', { tag: 'js', shotDialog: true, timeLimitS: 240, maxWaitMs: 300000 });
       timings.autorouteJs = { wallMs: js.wallMs, state: js.run.state, maxEvaluateLagMs: js.maxLag };
       const s = js.run.summary;
       if (js.run.state === 'done' && s && s.routed > 0) {
@@ -587,7 +587,7 @@ try {
         const okUndo = undone.tracks === js.before.tracks && undone.vias === js.before.vias;
         log(`js undo: tracks ${js.after.tracks} -> ${undone.tracks}, vias ${js.after.vias} -> ${undone.vias}${okUndo ? '' : ' !! unexpected'}`);
         record('autoroute-js', js.after.tracks === js.before.tracks + s.tracks && js.top === s.message && okUndo && js.maxLag < 2000,
-          `JS router in the tab: ${s.routed}/${s.total} connections, ${s.tracks} tracks, ${s.vias} vias, ${(s.trackLengthNm / 1e6).toFixed(1)} mm in ${(s.wallMs / 1000).toFixed(1)} s (dialog ${(js.wallMs / 1000).toFixed(1)} s, tab stayed responsive: max ${js.maxLag} ms per evaluate); status bar "${js.unrouted0}" -> "${js.unrouted1}"; history "${js.top}"; RefillZones + DRC: ${drc.errors} errors, ${drc.unconnected} unconnected, ${drc.warnings} warnings; undo removed it (tracks ${js.after.tracks} -> ${undone.tracks})`);
+          `js_autorouter on the bridge: ${s.routed}/${s.total} connections, ${s.tracks} tracks, ${s.vias} vias, ${(s.trackLengthNm / 1e6).toFixed(1)} mm in ${(s.wallMs / 1000).toFixed(1)} s (dialog ${(js.wallMs / 1000).toFixed(1)} s, max ${js.maxLag} ms per evaluate); status bar "${js.unrouted0}" -> "${js.unrouted1}"; history "${js.top}"; RefillZones + DRC: ${drc.errors} errors, ${drc.unconnected} unconnected, ${drc.warnings} warnings; undo removed it (tracks ${js.after.tracks} -> ${undone.tracks})`);
       } else {
         // the dialog must report the failure and leave the board alone
         await page.keyboard.press('Escape');
@@ -595,7 +595,7 @@ try {
         const untouched = js.after.tracks === js.before.tracks && js.after.vias === js.before.vias;
         const reported = !!(await textOf('[data-testid="autoroute-error"]').catch(() => '')) || js.run.state !== 'done';
         record('autoroute-js', untouched && (js.run.state === 'failed' || js.run.state === 'cancelled' || (s && s.routed === 0)) && js.maxLag < 2000,
-          `JS router in the tab ${js.run.state} after ${(js.wallMs / 1000).toFixed(1)} s: ${js.run.error ?? (s ? `${s.routed}/${s.total} routed` : 'no summary')}; board untouched (tracks ${js.before.tracks} -> ${js.after.tracks}), dialog ${reported ? 'reported it' : 'did NOT report it'}, tab stayed responsive (max ${js.maxLag} ms per evaluate)`, { knownGap: false });
+          `js_autorouter on the bridge ${js.run.state} after ${(js.wallMs / 1000).toFixed(1)} s: ${js.run.error ?? (s ? `${s.routed}/${s.total} routed` : 'no summary')}; board untouched (tracks ${js.before.tracks} -> ${js.after.tracks}), dialog ${reported ? 'reported it' : 'did NOT report it'}, max evaluate lag ${js.maxLag} ms`, { knownGap: false });
       }
     }
 

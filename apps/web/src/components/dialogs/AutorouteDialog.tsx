@@ -19,8 +19,7 @@ import { layerDisplayName } from '@/lib/enums';
 import { Dialog } from '../layout/Dialog';
 
 const ROUTERS: { value: AutorouterChoice; label: string; help: string }[] = [
-  { value: 'js-tab', label: 'JavaScript router, in this tab', help: 'capacity-autorouter in the page; instant on small boards, fails outright on dense ones' },
-  { value: 'js-server', label: 'JavaScript router, on the server', help: 'the same router inside the bridge, so a long run does not sit in the tab' },
+  { value: 'js-server', label: 'JavaScript router', help: 'TensorFleet js_autorouter inside the bridge' },
   { value: 'freerouting', label: 'Freerouting, on the server', help: 'Java; slower, completes dense boards; passes bound the run, a time limit kills it with nothing routed' },
 ];
 
@@ -61,7 +60,7 @@ export function AutorouteDialog() {
     return [...nets];
   }, [doc.selection, doc.highlightNets, store]);
 
-  const [router, setRouter] = useState<AutorouterChoice>('js-tab');
+  const [router, setRouter] = useState<AutorouterChoice>('js-server');
   const [netScope, setNetScope] = useState<'all' | 'selected'>('all');
   const [layers, setLayers] = useState<string[]>([]);
   const [viaCost, setViaCost] = useState(1);
@@ -146,7 +145,8 @@ export function AutorouteDialog() {
   const toggleLayer = (id: string) => setLayers((ls) => (ls.includes(id) ? ls.filter((l) => l !== id) : [...ls, id]));
   const freeroutingReason = availability && !availability.freerouting.ok ? availability.freerouting.reason : undefined;
   const serverReason = availability && !availability.server ? 'the bridge job route is not reachable from this tab' : undefined;
-  const routerDisabled = (r: AutorouterChoice) => (r === 'freerouting' ? !!freeroutingReason : r === 'js-server' ? !!serverReason : false);
+  const jsAutorouterReason = availability && !availability.jsAutorouter.ok ? availability.jsAutorouter.reason : undefined;
+  const routerDisabled = (r: AutorouterChoice) => (r === 'freerouting' ? !!freeroutingReason : r === 'js-server' ? !!(serverReason || jsAutorouterReason) : false);
   const elapsed = run ? (run.finishedAt ?? Date.now()) - run.startedAt : 0;
   const percent = run?.progress?.percent;
   const summary = run?.summary;
@@ -208,7 +208,7 @@ export function AutorouteDialog() {
           <span className="help">
             {ROUTERS.find((r) => r.value === router)?.help}
             {router === 'freerouting' && freeroutingReason ? ` — ${freeroutingReason}` : ''}
-            {router === 'js-server' && serverReason ? ` — ${serverReason}` : ''}
+            {router === 'js-server' && (serverReason || jsAutorouterReason) ? ` — ${serverReason || jsAutorouterReason}` : ''}
           </span>
 
           <label htmlFor="autoroute-nets">Nets</label>
@@ -251,7 +251,7 @@ export function AutorouteDialog() {
             onChange={(e) => setPasses({ ...passes, [router]: Math.max(1, Number(e.target.value) || 1) })}
           />
           <span className="help">
-            {router === 'freerouting' ? 'maximum auto-routing passes; ~20 finishes a medium board in a few minutes, 100 is Freerouting’s default' : 'capacity-autorouter effort (1 = default)'}
+            {router === 'freerouting' ? 'maximum auto-routing passes; ~20 finishes a medium board in a few minutes, 100 is Freerouting’s default' : 'js_autorouter maximum passes'}
           </span>
 
           <label htmlFor="autoroute-time">Time limit (s)</label>
@@ -267,7 +267,7 @@ export function AutorouteDialog() {
           <span className="help">
             {router === 'freerouting'
               ? '0 = none. Freerouting has no stop-and-save: hitting the limit kills it and nothing is applied'
-              : '0 = none; the JS router returns what it has when the limit hits'}
+              : '0 = none; forwarded to js_autorouter as its total time budget'}
           </span>
 
           <label htmlFor="autoroute-refill">Refill zones first</label>

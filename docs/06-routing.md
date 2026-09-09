@@ -1,5 +1,10 @@
 # 06 — Real boards and routing (milestone M7)
 
+> **Current status (2026-09-09):** this chapter preserves the original M7 benchmark and design
+> record. The tscircuit capacity-router implementation described below has been removed. The
+> bridge now adapts TensorFleet `js_autorouter` through DSN/SES, and the browser no longer embeds
+> a router. See `packages/router/README.md` for the live contract and migration blockers.
+
 Everything so far was proven on the API kitchen-sink fixtures. This phase uses real designs
 and adds autorouting.
 

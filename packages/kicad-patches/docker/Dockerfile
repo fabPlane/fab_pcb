@@ -89,7 +89,7 @@ RUN --mount=type=cache,target=/ccache,sharing=locked \
       -DKICAD_UPDATE_CHECK=OFF \
       -DKICAD_INSTALL_DEMOS=OFF \
       -DKICAD_USE_PCH=ON \
-    && ninja -C /src/build/linux ${JOBS:+-j$JOBS} kicad-cli pcbnew_kiface eeschema_kiface \
+    && ninja -C /src/build/linux ${JOBS:+-j$JOBS} kicad-cli pcbnew_kiface eeschema_kiface cvpcb_kiface \
     && ccache -s
 
 # Stage the runtime tree. On Linux KIWAY looks for _*.kiface next to the executable
@@ -103,14 +103,14 @@ RUN --mount=type=cache,target=/ccache,sharing=locked \
 # `docker run`.
 RUN set -eu \
     && mkdir -p /opt/kicad/bin /opt/kicad/lib /opt/kicad/share/kicad \
-    && cp build/linux/kicad/kicad-cli build/linux/pcbnew/_pcbnew.kiface build/linux/eeschema/_eeschema.kiface /opt/kicad/bin/ \
+    && cp build/linux/kicad/kicad-cli build/linux/pcbnew/_pcbnew.kiface build/linux/eeschema/_eeschema.kiface build/linux/cvpcb/_cvpcb.kiface /opt/kicad/bin/ \
     && find build/linux -name 'libki*.so*' -not -path '*/CMakeFiles/*' -exec cp -a {} /opt/kicad/lib/ \; \
     && ls -l /opt/kicad/lib \
     && (cp -r resources/project_template /opt/kicad/share/kicad/template 2>/dev/null || true) \
     && cp -r api/schemas /opt/kicad/share/kicad/schemas \
     && (cat /src/.kicad-commit 2>/dev/null || echo "$KICAD_REF") > /opt/kicad/KICAD_COMMIT \
     && export LD_LIBRARY_PATH=/opt/kicad/lib \
-    && bins="/opt/kicad/bin/kicad-cli /opt/kicad/bin/_pcbnew.kiface /opt/kicad/bin/_eeschema.kiface $(ls /opt/kicad/lib/*.so)" \
+    && bins="/opt/kicad/bin/kicad-cli /opt/kicad/bin/_pcbnew.kiface /opt/kicad/bin/_eeschema.kiface /opt/kicad/bin/_cvpcb.kiface $(ls /opt/kicad/lib/*.so)" \
     && ! ldd $bins | grep -q 'not found' \
     && ldd $bins | awk '/=> \//{print $3}' | sort -u | grep -v '^/opt/kicad/' \
          | xargs -r realpath | sort -u | xargs -r dpkg -S | cut -d: -f1 | sort -u > /opt/kicad/runtime-packages.txt \
@@ -133,7 +133,13 @@ COPY --from=build /opt/kicad/runtime-packages.txt /tmp/runtime-packages.txt
 RUN apt-get update && apt-get install -y --no-install-recommends \
     $(cat /tmp/runtime-packages.txt) ca-certificates shared-mime-info \
     && rm -rf /var/lib/apt/lists/* /tmp/runtime-packages.txt \
-    && useradd -m -u 1000 kicad && mkdir -p /tmp/kicad && chown kicad /tmp/kicad
+    && existing_user="$(getent passwd 1000 | cut -d: -f1)" \
+    && if [ -n "$existing_user" ]; then \
+         usermod --login kicad --home /home/kicad --move-home "$existing_user"; \
+       else \
+         useradd -m -u 1000 kicad; \
+       fi \
+    && mkdir -p /tmp/kicad && chown kicad /tmp/kicad
 COPY --from=build /opt/kicad /opt/kicad
 COPY entrypoint.sh /usr/local/bin/kicad-entrypoint
 RUN chmod +x /usr/local/bin/kicad-entrypoint
@@ -144,7 +150,7 @@ ENV PATH=/opt/kicad/bin:$PATH \
 USER kicad
 # Fail the build if the runtime stage cannot run the binary (as the runtime user, so the settings
 # KiCad writes on first start under $HOME/.config are owned by `kicad`, not root).
-RUN ! ldd /opt/kicad/bin/kicad-cli /opt/kicad/bin/_pcbnew.kiface /opt/kicad/bin/_eeschema.kiface | grep 'not found' \
+RUN ! ldd /opt/kicad/bin/kicad-cli /opt/kicad/bin/_pcbnew.kiface /opt/kicad/bin/_eeschema.kiface /opt/kicad/bin/_cvpcb.kiface | grep 'not found' \
     && kicad-cli version
 WORKDIR /work
 # api-server listens on a unix socket; share /tmp/kicad (or /work) with the host / sibling containers.

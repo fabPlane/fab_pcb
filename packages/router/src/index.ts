@@ -1,7 +1,8 @@
 export * from "./types";
 export { extractRouteInput, rulesForNet, copperLayersInOrder, isCopperLayer, type ExtractOptions } from "./extract";
 export { applyRouteResult, claimedViaItems, itemsFor, trackProto, viaProto, type ApplyOptions } from "./apply";
-export { CLAIM_TOLERANCE_NM, JsRouter, buildSimpleRouteJson, tracesToItems, LayerNames, type JsRouterOptions, type SimpleRouteJson, type SrjObstacle } from "./js-router";
+export { JsRouter, type JsRouterOptions } from "./js-router";
+export { JsAutorouter, type JsAutorouterOptions, type JsAutorouterRouteOptions, type RouteDsn } from "./js-autorouter";
 export {
   FreeroutingRouter,
   alreadyApplied,

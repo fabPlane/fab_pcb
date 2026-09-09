@@ -1,12 +1,13 @@
-// Autorouting for the board editor (Route -> Autoroute...). Three ways to run, one result shape:
+// Autorouting for the board editor (Route -> Autoroute...). Two supported bridge routers, one
+// result shape:
 //
-//   js-tab       `@fp-pcb/router`'s JsRouter in this tab: extractRouteInput over the session's
-//                WebSocket, the solver's step loop yielding to the UI every few tens of ms (so the
-//                dialog stays live and Cancel works), applyRouteResult as one commit.
-//   js-server    the same router inside the bridge (`POST /sessions/:id/route {router:"js"}`),
-//                for boards too big to keep a tab busy.
+//   js-server    TensorFleet js_autorouter inside the bridge
+//                (`POST /sessions/:id/route {router:"js"}`).
 //   freerouting  Freerouting (Java) on the bridge, DSN from KiCad's own exporter, the session
 //                parsed by the router package and applied under our commit message.
+//
+// `js-tab` remains as a compatibility path for older callers; its facade reports that the removed
+// browser router is unavailable.
 //
 // The bridge jobs are followed over their SSE stream (`GET .../route/:job` with
 // `Accept: text/event-stream`), progress and the log tail land in `AutorouteRun`, and the
@@ -95,12 +96,23 @@ export class KicadAutorouteService implements AutorouteService {
 
   async available(): Promise<AutorouteAvailability> {
     const id = this.session.session?.id;
-    if (this.session.bridgeless || !id) return { server: false, freerouting: { ok: false, reason: 'no bridge: the tab talks to KiCad directly' } };
+    if (this.session.bridgeless || !id) {
+      const reason = 'no bridge: the tab talks to KiCad directly';
+      return { server: false, jsAutorouter: { ok: false, reason }, freerouting: { ok: false, reason } };
+    }
     try {
-      const r = await this.session.bridgeJson<{ freerouting?: { ok: boolean; reason?: string } }>(`/sessions/${encodeURIComponent(id)}/route`);
-      return { server: true, freerouting: r.freerouting ?? { ok: false, reason: 'the bridge does not report Freerouting' } };
+      const r = await this.session.bridgeJson<{
+        jsAutorouter?: { ok: boolean; reason?: string };
+        freerouting?: { ok: boolean; reason?: string };
+      }>(`/sessions/${encodeURIComponent(id)}/route`);
+      return {
+        server: true,
+        jsAutorouter: r.jsAutorouter ?? { ok: false, reason: 'the bridge does not report js_autorouter' },
+        freerouting: r.freerouting ?? { ok: false, reason: 'the bridge does not report Freerouting' },
+      };
     } catch (e) {
-      return { server: false, freerouting: { ok: false, reason: `the bridge has no /route (${e instanceof Error ? e.message : String(e)})` } };
+      const reason = `the bridge has no /route (${e instanceof Error ? e.message : String(e)})`;
+      return { server: false, jsAutorouter: { ok: false, reason }, freerouting: { ok: false, reason } };
     }
   }
 
