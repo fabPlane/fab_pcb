@@ -341,3 +341,35 @@ Overnight wrap-up (branch `wasm`, agent `finish`), 2026-09-09.
 - **`bun test --cwd packages/bridge`** shows 15 failures without `KICAD_CLI` pointing at
   `build/dev`; with it, `bridge.kicad.test.ts` is 16/16. That is the stale `build/release` binary,
   not this work.
+
+## browser-worker
+
+Follow-ups 2 and 10 (branch `wasm`, agent `browser-worker`), 2026-09-09.
+
+- **The module runs in a Web Worker.** `packages/kicad-wasm/src/worker.ts` (entry) +
+  `worker-core.ts` (the logic, written against a port interface) own one instance and its MEMFS;
+  `worker-client.ts` is the page side. Same protocol as the bridge's backend, minus `{flush}` (a tab
+  has no disk to mirror to) and plus `{id, fs}` for writeFiles / readFile / exists / stat /
+  listFiles / mkdir — which is why `stat()` and `listMemfs()` on the session are now async.
+- **`dispatchAsync`.** `KiCadWasmInstance.dispatch` is synchronous because the ABI is, so it cannot
+  cross a thread. `WasmTransport` now prefers an optional `dispatchAsync` when the instance has one;
+  in-process callers (Bun, the bridge, conformance) keep the straight-line path unchanged. An abort
+  on the worker thread comes back as an error named `KiCadWasmAbort`, which the transport treats
+  like the `WebAssembly.RuntimeError` it would have caught itself, so it still closes.
+- **One module per tab.** `ownsInstance: false` on the transport; a teardown that is really a
+  reconnect keeps the module, `disconnect()` shuts it down, and only an abort forces a reload (the
+  import replay stays for that case). `?wasm=1` used to fetch 37 MB twice — once for the startup
+  `GetVersion`, once for the project the user then picked.
+- **Measured in the tab, real module, ecc83:** a worker round trip is **0.037 ms**; fifteen awaited
+  KiCad calls in a row give the main thread **0** macrotask turns on the main-thread path and
+  **2 507** through the worker; `kicad_api.wasm` is fetched **once** per page session (verified in
+  the network log); the board renders and DRC reports its 17 warnings. `?wasm-main=1` (or
+  `WasmModeOptions.inWorker: false`) keeps the old path for debugging.
+- **Verified** — `bun run typecheck`; `bun test` 177/177 in apps/web (two new tests: the reuse, and
+  the whole worker protocol through an in-process fake Worker), 18/18 unit + 20/20 with the real
+  module in packages/kicad-wasm, 135/135 unit in packages/client; `vite build` green (`worker.ts`
+  comes out as its own 6.6 KB ES-module chunk). The `.kicad.test.ts` failures in packages/client are
+  the usual missing `KICAD_CLI`, not this work.
+- **Still open here:** no cancel button — `terminate()` is available to the client but nothing in the
+  UI calls it, so a wedged command still needs a reload; and MEMFS is only reachable through the
+  session, so a future "download my project" needs `readFile` wired to the UI (the message is there).
