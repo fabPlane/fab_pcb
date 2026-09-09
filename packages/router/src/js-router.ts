@@ -130,6 +130,28 @@ export class LayerNames {
 
 const p = (v: Vec2) => ({ x: toMm(v.x), y: toMm(v.y) });
 
+/** Turn opaque KiCad item ids in a solver failure into actionable board locations. */
+export function describeSolverErrorEndpoints(error: string, input: RouteInput): string | undefined {
+  const pads = input.pads.filter((pad) => error.includes(pad.id));
+  if (!pads.length) return undefined;
+  const b = input.bounds;
+  const required = input.rules.edgeClearance;
+  const labels = pads.map((pad) => {
+    const box = pad.bounds ?? rotatedRectBounds(pad.position, pad.size, pad.rotation);
+    const edgeGap = Math.min(
+      box.x - b.x,
+      box.y - b.y,
+      b.x + b.w - (box.x + box.w),
+      b.y + b.h - (box.y + box.h),
+    );
+    const where = `${pad.footprint} pad ${pad.number} (${pad.net || "no net"}) at (${toMm(pad.position.x).toFixed(3)}, ${toMm(pad.position.y).toFixed(3)}) mm`;
+    return edgeGap < required
+      ? `${where}; copper edge gap ${toMm(edgeGap).toFixed(3)} mm is below the ${toMm(required).toFixed(3)} mm board-edge rule`
+      : where;
+  });
+  return `precheck endpoints: ${labels.join("; ")}`;
+}
+
 /** Builds the solver input. Pure; unit-tested on hand-written `RouteInput`s. */
 export function buildSimpleRouteJson(
   input: RouteInput,
@@ -458,6 +480,8 @@ export class JsRouter implements Autorouter {
         break;
       }
       log.push(`solver failed (attempt ${round + 1}): ${r.error.slice(0, 300)}`);
+      const endpointDetail = describeSolverErrorEndpoints(r.error, input);
+      if (endpointDetail) log.push(endpointDetail);
       // Failure messages name connections as `<net>_mst<n>` ("GND_mst2 (id->id)", 'connection "GND_mst0"').
       const named = [...new Set([...r.error.matchAll(/"?([^\s"]+?)_mst\d+\b/g)].map((m) => m[1]!))].filter((n) =>
         attempt.srj.connections.some((c) => c.name === n),
