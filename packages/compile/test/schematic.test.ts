@@ -50,14 +50,47 @@ describe("generated schematic", () => {
     const symbol = result.items.find((item): item is SchematicSymbol => item instanceof SchematicSymbol)!;
     expect(symbol.reference).toBe("R1");
     expect(symbol.value).toBe("10k");
-    expect(symbol.position).toEqual({ x: mm(30), y: mm(25) });
-    expect(symbol.field("Reference")?.position).toEqual({ x: mm(30), y: mm(23) });
+    expect(symbol.position).toEqual({ x: mm(30.48), y: mm(25.4) });
+    expect(symbol.field("Reference")?.position).toEqual({ x: mm(30.48), y: mm(23.4) });
+    expect(symbol.pins[0]?.position).toEqual({ x: mm(25.48), y: mm(25.4) });
     const wire = result.items.find((item): item is SchematicLine => item instanceof SchematicLine)!;
-    expect(wire.start).toEqual({ x: mm(25), y: mm(25) });
-    expect(wire.end).toEqual({ x: mm(19.92), y: mm(25) });
+    expect(wire.start).toEqual({ x: mm(25.48), y: mm(25.4) });
+    expect(wire.end).toEqual({ x: mm(20.4), y: mm(25.4) });
     const label = result.items.find((item): item is LocalLabel => item instanceof LocalLabel)!;
     expect(label.text).toBe("VCC");
     expect(result.items.every((item) => item.customProperties[GENERATED_SCHEMATIC_PROPERTY] === "circuit.netlist.json")).toBe(true);
+  });
+
+  test("converts vertical library pins to placed-symbol sheet coordinates", () => {
+    const vertical = deviceSymbol();
+    const pin1 = vertical.proto.items[0]!.item!;
+    const pin2 = vertical.proto.items[1]!.item!;
+    pin1.value = packAny(SchematicPinSchema, create(SchematicPinSchema, { number: "1", position: toVector2({ x: 0, y: mm(3.81) }) })).value;
+    pin2.value = packAny(
+      SchematicPinSchema,
+      create(SchematicPinSchema, { number: "2", position: toVector2({ x: 0, y: mm(-3.81) }) }),
+    ).value;
+
+    const result = buildGeneratedSchematic(
+      {
+        components: [{ ref: "R1", value: "10k", footprint: "Resistor_SMD:R_0402", libSource: { lib: "Device", part: "R" } }],
+        nets: [
+          { name: "VCC", nodes: [{ ref: "R1", pin: "1" }] },
+          { name: "GND", nodes: [{ ref: "R1", pin: "2" }] },
+        ],
+      },
+      new Map([["Device:R", vertical]]),
+    );
+
+    const symbol = result.items.find((item): item is SchematicSymbol => item instanceof SchematicSymbol)!;
+    expect(symbol.pins.map((pin) => pin.position)).toEqual([
+      { x: mm(30.48), y: mm(29.21) },
+      { x: mm(30.48), y: mm(21.59) },
+    ]);
+    expect(result.items.filter((item): item is SchematicLine => item instanceof SchematicLine).map((wire) => wire.start)).toEqual([
+      { x: mm(30.48), y: mm(29.21) },
+      { x: mm(30.48), y: mm(21.59) },
+    ]);
   });
 
   test("keeps board compilation compatible while diagnosing missing symbols and pins", () => {
@@ -67,7 +100,15 @@ describe("generated schematic", () => {
           { ref: "R1", value: "10k", footprint: "x" },
           { ref: "C1", value: "1u", footprint: "x", libSource: { lib: "Missing", part: "C" } },
         ],
-        nets: [{ name: "GND", nodes: [{ ref: "R1", pin: "1" }, { ref: "C1", pin: "2" }] }],
+        nets: [
+          {
+            name: "GND",
+            nodes: [
+              { ref: "R1", pin: "1" },
+              { ref: "C1", pin: "2" },
+            ],
+          },
+        ],
       },
       new Map(),
     );

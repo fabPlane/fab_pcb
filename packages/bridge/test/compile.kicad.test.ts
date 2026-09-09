@@ -156,13 +156,17 @@ describe.skipIf(!haveKicad)("compile jobs + kicad-cli api-server", () => {
     }
     const kicad = await KiCad.connect(bridge.sessions.get(sessionId)!.transport!, { clientName: "fp-pcb/bridge-placement-test" });
     expect(
-      Object.fromEntries((await (await kicad.currentBoard())!.getFootprints()).map((footprint) => [footprint.reference, footprint.position])),
+      Object.fromEntries(
+        (await (await kicad.currentBoard())!.getFootprints()).map((footprint) => [footprint.reference, footprint.position]),
+      ),
     ).toEqual({ R1: { x: 5_000_000, y: 4_000_000 }, R2: { x: 15_000_000, y: 6_000_000 } });
     const schematic = (await kicad.currentSchematic())!;
     const root = await schematic.rootSheet();
     expect((await root.getSymbols()).map((symbol) => symbol.reference).sort()).toEqual(["R1", "R2"]);
     const wires = await schematic.getWires(root.scope);
     expect(wires.length).toBe(4);
+    const erc = await schematic.erc.run();
+    expect(erc.errorCount).toBe(0);
     const preserved = wires[0]!;
     preserved.setCustomProperty("fp-pcb.generated", undefined);
     preservedWireId = (await root.commit("adopt generated wire as manual", (tx) => tx.update([preserved]))).updated[0]!.id;

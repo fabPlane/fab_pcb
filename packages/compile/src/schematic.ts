@@ -2,10 +2,12 @@
 import { clone, create } from "@bufbuild/protobuf";
 import {
   LocalLabelSchema,
+  packAny,
   SchematicSymbolSchema,
   SchematicFieldSchema,
   SchematicLabelSpinStyle,
   SchematicLineSchema,
+  SchematicPinSchema,
   SchematicLineType,
   SchematicSymbolBodyStyleSchema,
   SchematicSymbolInstanceSchema,
@@ -13,6 +15,7 @@ import {
   SchematicSymbolTransformSchema,
   SchematicSymbolUnitSchema,
   TextSchema,
+  unpackAnyAs,
   type SchematicField as SchematicFieldProto,
 } from "@fp-pcb/proto";
 import {
@@ -20,7 +23,6 @@ import {
   LocalLabel,
   mm,
   SchematicLine,
-  SchematicPin,
   SchematicSymbol,
   toVector2,
   vec2,
@@ -33,6 +35,7 @@ import type { Diagnostic, Netlist } from "./types";
 
 export const GENERATED_SCHEMATIC_PROPERTY = "fp-pcb.generated";
 const GENERATED_SCHEMATIC_VALUE = "circuit.netlist.json";
+const SCHEMATIC_GRID_MM = 1.27;
 
 export interface GeneratedSchematic {
   items: Item[];
@@ -61,8 +64,26 @@ function positionedField(source: SchematicFieldProto | undefined, name: string, 
   return field;
 }
 
-function pinNumber(item: Item): string | undefined {
-  return item instanceof SchematicPin ? item.proto.number : undefined;
+/**
+ * A symbol-library document exposes pin positions in library-local coordinates, while a placed
+ * SchematicSymbolInstance carries its selected pins in absolute sheet coordinates. Convert the
+ * cloned library definition before sending it to KiCad; shapes and fields remain library-local.
+ */
+function placedDefinition(source: LibSymbol, origin: Vec2, pins: Map<string, Vec2>, reference: string) {
+  const definition = clone(SchematicSymbolSchema, source.proto);
+
+  for (const child of definition.items) {
+    if (!child.item) continue;
+    const pin = unpackAnyAs(child.item, SchematicPinSchema);
+    if (!pin) continue;
+    const relative = vec2(pin.position);
+    const absolute = { x: origin.x + relative.x, y: origin.y + relative.y };
+    pin.position = toVector2(absolute);
+    child.item = packAny(SchematicPinSchema, pin);
+    if (pin.number) pins.set(`${reference}:${pin.number}`, absolute);
+  }
+
+  return definition;
 }
 
 /** Pure geometry builder, separated from KiCad I/O for focused regression tests. */
@@ -96,11 +117,15 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
       continue;
     }
 
-    const position = { x: mm(30 + (index % 4) * 35), y: mm(25 + Math.floor(index / 4) * 30) };
+    // Keep generated symbols and their labelled stubs on KiCad's default 50 mil grid.
+    const position = {
+      x: mm(24 * SCHEMATIC_GRID_MM + (index % 4) * 28 * SCHEMATIC_GRID_MM),
+      y: mm(20 * SCHEMATIC_GRID_MM + Math.floor(index / 4) * 24 * SCHEMATIC_GRID_MM),
+    };
     const proto = create(SchematicSymbolInstanceSchema, {
       position: toVector2(position),
       transform: create(SchematicSymbolTransformSchema, { orientation: SchematicSymbolOrientation.SSO_0 }),
-      definition: clone(SchematicSymbolSchema, definition.proto),
+      definition: placedDefinition(definition, position, pins, component.ref),
       libId: definition.proto.id,
       referenceField: positionedField(definition.proto.referenceField, "Reference", component.ref, position),
       valueField: positionedField(definition.proto.valueField, "Value", component.value, position),
@@ -129,12 +154,6 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
     const symbol = generated(new SchematicSymbol(proto));
     items.push(symbol);
     symbolsCreated++;
-    for (const pin of symbol.unitItems) {
-      const number = pinNumber(pin);
-      if (!number) continue;
-      const relative = (pin as SchematicPin).position;
-      pins.set(`${component.ref}:${number}`, { x: position.x + relative.x, y: position.y + relative.y });
-    }
   }
 
   // A labelled stub at every connected pin produces correct KiCad connectivity without routing
@@ -153,9 +172,7 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
       }
       const end = { x: start.x - mm(5.08), y: start.y };
       const wire = generated(
-        new SchematicLine(
-          create(SchematicLineSchema, { start: toVector2(start), end: toVector2(end), type: SchematicLineType.SLT_WIRE }),
-        ),
+        new SchematicLine(create(SchematicLineSchema, { start: toVector2(start), end: toVector2(end), type: SchematicLineType.SLT_WIRE })),
       );
       const label = generated(
         new LocalLabel(
