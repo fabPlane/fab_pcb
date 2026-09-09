@@ -69,6 +69,9 @@ async function start(cfg: WasmWorkerInit): Promise<void> {
     };
     wasm = await createKiCadWasm({
       module: mounting,
+      // Not for loading the factory -- that is `mounting` -- but so that `kicad_api.wasm` and
+      // `kicad_api.data` resolve next to the glue instead of against this process's cwd.
+      moduleUrl: toUrl(cfg.moduleUrl),
       home: cfg.home,
       share: cfg.share,
       env: cfg.env,

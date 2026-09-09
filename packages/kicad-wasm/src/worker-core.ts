@@ -59,6 +59,10 @@ export function serveKiCadWasm(port: KiCadWasmWorkerPort): void {
       };
       wasm = await createKiCadWasm({
         module: seeding,
+        // Not for loading the factory -- that is `seeding` -- but so that `kicad_api.data` and,
+        // with no explicit `wasmUrl`, `kicad_api.wasm` resolve next to the glue instead of next to
+        // this worker's own script.
+        moduleUrl: cfg.moduleUrl,
         wasmUrl: cfg.wasmUrl,
         home: cfg.home,
         share: cfg.share,

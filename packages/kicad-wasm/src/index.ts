@@ -208,9 +208,11 @@ export async function createKiCadWasm(opts: KiCadWasmOptions = {}): Promise<KiCa
   };
 
   const moduleArg: Record<string, unknown> = { __kiapiEvent: onEvent };
-  if (opts.wasmUrl) {
-    const wasmUrl = String(opts.wasmUrl);
-    moduleArg.locateFile = (path: string) => (path.endsWith(".wasm") ? wasmUrl : path);
+  const wasmUrl = opts.wasmUrl ? String(opts.wasmUrl) : undefined;
+  const sidecarBase = wasmUrl ?? sidecarBaseOf(opts);
+  if (wasmUrl ?? sidecarBase) {
+    moduleArg.locateFile = (path: string) =>
+      path.endsWith(".wasm") && wasmUrl ? wasmUrl : sidecarBase ? sibling(sidecarBase, path) : path;
   }
   if (opts.print) moduleArg.print = opts.print;
   if (opts.printErr) moduleArg.printErr = opts.printErr;
@@ -252,6 +254,30 @@ function normalise(module: KiCadWasmModule): KiCadWasmModule {
   }
   if (!m.HEAPU8) throw new KiCadWasmError("the wasm module does not expose HEAPU8 (-sEXPORTED_RUNTIME_METHODS=HEAPU8)");
   return module;
+}
+
+/**
+ * Where the module's sidecars (`kicad_api.wasm`, `kicad_api.data`) live, when `wasmUrl` does not
+ * say. An explicit `moduleUrl` wins; a caller that hands over its own `module` factory without one
+ * (the worker's seeding wrapper used to) gets `""`, i.e. Emscripten's own resolution.
+ */
+function sidecarBaseOf(opts: KiCadWasmOptions): string {
+  if (opts.moduleUrl) return String(opts.moduleUrl);
+  return opts.module ? "" : defaultModuleUrl().href;
+}
+
+/**
+ * Resolve one sidecar name against the module's own location.
+ *
+ * Emscripten asks for these by bare file name, and its two fallbacks are both wrong as soon as the
+ * module is not served from the page's (or the process's) own directory: the `--preload-file`
+ * loader `fetch`es `kicad_api.data` against the *document* URL in a browser and hands it straight
+ * to `readFileSync` — relative to the cwd — under Node and Bun. `file:` URLs come back as plain
+ * paths because that loader, unlike the wasm one, has no `file://` handling.
+ */
+function sibling(base: string, name: string): string {
+  const url = base.replace(/[^/]*$/, "") + name;
+  return url.startsWith("file://") ? decodeURIComponent(url.slice("file://".length)) : url;
 }
 
 /** Default module location: `dist/kicad_api.js`, where `bun run fetch` puts the build. */
