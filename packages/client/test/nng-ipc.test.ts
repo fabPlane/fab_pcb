@@ -117,8 +117,14 @@ describe("NngIpcTransport against a fake REP0 server", () => {
     const srv = await startFakeRepServer(() => null);
     servers.push(srv);
     const t = await NngIpcTransport.connect({ path: srv.path, reconnect: { initialDelayMs: 5, maxAttempts: 2 } });
+    // Send only once the drop has been noticed, so the request is queued rather than in flight.
+    // A request written before the transport sees the socket go is rejected by that drop, at a
+    // point where afterDisconnect has just moved to "connecting" for the next attempt; only a
+    // queued one survives the attempts and is failed by the give-up, which is what closes us.
+    const noticedDrop = new Promise<void>((r) => t.onStateChange((s) => s === "connecting" && r()));
     await srv.stop();
     servers = [];
+    await noticedDrop;
     const start = Date.now();
     await expect(t.send(new Uint8Array(1), { timeoutMs: 0 })).rejects.toBeInstanceOf(TransportError);
     expect(t.state).toBe("closed");
