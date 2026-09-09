@@ -278,3 +278,4 @@ async function loadFactory(moduleUrl?: string | URL): Promise<KiCadWasmModuleFac
 
 export * from "./fs";
 export * from "./fonts";
+export * from "./worker-client";

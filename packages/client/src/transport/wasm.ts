@@ -23,6 +23,13 @@ import type { Subscriber, SubscriberState } from "./nng-ipc-sub";
 export interface KiCadWasmInstance {
   /** Synchronously dispatch one serialized `ApiRequest`; returns the serialized `ApiResponse`. */
   dispatch(request: Uint8Array): Uint8Array;
+  /**
+   * The same dispatch, one round trip away — implemented by an instance that lives on another
+   * thread (`createKiCadWasmInWorker()` in the browser), where the module's synchronous ABI cannot
+   * be reached synchronously. `WasmTransport` prefers it when it is there; an in-process instance
+   * omits it and keeps the straight-line `dispatch` path.
+   */
+  dispatchAsync?(request: Uint8Array): Promise<Uint8Array>;
   /** Subscribe to serialized `kiapi.common.events.Event` frames. Returns an unsubscribe function. */
   onEvent(cb: (bytes: Uint8Array) => void): () => void;
   /** Tear the module down (`kiapi_shutdown`). */
@@ -171,32 +178,57 @@ export class WasmTransport implements Transport {
     if (p.timer) clearTimeout(p.timer);
     p.cancelled = true; // no timeout can fire once the module has the request
 
+    // An instance on another thread cannot answer synchronously; the event buffering and the
+    // strict one-at-a-time ordering are the same either way, only the reply arrives later.
+    if (this.instance.dispatchAsync) {
+      void this.pumpAsync(p);
+      return;
+    }
     let reply: Uint8Array;
     this.dispatching = true;
     try {
       reply = this.instance.dispatch(p.payload);
     } catch (e) {
-      const err =
-        e instanceof TransportError ? e : new TransportError("protocol", `wasm dispatch failed: ${errorMessage(e)}`, { cause: e });
       this.dispatching = false;
-      this.log(err.message);
-      p.reject(err);
-      if (isRuntimeAbort(e)) {
-        // The module called abort(): a headless GUI stub reached ___trap(), or the runtime ran
-        // out of memory. Everything in it is gone -- later dispatches trap again or return
-        // nothing, and the caller waits out its whole timeout instead of failing. The stdio
-        // transport gets this for free from the process exiting; do the same here so the owner
-        // sees a closed transport and can restart the module.
-        this.close();
-        return;
-      }
-      this.afterDispatch();
+      this.failDispatch(p, e);
       return;
     }
     this.dispatching = false;
     // Resolving schedules the caller's continuation; flushing from a later microtask therefore
     // delivers events strictly after the reply the module produced them for.
     p.resolve(reply);
+    this.afterDispatch();
+  }
+
+  /** `pump()` for an instance behind `dispatchAsync` (a Worker); nothing else runs meanwhile. */
+  private async pumpAsync(p: Pending): Promise<void> {
+    let reply: Uint8Array;
+    this.dispatching = true;
+    try {
+      reply = await this.instance.dispatchAsync!(p.payload);
+    } catch (e) {
+      this.dispatching = false;
+      this.failDispatch(p, e);
+      return;
+    }
+    this.dispatching = false;
+    p.resolve(reply);
+    this.afterDispatch();
+  }
+
+  private failDispatch(p: Pending, e: unknown): void {
+    const err = e instanceof TransportError ? e : new TransportError("protocol", `wasm dispatch failed: ${errorMessage(e)}`, { cause: e });
+    this.log(err.message);
+    p.reject(err);
+    if (isRuntimeAbort(e)) {
+      // The module called abort(): a headless GUI stub reached ___trap(), or the runtime ran
+      // out of memory. Everything in it is gone -- later dispatches trap again or return
+      // nothing, and the caller waits out its whole timeout instead of failing. The stdio
+      // transport gets this for free from the process exiting; do the same here so the owner
+      // sees a closed transport and can restart the module.
+      this.close();
+      return;
+    }
     this.afterDispatch();
   }
 
@@ -326,7 +358,13 @@ function errorMessage(e: unknown): string {
  * as a `WebAssembly.RuntimeError`. Every KiCad-level failure comes back as a well-formed
  * `ApiResponse` with a non-OK status instead, so a RuntimeError out of `dispatch` always means
  * the instance is unusable.
+ *
+ * An instance on another thread cannot throw the RuntimeError itself — only its message survives
+ * the structured clone — so it renames the error it rethrows instead. `@fp-pcb/kicad-wasm` exports
+ * that name as `WASM_ABORT_ERROR_NAME`; it is compared as a string here so the transport keeps no
+ * dependency on the loader.
  */
 function isRuntimeAbort(e: unknown): boolean {
+  if (e instanceof Error && e.name === "KiCadWasmAbort") return true;
   return typeof WebAssembly !== "undefined" && e instanceof WebAssembly.RuntimeError;
 }
