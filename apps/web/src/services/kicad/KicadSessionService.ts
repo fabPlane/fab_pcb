@@ -23,7 +23,23 @@
 // — nothing here spawns a process — and `bridgeless` unless a bridge was asked for explicitly.
 
 import { KiCad, KiCadEvents, NngWsSubscriber, NngWsTransport, TransportError, WasmSubscriber, WasmTransport, WebSocketTransport, bridgeWsUrl, type Transport } from '@fp-pcb/client';
-import { createKiCadWasm, exists as memfsExists, listFiles as memfsList, writeFile as memfsWrite, type KiCadWasm } from '@fp-pcb/kicad-wasm';
+import type { KiCadWasm } from '@fp-pcb/kicad-wasm';
+
+/**
+ * `@fp-pcb/kicad-wasm` is optional: it only matters in the in-browser wasm mode and is loaded with
+ * a dynamic `import()` the first time that mode connects, so the mock, bridge and direct-ws builds
+ * never bundle the loader (the 37 MB `kicad_api.wasm` is fetched by URL in any case, see
+ * vite.config.ts). A build without the package fails with a clear message instead of at startup.
+ */
+type KicadWasmPackage = typeof import('@fp-pcb/kicad-wasm');
+let wasmPackage: Promise<KicadWasmPackage> | null = null;
+function loadWasmPackage(): Promise<KicadWasmPackage> {
+  wasmPackage ??= import('@fp-pcb/kicad-wasm').catch((e: unknown) => {
+    wasmPackage = null;
+    throw new Error(`the in-browser wasm mode needs the optional @fp-pcb/kicad-wasm package: ${e instanceof Error ? e.message : String(e)}`);
+  });
+  return wasmPackage;
+}
 import { DocumentType } from '@fp-pcb/proto';
 import type { FileEntry, RecentProject, SessionInfo, SessionService } from '../types';
 
@@ -117,6 +133,8 @@ export class KicadSessionService implements SessionService {
   private subscriber: { close(): Promise<void> } | null = null;
   /** The loaded module in wasm mode; owns MEMFS and is shut down with the transport. */
   private instance: KiCadWasm | null = null;
+  /** The lazily imported loader package; set together with `instance`. */
+  private wasmPkg: KicadWasmPackage | null = null;
   /**
    * Every file imported in wasm mode, kept for the life of the service. MEMFS dies with the module
    * and `connect()` loads a fresh one, so the import has to be replayed into each new instance --
@@ -434,9 +452,12 @@ export class KicadSessionService implements SessionService {
   private async loadWasm(): Promise<Transport> {
     const opts = this.opts.wasm!;
     const t0 = performance.now();
+    // The MEMFS helpers are needed even when a test injects the instance.
+    const pkg = await loadWasmPackage();
+    this.wasmPkg = pkg;
     const instance = opts.createInstance
       ? await opts.createInstance()
-      : await createKiCadWasm({
+      : await pkg.createKiCadWasm({
           moduleUrl: opts.moduleUrl,
           wasmUrl: opts.wasmUrl,
           print: (line) => this.log(line),
@@ -477,9 +498,10 @@ export class KicadSessionService implements SessionService {
   /** Write everything the current instance is missing; a no-op until the module exists. */
   private flushStaged(): void {
     const instance = this.instance;
-    if (!instance || this.staged.length === this.stagedWritten) return;
+    const pkg = this.wasmPkg;
+    if (!instance || !pkg || this.staged.length === this.stagedWritten) return;
     const pending = this.staged.slice(this.stagedWritten);
-    for (const f of pending) memfsWrite(instance, f.path, f.bytes);
+    for (const f of pending) pkg.writeFile(instance, f.path, f.bytes);
     this.stagedWritten = this.staged.length;
     this.log(`wrote ${pending.length} file(s) into the wasm module's file system`);
   }
@@ -594,9 +616,11 @@ export class KicadSessionService implements SessionService {
   /** Everything imported into MEMFS under `dir`, flat, so the browser can show what was loaded. */
   private listMemfs(dir: string): FileEntry[] {
     const instance = this.instance;
-    if (!instance) return [];
+    const pkg = this.wasmPkg;
+    if (!instance || !pkg) return [];
     const base = dir.replace(/\/$/, '');
-    return memfsList(instance, base)
+    return pkg
+      .listFiles(instance, base)
       .filter((p) => p.startsWith(`${base}/`))
       .map<FileEntry>((p) => ({ name: p.slice(base.length + 1), path: p, kind: 'file', fileType: fileTypeOf(p) }))
       .sort((a, b) => a.name.localeCompare(b.name));
@@ -606,7 +630,8 @@ export class KicadSessionService implements SessionService {
   async stat(path: string): Promise<{ kind: 'dir' | 'file'; size: number } | null> {
     if (this.wasm) {
       const instance = this.instance;
-      if (!instance || !memfsExists(instance, path)) return null;
+      const pkg = this.wasmPkg;
+      if (!instance || !pkg || !pkg.exists(instance, path)) return null;
       const st = instance.FS.stat(path);
       return { kind: instance.FS.isDir(st.mode) ? 'dir' : 'file', size: st.size };
     }

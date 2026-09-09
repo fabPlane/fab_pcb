@@ -256,7 +256,9 @@ function normalise(module: KiCadWasmModule): KiCadWasmModule {
 
 /** Default module location: `dist/kicad_api.js`, where `bun run fetch` puts the build. */
 export function defaultModuleUrl(): URL {
-  return new URL("../dist/kicad_api.js", import.meta.url);
+  // `@vite-ignore`: a bundler must not resolve this at build time. Hosts that bundle the loader
+  // (apps/web) pass their own `moduleUrl`; this default is for Bun/Node running from the package.
+  return new URL(/* @vite-ignore */ "../dist/kicad_api.js", import.meta.url);
 }
 
 async function loadFactory(moduleUrl?: string | URL): Promise<KiCadWasmModuleFactory> {

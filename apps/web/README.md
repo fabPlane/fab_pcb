@@ -50,6 +50,8 @@ bun run --filter @fp-pcb/kicad-wasm fetch
 VITE_KICAD_WASM=1 bun run --filter @fp-pcb/app dev
 ```
 
+The package is optional: the loader is `import()`ed only when a wasm session connects, so the
+other modes never bundle it, and `vite build` without a wasm build still succeeds (with a warning).
 The module runs on the main thread, so a long command blocks paint; that is the known cost of the
 mode today. Events are the ones the module publishes in-process (`WasmSubscriber`), not a relay.
 

@@ -194,6 +194,11 @@ paint. A Worker needs the loader's `import()` and all of MEMFS behind a message 
 exactly what the bridge backend already implements; moving the browser to the same shape is the
 follow-up, and `WasmModeOptions.createInstance` is the seam it goes behind.
 
+**The package is optional.** `KicadSessionService` reaches `@fp-pcb/kicad-wasm` through a dynamic
+`import()` the first time a wasm session connects, so the mock, bridge and direct-ws builds never
+bundle the loader (it is its own ~8 KB chunk), and a build with no wasm build at all succeeds with a
+warning from the assets plugin — only `?wasm=1` then fails, with a message naming the package.
+
 **Vite.** `kicad_api.js` is loaded by URL at runtime and fetches its own `.wasm` / `.data`, so it is
 not bundled: `vite.config.ts` serves `packages/kicad-wasm/dist` under `/kicad-wasm/` in dev and
 copies it into `dist/` on build (`KICAD_WASM_DIR` overrides the source). `node:path` and

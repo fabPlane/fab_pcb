@@ -232,7 +232,15 @@ wrong. Worth a line in the MR description if any of this is ever proposed upstre
 8. **The pre-existing `format:check` failures** — 159 files, none of them touched by this work.
    Either run `bun run format` once across the repo or narrow the prettier glob; today the check is
    useless because it is always red.
-9. **The two wx asserts** logged on every project open (see above).
+9. **The two wx asserts** logged on every project open (see above), and the `ToProtoEnum<FILL_T>`
+   assertion the browser log fills with. These are not wasm regressions: the Homebrew wxWidgets is
+   built with `-DwxDEBUG_LEVEL=0`, so the native build compiles the same checks out and never
+   reports them. `tools/wasm/env.sh` now passes `-DwxDEBUG_LEVEL=0` for KiCad's own TUs (takes
+   effect at the next module build); the `FILL_T` value that is out of range on the ecc83 board is
+   still worth finding with a native `wxDEBUG_LEVEL=1` build.
+10. **The module is loaded twice per project open in the browser.** `importProjectFiles()` writes
+    into the instance loaded at startup (for `GetVersion`), and `connect()` then creates a fresh
+    module and replays the imports. Reusing the first instance would halve the 37 MB fetch.
 
 ## Housekeeping (for you to decide)
 
