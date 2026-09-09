@@ -1029,8 +1029,7 @@
     "requestType": "kiapi.board.commands.GetGraphicsDefaults",
     "responseType": "kiapi.board.commands.GraphicsDefaultsResponse",
     "handlers": [
-      "board",
-      "pcb"
+      "board"
     ],
     "headless": "ok"
   },
