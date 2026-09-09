@@ -27,3 +27,15 @@ export async function validateLibraryDirectory(kind: "footprint" | "symbol", roo
   const found = entries.some((entry) => entry.name.endsWith(suffix) && (kind === "footprint" ? entry.isDirectory() : entry.isFile()));
   if (!found) throw new Error(`${kind} library directory ${root} contains no ${suffix} libraries`);
 }
+
+export async function validateJsAutorouterSource(root: string): Promise<void> {
+  if (!(await stat(root).catch(() => null))?.isDirectory()) {
+    throw new Error(`js_autorouter source directory not found: ${root}`);
+  }
+  if (!(await stat(`${root}/package.json`).catch(() => null))?.isFile()) {
+    throw new Error(`js_autorouter package.json not found in ${root}`);
+  }
+  if (!(await stat(`${root}/src/index.ts`).catch(() => null))?.isFile()) {
+    throw new Error(`js_autorouter entry point not found: ${root}/src/index.ts`);
+  }
+}
