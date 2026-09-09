@@ -10,10 +10,11 @@ import { ApiRequestSchema, ApiResponseSchema, ApiStatusCode, EmptySchema, EventS
 import { KiCadEvents, WasmTransport, WebSocketTransport } from '@fp-pcb/client';
 import { createKiCadWasm, type KiCadWasm } from '@fp-pcb/kicad-wasm';
 import { createMockFactory } from '../../../packages/kicad-wasm/test/mock-module';
+import { MOCK_ENTRY_URL, MOCK_TOKEN, inProcessWorker } from '../../../packages/kicad-wasm/test/kicad-mock-entry';
 import { KicadSessionService, MEMFS_PROJECT_DIR } from '@/services/kicad/KicadSessionService';
 import { dirname, join } from '@/lib/node-path-stub';
 
-const TOKEN = 'wasm-token-0000-0000-0000-000000000000';
+const TOKEN = MOCK_TOKEN;
 const BOARD = `${MEMFS_PROJECT_DIR}/demo.kicad_pcb`;
 
 /** One `DocumentSaved` frame, published from inside every `Ping` dispatch. */
@@ -46,6 +47,16 @@ function mockInstance(): Promise<KiCadWasm> {
 
 function service(): KicadSessionService {
   return new KicadSessionService({ bridgeUrl: '', wasm: { createInstance: mockInstance }, log: () => {} });
+}
+
+/**
+ * The mode the app actually ships: the module in a Worker. `inProcessWorker()` is a Worker-shaped
+ * object whose messages reach `serveKiCadWasm()` in this process, and `MOCK_ENTRY_URL` is the JS
+ * mock of the ABI standing in for `kicad_api.js` — so this covers the whole protocol (dispatch,
+ * events, MEMFS) without a thread or a bundler.
+ */
+function workerService(): KicadSessionService {
+  return new KicadSessionService({ bridgeUrl: '', wasm: { moduleUrl: MOCK_ENTRY_URL, createWorker: inProcessWorker }, log: () => {} });
 }
 
 const bytes = (text: string) => new TextEncoder().encode(text);
@@ -109,6 +120,76 @@ describe('in-browser wasm mode', () => {
       // `WasmTransport` owns the module, so disconnecting runs `kiapi_shutdown`.
       expect(instance?.isShutDown).toBe(true);
       expect(s.wasmInstance).toBeNull();
+    }
+  });
+
+  test('loads the module once per tab, not once per project open', async () => {
+    // What the app really does with `?wasm=1`: connect with no project at startup (there is no
+    // bridge to browse), then connect again once the user has picked files. That used to fetch
+    // 37 MB twice and throw the first module -- and MEMFS with it -- away.
+    let loads = 0;
+    const s = new KicadSessionService({
+      bridgeUrl: '',
+      wasm: {
+        createInstance: () => {
+          loads++;
+          return mockInstance();
+        },
+      },
+      log: () => {},
+    });
+    await s.connect('');
+    const first = s.wasmInstance;
+    expect(loads).toBe(1);
+    expect(first).not.toBeNull();
+
+    await s.importProjectFiles([{ name: 'demo.kicad_pcb', bytes: bytes('(kicad_pcb (version 20240108))') }]);
+    await s.connect(BOARD);
+    expect(loads).toBe(1);
+    expect(s.wasmInstance).toBe(first);
+    expect(first!.isShutDown).toBe(false);
+    // Same module, same MEMFS: the import is there without having been replayed.
+    expect(await s.stat(BOARD)).toMatchObject({ kind: 'file' });
+
+    // Closing the project is what ends the module's life, and it does end it.
+    await s.disconnect();
+    expect(first!.isShutDown).toBe(true);
+    expect(s.wasmInstance).toBeNull();
+  });
+
+  test('runs the module in a Worker: dispatch, events and MEMFS all cross the thread', async () => {
+    const s = workerService();
+    const path = await s.importProjectFiles([
+      { name: 'demo.kicad_pcb', bytes: bytes('(kicad_pcb (version 20240108))') },
+      { name: 'demo.kicad_pro', bytes: bytes('{}') },
+    ]);
+    expect(path).toBe(`${MEMFS_PROJECT_DIR}/demo.kicad_pro`);
+    const info = await s.connect(BOARD);
+    try {
+      expect(s.wasmWorker).toBe(true);
+      expect(info.state).toBe('open');
+      expect(info.kicadVersion).toBe('10.99.0-wasm');
+      expect(info.kicadToken).toBe(TOKEN);
+      expect(s.transport).toBeInstanceOf(WasmTransport);
+
+      const events = s.events;
+      expect(events).toBeInstanceOf(KiCadEvents);
+      const saved: bigint[] = [];
+      const off = events!.on('documentSaved', (_payload, event) => void saved.push(event.sequence));
+      await s.kicad!.ping();
+      const deadline = Date.now() + 2000;
+      while (saved.length === 0 && Date.now() < deadline) await new Promise((r) => setTimeout(r, 5));
+      off();
+      expect(saved).toEqual([7n]);
+
+      // The staged import was written over messages, before the document service asked for it.
+      expect(await s.stat(BOARD)).toMatchObject({ kind: 'file' });
+      expect(await s.stat(`${MEMFS_PROJECT_DIR}/missing.kicad_pcb`)).toBeNull();
+      expect((await s.listFiles(MEMFS_PROJECT_DIR)).map((e) => e.name)).toEqual(['demo.kicad_pcb', 'demo.kicad_pro']);
+    } finally {
+      const instance = s.wasmInstance;
+      await s.disconnect();
+      expect(instance?.isShutDown).toBe(true);
     }
   });
 

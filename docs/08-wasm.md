@@ -184,9 +184,9 @@ code.
 ## In the browser
 
 `?wasm=1` (or `?kicad-wasm=<url of kicad_api.js>`, `VITE_KICAD_WASM=1`, `VITE_KICAD_WASM_URL`) runs
-KiCad inside the tab: no bridge, no server, no socket. `KicadSessionService` loads the module,
-wraps it in `WasmTransport`, and builds a `WasmSubscriber` for the events the module publishes
-in-process. That subscriber is passed to `KicadDocumentService.open()` as the explicit `events`
+KiCad inside the tab: no bridge, no server, no socket. `KicadSessionService` loads the module into a
+Web Worker, wraps it in `WasmTransport`, and builds a `WasmSubscriber` for the events the module
+publishes. That subscriber is passed to `KicadDocumentService.open()` as the explicit `events`
 option — the service's default only recognises a `WebSocketTransport`, and that check stays narrow.
 The session is `direct` (nothing spawns anything) and `bridgeless` unless `?bridge=` is given too,
 in which case the bridge is still used for `/files/*` and the library's second server.
@@ -198,23 +198,56 @@ directory picker's `webkitRelativePath` is preserved) are written into MEMFS und
 answer from MEMFS in this mode, so a `.kicad_pro` still finds the board sitting next to it. There is
 no export path yet: a save lands in MEMFS and stays there until someone downloads it.
 
-**Main thread, for now.** The module runs on the tab's main thread, so a slow `kiapi_dispatch` blocks
-paint. A Worker needs the loader's `import()` and all of MEMFS behind a message protocol, which is
-exactly what the bridge backend already implements; moving the browser to the same shape is the
-follow-up, and `WasmModeOptions.createInstance` is the seam it goes behind.
+**In a Worker.** `kiapi_dispatch` is a synchronous call into a single-threaded module, so on the main
+thread every command froze paint for as long as it ran. The module now loads in a Web Worker
+(`packages/kicad-wasm/src/worker.ts`, the logic in `worker-core.ts` so it can be driven from a test
+with a fake port; `worker-client.ts` on the page side), the same shape as the bridge's backend and
+with the same escape hatch — `terminate()` ends a command that never returns.
+
+```
+page  --{id, req}-->  Worker            page   --{id, fs}-->  Worker
+      <--{id, res}--  createKiCadWasm()        <--{id,value}-- MEMFS
+      <--{event}----  MEMFS
+```
+
+Two things differ from the bridge's protocol, both because a tab has no disk to mirror to: there is
+no `{flush}` (MEMFS _is_ the file system here) and the file operations the page needs — `writeFiles`,
+`readFile`, `exists`, `stat`, `listFiles`, `mkdir` — travel as `{id, fs}` messages, which is why
+`stat()` and `listFiles()` on the session are asynchronous.
+
+The one thing that does not cross a thread is `KiCadWasmInstance.dispatch`, which is synchronous
+because the ABI is. `createKiCadWasmInWorker()` implements `dispatchAsync` instead and
+`WasmTransport` prefers it when it is there; in the same thread (Bun, the bridge's worker, the
+conformance harness) nothing changed. A round trip through the worker costs **0.037 ms** measured in
+the tab, so the ordering and buffering guarantees are unaffected and so is throughput.
+
+`?wasm-main=1` (or `WasmModeOptions.inWorker: false`) puts the module back on the main thread, where
+a debugger can step into `kiapi_dispatch`. It is measurably the old behaviour: fifteen awaited KiCad
+calls in a row give the main thread **zero** macrotask turns there, against 2 500 with the worker.
+
+**One module per tab, not per project.** The module is loaded once and kept: `WasmTransport` is
+constructed with `ownsInstance: false`, so closing a session leaves it alive, and `connect()` reuses
+it. Only an abort replaces it — `WasmTransport` closes itself on a `WebAssembly.RuntimeError` (the
+worker reports one as a fatal `{id, error}`), the session marks the module dead, and the next
+connect loads a fresh one and replays every imported file into its empty MEMFS. Before that, opening
+a project fetched 37 MB twice: once for the version string at startup, once for the project.
 
 **The package is optional.** `KicadSessionService` reaches `@fp-pcb/kicad-wasm` through a dynamic
 `import()` the first time a wasm session connects, so the mock, bridge and direct-ws builds never
-bundle the loader (it is its own ~8 KB chunk), and a build with no wasm build at all succeeds with a
-warning from the assets plugin — only `?wasm=1` then fails, with a message naming the package.
+bundle the loader (it is its own ~15 KB chunk, and `worker.ts` a second ~7 KB one), and a build with
+no wasm build at all succeeds with a warning from the assets plugin — only `?wasm=1` then fails, with
+a message naming the package.
 
 **Vite.** `kicad_api.js` is loaded by URL at runtime and fetches its own `.wasm` / `.data`, so it is
 not bundled: `vite.config.ts` serves `packages/kicad-wasm/dist` under `/kicad-wasm/` in dev and
 copies it into `dist/` on build (`KICAD_WASM_DIR` overrides the source). `node:path` and
 `node:fs/promises` are aliased to browser stubs, because the loader's entry point re-exports
 host-disk helpers the tab never calls but whose imports still have to resolve — the `node:path` stub
-is a real POSIX implementation, since MEMFS paths are built with it. No COOP/COEP headers and no
-`SharedArrayBuffer` are needed: the module is single-threaded.
+is a real POSIX implementation, since MEMFS paths are built with it. `worker.format: "es"` is what
+makes `new Worker(new URL("./worker.ts", import.meta.url), { type: "module" })` come out as an ES
+module chunk; the module URL handed to the worker is resolved against the page first, because a
+worker's own `import()` resolves against its bundled script, which is somewhere else entirely. No
+COOP/COEP headers and no `SharedArrayBuffer` are needed: the module is single-threaded.
 
 ## Getting the module without building it
 
@@ -253,19 +286,19 @@ tools/wasm/package.sh                    # the same tarball the workflow uploads
 
 ## Environment variables
 
-| Variable           | Backend | Meaning                                                                     |
-| ------------------ | ------- | --------------------------------------------------------------------------- |
-| `KICAD_TRANSPORT`  | all     | `ipc` (default) / `stdio` / `wasm`                                          |
-| `KICAD_CLI`        | ipc     | `kicad-cli` binary                                                          |
-| `KICAD_API_HOST`   | stdio   | `kicad-api-host-native` binary (default `<kicad>/build/native-host/…`)      |
-| `KICAD_WASM_DIR`   | wasm    | directory with `kicad_api.js` / `.wasm` (default `<kicad>/build/wasm/host`) |
-| `KICAD_WASM_SHARE` | wasm    | host share tree to mount at `/kicad/share` (when the build has no `.data`)  |
-| `KICAD_FONTS_DIR`  | stdio, wasm | host directory of outline fonts (with an optional `manifest.json`); mounted at `/kicad/fonts` for wasm, `--fonts` for stdio |
-| `KICAD_WASM_RELEASE` | wasm | release tag to download instead of copying a build tree (default `packages/proto/KICAD_TAG`) |
-| `KICAD_WASM_RELEASE_FILE` | wasm | a `kicad-wasm-*.tar.gz` already on disk; skips the download |
-| `KICAD_WASM_REPO` | wasm | `owner/repo` holding the releases (default `TensorFleet/kicad`) |
-| `GITHUB_TOKEN` / `GH_TOKEN` | wasm | token for the private fork's release assets (else an authenticated `gh`) |
-| `KICAD_SRC`        | all     | the KiCad checkout (defaults to `../kicad`)                                 |
+| Variable                    | Backend     | Meaning                                                                                                                     |
+| --------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `KICAD_TRANSPORT`           | all         | `ipc` (default) / `stdio` / `wasm`                                                                                          |
+| `KICAD_CLI`                 | ipc         | `kicad-cli` binary                                                                                                          |
+| `KICAD_API_HOST`            | stdio       | `kicad-api-host-native` binary (default `<kicad>/build/native-host/…`)                                                      |
+| `KICAD_WASM_DIR`            | wasm        | directory with `kicad_api.js` / `.wasm` (default `<kicad>/build/wasm/host`)                                                 |
+| `KICAD_WASM_SHARE`          | wasm        | host share tree to mount at `/kicad/share` (when the build has no `.data`)                                                  |
+| `KICAD_FONTS_DIR`           | stdio, wasm | host directory of outline fonts (with an optional `manifest.json`); mounted at `/kicad/fonts` for wasm, `--fonts` for stdio |
+| `KICAD_WASM_RELEASE`        | wasm        | release tag to download instead of copying a build tree (default `packages/proto/KICAD_TAG`)                                |
+| `KICAD_WASM_RELEASE_FILE`   | wasm        | a `kicad-wasm-*.tar.gz` already on disk; skips the download                                                                 |
+| `KICAD_WASM_REPO`           | wasm        | `owner/repo` holding the releases (default `TensorFleet/kicad`)                                                             |
+| `GITHUB_TOKEN` / `GH_TOKEN` | wasm        | token for the private fork's release assets (else an authenticated `gh`)                                                    |
+| `KICAD_SRC`                 | all         | the KiCad checkout (defaults to `../kicad`)                                                                                 |
 
 Bridge-only (`packages/bridge`):
 

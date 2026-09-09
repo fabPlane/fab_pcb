@@ -16,14 +16,20 @@
 // need one, and the session adopts whatever project the running server already has open.
 //
 // **In-browser wasm (`wasm`, from `VITE_KICAD_WASM` / `VITE_KICAD_WASM_URL`).** There is no server
-// and no socket at all: `@fp-pcb/kicad-wasm` loads `kicad_api.js` into this tab and `WasmTransport`
-// calls `kiapi_dispatch` directly, with `WasmSubscriber` carrying the events the module publishes
-// in-process. The project lives in the module's MEMFS, so it is put there by hand
+// and no socket at all: `@fp-pcb/kicad-wasm` loads `kicad_api.js` into a Web Worker and
+// `WasmTransport` dispatches into it over messages, with `WasmSubscriber` carrying the events the
+// module publishes. The project lives in the module's MEMFS, so it is put there by hand
 // (`importProjectFiles`) instead of being read off a disk the tab cannot see. This is `direct` too
 // — nothing here spawns a process — and `bridgeless` unless a bridge was asked for explicitly.
+//
+// Two lifetimes matter in that mode and they are not the same. A **session** starts and ends with a
+// project; the **module** belongs to the tab. It is loaded once, kept across `disconnect()` /
+// `connect()` (`ownsInstance: false`, so closing the transport does not shut the module down) and
+// replaced only when it aborts — 37 MB is not a thing to fetch twice because the user picked a
+// project after the app had already connected once to ask for a version string.
 
 import { KiCad, KiCadEvents, NngWsSubscriber, NngWsTransport, TransportError, WasmSubscriber, WasmTransport, WebSocketTransport, bridgeWsUrl, type Transport } from '@fp-pcb/client';
-import type { KiCadWasm } from '@fp-pcb/kicad-wasm';
+import type { KiCadWasm, KiCadWasmWorkerLike } from '@fp-pcb/kicad-wasm';
 
 /**
  * `@fp-pcb/kicad-wasm` is optional: it only matters in the in-browser wasm mode and is loaded with
@@ -56,17 +62,65 @@ export interface BridgeSessionRecord {
   exitCode?: number | null;
 }
 
-/** Browser wasm mode: what to load and, for tests, how. */
+/** Browser wasm mode: what to load, where to run it and, for tests, how. */
 export interface WasmModeOptions {
-  /** `kicad_api.js`. Default: `dist/kicad_api.js` inside `@fp-pcb/kicad-wasm`. */
+  /** `kicad_api.js`. Default: `/kicad-wasm/kicad_api.js`, where vite.config.ts serves the build. */
   moduleUrl?: string;
   /** `kicad_api.wasm`, when it does not sit next to `kicad_api.js` (Emscripten `locateFile`). */
   wasmUrl?: string;
   /**
-   * Injection point for tests, and the seam a Web Worker would go behind: today the module runs on
-   * the main thread, so a long `kiapi_dispatch` blocks paint. See docs/08-wasm.md.
+   * Run the module in a Web Worker (the default). `kiapi_dispatch` is a synchronous call into a
+   * single-threaded module, so on the main thread a DRC or a zone fill freezes paint for as long as
+   * it runs. `?wasm-main=1` sets this to `false` to get the module back into the debugger's own
+   * thread, where breakpoints and heap inspection are easy. Defaults to `false` when
+   * `createInstance` is given, since that seam hands over a module that already exists here.
    */
+  inWorker?: boolean;
+  /** Injection point for tests: build the Worker (default: `worker.ts` from `@fp-pcb/kicad-wasm`). */
+  createWorker?: () => KiCadWasmWorkerLike;
+  /** Injection point for tests: a module on this thread, in place of loading `moduleUrl`. */
   createInstance?: () => Promise<KiCadWasm>;
+}
+
+/**
+ * A loaded module as the session uses it, wherever it runs. `WasmTransport` consumes the first four
+ * members (`dispatchAsync` is the Worker's answer to a synchronous ABI it cannot reach
+ * synchronously); the rest is MEMFS, which is a method call here and a message round trip there.
+ *
+ * `KiCadWasmWorkerClient` satisfies this as it stands; `mainThreadBackend()` wraps a `KiCadWasm`
+ * and the package's MEMFS helpers into the same shape.
+ */
+export interface WasmBackend {
+  dispatch(request: Uint8Array): Uint8Array;
+  dispatchAsync?(request: Uint8Array): Promise<Uint8Array>;
+  onEvent(cb: (bytes: Uint8Array) => void): () => void;
+  shutdown(): void | Promise<void>;
+  readonly isShutDown: boolean;
+  writeFiles(files: { path: string; bytes: Uint8Array }[]): Promise<number>;
+  stat(path: string): Promise<{ kind: 'dir' | 'file'; size: number } | null>;
+  listFiles(path: string): Promise<string[]>;
+}
+
+/** `WasmBackend` over a module on this thread: every call is synchronous under the promise. */
+function mainThreadBackend(instance: KiCadWasm, pkg: KicadWasmPackage): WasmBackend {
+  return {
+    dispatch: (request) => instance.dispatch(request),
+    onEvent: (cb) => instance.onEvent(cb),
+    shutdown: () => instance.shutdown(),
+    get isShutDown() {
+      return instance.isShutDown;
+    },
+    writeFiles: async (files) => {
+      for (const f of files) pkg.writeFile(instance, f.path, f.bytes);
+      return files.length;
+    },
+    stat: async (path) => {
+      if (!pkg.exists(instance, path)) return null;
+      const st = instance.FS.stat(path);
+      return { kind: instance.FS.isDir(st.mode) ? 'dir' : 'file', size: st.size };
+    },
+    listFiles: async (path) => pkg.listFiles(instance, path),
+  };
 }
 
 export interface KicadSessionOptions {
@@ -131,18 +185,22 @@ export class KicadSessionService implements SessionService {
   private offState: (() => void) | null = null;
   private reconnecting = false;
   private subscriber: { close(): Promise<void> } | null = null;
-  /** The loaded module in wasm mode; owns MEMFS and is shut down with the transport. */
-  private instance: KiCadWasm | null = null;
-  /** The lazily imported loader package; set together with `instance`. */
-  private wasmPkg: KicadWasmPackage | null = null;
+  /** The loaded module in wasm mode; owns MEMFS and outlives the session (see the header). */
+  private instance: WasmBackend | null = null;
+  /** Set when the transport closed on its own, i.e. the module aborted: do not reuse it. */
+  private wasmDead = false;
+  /** True while the module runs in a Worker (the default). */
+  private wasmInWorker = false;
   /**
-   * Every file imported in wasm mode, kept for the life of the service. MEMFS dies with the module
-   * and `connect()` loads a fresh one, so the import has to be replayed into each new instance --
-   * otherwise the project the user just picked is gone by the time KiCad is asked to open it.
+   * Every file imported in wasm mode, kept for the life of the service. A module that aborts takes
+   * MEMFS with it, so the import has to be replayed into the instance that replaces it -- otherwise
+   * the project the user picked is gone by the time KiCad is asked to reopen it.
    */
   private staged: { path: string; bytes: Uint8Array }[] = [];
   /** How many of `staged` the current instance already has. */
   private stagedWritten = 0;
+  /** Serialises the MEMFS writes, which are a round trip to the worker. */
+  private flushing: Promise<void> = Promise.resolve();
 
   constructor(private readonly opts: KicadSessionOptions) {
     this.fetchImpl = opts.fetch ?? ((input, init) => fetch(input, init));
@@ -167,8 +225,13 @@ export class KicadSessionService implements SessionService {
   }
 
   /** The loaded module, once `connect()` has run — for MEMFS access from the UI. */
-  get wasmInstance(): KiCadWasm | null {
+  get wasmInstance(): WasmBackend | null {
     return this.instance;
+  }
+
+  /** True when the loaded module runs in a Worker rather than on the tab's main thread. */
+  get wasmWorker(): boolean {
+    return this.wasmInWorker;
   }
 
   /** True when there is no bridge at all: no project browser, no second server, no spawning. */
@@ -285,7 +348,9 @@ export class KicadSessionService implements SessionService {
   }
 
   private async doConnect(projectPath: string): Promise<SessionInfo> {
-    if (this.session) await this.disconnect();
+    // Opening a project after another one keeps the tab's wasm module: it is the same KiCad, and
+    // reloading 37 MB to switch documents is exactly the cost this mode cannot afford.
+    if (this.session) await this.closeSession({ keepModule: true });
     let name =
       projectPath
         .split('/')
@@ -332,7 +397,9 @@ export class KicadSessionService implements SessionService {
       const id = this.session?.id;
       this.patch({ state: 'error', error: message });
       this.log(message, 'error');
-      await this.teardown();
+      // A failed open is usually the document, not the module: keep it unless it aborted, so
+      // retrying with another project does not re-fetch it.
+      await this.teardown({ keepModule: true });
       if (id && !this.direct) await this.deleteSession(id).catch(() => undefined);
       throw new Error(message);
     }
@@ -384,7 +451,15 @@ export class KicadSessionService implements SessionService {
     this.offState?.();
     this.offControl?.();
     this.offState = transport.onStateChange((s) => {
-      if (s === 'closed') void this.onTransportClosed();
+      if (s !== 'closed') return;
+      // `teardown()` detaches this listener before it closes anything, so a close that reaches it
+      // is the transport's own doing. For wasm that means one thing: the module called `abort()`
+      // and `WasmTransport` closed itself. Nothing in that heap can be trusted again.
+      if (this.wasm) {
+        this.wasmDead = true;
+        this.log('the wasm module aborted; the next connect loads a fresh one', 'error');
+      }
+      void this.onTransportClosed();
     });
     if (transport instanceof WebSocketTransport) {
       this.offControl = transport.onControl((m) => {
@@ -443,31 +518,66 @@ export class KicadSessionService implements SessionService {
   // ------------------------------------------------------------------ wasm mode
 
   /**
-   * Load `kicad_api.js` into this tab and wrap it in a `WasmTransport`. The module runs on the
-   * **main thread** for now: a Worker would need the loader's `import()` and MEMFS behind a message
-   * protocol (which is what the bridge's wasm backend does), and the browser gains nothing from it
-   * until long-running commands land. Until then a slow `kiapi_dispatch` blocks paint — noted in
-   * docs/08-wasm.md.
+   * Wrap the tab's module in a `WasmTransport`, loading it first if there is not one already.
+   *
+   * The module goes into a Web Worker by default (`?wasm-main=1` keeps it here for debugging):
+   * `kiapi_dispatch` is a synchronous call into a single-threaded module, so on the main thread a
+   * DRC or a zone fill freezes paint for as long as it runs, and there is no way to cancel it. The
+   * worker also gives the tab the bridge's escape hatch — `terminate()` ends a command that never
+   * returns.
+   *
+   * A healthy module is **reused**: the transport is a thin object, the 37 MB module is not.
    */
   private async loadWasm(): Promise<Transport> {
     const opts = this.opts.wasm!;
-    const t0 = performance.now();
     // The MEMFS helpers are needed even when a test injects the instance.
     const pkg = await loadWasmPackage();
-    this.wasmPkg = pkg;
-    const instance = opts.createInstance
-      ? await opts.createInstance()
-      : await pkg.createKiCadWasm({
-          moduleUrl: opts.moduleUrl,
-          wasmUrl: opts.wasmUrl,
-          print: (line) => this.log(line),
-          printErr: (line) => this.log(line, 'warn'),
-        });
-    this.instance = instance;
-    this.stagedWritten = 0; // a new module means a new (empty) MEMFS: replay every import
-    this.log(`KiCad wasm module loaded in ${Math.round(performance.now() - t0)} ms`);
-    this.flushStaged();
-    return new WasmTransport(instance, { defaultTimeoutMs: 120_000, log: (m) => this.log(m) });
+    const live = this.instance && !this.wasmDead && !this.instance.isShutDown ? this.instance : null;
+    if (this.instance && !live) {
+      // Aborted or already shut down: let go of its memory before asking for another 37 MB.
+      await Promise.resolve(this.instance.shutdown()).catch(() => undefined);
+      this.instance = null;
+    }
+    let backend = live;
+    if (backend) {
+      this.log(`reusing the KiCad wasm module already loaded in this tab (${this.wasmInWorker ? 'worker' : 'main thread'})`);
+    } else {
+      const t0 = performance.now();
+      const inWorker = opts.inWorker ?? !opts.createInstance;
+      backend = inWorker ? await this.loadWasmWorker(pkg, opts) : mainThreadBackend(await this.loadWasmHere(pkg, opts), pkg);
+      this.instance = backend;
+      this.wasmInWorker = inWorker;
+      this.wasmDead = false;
+      this.stagedWritten = 0; // a new module means a new (empty) MEMFS: replay every import
+      this.log(`KiCad wasm module loaded ${inWorker ? 'in a Worker' : 'on the main thread'} in ${Math.round(performance.now() - t0)} ms`);
+    }
+    // The files have to be in MEMFS before the caller's `OpenDocument`, so this is awaited.
+    await this.flushStaged();
+    // `ownsInstance: false`: the module belongs to the tab, the transport to the session.
+    return new WasmTransport(backend, { defaultTimeoutMs: 120_000, ownsInstance: false, log: (m) => this.log(m) });
+  }
+
+  /** The module in a Worker. Everything it is told has to fit through `postMessage`. */
+  private async loadWasmWorker(pkg: KicadWasmPackage, opts: WasmModeOptions): Promise<WasmBackend> {
+    return pkg.createKiCadWasmInWorker({
+      // A worker resolves a relative `import()` against its own bundled URL, so the default has to
+      // be the app's absolute path rather than the package's `dist/kicad_api.js`.
+      moduleUrl: opts.moduleUrl ?? '/kicad-wasm/kicad_api.js',
+      wasmUrl: opts.wasmUrl,
+      createWorker: opts.createWorker,
+      log: (line, level) => this.log(line, level),
+    });
+  }
+
+  /** The module on this thread: the debugging path, and the one tests inject into. */
+  private async loadWasmHere(pkg: KicadWasmPackage, opts: WasmModeOptions): Promise<KiCadWasm> {
+    if (opts.createInstance) return opts.createInstance();
+    return pkg.createKiCadWasm({
+      moduleUrl: opts.moduleUrl,
+      wasmUrl: opts.wasmUrl,
+      print: (line) => this.log(line),
+      printErr: (line) => this.log(line, 'warn'),
+    });
   }
 
   /**
@@ -487,7 +597,7 @@ export class KicadSessionService implements SessionService {
       const rel = f.name.replace(/^\/+/, '');
       this.staged.push({ path: `${root}/${rel}`, bytes: f.bytes });
     }
-    this.flushStaged();
+    await this.flushStaged();
     const names = files.map((f) => f.name.replace(/^\/+/, ''));
     const main = names.find((n) => n.endsWith('.kicad_pro')) ?? names.find((n) => n.endsWith('.kicad_pcb')) ?? names.find((n) => n.endsWith('.kicad_sch'));
     if (!main) throw new Error('no .kicad_pro, .kicad_pcb or .kicad_sch among the files');
@@ -495,15 +605,26 @@ export class KicadSessionService implements SessionService {
     return `${root}/${main}`;
   }
 
-  /** Write everything the current instance is missing; a no-op until the module exists. */
-  private flushStaged(): void {
-    const instance = this.instance;
-    const pkg = this.wasmPkg;
-    if (!instance || !pkg || this.staged.length === this.stagedWritten) return;
+  /**
+   * Write everything the current instance is missing; a no-op until the module exists. Chained on
+   * the previous flush, so two imports in a row cannot interleave their writes in the worker.
+   */
+  private flushStaged(): Promise<void> {
+    const backend = this.instance;
+    if (!backend || this.staged.length === this.stagedWritten) return this.flushing;
     const pending = this.staged.slice(this.stagedWritten);
-    for (const f of pending) pkg.writeFile(instance, f.path, f.bytes);
     this.stagedWritten = this.staged.length;
-    this.log(`wrote ${pending.length} file(s) into the wasm module's file system`);
+    this.flushing = this.flushing
+      .then(async () => {
+        await backend.writeFiles(pending);
+        this.log(`wrote ${pending.length} file(s) into the wasm module's file system`);
+      })
+      .catch((e: unknown) => {
+        // The files are still in `staged`; the next module to load replays them from zero.
+        this.stagedWritten = 0;
+        this.log(`writing the imported files into the wasm module failed: ${e instanceof Error ? e.message : String(e)}`, 'error');
+      });
+    return this.flushing;
   }
 
   private async closeEvents(): Promise<void> {
@@ -562,7 +683,13 @@ export class KicadSessionService implements SessionService {
     }
   }
 
-  private async teardown(): Promise<void> {
+  /**
+   * Close the transport and the client. In wasm mode `keepModule` decides what happens to the
+   * module itself: `connect()` reopening a project keeps it (that is the point of the whole
+   * lifetime split), `disconnect()` closing the tab's project shuts it down and frees its ~350 MB.
+   * A module that aborted (`wasmDead`) is never kept.
+   */
+  private async teardown({ keepModule = false }: { keepModule?: boolean } = {}): Promise<void> {
     this.offControl?.();
     this.offState?.();
     this.offControl = null;
@@ -570,24 +697,35 @@ export class KicadSessionService implements SessionService {
     await this.closeEvents();
     const k = this.kicad;
     const t = this.transport;
+    const backend = this.instance;
     this.kicad = null;
     this.transport = null;
-    // `WasmTransport` owns the instance, so closing it runs `kiapi_shutdown` and drops MEMFS.
-    this.instance = null;
+    // The transport does not own the module (`ownsInstance: false`), so closing it leaves MEMFS
+    // alone; whether the module survives is decided here.
+    const keep = keepModule && this.wasm && backend !== null && !this.wasmDead && !backend.isShutDown;
+    if (!keep) this.instance = null;
     try {
       if (k) await k.close();
       else if (t) await t.close();
     } catch {
       /* ignore */
     }
+    if (!keep && backend) {
+      await Promise.resolve(backend.shutdown()).catch((e: unknown) => this.log(`shutting the wasm module down: ${e instanceof Error ? e.message : String(e)}`, 'warn'));
+      this.stagedWritten = 0;
+    }
   }
 
   async disconnect(): Promise<void> {
+    return this.closeSession({ keepModule: false });
+  }
+
+  private async closeSession({ keepModule }: { keepModule: boolean }): Promise<void> {
     const s = this.session;
     if (!s) return;
     this.patch({ state: 'closed' });
     await this.opts.onDisconnected?.();
-    await this.teardown();
+    await this.teardown({ keepModule });
     // Direct mode never spawned the server, so it never stops it either.
     if (s.id && !this.direct) {
       await this.deleteSession(s.id).catch((e: unknown) => this.log(`DELETE /sessions/${s.id} failed: ${e instanceof Error ? e.message : String(e)}`, 'warn'));
@@ -613,14 +751,17 @@ export class KicadSessionService implements SessionService {
       .sort((a, b) => (a.kind === b.kind ? a.name.localeCompare(b.name) : a.kind === 'dir' ? -1 : 1));
   }
 
-  /** Everything imported into MEMFS under `dir`, flat, so the browser can show what was loaded. */
-  private listMemfs(dir: string): FileEntry[] {
-    const instance = this.instance;
-    const pkg = this.wasmPkg;
-    if (!instance || !pkg) return [];
+  /**
+   * Everything imported into MEMFS under `dir`, flat, so the browser can show what was loaded.
+   * Asynchronous because the module usually lives in a Worker: this is a message round trip, not a
+   * `FS.readdir`.
+   */
+  private async listMemfs(dir: string): Promise<FileEntry[]> {
+    const backend = this.instance;
+    if (!backend) return [];
     const base = dir.replace(/\/$/, '');
-    return pkg
-      .listFiles(instance, base)
+    const paths = await backend.listFiles(base).catch(() => [] as string[]);
+    return paths
       .filter((p) => p.startsWith(`${base}/`))
       .map<FileEntry>((p) => ({ name: p.slice(base.length + 1), path: p, kind: 'file', fileType: fileTypeOf(p) }))
       .sort((a, b) => a.name.localeCompare(b.name));
@@ -629,11 +770,9 @@ export class KicadSessionService implements SessionService {
   /** `GET /files/stat`; in wasm mode a MEMFS lookup, so `<name>.kicad_pcb` next to a `.kicad_pro` is found. */
   async stat(path: string): Promise<{ kind: 'dir' | 'file'; size: number } | null> {
     if (this.wasm) {
-      const instance = this.instance;
-      const pkg = this.wasmPkg;
-      if (!instance || !pkg || !pkg.exists(instance, path)) return null;
-      const st = instance.FS.stat(path);
-      return { kind: instance.FS.isDir(st.mode) ? 'dir' : 'file', size: st.size };
+      const backend = this.instance;
+      if (!backend) return null;
+      return backend.stat(path).catch(() => null);
     }
     if (this.bridgeless) return null;
     try {

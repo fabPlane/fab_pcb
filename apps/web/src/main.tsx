@@ -35,20 +35,25 @@ import './styles/app.css';
 //   - `?wasm=1` / `?kicad-wasm=<url of kicad_api.js>`, VITE_KICAD_WASM=1 or VITE_KICAD_WASM_URL
 //                                       -> real KiCad *in this tab*, compiled to WebAssembly: no
 //                                         bridge, no server, no socket. The project is imported
-//                                         into the module's file system with the file picker.
+//                                         into the module's file system with the file picker. The
+//                                         module runs in a Web Worker; add `?wasm-main=1` to run it
+//                                         on the main thread instead (debugging).
 //   - VITE_SERVICES=kicad               -> real services on the same origin.
-function pickServices(): { mode: 'mock' } | { mode: 'kicad'; bridgeUrl: string; directWsUrl?: string; wasmUrl?: string; wasm?: boolean; bridgeless: boolean } {
+function pickServices(): { mode: 'mock' } | { mode: 'kicad'; bridgeUrl: string; directWsUrl?: string; wasmUrl?: string; wasm?: boolean; wasmInWorker?: boolean; bridgeless: boolean } {
   const params = new URLSearchParams(location.search);
   const env = import.meta.env as Record<string, string | undefined>;
   if (params.get('mock') === '1' || env.VITE_SERVICES === 'mock') return { mode: 'mock' };
   const direct = params.get('kicad-ws') ?? env.VITE_KICAD_WS;
   const wasmUrl = params.get('kicad-wasm') ?? env.VITE_KICAD_WASM_URL;
   const wasm = Boolean(wasmUrl) || params.get('wasm') === '1' || env.VITE_KICAD_WASM === '1';
+  // The module runs in a Web Worker so a slow command cannot freeze paint; `?wasm-main=1` puts it
+  // back on this thread, where a debugger can step into `kiapi_dispatch`.
+  const wasmInWorker = params.get('wasm-main') !== '1' && env.VITE_KICAD_WASM_MAIN !== '1';
   const bridge = params.get('bridge') ?? env.VITE_BRIDGE_URL;
   const asked = bridge !== undefined && bridge !== null && bridge !== '';
   const bridgeUrl = !asked ? '' : bridge === 'proxy' || bridge === '1' ? '' : bridge!;
   // Wasm wins over a socket: there is nothing to dial when KiCad is already in the page.
-  if (wasm) return { mode: 'kicad', bridgeUrl, wasm: true, wasmUrl: wasmUrl ?? undefined, bridgeless: !asked };
+  if (wasm) return { mode: 'kicad', bridgeUrl, wasm: true, wasmUrl: wasmUrl ?? undefined, wasmInWorker, bridgeless: !asked };
   // A direct URL on its own means "no bridge anywhere"; asking for one as well keeps the
   // bridge-only features (file access, spawning) while requests still go straight to KiCad.
   if (direct) return { mode: 'kicad', bridgeUrl, directWsUrl: direct, bridgeless: !asked };
@@ -64,7 +69,7 @@ const services: Services =
         bridgeUrl: choice.bridgeUrl,
         directWsUrl: choice.directWsUrl,
         // vite.config.ts serves the build under /kicad-wasm/ in dev and copies it there on build.
-        wasm: choice.wasm ? { moduleUrl: choice.wasmUrl ?? '/kicad-wasm/kicad_api.js' } : undefined,
+        wasm: choice.wasm ? { moduleUrl: choice.wasmUrl ?? '/kicad-wasm/kicad_api.js', inWorker: choice.wasmInWorker } : undefined,
         bridgeless: choice.bridgeless,
       })
     : createMockServices();
@@ -72,7 +77,7 @@ log(
   choice.mode !== 'kicad'
     ? 'Services: in-memory mock (add ?bridge=http://127.0.0.1:4020, ?kicad-ws=ws://127.0.0.1:5599/kicad or ?wasm=1 for real KiCad)'
     : choice.wasm
-      ? `Services: KiCad as WebAssembly in this tab${choice.wasmUrl ? ` (${choice.wasmUrl})` : ''}`
+      ? `Services: KiCad as WebAssembly in this tab, ${choice.wasmInWorker ? 'in a Web Worker' : 'on the main thread (?wasm-main=1)'}${choice.wasmUrl ? ` (${choice.wasmUrl})` : ''}`
       : choice.directWsUrl
         ? `Services: KiCad directly at ${choice.directWsUrl}${choice.bridgeless ? ' (no bridge)' : ` (bridge ${choice.bridgeUrl || location.origin} for files only)`}`
         : `Services: KiCad via bridge ${choice.bridgeUrl || location.origin}`,
