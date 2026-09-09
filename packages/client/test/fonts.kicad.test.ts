@@ -123,3 +123,60 @@ describe.skipIf(!HAVE_FONTS)(`outline fonts from KICAD_FONTS_DIR (${KICAD_TRANSP
     expect(unknown.w).toBe(known.w);
   });
 });
+
+/**
+ * The same proof for the fonts the *module* carries: `KICAD_WASM_PRELOAD_FONTS` bundles Carlito
+ * Regular + Bold and a manifest into `kicad_api.data` at `/kicad/fonts`, which is where the host
+ * config's `fonts` already points under Emscripten. So a wasm build resolves outline text with no
+ * `KICAD_FONTS_DIR` and nothing mounted from the host at all — and that is exactly the case the
+ * block above skips, because it keys off a host directory.
+ */
+const PRELOADED = KICAD_TRANSPORT === "wasm" && !KICAD_FONTS_DIR && haveKicad();
+
+if (KICAD_TRANSPORT === "wasm" && !PRELOADED && !KICAD_FONTS_DIR) {
+  console.log("[skip] no wasm module: set KICAD_WASM_DIR to a build with kicad_api.{js,wasm,data}");
+}
+
+describe.skipIf(!PRELOADED)("outline fonts preloaded into the module (wasm, no KICAD_FONTS_DIR)", () => {
+  let rt: RunningKiCad;
+  let k: KiCad;
+  const family = "Carlito";
+
+  beforeAll(async () => {
+    rt = await startKiCad(null, "fonts-preloaded");
+    k = rt.kicad;
+  }, 120_000);
+
+  afterAll(async () => {
+    await rt?.stop();
+  });
+
+  test("GetTextExtents differs between the stroke font and the preloaded family", async () => {
+    const text = "Wg1i- fp-pcb";
+    const stroke = await k.textExtents({ text, attributes: { ...SIZE, fontName: "" } });
+    const outline = await k.textExtents({ text, attributes: { ...SIZE, fontName: family } });
+
+    expect(outline.w).toBeGreaterThan(0);
+    expect(outline.w).not.toBe(stroke.w);
+  });
+
+  test("GetTextAsShapes returns filled polygons for the preloaded family", async () => {
+    const attributes = { ...SIZE };
+    const [stroke] = await k.textAsShapes([{ text: { text: "Wg", attributes: { ...attributes, fontName: "" } } }]);
+    const [outline] = await k.textAsShapes([{ text: { text: "Wg", attributes: { ...attributes, fontName: family } } }]);
+
+    const strokeShapes = stroke!.shapes?.shapes ?? [];
+    const outlineShapes = outline!.shapes?.shapes ?? [];
+    expect(strokeShapes.length).toBeGreaterThan(0);
+    expect(outlineShapes.length).toBeGreaterThan(0);
+
+    // The stroke font tessellates to open segments; an outline face is polygons with nodes.
+    const nodes = outlineShapes.reduce((n, s) => {
+      const g = s.geometry;
+      return g.case === "polygon" ? n + g.value.polygons.reduce((m, p) => m + (p.outline?.nodes.length ?? 0), 0) : n;
+    }, 0);
+    expect(outlineShapes.every((s) => s.geometry.case === "polygon")).toBe(true);
+    expect(nodes).toBeGreaterThan(0);
+    expect(strokeShapes.some((s) => s.geometry.case === "polygon")).toBe(false);
+  });
+});
