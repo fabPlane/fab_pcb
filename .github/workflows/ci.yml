@@ -8,7 +8,11 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Superseding a branch push is the point of this; superseding the default branch is not.  Its
+  # run is the only one that builds and publishes the kicad-cli image, and that takes about an
+  # hour, so cancelling it whenever the next thing merges means it never finishes and every later
+  # run rebuilds KiCad from source.  Let those queue instead.
+  cancel-in-progress: ${{ github.ref_name != github.event.repository.default_branch }}
 
 env:
   BUN_VERSION: "1.4.0"
