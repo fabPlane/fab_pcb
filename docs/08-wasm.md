@@ -56,6 +56,7 @@ const char* kiapi_last_error(void);
   {
     "home": "/home/kicad",
     "share": "/kicad/share",
+    "fonts": "/kicad/fonts",
     "env": { "KICAD10_FOOTPRINT_DIR": "/kicad/share/footprints" },
     "preload": "",
     "token": "",
@@ -65,6 +66,14 @@ const char* kiapi_last_error(void);
   `home` is a writable MEMFS directory for KiCad's settings, `share` the (read-only) share tree,
   `env` extra environment variables to set before KiCad initialises, `preload` a MEMFS path to open
   at startup (or `""`), `token` a fixed API token (or `""` to generate one).
+- **Fonts**: `fonts` is exported as `KICAD_FONTS_DIR` and read by KiCad's replacement fontconfig
+  wrapper (`common/font/fontconfig_manifest.cpp`), which takes either a `manifest.json`
+  (`{"default":"Carlito","fonts":[{"family","style","bold","italic","file"}]}`) or a plain folder of
+  `.ttf`/`.otf` it reads the names out of with FreeType. Leave it empty and every outline font falls
+  back to the stroke font — silently, with the wrong geometry from `GetTextAsShapes`, the plot jobs
+  and text-height DRC rules. The module is built with Carlito preloaded at `/kicad/fonts`
+  (`KICAD_WASM_PRELOAD_FONTS`); `mountFonts()` from `@fp-pcb/kicad-wasm` adds host fonts to it and
+  writes the manifest for them.
 - **Events**: the module calls `Module.__kiapiEvent(bytes)` with one serialized
   `kiapi.common.events.Event` — the same frames the pub socket carries. The loader installs the
   callback _before_ `kiapi_init`. The bytes may be a view into the heap; the loader copies them.
@@ -251,6 +260,7 @@ tools/wasm/package.sh                    # the same tarball the workflow uploads
 | `KICAD_API_HOST`   | stdio   | `kicad-api-host-native` binary (default `<kicad>/build/native-host/…`)      |
 | `KICAD_WASM_DIR`   | wasm    | directory with `kicad_api.js` / `.wasm` (default `<kicad>/build/wasm/host`) |
 | `KICAD_WASM_SHARE` | wasm    | host share tree to mount at `/kicad/share` (when the build has no `.data`)  |
+| `KICAD_FONTS_DIR`  | stdio, wasm | host directory of outline fonts (with an optional `manifest.json`); mounted at `/kicad/fonts` for wasm, `--fonts` for stdio |
 | `KICAD_WASM_RELEASE` | wasm | release tag to download instead of copying a build tree (default `packages/proto/KICAD_TAG`) |
 | `KICAD_WASM_RELEASE_FILE` | wasm | a `kicad-wasm-*.tar.gz` already on disk; skips the download |
 | `KICAD_WASM_REPO` | wasm | `owner/repo` holding the releases (default `TensorFleet/kicad`) |

@@ -59,11 +59,14 @@ export const KICAD_API_HOST = process.env.KICAD_API_HOST ?? `${KICAD_ROOT}/build
 export const KICAD_WASM_DIR = process.env.KICAD_WASM_DIR ?? `${KICAD_ROOT}/build/wasm/host`;
 /** KiCad's share tree to mount at the module's `share` path (templates, schemas). */
 export const KICAD_WASM_SHARE = process.env.KICAD_WASM_SHARE ?? "";
+/** Host directory of outline fonts (with an optional `manifest.json`); `KICAD_FONTS_DIR`. */
+export const KICAD_FONTS_DIR = process.env.KICAD_FONTS_DIR ?? "";
 
 const WASM_MODULE = join(KICAD_WASM_DIR, "kicad_api.js");
 /** MEMFS home/share for the wasm backend. */
 const WASM_HOME = "/home/kicad";
 const WASM_SHARE = "/kicad/share";
+const WASM_FONTS = "/kicad/fonts";
 
 /** What the selected backend needs on disk, and where it should be. */
 export function backendBinary(): string {
@@ -240,7 +243,8 @@ async function startIpc(file: string | null, prefix: string, cli?: string): Prom
 async function startStdio(file: string | null, prefix: string): Promise<RunningKiCad> {
   const transport = await StdioTransport.connect({
     command: KICAD_API_HOST,
-    args: file ? [file] : [],
+    // The child would inherit KICAD_FONTS_DIR anyway; passing it makes the host config say so.
+    args: [...(KICAD_FONTS_DIR ? ["--fonts", KICAD_FONTS_DIR] : []), ...(file ? [file] : [])],
     defaultTimeoutMs: 60_000,
   });
   const kicad = await connect(transport, prefix);
@@ -357,6 +361,10 @@ async function startWasm(file: string | null, prefix: string, extraMounts: strin
     },
   });
   if (KICAD_WASM_SHARE) await mountPath(wasm, KICAD_WASM_SHARE, WASM_SHARE);
+  if (KICAD_FONTS_DIR) {
+    const { mountFonts } = await import("@fp-pcb/kicad-wasm");
+    await mountFonts(wasm, KICAD_FONTS_DIR, WASM_FONTS);
+  }
   const transport = new MirroringWasmTransport(wasm, { defaultTimeoutMs: 60_000 });
   for (const hostPath of [...wasmMounts, ...extraMounts]) {
     if (existsSync(hostPath)) await mountPath(wasm, hostPath);
