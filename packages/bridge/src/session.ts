@@ -70,6 +70,22 @@ export interface CreateSessionOptions {
   id?: string;
 }
 
+const APPIMAGE_RUNTIME_ENV = ["APPDIR", "APPIMAGE", "ARGV0", "OWD"] as const;
+
+/**
+ * AppImage launcher variables describe the Electron AppDir, not the bundled KiCad runtime.
+ * If inherited, KiCad looks for `_pcbnew.kiface` under `<AppDir>/usr/bin` instead of beside
+ * `KICAD_CLI` in `resources/pcb/kicad/bin`.
+ */
+export function kicadChildEnvironment(
+  base: Record<string, string | undefined> = process.env,
+  extra: Record<string, string> = {},
+): Record<string, string | undefined> {
+  const env = { ...base, ...extra };
+  for (const key of APPIMAGE_RUNTIME_ENV) delete env[key];
+  return env;
+}
+
 const LOG_RING = 200;
 const SESSION_ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
 
@@ -272,7 +288,7 @@ export class Session {
         stdout: "pipe",
         stderr: "pipe",
         stdin: "ignore",
-        env: { ...process.env, ...cfg.kicadEnv },
+        env: kicadChildEnvironment(process.env, cfg.kicadEnv),
       });
     } catch (e) {
       this.fail("failed", `cannot spawn ${cfg.kicadCli}: ${errorMessage(e)}`);
