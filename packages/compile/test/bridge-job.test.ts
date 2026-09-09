@@ -21,6 +21,7 @@ describe("checkRequest", () => {
   const kinds = ["netlist-json"];
   test("accepts a well-formed request", () => {
     expect(checkRequest({ source: SOURCE, project: { path: "/p/x.kicad_pro" } }, kinds)).toMatchObject({ ok: true });
+    expect(checkRequest({ source: SOURCE, rebuild: "clean" }, kinds)).toMatchObject({ ok: true });
   });
   test("names what is wrong", () => {
     const err = (body: unknown) => (checkRequest(body, kinds) as { error: string }).error;
@@ -30,6 +31,7 @@ describe("checkRequest", () => {
     expect(err({ source: { ...SOURCE, files: [] } })).toContain("source.files");
     expect(err({ source: { ...SOURCE, entrypoint: "" } })).toContain("source.entrypoint");
     expect(err({ source: SOURCE, project: { path: 3 } })).toContain("project.path");
+    expect(err({ source: SOURCE, rebuild: "sometimes" })).toContain("rebuild");
   });
 });
 

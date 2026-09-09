@@ -115,7 +115,16 @@ RUN set -eu \
     && ldd $bins | awk '/=> \//{print $3}' | sort -u | grep -v '^/opt/kicad/' \
          | xargs -r realpath | sort -u | xargs -r dpkg -S | cut -d: -f1 | sort -u > /opt/kicad/runtime-packages.txt \
     && test -s /opt/kicad/runtime-packages.txt \
-    && echo "runtime packages ($(wc -l < /opt/kicad/runtime-packages.txt)):" && cat /opt/kicad/runtime-packages.txt
+    && echo "runtime packages ($(wc -l < /opt/kicad/runtime-packages.txt)):" && cat /opt/kicad/runtime-packages.txt \
+    && mkdir -p /opt/kicad/lib/runtime \
+    && ldd $bins | awk '/=> \//{print $3}' | sort -u | grep -v '^/opt/kicad/' \
+         | while read -r library; do \
+             name="$(basename "$library")"; \
+             case "$name" in libc.so.*|libm.so.*|libdl.so.*|libpthread.so.*|librt.so.*|ld-linux-*) continue ;; esac; \
+             cp -L "$library" "/opt/kicad/lib/runtime/$name"; \
+           done \
+    && test -n "$(find /opt/kicad/lib/runtime -maxdepth 1 -type f -print -quit)" \
+    && echo "bundled runtime libraries: $(find /opt/kicad/lib/runtime -maxdepth 1 -type f | wc -l)"
 
 # ----------------------------------------------------------------------------- runtime
 FROM ${BASE} AS runtime

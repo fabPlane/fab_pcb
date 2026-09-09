@@ -44,6 +44,12 @@ only `/opt/kicad` does not copy Debian runtime packages into a desktop AppImage.
 The bridge currently contains `@tscircuit/capacity-autorouter`; see the migration blocker in
 `packages/router/README.md` before treating a public backend artifact as tscircuit-free.
 
+Linux bundles carry the non-glibc shared-library closure collected from the three KiCad binaries
+under `kicad/lib/runtime`; `bundle.json.libraryPaths` tells the desktop supervisor to prepend both
+KiCad library directories to `LD_LIBRARY_PATH`. End users never build or run the Docker image: it
+is only the reproducible native-build environment used to publish `fp-pcb-backend-linux-x64.tar.gz`.
+The Fabdesk release downloads that immutable asset and embeds it in the AppImage and `.deb`.
+
 ## Later manual test
 
 From an installed FabPlane build, with no separately installed KiCad and no external bridge:

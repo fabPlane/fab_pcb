@@ -5,11 +5,6 @@ on:
     branches: [master, main]
   pull_request:
   workflow_dispatch:
-    inputs:
-      build_kicad:
-        description: "Force a rebuild of the kicad-cli Docker image"
-        type: boolean
-        default: false
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -144,24 +139,18 @@ jobs:
 
   # ----------------------------------------------------------------- integration against the fork's kicad-cli
   #
-  # Builds (or pulls) the Linux image with `kicad-cli api-server` from the fork and runs the
+  # Pulls the Linux image with `kicad-cli api-server` from the fork and runs the
   # *.kicad.test.ts suites with KICAD_CLI pointing at a wrapper that execs into the container.
   #
-  # continue-on-error is set ON PURPOSE until the image exists on GHCR: a full KiCad build is ~1 h
-  # on a hosted runner, and nothing has been published yet.  The first run on the default branch
-  # after this builds the image and pushes it, and every later run whose KICAD_COMMIT is unchanged
-  # pulls it in seconds.  Once `docker pull $KICAD_IMAGE:<KICAD_COMMIT>` succeeds, remove
-  # `continue-on-error` so the job gates PRs like the other two.
+  # Native compilation belongs to backend-release.yml, keyed by KICAD_COMMIT. Routine CI never
+  # spends hours rebuilding KiCad; a missing immutable image is an actionable release error.
   kicad-integration:
     name: kicad-integration (Docker kicad-cli)
-    runs-on: ubuntu-24.04
-    timeout-minutes: 120
-    continue-on-error: true
-    # The repository default is read-only, which is enough to pull a public image but not to push
-    # one, so the push below needs the scope requested explicitly.
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    timeout-minutes: 30
     permissions:
       contents: read
-      packages: write
+      packages: read
     steps:
       - uses: actions/checkout@v4
 
@@ -197,35 +186,11 @@ jobs:
           echo "tag=${image}:${commit:0:10}" >> "$GITHUB_OUTPUT"
 
       - name: Pull the prebuilt image
-        id: pull
-        continue-on-error: true
         run: |
-          if [ "${{ github.event.inputs.build_kicad }}" = "true" ]; then exit 1; fi
-          docker pull "${{ steps.tag.outputs.tag }}"
-
-      - uses: docker/setup-buildx-action@v3
-        if: steps.pull.outcome != 'success'
-
-      - name: Build the image from the fork (KICAD_SOURCE=git)
-        if: steps.pull.outcome != 'success'
-        uses: docker/build-push-action@v6
-        with:
-          context: packages/kicad-patches/docker
-          file: packages/kicad-patches/docker/Dockerfile
-          build-args: |
-            KICAD_SOURCE=git
-            KICAD_REPO=${{ env.KICAD_REPO }}
-            KICAD_REF=${{ steps.tag.outputs.commit }}
-            JOBS=4
-          tags: ${{ steps.tag.outputs.tag }}
-          load: true
-          push: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Push the image (default branch only)
-        if: steps.pull.outcome != 'success' && github.ref_name == github.event.repository.default_branch
-        run: docker push "${{ steps.tag.outputs.tag }}"
+          docker pull "${{ steps.tag.outputs.tag }}" || {
+            echo "::error::Pinned KiCad image is missing. Run the Backend release workflow for this branch/commit first."
+            exit 1
+          }
 
       - name: kicad-cli version
         run: docker run --rm "${{ steps.tag.outputs.tag }}" version

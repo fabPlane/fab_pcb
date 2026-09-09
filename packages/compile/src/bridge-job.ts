@@ -27,7 +27,7 @@
  */
 import { mkdir } from "node:fs/promises";
 import { dirname, isAbsolute, resolve } from "node:path";
-import { KiCad, KiCadClient, type Board, type Schematic, type Transport } from "@fp-pcb/client";
+import { KiCad, KiCadClient, Via, type Board, type Schematic, type Transport } from "@fp-pcb/client";
 import { edgeClearanceNm } from "./apply";
 import { compile, CompileCancelled } from "./compile";
 import { netlistJsonFrontend } from "./frontends/netlist-json";
@@ -41,6 +41,7 @@ export type CompileJobState =
   | "frontend"
   | "validating"
   | "checking"
+  | "cleaning"
   | "outlining"
   | "importing"
   | "placing"
@@ -59,6 +60,8 @@ export interface CompileJobRequest {
   project?: { path: string };
   /** Overrides the frontend's board spec. */
   board?: BoardSpec;
+  /** Preserve compatible copper (default), or remove routed copper after validation and before import. */
+  rebuild?: "preserve" | "clean";
   matchMode?: MatchMode;
   deleteExtraFootprints?: boolean;
   updateFootprints?: boolean;
@@ -86,6 +89,8 @@ export interface CompileJobInfo {
   error?: string;
   /** Board revision after the job, for clients that cannot rely on `DocumentChanged`. */
   revision?: number;
+  /** Copper removed by a clean rebuild. Free, unassigned prefab vias are preserved. */
+  removedCopper?: { tracks: number; vias: number };
 }
 
 export interface CompileJobSession {
@@ -153,6 +158,8 @@ export function checkRequest(
   if (typeof s.entrypoint !== "string" || !s.entrypoint) return { ok: false, error: "source.entrypoint is required" };
   if (b!.project !== undefined && (typeof b!.project !== "object" || typeof b!.project?.path !== "string"))
     return { ok: false, error: "project.path must be a string" };
+  if (b!.rebuild !== undefined && b!.rebuild !== "preserve" && b!.rebuild !== "clean")
+    return { ok: false, error: 'rebuild must be "preserve" or "clean"' };
   return { ok: true, request: b as CompileJobRequest };
 }
 
@@ -239,6 +246,16 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
           signal: abort.signal,
           onStage: setState,
           beforeApply: async (built) => {
+            if (request.rebuild === "clean") {
+              setState("cleaning");
+              const routed = (await board.getTracks()).filter((item) => !(item instanceof Via) || Boolean(item.net));
+              const vias = routed.filter((item) => item instanceof Via).length;
+              if (routed.length) {
+                await board.commit("Clean rebuild: remove routed copper", (tx) => tx.delete(routed));
+              }
+              info.removedCopper = { tracks: routed.length - vias, vias };
+              pushLog(`clean rebuild: removed ${routed.length - vias} tracks/arcs and ${vias} routed vias`);
+            }
             rules = (request.board ?? built.board)?.rules;
             if (hasRules(rules)) pushLog(`rules: ${(await applyBoardConstraints(board, rules)).join(", ")}`);
             const libraries = [...(deps.libraries ?? []), ...(built.libraries ?? [])];
@@ -247,17 +264,13 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
               await registerLibraries(kicad, uniqueLibraries);
               const names = uniqueLibraries.map((library) => library.nickname);
               const shown = names.slice(0, 12).join(", ") + (names.length > 12 ? `, … +${names.length - 12}` : "");
-              pushLog(
-                `registered ${uniqueLibraries.length} project librar${uniqueLibraries.length === 1 ? "y" : "ies"}: ${shown}`,
-              );
+              pushLog(`registered ${uniqueLibraries.length} project librar${uniqueLibraries.length === 1 ? "y" : "ies"}: ${shown}`);
             }
           },
           afterApply: async (built) => {
             const generated = await generateSchematic(kicad, built.netlist!);
             schematic = generated.schematic;
-            pushLog(
-              `schematic: ${generated.symbolsCreated} symbols, ${generated.wiresCreated} wires, ${generated.labelsCreated} labels`,
-            );
+            pushLog(`schematic: ${generated.symbolsCreated} symbols, ${generated.wiresCreated} wires, ${generated.labelsCreated} labels`);
             return generated.diagnostics;
           },
         });

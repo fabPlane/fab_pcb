@@ -6,7 +6,9 @@ import { targetSpec, validateLibraryDirectory } from "./bundle-lib";
 
 const [target, runtimeArg, footprintsArg, symbolsArg, outputArg] = process.argv.slice(2);
 if (!target || !runtimeArg || !footprintsArg || !symbolsArg || !outputArg) {
-  console.error("usage: bundle.ts <linux-x64|darwin-x64|darwin-arm64|windows-x64> <kicad-runtime-dir> <footprints-dir> <symbols-dir> <output-dir>");
+  console.error(
+    "usage: bundle.ts <linux-x64|darwin-x64|darwin-arm64|windows-x64> <kicad-runtime-dir> <footprints-dir> <symbols-dir> <output-dir>",
+  );
   process.exit(2);
 }
 const spec = targetSpec(target);
@@ -25,24 +27,42 @@ await cp(footprints, join(output, "libraries", "footprints"), { recursive: true,
 await cp(symbols, join(output, "libraries", "symbols"), { recursive: true, preserveTimestamps: true });
 
 const bridge = join(output, "bin", spec.bridgeName);
-const build = Bun.spawn([
-  "bun", "build", join(import.meta.dir, "..", "bridge", "src", "main.ts"), "--compile", `--target=${spec.bunTarget}`, `--outfile=${bridge}`,
-], { cwd: resolve(import.meta.dir, "../.."), stdout: "inherit", stderr: "inherit" });
+const build = Bun.spawn(
+  [
+    "bun",
+    "build",
+    join(import.meta.dir, "..", "bridge", "src", "main.ts"),
+    "--compile",
+    `--target=${spec.bunTarget}`,
+    `--outfile=${bridge}`,
+  ],
+  { cwd: resolve(import.meta.dir, "../.."), stdout: "inherit", stderr: "inherit" },
+);
 if (await build.exited) throw new Error(`bridge compilation failed for ${spec.bunTarget}`);
 
 const cli = await findFile(join(output, "kicad"), spec.kicadCliName);
 if (!cli) throw new Error(`${spec.kicadCliName} is absent from ${runtime}`);
 const relativeCli = cli.slice(output.length + 1).replaceAll("\\", "/");
-await Bun.write(join(output, "bundle.json"), JSON.stringify({
-  format: 1,
-  target,
-  kicadCli: relativeCli,
-  bridge: `bin/${spec.bridgeName}`,
-  footprints: "libraries/footprints",
-  symbols: "libraries/symbols",
-  environment: { KICAD_SOCKET_TRANSPORT: spec.socketTransport },
-}, null, 2) + "\n");
-console.log(`FabPlane PCB bundle: ${output} (${basename(cli)}, ${await countLibraries(footprints, ".pretty")} footprint libraries, ${await countLibraries(symbols, ".kicad_sym")} symbol libraries)`);
+await Bun.write(
+  join(output, "bundle.json"),
+  JSON.stringify(
+    {
+      format: 1,
+      target,
+      kicadCli: relativeCli,
+      bridge: `bin/${spec.bridgeName}`,
+      footprints: "libraries/footprints",
+      symbols: "libraries/symbols",
+      ...(target.startsWith("linux-") ? { libraryPaths: ["kicad/lib", "kicad/lib/runtime"] } : {}),
+      environment: { KICAD_SOCKET_TRANSPORT: spec.socketTransport },
+    },
+    null,
+    2,
+  ) + "\n",
+);
+console.log(
+  `FabPlane PCB bundle: ${output} (${basename(cli)}, ${await countLibraries(footprints, ".pretty")} footprint libraries, ${await countLibraries(symbols, ".kicad_sym")} symbol libraries)`,
+);
 
 async function findFile(root: string, name: string): Promise<string | null> {
   for (const entry of await readdir(root, { withFileTypes: true })) {
