@@ -207,6 +207,41 @@ host-disk helpers the tab never calls but whose imports still have to resolve �
 is a real POSIX implementation, since MEMFS paths are built with it. No COOP/COEP headers and no
 `SharedArrayBuffer` are needed: the module is single-threaded.
 
+## Getting the module without building it
+
+Building `kicad_api.wasm` locally means an emscripten toolchain plus roughly 30 minutes of
+dependencies and 50 of KiCad (`kicad/host/STATUS-wasm-deps.md`, `kicad/host/STATUS-wasm-build.md`).
+Only the person cutting a release has to do that: the fork's `.github/workflows/wasm-release.yml`
+builds the module on every pushed `fp-pcb/*` alignment tag and attaches
+`kicad-wasm-<tag with / replaced by ->.tar.gz` to the GitHub release for that tag —
+`kicad_api.js`, `kicad_api.wasm`, a `kicad-wasm.json` manifest (fork commit, tag, emscripten and
+protobuf versions, build date, sizes) and `SHA256SUMS`.
+
+```sh
+# whatever packages/proto/KICAD_TAG pins, i.e. the fork tag the bindings came from
+bun run --filter @fp-pcb/kicad-wasm fetch:release
+
+# or a specific tag / a tarball already on disk
+KICAD_WASM_RELEASE=fp-pcb/2026-09-09-wasm bun run --filter @fp-pcb/kicad-wasm fetch
+KICAD_WASM_RELEASE_FILE=~/Downloads/kicad-wasm-fp-pcb-2026-09-09-wasm.tar.gz \
+  bun run --filter @fp-pcb/kicad-wasm fetch
+```
+
+`fetch` verifies every file against the tarball's `SHA256SUMS` before anything reaches `dist/`, and
+prints which fork commit and toolchain produced the module. The fork is private, so a download needs
+`GITHUB_TOKEN` / `GH_TOKEN` (the script uses the releases API with
+`Accept: application/octet-stream`) or an authenticated `gh` CLI.
+
+A local build tree still wins when it exists: plain `fetch` copies from `KICAD_WASM_DIR` and only
+falls back to a release if told to. To build it yourself, see `kicad/host/STATUS.md`:
+
+```sh
+tools/wasm/build-deps.sh                 # ~30 min, idempotent
+tools/wasm/host-tools.sh                 # native lemon + protoc 36.1 (Linux; brew covers macOS)
+tools/wasm/configure.sh && ninja -C build/wasm kicad_api
+tools/wasm/package.sh                    # the same tarball the workflow uploads
+```
+
 ## Environment variables
 
 | Variable           | Backend | Meaning                                                                     |
@@ -216,6 +251,10 @@ is a real POSIX implementation, since MEMFS paths are built with it. No COOP/COE
 | `KICAD_API_HOST`   | stdio   | `kicad-api-host-native` binary (default `<kicad>/build/native-host/…`)      |
 | `KICAD_WASM_DIR`   | wasm    | directory with `kicad_api.js` / `.wasm` (default `<kicad>/build/wasm/host`) |
 | `KICAD_WASM_SHARE` | wasm    | host share tree to mount at `/kicad/share` (when the build has no `.data`)  |
+| `KICAD_WASM_RELEASE` | wasm | release tag to download instead of copying a build tree (default `packages/proto/KICAD_TAG`) |
+| `KICAD_WASM_RELEASE_FILE` | wasm | a `kicad-wasm-*.tar.gz` already on disk; skips the download |
+| `KICAD_WASM_REPO` | wasm | `owner/repo` holding the releases (default `TensorFleet/kicad`) |
+| `GITHUB_TOKEN` / `GH_TOKEN` | wasm | token for the private fork's release assets (else an authenticated `gh`) |
 | `KICAD_SRC`        | all     | the KiCad checkout (defaults to `../kicad`)                                 |
 
 Bridge-only (`packages/bridge`):

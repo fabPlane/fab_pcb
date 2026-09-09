@@ -283,3 +283,33 @@ jobs:
         env:
           KICAD_INTEGRATION_REQUIRED: "1"
         run: bun run test:integration
+
+  # ----------------------------------------------------------------- wasm (not wired up yet)
+  # The KiCad fork builds `kicad_api.{js,wasm}` on every pushed `fp-pcb/*` alignment tag
+  # (kicad/.github/workflows/wasm-release.yml) and attaches a verified tarball to the release for
+  # that tag.  Once the first release exists, this job runs the wasm conformance suite here without
+  # an emscripten toolchain -- it is left commented out deliberately, because a job that depends on
+  # a release that has not been cut yet would fail every run.  See docs/08-wasm.md.
+  #
+  # wasm:
+  #   name: wasm (conformance)
+  #   runs-on: ubuntu-24.04
+  #   timeout-minutes: 30
+  #   continue-on-error: true
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: oven-sh/setup-bun@v2
+  #       with:
+  #         bun-version: ${{ env.BUN_VERSION }}
+  #     - run: bun install --frozen-lockfile
+  #     # Downloads kicad-wasm-<tag>.tar.gz for the tag in packages/proto/KICAD_TAG, verifies
+  #     # SHA256SUMS, and unpacks it into packages/kicad-wasm/dist.  The fork is private, so this
+  #     # needs a token that can read it: the job's own GITHUB_TOKEN cannot, hence a PAT secret.
+  #     - name: Fetch the released wasm build
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.KICAD_FORK_TOKEN }}
+  #       run: bun run --filter @fp-pcb/kicad-wasm fetch:release
+  #     - name: Conformance (wasm)
+  #       env:
+  #         KICAD_TRANSPORT: wasm
+  #       run: bun run --cwd packages/client test:conformance

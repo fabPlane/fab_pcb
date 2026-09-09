@@ -12,12 +12,30 @@ scripts/fetch.ts   copy kicad_api.{js,wasm,data} from the KiCad build into dist/
 
 ## Getting a build
 
-The wasm build lives in the KiCad fork (`docs/08-wasm.md`), not here. Once it exists:
+The wasm build lives in the KiCad fork (`docs/08-wasm.md`), not here. Either copy one out of a local
+build tree, or download one that the fork's CI already built.
 
 ```sh
-bun run --filter @fp-pcb/kicad-wasm fetch          # from ../kicad/build/wasm/host
+# local build tree (the default whenever it exists)
+bun run --filter @fp-pcb/kicad-wasm fetch           # from ../kicad/build/wasm/host
 KICAD_WASM_DIR=/path/to/host bun run fetch          # or from somewhere else
+
+# a released build -- no emscripten toolchain, no 80-minute build
+bun run --filter @fp-pcb/kicad-wasm fetch:release   # tag from packages/proto/KICAD_TAG
+KICAD_WASM_RELEASE=fp-pcb/2026-09-09-wasm bun run fetch
+KICAD_WASM_RELEASE_FILE=/path/to/kicad-wasm-fp-pcb-2026-09-09-wasm.tar.gz bun run fetch
 ```
+
+Release mode downloads `kicad-wasm-<tag with / replaced by ->.tar.gz` from the fork's GitHub
+release for that tag, checks every file against the tarball's `SHA256SUMS`, and unpacks
+`kicad_api.js`, `kicad_api.wasm` and the `kicad-wasm.json` manifest (fork commit, emscripten and
+protobuf versions, sizes) into `dist/`. The fork is private, so it needs `GITHUB_TOKEN` / `GH_TOKEN`
+(used against the releases API) or an authenticated `gh`. `KICAD_WASM_REPO` overrides
+`TensorFleet/kicad`.
+
+The tarball is produced by `kicad/tools/wasm/package.sh` and attached by the fork's
+`.github/workflows/wasm-release.yml` when an `fp-pcb/*` alignment tag is pushed
+(`kicad/host/STATUS-release-artifact.md`).
 
 `dist/` is generated and git-ignored; nothing in this package is checked in as a binary.
 

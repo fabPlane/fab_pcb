@@ -10,6 +10,7 @@
   },
   "scripts": {
     "fetch": "bun run scripts/fetch.ts",
+    "fetch:release": "bun run scripts/fetch.ts --release",
     "test": "bun test",
     "typecheck": "tsc -b"
   },
