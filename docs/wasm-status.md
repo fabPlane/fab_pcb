@@ -1,17 +1,18 @@
 # KiCad as WebAssembly — status, 2026-09-09
 
 KiCad's headless API core is compiled to WebAssembly and answers the same protobuf envelope the
-`kicad-cli api-server` does. Under `KICAD_TRANSPORT=wasm` the conformance suite scores **150 of 153
-headless commands — identical to the native build** — and the three failures are the same three the
-native host has. The bridge runs a session as a module in a Worker; `apps/web` runs KiCad in the tab
-and renders the kitchen-sink board with no server anywhere.
+`kicad-cli api-server` does. Under `KICAD_TRANSPORT=wasm` the conformance suite scores **151 of 153
+headless commands — identical to the native host** — and the two failures are the two the native
+host has (3D export and 3D render; there is no OpenCascade in this link). The bridge runs a session
+as a module in a Worker; `apps/web` runs KiCad in a Web Worker in the tab, opens a real project and
+runs DRC with no server anywhere.
 
 Everything is on the branch `wasm` in both repos. Nothing is pushed and nothing is tagged — see
 [Housekeeping](#housekeeping-for-you-to-decide).
 
 ## What exists
 
-**Fork (`tensorfleet/kicad`, branch `wasm`, 31 commits on top of `web-api`)**
+**Fork (`tensorfleet/kicad`, branch `wasm`, 41 commits on top of `web-api`)**
 
 - `KICAD_HEADLESS_API` (CMake option, default OFF): splits the GUI out of `kicommon`/`common`/`gal`,
   links the pcbnew and eeschema kifaces statically into one image, runs the thread pool and the job
@@ -21,19 +22,49 @@ Everything is on the branch `wasm` in both repos. Nothing is pushed and nothing 
   `kiapi_*` C ABI (`kicad_api_c.cpp`), the native stdio binary (`main_native.cpp`), the Emscripten
   entry point (`host/wasm/main_wasm.cpp`), and `host/wx_headless/` — real `wxColour` / `wxImage` /
   `wxPGChoices` for a wxBase-only link, plus the `wxUSE_GUI` header shim.
+- **A BOM data model that is not a wxGrid table.** Under `KICAD_HEADLESS_API` the fields tables
+  derive from a new `HEADLESS_GRID_TABLE_BASE` (`include/widgets/headless_grid_table.h`) instead of
+  `wxGridTableBase`, so `RunSchematicJobExportBOM` works on both headless backends and writes a CSV
+  byte-identical to `kicad-cli`'s. This was the one command that used to abort an instance.
+  (`host/STATUS-bom-fix.md`)
+- **Outline fonts from a manifest.** `common/font/fontconfig_manifest.cpp` replaces the old
+  `fontconfig_stub.cpp`: it resolves `FindFont()` against a `manifest.json` (or a bare folder of
+  `.ttf`/`.otf` it reads with FreeType) under `KICAD_FONTS_DIR`, matching `fontconfig.cpp`'s rules
+  and `FF_RESULT` codes line for line. `KICAD_API_HOST_CONFIG::fonts` (`--fonts`, JSON `fonts`,
+  default `/kicad/fonts` under Emscripten) exports it. `KICAD_WASM_PRELOAD_FONTS=ON` bundles Carlito
+  Regular + Bold and a generated manifest into `kicad_api.data`, so **the module resolves outline
+  text with no host font directory at all**. (`host/STATUS-fonts.md`)
+- **`EDA_SHAPE( const SHAPE& )` no longer leaves its fill out of range** — it value-initialised
+  `m_fill` and `FILL_T` starts at 1, so every glyph outline `handleGetTextAsShapes` wrapped tripped
+  a `ToProtoEnum<FILL_T>` assertion. That is what filled the browser log; it is gone.
+- **`-DwxDEBUG_LEVEL=0` for KiCad's own TUs** (`tools/wasm/env.sh`), matching the Homebrew wx the
+  native build uses, and **`WASM_OPT_LEVEL`** (`tools/wasm/configure.sh`, default `-O2`): CMake used
+  to append `-O3 -DNDEBUG` after `env.sh`'s `-O2`, so every KiCad TU was silently built at `-O3`.
 - `tools/wasm/` — `build-deps.sh` (wxWidgets 3.2.11 base-only, protobuf 36.1 + abseil, zstd, and an
-  81-check smoke test), `configure.sh`, `gen_wasm_link_stubs.py` (the 71 data stubs wasm-ld cannot
-  synthesise), `check_wx_abi.sh`.
+  81-check smoke test), `configure.sh`, `regen_wasm_link_stubs.sh` + `gen_wasm_link_stubs.py` (the
+  65 data stubs wasm-ld cannot synthesise), `check_wx_abi.sh`, `size-report.sh`,
+  `audit_undefined.py`, `package.sh`, `host-tools.sh`.
+- **A release workflow.** `.github/workflows/wasm-release.yml` builds the module on Ubuntu on any
+  `fp-pcb/*` tag (or `workflow_dispatch`) and attaches `kicad-wasm-<tag-slug>.tar.gz` — module,
+  `kicad-wasm.json` provenance manifest and `SHA256SUMS` — to the release, so a consumer never needs
+  the toolchain. Never run yet; the Linux path is the experiment. (`host/STATUS-release-artifact.md`)
 
-**fab_pcb (branch `wasm`, 19 commits on top of `main`)**
+**fab_pcb (branch `wasm`, 28 commits on top of `main`)**
 
 - `@fp-pcb/client`: `StdioTransport`/`StdioSubscriber` and `WasmTransport`/`WasmSubscriber`. The
   `Transport` interface did not change.
 - `@fp-pcb/kicad-wasm`: the loader over the `kiapi_*` ABI, MEMFS helpers (`mountProject`,
-  `exportDir`, `DirMirror`), `bun run fetch` to copy a build into `dist/`.
+  `exportDir`, `DirMirror`), font mounting (`mountFonts`, `buildFontManifest`, an sfnt `name`-table
+  parser), `bun run fetch` to copy a build into `dist/` and `fetch:release` to download, verify and
+  unpack a fork release tarball instead.
+- **The module runs in a Web Worker** (`worker.ts` / `worker-core.ts` / `worker-client.ts`): one
+  instance per tab, the bridge's protocol plus `{id, fs}` for file operations, and `dispatchAsync`
+  on the transport so in-process callers keep the straight-line path. `?wasm-main=1` keeps the old
+  main-thread path for debugging.
 - The conformance harness picks a backend with `KICAD_TRANSPORT`; the suites only see `RunningKiCad`.
 - `@fp-pcb/bridge`: `SESSION_BACKEND=wasm` runs each session as a module in its own Bun `Worker`.
-- `apps/web`: `?wasm=1` runs KiCad in the tab, with a file picker that imports a project into MEMFS.
+- `apps/web`: `?wasm=1` runs KiCad in the tab, with a file picker (and drop target) that imports a
+  project into MEMFS.
 
 ## Building it
 
@@ -46,13 +77,25 @@ ninja -C build/headless -j10 kicad-api-host-native      # -> build/native-host/k
 # --- the wasm module ---------------------------------------------------------
 tools/wasm/build-deps.sh          # wx + protobuf + abseil + zstd for wasm32, ~30 min, idempotent
 tools/wasm/configure.sh           # emcmake; needs build/headless for lemon and brew protoc 36.1
-ninja -C build/wasm -j10 kicad_api   # -> build/wasm/host/kicad_api.{js,wasm}, ~50 min from clean
+tools/wasm/regen_wasm_link_stubs.sh   # after ANY change that adds or removes a definition
+ninja -C build/wasm -j10 kicad_api    # -> build/wasm/host/kicad_api.{js,wasm,data}, ~50 min clean
+tools/wasm/size-report.sh build/wasm/host/kicad_api.wasm
+tools/wasm/package.sh             # -> build/wasm-release/kicad-wasm-<tag>.tar.gz + SHA256SUMS
 ```
 
-Two traps that cost hours and are worth re-reading before touching the build: never run two `ninja`
-processes in one build dir (it corrupts `.ninja_deps` and every later load rebuilds all 1100 TUs),
-and `tools/wasm/regen_wasm_link_stubs.sh` must be re-run after any change that adds a definition —
-a stale data stub silently shadows the real symbol. Details in `kicad/host/STATUS-wasm-build.md`.
+Pushing an `fp-pcb/*` tag runs `.github/workflows/wasm-release.yml`, which does all of the above on
+an Ubuntu runner and attaches that tarball to the GitHub release, so fab_pcb can
+`bun run --filter @fp-pcb/kicad-wasm fetch:release` instead of owning a toolchain. Nothing is pushed
+or tagged yet — `host/STATUS-release-artifact.md` has the steps and the caveats (the Linux path is
+untested; `tools/wasm/host-tools.sh` supplies the native `lemon` and `protoc` there).
+
+Three traps that cost hours and are worth re-reading before touching the build: never run two
+`ninja` processes in one build dir (it corrupts `.ninja_deps` and every later load rebuilds all 1100
+TUs); `tools/wasm/regen_wasm_link_stubs.sh` must be re-run after any change that adds a definition,
+or the link fails with `duplicate symbol` (the BOM fix defined six symbols the stub file still
+carried, and that is exactly how this rebuild started); and the native
+`tools/regen_link_stubs.sh` needs `WXLIBDIR=/opt/homebrew/lib` on this machine, plus `DEVSYMS_CACHE`
+unless you want to wait out an `nm` pass over `build/dev`. Details in `kicad/host/STATUS-wasm-build.md`.
 
 ## Running it
 
@@ -64,6 +107,9 @@ KICAD_TRANSPORT=wasm KICAD_WASM_DIR=../kicad/build/wasm/host bun run --cwd packa
 
 # the module on its own (Ping/GetVersion through kiapi_dispatch) and two instances at once
 KICAD_WASM_DIR=../kicad/build/wasm/host bun test --cwd packages/kicad-wasm
+
+# outline fonts: the preloaded bundle needs no KICAD_FONTS_DIR, a host directory overrides it
+KICAD_TRANSPORT=wasm KICAD_WASM_DIR=../kicad/build/wasm/host bun test --cwd packages/client test/fonts.kicad.test.ts
 
 # the bridge, every session a module in a worker
 SESSION_BACKEND=wasm KICAD_WASM_DIR=../kicad/build/wasm/host bun run --filter @fp-pcb/bridge start
@@ -83,66 +129,99 @@ integration tests fail for reasons that have nothing to do with this work.
 ## The numbers
 
 Conformance is 168 commands (153 headless + 15 gui-only, which every headless backend skips) plus
-6 extra checks. Measured on this machine, idle.
+6 extra checks. Measured on this machine, idle, against the module built from `78a0998b2a` + the
+regenerated stubs.
 
-|                                | `ipc` (kicad-cli)              | `stdio` (native host)           | `wasm`                                                                      |
-| ------------------------------ | ------------------------------ | ------------------------------- | --------------------------------------------------------------------------- |
-| Conformance                    | **177/177** (153/153 headless) | **150/153** headless, 6/6 extra | **150/153** headless, 6/6 extra                                             |
-| Conformance wall time          | ~5 min                         | ~2 min                          | **63 s** (both files)                                                       |
-| Open project + board           | 392 ms                         | 65 ms                           | **115 ms**                                                                  |
-| DRC, kitchen sink (11 markers) | 69 ms                          | 65 ms                           | **77 ms** (first run 108 ms)                                                |
+|                                | `ipc` (kicad-cli)              | `stdio` (native host)           | `wasm`                                                                     |
+| ------------------------------ | ------------------------------ | ------------------------------- | -------------------------------------------------------------------------- |
+| Conformance                    | **177/177** (153/153 headless) | **151/153** headless, 6/6 extra | **151/153** headless, 6/6 extra                                            |
+| Conformance wall time          | ~5 min                         | 61 s                            | **63 s**                                                                   |
+| Open project + board           | 392 ms                         | 65 ms                           | **114 ms**                                                                 |
+| DRC, kitchen sink (11 markers) | 69 ms                          | 64 ms                           | **78 ms** (first run 109 ms)                                               |
 | Ping, mean of 200              | 0.052 ms                       | 0.031 ms                        | **0.006 ms** raw dispatch (0.19 ms through the test harness's MEMFS mirror) |
 
-Module and lifecycle:
+The module, `-O2` with `wxDEBUG_LEVEL=0` and the Carlito bundle:
+
+| file                            |                    raw |         `brotli -q 11` |
+| ------------------------------- | ---------------------: | ---------------------: |
+| `kicad_api.wasm`                | 35 532 539 (33.89 MiB) |  6 752 286 (6.44 MiB)  |
+| `kicad_api.js`                  |                212 054 |                 33 485 |
+| `kicad_api.data` (fonts)        |  1 310 761 (1.25 MiB)  |                381 605 |
+| **everything the browser pulls**| 37 055 354 (35.34 MiB) | **7 167 376 (6.84 MiB)** |
+
+`gzip -9` on the wasm is 10 120 900 and `brotli -9` is 7 810 755, so the difference between "no
+`Content-Encoding`" and "brotli at quality 11" is **35.3 MB against 6.4 MB** — still the largest
+single win available, and still not done. Sections: `CODE` 29 903 647 (84.2%), `DATA` 5 488 887
+(15.4%), 37 410 function bodies, 17 exports, **450 function imports** — 57 Emscripten/WASI runtime
+and **393 KiCad symbols left undefined**, down from 444 (the BOM fix took 51 with it).
+`tools/wasm/audit_undefined.py` classifies the rest.
+
+Lifecycle:
 
 |                                                 |                                                                                 |
 | ----------------------------------------------- | ------------------------------------------------------------------------------- |
-| `kicad_api.wasm` / `kicad_api.js`               | **37.4 MB** / 224 KB, no `.data` bundle                                         |
-| `createKiCadWasm()`                             | **104 ms** under Bun; 143 ms in a warm browser tab                              |
-| First browser load                              | 37 MB fetched and instantiated in **564 ms** over localhost                     |
+| `createKiCadWasm()`                             | **85-103 ms** under Bun                                                         |
 | Mounting KiCad's share tree (185 files, 5.6 MB) | 16 ms                                                                           |
-| Bridge `POST /sessions` → running and pinged    | **255 ms**                                                                      |
-| RSS per instance                                | +346 MB for the first, +209 MB for the second; 744 MB with a board open in each |
+| Bridge `POST /sessions` → running and pinged    | **253 ms**                                                                      |
+| RSS per instance                                | +327 MB for the first, +155 MB for the second; 679 MB with a board open in each |
+
+Outline fonts, module-preloaded, **no `KICAD_FONTS_DIR` and nothing mounted from the host**
+(`GetTextExtents("Wg1i- fp-pcb")` / `GetTextAsShapes("Wg")` at 2 mm, wasm transport) — the same four
+numbers the native host gives with a host font directory:
+
+| fontName          | extent     | shapes                |
+| ----------------- | ---------- | --------------------- |
+| `""` (stroke)     | 21.914 mm  | 21 segments           |
+| `Carlito`         | 14.580 mm  | 2 polygons, 179 nodes |
+| `Carlito` + bold  | 14.795 mm  | 2 polygons, 171 nodes |
+| `No Such Family`  | 14.580 mm  | substituted to the default |
 
 Isolation (`packages/kicad-wasm/test/isolation.kicad.test.ts`): two instances in one Bun process,
 each with a different board at a different absolute path, answer `GetOpenDocuments` independently,
 neither can `stat` the other's tree, and shutting one down leaves the other answering while the dead
-one throws rather than touching a freed heap.
+one throws rather than touching a freed heap. 20/20 in that package against the real module.
 
-Browser (verified by hand against the real 37 MB module, not the mock): `?wasm=1` loads the module,
-the file picker imports `api_kitchen_sink.kicad_pro` + `.kicad_pcb` into MEMFS, KiCad opens both,
-and the board renders — 6 footprints, 71 pads, the DRC panel live.
+Browser, driven by hand against the real module at `http://localhost:5178/?wasm=1` with the ecc83
+fixture dropped onto the import target: the board opens and renders (59 tracks, 33 pads, 15
+footprints, 4 graphic shapes, 1 zone), **Run DRC** reports 0 errors / 17 warnings, `kicad_api.js`,
+`kicad_api.wasm` and `kicad_api.data` are each served **exactly once** per page session (counted at
+the dev server), and the app log has **no `ToProtoEnum<FILL_T>` lines at all**.
 
 ## Known failures, with root causes
 
-Three, all in the module, all also failing on the native host — so none of them is an Emscripten or
-MEMFS problem:
+Two, both in the module, both also failing on the native host — so neither is an Emscripten or
+MEMFS problem, and both are the same missing dependency:
 
-1. **`RunSchematicJobExportBOM`** — `FIELDS_TABLE_DATA_MODEL_BASE` derives from `wxGridTableBase`,
-   which a wxBase-only link does not have. In wasm it surfaces as the Emscripten stub trapping with
-   the constructor's own mangled name (`_ZN28FIELDS_TABLE_DATA_MODEL_BASEC2Ev`) — exactly the
-   diagnostic the design wanted from `-sERROR_ON_UNDEFINED_SYMBOLS=0`. An `abort()` kills the
-   instance, so the harness restarts the module and carries on.
-2. **`RunBoardJobExport3D`** — "3D model export is not available in this build"; OpenCascade is not
+1. **`RunBoardJobExport3D`** — "3D model export is not available in this build"; OpenCascade is not
    in the headless link.
-3. **`RunBoardJobExportRender`** — "3D rendering is not available in this build"; the 3D viewer is
+2. **`RunBoardJobExportRender`** — "3D rendering is not available in this build"; the 3D viewer is
    not built.
 
-Fixed tonight, for the record: the 25-command gap between wasm (125/153) and stdio (150/153) was
-**not** the module. Every failing command wrote a file, the file landed in the module's MEMFS, and
-the test stat'ed the host path. `DirMirror` + `MirroringWasmTransport` now mirror the suite's
-directories in both directions around every request, and the gap is gone.
+Fixed since the last report: `RunSchematicJobExportBOM` (the wxGrid data model), the
+`ToProtoEnum<FILL_T>` assertion storm (`EDA_SHAPE( const SHAPE& )`), and one wx assert per project
+open (`wxString::Last(): index out of bounds`, compiled out by `-DwxDEBUG_LEVEL=0`).
 
-Non-blocking noise: opening a project logs two wx asserts per instance
-(`wxString::Last(): index out of bounds`, `wxArrayString::Remove: bad index`). They are harmless
-today, but they are the loudest unexplained thing in the log.
+Non-blocking noise: opening a project still logs one wx assert per instance
+(`wxArrayString::Remove: bad index`, from `arrstr.cpp`). `-DwxDEBUG_LEVEL=0` applies to KiCad's TUs,
+not to the wx library in `build/wasm-deps`, so this one still reports. It is the loudest unexplained
+thing left in the log.
 
 ## Commits
 
-`kicad`, `git log --oneline web-api..wasm` (31, newest first):
+`kicad`, `git log --oneline web-api..wasm` (41, newest first):
 
 ```
-<this report>  docs: host/STATUS.md, the consolidated wasm status
+<this report>  docs: host/STATUS.md, rebuilt and re-measured
+be56740b1c wasm: regenerate the link stubs against the BOM data model
+78a0998b2a wasm: an -O3 control build, so the -O2 win is an isolated number
+888b107163 wasm: measure the module, and build KiCad's TUs at -O2 instead of -O3
+981109bbbc Headless: host/STATUS-bom-fix.md
+c888753512 Headless: EDA_SHAPE( const SHAPE& ) left its fill out of range
+a7dfdd5e6f Headless: a BOM data model that is not a wxGrid table
+035db1f35e Headless: resolve outline fonts from a manifest instead of missing every lookup
+4a9f583468 wasm: ship the module as a GitHub release artifact
+afc30d7673 wasm: compile KiCad TUs with wxDEBUG_LEVEL=0
+67a30a2661 docs: host/STATUS.md, the consolidated wasm status
 8b8a65ebbc wasm: host/STATUS-wasm-build.md
 d4719b5450 wasm: link the module -- the freetype port has setjmp variants and find_package picks the wrong one
 8376472d4d wasm: real values for the five plain-data globals the link is missing
@@ -175,10 +254,19 @@ b83e3960f9 Headless: link the pcbnew and eeschema kifaces statically into one im
 20475e3aa2 Headless: add KICAD_HEADLESS_API and split the GUI out of the core libraries
 ```
 
-`fab_pcb`, `git log --oneline main..wasm` (19, newest first):
+`fab_pcb`, `git log --oneline main..wasm` (28, newest first):
 
 ```
-<this report>  docs: one consolidated wasm status, with the numbers
+<this report>  docs: the consolidated wasm status, rebuilt and re-measured
+6e79169 client: an outline-font test for the fonts the module carries
+e9013a6 kicad-wasm: resolve kicad_api.data next to the module, not against the cwd
+627e472 docs: what the browser-worker agent changed
+b2b18a2 web: KiCad in a Worker, and one module per tab
+f978e78 kicad-wasm: run the module in a Web Worker
+003f6bb kicad-wasm: mount outline fonts into the module
+a640293 kicad-wasm: fetch the module from a fork release
+22a88bf web: load @fp-pcb/kicad-wasm lazily so the package is optional
+7426eee docs: one consolidated wasm status, with the numbers
 de0c08c client: a hand-run benchmark for the three backends
 2869437 web: replay imported files into every wasm instance, and stub node's rm
 886ef24 bridge: an integration test for the wasm backend against the real module
@@ -199,58 +287,77 @@ d2355f6 kicad-wasm: new @fp-pcb/kicad-wasm loader package (WT2)
 e175cd7 client: add StdioTransport and WasmTransport (WT1)
 ```
 
-One commit is mislabelled, and it is recorded in `kicad/host/STATUS-seams.md`: the move of
-`PROJECT_TEMPLATE` to `include/project_template.h` + `common/project_template.cpp` and the
-`COMMON_SRCS` additions belong to the seams work (`77fb4216dd`), but a `git add -A` swept them into
-`20475e3aa2` "Headless: add KICAD_HEADLESS_API…". The content is correct, only the attribution is
-wrong. Worth a line in the MR description if any of this is ever proposed upstream.
+Three commits carry content that belongs to a neighbour. The content is right in every case; only
+the attribution is wrong, which matters if any of this is ever proposed upstream:
+
+1. The move of `PROJECT_TEMPLATE` to `include/project_template.h` + `common/project_template.cpp`
+   and the `COMMON_SRCS` additions belong to the seams work (`77fb4216dd`), but a `git add -A` swept
+   them into `20475e3aa2` "Headless: add KICAD_HEADLESS_API…". Recorded in
+   `kicad/host/STATUS-seams.md`.
+2. The **deletion** of `common/font/fontconfig_stub.cpp` belongs to the fonts commit
+   (`035db1f35e`, which added `fontconfig_manifest.cpp` and repointed `common/CMakeLists.txt`), but
+   it landed in `4a9f583468` "wasm: ship the module as a GitHub release artifact" instead. Neither
+   commit is buildable on its own as a result.
+3. `a7dfdd5e6f` "Headless: a BOM data model…" regenerated `host/headless_link_stubs.cpp` against a
+   working tree that already had the (then uncommitted) font changes, so part of that 1601-line
+   diff is index renumbering caused by the fonts work rather than by the BOM fix.
+   (`host/STATUS-bom-fix.md`)
 
 ## Follow-ups, in priority order
 
-1. **Split `FIELDS_TABLE_DATA_MODEL_BASE`** so the BOM export has a data model that does not derive
-   from `wxGridTableBase`. It is the only one of the three failures fixable in KiCad's own source,
-   it fixes the native host too, and it removes the one command that kills an instance.
-2. **A Worker for the browser mode.** `apps/web` runs `kiapi_dispatch` on the main thread, so a slow
-   command freezes paint. The seam exists (`WasmModeOptions.createInstance`) and the bridge's
-   `wasm-worker.ts` is the model to copy.
-3. **Fontconfig manifest for outline fonts.** KiCad's fontconfig wrapper is stubbed, so only stroke
-   fonts resolve. A JSON manifest of font files mounted into MEMFS, read by a replacement for the
-   stub, would make outline text plot correctly.
-4. **A real PNG decoder for reference images.** `host/wx_headless/wx_image.cpp` reads geometry out
+1. **Serve the module Brotli-compressed.** 6.44 MB against 35.3 MB, today, with no build change —
+   worth more than every compile-flag experiment combined, and more than the four size items below
+   put together. Nothing in fab_pcb or the Vite dev middleware sets `Content-Encoding` yet.
+2. **The ~120 frame/tool/dialog stubs** among the 393 still-undefined symbols — `SCH_EDIT_FRAME`
+   (11), `PCB_EDIT_FRAME` (7), `PCB_SELECTION_TOOL` (5), the `DIALOG_*` vtables the job handlers
+   name. These are KiCad's own classes, named by code that does run, so a command that takes a "we
+   have a frame" branch hits a trap that kills the instance instead of a clean error. Each is an
+   `#ifdef KICAD_HEADLESS_API` guard plus an error return. Keep `KICAD_WASM_ALLOW_UNDEFINED=ON`
+   until they are done; the remaining ~280 are wx GUI classes the header shim declares and nothing
+   constructs. `tools/wasm/audit_undefined.py` prints the list, sorted, with the referencing files.
+3. **A cancel button in the UI.** `terminate()` is on the worker client and nothing calls it, so a
+   wedged command still needs a page reload.
+4. **Project download.** MEMFS is only reachable through the session; `readFile` is already in the
+   worker protocol, so "save my project back out of the tab" is UI work, not plumbing.
+5. **pthreads.** DRC and zone fill are the two things a user waits on and both are parallel
+   natively. `-pthread` needs COOP/COEP headers on the app and a real thread pool instead of the
+   inline façade.
+6. **Two size seams worth real work**, both needing a code change rather than a flag:
+   **exclude the ngspice model tables** (3.4 MB, 10.9% of `CODE`, reachable only through the SPICE
+   netlist exporter — `RunSchematicJobExportNetlist` must stay green) and a
+   **`KICAD_HEADLESS_MINIMAL_IO`** option dropping the 14 foreign-format importers (~6.4 MB, 20%).
+   `-Os` gives 17.5% for 28% of DRC, so it stays opt-in as `WASM_OPT_LEVEL=-Os`; `-flto` is the one
+   untried candidate that might get close without the DRC cost. All measurements, and the six
+   link-flag experiments that were **not** worth adopting, are in `kicad/host/STATUS-module-size.md`.
+7. **A real PNG decoder for reference images.** `host/wx_headless/wx_image.cpp` reads geometry out
    of the container header (PNG `IHDR`, JPEG `SOFn`, BMP, GIF) and leaves the raster blank. Boards
    round-trip byte for byte because `BITMAP_BASE` keeps the undecoded bytes, but nothing can render
    or plot the image. Emscripten's libpng port is the cheap route.
-5. **Shrink the 37 MB module.** Nothing has been tried yet: no `-Os` on the cold half, no
-   `--gc-sections` audit, no split between the board and schematic kifaces, no Brotli at the CDN
-   (which alone should get the wire size well under 10 MB).
-6. **Flip `-sERROR_ON_UNDEFINED_SYMBOLS=0` off** (`KICAD_WASM_ALLOW_UNDEFINED=OFF`). 792 functions
-   are still imported as throwing stubs; each one is a command that will abort an instance if it is
-   ever reached. Sorting them by "reachable from a headless API handler" is the useful first pass.
-7. **pthreads.** Single-threaded was the right call for the first build, but DRC and zone fill are
-   the two things a user waits on and both are parallel natively. `-pthread` needs COOP/COEP headers
-   on the app and a real thread pool instead of the inline façade.
 8. **The pre-existing `format:check` failures** — 159 files, none of them touched by this work.
    Either run `bun run format` once across the repo or narrow the prettier glob; today the check is
    useless because it is always red.
-9. **The two wx asserts** logged on every project open (see above), and the `ToProtoEnum<FILL_T>`
-   assertion the browser log fills with. These are not wasm regressions: the Homebrew wxWidgets is
-   built with `-DwxDEBUG_LEVEL=0`, so the native build compiles the same checks out and never
-   reports them. `tools/wasm/env.sh` now passes `-DwxDEBUG_LEVEL=0` for KiCad's own TUs (takes
-   effect at the next module build); the `FILL_T` value that is out of range on the ecc83 board is
-   still worth finding with a native `wxDEBUG_LEVEL=1` build.
-10. **The module is loaded twice per project open in the browser.** `importProjectFiles()` writes
-    into the instance loaded at startup (for `GetVersion`), and `connect()` then creates a fresh
-    module and replays the imports. Reusing the first instance would halve the 37 MB fetch.
+9. **The `wxArrayString::Remove` assert** on every project open (see above). It is inside wx itself,
+   so finding it means a `wxDEBUG_LEVEL=1` wx and a backtrace, not a KiCad rebuild.
+10. **KiCad's stock fonts are still not installed anywhere the module can find.** Carlito comes from
+    `thirdparty/libwmf/fonts/`; a board naming any other family gets the substitution, not the real
+    face. `mountFonts()` is the escape hatch, and nothing in the API returns `ListFonts()`.
 
 ## Housekeeping (for you to decide)
 
-- Nothing is pushed. Both `wasm` branches are local: `kicad` is 31 commits ahead of `web-api`,
-  `fab_pcb` is 19 ahead of `main`.
-- Nothing is tagged. The `fp-pcb/<date>-<name>` scheme wants a tag on both repos at a change set
-  this size — `fp-pcb/2026-09-09-wasm` is the obvious name, but that is your call, not mine.
-- `packages/kicad-wasm/dist/` now holds a 37 MB `kicad_api.wasm` (from `bun run fetch`). It is
-  ignored by git; decide whether a build artefact that large should ever be committed, or whether
-  the app should fetch it from a CDN.
+- **Push both branches.** They are still local: `kicad` is 41 commits ahead of `web-api`, `fab_pcb`
+  28 ahead of `main`. `git push origin wasm` in each.
+- **Tag `fp-pcb/2026-09-09-wasm` on both repos.** The alignment scheme wants a tag on both at a
+  change set this size, and on the fork the tag push is also what triggers the release workflow.
+- **Then cut the first release run.** The tag starts **kicad-wasm release**; from cold caches expect
+  100-140 minutes. When it finishes, set `packages/proto/KICAD_TAG` to that tag and
+  `GITHUB_TOKEN=<pat> bun run --filter @fp-pcb/kicad-wasm fetch:release` — after which the wasm
+  suites need no toolchain at all. Optionally uncomment the `wasm` job in fab_pcb's
+  `.github/workflows/ci.yml` and add a `KICAD_FORK_TOKEN` secret (a repository's own `GITHUB_TOKEN`
+  cannot read another private repository's release assets). Steps and caveats:
+  `kicad/host/STATUS-release-artifact.md`.
+- `packages/kicad-wasm/dist/` holds a 35 MB `kicad_api.wasm` plus the 1.3 MB `kicad_api.data` (from
+  `bun run fetch`). Both are ignored by git; decide whether the app should fetch them from a CDN,
+  which is also where the Brotli follow-up wants to live.
 
 ---
 
@@ -373,3 +480,32 @@ Follow-ups 2 and 10 (branch `wasm`, agent `browser-worker`), 2026-09-09.
 - **Still open here:** no cancel button — `terminate()` is available to the client but nothing in the
   UI calls it, so a wedged command still needs a reload; and MEMFS is only reachable through the
   session, so a future "download my project" needs `readFile` wired to the UI (the message is there).
+
+## rebuild
+
+The rebuild after everything above landed (branch `wasm`, agent `rebuild`), 2026-09-09.
+
+- **The link failed first, exactly as documented.** The BOM data model defines six symbols
+  (`FIELDS_TABLE_DATA_MODEL_BASE`'s typeinfo and two statics, `wxGridTableBase`'s typeinfo, the two
+  editor grid model vtables) that `host/wasm/wasm_link_stubs.cpp` still carried.
+  `tools/wasm/regen_wasm_link_stubs.sh` took the file from 71 data stubs to **65** and the link went
+  through. The compile pass was ~40 minutes because `-DwxDEBUG_LEVEL=0` and `WASM_OPT_LEVEL=-O2`
+  invalidated every KiCad TU.
+- **`kicad_api.data` was not being found.** `--preload-file` makes Emscripten ask for the package by
+  bare name, and its two fallbacks are both wrong here: `readFileSync("kicad_api.data")` relative to
+  the cwd under Bun, and a `fetch` against the *document* URL in a browser. `createKiCadWasm()` now
+  installs a `locateFile` that resolves every sidecar against the module's own URL (and hands back a
+  plain path for `file:` ones, which the data loader — unlike the wasm loader — cannot parse), and
+  both workers pass their `moduleUrl` through for it. Without this the module aborted at load in
+  every backend.
+- **Numbers above are all from this run**: conformance on `stdio` and `wasm`, `bench-drc.ts` on both,
+  `bun test` in `packages/kicad-wasm` (20/20) and the bridge's real-module test (4/4, session ready
+  in 253 ms), `tools/wasm/size-report.sh` plus a `brotli -q 11` pass, and the browser session with
+  the ecc83 fixture.
+- **Fonts have a wasm-preloaded variant now.** `packages/client/test/fonts.kicad.test.ts` keyed its
+  whole suite off a host `KICAD_FONTS_DIR`, which is precisely the thing the preloaded bundle
+  removes the need for; a second `describe` runs under `KICAD_TRANSPORT=wasm` with no fonts
+  directory and checks that `Carlito` comes back as polygons where the stroke font gives segments.
+- **Left alone deliberately:** `apps/web/vite.config.ts` was patched to log each sidecar request
+  while the browser check ran, and restored afterwards — the "fetched exactly once" figure comes
+  from that log, not from the page's resource timings, because the fetches happen inside the Worker.
