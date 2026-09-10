@@ -27,7 +27,9 @@ jobs:
   bun:
     name: bun (unit)
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    # Runs in ~1.5 min.  No job here may exceed 10: a hang should cost a tenth of an hour, not a
+    # whole one, and nothing in this workflow legitimately takes that long any more.
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -96,7 +98,8 @@ jobs:
   e2e:
     name: e2e (Playwright smoke)
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    # Runs in ~1.2 min; see the bun job on the 10-minute ceiling.
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -175,7 +178,8 @@ jobs:
   kicad-integration:
     name: kicad-integration (nightly kicad-cli)
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    # ~3 min: fixtures, a ~200 MB download and the suites.  See the bun job on the 10-minute ceiling.
+    timeout-minutes: 10
     continue-on-error: true
     permissions:
       contents: read
@@ -212,28 +216,39 @@ jobs:
             "https://api.github.com/repos/${{ github.repository_owner }}/kicad/releases?per_page=100")"
           tag="$(printf '%s' "$releases" | jq -r --arg s "$sha10" \
             '.[] | .tag_name | select(startswith("nightly-") and endswith("-" + $s))' | head -1)"
+          # What the fork does publish, so a miss can say so instead of just "not found".
+          newest="$(printf '%s' "$releases" | jq -r \
+            '[.[] | .tag_name | select(startswith("nightly-"))] | sort | reverse | .[0] // ""')"
           echo "sha10=$sha10" >> "$GITHUB_OUTPUT"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "newest=$newest" >> "$GITHUB_OUTPUT"
           if [ -n "$tag" ]; then
             echo "found=yes" >> "$GITHUB_OUTPUT"
             echo "kicad-cli nightly for $sha10: $tag"
           else
             echo "found=no" >> "$GITHUB_OUTPUT"
+            echo "no nightly for $sha10; newest the fork has is ${newest:-none}"
           fi
 
       - name: No nightly build for this KICAD_COMMIT
         if: steps.nightly.outputs.found != 'yes'
         run: |
           sha10="${{ steps.nightly.outputs.sha10 }}"
+          newest="${{ steps.nightly.outputs.newest }}"
           {
             echo "### kicad-integration skipped"
             echo
-            echo "The fork publishes no \`nightly-*-$sha10\` release, so the integration suites did not run."
+            echo "\`packages/proto/KICAD_COMMIT\` is \`$sha10\`, and the fork publishes no"
+            echo "\`nightly-*-$sha10\` release, so the integration suites did not run."
             echo
-            echo "Nightlies are pruned after 14 builds. Repin \`packages/proto/KICAD_COMMIT\` to a commit"
-            echo "the fork still publishes, or run the fork's nightly workflow for this ref."
+            echo "The newest build the fork has is \`${newest:-none}\`."
+            echo
+            echo "To get the suites running, line the two up either way round:"
+            echo
+            echo "- run the fork's nightly workflow (\`workflow_dispatch\`, \`ref: $sha10\`) to publish a build for this pin, or"
+            echo "- repin \`KICAD_COMMIT\` to the commit that release carries and regenerate (\`bun run gen\`, \`bun run coverage\`)."
           } >> "$GITHUB_STEP_SUMMARY"
-          echo "::warning title=kicad-integration skipped::no nightly-*-$sha10 release on the fork; repin KICAD_COMMIT or run the fork's nightly workflow"
+          echo "::warning title=kicad-integration skipped::KICAD_COMMIT is $sha10 but the fork's newest build is ${newest:-none}; publish a nightly for this ref or repin"
 
       # qa/data holds the fixtures the suites open; tools/nightly/linux carries the host package
       # list the archive expects.  Blobless and sparse, but qa/data is most of the fork's weight,
