@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { mkdtemp, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { targetSpec, validateJsAutorouterSource } from "./bundle-lib";
+import { findStockData, targetSpec, validateJsAutorouterSource } from "./bundle-lib";
 
 describe("backend bundle targets", () => {
   test("uses IPC on Unix and KiCad WebSockets on Windows", () => {
@@ -22,5 +22,17 @@ describe("private js_autorouter source", () => {
     await mkdir(join(root, "src"));
     await Bun.write(join(root, "src", "index.ts"), "export {};\n");
     await expect(validateJsAutorouterSource(root)).resolves.toBeUndefined();
+  });
+});
+
+describe("KiCad stock data", () => {
+  test("recognizes installed and macOS bundle layouts", async () => {
+    const installed = await mkdtemp(join(tmpdir(), "fp-pcb-stock-installed-"));
+    await mkdir(join(installed, "share", "kicad"), { recursive: true });
+    expect(await findStockData(installed)).toBe(join(installed, "share", "kicad"));
+
+    const mac = await mkdtemp(join(tmpdir(), "fp-pcb-stock-mac-"));
+    await mkdir(join(mac, "KiCad.app", "Contents", "SharedSupport"), { recursive: true });
+    expect(await findStockData(mac)).toBe(join(mac, "KiCad.app", "Contents", "SharedSupport"));
   });
 });

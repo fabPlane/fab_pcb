@@ -1,4 +1,5 @@
 import { readdir, stat } from "node:fs/promises";
+import { join } from "node:path";
 
 export interface BundleTarget {
   bunTarget: string;
@@ -38,4 +39,12 @@ export async function validateJsAutorouterSource(root: string): Promise<void> {
   if (!(await stat(`${root}/src/index.ts`).catch(() => null))?.isFile()) {
     throw new Error(`js_autorouter entry point not found: ${root}/src/index.ts`);
   }
+}
+
+/** Locate KiCad's stock-data root in an installed prefix or a macOS application bundle. */
+export async function findStockData(root: string): Promise<string | null> {
+  for (const candidate of [join(root, "share", "kicad"), join(root, "KiCad.app", "Contents", "SharedSupport")]) {
+    if ((await stat(candidate).catch(() => null))?.isDirectory()) return candidate;
+  }
+  return null;
 }
