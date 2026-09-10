@@ -16,7 +16,7 @@ export interface CommandInfo {
 }
 
 /** KiCad commit the table was generated from. */
-export const KICAD_COMMIT = "775c92a635586ceef4fb733a4609fee6d153b31b";
+export const KICAD_COMMIT = "294a00b8510c066054afa4adf9626a8732042156";
 
 /** Every command in the KiCad IPC API, in proto order. */
 export const COMMANDS: readonly CommandInfo[] = [
