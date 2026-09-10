@@ -68,6 +68,12 @@ export interface NetlistNode {
   pinType?: string;
 }
 
+/** A symbol pin the author has deliberately left electrically unconnected. */
+export interface NetlistNoConnect {
+  ref: string;
+  pin: string;
+}
+
 export interface NetlistNet {
   name: string;
   /**
@@ -89,6 +95,8 @@ export interface NetlistDesign {
 export interface Netlist {
   components: NetlistComponent[];
   nets: NetlistNet[];
+  /** Explicit electrical intent; ERC must not infer this from a pin missing from `nets`. */
+  noConnects?: NetlistNoConnect[];
   design?: NetlistDesign;
 }
 

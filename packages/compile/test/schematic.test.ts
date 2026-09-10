@@ -10,7 +10,7 @@ import {
   SchematicSymbolSchema,
   TextSchema,
 } from "@fp-pcb/proto";
-import { GlobalLabel, LibSymbol, mm, SchematicLine, SchematicSymbol, toVector2 } from "@fp-pcb/client";
+import { GlobalLabel, LibSymbol, mm, NoConnect, SchematicLine, SchematicSymbol, toVector2 } from "@fp-pcb/client";
 import { buildGeneratedSchematic, GENERATED_SCHEMATIC_PROPERTY } from "../src/schematic";
 
 function deviceSymbol(): LibSymbol {
@@ -55,6 +55,7 @@ describe("generated schematic", () => {
 
     expect(result.diagnostics).toEqual([]);
     expect([result.symbolsCreated, result.wiresCreated, result.labelsCreated]).toEqual([1, 1, 1]);
+    expect(result.noConnectsCreated).toBe(0);
     const symbol = result.items.find((item): item is SchematicSymbol => item instanceof SchematicSymbol)!;
     expect(symbol.reference).toBe("R1");
     expect(symbol.value).toBe("10k");
@@ -66,6 +67,7 @@ describe("generated schematic", () => {
     expect(wire.end).toEqual({ x: mm(20.4), y: mm(25.4) });
     const label = result.items.find((item): item is GlobalLabel => item instanceof GlobalLabel)!;
     expect(label.text).toBe("VCC");
+    expect(label.fields.map((field) => [field.name, field.text])).toContainEqual([GENERATED_SCHEMATIC_PROPERTY, "circuit.netlist.json"]);
     expect(result.items.every((item) => item.customProperties[GENERATED_SCHEMATIC_PROPERTY] === "circuit.netlist.json")).toBe(true);
   });
 
@@ -117,6 +119,38 @@ describe("generated schematic", () => {
 
     expect(pinIds).toHaveLength(4);
     expect(pinIds).toEqual(["", "", "", ""]);
+  });
+
+  test("rejects a symbol whose library reference class does not match the component", () => {
+    const result = buildGeneratedSchematic(
+      {
+        components: [{ ref: "U1", value: "NE555D", footprint: "x", libSource: { lib: "Connector_Generic", part: "Conn_02x04" } }],
+        nets: [],
+      },
+      new Map([["Connector_Generic:Conn_02x04", deviceSymbol()]]),
+    );
+
+    expect(result.diagnostics).toEqual([
+      expect.objectContaining({ code: "symbol_reference_mismatch", message: expect.stringContaining("declares reference class R, not U") }),
+    ]);
+  });
+
+  test("draws explicit no-connect intent and rejects an X on a connected position", () => {
+    const result = buildGeneratedSchematic(
+      {
+        components: [{ ref: "R1", value: "10k", footprint: "x", libSource: { lib: "Device", part: "R" } }],
+        nets: [{ name: "VCC", nodes: [{ ref: "R1", pin: "1" }] }],
+        noConnects: [
+          { ref: "R1", pin: "2" },
+          { ref: "R1", pin: "1" },
+        ],
+      },
+      new Map([["Device:R", deviceSymbol()]]),
+    );
+
+    expect(result.noConnectsCreated).toBe(1);
+    expect(result.items.filter((item) => item instanceof NoConnect)).toHaveLength(1);
+    expect(result.diagnostics).toEqual([expect.objectContaining({ code: "no_connect_on_connected_position", severity: "error" })]);
   });
 
   test("fails closed when the authoritative schematic cannot represent symbols or pins", () => {

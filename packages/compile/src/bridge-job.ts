@@ -26,8 +26,8 @@
  * `done` events carry `revision` as a compatibility fallback for older fork builds that do not
  * publish `DocumentChanged` from `ImportNetlist`.
  */
-import { mkdir } from "node:fs/promises";
-import { dirname, isAbsolute, resolve } from "node:path";
+import { mkdir, readFile } from "node:fs/promises";
+import { dirname, isAbsolute, join, resolve } from "node:path";
 import { KiCad, KiCadClient, Via, type Board, type Schematic, type Transport } from "@fp-pcb/client";
 import { edgeClearanceNm } from "./apply";
 import { compile, CompileCancelled } from "./compile";
@@ -93,6 +93,8 @@ export interface CompileJobInfo {
   revision?: number;
   /** Copper removed by a clean rebuild. Free, unassigned prefab vias are preserved. */
   removedCopper?: { tracks: number; vias: number };
+  /** Rejected candidate retained for diagnosis when ERC fails; the canonical schematic is restored. */
+  rejectedSchematicPath?: string;
 }
 
 export interface CompileJobSession {
@@ -227,6 +229,7 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
 
         const projectInfo = await kicad.projectInfo();
         const projectDir = dirname(projectInfo.kicadProPath);
+        const schematicPath = projectInfo.kicadProPath.replace(/\.kicad_pro$/, ".kicad_sch");
         const rel = request.netlistPath ?? DEFAULT_NETLIST_PATH;
         const netlistPath = isAbsolute(rel) ? rel : resolve(projectDir, rel);
         await mkdir(dirname(netlistPath), { recursive: true });
@@ -248,6 +251,9 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
           signal: abort.signal,
           onStage: setState,
           beforeApply: async (built) => {
+            // ERC needs a real save/reopen boundary, but a rejected candidate must not become the
+            // project's canonical schematic. Keep the exact prior file for rollback.
+            const acceptedSchematic = request.save !== false ? await readFile(schematicPath) : undefined;
             const libraries = [...(deps.libraries ?? []), ...(built.libraries ?? [])];
             const uniqueLibraries = [...new Map(libraries.map((library) => [`${library.kind}:${library.nickname}`, library])).values()];
             if (uniqueLibraries.length) {
@@ -258,11 +264,13 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
             }
             const generated = await generateSchematic(kicad, built.netlist!);
             schematic = generated.schematic;
-            pushLog(`schematic: ${generated.symbolsCreated} symbols, ${generated.wiresCreated} wires, ${generated.labelsCreated} labels`);
+            pushLog(
+              `schematic: ${generated.symbolsCreated} symbols, ${generated.wiresCreated} wires, ${generated.labelsCreated} labels, ${generated.noConnectsCreated} no-connects`,
+            );
             if (request.save !== false) {
               await schematic.save();
               await schematic.close();
-              schematic = await kicad.openSchematic(projectInfo.kicadProPath.replace(/\.kicad_pro$/, ".kicad_sch"));
+              schematic = await kicad.openSchematic(schematicPath);
               pushLog("schematic: saved and reopened before ERC");
             }
             const erc = await schematic.erc.run();
@@ -281,7 +289,23 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
                 message: `Generated schematic has ${erc.errorCount} ERC error(s) after save/reload${detail ? `: ${detail}` : "."}`,
               });
             }
-            if (diagnostics.some((diagnostic) => diagnostic.severity === "error")) return diagnostics;
+            if (diagnostics.some((diagnostic) => diagnostic.severity === "error")) {
+              if (request.save !== false) {
+                const rejectedDir = join(projectDir, ".fp-pcb", "rejected");
+                await mkdir(rejectedDir, { recursive: true });
+                info.rejectedSchematicPath = join(rejectedDir, `${id}.kicad_sch`);
+                await schematic.saveCopy(info.rejectedSchematicPath, { overwrite: true });
+              }
+              await schematic.close();
+              if (acceptedSchematic) await Bun.write(schematicPath, acceptedSchematic);
+              schematic = await kicad.openSchematic(schematicPath);
+              pushLog(
+                info.rejectedSchematicPath
+                  ? `schematic: rejected candidate saved to ${info.rejectedSchematicPath}; restored last-known-good schematic`
+                  : "schematic: rejected candidate discarded; restored last-known-good schematic",
+              );
+              return diagnostics;
+            }
 
             if (request.rebuild === "clean") {
               setState("cleaning");
