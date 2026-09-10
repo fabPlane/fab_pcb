@@ -171,16 +171,16 @@ jobs:
   # tools/nightly/linux/runtime-packages.txt.  That file is read from the checkout rather than
   # copied here, so the two cannot drift.
   #
-  # continue-on-error is set ON PURPOSE: the fork prunes nightlies (KEEP_NIGHTLIES=14), so a pin
-  # older than that has no build to download and the suites skip with a notice rather than failing
-  # a PR over a missing artifact.  Bump KICAD_COMMIT to a commit the fork still publishes, or
-  # remove this once the pin is guaranteed fresh, to make the job gate like the other two.
+  # This job requires the build to be there and fails when it is not.  It does not build one: no
+  # amount of CI time is allowed to turn into a KiCad compile again.  A missing build means the pin
+  # and the fork's releases have drifted apart, which is a thing to fix in one of the two ways the
+  # failure message names -- publish a build for the pin, or move the pin -- not something to paper
+  # over by compiling, and not something to leave as a green run that tested nothing.
   kicad-integration:
     name: kicad-integration (nightly kicad-cli)
     runs-on: ubuntu-24.04
     # ~3 min: fixtures, a ~200 MB download and the suites.  See the bun job on the 10-minute ceiling.
     timeout-minutes: 10
-    continue-on-error: true
     permissions:
       contents: read
     steps:
@@ -219,42 +219,31 @@ jobs:
           # What the fork does publish, so a miss can say so instead of just "not found".
           newest="$(printf '%s' "$releases" | jq -r \
             '[.[] | .tag_name | select(startswith("nightly-"))] | sort | reverse | .[0] // ""')"
-          echo "sha10=$sha10" >> "$GITHUB_OUTPUT"
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
-          echo "newest=$newest" >> "$GITHUB_OUTPUT"
-          if [ -n "$tag" ]; then
-            echo "found=yes" >> "$GITHUB_OUTPUT"
-            echo "kicad-cli nightly for $sha10: $tag"
-          else
-            echo "found=no" >> "$GITHUB_OUTPUT"
-            echo "no nightly for $sha10; newest the fork has is ${newest:-none}"
+          if [ -z "$tag" ]; then
+            {
+              echo "### kicad-integration failed: no kicad-cli for this pin"
+              echo
+              echo "\`packages/proto/KICAD_COMMIT\` is \`$sha10\`, and the fork publishes no"
+              echo "\`nightly-*-$sha10\` release, so there is no kicad-cli to test against."
+              echo
+              echo "The newest build the fork has is \`${newest:-none}\`."
+              echo
+              echo "CI does not build KiCad -- a compile is ~3 h and will not run here. Line the pin"
+              echo "and the releases up instead, either way round:"
+              echo
+              echo "- run the fork's nightly workflow (\`workflow_dispatch\`, \`ref: $sha10\`) to publish a build for this pin, or"
+              echo "- repin \`KICAD_COMMIT\` to the commit that release carries and regenerate (\`bun run gen\`, \`bun run coverage\`)."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error title=no kicad-cli for KICAD_COMMIT::KICAD_COMMIT is $sha10 but the fork's newest build is ${newest:-none}; publish a nightly for this ref or repin"
+            exit 1
           fi
-
-      - name: No nightly build for this KICAD_COMMIT
-        if: steps.nightly.outputs.found != 'yes'
-        run: |
-          sha10="${{ steps.nightly.outputs.sha10 }}"
-          newest="${{ steps.nightly.outputs.newest }}"
-          {
-            echo "### kicad-integration skipped"
-            echo
-            echo "\`packages/proto/KICAD_COMMIT\` is \`$sha10\`, and the fork publishes no"
-            echo "\`nightly-*-$sha10\` release, so the integration suites did not run."
-            echo
-            echo "The newest build the fork has is \`${newest:-none}\`."
-            echo
-            echo "To get the suites running, line the two up either way round:"
-            echo
-            echo "- run the fork's nightly workflow (\`workflow_dispatch\`, \`ref: $sha10\`) to publish a build for this pin, or"
-            echo "- repin \`KICAD_COMMIT\` to the commit that release carries and regenerate (\`bun run gen\`, \`bun run coverage\`)."
-          } >> "$GITHUB_STEP_SUMMARY"
-          echo "::warning title=kicad-integration skipped::KICAD_COMMIT is $sha10 but the fork's newest build is ${newest:-none}; publish a nightly for this ref or repin"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "kicad-cli nightly for $sha10: $tag"
 
       # qa/data holds the fixtures the suites open; tools/nightly/linux carries the host package
       # list the archive expects.  Blobless and sparse, but qa/data is most of the fork's weight,
       # so this is ~25 s and there is no point trimming further.
       - name: Check out the KiCad fork (fixtures and the runtime package list)
-        if: steps.nightly.outputs.found == 'yes'
         run: |
           set -euo pipefail
           commit="$(cat packages/proto/KICAD_COMMIT)"
@@ -266,7 +255,6 @@ jobs:
           echo "KICAD_SRC=$(cd ../kicad && pwd)" >> "$GITHUB_ENV"
 
       - name: Runtime libraries the bundle expects from the host
-        if: steps.nightly.outputs.found == 'yes'
         run: |
           set -euo pipefail
           list="$KICAD_SRC/tools/nightly/linux/runtime-packages.txt"
@@ -278,7 +266,6 @@ jobs:
       # Prints the launcher's path on stdout; it sets KICAD_STOCK_DATA_HOME and execs bin/kicad-cli,
       # so the suites can spawn it directly -- no container, so no wrapper and no path mapping.
       - name: Download the nightly kicad-cli
-        if: steps.nightly.outputs.found == 'yes'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
@@ -288,13 +275,11 @@ jobs:
           echo "KICAD_CLI=$cli" >> "$GITHUB_ENV"
 
       - name: kicad-cli version
-        if: steps.nightly.outputs.found == 'yes'
         run: |
           "$KICAD_CLI" version
           cat "$(dirname "$KICAD_CLI")/KICAD_COMMIT"
 
       - name: Integration tests
-        if: steps.nightly.outputs.found == 'yes'
         env:
           KICAD_INTEGRATION_REQUIRED: "1"
         run: bun run test:integration
