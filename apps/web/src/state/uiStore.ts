@@ -105,8 +105,7 @@ export const useUiStore = create<UiState>()(
         const { min, max } = PANEL_LIMITS[side];
         set({ panels: { ...get().panels, [side]: { ...get().panels[side], size: Math.max(min, Math.min(max, size)) } } });
       },
-      togglePanel: (side, collapsed) =>
-        set({ panels: { ...get().panels, [side]: { ...get().panels[side], collapsed: collapsed ?? !get().panels[side].collapsed } } }),
+      togglePanel: (side, collapsed) => set({ panels: { ...get().panels, [side]: { ...get().panels[side], collapsed: collapsed ?? !get().panels[side].collapsed } } }),
       setBottomTab: (bottomTab) => set({ bottomTab, panels: { ...get().panels, bottom: { ...get().panels.bottom, collapsed: false } } }),
       setLeftTab: (leftTab) => set({ leftTab, panels: { ...get().panels, left: { ...get().panels.left, collapsed: false } } }),
       openDialog: (dialog) => set({ dialog }),
@@ -115,7 +114,17 @@ export const useUiStore = create<UiState>()(
     {
       name: 'fp-pcb.ui',
       version: 1,
-      partialize: (s) => ({ theme: s.theme, canvasTheme: s.canvasTheme, units: s.units, gridNm: s.gridNm, showGrid: s.showGrid, showRatsnest: s.showRatsnest, panels: s.panels, bottomTab: s.bottomTab, leftTab: s.leftTab }),
+      partialize: (s) => ({
+        theme: s.theme,
+        canvasTheme: s.canvasTheme,
+        units: s.units,
+        gridNm: s.gridNm,
+        showGrid: s.showGrid,
+        showRatsnest: s.showRatsnest,
+        panels: s.panels,
+        bottomTab: s.bottomTab,
+        leftTab: s.leftTab,
+      }),
     },
   ),
 );

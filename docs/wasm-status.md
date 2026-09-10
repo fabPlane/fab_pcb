@@ -132,22 +132,22 @@ Conformance is 168 commands (153 headless + 15 gui-only, which every headless ba
 6 extra checks. Measured on this machine, idle, against the module built from `78a0998b2a` + the
 regenerated stubs.
 
-|                                | `ipc` (kicad-cli)              | `stdio` (native host)           | `wasm`                                                                     |
-| ------------------------------ | ------------------------------ | ------------------------------- | -------------------------------------------------------------------------- |
-| Conformance                    | **177/177** (153/153 headless) | **151/153** headless, 6/6 extra | **151/153** headless, 6/6 extra                                            |
-| Conformance wall time          | ~5 min                         | 61 s                            | **63 s**                                                                   |
-| Open project + board           | 392 ms                         | 65 ms                           | **114 ms**                                                                 |
-| DRC, kitchen sink (11 markers) | 69 ms                          | 64 ms                           | **78 ms** (first run 109 ms)                                               |
+|                                | `ipc` (kicad-cli)              | `stdio` (native host)           | `wasm`                                                                      |
+| ------------------------------ | ------------------------------ | ------------------------------- | --------------------------------------------------------------------------- |
+| Conformance                    | **177/177** (153/153 headless) | **151/153** headless, 6/6 extra | **151/153** headless, 6/6 extra                                             |
+| Conformance wall time          | ~5 min                         | 61 s                            | **63 s**                                                                    |
+| Open project + board           | 392 ms                         | 65 ms                           | **114 ms**                                                                  |
+| DRC, kitchen sink (11 markers) | 69 ms                          | 64 ms                           | **78 ms** (first run 109 ms)                                                |
 | Ping, mean of 200              | 0.052 ms                       | 0.031 ms                        | **0.006 ms** raw dispatch (0.19 ms through the test harness's MEMFS mirror) |
 
 The module, `-O2` with `wxDEBUG_LEVEL=0` and the Carlito bundle:
 
-| file                            |                    raw |         `brotli -q 11` |
-| ------------------------------- | ---------------------: | ---------------------: |
-| `kicad_api.wasm`                | 35 532 539 (33.89 MiB) |  6 752 286 (6.44 MiB)  |
-| `kicad_api.js`                  |                212 054 |                 33 485 |
-| `kicad_api.data` (fonts)        |  1 310 761 (1.25 MiB)  |                381 605 |
-| **everything the browser pulls**| 37 055 354 (35.34 MiB) | **7 167 376 (6.84 MiB)** |
+| file                             |                    raw |           `brotli -q 11` |
+| -------------------------------- | ---------------------: | -----------------------: |
+| `kicad_api.wasm`                 | 35 532 539 (33.89 MiB) |     6 752 286 (6.44 MiB) |
+| `kicad_api.js`                   |                212 054 |                   33 485 |
+| `kicad_api.data` (fonts)         |   1 310 761 (1.25 MiB) |                  381 605 |
+| **everything the browser pulls** | 37 055 354 (35.34 MiB) | **7 167 376 (6.84 MiB)** |
 
 `gzip -9` on the wasm is 10 120 900 and `brotli -9` is 7 810 755, so the difference between "no
 `Content-Encoding`" and "brotli at quality 11" is **35.3 MB against 6.4 MB** — still the largest
@@ -169,12 +169,12 @@ Outline fonts, module-preloaded, **no `KICAD_FONTS_DIR` and nothing mounted from
 (`GetTextExtents("Wg1i- fp-pcb")` / `GetTextAsShapes("Wg")` at 2 mm, wasm transport) — the same four
 numbers the native host gives with a host font directory:
 
-| fontName          | extent     | shapes                |
-| ----------------- | ---------- | --------------------- |
-| `""` (stroke)     | 21.914 mm  | 21 segments           |
-| `Carlito`         | 14.580 mm  | 2 polygons, 179 nodes |
-| `Carlito` + bold  | 14.795 mm  | 2 polygons, 171 nodes |
-| `No Such Family`  | 14.580 mm  | substituted to the default |
+| fontName         | extent    | shapes                     |
+| ---------------- | --------- | -------------------------- |
+| `""` (stroke)    | 21.914 mm | 21 segments                |
+| `Carlito`        | 14.580 mm | 2 polygons, 179 nodes      |
+| `Carlito` + bold | 14.795 mm | 2 polygons, 171 nodes      |
+| `No Such Family` | 14.580 mm | substituted to the default |
 
 Isolation (`packages/kicad-wasm/test/isolation.kicad.test.ts`): two instances in one Bun process,
 each with a different board at a different absolute path, answer `GetOpenDocuments` independently,
@@ -493,7 +493,7 @@ The rebuild after everything above landed (branch `wasm`, agent `rebuild`), 2026
   invalidated every KiCad TU.
 - **`kicad_api.data` was not being found.** `--preload-file` makes Emscripten ask for the package by
   bare name, and its two fallbacks are both wrong here: `readFileSync("kicad_api.data")` relative to
-  the cwd under Bun, and a `fetch` against the *document* URL in a browser. `createKiCadWasm()` now
+  the cwd under Bun, and a `fetch` against the _document_ URL in a browser. `createKiCadWasm()` now
   installs a `locateFile` that resolves every sidecar against the module's own URL (and hands back a
   plain path for `file:` ones, which the data loader — unlike the wasm loader — cannot parse), and
   both workers pass their `moduleUrl` through for it. Without this the module aborted at load in

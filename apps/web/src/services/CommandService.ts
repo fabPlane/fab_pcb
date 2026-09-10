@@ -100,9 +100,7 @@ export class MockCommitBackend implements CommitBackend {
  */
 export function storeKeyOf(store: ItemStore): string {
   if (store instanceof MemoryItemStore) return store.key;
-  const doc = store.document as
-    | { identifier?: { case?: string; value?: unknown }; boardFilename?: string; sheetPath?: { pathHumanReadable?: string } }
-    | undefined;
+  const doc = store.document as { identifier?: { case?: string; value?: unknown }; boardFilename?: string; sheetPath?: { pathHumanReadable?: string } } | undefined;
   if (store.kind === 'board') return 'board';
   const ident = doc?.identifier;
   if (ident?.case === 'sheetPath') {

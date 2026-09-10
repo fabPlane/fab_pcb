@@ -7,7 +7,13 @@ import { Dialog } from '../layout/Dialog';
 
 type Page = 'stackup' | 'rules' | 'custom' | 'origin';
 
-const SEVERITIES = [{ value: 0, label: 'default' }, { value: 1, label: 'warning' }, { value: 2, label: 'error' }, { value: 3, label: 'exclusion' }, { value: 4, label: 'ignore' }];
+const SEVERITIES = [
+  { value: 0, label: 'default' },
+  { value: 1, label: 'warning' },
+  { value: 2, label: 'error' },
+  { value: 3, label: 'exclusion' },
+  { value: 4, label: 'ignore' },
+];
 
 const RULE_LABELS: { key: keyof DesignRules; label: string; help: string }[] = [
   { key: 'minClearanceNm', label: 'Minimum clearance', help: 'Copper to copper, any net' },
@@ -175,8 +181,8 @@ export function BoardSetupDialog() {
         {page === 'custom' && (
           <section style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <p className="dialog-desc">
-              Custom design rules as KiCad serves them (GetCustomDesignRules). Name, condition, comment and severity are written back with SetCustomDesignRules; constraints are shown
-              read-only in the .kicad_dru rendering below.
+              Custom design rules as KiCad serves them (GetCustomDesignRules). Name, condition, comment and severity are written back with SetCustomDesignRules; constraints are shown read-only in the
+              .kicad_dru rendering below.
               {draft.customRulesError && <span style={{ color: 'var(--danger)' }}> Server parse error: {draft.customRulesError}</span>}
             </p>
             <table className="table">

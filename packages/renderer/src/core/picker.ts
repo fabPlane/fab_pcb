@@ -97,7 +97,8 @@ export class Picker {
         if (pd < d) d = pd;
         if (d === 0) break;
       }
-      if (d <= tolerance) hits.push({ id: it.id, owner: it.owner ?? it.id, ref: it.ref ?? it.id, layer: it.layer, net: it.net, distance: d, item: it });
+      if (d <= tolerance)
+        hits.push({ id: it.id, owner: it.owner ?? it.id, ref: it.ref ?? it.id, layer: it.layer, net: it.net, distance: d, item: it });
     }
     hits.sort((a, b) => a.distance - b.distance || bboxArea(a.item.bbox) - bboxArea(b.item.bbox));
     return opts.limit ? hits.slice(0, opts.limit) : hits;

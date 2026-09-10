@@ -190,11 +190,23 @@ describe("prefab blanks: free vias, the laser-prefab preset and claiming", () =>
     const traces: SrjTrace[] = [
       {
         connection_name: "A",
-        route: [wire(5, 5, "top"), wire(10, 15, "top"), { route_type: "via", x: 10, y: 15, from_layer: "top", to_layer: "bottom" }, wire(10, 15, "bottom"), wire(25, 25, "bottom")],
+        route: [
+          wire(5, 5, "top"),
+          wire(10, 15, "top"),
+          { route_type: "via", x: 10, y: 15, from_layer: "top", to_layer: "bottom" },
+          wire(10, 15, "bottom"),
+          wire(25, 25, "bottom"),
+        ],
       },
       {
         connection_name: "B",
-        route: [wire(25, 5, "top"), wire(20, 20, "top"), { route_type: "via", x: 20, y: 20, from_layer: "top", to_layer: "bottom" }, wire(20, 20, "bottom"), wire(5, 25, "bottom")],
+        route: [
+          wire(25, 5, "top"),
+          wire(20, 20, "top"),
+          { route_type: "via", x: 20, y: 20, from_layer: "top", to_layer: "bottom" },
+          wire(20, 20, "bottom"),
+          wire(5, 25, "bottom"),
+        ],
       },
     ];
     const r = tracesToItems(traces, input, layers);
@@ -257,7 +269,9 @@ describe("prefab blanks: free vias, the laser-prefab preset and claiming", () =>
     expect(result.log.some((l) => l.startsWith("laser-prefab:"))).toBe(true);
     // Two crossing nets between top-only pads: one of them claimed vias, or stayed unrouted.
     expect((result.claimedVias ?? []).length + result.unrouted.length).toBeGreaterThan(0);
-    console.log(`laser-prefab on the two-net board: ${result.claimedVias?.length ?? 0} claimed, ${result.unrouted.length} unrouted, ${result.elapsedMs} ms`);
+    console.log(
+      `laser-prefab on the two-net board: ${result.claimedVias?.length ?? 0} claimed, ${result.unrouted.length} unrouted, ${result.elapsedMs} ms`,
+    );
   }, 120_000);
 
   test("preset default treats free vias as obstacles and says so", async () => {

@@ -1664,7 +1664,7 @@ h3.section:first-child {
   font-size: 11px;
   font-family: var(--font-mono, monospace);
 }
-.canvas-slot[data-tool]:not([data-tool='select']):not([data-tool='move']) canvas {
+.canvas-slot[data-tool]:not([data-tool="select"]):not([data-tool="move"]) canvas {
   cursor: crosshair;
 }
 

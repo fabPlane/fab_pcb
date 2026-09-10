@@ -13,12 +13,12 @@ packages/kicad-patches/build-macos.sh            # ../kicad checkout, Release
 
 What the script pins, and why (each one was a configure failure on a stock setup):
 
-| Flag | Reason |
-|---|---|
-| `-DwxWidgets_CONFIG_EXECUTABLE=$(brew --prefix)/bin/wx-config-3.2` | Homebrew installs `wxwidgets@3.2` with a versioned `wx-config` |
-| `-DNGSPICE_LIB_NAME=libngspice.0.dylib -DNGSPICE_ROOT_DIR=…/libngspice` | `Findngspice.cmake` searches for `libngspice.so.0` on every UNIX, including macOS |
-| `-DOCC_INCLUDE_DIR=…/opencascade/include/opencascade -DOCC_LIBRARY_DIR=…/opencascade/lib` | `FindOCC.cmake` does not know the Homebrew layout |
-| `KICAD_BUILD_QA_TESTS/I18N/USE_SENTRY/UPDATE_CHECK/INSTALL_DEMOS=OFF` | not needed for a server |
+| Flag                                                                                      | Reason                                                                            |
+| ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `-DwxWidgets_CONFIG_EXECUTABLE=$(brew --prefix)/bin/wx-config-3.2`                        | Homebrew installs `wxwidgets@3.2` with a versioned `wx-config`                    |
+| `-DNGSPICE_LIB_NAME=libngspice.0.dylib -DNGSPICE_ROOT_DIR=…/libngspice`                   | `Findngspice.cmake` searches for `libngspice.so.0` on every UNIX, including macOS |
+| `-DOCC_INCLUDE_DIR=…/opencascade/include/opencascade -DOCC_LIBRARY_DIR=…/opencascade/lib` | `FindOCC.cmake` does not know the Homebrew layout                                 |
+| `KICAD_BUILD_QA_TESTS/I18N/USE_SENTRY/UPDATE_CHECK/INSTALL_DEMOS=OFF`                     | not needed for a server                                                           |
 
 Only three targets are built: `kicad-cli`, `pcbnew_kiface`, `eeschema_kiface`. On macOS
 they land in the build tree as

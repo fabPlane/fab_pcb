@@ -163,7 +163,11 @@ describe.skipIf(!haveKicad())("applyNetlist + kicad-cli api-server", () => {
     expect(edges.filter((s) => s.proto.shape?.geometry.case === "circle")).toHaveLength(1);
 
     // A second compile sees the outline and leaves the blank alone.
-    const again = await applyNetlist(board, NETLIST, { netlistPath: join(projectDir, ".fp-pcb", "compile.net"), board: { widthMm: 30, heightMm: 20, vias: [{ x: 5, y: 5 }] }, autoplace: false });
+    const again = await applyNetlist(board, NETLIST, {
+      netlistPath: join(projectDir, ".fp-pcb", "compile.net"),
+      board: { widthMm: 30, heightMm: 20, vias: [{ x: 5, y: 5 }] },
+      autoplace: false,
+    });
     expect(again.viasAdded).toBe(0);
     expect(again.diagnostics).toEqual([]);
     expect((await board.getTracks()).filter((t) => t instanceof Via)).toHaveLength(2);

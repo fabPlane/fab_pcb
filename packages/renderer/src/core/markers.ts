@@ -148,7 +148,12 @@ export class MarkerLayer {
       const o = new MarkerObject();
       o.spec = m;
       o.label = `marker:${m.id}`;
-      o.glyph.poly(MARKER_SHAPE.flatMap((p) => [p.x, p.y]), true).fill(0xffffff);
+      o.glyph
+        .poly(
+          MARKER_SHAPE.flatMap((p) => [p.x, p.y]),
+          true,
+        )
+        .fill(0xffffff);
       o.addChild(o.glyph);
       o.position.set(m.position.x - this.originX, m.position.y - this.originY);
       o.scale.set(this.scaleNm);

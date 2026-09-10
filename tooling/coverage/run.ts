@@ -123,9 +123,7 @@ export function useWorktree(): boolean {
 /** Every `*_commands.proto` / `*_jobs.proto` under api/proto, as repo-relative paths. */
 async function listCommandProtos(src: string): Promise<string[]> {
   const r = Bun.spawnSync(
-    useWorktree()
-      ? ["git", "-C", src, "ls-files", "api/proto"]
-      : ["git", "-C", src, "ls-tree", "-r", "--name-only", "HEAD", "api/proto"],
+    useWorktree() ? ["git", "-C", src, "ls-files", "api/proto"] : ["git", "-C", src, "ls-tree", "-r", "--name-only", "HEAD", "api/proto"],
   );
   if (r.exitCode !== 0) throw new Error(`git failed listing protos in ${src}: ${r.stderr.toString()}`);
   return r.stdout

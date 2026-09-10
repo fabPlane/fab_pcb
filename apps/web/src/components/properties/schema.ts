@@ -14,20 +14,7 @@ import { ScalarType, type DescEnum, type DescField, type DescMessage, type DescO
 import { kiapiRegistry } from '@fp-pcb/proto';
 import { enumOptionsFor } from '@/lib/enums';
 
-export type FieldKind =
-  | 'distance'
-  | 'angle'
-  | 'vector'
-  | 'ratio'
-  | 'color'
-  | 'kiid'
-  | 'enum'
-  | 'bool'
-  | 'number'
-  | 'string'
-  | 'message'
-  | 'repeated'
-  | 'unknown';
+export type FieldKind = 'distance' | 'angle' | 'vector' | 'ratio' | 'color' | 'kiid' | 'enum' | 'bool' | 'number' | 'string' | 'message' | 'repeated' | 'unknown';
 
 export interface FieldSchema {
   kind: FieldKind;

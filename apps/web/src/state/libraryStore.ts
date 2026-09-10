@@ -63,7 +63,10 @@ export const useLibraryStore = create<LibraryState>((set, get) => ({
 }));
 
 /** Opens the browser and resolves with the chosen `nickname:name`, or null when cancelled. */
-export function pickLibraryEntry(kind: 'footprint' | 'symbol', opts: Omit<LibraryRequest, 'kind'> = { purpose: 'place', title: kind === 'footprint' ? 'Choose a footprint' : 'Choose a symbol' }): Promise<string | null> {
+export function pickLibraryEntry(
+  kind: 'footprint' | 'symbol',
+  opts: Omit<LibraryRequest, 'kind'> = { purpose: 'place', title: kind === 'footprint' ? 'Choose a footprint' : 'Choose a symbol' },
+): Promise<string | null> {
   return useLibraryStore.getState().open({ kind, ...opts });
 }
 

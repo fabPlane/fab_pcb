@@ -71,19 +71,7 @@ export function buildBoard(): BoardFixture {
   edge(mockKiid('edge3'), 60, 40, 0, 40);
   edge(mockKiid('edge4'), 0, 40, 0, 0);
 
-  const footprint = (
-    ref: string,
-    value: string,
-    lib: string,
-    name: string,
-    x: number,
-    y: number,
-    rot: number,
-    layer: 'BL_F_Cu' | 'BL_B_Cu',
-    bodyW: number,
-    bodyH: number,
-    description: string,
-  ) => {
+  const footprint = (ref: string, value: string, lib: string, name: string, x: number, y: number, rot: number, layer: 'BL_F_Cu' | 'BL_B_Cu', bodyW: number, bodyH: number, description: string) => {
     const id = mockKiid(ref);
     ids[ref] = id;
     items.push({
@@ -166,11 +154,7 @@ export function buildBoard(): BoardFixture {
   ) => {
     const id = mockKiid(`${parentRef}p${number}`);
     ids[`${parentRef}.${number}`] = id;
-    const layers = smd
-      ? layer === 'BL_F_Cu'
-        ? ['BL_F_Cu', 'BL_F_Paste', 'BL_F_Mask']
-        : ['BL_B_Cu', 'BL_B_Paste', 'BL_B_Mask']
-      : ['BL_F_Cu', 'BL_B_Cu', 'BL_F_Mask', 'BL_B_Mask'];
+    const layers = smd ? (layer === 'BL_F_Cu' ? ['BL_F_Cu', 'BL_F_Paste', 'BL_F_Mask'] : ['BL_B_Cu', 'BL_B_Paste', 'BL_B_Mask']) : ['BL_F_Cu', 'BL_B_Cu', 'BL_F_Mask', 'BL_B_Mask'];
     items.push({
       id,
       type: 'KOT_PCB_PAD',
@@ -230,7 +214,19 @@ export function buildBoard(): BoardFixture {
   }
 
   // J1 pin header 1x04 at (50, 8..15.62) PTH
-  const j1 = footprint('J1', 'Conn_01x04', 'Connector_PinHeader_2.54mm', 'PinHeader_1x04_P2.54mm_Vertical', 50, 11.81, 0, 'BL_F_Cu', 2.54, 10.16, 'Through hole straight pin header, 1x04, 2.54mm pitch');
+  const j1 = footprint(
+    'J1',
+    'Conn_01x04',
+    'Connector_PinHeader_2.54mm',
+    'PinHeader_1x04_P2.54mm_Vertical',
+    50,
+    11.81,
+    0,
+    'BL_F_Cu',
+    2.54,
+    10.16,
+    'Through hole straight pin header, 1x04, 2.54mm pitch',
+  );
   const j1Nets = ['VCC', 'GND', 'SIG', 'PB0'];
   for (let i = 0; i < 4; i++) pad(j1, 'J1', String(i + 1), 50, 8 + i * 2.54, 1.7, 1.7, j1Nets[i], false, 'BL_F_Cu', i === 0 ? 'PSS_RECTANGLE' : 'PSS_CIRCLE');
 
@@ -489,28 +485,83 @@ export function buildSchematic(): SchematicFixture {
   };
 
   // R1 vertical at (40, 40) mm
-  symbol('R1', '10k', 'Device', 'R', 'Resistor_SMD:R_0603_1608Metric', 40, 40, 'SSO_0',
-    [pin('~', '1', 0, -g(3), 'SPO_DOWN'), pin('~', '2', 0, g(3), 'SPO_UP')], { w: 2.54, h: 7.62 }, 'Resistor');
-  symbol('C1', '100nF', 'Device', 'C', 'Capacitor_SMD:C_0603_1608Metric', 40, 60, 'SSO_0',
-    [pin('~', '1', 0, -g(3), 'SPO_DOWN'), pin('~', '2', 0, g(3), 'SPO_UP')], { w: 2.54, h: 7.62 }, 'Unpolarized capacitor');
-  symbol('U1', 'ATtiny85-20SU', 'MCU_Microchip_ATtiny', 'ATtiny85-20SU', 'Package_SO:SOIC-8_5.3x5.3mm_P1.27mm', 70, 50, 'SSO_0', [
-    pin('PB0', '5', -g(8), -g(3), 'SPO_RIGHT', 'EPT_BIDIRECTIONAL'),
-    pin('PB1', '6', -g(8), -g(1), 'SPO_RIGHT', 'EPT_BIDIRECTIONAL'),
-    pin('PB2', '7', -g(8), g(1), 'SPO_RIGHT', 'EPT_BIDIRECTIONAL'),
-    pin('PB3', '2', g(8), -g(3), 'SPO_LEFT', 'EPT_BIDIRECTIONAL'),
-    pin('PB4', '3', g(8), -g(1), 'SPO_LEFT', 'EPT_BIDIRECTIONAL'),
-    pin('~{RESET}/PB5', '1', g(8), g(1), 'SPO_LEFT', 'EPT_BIDIRECTIONAL'),
-    pin('VCC', '8', 0, -g(6), 'SPO_DOWN', 'EPT_POWER_IN'),
-    pin('GND', '4', 0, g(6), 'SPO_UP', 'EPT_POWER_IN'),
-  ], { w: 15.24, h: 12.7 }, '8-bit AVR microcontroller, SOIC-8');
-  symbol('J1', 'Conn_01x04', 'Connector_Generic', 'Conn_01x04', 'Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical', 100, 50, 'SSO_0', [
-    pin('Pin_1', '1', -g(4), -g(3), 'SPO_RIGHT'),
-    pin('Pin_2', '2', -g(4), -g(1), 'SPO_RIGHT'),
-    pin('Pin_3', '3', -g(4), g(1), 'SPO_RIGHT'),
-    pin('Pin_4', '4', -g(4), g(3), 'SPO_RIGHT'),
-  ], { w: 5.08, h: 10.16 }, 'Generic connector, single row, 01x04');
-  symbol('#PWR01', 'VCC', 'power', 'VCC', '', 40, 30, 'SSO_0', [pin('VCC', '1', 0, 0, 'SPO_UP', 'EPT_POWER_IN')], { w: 2.54, h: 2.54 }, 'Power symbol creates a global label with name "VCC"', 'SST_GLOBAL_POWER');
-  symbol('#PWR02', 'GND', 'power', 'GND', '', 40, 70, 'SSO_0', [pin('GND', '1', 0, 0, 'SPO_UP', 'EPT_POWER_IN')], { w: 2.54, h: 2.54 }, 'Power symbol creates a global label with name "GND"', 'SST_GLOBAL_POWER');
+  symbol('R1', '10k', 'Device', 'R', 'Resistor_SMD:R_0603_1608Metric', 40, 40, 'SSO_0', [pin('~', '1', 0, -g(3), 'SPO_DOWN'), pin('~', '2', 0, g(3), 'SPO_UP')], { w: 2.54, h: 7.62 }, 'Resistor');
+  symbol(
+    'C1',
+    '100nF',
+    'Device',
+    'C',
+    'Capacitor_SMD:C_0603_1608Metric',
+    40,
+    60,
+    'SSO_0',
+    [pin('~', '1', 0, -g(3), 'SPO_DOWN'), pin('~', '2', 0, g(3), 'SPO_UP')],
+    { w: 2.54, h: 7.62 },
+    'Unpolarized capacitor',
+  );
+  symbol(
+    'U1',
+    'ATtiny85-20SU',
+    'MCU_Microchip_ATtiny',
+    'ATtiny85-20SU',
+    'Package_SO:SOIC-8_5.3x5.3mm_P1.27mm',
+    70,
+    50,
+    'SSO_0',
+    [
+      pin('PB0', '5', -g(8), -g(3), 'SPO_RIGHT', 'EPT_BIDIRECTIONAL'),
+      pin('PB1', '6', -g(8), -g(1), 'SPO_RIGHT', 'EPT_BIDIRECTIONAL'),
+      pin('PB2', '7', -g(8), g(1), 'SPO_RIGHT', 'EPT_BIDIRECTIONAL'),
+      pin('PB3', '2', g(8), -g(3), 'SPO_LEFT', 'EPT_BIDIRECTIONAL'),
+      pin('PB4', '3', g(8), -g(1), 'SPO_LEFT', 'EPT_BIDIRECTIONAL'),
+      pin('~{RESET}/PB5', '1', g(8), g(1), 'SPO_LEFT', 'EPT_BIDIRECTIONAL'),
+      pin('VCC', '8', 0, -g(6), 'SPO_DOWN', 'EPT_POWER_IN'),
+      pin('GND', '4', 0, g(6), 'SPO_UP', 'EPT_POWER_IN'),
+    ],
+    { w: 15.24, h: 12.7 },
+    '8-bit AVR microcontroller, SOIC-8',
+  );
+  symbol(
+    'J1',
+    'Conn_01x04',
+    'Connector_Generic',
+    'Conn_01x04',
+    'Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical',
+    100,
+    50,
+    'SSO_0',
+    [pin('Pin_1', '1', -g(4), -g(3), 'SPO_RIGHT'), pin('Pin_2', '2', -g(4), -g(1), 'SPO_RIGHT'), pin('Pin_3', '3', -g(4), g(1), 'SPO_RIGHT'), pin('Pin_4', '4', -g(4), g(3), 'SPO_RIGHT')],
+    { w: 5.08, h: 10.16 },
+    'Generic connector, single row, 01x04',
+  );
+  symbol(
+    '#PWR01',
+    'VCC',
+    'power',
+    'VCC',
+    '',
+    40,
+    30,
+    'SSO_0',
+    [pin('VCC', '1', 0, 0, 'SPO_UP', 'EPT_POWER_IN')],
+    { w: 2.54, h: 2.54 },
+    'Power symbol creates a global label with name "VCC"',
+    'SST_GLOBAL_POWER',
+  );
+  symbol(
+    '#PWR02',
+    'GND',
+    'power',
+    'GND',
+    '',
+    40,
+    70,
+    'SSO_0',
+    [pin('GND', '1', 0, 0, 'SPO_UP', 'EPT_POWER_IN')],
+    { w: 2.54, h: 2.54 },
+    'Power symbol creates a global label with name "GND"',
+    'SST_GLOBAL_POWER',
+  );
 
   const wire = (tag: string, ax: number, ay: number, bx: number, by: number, type: 'SLT_WIRE' | 'SLT_BUS' = 'SLT_WIRE') => {
     const id = mockKiid(tag);

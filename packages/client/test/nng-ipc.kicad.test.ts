@@ -60,7 +60,9 @@ describe.skipIf(!haveKicad())("NngIpcTransport against kicad-cli api-server", ()
       token = r.token;
     }
     const ms = performance.now() - t0;
-    console.log(`  [timing] NngIpcTransport: 200 sequential Pings in ${ms.toFixed(1)} ms (${(ms / 200).toFixed(2)} ms/req), token ${token}`);
+    console.log(
+      `  [timing] NngIpcTransport: 200 sequential Pings in ${ms.toFixed(1)} ms (${(ms / 200).toFixed(2)} ms/req), token ${token}`,
+    );
   }, 30_000);
 
   test("200 queued Pings share one socket and all succeed", async () => {

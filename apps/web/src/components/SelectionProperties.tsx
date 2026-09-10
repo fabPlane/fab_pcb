@@ -41,7 +41,16 @@ export function SelectionProperties({ storeKey, store, kind }: { storeKey: strin
               {[...counts.entries()]
                 .sort((a, b) => b[1] - a[1])
                 .map(([type, n]) => (
-                  <tr key={type} onClick={() => setSelection(storeKey, [...store.byType(type)].map((i) => i.id))} title="Select all of this type">
+                  <tr
+                    key={type}
+                    onClick={() =>
+                      setSelection(
+                        storeKey,
+                        [...store.byType(type)].map((i) => i.id),
+                      )
+                    }
+                    title="Select all of this type"
+                  >
                     <td>{typeLabel(type)}</td>
                     <td className="num">{n}</td>
                   </tr>
@@ -58,7 +67,14 @@ export function SelectionProperties({ storeKey, store, kind }: { storeKey: strin
 
   if (items.length > 1) {
     return (
-      <Panel title={`Properties · ${items.length} items`} actions={<button className="btn ghost sm" onClick={() => setSelection(storeKey, [])}>clear</button>}>
+      <Panel
+        title={`Properties · ${items.length} items`}
+        actions={
+          <button className="btn ghost sm" onClick={() => setSelection(storeKey, [])}>
+            clear
+          </button>
+        }
+      >
         <div className="rows">
           {items.map((it) => (
             <div key={it.id} className="row" onClick={() => setSelection(storeKey, [it.id])} title="Click to edit this item alone">
