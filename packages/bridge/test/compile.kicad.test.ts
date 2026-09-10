@@ -161,13 +161,44 @@ describe.skipIf(!haveKicad)("compile jobs + kicad-cli api-server", () => {
       ),
     ).toEqual({ R1: { x: 5_000_000, y: 4_000_000 }, R2: { x: 15_000_000, y: 6_000_000 } });
     const schematic = (await kicad.currentSchematic())!;
-    const root = await schematic.rootSheet();
+    let root = await schematic.rootSheet();
     expect((await root.getSymbols()).map((symbol) => symbol.reference).sort()).toEqual(["R1", "R2"]);
     const wires = await schematic.getWires(root.scope);
     expect(wires.length).toBe(4);
-    const erc = await schematic.erc.run();
-    expect(erc.errorCount).toBe(0);
-    const preserved = wires[0]!;
+    const symbols = await root.getSymbols();
+    const pins = symbols.flatMap((symbol) => symbol.pins);
+    expect(pins).toHaveLength(4);
+    expect(new Set(pins.map((pin) => pin.id)).size).toBe(pins.length);
+    const pinPositions = symbols
+      .flatMap((symbol) => symbol.pins.map((pin) => [symbol.reference, pin.proto.number, pin.position] as const))
+      .sort(([aRef, aPin], [bRef, bPin]) => `${aRef}:${aPin}`.localeCompare(`${bRef}:${bPin}`));
+    const initialErc = await schematic.erc.run();
+    expect(initialErc.errorCount).toBe(0);
+    expect(initialErc.markers.map((marker) => marker.description).join("\n")).not.toMatch(
+      /not connected|unconnected wire endpoint|off connection grid/i,
+    );
+
+    // The editable source of truth must survive the actual file boundary, not merely look right
+    // in the server's in-memory model.
+    await schematic.close();
+    const reopened = await kicad.openSchematic(join(workspace, "demo", "demo.kicad_sch"));
+    root = await reopened.rootSheet();
+    expect((await root.getSymbols()).map((symbol) => symbol.reference).sort()).toEqual(["R1", "R2"]);
+    const reloadedErc = await reopened.erc.run();
+    expect(reloadedErc.errorCount).toBe(0);
+    expect(reloadedErc.markers.map((marker) => marker.description).join("\n")).not.toMatch(
+      /not connected|unconnected wire endpoint|off connection grid/i,
+    );
+    const reloadedSymbols = await root.getSymbols();
+    const reloadedPins = reloadedSymbols.flatMap((symbol) => symbol.pins);
+    expect(reloadedPins).toHaveLength(4);
+    expect(new Set(reloadedPins.map((pin) => pin.id)).size).toBe(reloadedPins.length);
+    expect(
+      reloadedSymbols
+        .flatMap((symbol) => symbol.pins.map((pin) => [symbol.reference, pin.proto.number, pin.position] as const))
+        .sort(([aRef, aPin], [bRef, bPin]) => `${aRef}:${aPin}`.localeCompare(`${bRef}:${bPin}`)),
+    ).toEqual(pinPositions);
+    const preserved = (await reopened.getWires(root.scope))[0]!;
     preserved.setCustomProperty("fp-pcb.generated", undefined);
     preservedWireId = (await root.commit("adopt generated wire as manual", (tx) => tx.update([preserved]))).updated[0]!.id;
     const polled = (await (await api(`/sessions/${sessionId}/compile/${job.id}`)).json()) as { job: CompileJobInfo };

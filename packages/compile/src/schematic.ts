@@ -78,6 +78,9 @@ function placedDefinition(source: LibSymbol, origin: Vec2, pins: Map<string, Vec
     if (!pin) continue;
     const relative = vec2(pin.position);
     const absolute = { x: origin.x + relative.x, y: origin.y + relative.y };
+    // Library pin KIIDs belong to the library definition. Each placed instance must receive
+    // independent pin identities from KiCad rather than aliasing pins across repeated symbols.
+    pin.id = undefined;
     pin.position = toVector2(absolute);
     child.item = packAny(SchematicPinSchema, pin);
     if (pin.number) pins.set(`${reference}:${pin.number}`, absolute);

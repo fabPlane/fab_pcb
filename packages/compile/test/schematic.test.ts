@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { create } from "@bufbuild/protobuf";
 import {
+  KIIDSchema,
   LibraryIdentifierSchema,
   packAny,
   SchematicFieldSchema,
@@ -17,7 +18,14 @@ function deviceSymbol(): LibSymbol {
     create(SchematicSymbolChildSchema, {
       unit: { unit: 1 },
       bodyStyle: { style: 1 },
-      item: packAny(SchematicPinSchema, create(SchematicPinSchema, { number, position: toVector2({ x: mm(x), y: mm(y) }) })),
+      item: packAny(
+        SchematicPinSchema,
+        create(SchematicPinSchema, {
+          id: create(KIIDSchema, { value: `library-pin-${number}` }),
+          number,
+          position: toVector2({ x: mm(x), y: mm(y) }),
+        }),
+      ),
     });
   const field = (name: string, text: string, x: number, y: number) =>
     create(SchematicFieldSchema, { name, text: create(TextSchema, { text, position: toVector2({ x: mm(x), y: mm(y) }) }) });
@@ -91,6 +99,24 @@ describe("generated schematic", () => {
       { x: mm(30.48), y: mm(29.21) },
       { x: mm(30.48), y: mm(21.59) },
     ]);
+  });
+
+  test("does not reuse library pin identities for placed symbols", () => {
+    const result = buildGeneratedSchematic(
+      {
+        components: [
+          { ref: "R1", value: "1k", footprint: "x", libSource: { lib: "Device", part: "R" } },
+          { ref: "R2", value: "2k2", footprint: "x", libSource: { lib: "Device", part: "R" } },
+        ],
+        nets: [],
+      },
+      new Map([["Device:R", deviceSymbol()]]),
+    );
+    const symbols = result.items.filter((item): item is SchematicSymbol => item instanceof SchematicSymbol);
+    const pinIds = symbols.flatMap((symbol) => symbol.pins.map((pin) => pin.id));
+
+    expect(pinIds).toHaveLength(4);
+    expect(pinIds).toEqual(["", "", "", ""]);
   });
 
   test("keeps board compilation compatible while diagnosing missing symbols and pins", () => {
