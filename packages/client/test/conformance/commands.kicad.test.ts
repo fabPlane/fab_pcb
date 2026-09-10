@@ -49,7 +49,7 @@ import {
 } from "@fp-pcb/proto";
 import { COMMANDS, KICAD_COMMIT } from "../../src/commands-data";
 import * as cmd from "../../src/commands";
-import { ActionError, KiCadApiError } from "../../src/errors";
+import { ActionError, JobError, KiCadApiError } from "../../src/errors";
 import { KiCadEvents } from "../../src/events";
 import {
   Board,
@@ -1842,11 +1842,23 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     run: (out: string) => Promise<{ outputPaths: string[]; status: JobStatus }>,
     ext: string,
     timeout = 120_000,
+    // Jobs the headless core (stdio, wasm) cannot run at all -- no OpenCascade, no 3D viewer.
+    // There the contract is a clean JobError naming the gap, never a crash or a hang.
+    headlessUnsupported = false,
   ) =>
     cmdTest(
       name,
       async () => {
         const out = join(tmp.dir, `job-${name}${ext}`);
+        if (headlessUnsupported && KICAD_TRANSPORT !== "ipc") {
+          const err = await run(out).then(
+            () => null,
+            (e: unknown) => e,
+          );
+          expect(err).toBeInstanceOf(JobError);
+          expect((err as JobError).message).toMatch(/not available in this build/);
+          return `unsupported in the headless core: ${(err as JobError).message.replace(/^.*?: /, "")}`;
+        }
         const r = await run(out);
         const produced = [...r.outputPaths, out].filter((p) => existsSync(p));
         expect(produced.length).toBeGreaterThan(0);
@@ -1894,12 +1906,19 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     expect(r.viasAdded).toBe(0);
     return `garbage -> AS_BAD_REQUEST; empty session applied: ${r.tracksAdded} tracks, ${r.footprintsMoved} footprints moved, ${r.warnings.length} warning(s)`;
   });
-  boardJob("RunBoardJobExport3D", (out) => board.jobs.export3D(out, { format: Board3DFormat.B3D_GLB, overwrite: true }), ".glb", 300_000);
+  boardJob(
+    "RunBoardJobExport3D",
+    (out) => board.jobs.export3D(out, { format: Board3DFormat.B3D_GLB, overwrite: true }),
+    ".glb",
+    300_000,
+    true,
+  );
   boardJob(
     "RunBoardJobExportRender",
     (out) => board.jobs.exportRender(out, { format: RenderFormat.RF_PNG, width: 320, height: 240 }),
     ".png",
     300_000,
+    true,
   );
   cmdTest(
     "GetJobStatus",
