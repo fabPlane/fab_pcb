@@ -172,6 +172,35 @@ jobs:
       - name: Install
         run: bun install --frozen-lockfile
 
+      - name: Resolve the private router pin
+        id: private-router
+        run: echo "commit=$(tr -d '[:space:]' < packages/router/JS_AUTOROUTER_COMMIT)" >> "$GITHUB_OUTPUT"
+
+      - name: Check out the pinned private router
+        uses: actions/checkout@v4
+        with:
+          repository: TensorFleet/js_autorouter
+          ref: ${{ steps.private-router.outputs.commit }}
+          path: .ci-private/js_autorouter
+          token: ${{ secrets.JS_AUTOROUTER_READ_TOKEN }}
+          persist-credentials: false
+          sparse-checkout: |
+            package.json
+            src
+          sparse-checkout-cone-mode: false
+
+      - name: Validate the private router package boundary
+        run: |
+          bun -e '
+            const pkg = await Bun.file(".ci-private/js_autorouter/package.json").json()
+            if (pkg.name !== "@tensorfleet/js-autorouter" || pkg.private !== true) {
+              throw new Error("unexpected private router package metadata")
+            }
+            if (Object.keys(pkg.dependencies ?? {}).length !== 0) {
+              throw new Error("private router gained runtime dependencies; update packaging explicitly")
+            }
+          '
+
       - name: Log in to GHCR
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         uses: docker/login-action@v3
@@ -225,6 +254,7 @@ jobs:
       - name: Integration tests
         env:
           KICAD_INTEGRATION_REQUIRED: "1"
+          JS_AUTOROUTER_MODULE: ${{ github.workspace }}/.ci-private/js_autorouter/src/index.ts
           # Two process-signal tests run against the extracted native executable in the backend
           # workflow; a docker CLI wrapper cannot forward SIGSTOP/SIGKILL to the container.
           KICAD_CLI_WRAPPED: "1"
