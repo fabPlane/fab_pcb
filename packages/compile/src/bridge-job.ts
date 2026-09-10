@@ -16,8 +16,9 @@
  *
  * What a job does: finds the session's open board — or, when the session was started bare,
  * creates the project at `request.project.path` and opens its board — registers the frontend's
- * libraries in the project tables, runs `compile()` (frontend → validate → dry run → outline →
- * import → autoplace with the edge-clearance inset), and saves. A compile whose frontend or
+ * libraries in the project tables, generates and reloads the schematic, requires zero ERC errors,
+ * updates the board through KiCad's `SyncSchematicToBoard`, places it, requires zero schematic
+ * parity conflicts, and saves. A compile whose frontend or
  * netlist has errors ends `failed` with `result.diagnostics`; an infrastructure failure ends
  * `failed` with `error` and no `result`. Cancelling before the import leaves the board with at
  * most the outline commit; after it, KiCad's own "Update Netlist" commit stays.
@@ -46,6 +47,7 @@ export type CompileJobState =
   | "importing"
   | "placing"
   | "schematic"
+  | "parity"
   | "saving"
   | "done"
   | "failed"
@@ -246,18 +248,6 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
           signal: abort.signal,
           onStage: setState,
           beforeApply: async (built) => {
-            if (request.rebuild === "clean") {
-              setState("cleaning");
-              const routed = (await board.getTracks()).filter((item) => !(item instanceof Via) || Boolean(item.net));
-              const vias = routed.filter((item) => item instanceof Via).length;
-              if (routed.length) {
-                await board.commit("Clean rebuild: remove routed copper", (tx) => tx.delete(routed));
-              }
-              info.removedCopper = { tracks: routed.length - vias, vias };
-              pushLog(`clean rebuild: removed ${routed.length - vias} tracks/arcs and ${vias} routed vias`);
-            }
-            rules = (request.board ?? built.board)?.rules;
-            if (hasRules(rules)) pushLog(`rules: ${(await applyBoardConstraints(board, rules)).join(", ")}`);
             const libraries = [...(deps.libraries ?? []), ...(built.libraries ?? [])];
             const uniqueLibraries = [...new Map(libraries.map((library) => [`${library.kind}:${library.nickname}`, library])).values()];
             if (uniqueLibraries.length) {
@@ -266,12 +256,65 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
               const shown = names.slice(0, 12).join(", ") + (names.length > 12 ? `, … +${names.length - 12}` : "");
               pushLog(`registered ${uniqueLibraries.length} project librar${uniqueLibraries.length === 1 ? "y" : "ies"}: ${shown}`);
             }
-          },
-          afterApply: async (built) => {
             const generated = await generateSchematic(kicad, built.netlist!);
             schematic = generated.schematic;
             pushLog(`schematic: ${generated.symbolsCreated} symbols, ${generated.wiresCreated} wires, ${generated.labelsCreated} labels`);
-            return generated.diagnostics;
+            if (request.save !== false) {
+              await schematic.save();
+              await schematic.close();
+              schematic = await kicad.openSchematic(projectInfo.kicadProPath.replace(/\.kicad_pro$/, ".kicad_sch"));
+              pushLog("schematic: saved and reopened before ERC");
+            }
+            const erc = await schematic.erc.run();
+            pushLog(`ERC: ${erc.errorCount} errors, ${erc.warningCount} warnings`);
+            const diagnostics = [...generated.diagnostics];
+            if (erc.errorCount) {
+              const detail = erc.markers
+                .filter((marker) => !marker.excluded)
+                .slice(0, 10)
+                .map((marker) => marker.description)
+                .join("; ");
+              diagnostics.push({
+                severity: "error",
+                stage: "schematic",
+                code: "erc_errors",
+                message: `Generated schematic has ${erc.errorCount} ERC error(s) after save/reload${detail ? `: ${detail}` : "."}`,
+              });
+            }
+            if (diagnostics.some((diagnostic) => diagnostic.severity === "error")) return diagnostics;
+
+            if (request.rebuild === "clean") {
+              setState("cleaning");
+              const routed = (await board.getTracks()).filter((item) => !(item instanceof Via) || Boolean(item.net));
+              const vias = routed.filter((item) => item instanceof Via).length;
+              if (routed.length) await board.commit("Clean rebuild: remove routed copper", (tx) => tx.delete(routed));
+              info.removedCopper = { tracks: routed.length - vias, vias };
+              pushLog(`clean rebuild: removed ${routed.length - vias} tracks/arcs and ${vias} routed vias`);
+            }
+            rules = (request.board ?? built.board)?.rules;
+            if (hasRules(rules)) pushLog(`rules: ${(await applyBoardConstraints(board, rules)).join(", ")}`);
+            pushLog("board update: SyncSchematicToBoard (schematic authoritative)");
+            return diagnostics;
+          },
+          updateBoard: (options) =>
+            schematic!.syncToBoard(board, {
+              ...options,
+              updateFields: true,
+              removeExtraFields: false,
+            }),
+          afterApply: async () => {
+            const parity = await board.drc.run({ testFootprintsAgainstSchematic: true });
+            pushLog(`schematic parity: ${parity.parityCount} conflict${parity.parityCount === 1 ? "" : "s"}`);
+            return parity.parityCount
+              ? [
+                  {
+                    severity: "error",
+                    stage: "apply",
+                    code: "schematic_parity",
+                    message: `Updated board has ${parity.parityCount} schematic parity conflict(s); inspect DRC before routing or release.`,
+                  },
+                ]
+              : [];
           },
         });
         for (const d of result.diagnostics) pushLog(`${d.severity} [${d.stage}${d.code ? `/${d.code}` : ""}] ${d.message.split("\n")[0]}`);

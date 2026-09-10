@@ -3,36 +3,54 @@
 Turns a **design source** into a **KiCad project**.
 
 ```
-source --[Frontend]--> Netlist --[emit + apply]--> KiCad board + generated schematic
+source --[Frontend]--> Netlist --> generated schematic --> ERC --> KiCad board --> parity
 ```
 
-The split is the point. The left half changes with whatever authoring format you want; the right
-half is stable, because it ends in `ImportNetlist` — the same path eeschema uses to push a
-schematic to a board. Footprint matching, field updates and net assignment are KiCad's code.
+The split is the point. The left half changes with whatever authoring format you want. In the
+bridge workflow, the right half creates and reloads the schematic, requires zero ERC errors, and
+uses KiCad's `SyncSchematicToBoard` operation so that saved schematic is the board's electrical
+source of truth. Footprint matching, field updates and net assignment remain KiCad's code. The
+lower-level apply API retains file-based `ImportNetlist` for callers that do not own a schematic.
 
 ## What is here
 
-| file                            | role                                                                                             |
-| ------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `src/types.ts`                  | the contract: `Netlist` IR, `Frontend`, `LibrarySpec`, `Diagnostic`, `CompileResult`             |
-| `src/netlist.ts`                | `emitKicadNetlist` (IR → KiCad `.net`) and `validateNetlist`                                     |
-| `src/apply.ts`                  | `applyNetlist`: write → dry-run `ImportNetlist` → outline (+ a blank's vias and holes) → `ImportNetlist` → autoplace unspecified additions → source placement |
-| `src/rules.ts`                  | `applyBoardRules`: `BoardSpec.rules` → `SetBoardDesignRules` + the `Default` net class (`SetNetClasses`) |
-| `src/compile.ts`                | orchestration, with the stage and `beforeApply` hooks the job uses                               |
-| `src/frontends/netlist-json.ts` | the first frontend: `circuit.netlist.json` = `{ netlist, board?, libraries? }`, the IR as a file |
-| `src/libraries.ts`              | `LibrarySpec` → project `fp-lib-table` / `sym-lib-table` rows (`AddLibraryTableRow`)             |
-| `src/schematic.ts`              | symbol lookup and owned generated symbols, wires, and labels on the root sheet                  |
-| `src/bridge-job.ts`             | the job the bridge mounts at `/sessions/:id/compile` (see `packages/bridge/README.md`)           |
+| file                            | role                                                                                                                                                                     |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/types.ts`                  | the contract: `Netlist` IR, `Frontend`, `LibrarySpec`, `Diagnostic`, `CompileResult`                                                                                     |
+| `src/netlist.ts`                | `emitKicadNetlist` (IR → KiCad `.net`) and `validateNetlist`                                                                                                             |
+| `src/apply.ts`                  | `applyNetlist`: write evidence netlist → dry-run board update → outline (+ a blank's vias and holes) → board update → autoplace unspecified additions → source placement |
+| `src/rules.ts`                  | `applyBoardRules`: `BoardSpec.rules` → `SetBoardDesignRules` + the `Default` net class (`SetNetClasses`)                                                                 |
+| `src/compile.ts`                | orchestration, with the stage and `beforeApply` hooks the job uses                                                                                                       |
+| `src/frontends/netlist-json.ts` | the first frontend: `circuit.netlist.json` = `{ netlist, board?, libraries? }`, the IR as a file                                                                         |
+| `src/libraries.ts`              | `LibrarySpec` → project `fp-lib-table` / `sym-lib-table` rows (`AddLibraryTableRow`)                                                                                     |
+| `src/schematic.ts`              | symbol lookup and owned generated symbols, wires, and labels on the root sheet                                                                                           |
+| `src/bridge-job.ts`             | the job the bridge mounts at `/sessions/:id/compile` (see `packages/bridge/README.md`)                                                                                   |
 
 The emitter, validator, frontend, outline geometry and generated-schematic geometry are pure, so the package is
 unit-tested without a KiCad server (`bun test`).
 
-## The apply order, and why
+## The bridge compile order, and why
 
-Each step was checked against the fork at `280274cc3d` and run live (`bench/experiment.ts`):
+The bridge follows KiCad's schematic-first project lifecycle:
 
-1. **`ImportNetlist` with `dryRun`** — the only check that sees the server's `fp-lib-table`.
-   An error here stops the compile with the board untouched.
+1. **Generate, save, and reopen the schematic.** Reopening validates the durable artifact rather
+   than only the in-memory construction.
+2. **Run ERC.** Any ERC error stops the job before the board update. ERC warnings remain visible
+   for explicit review.
+3. **Dry-run `SyncSchematicToBoard`.** This checks footprint resolution against the project
+   library tables without changing the board.
+4. **Reconcile the outline**, then run `SyncSchematicToBoard` for real. The generated `.net` file
+   remains an evidence/debugging artifact; it is not the bridge's board authority.
+5. **Place footprints** using source positions or the legacy autoplacer and its edge inset.
+6. **Run board DRC with schematic comparison enabled.** Any parity conflict fails the compile and
+   prevents the final save.
+7. **Save the schematic and board** only after those gates pass.
+
+Within the reusable board apply operation, the detailed order is:
+
+1. **Board update with `dryRun`** — the only check that sees the server's `fp-lib-table`.
+   This is `ImportNetlist` by default and the open schematic's `SyncSchematicToBoard` in the
+   bridge. An error here stops the compile with the board untouched.
 2. **Outline reconciliation.** `AutoplaceFootprints` answers
    `APR_NO_BOARD_OUTLINE` without one; the outline _is_ the placement box. A prefabricated
    blank's features go into the same commit: `BoardSpec.vias` as through vias on no net (free
@@ -43,8 +61,8 @@ Each step was checked against the fork at `280274cc3d` and run live (`bench/expe
    change while independent manual cutout contours are preserved. A matching user outline is
    accepted; a differing user-authored outer contour fails with `outline_conflict` instead of
    silently retaining stale geometry.
-3. **`ImportNetlist` for real.** Headless KiCad spreads new footprints from the origin, inside
-   the rectangle step 2 drew.
+3. **Board update for real.** Headless KiCad spreads new footprints from the origin, inside the
+   rectangle step 2 drew.
 4. **`AutoplaceFootprints` on the footprints step 3 added**, with `includeOffboard` — an empty
    id list means "offboard only" to KiCad, which would skip everything the spread put inside.
 5. **The edge-clearance inset for autoplaced additions.** The legacy autoplacer packs into the outline's top-left corner
@@ -103,32 +121,32 @@ A component names its KiCad symbol independently of its footprint:
 }
 ```
 
-After a successful `ImportNetlist`, the bridge embeds each `lib:part` definition in a searchable
-schematic symbol and draws a short wire plus a same-name local label at every connected pin. Equal
-labels create real KiCad connectivity without routing long generated wires through other symbols.
+Before updating the board, the bridge embeds each `lib:part` definition in a searchable schematic
+symbol and draws a short wire plus a same-name global label at every connected pin. Equal labels
+create real KiCad connectivity without routing long generated wires through other symbols, while
+global labels preserve the exact board net name instead of adding a root-sheet `/` prefix.
 Generated items carry `fp-pcb.generated=circuit.netlist.json`; rebuild replaces only those items,
 preserving anything a person added or explicitly adopted in KiCad.
 
 Placements stay on KiCad's default 50 mil electrical grid. Library pin geometry is converted from
 symbol-local coordinates to the sheet-coordinate form required by KiCad's placed-symbol API, and
-library pin ids are cleared so KiCad assigns independent instance ids. The real-server test runs
-ERC before and after close/reopen and rejects disconnected labels/wires, off-grid endpoints, or
-coordinate drift.
+library pin ids are cleared so KiCad assigns independent instance ids. The bridge saves and
+reopens the generated schematic, then runs ERC. The real-server test also checks that the resulting
+board has zero schematic parity conflicts.
 
 Missing `libSource`, an unavailable symbol, or a pin absent from its symbol produces a `schematic`
-warning while leaving the successful board compile intact. This preserves old netlists, but ERC and
-schematic rendering are complete only when every component supplies a valid symbol. Project and
-bundled symbol libraries are registered before lookup.
+warning. ERC still decides whether the compile may proceed; schematic parity decides whether it may
+be saved. Project and bundled symbol libraries are registered before lookup.
 
 ## The job
 
 `createCompileJobs()` returns what the bridge mounts: `POST /sessions/:id/compile` takes a
 `CompileSource` inline (no file staging), creates the project at `project.path` when the session
 was started bare, registers source and bundled libraries in the project tables, runs `compile()`
-with the stages above as job states, saves, and reports the board `revision` as a compatibility
-fallback for older fork builds. Current fork builds also publish `DocumentChanged` for the real
-`ImportNetlist`. `done` carries `result` whether or not it is `ok`; `error` is an infrastructure
-failure. `DELETE` cancels between stages.
+with the stages above as job states, saves only after ERC and parity pass, and reports the board
+`revision` as a compatibility fallback for older fork builds. Current fork builds also publish
+`DocumentChanged` for the real board update. `done` carries `result` whether or not it is `ok`;
+`error` is an infrastructure failure. `DELETE` cancels between stages.
 
 ## Tests
 
@@ -157,4 +175,5 @@ are in fabdesk's `docs/fab-pcb-migration.md` §6.1.
   — a compiled design has no schematic UUIDs.
 - `NewProject` wants the `.kicad_pro` path (an extension-less path becomes a directory to
   create), and `currentBoard()` is empty afterwards — open the board explicitly.
-- A compile that fails never touches the board.
+- A frontend, validation, schematic-generation, or ERC failure does not update the board. A parity
+  failure necessarily occurs after an in-memory board update, but the job does not save that board.

@@ -1,7 +1,7 @@
 /** Rebuild the generated part of a project's root schematic from the compile netlist. */
 import { clone, create } from "@bufbuild/protobuf";
 import {
-  LocalLabelSchema,
+  GlobalLabelSchema,
   packAny,
   SchematicSymbolSchema,
   SchematicFieldSchema,
@@ -20,7 +20,7 @@ import {
 } from "@fp-pcb/proto";
 import {
   KiCad,
-  LocalLabel,
+  GlobalLabel,
   mm,
   SchematicLine,
   SchematicSymbol,
@@ -142,7 +142,7 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
       descriptionField: positionedField(
         definition.proto.descriptionField,
         "Description",
-        component.libSource.description ?? definition.description,
+        component.fields?.Description ?? component.fields?.description ?? "",
         position,
       ),
       unit: create(SchematicSymbolUnitSchema, { unit: 1 }),
@@ -160,7 +160,8 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
   }
 
   // A labelled stub at every connected pin produces correct KiCad connectivity without routing
-  // long wires through unrelated symbols. Equal local-label text joins all nodes of one net.
+  // long wires through unrelated symbols. Global labels keep the root schematic's net names
+  // identical to the board updater's names instead of path-qualifying them as `/NAME`.
   for (const net of netlist.nets) {
     for (const node of net.nodes) {
       const start = pins.get(`${node.ref}:${node.pin}`);
@@ -178,8 +179,8 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
         new SchematicLine(create(SchematicLineSchema, { start: toVector2(start), end: toVector2(end), type: SchematicLineType.SLT_WIRE })),
       );
       const label = generated(
-        new LocalLabel(
-          create(LocalLabelSchema, {
+        new GlobalLabel(
+          create(GlobalLabelSchema, {
             position: toVector2(end),
             text: create(TextSchema, { text: net.name, position: toVector2(end) }),
             spinStyle: SchematicLabelSpinStyle.SLSS_LEFT,

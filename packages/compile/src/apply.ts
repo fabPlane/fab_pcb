@@ -39,7 +39,16 @@
  * that, so the library stays free of persistence the way the router's `applyRouteResult` is.
  */
 import { create } from "@bufbuild/protobuf";
-import { BoardGraphicShapeSchema, BoardLayer, DrillShape, KiCadObjectType, PadStackShape, PadStackType, ViaSchema, ViaType } from "@fp-pcb/proto";
+import {
+  BoardGraphicShapeSchema,
+  BoardLayer,
+  DrillShape,
+  KiCadObjectType,
+  PadStackShape,
+  PadStackType,
+  ViaSchema,
+  ViaType,
+} from "@fp-pcb/proto";
 import { BoardShape, Footprint, Via, mm, toVector2, vec2, type Board, type Item, type Vec2 } from "@fp-pcb/client";
 import { CompileCancelled } from "./compile";
 import { emitKicadNetlist, type EmitOptions } from "./netlist";
@@ -84,6 +93,17 @@ export interface ApplyOptions extends EmitOptions {
   edgeMarginNm?: number;
   /** Commit message for the outline commit, shown in KiCad's undo history. */
   message?: string;
+  /**
+   * Override the board netlist updater. The bridge supplies the open schematic's
+   * `SyncSchematicToBoard` operation so its saved electrical design, rather than a sibling export,
+   * is authoritative. Other callers retain the file-based `ImportNetlist` default.
+   */
+  updateBoard?: (opts: {
+    dryRun?: boolean;
+    matchMode: MatchMode;
+    deleteExtraFootprints: boolean;
+    updateFootprints: boolean;
+  }) => Promise<{ errorCount: number; warningCount: number; newFootprintCount: number; report: string }>;
 }
 
 export interface ApplyOutcome {
@@ -322,7 +342,12 @@ export function holeItem(center: Vec2, diameterNm: number): BoardShape {
   return new BoardShape(
     create(BoardGraphicShapeSchema, {
       layer: BoardLayer.BL_Edge_Cuts,
-      shape: { geometry: { case: "circle", value: { center: toVector2(c), radiusPoint: toVector2({ x: c.x + Math.round(diameterNm / 2), y: c.y }) } } },
+      shape: {
+        geometry: {
+          case: "circle",
+          value: { center: toVector2(c), radiusPoint: toVector2({ x: c.x + Math.round(diameterNm / 2), y: c.y }) },
+        },
+      },
     }),
   );
 }
@@ -332,7 +357,9 @@ export function prefabItems(spec: BoardSpec | undefined): { vias: Via[]; holes: 
   const viaDiameter = spec?.rules?.viaDiameterMm ?? DEFAULT_VIA.diameterMm;
   const viaDrill = spec?.rules?.viaDrillMm ?? DEFAULT_VIA.drillMm;
   return {
-    vias: (spec?.vias ?? []).map((v) => freeViaItem({ x: mm(v.x), y: mm(v.y) }, mm(v.diameterMm ?? viaDiameter), mm(v.drillMm ?? viaDrill))),
+    vias: (spec?.vias ?? []).map((v) =>
+      freeViaItem({ x: mm(v.x), y: mm(v.y) }, mm(v.diameterMm ?? viaDiameter), mm(v.drillMm ?? viaDrill)),
+    ),
     holes: (spec?.holes ?? []).map((h) => holeItem({ x: mm(h.x), y: mm(h.y) }, mm(h.diameterMm))),
   };
 }
@@ -558,11 +585,12 @@ export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOp
     deleteExtraFootprints: opts.deleteExtraFootprints ?? true,
     updateFootprints: opts.updateFootprints ?? true,
   } as const;
+  const updateBoard = opts.updateBoard ?? ((options) => board.importNetlist(serverPath, options));
 
   // 1. Dry run: the only check that sees the server's library tables.
   cancelled();
   opts.onStage?.("checking");
-  const dry = await board.importNetlist(serverPath, { ...importOptions, dryRun: true });
+  const dry = await updateBoard({ ...importOptions, dryRun: true });
   if (dry.errorCount > 0) return untouched(reportDiagnostics(dry.report, dry.errorCount, dry.warningCount), dry.report);
 
   // 2. Outline, before anything is placed.
@@ -576,7 +604,7 @@ export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOp
   cancelled();
   opts.onStage?.("importing");
   const before = new Set(await footprintIds(board));
-  const imported = await board.importNetlist(serverPath, importOptions);
+  const imported = await updateBoard(importOptions);
   diagnostics.push(...reportDiagnostics(imported.report, imported.errorCount, imported.warningCount));
   const added = (await footprintIds(board)).filter((id) => !before.has(id));
 
@@ -587,7 +615,9 @@ export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOp
   const placements = opts.board?.placements ?? [];
   const footprints = placements.length ? await board.getFootprints() : [];
   const explicitlyPlacedIds = new Set(
-    footprints.filter((footprint) => placements.some((placement) => placement.ref === footprint.reference)).map((footprint) => footprint.id),
+    footprints
+      .filter((footprint) => placements.some((placement) => placement.ref === footprint.reference))
+      .map((footprint) => footprint.id),
   );
   const autoIds = added.filter((id) => !explicitlyPlacedIds.has(id));
   if ((opts.autoplace && autoIds.length) || placements.length) {
@@ -605,7 +635,13 @@ export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOp
     }));
     footprintsPlaced = outcome.placedCount;
     if ("error" in outcome) {
-      diagnostics.push(diag("warning", `Autoplace failed (${outcome.error}); the imported footprints were left where the import put them.`, "autoplace_failed"));
+      diagnostics.push(
+        diag(
+          "warning",
+          `Autoplace failed (${outcome.error}); the imported footprints were left where the import put them.`,
+          "autoplace_failed",
+        ),
+      );
     } else if (!outcome.ok) {
       // Every non-completed result comes back as APR_NO_BOARD_OUTLINE, so the wording stays broad.
       diagnostics.push(

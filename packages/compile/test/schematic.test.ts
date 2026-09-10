@@ -10,7 +10,7 @@ import {
   SchematicSymbolSchema,
   TextSchema,
 } from "@fp-pcb/proto";
-import { LibSymbol, LocalLabel, mm, SchematicLine, SchematicSymbol, toVector2 } from "@fp-pcb/client";
+import { GlobalLabel, LibSymbol, mm, SchematicLine, SchematicSymbol, toVector2 } from "@fp-pcb/client";
 import { buildGeneratedSchematic, GENERATED_SCHEMATIC_PROPERTY } from "../src/schematic";
 
 function deviceSymbol(): LibSymbol {
@@ -64,7 +64,7 @@ describe("generated schematic", () => {
     const wire = result.items.find((item): item is SchematicLine => item instanceof SchematicLine)!;
     expect(wire.start).toEqual({ x: mm(25.48), y: mm(25.4) });
     expect(wire.end).toEqual({ x: mm(20.4), y: mm(25.4) });
-    const label = result.items.find((item): item is LocalLabel => item instanceof LocalLabel)!;
+    const label = result.items.find((item): item is GlobalLabel => item instanceof GlobalLabel)!;
     expect(label.text).toBe("VCC");
     expect(result.items.every((item) => item.customProperties[GENERATED_SCHEMATIC_PROPERTY] === "circuit.netlist.json")).toBe(true);
   });

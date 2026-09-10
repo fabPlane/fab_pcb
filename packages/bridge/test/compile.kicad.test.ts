@@ -132,9 +132,16 @@ describe.skipIf(!haveKicad)("compile jobs + kicad-cli api-server", () => {
       counts: { components: 2, nets: 2, footprintsAdded: 2, footprintsPlaced: 2 },
     });
     expect(typeof done.revision).toBe("number");
-    for (const s of ["checking", "outlining", "importing", "placing", "schematic", "saving"]) expect(states).toContain(`progress:${s}`);
+    for (const s of ["schematic", "checking", "outlining", "importing", "placing", "parity", "saving"])
+      expect(states).toContain(`progress:${s}`);
+    expect(states.indexOf("progress:schematic")).toBeLessThan(states.indexOf("progress:checking"));
+    expect(states.indexOf("progress:parity")).toBeGreaterThan(states.indexOf("progress:importing"));
     expect(done.log.some((l) => l.includes("registered 2 project libraries: Resistor_SMD, Device"))).toBe(true);
     expect(done.log.some((l) => l.includes("schematic: 2 symbols, 4 wires, 4 labels"))).toBe(true);
+    expect(done.log).toContain("schematic: saved and reopened before ERC");
+    expect(done.log.some((line) => line.startsWith("ERC: 0 errors"))).toBe(true);
+    expect(done.log).toContain("board update: SyncSchematicToBoard (schematic authoritative)");
+    expect(done.log).toContain("schematic parity: 0 conflicts");
     expect(existsSync(projectPath)).toBe(true);
     expect(existsSync(join(workspace, "demo", "demo.kicad_pcb"))).toBe(true);
     expect(existsSync(join(workspace, "demo", ".fabdesk", "compile.net"))).toBe(true);
@@ -198,6 +205,8 @@ describe.skipIf(!haveKicad)("compile jobs + kicad-cli api-server", () => {
         .flatMap((symbol) => symbol.pins.map((pin) => [symbol.reference, pin.proto.number, pin.position] as const))
         .sort(([aRef, aPin], [bRef, bPin]) => `${aRef}:${aPin}`.localeCompare(`${bRef}:${bPin}`)),
     ).toEqual(pinPositions);
+    const parity = await (await kicad.currentBoard())!.drc.run({ testFootprintsAgainstSchematic: true });
+    expect(parity.parityCount).toBe(0);
     const preserved = (await reopened.getWires(root.scope))[0]!;
     preserved.setCustomProperty("fp-pcb.generated", undefined);
     preservedWireId = (await root.commit("adopt generated wire as manual", (tx) => tx.update([preserved]))).updated[0]!.id;
@@ -233,6 +242,44 @@ describe.skipIf(!haveKicad)("compile jobs + kicad-cli api-server", () => {
     expect((await root.getSymbols()).map((symbol) => symbol.reference).sort()).toEqual(["R1", "R2"]);
     expect((await root.getAllItems()).some((item) => item.id === preservedWireId)).toBe(true);
     expect((await (await kicad.currentSchematic())!.getWires(root.scope)).length).toBe(6);
+  }, 60_000);
+
+  test("an ERC-invalid schematic fails before the board update", async () => {
+    const sessionResponse = await fetch(`${bridge.url}/sessions`, { method: "POST", body: JSON.stringify({ path: null }) });
+    expect(sessionResponse.status).toBe(201);
+    const isolatedSessionId = ((await sessionResponse.json()) as { session: { id: string } }).session.id;
+    const invalid = {
+      ...NETLIST_JSON,
+      netlist: { components: [NETLIST_JSON.netlist.components[0]], nets: [] },
+      board: { widthMm: 10, heightMm: 10 },
+    };
+    try {
+      const response = await fetch(`${bridge.url}/sessions/${isolatedSessionId}/compile`, {
+        method: "POST",
+        body: JSON.stringify({
+          source: {
+            kind: "netlist-json",
+            files: { "circuit.netlist.json": JSON.stringify(invalid) },
+            entrypoint: "circuit.netlist.json",
+          },
+          project: { path: join(workspace, "erc-invalid", "erc-invalid.kicad_pro") },
+        }),
+      });
+      expect(response.status).toBe(202);
+      const { job } = (await response.json()) as { job: CompileJobInfo };
+      const done = await bridge.compileJobs.wait(job.id);
+      expect(done.state).toBe("failed");
+      expect(done.error).toBeUndefined();
+      expect(done.result?.diagnostics.map((diagnostic) => diagnostic.code)).toContain("erc_errors");
+      expect(done.log.some((line) => /^ERC: [1-9]\d* errors/.test(line))).toBe(true);
+      expect(done.log).not.toContain("board update: SyncSchematicToBoard (schematic authoritative)");
+      const isolated = await KiCad.connect(bridge.sessions.get(isolatedSessionId)!.transport!, {
+        clientName: "fp-pcb/erc-fail-closed-test",
+      });
+      expect(await (await isolated.currentBoard())!.getFootprints()).toHaveLength(0);
+    } finally {
+      await fetch(`${bridge.url}/sessions/${isolatedSessionId}`, { method: "DELETE" });
+    }
   }, 60_000);
 
   test("a frontend error ends failed with diagnostics and no infrastructure error", async () => {

@@ -21,7 +21,7 @@ import {
 } from "./types";
 import type { Board } from "@fp-pcb/client";
 
-export type CompileStageName = "frontend" | "validating" | ApplyStage | "schematic";
+export type CompileStageName = "frontend" | "validating" | "schematic" | ApplyStage | "parity";
 
 export interface CompileOptions extends ApplyOptions {
   /** Turns `source` into a netlist. See `Frontend` in `types.ts`. */
@@ -32,8 +32,8 @@ export interface CompileOptions extends ApplyOptions {
    * Runs after the frontend succeeded and before anything touches the board — where a caller
    * registers the frontend's libraries so the dry run can resolve them.
    */
-  beforeApply?: (built: FrontendResult) => Promise<void>;
-  /** Runs after a successful board import; the bridge uses it to rebuild generated schematic items. */
+  beforeApply?: (built: FrontendResult) => Promise<Diagnostic[] | void>;
+  /** Runs after a successful board update; the bridge uses it to require schematic parity. */
   afterApply?: (built: FrontendResult) => Promise<Diagnostic[]>;
 }
 
@@ -140,7 +140,11 @@ export async function compile(source: CompileSource, board: Board, opts: Compile
   if (hasErrors(diagnostics)) return done(diagnostics, counts, started);
 
   cancelled();
-  await opts.beforeApply?.(built);
+  if (opts.beforeApply) {
+    opts.onStage?.("schematic");
+    diagnostics.push(...((await opts.beforeApply(built)) ?? []));
+  }
+  if (hasErrors(diagnostics)) return done(diagnostics, counts, started);
   cancelled();
   const applied = await applyNetlist(board, netlist, {
     ...opts,
@@ -149,13 +153,19 @@ export async function compile(source: CompileSource, board: Board, opts: Compile
   diagnostics.push(...applied.diagnostics);
   if (!hasErrors(diagnostics) && opts.afterApply) {
     cancelled();
-    opts.onStage?.("schematic");
+    opts.onStage?.("parity");
     diagnostics.push(...(await opts.afterApply(built)));
   }
 
   return done(
     diagnostics,
-    { ...counts, footprintsAdded: applied.footprintsAdded, footprintsPlaced: applied.footprintsPlaced, viasAdded: applied.viasAdded, holesAdded: applied.holesAdded },
+    {
+      ...counts,
+      footprintsAdded: applied.footprintsAdded,
+      footprintsPlaced: applied.footprintsPlaced,
+      viasAdded: applied.viasAdded,
+      holesAdded: applied.holesAdded,
+    },
     started,
     applied.netlistPath,
   );
