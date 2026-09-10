@@ -43,6 +43,9 @@ jobs:
         with:
           bun-version: 1.4.0
 
+      - name: Install JS dependencies
+        run: bun install --frozen-lockfile
+
       - name: Resolve immutable versions
         id: versions
         shell: bash
