@@ -17,8 +17,9 @@
  *   --repo <owner/name>  default TensorFleet/kicad
  *   --check            only print what the release carries; download nothing
  *
- * The repository is private: GITHUB_TOKEN or GH_TOKEN (contents:read) is required.  The path
- * goes to stdout, everything else to stderr, so the output can be captured directly.
+ * The fork is public, so no token is needed; GITHUB_TOKEN or GH_TOKEN is used when set (it
+ * lifts the API rate limit, which matters on CI runners that share an IP).  The path goes to
+ * stdout, everything else to stderr, so the output can be captured directly.
  */
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
@@ -119,32 +120,33 @@ function parseArgs(argv: string[]) {
 }
 
 const HELP = `usage: bun tooling/kicad-cli/fetch.ts [--tag nightly|nightly-<date>-<sha10>] [--platform <p>] [--dir <dir>] [--repo owner/name] [--check]
-prints the path of the kicad-cli executable; needs GITHUB_TOKEN or GH_TOKEN`;
+prints the path of the kicad-cli executable; GITHUB_TOKEN / GH_TOKEN are optional (rate limit)`;
 
 const log = (msg: string) => console.error(`kicad-cli fetch: ${msg}`);
 
-function token(): string {
+/** Authorization header when a token is set; an empty object otherwise (the fork is public). */
+function auth(): Record<string, string> {
   const t = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN;
-  if (!t) throw new Error("GITHUB_TOKEN or GH_TOKEN is required (the kicad fork is a private repository)");
-  return t;
+  return t ? { Authorization: `Bearer ${t}` } : {};
 }
 
 async function api<T>(url: string): Promise<T> {
   const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token()}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" },
+    headers: { ...auth(), Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" },
   });
   if (!res.ok) throw new Error(`${url}: HTTP ${res.status} ${await res.text()}`);
   return (await res.json()) as T;
 }
 
 /**
- * Download a release asset.  GitHub answers the asset URL with a redirect to object storage that
- * must be followed WITHOUT the Authorization header (the storage rejects a request carrying both
- * its signed query and a bearer token), so the redirect is handled by hand.
+ * Download a release asset through the API asset URL (works for public and private repositories
+ * alike).  GitHub answers with a redirect to object storage that must be followed WITHOUT the
+ * Authorization header (the storage rejects a request carrying both its signed query and a bearer
+ * token), so the redirect is handled by hand.
  */
 async function downloadAsset(asset: ReleaseAsset, dest: string): Promise<string> {
   const first = await fetch(asset.url, {
-    headers: { Authorization: `Bearer ${token()}`, Accept: "application/octet-stream" },
+    headers: { ...auth(), Accept: "application/octet-stream" },
     redirect: "manual",
   });
   let res = first;

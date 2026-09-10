@@ -41,8 +41,7 @@ requirements: `tools/nightly/README.md` in the fork). `tooling/kicad-cli/fetch.t
 dependency-free downloader — the same logic fabdesk uses to pull the binary in:
 
 ```bash
-export GITHUB_TOKEN=...                           # the fork is private
-bun run kicad:fetch                               # latest for this machine -> prints the executable
+bun run kicad:fetch                               # latest for this machine -> prints the executable (no token needed)
 bun run kicad:fetch -- --tag nightly-20260910-0c45443da6   # pin a build
 bun run kicad:fetch -- --check                    # what the release carries, no download
 ```
