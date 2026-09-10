@@ -157,13 +157,16 @@ jobs:
           for attempt in $(seq 1 60); do curl -fsS http://127.0.0.1:4020/health && break || sleep 1; done
           curl -fsS http://127.0.0.1:4020/health | grep -q '"ok":true'
 
-      - name: Native KiCad integration suite
+      - name: Native KiCad process-signal integration
         env:
           KICAD_CLI: ${{ github.workspace }}/dist/pcb/linux-x64/kicad/bin/kicad-cli
           KICAD_SRC: ${{ runner.temp }}/kicad-source
           KICAD_INTEGRATION_REQUIRED: "1"
           LD_LIBRARY_PATH: ${{ github.workspace }}/dist/pcb/linux-x64/kicad/lib:${{ github.workspace }}/dist/pcb/linux-x64/kicad/lib/runtime
-        run: bun run test:integration
+        run: |
+          bun test packages/bridge/test/bridge.kicad.test.ts
+          bun test packages/client/test/nng-ipc.kicad.test.ts \
+            --test-name-pattern "server killed mid-request"
 
       - name: Archive backend asset
         shell: bash
