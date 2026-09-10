@@ -34,10 +34,8 @@ env:
 
 jobs:
   linux-x64:
-    # KiCad has thousands of large C++ translation units. This runner provides 32 vCPU / 128 GB,
-    # enough to use every CPU without exceeding the ~1.5 GB peak per PCH-heavy compile job.
-    runs-on: blacksmith-32vcpu-ubuntu-2404
-    timeout-minutes: 180
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
 
@@ -73,12 +71,12 @@ jobs:
           if [ "${{ inputs.rebuild_image }}" = "true" ]; then exit 1; fi
           docker pull "${{ steps.versions.outputs.image }}"
 
-      - uses: useblacksmith/setup-docker-builder@v1
+      - uses: docker/setup-buildx-action@v3
         if: steps.image.outcome != 'success'
 
       - name: Build and publish the pinned KiCad image
         if: steps.image.outcome != 'success'
-        uses: useblacksmith/build-push-action@v2
+        uses: docker/build-push-action@v6
         with:
           context: packages/kicad-patches/docker
           file: packages/kicad-patches/docker/Dockerfile
@@ -86,12 +84,14 @@ jobs:
             KICAD_SOURCE=git
             KICAD_REPO=${{ env.KICAD_REPO }}
             KICAD_REF=${{ steps.versions.outputs.kicad }}
-            JOBS=32
+            JOBS=3
             BASE=ubuntu:24.04
           tags: |
             ${{ steps.versions.outputs.image }}
             ${{ steps.versions.outputs.image_short }}
           push: true
+          cache-from: type=gha,scope=kicad-${{ steps.versions.outputs.kicad }}
+          cache-to: type=gha,mode=max,scope=kicad-${{ steps.versions.outputs.kicad }}
 
       - name: Pull newly published image
         if: steps.image.outcome != 'success'
