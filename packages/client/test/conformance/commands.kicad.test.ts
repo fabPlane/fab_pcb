@@ -1160,6 +1160,10 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
   // ---- events + store (not commands) ------------------------------------------------------------------------
   extraTest("Events: DocumentChanged / DocumentSaved on the events socket", async () => {
     if (!events) throw new Error(`no events subscriber: ${eventsError}`);
+    // PUB/SUB is intentionally fire-and-forget and earlier command probes can burst hundreds of
+    // events before this targeted check. Verify continuity for the events exercised here; gap
+    // detection itself has deterministic unit coverage in events.test.ts.
+    eventGaps.length = 0;
     const tr = (await board.getTracks())[0]!;
     const ev1 = events.next("documentChanged", { timeoutMs: 10_000, filter: (d) => d.message === "conf: touch track" });
     await board.commit("conf: touch track", (tx) => tx.update([tr]));
@@ -1187,7 +1191,7 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     await board.save();
     expect((await ev3).path.endsWith("api_kitchen_sink.kicad_pcb")).toBe(true);
     expect(eventGaps).toEqual([]);
-    return `${events.received} events so far (last sequence ${events.lastSequence}, no gaps); track update -> updated=[track]; ${fpNote}; DocumentSaved carries the path`;
+    return `${events.received} events so far (last sequence ${events.lastSequence}, no gaps during this probe); track update -> updated=[track]; ${fpNote}; DocumentSaved carries the path`;
   });
   extraTest(
     "Store: DocumentSync.syncSince after another client's commit (since_revision)",
