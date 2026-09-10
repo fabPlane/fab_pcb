@@ -101,6 +101,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          kicad="$(tr -d '[:space:]' < packages/proto/KICAD_COMMIT)"
+          git init -q "$RUNNER_TEMP/kicad-source"
+          git -C "$RUNNER_TEMP/kicad-source" remote add origin "$KICAD_REPO"
+          git -C "$RUNNER_TEMP/kicad-source" fetch --depth 1 origin "$kicad"
+          git -C "$RUNNER_TEMP/kicad-source" checkout -q FETCH_HEAD
           for name in footprints symbols; do
             case "$name" in
               footprints) repo=https://gitlab.com/kicad/libraries/kicad-footprints.git; pin=packages/kicad-patches/KICAD_FOOTPRINTS_COMMIT ;;
@@ -124,6 +129,13 @@ jobs:
             "$RUNNER_TEMP/runtime" "$RUNNER_TEMP/kicad-footprints" "$RUNNER_TEMP/kicad-symbols" dist/pcb/linux-x64
       - name: Native bundle smoke
         run: bun packages/kicad-patches/smoke-bundle.ts dist/pcb/linux-x64/bundle.json linux-x64
+      - name: Native KiCad integration suite
+        env:
+          KICAD_CLI: ${{ github.workspace }}/dist/pcb/linux-x64/kicad/bin/kicad-cli
+          KICAD_SRC: ${{ runner.temp }}/kicad-source
+          KICAD_INTEGRATION_REQUIRED: "1"
+          LD_LIBRARY_PATH: ${{ github.workspace }}/dist/pcb/linux-x64/kicad/lib:${{ github.workspace }}/dist/pcb/linux-x64/kicad/lib/runtime
+        run: bun run test:integration
       - name: Archive backend
         run: tar -C dist/pcb/linux-x64 -czf fp-pcb-backend-linux-x64.tar.gz .
       - uses: actions/upload-artifact@v4

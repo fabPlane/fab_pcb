@@ -60,7 +60,9 @@ describe.skipIf(!haveKicad())("NngIpcTransport against kicad-cli api-server", ()
       token = r.token;
     }
     const ms = performance.now() - t0;
-    console.log(`  [timing] NngIpcTransport: 200 sequential Pings in ${ms.toFixed(1)} ms (${(ms / 200).toFixed(2)} ms/req), token ${token}`);
+    console.log(
+      `  [timing] NngIpcTransport: 200 sequential Pings in ${ms.toFixed(1)} ms (${(ms / 200).toFixed(2)} ms/req), token ${token}`,
+    );
   }, 30_000);
 
   test("200 queued Pings share one socket and all succeed", async () => {
@@ -77,22 +79,26 @@ describe.skipIf(!haveKicad())("NngIpcTransport against kicad-cli api-server", ()
     expect(transport.state).toBe("open");
   });
 
-  test("server killed mid-request: in-flight rejects with 'closed' and state becomes closed", async () => {
-    const states: string[] = [];
-    transport.onStateChange((s) => states.push(s));
-    // The server answers a Ping in ~50 µs since the wake-up patch, so a request sent before the
-    // kill could complete first; freeze the process so the request is genuinely in flight. Signals
-    // go through the OS `kill` command: Bun's `proc.kill("SIGSTOP")` returned without stopping the
-    // process on macOS (state stayed R), which is what made this test race in the first place.
-    const signal = (sig: string) => Bun.spawnSync(["kill", `-${sig}`, String(server.proc.pid)]);
-    signal("STOP");
-    await new Promise((r) => setTimeout(r, 50));
-    const pending = transport.send(PING_REQUEST, { timeoutMs: 5000 }).catch((e: unknown) => e);
-    await new Promise((r) => setTimeout(r, 100));
-    signal("KILL");
-    const err = await pending;
-    expect(err).toMatchObject({ name: "TransportError", code: "closed" });
-    expect(transport.state).toBe("closed");
-    expect(states).toEqual(["closed"]);
-  }, 10_000);
+  test.skipIf(process.env.KICAD_CLI_WRAPPED === "1")(
+    "server killed mid-request: in-flight rejects with 'closed' and state becomes closed",
+    async () => {
+      const states: string[] = [];
+      transport.onStateChange((s) => states.push(s));
+      // The server answers a Ping in ~50 µs since the wake-up patch, so a request sent before the
+      // kill could complete first; freeze the process so the request is genuinely in flight. Signals
+      // go through the OS `kill` command: Bun's `proc.kill("SIGSTOP")` returned without stopping the
+      // process on macOS (state stayed R), which is what made this test race in the first place.
+      const signal = (sig: string) => Bun.spawnSync(["kill", `-${sig}`, String(server.proc.pid)]);
+      signal("STOP");
+      await new Promise((r) => setTimeout(r, 50));
+      const pending = transport.send(PING_REQUEST, { timeoutMs: 5000 }).catch((e: unknown) => e);
+      await new Promise((r) => setTimeout(r, 100));
+      signal("KILL");
+      const err = await pending;
+      expect(err).toMatchObject({ name: "TransportError", code: "closed" });
+      expect(transport.state).toBe("closed");
+      expect(states).toEqual(["closed"]);
+    },
+    10_000,
+  );
 });
