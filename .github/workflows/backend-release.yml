@@ -98,8 +98,8 @@ jobs:
           set -euo pipefail
           for name in footprints symbols; do
             case "$name" in
-              footprints) repo=https://github.com/KiCad/kicad-footprints.git; pin=packages/kicad-patches/KICAD_FOOTPRINTS_COMMIT ;;
-              symbols) repo=https://github.com/KiCad/kicad-symbols.git; pin=packages/kicad-patches/KICAD_SYMBOLS_COMMIT ;;
+              footprints) repo=https://gitlab.com/kicad/libraries/kicad-footprints.git; pin=packages/kicad-patches/KICAD_FOOTPRINTS_COMMIT ;;
+              symbols) repo=https://gitlab.com/kicad/libraries/kicad-symbols.git; pin=packages/kicad-patches/KICAD_SYMBOLS_COMMIT ;;
             esac
             commit="$(tr -d '[:space:]' < "$pin")"
             git init -q "$RUNNER_TEMP/kicad-$name"
@@ -154,8 +154,8 @@ jobs:
           git -C "$RUNNER_TEMP/kicad" checkout -q FETCH_HEAD
           for name in footprints symbols; do
             case "$name" in
-              footprints) repo=https://github.com/KiCad/kicad-footprints.git; pin=packages/kicad-patches/KICAD_FOOTPRINTS_COMMIT ;;
-              symbols) repo=https://github.com/KiCad/kicad-symbols.git; pin=packages/kicad-patches/KICAD_SYMBOLS_COMMIT ;;
+              footprints) repo=https://gitlab.com/kicad/libraries/kicad-footprints.git; pin=packages/kicad-patches/KICAD_FOOTPRINTS_COMMIT ;;
+              symbols) repo=https://gitlab.com/kicad/libraries/kicad-symbols.git; pin=packages/kicad-patches/KICAD_SYMBOLS_COMMIT ;;
             esac
             commit="$(tr -d '[:space:]' < "$pin")"
             git init -q "$RUNNER_TEMP/kicad-$name"
@@ -217,8 +217,8 @@ jobs:
           git -C "$env:RUNNER_TEMP/kicad" fetch --depth 1 origin $kicad
           git -C "$env:RUNNER_TEMP/kicad" checkout -q FETCH_HEAD
           $libraries = @(
-            @{ Name = "footprints"; Repo = "https://github.com/KiCad/kicad-footprints.git"; Pin = "packages/kicad-patches/KICAD_FOOTPRINTS_COMMIT" },
-            @{ Name = "symbols"; Repo = "https://github.com/KiCad/kicad-symbols.git"; Pin = "packages/kicad-patches/KICAD_SYMBOLS_COMMIT" }
+            @{ Name = "footprints"; Repo = "https://gitlab.com/kicad/libraries/kicad-footprints.git"; Pin = "packages/kicad-patches/KICAD_FOOTPRINTS_COMMIT" },
+            @{ Name = "symbols"; Repo = "https://gitlab.com/kicad/libraries/kicad-symbols.git"; Pin = "packages/kicad-patches/KICAD_SYMBOLS_COMMIT" }
           )
           foreach ($library in $libraries) {
             $commit = (Get-Content $library.Pin -Raw).Trim()
