@@ -230,6 +230,9 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ env.BUN_VERSION }}
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
       - name: Install JS dependencies
         run: bun install --frozen-lockfile
       - name: Check out pinned KiCad source and libraries
@@ -252,23 +255,75 @@ jobs:
             git -C $path fetch --depth 1 origin $commit
             git -C $path checkout -q FETCH_HEAD
           }
-      - name: Cache vcpkg binary packages
-        uses: actions/cache@v4
+      - name: Set up the KiCad-pinned vcpkg
+        shell: pwsh
+        run: |
+          $config = Get-Content "$env:RUNNER_TEMP/kicad/vcpkg-configuration.json" | ConvertFrom-Json
+          $baseline = $config."default-registry".baseline
+          $root = "$env:RUNNER_TEMP/vcpkg"
+          git clone --quiet --filter=tree:0 https://github.com/microsoft/vcpkg $root
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          git -C $root checkout --quiet $baseline
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          & "$root/bootstrap-vcpkg.bat" -disableMetrics
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          "VCPKG_ROOT=$root" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "VCPKG_BINARY_SOURCES=clear;files,$env:RUNNER_TEMP/vcpkg-cache,readwrite" |
+            Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Restore vcpkg binary packages
+        id: vcpkg-cache
+        uses: actions/cache/restore@v4
         with:
           path: ${{ runner.temp }}/vcpkg-cache
           key: vcpkg-windows-x64-${{ hashFiles('packages/proto/KICAD_COMMIT') }}
           restore-keys: vcpkg-windows-x64-
-      - name: Build patched KiCad and assemble backend
+
+      # A cold Windows dependency build can exceed one run. Save its completed ports before
+      # failing so a rerun resumes instead of restarting OpenCascade, wxWidgets, Boost, and ICU.
+      - name: Install vcpkg dependencies
+        id: vcpkg-install
+        timeout-minutes: 250
+        continue-on-error: true
         shell: pwsh
-        env:
-          VCPKG_BINARY_SOURCES: clear;files,${{ runner.temp }}/vcpkg-cache,readwrite
         run: |
           New-Item -ItemType Directory -Force "$env:RUNNER_TEMP/vcpkg-cache" | Out-Null
-          $vcpkg = $env:VCPKG_INSTALLATION_ROOT
-          if (-not $vcpkg) { $vcpkg = "C:\\vcpkg" }
+          & "$env:VCPKG_ROOT/vcpkg.exe" install `
+            --triplet=x64-windows `
+            "--x-manifest-root=$env:RUNNER_TEMP/kicad" `
+            "--x-install-root=$env:RUNNER_TEMP/kicad/build/release/vcpkg_installed" `
+            "--overlay-triplets=$env:RUNNER_TEMP/kicad/tools/custom_vcpkg_triplets" `
+            --x-abi-tools-use-exact-versions `
+            --clean-after-build
+          exit $LASTEXITCODE
+
+      - name: Save complete vcpkg cache
+        if: steps.vcpkg-install.outcome == 'success' && steps.vcpkg-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/vcpkg-cache
+          key: ${{ steps.vcpkg-cache.outputs.cache-primary-key }}
+
+      - name: Save partial vcpkg cache
+        if: always() && steps.vcpkg-install.outcome != 'success'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/vcpkg-cache
+          key: ${{ steps.vcpkg-cache.outputs.cache-primary-key }}-partial-${{ github.run_id }}
+
+      - name: Require complete vcpkg dependencies
+        if: steps.vcpkg-install.outcome != 'success'
+        shell: bash
+        run: |
+          echo "::error::vcpkg did not finish inside its time budget. Partial packages were cached; rerun this workflow to continue."
+          exit 1
+
+      - name: Build patched KiCad and assemble backend
+        shell: pwsh
+        run: |
           packages/kicad-patches/build-windows.ps1 `
             -KicadSource "$env:RUNNER_TEMP/kicad" `
-            -VcpkgRoot $vcpkg `
+            -VcpkgRoot $env:VCPKG_ROOT `
             -Footprints "$env:RUNNER_TEMP/kicad-footprints" `
             -Symbols "$env:RUNNER_TEMP/kicad-symbols" `
             -Output "dist/pcb/windows-x64"
