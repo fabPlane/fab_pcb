@@ -12,13 +12,17 @@ on:
         default: false
 
 concurrency:
-  # A `build_kicad` dispatch compiles KiCad and runs for hours, so it gets its own group: sharing
-  # one with the default branch would make every merge queue behind it (the default branch does
-  # not cancel), and blocking a three-minute CI run on a six-hour build helps nobody.
+  # A `build_kicad` dispatch compiles KiCad and runs for hours, so it gets its own group: nothing
+  # else shares it, so no push can cancel a build halfway and no three-minute CI run has to wait
+  # behind one.  That separation is what makes cancelling everywhere below safe.
   group: ci-${{ github.ref }}-${{ github.event_name }}
-  # Superseding a branch push is the point of this; superseding the default branch is not, so its
-  # runs queue and each merge commit keeps a result of its own.  They are minutes now, not hours.
-  cancel-in-progress: ${{ github.ref_name != github.event.repository.default_branch }}
+  # Superseded runs are cancelled on every branch, the default one included.  It used to be exempt
+  # to protect the image build its pushes carried, but that build no longer runs on a push, and the
+  # exemption had the opposite of its intended effect: runs did not supersede, so they queued, and
+  # a two-hour build that was going to time out anyway sat behind another one (run 26 waited two
+  # hours to start, then spent two more failing).  Nothing on a push is long enough to be worth
+  # protecting now -- the default branch finishes in under two minutes.
+  cancel-in-progress: true
 
 env:
   BUN_VERSION: "1.4.0"
