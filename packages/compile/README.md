@@ -134,9 +134,11 @@ library pin ids are cleared so KiCad assigns independent instance ids. The bridg
 reopens the generated schematic, then runs ERC. The real-server test also checks that the resulting
 board has zero schematic parity conflicts.
 
-Missing `libSource`, an unavailable symbol, or a pin absent from its symbol produces a `schematic`
-warning. ERC still decides whether the compile may proceed; schematic parity decides whether it may
-be saved. Project and bundled symbol libraries are registered before lookup.
+Missing `libSource`, an unavailable symbol, or a connected pin absent from its symbol produces a
+`schematic` error. Once the schematic drives `SyncSchematicToBoard`, allowing one of those omissions
+would silently remove electrical intent before ERC or parity could inspect it. ERC then decides
+whether the represented design may proceed; schematic parity decides whether it may be saved.
+Project and bundled symbol libraries are registered before lookup.
 
 ## The job
 

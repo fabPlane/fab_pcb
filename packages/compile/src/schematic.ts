@@ -101,7 +101,7 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
   for (const [index, component] of netlist.components.entries()) {
     if (!component.libSource) {
       diagnostics.push({
-        severity: "warning",
+        severity: "error",
         stage: "schematic",
         code: "missing_symbol",
         message: `${component.ref}: libSource is required to draw this component in the generated schematic.`,
@@ -112,7 +112,7 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
     const definition = definitions.get(libId);
     if (!definition) {
       diagnostics.push({
-        severity: "warning",
+        severity: "error",
         stage: "schematic",
         code: "unknown_symbol",
         message: `${component.ref}: symbol ${libId} could not be loaded; the board compile is unchanged.`,
@@ -167,7 +167,7 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
       const start = pins.get(`${node.ref}:${node.pin}`);
       if (!start) {
         diagnostics.push({
-          severity: "warning",
+          severity: "error",
           stage: "schematic",
           code: "unknown_symbol_pin",
           message: `${node.ref} pin ${node.pin} (${net.name}) could not be drawn because the symbol or pin is unavailable.`,

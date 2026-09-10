@@ -119,7 +119,7 @@ describe("generated schematic", () => {
     expect(pinIds).toEqual(["", "", "", ""]);
   });
 
-  test("keeps board compilation compatible while diagnosing missing symbols and pins", () => {
+  test("fails closed when the authoritative schematic cannot represent symbols or pins", () => {
     const result = buildGeneratedSchematic(
       {
         components: [
@@ -145,6 +145,6 @@ describe("generated schematic", () => {
       "unknown_symbol_pin",
       "unknown_symbol_pin",
     ]);
-    expect(result.diagnostics.every((diagnostic) => diagnostic.severity === "warning")).toBe(true);
+    expect(result.diagnostics.every((diagnostic) => diagnostic.severity === "error")).toBe(true);
   });
 });
