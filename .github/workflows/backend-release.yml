@@ -86,8 +86,8 @@ jobs:
           tags: |
             ${{ steps.versions.outputs.image }}
             ${{ steps.versions.outputs.image_short }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=kicad-${{ steps.versions.outputs.kicad }}
+          cache-to: type=gha,mode=max,scope=kicad-${{ steps.versions.outputs.kicad }}
           push: true
       - name: Pull the newly published image
         if: steps.image.outcome != 'success'
