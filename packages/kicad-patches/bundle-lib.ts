@@ -39,3 +39,9 @@ export async function validateJsAutorouterSource(root: string): Promise<void> {
     throw new Error(`js_autorouter entry point not found: ${root}/src/index.ts`);
   }
 }
+
+export function bundledJavaRelativePath(target: string): string {
+  if (target.startsWith("darwin-")) return "private/freerouting/jdk/Contents/Home/bin/java";
+  if (target === "windows-x64") return "private/freerouting/jdk/bin/java.exe";
+  return "private/freerouting/jdk/bin/java";
+}

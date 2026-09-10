@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { mkdtemp, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { targetSpec, validateJsAutorouterSource } from "./bundle-lib";
+import { bundledJavaRelativePath, targetSpec, validateJsAutorouterSource } from "./bundle-lib";
 
 describe("backend bundle targets", () => {
   test("uses IPC on Unix and KiCad WebSockets on Windows", () => {
@@ -10,6 +10,12 @@ describe("backend bundle targets", () => {
     expect(targetSpec("darwin-arm64")).toMatchObject({ bunTarget: "bun-darwin-arm64", socketTransport: "ipc" });
     expect(targetSpec("windows-x64")).toMatchObject({ bunTarget: "bun-windows-x64", socketTransport: "ws", kicadCliName: "kicad-cli.exe" });
     expect(() => targetSpec("plan9-x64")).toThrow(/unsupported bundle target/);
+  });
+
+  test("uses the platform Java layout for portable Freerouting", () => {
+    expect(bundledJavaRelativePath("linux-x64")).toBe("private/freerouting/jdk/bin/java");
+    expect(bundledJavaRelativePath("darwin-arm64")).toBe("private/freerouting/jdk/Contents/Home/bin/java");
+    expect(bundledJavaRelativePath("windows-x64")).toBe("private/freerouting/jdk/bin/java.exe");
   });
 });
 
