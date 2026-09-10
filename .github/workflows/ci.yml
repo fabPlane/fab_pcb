@@ -201,8 +201,9 @@ jobs:
 
       # The integration tests spawn `$KICAD_CLI api-server <file> --socket <path>` and expect the
       # socket to appear on the host, so KICAD_CLI is a wrapper that runs the container with the
-      # host's /tmp and the checkout mounted at the same paths. The tests create temporary
-      # workspaces outside /tmp/kicad, and KiCad must be able to read those files too.
+      # host's /tmp and the checkout mounted at the same paths. The explicit /tmp/kicad mount
+      # overrides the image's VOLUME there so sockets reach the host; the parent mount exposes
+      # temporary test workspaces so KiCad can read their files.
       - name: Check out the KiCad fork (fixtures) and write the kicad-cli wrapper
         run: |
           set -euo pipefail
@@ -215,7 +216,7 @@ jobs:
           cat > /tmp/kicad-cli <<EOS
           #!/bin/sh
           exec docker run --rm -i --user "\$(id -u):\$(id -g)" -e HOME=/tmp \
-            -v /tmp:/tmp -v "$(cd .. && pwd):$(cd .. && pwd)" \
+            -v /tmp:/tmp -v /tmp/kicad:/tmp/kicad -v "$(cd .. && pwd):$(cd .. && pwd)" \
             "${{ steps.tag.outputs.tag }}" "\$@"
           EOS
           chmod +x /tmp/kicad-cli
