@@ -121,6 +121,28 @@ export class KiCadWasmWorkerClient {
     }
   }
 
+  /**
+   * `terminate()` and nothing else — the escape hatch a worker exists for.
+   *
+   * `shutdown()` asks the module to stop first, which a wedged one cannot answer: `kiapi_dispatch`
+   * is a synchronous call into a single-threaded module, so a command that never returns holds the
+   * worker's message loop and the `{stop: true}` frame is never read. This skips the handshake and
+   * kills the thread, taking MEMFS with it. Idempotent, synchronous, and always a hard stop: the
+   * caller has to reload a module and replay whatever it had written.
+   */
+  terminate(reason = "the KiCad wasm worker was terminated"): void {
+    if (this.closed) return;
+    this.closed = true;
+    this.worker.terminate();
+    this._state = "failed";
+    this.notifyState("failed", reason);
+    // `fatal`, so a `WasmTransport` still holding this client closes itself rather than dispatching
+    // into a thread that no longer exists.
+    this.failAll(new Error(reason), true);
+    this.listeners.clear();
+    this.log(reason, "warn");
+  }
+
   // ------------------------------------------------------------------ MEMFS, over messages
 
   /** Write files into MEMFS (parents created). Returns how many. */

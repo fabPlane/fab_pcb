@@ -95,8 +95,15 @@ export interface WasmBackend {
   dispatchAsync?(request: Uint8Array): Promise<Uint8Array>;
   onEvent(cb: (bytes: Uint8Array) => void): () => void;
   shutdown(): void | Promise<void>;
+  /**
+   * End the module without asking it to stop first, for one that no longer answers. Only a worker
+   * can do that — on the main thread there is no thread to kill — so it is optional and
+   * `stopKiCad()` falls back to `shutdown()`.
+   */
+  terminate?(reason?: string): void;
   readonly isShutDown: boolean;
   writeFiles(files: { path: string; bytes: Uint8Array }[]): Promise<number>;
+  readFile(path: string): Promise<Uint8Array>;
   stat(path: string): Promise<{ kind: 'dir' | 'file'; size: number } | null>;
   listFiles(path: string): Promise<string[]>;
 }
@@ -114,6 +121,7 @@ function mainThreadBackend(instance: KiCadWasm, pkg: KicadWasmPackage): WasmBack
       for (const f of files) pkg.writeFile(instance, f.path, f.bytes);
       return files.length;
     },
+    readFile: async (path) => pkg.readFile(instance, path),
     stat: async (path) => {
       if (!pkg.exists(instance, path)) return null;
       const st = instance.FS.stat(path);
@@ -197,6 +205,8 @@ export class KicadSessionService implements SessionService {
    * the project the user picked is gone by the time KiCad is asked to reopen it.
    */
   private staged: { path: string; bytes: Uint8Array }[] = [];
+  /** The document `importProjectFiles()` picked out of the last import, for `stagedProject()`. */
+  private stagedMain = '';
   /** How many of `staged` the current instance already has. */
   private stagedWritten = 0;
   /** Serialises the MEMFS writes, which are a round trip to the worker. */
@@ -602,7 +612,81 @@ export class KicadSessionService implements SessionService {
     const main = names.find((n) => n.endsWith('.kicad_pro')) ?? names.find((n) => n.endsWith('.kicad_pcb')) ?? names.find((n) => n.endsWith('.kicad_sch'));
     if (!main) throw new Error('no .kicad_pro, .kicad_pcb or .kicad_sch among the files');
     this.root = root;
-    return `${root}/${main}`;
+    this.stagedMain = `${root}/${main}`;
+    return this.stagedMain;
+  }
+
+  /**
+   * The project the user last imported, or `null` if none has been. Survives `stopKiCad()` and a
+   * module that aborted, which is the point: the bytes are still in `staged`, so the screen can
+   * offer to reopen it rather than making the user find the files on disk a second time.
+   */
+  stagedProject(): { path: string; name: string; files: number } | null {
+    if (!this.stagedMain || this.staged.length === 0) return null;
+    const file = this.stagedMain.slice(this.stagedMain.lastIndexOf('/') + 1);
+    return { path: this.stagedMain, name: file.replace(/\.kicad_(pro|pcb|sch)$/, ''), files: this.staged.length };
+  }
+
+  /**
+   * Read the project back out of MEMFS: every file under the workspace root, as
+   * `<path relative to the root>` plus its bytes. This is the only way anything KiCad wrote in this
+   * tab reaches the user's disk — there is no host file system behind the module, so a save lands
+   * in a heap that dies with the tab.
+   *
+   * Ordered by path, and `.kicad_pro` / `.kicad_pcb` / `.kicad_sch` first, so a zip of it opens on
+   * the project rather than on a backup.
+   */
+  async readProjectFiles(): Promise<{ path: string; bytes: Uint8Array }[]> {
+    if (!this.wasm) throw new Error('reading files back out of MEMFS needs the in-browser wasm mode');
+    const backend = this.instance;
+    if (!backend || backend.isShutDown) throw new Error('the KiCad wasm module is not running, so there is nothing to read');
+    const root = (this.root || MEMFS_PROJECT_DIR).replace(/\/$/, '');
+    const paths = await backend.listFiles(root);
+    const rank = (p: string) => (p.endsWith('.kicad_pro') ? 0 : p.endsWith('.kicad_pcb') || p.endsWith('.kicad_sch') ? 1 : 2);
+    const sorted = [...paths].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+    const out: { path: string; bytes: Uint8Array }[] = [];
+    for (const abs of sorted) {
+      // One at a time: each is a round trip to the worker, and a project is tens of files.
+      const bytes = await backend.readFile(abs);
+      out.push({ path: abs.startsWith(`${root}/`) ? abs.slice(root.length + 1) : abs.replace(/^\/+/, ''), bytes });
+    }
+    return out;
+  }
+
+  /**
+   * Stop the module now, whatever it is doing, and leave the session in `error` so the screen can
+   * offer to start over. The escape hatch for a wedged KiCad: `kiapi_dispatch` is a synchronous
+   * call into a single-threaded module, so a command that never returns cannot be cancelled and
+   * cannot even be asked to stop — the worker's message loop is inside it. `terminate()` is the
+   * only answer, and it takes MEMFS with it.
+   *
+   * Nothing is lost that was not already lost: every imported file is replayed into the module the
+   * next `connect()` loads (`stagedWritten` back to zero). Anything KiCad *wrote* since then is
+   * gone with the heap, so `file.downloadProject` is worth offering before this.
+   */
+  async stopKiCad(reason = 'KiCad was stopped from the app'): Promise<void> {
+    if (!this.wasm) throw new Error('stopping the module needs the in-browser wasm mode');
+    const backend = this.instance;
+    // Before the teardown, so nothing below tries to reuse or gracefully close it.
+    this.instance = null;
+    this.wasmDead = true;
+    this.stagedWritten = 0;
+    if (backend) {
+      // `terminate()` where there is a thread to end; on the main thread `shutdown()` is all there
+      // is, and a module wedged there has taken the tab with it anyway.
+      if (backend.terminate) backend.terminate(reason);
+      else await Promise.resolve(backend.shutdown()).catch(() => undefined);
+    }
+    this.log(reason, 'warn');
+    try {
+      await this.opts.onDisconnected?.();
+    } catch (e) {
+      this.log(`closing the documents: ${e instanceof Error ? e.message : String(e)}`, 'warn');
+    }
+    await this.teardown({ keepModule: false });
+    // `error`, not `closed`: the project is still named, and `staged` still holds its files, so the
+    // screen shows "reopen" rather than an empty file picker.
+    if (this.session) this.patch({ state: 'error', error: reason });
   }
 
   /**

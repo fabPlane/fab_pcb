@@ -97,6 +97,33 @@ describe("the module in a worker", () => {
     await wasm.shutdown();
   });
 
+  test("terminate() kills it without the handshake, and fails what was in flight", async () => {
+    const wasm = await start();
+    // In flight when the thread ends. A wedged module never reads `{stop: true}` either -- the
+    // worker's message loop is inside the dispatch -- so `shutdown()` would sit out its two-second
+    // wait first. This is the hard stop.
+    const inFlight = wasm.dispatchAsync(PING).then(
+      () => null,
+      (e: Error) => e,
+    );
+    wasm.terminate("stopped from the app");
+
+    expect(wasm.state).toBe("failed");
+    expect(wasm.isShutDown).toBe(true);
+    const err = await inFlight;
+    expect(err?.message).toBe("stopped from the app");
+    // Fatal, so a `WasmTransport` still holding this client closes rather than dispatching into a
+    // thread that is gone.
+    expect(err?.name).toBe(WASM_ABORT_ERROR_NAME);
+    await expect(wasm.dispatchAsync(PING)).rejects.toThrow(/not running/);
+    await expect(wasm.readFile("/project/demo.kicad_pcb")).rejects.toThrow(/not running/);
+
+    // Idempotent, and `shutdown()` afterwards is a no-op rather than a second terminate.
+    wasm.terminate();
+    await wasm.shutdown();
+    expect(wasm.state).toBe("failed");
+  });
+
   test("fails to start when the module URL has no factory", async () => {
     await expect(createKiCadWasmInWorker({ moduleUrl: "", createWorker: inProcessWorker, startTimeoutMs: 5000 })).rejects.toThrow(
       /moduleUrl/,

@@ -46,6 +46,10 @@ function ImportProject({ session, onOpen, busy }: { session: KicadSessionService
   const input = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [dropping, setDropping] = useState(false);
+  // Every imported file is kept for the life of the tab, so a module that aborted — or that
+  // "Stop KiCad" killed — can be replaced without sending the user back to the file picker:
+  // `connect()` loads a fresh one and replays the import into it.
+  const staged = session.stagedProject();
 
   const take = async (list: FileList | null) => {
     setError(null);
@@ -88,9 +92,19 @@ function ImportProject({ session, onOpen, busy }: { session: KicadSessionService
           {error}
         </div>
       )}
+      {staged && (
+        <div className="empty-state">
+          {staged.files} file{staged.files === 1 ? '' : 's'} from <strong>{staged.name}</strong> are still held in this tab. Reopening loads a fresh KiCad and writes them back into it.
+        </div>
+      )}
       <input ref={input} type="file" multiple hidden accept=".kicad_pro,.kicad_pcb,.kicad_sch,.kicad_prl,.kicad_sym,.kicad_mod,.csv,.json" onChange={(e) => void take(e.target.files)} />
       <div className="project-actions">
         <span className="path">{session.workspaceRoot()}</span>
+        {staged && (
+          <button className="btn" disabled={busy} onClick={() => onOpen(staged.path)}>
+            {busy ? 'Opening…' : `Reopen ${staged.name}`}
+          </button>
+        )}
         <button className="btn primary" disabled={busy} onClick={() => input.current?.click()}>
           {busy ? 'Opening…' : 'Choose files…'}
         </button>

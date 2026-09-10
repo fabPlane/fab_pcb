@@ -13,6 +13,7 @@ import { createMockFactory } from '../../../packages/kicad-wasm/test/mock-module
 import { MOCK_ENTRY_URL, MOCK_TOKEN, inProcessWorker } from '../../../packages/kicad-wasm/test/kicad-mock-entry';
 import { KicadSessionService, MEMFS_PROJECT_DIR } from '@/services/kicad/KicadSessionService';
 import { dirname, join } from '@/lib/node-path-stub';
+import { crc32, zipStore } from '@/lib/zip';
 
 const TOKEN = MOCK_TOKEN;
 const BOARD = `${MEMFS_PROJECT_DIR}/demo.kicad_pcb`;
@@ -197,6 +198,101 @@ describe('in-browser wasm mode', () => {
     const s = new KicadSessionService({ bridgeUrl: 'http://127.0.0.1:4020', log: () => {} });
     expect(s.wasm).toBe(false);
     await expect(s.importProjectFiles([{ name: 'x.kicad_pcb', bytes: bytes('') }])).rejects.toThrow(/wasm mode/);
+    await expect(s.readProjectFiles()).rejects.toThrow(/wasm mode/);
+    await expect(s.stopKiCad()).rejects.toThrow(/wasm mode/);
+  });
+
+  // "Download project": MEMFS is the only place anything KiCad wrote in this tab exists, and it
+  // dies with the module, so reading it back is the whole export story.
+  test('reads the project back out of MEMFS, project files first', async () => {
+    const s = workerService();
+    await s.importProjectFiles([
+      { name: 'sheets/page2.kicad_sch', bytes: bytes('(kicad_sch)') },
+      { name: 'fp-info-cache', bytes: bytes('cache') },
+      { name: 'demo.kicad_pcb', bytes: bytes('(kicad_pcb (version 20240108))') },
+      { name: 'demo.kicad_pro', bytes: bytes('{}') },
+    ]);
+    await s.connect(BOARD);
+    try {
+      const files = await s.readProjectFiles();
+      // Paths come back relative to the workspace root, sub-directories intact, project files first.
+      expect(files.map((f) => f.path)).toEqual(['demo.kicad_pro', 'demo.kicad_pcb', 'sheets/page2.kicad_sch', 'fp-info-cache']);
+      expect(new TextDecoder().decode(files[1]!.bytes)).toBe('(kicad_pcb (version 20240108))');
+    } finally {
+      await s.disconnect();
+    }
+    // Nothing to read once the module is gone; the message says so rather than returning nothing.
+    await expect(s.readProjectFiles()).rejects.toThrow(/not running/);
+  });
+
+  // "Stop KiCad": the escape hatch for a module that no longer answers. `kiapi_dispatch` is
+  // synchronous inside a single-threaded module, so ending the thread is the only way back.
+  test('stops the module and replays the import into the next one', async () => {
+    const s = workerService();
+    await s.importProjectFiles([
+      { name: 'demo.kicad_pcb', bytes: bytes('(kicad_pcb (version 20240108))') },
+      { name: 'demo.kicad_pro', bytes: bytes('{}') },
+    ]);
+    await s.connect(BOARD);
+    const first = s.wasmInstance;
+    expect(first).not.toBeNull();
+
+    await s.stopKiCad('wedged on purpose');
+    expect(first!.isShutDown).toBe(true);
+    expect(s.wasmInstance).toBeNull();
+    // `error`, not `closed`: the project is still named, so the screen offers to reopen it.
+    expect(s.session?.state).toBe('error');
+    expect(s.session?.error).toBe('wedged on purpose');
+    // Nothing in the old heap is reachable any more.
+    await expect(s.readProjectFiles()).rejects.toThrow(/not running/);
+
+    // The import is kept for the life of the tab, so the screen can offer this without a picker.
+    const staged = s.stagedProject();
+    expect(staged).toMatchObject({ path: `${MEMFS_PROJECT_DIR}/demo.kicad_pro`, name: 'demo', files: 2 });
+
+    // Reopening loads a fresh module and writes every staged file into its empty MEMFS.
+    const info = await s.connect(staged!.path);
+    try {
+      expect(info.state).toBe('open');
+      expect(s.wasmInstance).not.toBe(first);
+      expect((await s.readProjectFiles()).map((f) => f.path)).toEqual(['demo.kicad_pro', 'demo.kicad_pcb']);
+    } finally {
+      await s.disconnect();
+    }
+  });
+});
+
+// The archive "Download project" hands the browser. Store-only and hand-rolled, so the byte layout
+// is worth pinning: a wrong central-directory offset makes an archive only some tools open.
+describe('the zip writer', () => {
+  test('produces a readable stored archive', () => {
+    const zip = zipStore([
+      { path: 'demo.kicad_pro', bytes: bytes('{}'), modified: new Date(2026, 0, 2, 3, 4, 6) },
+      { path: '/sheets/page2.kicad_sch', bytes: bytes('(kicad_sch)'), modified: new Date(2026, 0, 2, 3, 4, 6) },
+    ]);
+    const view = new DataView(zip.buffer, zip.byteOffset, zip.byteLength);
+    expect(view.getUint32(0, true)).toBe(0x04034b50); // the first local header
+
+    // The end-of-central-directory record is the last 22 bytes (no archive comment).
+    const eocd = zip.length - 22;
+    expect(view.getUint32(eocd, true)).toBe(0x06054b50);
+    expect(view.getUint16(eocd + 8, true)).toBe(2); // entries on this disk
+    expect(view.getUint16(eocd + 10, true)).toBe(2); // entries in total
+    const centralSize = view.getUint32(eocd + 12, true);
+    const centralAt = view.getUint32(eocd + 16, true);
+    expect(centralAt + centralSize).toBe(eocd);
+    expect(view.getUint32(centralAt, true)).toBe(0x02014b50);
+    // The first central header points at a local header, and the leading slash was dropped.
+    expect(view.getUint32(view.getUint32(centralAt + 42, true), true)).toBe(0x04034b50);
+    const text = new TextDecoder().decode(zip);
+    expect(text).toContain('sheets/page2.kicad_sch');
+    expect(text).not.toContain('/sheets/page2.kicad_sch');
+  });
+
+  test('computes CRC-32 the way the format wants', () => {
+    expect(crc32(new Uint8Array(0))).toBe(0);
+    expect(crc32(bytes('abc')).toString(16)).toBe('352441c2');
+    expect(crc32(bytes('123456789'))).toBe(0xcbf43926);
   });
 });
 

@@ -195,8 +195,28 @@ in which case the bridge is still used for `/files/*` and the library's second s
 screen shows a file picker and a drop target instead of the workspace browser: the chosen files (a
 directory picker's `webkitRelativePath` is preserved) are written into MEMFS under `/project` and the
 `.kicad_pro` — else the `.kicad_pcb`, else the `.kicad_sch` — is opened. `stat()` and `listFiles()`
-answer from MEMFS in this mode, so a `.kicad_pro` still finds the board sitting next to it. There is
-no export path yet: a save lands in MEMFS and stays there until someone downloads it.
+answer from MEMFS in this mode, so a `.kicad_pro` still finds the board sitting next to it.
+
+**Getting the project back out.** A save lands in MEMFS, which dies with the module, so
+**File → Download project (.zip)** (`file.downloadProject`) is how anything KiCad wrote in this tab
+reaches a disk. It flushes the dirty documents, reads every file under the workspace root back over
+the worker's `listFiles` / `readFile` messages (`KicadSessionService.readProjectFiles()`), and hands
+the browser one archive. The zip is `apps/web/src/lib/zip.ts`: store-only, about sixty lines, no
+dependency — a project is a dozen small text files, and every library that deflates them is larger
+than the saving. Zip64 and encryption are deliberately absent; `zipStore()` throws rather than write
+an archive that lies about its sizes. The command is registered `hidden` outside wasm mode, where
+there is a real file system on the other end and nothing to export.
+
+**Stopping a wedged KiCad.** `kiapi_dispatch` is a synchronous call into a single-threaded module,
+so a command that never returns cannot be cancelled — and cannot even be asked to stop, because the
+worker's message loop is inside it. **Tools → Stop KiCad** (`session.stopKicad`) is the escape hatch
+the Worker exists for: `KiCadWasmWorkerClient.terminate()` skips the `kiapi_shutdown` handshake that
+`shutdown()` would wait two seconds for, ends the thread, and fails everything in flight as fatal so
+a `WasmTransport` still holding the client closes instead of dispatching into a thread that is gone.
+The session goes to `error` rather than `closed`, and because every imported file is kept for the
+life of the tab (`stagedProject()`), the project screen offers **Reopen &lt;project&gt;** — the next
+`connect()` loads a fresh module and replays the import into its empty MEMFS. Anything KiCad wrote
+since the import goes with the heap, which is the other reason to offer the download first.
 
 **In a Worker.** `kiapi_dispatch` is a synchronous call into a single-threaded module, so on the main
 thread every command froze paint for as long as it ran. The module now loads in a Web Worker
