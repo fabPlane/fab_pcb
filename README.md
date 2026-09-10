@@ -27,7 +27,27 @@ bun run test:unit          # every workspace, one bun process each (tooling/ci/r
 KICAD_CLI=... bun run test:integration   # *.kicad.test.ts against a real kicad-cli api-server
 bun run test:e2e           # Playwright smoke on apps/web + mock services (e2e/)
 packages/kicad-patches/build-macos.sh    # native kicad-cli; build-linux.sh for the Docker image
+KICAD_CLI="$(bun run --silent kicad:fetch)" bun run test:integration   # or use a prebuilt nightly (below)
 ```
+
+### Prebuilt `kicad-cli` nightlies
+
+The fork publishes the headless server (`kicad-cli` + the pcbnew/eeschema kifaces) for
+Linux x86_64, macOS arm64/x86_64 and Windows x86_64 every night as GitHub Releases:
+[`nightly`](https://github.com/TensorFleet/kicad/releases/tag/nightly) is the rolling
+latest, `nightly-<date>-<sha10>` are pinnable builds, and `manifest.json` on each release
+maps platform → archive, sha256 and the executable's path inside it (format and runtime
+requirements: `tools/nightly/README.md` in the fork). `tooling/kicad-cli/fetch.ts` is the
+dependency-free downloader — the same logic fabdesk uses to pull the binary in:
+
+```bash
+export GITHUB_TOKEN=...                           # the fork is private
+bun run kicad:fetch                               # latest for this machine -> prints the executable
+bun run kicad:fetch -- --tag nightly-20260910-0c45443da6   # pin a build
+bun run kicad:fetch -- --check                    # what the release carries, no download
+```
+
+Builds unpack under `.kicad-cli/<build tag>/<platform>/` and are reused when complete.
 
 Ownership of every path is in [docs/ownership.md](docs/ownership.md). Start with the docs, in order:
 

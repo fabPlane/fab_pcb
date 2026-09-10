@@ -155,6 +155,13 @@
         "@fp-pcb/proto": "workspace:*",
       },
     },
+    "tooling/kicad-cli": {
+      "name": "@fp-pcb/kicad-cli",
+      "version": "0.0.1",
+      "devDependencies": {
+        "@types/bun": "^1.2.0",
+      },
+    },
   },
   "packages": {
     "@babel/code-frame": ["@babel/code-frame@7.29.7", "", { "dependencies": { "@babel/helper-validator-identifier": "^7.29.7", "js-tokens": "^4.0.0", "picocolors": "^1.1.1" } }, "sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw=="],
@@ -292,6 +299,8 @@
     "@fp-pcb/coverage": ["@fp-pcb/coverage@workspace:tooling/coverage"],
 
     "@fp-pcb/e2e": ["@fp-pcb/e2e@workspace:e2e"],
+
+    "@fp-pcb/kicad-cli": ["@fp-pcb/kicad-cli@workspace:tooling/kicad-cli"],
 
     "@fp-pcb/proto": ["@fp-pcb/proto@workspace:packages/proto"],
 

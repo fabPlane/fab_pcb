@@ -29,6 +29,9 @@
       "path": "tooling/bench"
     },
     {
+      "path": "tooling/kicad-cli"
+    },
+    {
       "path": "apps/web"
     }
   ]

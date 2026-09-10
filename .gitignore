@@ -12,3 +12,5 @@ e2e/.auth/
 coverage-summary.md
 packages/renderer/scripts/pixel-diff-out/
 .worktrees/
+# nightly kicad-cli builds unpacked by tooling/kicad-cli/fetch.ts
+/.kicad-cli/
