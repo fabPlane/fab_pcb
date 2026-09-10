@@ -4,6 +4,7 @@
 param(
   [string]$KicadSource = (Resolve-Path "$PSScriptRoot\..\..\..\kicad"),
   [string]$VcpkgRoot = $env:VCPKG_ROOT,
+  [string]$VcpkgOverlayTriplets = "$KicadSource\tools\custom_vcpkg_triplets",
   [string]$Footprints = $env:KICAD_FOOTPRINT_DIR,
   [string]$Symbols = $env:KICAD_SYMBOL_DIR,
   [string]$Output = "$PSScriptRoot\dist\windows-x64"
@@ -18,7 +19,7 @@ $installed = Join-Path $build "vcpkg_installed"
 if (-not (Test-Path $installed)) { throw "vcpkg dependencies are missing: $installed" }
 cmake -S $KicadSource -B $build -G Ninja `
   -DCMAKE_TOOLCHAIN_FILE="$VcpkgRoot\scripts\buildsystems\vcpkg.cmake" `
-  -DVCPKG_OVERLAY_TRIPLETS="$KicadSource\tools\custom_vcpkg_triplets" `
+  -DVCPKG_OVERLAY_TRIPLETS="$VcpkgOverlayTriplets" `
   -DVCPKG_TARGET_TRIPLET=x64-windows `
   -DVCPKG_MANIFEST_INSTALL=OFF `
   -DVCPKG_INSTALLED_DIR="$installed" `

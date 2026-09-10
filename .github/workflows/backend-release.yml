@@ -267,7 +267,15 @@ jobs:
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           & "$root/bootstrap-vcpkg.bat" -disableMetrics
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $triplets = "$env:RUNNER_TEMP/kicad-release-triplets"
+          New-Item -ItemType Directory -Force $triplets | Out-Null
+          $baseTriplet = "$env:RUNNER_TEMP/kicad/tools/custom_vcpkg_triplets/x64-windows.cmake" -replace '\\', '/'
+          @"
+          include("$baseTriplet")
+          set(VCPKG_BUILD_TYPE release)
+          "@ | Set-Content "$triplets/x64-windows.cmake"
           "VCPKG_ROOT=$root" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "KICAD_WINDOWS_TRIPLETS=$triplets" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           "VCPKG_BINARY_SOURCES=clear;files,$env:RUNNER_TEMP/vcpkg-cache,readwrite" |
             Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
@@ -276,8 +284,8 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ runner.temp }}/vcpkg-cache
-          key: vcpkg-windows-x64-${{ hashFiles('packages/proto/KICAD_COMMIT') }}
-          restore-keys: vcpkg-windows-x64-
+          key: vcpkg-windows-x64-release-v1-${{ hashFiles('packages/proto/KICAD_COMMIT') }}
+          restore-keys: vcpkg-windows-x64-release-v1-
 
       # A cold Windows dependency build can exceed one run. Save its completed ports before
       # failing so a rerun resumes instead of restarting OpenCascade, wxWidgets, Boost, and ICU.
@@ -292,7 +300,7 @@ jobs:
             --triplet=x64-windows `
             "--x-manifest-root=$env:RUNNER_TEMP/kicad" `
             "--x-install-root=$env:RUNNER_TEMP/kicad/build/release/vcpkg_installed" `
-            "--overlay-triplets=$env:RUNNER_TEMP/kicad/tools/custom_vcpkg_triplets" `
+            "--overlay-triplets=$env:KICAD_WINDOWS_TRIPLETS" `
             --x-abi-tools-use-exact-versions `
             --clean-after-build
           exit $LASTEXITCODE
@@ -324,6 +332,7 @@ jobs:
           packages/kicad-patches/build-windows.ps1 `
             -KicadSource "$env:RUNNER_TEMP/kicad" `
             -VcpkgRoot $env:VCPKG_ROOT `
+            -VcpkgOverlayTriplets $env:KICAD_WINDOWS_TRIPLETS `
             -Footprints "$env:RUNNER_TEMP/kicad-footprints" `
             -Symbols "$env:RUNNER_TEMP/kicad-symbols" `
             -Output "dist/pcb/windows-x64"
