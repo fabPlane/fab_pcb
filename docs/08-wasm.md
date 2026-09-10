@@ -270,9 +270,11 @@ KICAD_WASM_RELEASE_FILE=~/Downloads/kicad-wasm-fp-pcb-2026-09-09-wasm.tar.gz \
 ```
 
 `fetch` verifies every file against the tarball's `SHA256SUMS` before anything reaches `dist/`, and
-prints which fork commit and toolchain produced the module. The fork is private, so a download needs
-`GITHUB_TOKEN` / `GH_TOKEN` (the script uses the releases API with
-`Accept: application/octet-stream`) or an authenticated `gh` CLI.
+prints which fork commit and toolchain produced the module. `TensorFleet/kicad` is public, so the
+download needs no credentials; `GITHUB_TOKEN` / `GH_TOKEN` is used when set, which lifts the
+unauthenticated API rate limit (that matters on CI runners, which share an IP). If the fork is ever
+made private again the token stops being optional — the script then falls back to an authenticated
+`gh` CLI, and fails with instructions if there is neither.
 
 A local build tree still wins when it exists: plain `fetch` copies from `KICAD_WASM_DIR` and only
 falls back to a release if told to. To build it yourself, see `kicad/host/STATUS.md`:
@@ -297,7 +299,7 @@ tools/wasm/package.sh                    # the same tarball the workflow uploads
 | `KICAD_WASM_RELEASE`        | wasm        | release tag to download instead of copying a build tree (default `packages/proto/KICAD_TAG`)                                |
 | `KICAD_WASM_RELEASE_FILE`   | wasm        | a `kicad-wasm-*.tar.gz` already on disk; skips the download                                                                 |
 | `KICAD_WASM_REPO`           | wasm        | `owner/repo` holding the releases (default `TensorFleet/kicad`)                                                             |
-| `GITHUB_TOKEN` / `GH_TOKEN` | wasm        | token for the private fork's release assets (else an authenticated `gh`)                                                    |
+| `GITHUB_TOKEN` / `GH_TOKEN` | wasm        | optional; lifts the releases API rate limit (and is required if the fork goes private again)                                |
 | `KICAD_SRC`                 | all         | the KiCad checkout (defaults to `../kicad`)                                                                                 |
 
 Bridge-only (`packages/bridge`):
@@ -349,6 +351,36 @@ unknown `KICAD_TRANSPORT` fails immediately. The summary line names the backend 
 `packages/kicad-wasm` also has its own integration test (`test/wasm.kicad.test.ts`) that runs
 `Ping` and `GetVersion` straight through `kiapi_dispatch` — the first thing to try when a fresh
 build lands.
+
+## On CI
+
+The `wasm (conformance)` job in `.github/workflows/ci.yml` runs all of that on every PR. It does not
+build the module — an Emscripten build of KiCad is about 80 minutes — it downloads the released one:
+
+1. **Look for a released wasm build.** `gh api repos/<owner>/kicad/releases/tags/<tag>` for the tag
+   in the repository variable `KICAD_WASM_RELEASE`, or `packages/proto/KICAD_TAG` when that is
+   unset, and checks the release's assets for `kicad-wasm-<tag with / replaced by ->.tar.gz`. The
+   result is the step output `have`.
+2. **Everything after it is `if: steps.release.outputs.have == 'true'`.** This is the green-by-skip
+   part, and it is deliberate: until the first wasm release is cut there is no asset, so the job
+   succeeds having run nothing and does not block a PR. The moment a release for the tag exists the
+   same job starts gating for real, with no workflow change. The step summary says which of the two
+   happened, so a skip is visible rather than silent.
+3. **Fetch, then assert.** `bun run --filter @fp-pcb/kicad-wasm fetch:release`, then a `test -f` on
+   `dist/kicad_api.{js,wasm}` — the suites below skip themselves when the module is missing, so a
+   fetch that quietly produced nothing would otherwise look like a pass.
+4. **The fork at `KICAD_COMMIT`**, shallow and unbuilt, for `KICAD_SRC`: the conformance fixtures are
+   KiCad's own `qa/data` (the kitchen-sink board and schematic, the QA libraries).
+5. **The three suites**: `bun test --cwd packages/kicad-wasm` (loader, isolation, dispatch),
+   `KICAD_TRANSPORT=wasm bun run --cwd packages/client test:conformance`, and
+   `bun test --cwd packages/bridge test/session-wasm.kicad.test.ts` (a session as a module in a
+   Worker). `KICAD_WASM_DIR` is exported once, by step 3.
+6. **Provenance** of what was tested — the tarball's `kicad-wasm.json` — into the step summary.
+
+No secret is involved: the fork is public, and the job's own `GITHUB_TOKEN` is passed only to lift
+the API rate limit. If the fork goes private again, both the probe and the fetch need a PAT that can
+read it, passed as `GH_TOKEN` and `GITHUB_TOKEN` respectively; a repository's own `GITHUB_TOKEN`
+cannot read another private repository's release assets.
 
 ## Status
 

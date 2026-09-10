@@ -20,9 +20,10 @@
  * came from. The asset is `kicad-wasm-<tag with / replaced by ->.tar.gz` (release asset names cannot
  * contain a slash); `kicad/tools/wasm/package.sh` builds it and this reads it back.
  *
- * The fork is private, so the download needs a token: `GITHUB_TOKEN` or `GH_TOKEN`, used against the
- * releases API (the asset URL with `Accept: application/octet-stream`). With no token, an installed
- * and authenticated `gh` is used instead.
+ * `TensorFleet/kicad` is public, so the download needs no credentials. `GITHUB_TOKEN` or `GH_TOKEN`
+ * is used against the releases API when set (it lifts the rate limit, which matters on CI runners
+ * that share an IP, and is what a private fork would need); an authenticated `gh` is the fallback
+ * if the unauthenticated request cannot reach the API at all.
  *
  * `kicad_api.js` and `kicad_api.wasm` are required; `kicad_api.data` (an Emscripten
  * `--preload-file` bundle, e.g. KiCad's share tree) and `kicad_api.worker.js` are taken when
@@ -87,15 +88,29 @@ function run(cmd: string[], cwd?: string) {
 // --------------------------------------------------------------------------------- download
 type Asset = { name: string; url: string; size: number };
 
-async function downloadWithToken(tag: string, token: string, into: string): Promise<string> {
-  const auth = {
-    Authorization: `Bearer ${token}`,
+/**
+ * Thrown instead of exiting when the API refused in a way an authenticated `gh` might not: no
+ * credentials plus 401/403/404 is exactly what a private repository looks like from the outside.
+ * `fromRelease()` catches this one and retries through `gh`; every other failure still exits.
+ */
+class MaybeNeedsAuth extends Error {}
+
+async function downloadFromApi(tag: string, token: string | undefined, into: string): Promise<string> {
+  const auth: Record<string, string> = {
     "X-GitHub-Api-Version": "2022-11-28",
     "User-Agent": "fp-pcb-kicad-wasm-fetch",
   };
+  // TensorFleet/kicad is public, so a token is optional here; when one is set it lifts the API rate
+  // limit (which matters on CI runners that share an IP) and is what a private fork would need.
+  if (token) auth.Authorization = `Bearer ${token}`;
+  // Unauthenticated, these are indistinguishable from "the repository is private", so they are worth
+  // a second attempt through `gh` rather than an immediate exit.
+  const deniable = (status: number) => !token && (status === 401 || status === 403 || status === 404);
+
   // Tag names contain a slash (fp-pcb/<date>-<name>); the API takes the rest of the path as the tag.
   const relUrl = `${API}/repos/${RELEASE_REPO}/releases/tags/${tag}`;
   const rel = await fetch(relUrl, { headers: { ...auth, Accept: "application/vnd.github+json" } });
+  if (deniable(rel.status)) throw new MaybeNeedsAuth(`GET ${relUrl} -> ${rel.status} ${rel.statusText}`);
   if (rel.status === 404) {
     fail(`no release ${tag} in ${RELEASE_REPO} (or this token cannot see it).
 Cut one by pushing the tag: the fork's .github/workflows/wasm-release.yml builds and attaches the asset.`);
@@ -111,9 +126,10 @@ Cut one by pushing the tag: the fork's .github/workflows/wasm-release.yml builds
   }
 
   console.log(`  downloading ${want} (${mib(asset.size)}) from ${RELEASE_REPO}`);
-  // The asset API URL plus this Accept is what serves the bytes of a private repo's asset; the
-  // browser_download_url would need a session cookie.
+  // The asset API URL plus this Accept serves the bytes for a public and a private release alike;
+  // for a private one the browser_download_url would need a session cookie.
   const bin = await fetch(asset.url, { headers: { ...auth, Accept: "application/octet-stream" } });
+  if (deniable(bin.status)) throw new MaybeNeedsAuth(`GET ${asset.url} -> ${bin.status} ${bin.statusText}`);
   if (!bin.ok) fail(`GET ${asset.url} -> ${bin.status} ${bin.statusText}`);
 
   const path = join(into, want);
@@ -187,14 +203,21 @@ async function fromRelease() {
     } else {
       if (!tag) tag = await defaultTag();
       const token = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN;
-      console.log(`release: ${tag} from ${RELEASE_REPO}`);
-      if (token) {
-        tarball = await downloadWithToken(tag, token, staging);
-      } else if (run(["gh", "--version"]).ok) {
-        tarball = downloadWithGh(tag, staging);
-      } else {
-        fail(`${RELEASE_REPO} is private: set GITHUB_TOKEN (or GH_TOKEN), or install and authenticate the gh CLI.
+      console.log(`release: ${tag} from ${RELEASE_REPO}${token ? "" : " (unauthenticated)"}`);
+      // The plain API path works with or without a token; `gh` is the fallback for someone who has
+      // it authenticated but no token in the environment (and the way a private fork would be read).
+      try {
+        tarball = await downloadFromApi(tag, token, staging);
+      } catch (err) {
+        if (!(err instanceof MaybeNeedsAuth)) throw err;
+        if (!run(["gh", "--version"]).ok) {
+          fail(`${err.message}
+${RELEASE_REPO} is public, so this should have worked; if it has been made private again, set GITHUB_TOKEN
+(or GH_TOKEN) to a token that can read it, or install and authenticate the gh CLI.
 A local tarball works too: KICAD_WASM_RELEASE_FILE=/path/to/${assetName(tag)}`);
+        }
+        console.log(`  unauthenticated download failed (${err.message}); trying gh`);
+        tarball = downloadWithGh(tag, staging);
       }
     }
 

@@ -29,9 +29,9 @@ KICAD_WASM_RELEASE_FILE=/path/to/kicad-wasm-fp-pcb-2026-09-09-wasm.tar.gz bun ru
 Release mode downloads `kicad-wasm-<tag with / replaced by ->.tar.gz` from the fork's GitHub
 release for that tag, checks every file against the tarball's `SHA256SUMS`, and unpacks
 `kicad_api.js`, `kicad_api.wasm` and the `kicad-wasm.json` manifest (fork commit, emscripten and
-protobuf versions, sizes) into `dist/`. The fork is private, so it needs `GITHUB_TOKEN` / `GH_TOKEN`
-(used against the releases API) or an authenticated `gh`. `KICAD_WASM_REPO` overrides
-`TensorFleet/kicad`.
+protobuf versions, sizes) into `dist/`. `TensorFleet/kicad` is public, so this needs no credentials;
+`GITHUB_TOKEN` / `GH_TOKEN` is used when set (it lifts the API rate limit, and is what a private
+fork would need), and an authenticated `gh` is the fallback. `KICAD_WASM_REPO` overrides the repo.
 
 The tarball is produced by `kicad/tools/wasm/package.sh` and attached by the fork's
 `.github/workflows/wasm-release.yml` when an `fp-pcb/*` alignment tag is pushed
