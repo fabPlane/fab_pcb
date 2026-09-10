@@ -12,21 +12,23 @@ on:
         default: false
 
 concurrency:
-  group: ci-${{ github.ref }}
-  # Superseding a branch push is the point of this; superseding the default branch is not.  Its
-  # run is the only one that builds and publishes the kicad-cli image, and that takes about an
-  # hour, so cancelling it whenever the next thing merges means it never finishes and every later
-  # run rebuilds KiCad from source.  Let those queue instead.
+  # A `build_kicad` dispatch compiles KiCad and runs for hours, so it gets its own group: sharing
+  # one with the default branch would make every merge queue behind it (the default branch does
+  # not cancel), and blocking a three-minute CI run on a six-hour build helps nobody.
+  group: ci-${{ github.ref }}-${{ github.event_name }}
+  # Superseding a branch push is the point of this; superseding the default branch is not, so its
+  # runs queue and each merge commit keeps a result of its own.  They are minutes now, not hours.
   cancel-in-progress: ${{ github.ref_name != github.event.repository.default_branch }}
 
 env:
   BUN_VERSION: "1.4.0"
-  # Image with kicad-cli + kifaces built from the fork (packages/kicad-patches/docker). Until the
-  # first image is published to GHCR the kicad-integration job builds it from KICAD_REPO/KICAD_REF.
-  # KICAD_REPO is the fork, not upstream KiCad: KICAD_COMMIT pins a commit that only exists there.
+  # Image with kicad-cli + kifaces built from the fork (packages/kicad-patches/docker), tagged with
+  # the commit in packages/proto/KICAD_COMMIT and published by a build_kicad dispatch; see the
+  # kicad-integration job.  KICAD_REPO is the fork, not upstream KiCad: KICAD_COMMIT pins a commit
+  # that only exists there, and it is also what the build checks out, so there is no branch ref
+  # here to drift away from the pin.
   KICAD_IMAGE: ghcr.io/${{ github.repository_owner }}/kicad-cli
   KICAD_REPO: https://github.com/${{ github.repository_owner }}/kicad.git
-  KICAD_REF: web-api
 
 jobs:
   # ----------------------------------------------------------------- unit, typecheck, generated files
@@ -52,14 +54,23 @@ jobs:
         run: bun install --frozen-lockfile
 
       # gen:check and coverage:check need the KiCad fork's api/proto and C++ handler sources at the
-      # pinned commit. A shallow checkout of that one commit is enough (no build).
-      - name: Check out the KiCad fork at KICAD_COMMIT
+      # pinned commit (no build).  Only those four directories are read, so the checkout is sparse
+      # and blobless: ~5 MB in a few seconds, where the whole tree at depth 1 is ~600 MB, almost
+      # all of it the qa/ fixtures that only the integration job below opens.
+      #
+      # The path list is the one tooling/coverage/run.ts walks (COMMAND_FILES under api/proto,
+      # HANDLER_FILES under common|pcbnew|eeschema/api).  It cannot silently go stale: a source
+      # this misses is a command missing from the matrix, which is exactly the drift coverage:check
+      # fails on.  --filter=blob:none also leaves `git show HEAD:<path>` able to fetch a file from
+      # outside the set on demand, so a new handler directory degrades to slow, not broken.
+      - name: Check out the KiCad fork at KICAD_COMMIT (api sources only)
         run: |
           set -euo pipefail
           commit="$(cat packages/proto/KICAD_COMMIT)"
           git init -q ../kicad
           git -C ../kicad remote add origin "$KICAD_REPO"
-          git -C ../kicad fetch --depth 1 origin "$commit"
+          git -C ../kicad sparse-checkout set --no-cone api/proto common/api pcbnew/api eeschema/api
+          git -C ../kicad fetch --depth 1 --filter=blob:none origin "$commit"
           git -C ../kicad checkout -q FETCH_HEAD
           echo "KICAD_SRC=$(cd ../kicad && pwd)" >> "$GITHUB_ENV"
 
@@ -87,6 +98,7 @@ jobs:
             coverage-summary.md
             docs/coverage-badge.json
             docs/api-coverage.md
+          retention-days: 7
 
   # ----------------------------------------------------------------- Playwright smoke (mock services)
   e2e:
@@ -134,8 +146,10 @@ jobs:
           E2E_SERVER: preview
         run: cd e2e && bunx playwright test
 
+      # Only when something failed: a green run's report is never opened, and artifact storage on
+      # a private repository is billed for every day it is kept.
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
           name: playwright-report
           path: |
@@ -145,18 +159,31 @@ jobs:
 
   # ----------------------------------------------------------------- integration against the fork's kicad-cli
   #
-  # Builds (or pulls) the Linux image with `kicad-cli api-server` from the fork and runs the
-  # *.kicad.test.ts suites with KICAD_CLI pointing at a wrapper that execs into the container.
+  # Pulls the Linux image with `kicad-cli api-server` from the fork and runs the *.kicad.test.ts
+  # suites with KICAD_CLI pointing at a wrapper that execs into the container.  Pulling and running
+  # takes about three minutes.
   #
-  # continue-on-error is set ON PURPOSE until the image exists on GHCR: a full KiCad build is ~1 h
-  # on a hosted runner, and nothing has been published yet.  The first run on the default branch
-  # after this builds the image and pushes it, and every later run whose KICAD_COMMIT is unchanged
-  # pulls it in seconds.  Once `docker pull $KICAD_IMAGE:<KICAD_COMMIT>` succeeds, remove
-  # `continue-on-error` so the job gates PRs like the other two.
+  # Compiling KiCad from source takes longer than a job may run, so it happens ONLY on an explicit
+  # `build_kicad` dispatch, never on a push or a pull request.  It used to be the automatic
+  # fallback whenever the pull missed, which cost two runner-hours per run and produced nothing:
+  # the build hit the job timeout, so the image was never pushed, so the next run missed the pull
+  # and built again.  A run that finds no image now says so and skips the suites instead.
+  #
+  # After bumping packages/proto/KICAD_COMMIT, publish the matching image once:
+  #
+  #   Actions -> CI -> Run workflow, on the default branch, with build_kicad checked
+  #
+  # Every later run pulls it in seconds.
+  #
+  # continue-on-error is set ON PURPOSE while the image is not yet published for every pin: the
+  # suites are advisory until then.  Once a bump reliably comes with its image, remove it so the
+  # job gates PRs like the other two.
   kicad-integration:
     name: kicad-integration (Docker kicad-cli)
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    # The pull-and-test path is minutes; only a deliberate build needs hours.  120 was the worst of
+    # both: too long to fail fast, too short for the build it was waiting on to ever finish.
+    timeout-minutes: ${{ inputs.build_kicad && 360 || 25 }}
     continue-on-error: true
     # The repository default is read-only, which is enough to pull a public image but not to push
     # one, so the push below needs the scope requested explicitly.
@@ -201,14 +228,19 @@ jobs:
         id: pull
         continue-on-error: true
         run: |
-          if [ "${{ github.event.inputs.build_kicad }}" = "true" ]; then exit 1; fi
+          # A build_kicad dispatch wants a fresh image, so miss the pull on purpose.
+          if [ "${{ inputs.build_kicad }}" = "true" ]; then exit 1; fi
           docker pull "${{ steps.tag.outputs.tag }}"
 
       - uses: docker/setup-buildx-action@v3
-        if: steps.pull.outcome != 'success'
+        if: steps.pull.outcome != 'success' && inputs.build_kicad
 
+      # No cache-from/cache-to: type=gha.  A KiCad build's layer cache is tens of gigabytes and
+      # would evict the bun and Playwright caches from the repository's 10 GB budget, slowing every
+      # run to speed up one that now happens a couple of times a year.  GHCR is the cache.
       - name: Build the image from the fork (KICAD_SOURCE=git)
-        if: steps.pull.outcome != 'success'
+        id: build
+        if: steps.pull.outcome != 'success' && inputs.build_kicad
         uses: docker/build-push-action@v6
         with:
           context: packages/kicad-patches/docker
@@ -221,20 +253,41 @@ jobs:
           tags: ${{ steps.tag.outputs.tag }}
           load: true
           push: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Push the image (default branch only)
-        if: steps.pull.outcome != 'success' && github.ref_name == github.event.repository.default_branch
+        if: steps.build.outcome == 'success' && github.ref_name == github.event.repository.default_branch
         run: docker push "${{ steps.tag.outputs.tag }}"
 
+      # Everything below needs an image.  A skipped build leaves outcome == 'skipped', so this is
+      # 'yes' only when the pull hit or a dispatched build actually produced one.
+      - name: Image ready?
+        id: image
+        run: echo "ready=${{ (steps.pull.outcome == 'success' || steps.build.outcome == 'success') && 'yes' || 'no' }}" >> "$GITHUB_OUTPUT"
+
+      - name: No image for this KICAD_COMMIT
+        if: steps.image.outputs.ready != 'yes'
+        run: |
+          tag="${{ steps.tag.outputs.tag }}"
+          {
+            echo "### kicad-integration skipped"
+            echo
+            echo "\`$tag\` is not on GHCR, so the integration suites did not run."
+            echo
+            echo "Publish it once from **Actions -> CI -> Run workflow** on"
+            echo "\`${{ github.event.repository.default_branch }}\` with **build_kicad** checked."
+            echo "Every later run with this \`packages/proto/KICAD_COMMIT\` then pulls it in seconds."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::warning title=kicad-integration skipped::$tag is not on GHCR; run CI with build_kicad=true on the default branch to publish it"
+
       - name: kicad-cli version
+        if: steps.image.outputs.ready == 'yes'
         run: docker run --rm "${{ steps.tag.outputs.tag }}" version
 
       # The integration tests spawn `$KICAD_CLI api-server <file> --socket <path>` and expect the
       # socket to appear on the host, so KICAD_CLI is a wrapper that runs the container with the
       # host's /tmp/kicad and the checkout mounted at the same paths.
       - name: Check out the KiCad fork (fixtures) and write the kicad-cli wrapper
+        if: steps.image.outputs.ready == 'yes'
         run: |
           set -euo pipefail
           commit="${{ steps.tag.outputs.commit }}"
@@ -253,6 +306,7 @@ jobs:
           echo "KICAD_CLI=/tmp/kicad-cli" >> "$GITHUB_ENV"
 
       - name: Integration tests
+        if: steps.image.outputs.ready == 'yes'
         env:
           KICAD_INTEGRATION_REQUIRED: "1"
         run: bun run test:integration
