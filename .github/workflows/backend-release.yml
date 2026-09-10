@@ -103,8 +103,8 @@ jobs:
           set -euo pipefail
           for name in footprints symbols; do
             case "$name" in
-              footprints) repo=https://github.com/KiCad/kicad-footprints.git; pin=packages/kicad-patches/KICAD_FOOTPRINTS_COMMIT ;;
-              symbols) repo=https://github.com/KiCad/kicad-symbols.git; pin=packages/kicad-patches/KICAD_SYMBOLS_COMMIT ;;
+              footprints) repo=https://gitlab.com/kicad/libraries/kicad-footprints.git; pin=packages/kicad-patches/KICAD_FOOTPRINTS_COMMIT ;;
+              symbols) repo=https://gitlab.com/kicad/libraries/kicad-symbols.git; pin=packages/kicad-patches/KICAD_SYMBOLS_COMMIT ;;
             esac
             commit="$(tr -d '[:space:]' < "$pin")"
             git init -q "$RUNNER_TEMP/kicad-$name"
