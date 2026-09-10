@@ -215,7 +215,7 @@ jobs:
           mkdir -p /tmp/kicad
           cat > /tmp/kicad-cli <<EOS
           #!/bin/sh
-          exec docker run --rm -i --user "\$(id -u):\$(id -g)" -e HOME=/tmp \
+          exec docker run --rm -i --network host --user "\$(id -u):\$(id -g)" -e HOME=/tmp \
             -v /tmp:/tmp -v /tmp/kicad:/tmp/kicad -v "$(cd .. && pwd):$(cd .. && pwd)" \
             "${{ steps.tag.outputs.tag }}" "\$@"
           EOS
@@ -225,4 +225,7 @@ jobs:
       - name: Integration tests
         env:
           KICAD_INTEGRATION_REQUIRED: "1"
+          # Two process-signal tests run against the extracted native executable in the backend
+          # workflow; a docker CLI wrapper cannot forward SIGSTOP/SIGKILL to the container.
+          KICAD_CLI_WRAPPED: "1"
         run: bun run test:integration

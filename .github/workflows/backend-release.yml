@@ -108,6 +108,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          kicad="$(tr -d '[:space:]' < packages/proto/KICAD_COMMIT)"
+          git init -q "$RUNNER_TEMP/kicad-source"
+          git -C "$RUNNER_TEMP/kicad-source" remote add origin "$KICAD_REPO"
+          git -C "$RUNNER_TEMP/kicad-source" fetch --depth 1 origin "$kicad"
+          git -C "$RUNNER_TEMP/kicad-source" checkout -q FETCH_HEAD
           for name in footprints symbols; do
             case "$name" in
               footprints) repo=https://gitlab.com/kicad/libraries/kicad-footprints.git; pin=packages/kicad-patches/KICAD_FOOTPRINTS_COMMIT ;;
@@ -151,6 +156,14 @@ jobs:
           trap 'kill "$bridge_pid" >/dev/null 2>&1 || true' EXIT
           for attempt in $(seq 1 60); do curl -fsS http://127.0.0.1:4020/health && break || sleep 1; done
           curl -fsS http://127.0.0.1:4020/health | grep -q '"ok":true'
+
+      - name: Native KiCad integration suite
+        env:
+          KICAD_CLI: ${{ github.workspace }}/dist/pcb/linux-x64/kicad/bin/kicad-cli
+          KICAD_SRC: ${{ runner.temp }}/kicad-source
+          KICAD_INTEGRATION_REQUIRED: "1"
+          LD_LIBRARY_PATH: ${{ github.workspace }}/dist/pcb/linux-x64/kicad/lib:${{ github.workspace }}/dist/pcb/linux-x64/kicad/lib/runtime
+        run: bun run test:integration
 
       - name: Archive backend asset
         shell: bash
