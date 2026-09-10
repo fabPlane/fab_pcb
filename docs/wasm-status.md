@@ -10,6 +10,11 @@ runs DRC with no server anywhere.
 Everything is on the branch `wasm` in both repos. Nothing is pushed and nothing is tagged — see
 [Housekeeping](#housekeeping-for-you-to-decide).
 
+**Since (2026-09-10):** CI has a `wasm (conformance)` job that runs the wasm suites against the
+released module, green-by-skip until the first release exists ([On CI](#on-ci)); the app can stop a
+wedged module and download the project out of MEMFS (follow-ups 3 and 4); and `format:check` gates
+in CI (follow-up 8).
+
 ## What exists
 
 **Fork (`tensorfleet/kicad`, branch `wasm`, 41 commits on top of `web-api`)**
@@ -125,6 +130,31 @@ bun packages/client/test/bench-drc.ts
 
 `KICAD_CLI` matters: without it the suites silently use the stale `build/release` binary and the
 integration tests fail for reasons that have nothing to do with this work.
+
+## On CI
+
+`.github/workflows/ci.yml` has a `wasm (conformance)` job as of 2026-09-10. It never builds the
+module — 80 minutes and a toolchain this repo does not own — it downloads the one the fork's
+`wasm-release.yml` attaches to each `fp-pcb/*` alignment tag, then runs the loader and isolation
+tests, the client conformance suite over `WasmTransport`, and the bridge's session-in-a-Worker test.
+The fixtures come from a shallow checkout of the fork at `KICAD_COMMIT`, unbuilt, for `KICAD_SRC`.
+
+Two decisions worth knowing:
+
+- **Green by skip.** A first step probes the release for `kicad-wasm-<tag>.tar.gz` and every later
+  step is gated on the result, so until the first release is cut the job succeeds having run
+  nothing. That is why it was commented out before: a job depending on a release that does not
+  exist would have failed every run. It starts gating for real the moment the release appears, with
+  no workflow change, and the step summary says which of the two happened so a skip is never
+  silent. After the fetch it asserts `dist/kicad_api.{js,wasm}` exist, because the suites below skip
+  themselves when the module is missing and a fetch that quietly produced nothing would otherwise
+  read as a pass.
+- **No secret.** `TensorFleet/kicad` is public now, so the release is readable with no credentials;
+  the job's own `GITHUB_TOKEN` is passed only to lift the rate limit hosted runners share an IP for.
+  If the fork ever goes private again, both the probe and the fetch need a PAT — a repository's own
+  `GITHUB_TOKEN` cannot read another private repository's release assets.
+
+The tag is the repository variable `KICAD_WASM_RELEASE` when set, otherwise `packages/proto/KICAD_TAG`.
 
 ## The numbers
 
@@ -315,10 +345,20 @@ the attribution is wrong, which matters if any of this is ever proposed upstream
    `#ifdef KICAD_HEADLESS_API` guard plus an error return. Keep `KICAD_WASM_ALLOW_UNDEFINED=ON`
    until they are done; the remaining ~280 are wx GUI classes the header shim declares and nothing
    constructs. `tools/wasm/audit_undefined.py` prints the list, sorted, with the referencing files.
-3. **A cancel button in the UI.** `terminate()` is on the worker client and nothing calls it, so a
-   wedged command still needs a page reload.
-4. **Project download.** MEMFS is only reachable through the session; `readFile` is already in the
-   worker protocol, so "save my project back out of the tab" is UI work, not plumbing.
+3. ~~**A cancel button in the UI.**~~ **Done** (2026-09-10). **Tools → Stop KiCad**
+   (`session.stopKicad`) calls a new `KiCadWasmWorkerClient.terminate()`, which skips the
+   `kiapi_shutdown` handshake `shutdown()` would wait two seconds for — a wedged module never reads
+   that frame, because the worker's message loop is inside the dispatch — and fails everything in
+   flight as fatal so `WasmTransport` closes itself. The session lands in `error`, and since every
+   imported file is kept for the life of the tab the project screen offers **Reopen &lt;project&gt;**:
+   the next connect loads a fresh module and replays the import into its empty MEMFS. No page
+   reload. This is a stop, not a cancel — one command cannot be killed without the instance.
+4. ~~**Project download.**~~ **Done** (2026-09-10). **File → Download project (.zip)**
+   (`file.downloadProject`) flushes the dirty documents, reads every file under the workspace root
+   back through the worker's `listFiles` / `readFile` messages
+   (`KicadSessionService.readProjectFiles()`), and hands the browser one archive, project files
+   first. The zip is `apps/web/src/lib/zip.ts` — store-only, ~60 lines, no dependency, verified
+   against system `unzip`; deflate would save bandwidth that never leaves the machine.
 5. **pthreads.** DRC and zone fill are the two things a user waits on and both are parallel
    natively. `-pthread` needs COOP/COEP headers on the app and a real thread pool instead of the
    inline façade.
@@ -333,9 +373,9 @@ the attribution is wrong, which matters if any of this is ever proposed upstream
    of the container header (PNG `IHDR`, JPEG `SOFn`, BMP, GIF) and leaves the raster blank. Boards
    round-trip byte for byte because `BITMAP_BASE` keeps the undecoded bytes, but nothing can render
    or plot the image. Emscripten's libpng port is the cheap route.
-8. **The pre-existing `format:check` failures** — 159 files, none of them touched by this work.
-   Either run `bun run format` once across the repo or narrow the prettier glob; today the check is
-   useless because it is always red.
+8. ~~**The pre-existing `format:check` failures**~~ **Done** (2026-09-10). `bun run format` was run
+   once across the repo ("chore: format the repo once so format:check can gate", 159 files), and
+   `format:check` is now a step in CI's `bun (unit)` job, so it stays green.
 9. **The `wxArrayString::Remove` assert** on every project open (see above). It is inside wx itself,
    so finding it means a `wxDEBUG_LEVEL=1` wx and a backtrace, not a KiCad rebuild.
 10. **KiCad's stock fonts are still not installed anywhere the module can find.** Carlito comes from
@@ -349,11 +389,11 @@ the attribution is wrong, which matters if any of this is ever proposed upstream
 - **Tag `fp-pcb/2026-09-09-wasm` on both repos.** The alignment scheme wants a tag on both at a
   change set this size, and on the fork the tag push is also what triggers the release workflow.
 - **Then cut the first release run.** The tag starts **kicad-wasm release**; from cold caches expect
-  100-140 minutes. When it finishes, set `packages/proto/KICAD_TAG` to that tag and
-  `GITHUB_TOKEN=<pat> bun run --filter @fp-pcb/kicad-wasm fetch:release` — after which the wasm
-  suites need no toolchain at all. Optionally uncomment the `wasm` job in fab_pcb's
-  `.github/workflows/ci.yml` and add a `KICAD_FORK_TOKEN` secret (a repository's own `GITHUB_TOKEN`
-  cannot read another private repository's release assets). Steps and caveats:
+  100-140 minutes. When it finishes, set `packages/proto/KICAD_TAG` to that tag (or the repository
+  variable `KICAD_WASM_RELEASE`) and `bun run --filter @fp-pcb/kicad-wasm fetch:release` — after
+  which the wasm suites need no toolchain at all. Nothing else has to be wired up: CI's `wasm
+(conformance)` job is live and starts gating by itself the moment that release exists (below), and
+  the fork being public means no token or secret is involved. Steps and caveats:
   `kicad/host/STATUS-release-artifact.md`.
 - `packages/kicad-wasm/dist/` holds a 35 MB `kicad_api.wasm` plus the 1.3 MB `kicad_api.data` (from
   `bun run fetch`). Both are ignored by git; decide whether the app should fetch them from a CDN,
