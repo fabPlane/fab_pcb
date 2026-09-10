@@ -46,7 +46,11 @@ while (changed) {
       const source = await resolveDependency(dependency, original);
       if (!source || isSystem(source) || source.startsWith(`${app}/`)) continue;
       const canonical = await realpath(source).catch(() => source);
-      const destination = join(frameworks, basename(canonical));
+      // Keep the filename used by the Mach-O install name. Homebrew often exposes
+      // an unversioned/major-version symlink whose real target has a different
+      // basename; copying only the target name leaves the original install name
+      // with nothing to rewrite to in the staged Frameworks directory.
+      const destination = join(frameworks, basename(source));
       if (!sourceByStagedPath.has(destination)) {
         await cp(canonical, destination, { preserveTimestamps: true });
         await chmod(destination, 0o755);
