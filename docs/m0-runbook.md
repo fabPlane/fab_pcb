@@ -1,5 +1,10 @@
 # M0 runbook — build kicad-cli and answer a Ping from Bun
 
+> Building is optional now: the fork publishes nightly `kicad-cli` archives for Linux,
+> macOS and Windows (rolling release `nightly`, pinnable `nightly-<date>-<sha10>`), and
+> `bun run kicad:fetch` downloads the one for this machine and prints the executable
+> (see the README). The steps below are for building the same three targets yourself.
+
 ## 1. Build KiCad 10.99 (macOS, Homebrew libraries)
 
 ```bash
