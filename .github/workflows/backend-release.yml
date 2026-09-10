@@ -200,7 +200,7 @@ jobs:
         run: |
           set -euo pipefail
           bun packages/kicad-patches/stage-macos.ts \
-            "$RUNNER_TEMP/kicad/build/release/kicad/KiCad.app" "$RUNNER_TEMP/runtime"
+            "$RUNNER_TEMP/kicad/build/release/kicad/KiCad.app" "$RUNNER_TEMP/runtime" "$RUNNER_TEMP/kicad"
           bun packages/kicad-patches/bundle.ts "${{ matrix.target }}" \
             "$RUNNER_TEMP/runtime" "$RUNNER_TEMP/kicad-footprints" "$RUNNER_TEMP/kicad-symbols" "dist/pcb/${{ matrix.target }}"
       - name: Native bundle smoke

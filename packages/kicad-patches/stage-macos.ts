@@ -3,21 +3,36 @@
 import { chmod, cp, mkdir, readdir, realpath, rm, stat } from "node:fs/promises";
 import { basename, dirname, join, relative, resolve } from "node:path";
 
-const [appArg, outputArg] = process.argv.slice(2);
-if (!appArg || !outputArg) {
-  console.error("usage: stage-macos.ts <KiCad.app> <runtime-output-dir>");
+const [appArg, outputArg, sourceArg] = process.argv.slice(2);
+if (!appArg || !outputArg || !sourceArg) {
+  console.error("usage: stage-macos.ts <KiCad.app> <runtime-output-dir> <KiCad-source-dir>");
   process.exit(2);
 }
 
 const sourceApp = resolve(appArg);
 const output = resolve(outputArg);
+const source = resolve(sourceArg);
 const app = join(output, "KiCad.app");
 const frameworks = join(app, "Contents", "Frameworks");
+const sharedSupport = join(app, "Contents", "SharedSupport");
 if (!(await stat(sourceApp).catch(() => null))?.isDirectory()) throw new Error(`KiCad.app not found: ${sourceApp}`);
+if (!(await stat(source).catch(() => null))?.isDirectory()) throw new Error(`KiCad source not found: ${source}`);
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
 await cp(sourceApp, app, { recursive: true, preserveTimestamps: true });
 await mkdir(frameworks, { recursive: true });
+
+// The build tree does not populate SharedSupport. Match KiCad's macOS bundle
+// assembly so the CLI can locate its schemas and project template at runtime.
+await mkdir(sharedSupport, { recursive: true });
+await cp(join(source, "api", "schemas"), join(sharedSupport, "schemas"), {
+  recursive: true,
+  preserveTimestamps: true,
+});
+await cp(join(source, "resources", "project_template"), join(sharedSupport, "template"), {
+  recursive: true,
+  preserveTimestamps: true,
+});
 
 const sourceByStagedPath = new Map<string, string>();
 for (const file of await machoFiles(app)) sourceByStagedPath.set(file, file);
@@ -64,6 +79,9 @@ const pcbnew = join(app, "Contents", "PlugIns", "_pcbnew.kiface");
 const eeschema = join(app, "Contents", "PlugIns", "_eeschema.kiface");
 for (const required of [cli, pcbnew, eeschema]) {
   if (!(await stat(required).catch(() => null))?.isFile()) throw new Error(`staged KiCad file missing: ${required}`);
+}
+for (const required of [join(sharedSupport, "schemas"), join(sharedSupport, "template")]) {
+  if (!(await stat(required).catch(() => null))?.isDirectory()) throw new Error(`staged KiCad data missing: ${required}`);
 }
 const version = run(cli, ["version"]);
 console.log(`Staged relocatable KiCad runtime: ${app} (${version.trim()})`);
