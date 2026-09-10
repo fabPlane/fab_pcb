@@ -6,10 +6,10 @@
  */
 import { stat } from "node:fs/promises";
 import { extname, resolve } from "node:path";
-import { decodeEvent, eventToJson } from "@fp-pcb/client";
+import { KiCad, KiCadClient, decodeEvent, eventToJson } from "@fp-pcb/client";
 import { createRouteJobs, matchRouteJobPath, type RouteJobs } from "@fp-pcb/router/bridge-job";
 import { createCompileJobs, matchCompileJobPath, type CompileJobs } from "@fp-pcb/compile/bridge-job";
-import { discoverLibraries } from "@fp-pcb/compile/libraries";
+import { discoverLibraries, registerLibraries } from "@fp-pcb/compile/libraries";
 import {
   TransportError,
   WS_BRIDGE_PROTOCOL_VERSION,
@@ -152,6 +152,23 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
           },
           compileRoute.jobId,
         );
+      }
+
+      const libraryRoute = /^\/sessions\/([^/]+)\/libraries\/register-bundled$/.exec(path);
+      if (libraryRoute) {
+        const id = decodeURIComponent(libraryRoute[1]!);
+        const session = sessions.get(id);
+        if (!session) return json({ error: `unknown session "${id}"` }, 404);
+        if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
+        if (!session.transport) return json({ error: "session has no running KiCad transport" }, 409);
+        try {
+          const client = new KiCadClient(session.transport, { clientName: `fp-pcb/bridge/${id}/libraries` });
+          await registerLibraries(new KiCad(client), bundledLibraries);
+          session.touch();
+          return json({ ok: true, registered: bundledLibraries.length });
+        } catch (error) {
+          return json({ error: error instanceof Error ? error.message : String(error) }, 409);
+        }
       }
 
       const m = /^\/sessions\/([^/]+)(?:\/(log|events))?$/.exec(path);
