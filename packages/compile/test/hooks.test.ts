@@ -128,9 +128,10 @@ describe("compile hooks", () => {
     expect(await insetOutline(b as unknown as Board, ["fp1"], 500_000)).toBeNull();
   });
 
-  test("a pre-existing outline is not moved: the compile reports edge_clearance_unchecked", async () => {
+  test("a differing user-authored outline fails closed instead of ignoring source dimensions", async () => {
     const log: string[] = [];
     const b = board(log);
+    for (const edge of b.edges) edge.setCustomProperty("fp-pcb.generated-outline", undefined);
     const res = await compile(SOURCE, b as unknown as Board, {
       frontend,
       netlistPath: await netlistPath(),
@@ -138,8 +139,23 @@ describe("compile hooks", () => {
       edgeMarginNm: 500_000,
       board: { widthMm: 20, heightMm: 10 },
     });
-    expect(res.ok).toBe(true);
-    expect(res.diagnostics.map((d) => d.code)).toEqual(["edge_clearance_unchecked"]);
+    expect(res.ok).toBe(false);
+    expect(res.diagnostics.map((d) => d.code)).toEqual(["outline_conflict"]);
+    expect(log.filter((l) => l.startsWith("commit:"))).toEqual([]);
+  });
+
+  test("a partially owned generated outline fails closed instead of duplicating its contour", async () => {
+    const log: string[] = [];
+    const b = board(log);
+    b.edges.pop();
+    const res = await compile(SOURCE, b as unknown as Board, {
+      frontend,
+      netlistPath: await netlistPath(),
+      autoplace: true,
+      board: { widthMm: 20, heightMm: 10 },
+    });
+    expect(res.ok).toBe(false);
+    expect(res.diagnostics.map((d) => d.code)).toEqual(["outline_conflict"]);
     expect(log.filter((l) => l.startsWith("commit:"))).toEqual([]);
   });
 

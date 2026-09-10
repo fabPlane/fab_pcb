@@ -33,14 +33,16 @@ Each step was checked against the fork at `280274cc3d` and run live (`bench/expe
 
 1. **`ImportNetlist` with `dryRun`** — the only check that sees the server's `fp-lib-table`.
    An error here stops the compile with the board untouched.
-2. **Outline commit**, when the board has none. `AutoplaceFootprints` answers
+2. **Outline reconciliation.** `AutoplaceFootprints` answers
    `APR_NO_BOARD_OUTLINE` without one; the outline _is_ the placement box. A prefabricated
    blank's features go into the same commit: `BoardSpec.vias` as through vias on no net (free
    vias, which the router's `laser-prefab` preset routes through and claims) and `BoardSpec.holes`
    as circles on `Edge.Cuts` (a mounting hole is a cutout to DRC). Such an outline is the blank's
    and step 5 never moves it; `prefab_placement` warns that the autoplacer may have put parts on
-   the vias. A board that already has an outline keeps it, blank included (`blank_not_drawn` says
-   so when the spec has vias but the board has none).
+   the vias. Compiler-created boundary segments are marked and replaced when source dimensions
+   change while independent manual cutout contours are preserved. A matching user outline is
+   accepted; a differing user-authored outer contour fails with `outline_conflict` instead of
+   silently retaining stale geometry.
 3. **`ImportNetlist` for real.** Headless KiCad spreads new footprints from the origin, inside
    the rectangle step 2 drew.
 4. **`AutoplaceFootprints` on the footprints step 3 added**, with `includeOffboard` — an empty
@@ -106,6 +108,12 @@ schematic symbol and draws a short wire plus a same-name local label at every co
 labels create real KiCad connectivity without routing long generated wires through other symbols.
 Generated items carry `fp-pcb.generated=circuit.netlist.json`; rebuild replaces only those items,
 preserving anything a person added or explicitly adopted in KiCad.
+
+Placements stay on KiCad's default 50 mil electrical grid. Library pin geometry is converted from
+symbol-local coordinates to the sheet-coordinate form required by KiCad's placed-symbol API, and
+library pin ids are cleared so KiCad assigns independent instance ids. The real-server test runs
+ERC before and after close/reopen and rejects disconnected labels/wires, off-grid endpoints, or
+coordinate drift.
 
 Missing `libSource`, an unavailable symbol, or a pin absent from its symbol produces a `schematic`
 warning while leaving the successful board compile intact. This preserves old netlists, but ERC and

@@ -11,8 +11,8 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { BoardLayer } from "@fp-pcb/proto";
-import { Via, toMm } from "@fp-pcb/client";
-import { applyNetlist, edgeClearanceNm, footprintIds, hasOutline, outlineOrigin, type ApplyStage } from "../src/apply";
+import { Via, mm, toMm } from "@fp-pcb/client";
+import { applyNetlist, edgeClearanceNm, footprintIds, hasOutline, outlineItems, outlineOrigin, type ApplyStage } from "../src/apply";
 import { applyBoardConstraints, applyDefaultNetClass, defaultNetClass } from "../src/rules";
 import { haveKicad, KICAD_CLI, NETLIST, newProjectWithLibraries, startBareServer, type RunningServer } from "./kicad-server";
 
@@ -85,7 +85,97 @@ describe.skipIf(!haveKicad())("applyNetlist + kicad-cli api-server", () => {
     });
     expect(again.footprintsAdded).toBe(0);
     expect(again.diagnostics).toEqual([]);
+
+    // A manually drawn internal cutout is an independent Edge.Cuts contour. It must survive
+    // source-driven replacement of the compiler-owned outer boundary.
+    const cutout = outlineItems([
+      { x: mm(2), y: mm(2) },
+      { x: mm(4), y: mm(2) },
+      { x: mm(4), y: mm(4) },
+      { x: mm(2), y: mm(4) },
+    ]);
+    for (const edge of cutout) edge.setCustomProperty("fp-pcb.generated-outline", undefined);
+    await board.commit("Test: add manual cutout", (tx) => tx.create(cutout));
+
+    // Source dimensions remain authoritative on rebuild. The compiler owns this outline, so a
+    // later size change replaces it instead of reporting success while retaining stale geometry;
+    // unrelated manual cutouts remain untouched.
+    const resized = await applyNetlist(board, NETLIST, {
+      netlistPath: join(projectDir, ".fp-pcb", "compile.net"),
+      board: { widthMm: 18, heightMm: 17 },
+      autoplace: false,
+    });
+    expect(resized.diagnostics).toEqual([]);
+    const edgeSegments = (await board.getShapes()).filter(
+      (shape) => shape.proto.layer === BoardLayer.BL_Edge_Cuts && shape.proto.shape?.geometry.case === "segment",
+    );
+    expect(edgeSegments).toHaveLength(8);
+    const endpoints = edgeSegments.flatMap((shape) => {
+      const geometry = shape.proto.shape!.geometry;
+      if (geometry.case !== "segment") return [];
+      return [geometry.value.start, geometry.value.end].map((point) => [Number(point?.xNm ?? 0), Number(point?.yNm ?? 0)]);
+    });
+    expect([Math.min(...endpoints.map(([x]) => x!)), Math.max(...endpoints.map(([x]) => x!))]).toEqual([0, mm(18)]);
+    expect([Math.min(...endpoints.map(([, y]) => y!)), Math.max(...endpoints.map(([, y]) => y!))]).toEqual([0, mm(17)]);
+    const cutoutEndpoints = endpoints.filter(([x, y]) => x! >= mm(2) && x! <= mm(4) && y! >= mm(2) && y! <= mm(4));
+    expect(cutoutEndpoints).toHaveLength(8);
   }, 120_000);
+
+  test("a matching manual outline may contain an independent segmented cutout", async () => {
+    const { board, projectDir } = await newProjectWithLibraries(server.kicad, root, "manual-cutout");
+    const contours = [
+      ...outlineItems([
+        { x: 0, y: 0 },
+        { x: mm(20), y: 0 },
+        { x: mm(20), y: mm(10) },
+        { x: 0, y: mm(10) },
+      ]),
+      ...outlineItems([
+        { x: mm(2), y: mm(2) },
+        { x: mm(4), y: mm(2) },
+        { x: mm(4), y: mm(4) },
+        { x: mm(2), y: mm(4) },
+      ]),
+    ];
+    for (const edge of contours) edge.setCustomProperty("fp-pcb.generated-outline", undefined);
+    await board.commit("Test: add manual contours", (tx) => tx.create(contours));
+
+    const outcome = await applyNetlist(board, NETLIST, {
+      netlistPath: join(projectDir, ".fp-pcb", "compile.net"),
+      board: { widthMm: 20, heightMm: 10 },
+      autoplace: false,
+    });
+    expect(outcome.diagnostics).toEqual([]);
+    expect((await board.getShapes()).filter((shape) => shape.proto.layer === BoardLayer.BL_Edge_Cuts)).toHaveLength(8);
+  }, 60_000);
+
+  test("a matching inner contour cannot masquerade as the requested manual board outline", async () => {
+    const { board, projectDir } = await newProjectWithLibraries(server.kicad, root, "manual-outer-conflict");
+    const contours = [
+      ...outlineItems([
+        { x: mm(-5), y: mm(-5) },
+        { x: mm(25), y: mm(-5) },
+        { x: mm(25), y: mm(15) },
+        { x: mm(-5), y: mm(15) },
+      ]),
+      ...outlineItems([
+        { x: 0, y: 0 },
+        { x: mm(20), y: 0 },
+        { x: mm(20), y: mm(10) },
+        { x: 0, y: mm(10) },
+      ]),
+    ];
+    for (const edge of contours) edge.setCustomProperty("fp-pcb.generated-outline", undefined);
+    await board.commit("Test: add mismatched manual contours", (tx) => tx.create(contours));
+
+    const outcome = await applyNetlist(board, NETLIST, {
+      netlistPath: join(projectDir, ".fp-pcb", "compile.net"),
+      board: { widthMm: 20, heightMm: 10 },
+      autoplace: false,
+    });
+    expect(outcome.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["outline_conflict"]);
+    expect(outcome.footprintsAdded).toBe(0);
+  }, 60_000);
 
   test("an unresolvable footprint fails the dry run and leaves the board untouched", async () => {
     const { board, projectDir } = await newProjectWithLibraries(server.kicad, root, "missing");

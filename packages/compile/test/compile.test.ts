@@ -67,7 +67,7 @@ function board(o: StubOptions = {}): { board: Board; log: string[]; autoplaceArg
     },
     async getShapes() {
       log.push("getShapes");
-      return o.outlined ? [{ proto: { layer: BoardLayer.BL_Edge_Cuts } }] : [];
+      return o.outlined ? outlineItems(outlinePoints(spec)!) : [];
     },
     async getItems() {
       log.push("getItems");
@@ -203,7 +203,7 @@ describe("compile", () => {
         return { errorCount: 0, warningCount: 0, newFootprintCount: imported ? 1 : 0, report: "" };
       },
       async getShapes() {
-        return [{ proto: { layer: BoardLayer.BL_Edge_Cuts } }];
+        return outlineItems(outlinePoints({ widthMm: 20, heightMm: 10 })!);
       },
       async getItems() {
         return imported ? [footprint] : [];
