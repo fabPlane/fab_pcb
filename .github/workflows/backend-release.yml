@@ -93,6 +93,10 @@ jobs:
           cache-from: type=gha,scope=kicad-${{ steps.versions.outputs.kicad }}
           cache-to: type=gha,mode=max,scope=kicad-${{ steps.versions.outputs.kicad }}
 
+      - name: Free local BuildKit cache before pulling the published image
+        if: steps.image.outcome != 'success'
+        run: docker buildx prune --all --force
+
       - name: Pull newly published image
         if: steps.image.outcome != 'success'
         run: docker pull "${{ steps.versions.outputs.image }}"
