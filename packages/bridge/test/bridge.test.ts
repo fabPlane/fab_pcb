@@ -3,10 +3,32 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { FilesError, Session, configFromEnv, eventsSocketPathFor, kicadChildEnvironment, resolveInRoot, startBridge, type BridgeServer } from "../src/index";
+import {
+  FilesError,
+  Session,
+  configFromEnv,
+  eventsSocketPathFor,
+  kicadChildEnvironment,
+  resolveInRoot,
+  startBridge,
+  type BridgeServer,
+} from "../src/index";
 import { decodeApiResponse, encodeApiRequest, encodePing } from "../src/kicad-ping";
 
 describe("configFromEnv", () => {
+  test("records the owning packaged runtime identity", () => {
+    expect(
+      configFromEnv({
+        FABDESK_RUNTIME_ID: "runtime-123",
+        FABDESK_DESKTOP_PID: "456",
+        JS_AUTOROUTER_MODULE: "/bundle/router/index.ts",
+      }),
+    ).toMatchObject({
+      runtimeId: "runtime-123",
+      ownerPid: 456,
+      jsAutorouterModule: "/bundle/router/index.ts",
+    });
+  });
   test("defaults and env overrides", () => {
     const c = configFromEnv({});
     expect(c.port).toBe(4020);
@@ -20,7 +42,10 @@ describe("configFromEnv", () => {
     expect(d.kicadCli).toBe("/x/kicad-cli");
     expect(d.staticDir).toBe("/srv");
     expect(d.maxPayloadBytes).toBe(1024);
-    expect(configFromEnv({ KICAD_SOCKET_TRANSPORT: "ws", KICAD_WS_HOST: "localhost" })).toMatchObject({ socketTransport: "ws", wsHostname: "localhost" });
+    expect(configFromEnv({ KICAD_SOCKET_TRANSPORT: "ws", KICAD_WS_HOST: "localhost" })).toMatchObject({
+      socketTransport: "ws",
+      wsHostname: "localhost",
+    });
     expect(() => configFromEnv({ KICAD_SOCKET_TRANSPORT: "tcp" })).toThrow(/ipc.*ws/);
     expect(() => configFromEnv({ PORT: "abc" })).toThrow();
   });
@@ -28,7 +53,9 @@ describe("configFromEnv", () => {
 
 describe("kicad-ping envelope", () => {
   test("encodes the same bytes as the M0 script", () => {
-    const hex = Array.from(encodePing("kicad-web/m0-ping") /* the M0 capture predates the rename */, (b) => b.toString(16).padStart(2, "0")).join("");
+    const hex = Array.from(encodePing("kicad-web/m0-ping") /* the M0 capture predates the rename */, (b) =>
+      b.toString(16).padStart(2, "0"),
+    ).join("");
     expect(hex).toBe(
       "0a1312116b696361642d7765622f6d302d70696e6712320a2e747970652e676f6f676c65617069732e636f6d2f6b696170692e636f6d6d6f6e2e636f6d6d616e64732e50696e671200",
     );
@@ -112,17 +139,51 @@ describe("bridge HTTP without KiCad", () => {
     await writeFile(join(staticDir, "index.html"), "<h1>app</h1>");
     await mkdir(join(staticDir, "assets"));
     await writeFile(join(staticDir, "assets", "a.js"), "console.log(1)");
-    bridge = await startBridge(configFromEnv({}, { port: 0, kicadCli: "/nonexistent/kicad-cli", staticDir, workspaceRoot: staticDir, log: () => {} }));
+    bridge = await startBridge(
+      configFromEnv(
+        {
+          FABDESK_RUNTIME_ID: "runtime-123",
+          FABDESK_DESKTOP_PID: "456",
+          JS_AUTOROUTER_MODULE: join(staticDir, "router.ts"),
+        },
+        {
+          port: 0,
+          kicadCli: "/nonexistent/kicad-cli",
+          staticDir,
+          workspaceRoot: staticDir,
+          log: () => {},
+        },
+      ),
+    );
   });
   afterAll(async () => {
     await bridge.stop();
     await rm(staticDir, { recursive: true, force: true });
   });
 
-  test("health reports the missing binary", async () => {
-    const h = (await (await fetch(`${bridge.url}/health`)).json()) as { ok: boolean; kicadCliExists: boolean };
+  test("health attests runtime, process owner, workspace, CLI, and router identity", async () => {
+    const h = (await (await fetch(`${bridge.url}/health`)).json()) as {
+      ok: boolean;
+      name: string;
+      pid: number;
+      runtimeId: string;
+      ownerPid: number;
+      kicadCli: string;
+      kicadCliExists: boolean;
+      workspaceRoot: string;
+      jsAutorouter: { module: string };
+    };
     expect(h.ok).toBe(true);
     expect(h.kicadCliExists).toBe(false);
+    expect(h).toMatchObject({
+      name: "@fp-pcb/bridge",
+      pid: process.pid,
+      runtimeId: "runtime-123",
+      ownerPid: 456,
+      kicadCli: "/nonexistent/kicad-cli",
+      workspaceRoot: staticDir,
+      jsAutorouter: { module: join(staticDir, "router.ts") },
+    });
   });
   test("POST /sessions fails with 502 when kicad-cli cannot be spawned", async () => {
     const res = await fetch(`${bridge.url}/sessions`, { method: "POST", body: "{}" });
