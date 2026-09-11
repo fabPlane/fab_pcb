@@ -364,7 +364,7 @@ export class KiCadClient {
 
   /**
    * Commands the server supports. Uses `GetSupportedCommands` when the server implements it (KiCad
-   * >= the `web-api` branch), otherwise the coverage table bundled at build time. Cached.
+   * >= the fork's `main` branch, formerly `web-api`), otherwise the coverage table bundled at build time. Cached.
    */
   capabilities(): Promise<Capabilities> {
     this.caps ??= this.fetchCapabilities();

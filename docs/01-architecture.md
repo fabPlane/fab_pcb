@@ -120,7 +120,7 @@ fp-pcb/
   docs/                     this plan
 ```
 
-The KiCad fork lives in its own repo/branch (`kicad`, branch `web-api`); `fp-pcb`
+The KiCad fork lives in its own repo/branch (`kicad`, branch `main`); `fp-pcb`
 pins the fork commit it was generated against in `packages/proto/KICAD_COMMIT`.
 
 ### Alignment tags (rule)

@@ -74,7 +74,7 @@ them in parallel.
 
 ### A7 · KiCad API-gap agent (C++)
 
-- Works in the KiCad fork, branch `web-api`, in the order given in
+- Works in the KiCad fork, branch `main`, in the order given in
   [04-ipc-gaps.md](04-ipc-gaps.md): G13, G6, G1, G5, G4, G3, then G16, G17.
 - Every patch: proto + handler + `qa/tests/api` test + note in `api-coverage.md`
   via A2's script + a conformance test handed to A4.

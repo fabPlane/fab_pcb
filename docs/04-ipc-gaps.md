@@ -5,7 +5,7 @@ flow (project → schematic → board → outputs) can be done from a headless s
 exact per-command state of today's API is in [api-coverage.md](api-coverage.md).
 Below is everything that is missing, grouped, with the concrete fix in KiCad.
 
-All fixes go into our KiCad fork on branch `web-api` as a patch series (one commit
+All fixes go into our KiCad fork on branch `main` as a patch series (one commit
 per gap, each with a proto change, a handler, a QA test in `qa/tests/api`, and a
 client conformance test). Every patch is written to be upstreamable; KiCad marks new
 API fields with `// Since 11.0` comments, we follow that.
@@ -184,14 +184,14 @@ board, or schematic; `DOCTYPE_SYMBOL` and `DOCTYPE_DRAWING_SHEET` are rejected.
 
 ### G6 · Register what already exists
 
-**Status:** done (web-api 8b63c6b83e): `UpdateBoardStackup` implemented (with `BOARD_STACKUP::Deserialize`), `RefreshEditor`/`FocusOnItem` headless no-ops, `SaveItemsToString` added.
+**Status:** done (main 8b63c6b83e): `UpdateBoardStackup` implemented (with `BOARD_STACKUP::Deserialize`), `RefreshEditor`/`FocusOnItem` headless no-ops, `SaveItemsToString` added.
 `UpdateBoardStackup` (proto exists, no handler; wire to `BOARD_STACKUP` +
 `BOARD_DESIGN_SETTINGS`), `FocusOnItem` and `RefreshEditor` (no-op success headless
 so clients need no branching).
 
 ### G13 · Capability discovery
 
-**Status:** done (web-api ef0ed71606): `GetSupportedCommands` served by an internal handler; registrations carry a `HANDLER_MODE` (GUI-only flag).
+**Status:** done (main ef0ed71606): `GetSupportedCommands` served by an internal handler; registrations carry a `HANDLER_MODE` (GUI-only flag).
 **Fix:** `GetSupportedCommands → [{type_url, headless}]` enumerated from the
 registered handler tables in `KICAD_API_SERVER`. Trivial and makes every client
 future-proof.
@@ -281,7 +281,7 @@ need filesystem access to the server's output directory.
 
 ### G18 · Request latency in `kicad-cli api-server`
 
-**Status:** done (web-api 72b2d2afe3): condition-variable wake-up; Ping went from 12.0 ms to 0.05 ms average, 1000 pings in 47 ms.
+**Status:** done (main 72b2d2afe3): condition-variable wake-up; Ping went from 12.0 ms to 0.05 ms average, 1000 pings in 47 ms.
 **Today:** the server loop is `while(!exit){ ProcessPendingEvents(); wxMilliSleep(10); }`,
 so every request waits up to 10 ms before dispatch (measured ~11 ms for `Ping`).
 **Fix:** wake the loop from `KICAD_API_SERVER::onApiRequest` with a condition variable

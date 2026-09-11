@@ -1,6 +1,6 @@
 # 06 — Upstreaming the KiCad API patch series
 
-Branch `web-api` in our fork, 32 commits on top of upstream `cbd303d16b` (KiCad 10.99,
+Branch `main` (formerly `web-api`) in our fork, 32 commits on top of upstream `cbd303d16b` (KiCad 10.99,
 the development branch that becomes v11). Totals across the range:
 
 | Area                    |     Added |               Removed |
@@ -131,7 +131,7 @@ Ordered as they sit on the branch (oldest first). "Proto" says whether
 
 ### Proto compatibility, verified
 
-`git diff cbd303d16b..web-api -- 'api/proto/*' | grep '^-'` produces **six lines, all
+`git diff cbd303d16b..main -- 'api/proto/*' | grep '^-'` produces **six lines, all
 comments**. Nothing is removed, renumbered or retyped anywhere in the series, so every
 change is wire-backward-compatible: three new `.proto` files, new messages, new fields
 with new numbers, new enum values, and comment edits. 147 `Since 11.0` annotations are
