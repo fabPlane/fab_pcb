@@ -314,6 +314,8 @@ export interface BoardGeometrySnapshot {
     clearance: number;
     minThickness: number;
     outline: Vec2[];
+    /** Complete native polygon set, including holes and non-point nodes. */
+    polygons: PolygonWithHoles[];
     locked: boolean;
   }>;
   texts: Array<{
@@ -331,6 +333,8 @@ export interface BoardGeometrySnapshot {
     kind: string;
     start: Vec2;
     end: Vec2;
+    /** Complete native geometry oneof for segments, rectangles, arcs, circles, and polygons. */
+    geometry: unknown;
     strokeWidth: number;
     layer: BoardLayer;
     net?: string;
@@ -474,6 +478,7 @@ export async function inspectBoardGeometry(board: Board): Promise<BoardGeometryS
       clearance: item.clearance,
       minThickness: item.minThickness,
       outline: item.outlinePoints,
+      polygons: item.outline?.polygons ?? [],
       locked: item.locked,
     })),
     texts: texts.map((item) => ({
@@ -491,6 +496,7 @@ export async function inspectBoardGeometry(board: Board): Promise<BoardGeometryS
       kind: item.kind,
       start: item.start,
       end: item.end,
+      geometry: item.shape?.geometry ?? { case: undefined },
       strokeWidth: item.strokeWidth,
       layer: item.layerId,
       ...(item.net ? { net: item.net } : {}),

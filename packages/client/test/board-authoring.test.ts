@@ -245,5 +245,7 @@ describe("board authoring", () => {
       rules: { minimums: { minClearance: 100, minTrackWidth: 125 }, customStatus: 1, customErrorText: "" },
     });
     expect(snapshot.pads[0]!.polygons[0]!.shape).toBe(polygon);
+    expect(snapshot.zones[0]!.polygons).toHaveLength(1);
+    expect(snapshot.graphics[0]!.geometry).toMatchObject({ case: "segment" });
   });
 });
