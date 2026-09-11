@@ -46,6 +46,21 @@ jobs:
           bun-version: ${{ env.BUN_VERSION }}
       - name: Install JS dependencies
         run: bun install --frozen-lockfile
+      - name: Free runner disk space for the KiCad image build
+        shell: bash
+        run: |
+          set -euo pipefail
+          df -h /
+          # The hosted image carries large toolchains that this Linux/Docker job never uses.
+          # KiCad's native build and BuildKit layers otherwise exceed the runner's free disk.
+          sudo rm -rf \
+            /usr/local/lib/android \
+            /usr/share/dotnet \
+            /opt/ghc \
+            /usr/local/.ghcup \
+            /opt/hostedtoolcache/CodeQL
+          docker system prune --all --force --volumes
+          df -h /
       - uses: docker/setup-buildx-action@v3
       - name: Resolve immutable versions
         id: versions
@@ -88,8 +103,8 @@ jobs:
           tags: |
             ${{ steps.versions.outputs.image }}
             ${{ steps.versions.outputs.image_short }}
-          cache-from: type=gha,scope=kicad-${{ steps.versions.outputs.kicad }}
-          cache-to: type=gha,mode=max,scope=kicad-${{ steps.versions.outputs.kicad }}
+          # The immutable GHCR tag is the cache: successful builds are pulled above and skipped.
+          # Exporting the large native build cache doubles peak disk use on GitHub-hosted runners.
           push: true
       - name: Free local BuildKit cache before pulling the published image
         if: steps.image.outcome != 'success'
