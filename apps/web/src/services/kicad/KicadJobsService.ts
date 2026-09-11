@@ -8,7 +8,20 @@
 // server that runs jobs synchronously just returns the finished result. `RunSchematicJobExportNetlist`
 // used to wedge the headless server; that is fixed in web-api 022e45f6d2+.
 
-import { BoardLayer, Board3DFormat, DrillFormat, DrillMapFormat, DrillOrigin, GerberPrecision, Ipc2581Version, JobStatus, OdbCompression, PositionSide, SchematicNetlistFormat, Units } from '@fp-pcb/proto';
+import {
+  BoardLayer,
+  Board3DFormat,
+  DrillFormat,
+  DrillMapFormat,
+  DrillOrigin,
+  GerberPrecision,
+  Ipc2581Version,
+  JobStatus,
+  OdbCompression,
+  PositionSide,
+  SchematicNetlistFormat,
+  Units,
+} from '@fp-pcb/proto';
 import { JobError, type JobOptions, type JobResult } from '@fp-pcb/client';
 
 /** Every job runs async when the server supports it; see the header. */
@@ -17,7 +30,27 @@ import type { JobDefinition, JobOutput, JobRun, JobsService } from '../types';
 import type { KicadDocumentService } from './KicadDocumentService';
 import type { KicadSessionService } from './KicadSessionService';
 
-const COPPER_AND_TECH = ['BL_F_Cu', 'BL_In1_Cu', 'BL_In2_Cu', 'BL_In3_Cu', 'BL_In4_Cu', 'BL_B_Cu', 'BL_F_SilkS', 'BL_B_SilkS', 'BL_F_Mask', 'BL_B_Mask', 'BL_F_Paste', 'BL_B_Paste', 'BL_Edge_Cuts', 'BL_F_Fab', 'BL_B_Fab', 'BL_F_CrtYd', 'BL_B_CrtYd', 'BL_Dwgs_User', 'BL_Cmts_User'];
+const COPPER_AND_TECH = [
+  'BL_F_Cu',
+  'BL_In1_Cu',
+  'BL_In2_Cu',
+  'BL_In3_Cu',
+  'BL_In4_Cu',
+  'BL_B_Cu',
+  'BL_F_SilkS',
+  'BL_B_SilkS',
+  'BL_F_Mask',
+  'BL_B_Mask',
+  'BL_F_Paste',
+  'BL_B_Paste',
+  'BL_Edge_Cuts',
+  'BL_F_Fab',
+  'BL_B_Fab',
+  'BL_F_CrtYd',
+  'BL_B_CrtYd',
+  'BL_Dwgs_User',
+  'BL_Cmts_User',
+];
 
 const layerChoices = (ids: readonly string[]) => ids.map((l) => ({ value: l, label: l.replace('BL_', '').replace(/_/g, '.') }));
 
@@ -48,7 +81,16 @@ export function jobDefinitions(enabledLayers: readonly string[]): JobDefinition[
         { key: 'useProtelExtensions', label: 'Use Protel filename extensions', type: 'boolean', default: false },
         { key: 'includeNetlistAttributes', label: 'Include netlist attributes (X2)', type: 'boolean', default: true },
         { key: 'createGerberJobFile', label: 'Create job file (.gbrjob)', type: 'boolean', default: true },
-        { key: 'precision', label: 'Coordinate format', type: 'select', default: '4.6', choices: [{ value: '4.5', label: '4.5 (unit mm)' }, { value: '4.6', label: '4.6 (unit mm)' }] },
+        {
+          key: 'precision',
+          label: 'Coordinate format',
+          type: 'select',
+          default: '4.6',
+          choices: [
+            { value: '4.5', label: '4.5 (unit mm)' },
+            { value: '4.6', label: '4.6 (unit mm)' },
+          ],
+        },
       ],
     },
     {
@@ -58,10 +100,37 @@ export function jobDefinitions(enabledLayers: readonly string[]): JobDefinition[
       document: 'board',
       command: 'RunBoardJobExportDrill',
       options: [
-        { key: 'format', label: 'Format', type: 'select', default: 'excellon', choices: [{ value: 'excellon', label: 'Excellon' }, { value: 'gerber', label: 'Gerber X2' }] },
-        { key: 'units', label: 'Units', type: 'select', default: 'mm', choices: [{ value: 'mm', label: 'Millimetres' }, { value: 'in', label: 'Inches' }] },
+        {
+          key: 'format',
+          label: 'Format',
+          type: 'select',
+          default: 'excellon',
+          choices: [
+            { value: 'excellon', label: 'Excellon' },
+            { value: 'gerber', label: 'Gerber X2' },
+          ],
+        },
+        {
+          key: 'units',
+          label: 'Units',
+          type: 'select',
+          default: 'mm',
+          choices: [
+            { value: 'mm', label: 'Millimetres' },
+            { value: 'in', label: 'Inches' },
+          ],
+        },
         { key: 'generateMap', label: 'Generate drill map (PDF)', type: 'boolean', default: false },
-        { key: 'origin', label: 'Drill origin', type: 'select', default: 'absolute', choices: [{ value: 'absolute', label: 'Absolute' }, { value: 'plot', label: 'Drill/place file origin' }] },
+        {
+          key: 'origin',
+          label: 'Drill origin',
+          type: 'select',
+          default: 'absolute',
+          choices: [
+            { value: 'absolute', label: 'Absolute' },
+            { value: 'plot', label: 'Drill/place file origin' },
+          ],
+        },
       ],
     },
     {
@@ -71,8 +140,27 @@ export function jobDefinitions(enabledLayers: readonly string[]): JobDefinition[
       document: 'board',
       command: 'RunBoardJobExportPosition',
       options: [
-        { key: 'units', label: 'Units', type: 'select', default: 'mm', choices: [{ value: 'mm', label: 'Millimetres' }, { value: 'in', label: 'Inches' }] },
-        { key: 'side', label: 'Side', type: 'select', default: 'both', choices: [{ value: 'front', label: 'Front' }, { value: 'back', label: 'Back' }, { value: 'both', label: 'Both' }] },
+        {
+          key: 'units',
+          label: 'Units',
+          type: 'select',
+          default: 'mm',
+          choices: [
+            { value: 'mm', label: 'Millimetres' },
+            { value: 'in', label: 'Inches' },
+          ],
+        },
+        {
+          key: 'side',
+          label: 'Side',
+          type: 'select',
+          default: 'both',
+          choices: [
+            { value: 'front', label: 'Front' },
+            { value: 'back', label: 'Back' },
+            { value: 'both', label: 'Both' },
+          ],
+        },
         { key: 'smdOnly', label: 'SMD footprints only', type: 'boolean', default: false },
         { key: 'excludeDnp', label: 'Exclude DNP', type: 'boolean', default: true },
       ],
@@ -102,7 +190,17 @@ export function jobDefinitions(enabledLayers: readonly string[]): JobDefinition[
         { key: 'exportZones', label: 'Export zones', type: 'boolean', default: false },
         { key: 'fuseShapes', label: 'Fuse shapes', type: 'boolean', default: false },
         { key: 'optimizeStep', label: 'Optimize STEP', type: 'boolean', default: true },
-        { key: 'origin', label: 'Origin', type: 'select', default: 'center', choices: [{ value: 'center', label: 'Board centre' }, { value: 'grid', label: 'Grid origin' }, { value: 'drill', label: 'Drill/place origin' }] },
+        {
+          key: 'origin',
+          label: 'Origin',
+          type: 'select',
+          default: 'center',
+          choices: [
+            { value: 'center', label: 'Board centre' },
+            { value: 'grid', label: 'Grid origin' },
+            { value: 'drill', label: 'Drill/place origin' },
+          ],
+        },
       ],
     },
     {
@@ -127,8 +225,26 @@ export function jobDefinitions(enabledLayers: readonly string[]): JobDefinition[
       document: 'board',
       command: 'RunBoardJobExportIpc2581',
       options: [
-        { key: 'units', label: 'Units', type: 'select', default: 'mm', choices: [{ value: 'mm', label: 'Millimetres' }, { value: 'in', label: 'Inches' }] },
-        { key: 'version', label: 'Version', type: 'select', default: 'C', choices: [{ value: 'B', label: 'IPC-2581 B' }, { value: 'C', label: 'IPC-2581 C' }] },
+        {
+          key: 'units',
+          label: 'Units',
+          type: 'select',
+          default: 'mm',
+          choices: [
+            { value: 'mm', label: 'Millimetres' },
+            { value: 'in', label: 'Inches' },
+          ],
+        },
+        {
+          key: 'version',
+          label: 'Version',
+          type: 'select',
+          default: 'C',
+          choices: [
+            { value: 'B', label: 'IPC-2581 B' },
+            { value: 'C', label: 'IPC-2581 C' },
+          ],
+        },
         { key: 'precision', label: 'Precision (digits)', type: 'number', default: 3 },
         { key: 'compress', label: 'Compress (zip)', type: 'boolean', default: false },
         { key: 'bomRevision', label: 'BOM revision', type: 'string', default: '' },
@@ -143,9 +259,28 @@ export function jobDefinitions(enabledLayers: readonly string[]): JobDefinition[
       document: 'board',
       command: 'RunBoardJobExportODB',
       options: [
-        { key: 'units', label: 'Units', type: 'select', default: 'mm', choices: [{ value: 'mm', label: 'Millimetres' }, { value: 'in', label: 'Inches' }] },
+        {
+          key: 'units',
+          label: 'Units',
+          type: 'select',
+          default: 'mm',
+          choices: [
+            { value: 'mm', label: 'Millimetres' },
+            { value: 'in', label: 'Inches' },
+          ],
+        },
         { key: 'precision', label: 'Precision (digits)', type: 'number', default: 2 },
-        { key: 'compression', label: 'Compression', type: 'select', default: 'zip', choices: [{ value: 'none', label: 'None (directory)' }, { value: 'zip', label: 'ZIP' }, { value: 'tgz', label: 'TGZ' }] },
+        {
+          key: 'compression',
+          label: 'Compression',
+          type: 'select',
+          default: 'zip',
+          choices: [
+            { value: 'none', label: 'None (directory)' },
+            { value: 'zip', label: 'ZIP' },
+            { value: 'tgz', label: 'TGZ' },
+          ],
+        },
       ],
     },
     {
@@ -185,7 +320,18 @@ export function jobDefinitions(enabledLayers: readonly string[]): JobDefinition[
       description: 'KiCad s-expression netlist (RunSchematicJobExportNetlist).',
       document: 'schematic',
       command: 'RunSchematicJobExportNetlist',
-      options: [{ key: 'format', label: 'Format', type: 'select', default: 'sexpr', choices: [{ value: 'sexpr', label: 'KiCad s-expression' }, { value: 'xml', label: 'KiCad XML' }] }],
+      options: [
+        {
+          key: 'format',
+          label: 'Format',
+          type: 'select',
+          default: 'sexpr',
+          choices: [
+            { value: 'sexpr', label: 'KiCad s-expression' },
+            { value: 'xml', label: 'KiCad XML' },
+          ],
+        },
+      ],
     },
     {
       id: 'schematic.bom',
@@ -207,7 +353,19 @@ const layerEnums = (ids: unknown): BoardLayer[] => (Array.isArray(ids) ? ids.map
 function mimeFor(name: string): string {
   const ext = name.slice(name.lastIndexOf('.') + 1).toLowerCase();
   return (
-    { svg: 'image/svg+xml', pdf: 'application/pdf', csv: 'text/csv', pos: 'text/plain', drl: 'text/plain', gbr: 'application/vnd.gerber', gbrjob: 'application/json', step: 'model/step', glb: 'model/gltf-binary', xml: 'application/xml', txt: 'text/plain' }[ext] ?? 'application/octet-stream'
+    {
+      svg: 'image/svg+xml',
+      pdf: 'application/pdf',
+      csv: 'text/csv',
+      pos: 'text/plain',
+      drl: 'text/plain',
+      gbr: 'application/vnd.gerber',
+      gbrjob: 'application/json',
+      step: 'model/step',
+      glb: 'model/gltf-binary',
+      xml: 'application/xml',
+      txt: 'text/plain',
+    }[ext] ?? 'application/octet-stream'
   );
 }
 
@@ -311,89 +469,121 @@ export class KicadJobsService implements JobsService {
     switch (def.id) {
       case 'board.svg':
         if (!board) throw new Error('no board is open');
-        return board.jobs.exportSvg(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.svg`, { plotSettings: { layers: layerEnums(o.layers), blackAndWhite: bool('blackAndWhite'), mirror: bool('mirror') }, fitPageToBoard: bool('fitPageToBoard') }, JOB);
+        return board.jobs.exportSvg(
+          `${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.svg`,
+          { plotSettings: { layers: layerEnums(o.layers), blackAndWhite: bool('blackAndWhite'), mirror: bool('mirror') }, fitPageToBoard: bool('fitPageToBoard') },
+          JOB,
+        );
       case 'board.gerbers':
         if (!board) throw new Error('no board is open');
-        return board.jobs.exportGerbers(`${dir}/`, {
-          plotSettings: { layers: layerEnums(o.layers) },
-          useProtelFileExtensions: bool('useProtelExtensions'),
-          includeNetlistAttributes: bool('includeNetlistAttributes'),
-          createGerberJobFile: bool('createGerberJobFile'),
-          useX2Format: true,
-          precision: o.precision === '4.5' ? GerberPrecision.GP_5 : GerberPrecision.GP_6,
-        }, JOB);
+        return board.jobs.exportGerbers(
+          `${dir}/`,
+          {
+            plotSettings: { layers: layerEnums(o.layers) },
+            useProtelFileExtensions: bool('useProtelExtensions'),
+            includeNetlistAttributes: bool('includeNetlistAttributes'),
+            createGerberJobFile: bool('createGerberJobFile'),
+            useX2Format: true,
+            precision: o.precision === '4.5' ? GerberPrecision.GP_5 : GerberPrecision.GP_6,
+          },
+          JOB,
+        );
       case 'board.drill':
         if (!board) throw new Error('no board is open');
-        return board.jobs.exportDrill(`${dir}/`, {
-          format: o.format === 'gerber' ? DrillFormat.DF_GERBER : DrillFormat.DF_EXCELLON,
-          units,
-          origin: o.origin === 'plot' ? DrillOrigin.DO_PLOT : DrillOrigin.DO_ABSOLUTE,
-          mapFormat: bool('generateMap') ? DrillMapFormat.DMF_PDF : DrillMapFormat.DMF_UNKNOWN,
-        }, JOB);
+        return board.jobs.exportDrill(
+          `${dir}/`,
+          {
+            format: o.format === 'gerber' ? DrillFormat.DF_GERBER : DrillFormat.DF_EXCELLON,
+            units,
+            origin: o.origin === 'plot' ? DrillOrigin.DO_PLOT : DrillOrigin.DO_ABSOLUTE,
+            mapFormat: bool('generateMap') ? DrillMapFormat.DMF_PDF : DrillMapFormat.DMF_UNKNOWN,
+          },
+          JOB,
+        );
       case 'board.position':
         if (!board) throw new Error('no board is open');
-        return board.jobs.exportPosition(`${dir}/`, {
-          units,
-          side: o.side === 'front' ? PositionSide.PS_FRONT : o.side === 'back' ? PositionSide.PS_BACK : PositionSide.PS_BOTH,
-          smdOnly: bool('smdOnly'),
-          excludeDnp: bool('excludeDnp'),
-        }, JOB);
+        return board.jobs.exportPosition(
+          `${dir}/`,
+          {
+            units,
+            side: o.side === 'front' ? PositionSide.PS_FRONT : o.side === 'back' ? PositionSide.PS_BACK : PositionSide.PS_BOTH,
+            smdOnly: bool('smdOnly'),
+            excludeDnp: bool('excludeDnp'),
+          },
+          JOB,
+        );
       case 'board.pdf':
         if (!board) throw new Error('no board is open');
         return board.jobs.exportPdf(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.pdf`, { plotSettings: { layers: layerEnums(o.layers), blackAndWhite: bool('blackAndWhite') } }, JOB);
       case 'board.step':
         if (!board) throw new Error('no board is open');
-        return board.jobs.export3D(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.step`, {
-          format: Board3DFormat.B3D_STEP,
-          substituteModels: bool('substituteModels'),
-          includeDnp: bool('includeDnp'),
-          includeUnspecified: bool('includeUnspecified'),
-          exportTracksAndVias: bool('exportTracksAndVias'),
-          exportZones: bool('exportZones'),
-          fuseShapes: bool('fuseShapes'),
-          optimizeStep: bool('optimizeStep'),
-          exportBoardBody: true,
-          exportComponents: true,
-          usePcbCenterOrigin: o.origin === 'center',
-          useGridOrigin: o.origin === 'grid',
-          useDrillOrigin: o.origin === 'drill',
-          overwrite: true,
-        }, JOB);
+        return board.jobs.export3D(
+          `${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.step`,
+          {
+            format: Board3DFormat.B3D_STEP,
+            substituteModels: bool('substituteModels'),
+            includeDnp: bool('includeDnp'),
+            includeUnspecified: bool('includeUnspecified'),
+            exportTracksAndVias: bool('exportTracksAndVias'),
+            exportZones: bool('exportZones'),
+            fuseShapes: bool('fuseShapes'),
+            optimizeStep: bool('optimizeStep'),
+            exportBoardBody: true,
+            exportComponents: true,
+            usePcbCenterOrigin: o.origin === 'center',
+            useGridOrigin: o.origin === 'grid',
+            useDrillOrigin: o.origin === 'drill',
+            overwrite: true,
+          },
+          JOB,
+        );
       case 'board.glb':
         if (!board) throw new Error('no board is open');
-        return board.jobs.export3D(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.glb`, {
-          format: Board3DFormat.B3D_GLB,
-          substituteModels: o.substituteModels === undefined ? true : bool('substituteModels'),
-          includeDnp: bool('includeDnp'),
-          includeUnspecified: true,
-          exportBoardBody: true,
-          exportComponents: true,
-          exportTracksAndVias: o.exportTracksAndVias === undefined ? true : bool('exportTracksAndVias'),
-          exportPads: true,
-          exportZones: o.exportZones === undefined ? true : bool('exportZones'),
-          exportSilkscreen: o.exportSilkscreen === undefined ? true : bool('exportSilkscreen'),
-          exportSoldermask: o.exportSoldermask === undefined ? true : bool('exportSoldermask'),
-          usePcbCenterOrigin: true,
-          overwrite: true,
-        }, JOB);
+        return board.jobs.export3D(
+          `${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.glb`,
+          {
+            format: Board3DFormat.B3D_GLB,
+            substituteModels: o.substituteModels === undefined ? true : bool('substituteModels'),
+            includeDnp: bool('includeDnp'),
+            includeUnspecified: true,
+            exportBoardBody: true,
+            exportComponents: true,
+            exportTracksAndVias: o.exportTracksAndVias === undefined ? true : bool('exportTracksAndVias'),
+            exportPads: true,
+            exportZones: o.exportZones === undefined ? true : bool('exportZones'),
+            exportSilkscreen: o.exportSilkscreen === undefined ? true : bool('exportSilkscreen'),
+            exportSoldermask: o.exportSoldermask === undefined ? true : bool('exportSoldermask'),
+            usePcbCenterOrigin: true,
+            overwrite: true,
+          },
+          JOB,
+        );
       case 'board.ipc2581':
         if (!board) throw new Error('no board is open');
-        return board.jobs.exportIpc2581(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.xml`, {
-          units,
-          version: o.version === 'B' ? Ipc2581Version.IPC2581V_B : Ipc2581Version.IPC2581V_C,
-          precision: Number(o.precision ?? 3),
-          compress: bool('compress'),
-          bomRevision: String(o.bomRevision ?? ''),
-          manufacturerPartNumberColumn: String(o.mpnColumn ?? ''),
-          manufacturerColumn: String(o.manufacturerColumn ?? ''),
-        }, JOB);
+        return board.jobs.exportIpc2581(
+          `${dir}/${board.name.replace(/\.kicad_pcb$/, '')}.xml`,
+          {
+            units,
+            version: o.version === 'B' ? Ipc2581Version.IPC2581V_B : Ipc2581Version.IPC2581V_C,
+            precision: Number(o.precision ?? 3),
+            compress: bool('compress'),
+            bomRevision: String(o.bomRevision ?? ''),
+            manufacturerPartNumberColumn: String(o.mpnColumn ?? ''),
+            manufacturerColumn: String(o.manufacturerColumn ?? ''),
+          },
+          JOB,
+        );
       case 'board.odb':
         if (!board) throw new Error('no board is open');
-        return board.jobs.exportOdb(`${dir}/${board.name.replace(/\.kicad_pcb$/, '')}-odb${o.compression === 'zip' ? '.zip' : o.compression === 'tgz' ? '.tgz' : ''}`, {
-          units,
-          precision: Number(o.precision ?? 2),
-          compression: o.compression === 'none' ? OdbCompression.ODBC_NONE : o.compression === 'tgz' ? OdbCompression.ODBC_TGZ : OdbCompression.ODBC_ZIP,
-        }, JOB);
+        return board.jobs.exportOdb(
+          `${dir}/${board.name.replace(/\.kicad_pcb$/, '')}-odb${o.compression === 'zip' ? '.zip' : o.compression === 'tgz' ? '.tgz' : ''}`,
+          {
+            units,
+            precision: Number(o.precision ?? 2),
+            compression: o.compression === 'none' ? OdbCompression.ODBC_NONE : o.compression === 'tgz' ? OdbCompression.ODBC_TGZ : OdbCompression.ODBC_ZIP,
+          },
+          JOB,
+        );
       case 'board.dxf':
         if (!board) throw new Error('no board is open');
         // DXF wants a file name (a directory fails with "Failed to create file"); KiCad writes one file per layer next to it
@@ -403,13 +593,21 @@ export class KicadJobsService implements JobsService {
         return sch.jobs.exportSvg(`${dir}/`, { plotSettings: { blackAndWhite: bool('blackAndWhite'), plotDrawingSheet: bool('plotDrawingSheet'), plotAll: true } }, JOB);
       case 'schematic.pdf':
         if (!sch) throw new Error('no schematic is open');
-        return sch.jobs.exportPdf(`${dir}/${sch.name || 'schematic'}.pdf`, { plotSettings: { blackAndWhite: bool('blackAndWhite'), plotDrawingSheet: bool('plotDrawingSheet'), plotAll: true }, hierarchicalLinks: bool('hierarchicalLinks') }, JOB);
+        return sch.jobs.exportPdf(
+          `${dir}/${sch.name || 'schematic'}.pdf`,
+          { plotSettings: { blackAndWhite: bool('blackAndWhite'), plotDrawingSheet: bool('plotDrawingSheet'), plotAll: true }, hierarchicalLinks: bool('hierarchicalLinks') },
+          JOB,
+        );
       case 'schematic.bom':
         if (!sch) throw new Error('no schematic is open');
         return sch.jobs.exportBom(`${dir}/${sch.name || 'schematic'}-bom.csv`, { excludeDnp: bool('excludeDnp'), groupSymbols: bool('groupSymbols') }, JOB);
       case 'schematic.netlist':
         if (!sch) throw new Error('no schematic is open');
-        return sch.jobs.exportNetlist(`${dir}/${(sch.name || 'schematic').replace(/\.kicad_sch$/, '')}.${o.format === 'xml' ? 'xml' : 'net'}`, { format: o.format === 'xml' ? SchematicNetlistFormat.SNF_KICAD_XML : SchematicNetlistFormat.SNF_KICAD_SEXPR }, JOB);
+        return sch.jobs.exportNetlist(
+          `${dir}/${(sch.name || 'schematic').replace(/\.kicad_sch$/, '')}.${o.format === 'xml' ? 'xml' : 'net'}`,
+          { format: o.format === 'xml' ? SchematicNetlistFormat.SNF_KICAD_XML : SchematicNetlistFormat.SNF_KICAD_SEXPR },
+          JOB,
+        );
       default:
         throw new Error(`job ${def.id} has no runner`);
     }

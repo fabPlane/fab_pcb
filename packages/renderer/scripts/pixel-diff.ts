@@ -111,7 +111,13 @@ function parseArgs(argv: string[]): Args {
         break;
       case '--layers': {
         const s = v();
-        a.layers = s === 'all' || s === 'default' ? s : s.split(',').map((l) => l.trim()).filter(Boolean);
+        a.layers =
+          s === 'all' || s === 'default'
+            ? s
+            : s
+                .split(',')
+                .map((l) => l.trim())
+                .filter(Boolean);
         break;
       }
       case '--kicad-cli':
@@ -208,7 +214,10 @@ async function startServer(cli: string, projectFile: string, out: string): Promi
 }
 
 /** Temp copy of the project (board + schematic + project + DRU) with local library tables. */
-async function tempProject(board: string, schematic: string): Promise<{ dir: string; pro: string; pcb: string; sch: string; cleanup(): Promise<void> }> {
+async function tempProject(
+  board: string,
+  schematic: string,
+): Promise<{ dir: string; pro: string; pcb: string; sch: string; cleanup(): Promise<void> }> {
   const dir = await mkdtemp(join(tmpdir(), 'fp-pcb-pixel-diff-'));
   const base = board.replace(/\.kicad_pcb$/, '');
   const name = basename(base);
@@ -229,8 +238,16 @@ async function tempProject(board: string, schematic: string): Promise<{ dir: str
     const isLib = f.endsWith('.kicad_sym') || f.endsWith('.pretty') || f === 'libs' || f === 'fp-lib-table' || f === 'sym-lib-table';
     if (isSheet || isLib) await cp(src, join(dir, f), { recursive: true });
   }
-  if (!existsSync(join(dir, 'fp-lib-table'))) await writeFile(join(dir, 'fp-lib-table'), `(fp_lib_table\n  (version 7)\n  (lib (name "Resistor_SMD") (type "KiCad") (uri "${QA}/libraries/Resistor_SMD.pretty") (options "") (descr ""))\n)\n`);
-  if (!existsSync(join(dir, 'sym-lib-table'))) await writeFile(join(dir, 'sym-lib-table'), `(sym_lib_table\n  (version 7)\n  (lib (name "Device") (type "KiCad") (uri "${QA}/libraries/Device.kicad_sym") (options "") (descr ""))\n)\n`);
+  if (!existsSync(join(dir, 'fp-lib-table')))
+    await writeFile(
+      join(dir, 'fp-lib-table'),
+      `(fp_lib_table\n  (version 7)\n  (lib (name "Resistor_SMD") (type "KiCad") (uri "${QA}/libraries/Resistor_SMD.pretty") (options "") (descr ""))\n)\n`,
+    );
+  if (!existsSync(join(dir, 'sym-lib-table')))
+    await writeFile(
+      join(dir, 'sym-lib-table'),
+      `(sym_lib_table\n  (version 7)\n  (lib (name "Device") (type "KiCad") (uri "${QA}/libraries/Device.kicad_sym") (options "") (descr ""))\n)\n`,
+    );
   return { dir, pro, pcb, sch, cleanup: () => rm(dir, { recursive: true, force: true }) };
 }
 
@@ -265,7 +282,20 @@ function decodeSymbolChildren(proto: Record<string, any>): void {
 function hashText(t: Text): string {
   const a = t.attributes;
   const p = t.position;
-  return [t.text, num(p?.xNm), num(p?.yNm), a?.angle?.valueDegrees, num(a?.size?.xNm), num(a?.size?.yNm), num(a?.strokeWidth?.valueNm), a?.horizontalAlignment, a?.verticalAlignment, a?.italic, a?.bold, a?.mirrored].join('|');
+  return [
+    t.text,
+    num(p?.xNm),
+    num(p?.yNm),
+    a?.angle?.valueDegrees,
+    num(a?.size?.xNm),
+    num(a?.size?.yNm),
+    num(a?.strokeWidth?.valueNm),
+    a?.horizontalAlignment,
+    a?.verticalAlignment,
+    a?.italic,
+    a?.bold,
+    a?.mirrored,
+  ].join('|');
 }
 
 /**
@@ -331,7 +361,8 @@ function boardTexts(it: StoredItem): TextRef[] {
       push(p.text?.id?.value, p.text?.text);
       break;
     case 'KOT_PCB_FOOTPRINT':
-      for (const f of [p.referenceField, p.valueField, p.datasheetField, p.descriptionField, ...(p.userFields ?? [])]) push(f?.text?.id?.value, f?.text?.text);
+      for (const f of [p.referenceField, p.valueField, p.datasheetField, p.descriptionField, ...(p.userFields ?? [])])
+        push(f?.text?.id?.value, f?.text?.text);
       for (const child of p.definition?.items ?? []) {
         const c = child as Record<string, any>;
         if (c?.$typeName === 'kiapi.board.types.BoardText') push(c.id?.value, c.text);
@@ -349,7 +380,10 @@ async function fetchTextShapes(kicad: KiCad, refs: Array<TextRef | SchRef>): Pro
   const seen = new Map<string, TextRef | SchRef>();
   for (const r of refs) if (!seen.has(r.key) || seen.get(r.key) !== r) seen.set(r.key, r);
   // symbol fields that need their KiCad text box first (one GetTextExtents each)
-  const measured = await resolveTextRequests([...seen.values()].filter((r): r is SchRef => 'hash' in r), (t) => kicad.textExtents(t as never));
+  const measured = await resolveTextRequests(
+    [...seen.values()].filter((r): r is SchRef => 'hash' in r),
+    (t) => kicad.textExtents(t as never),
+  );
   const list = [...seen.values()].filter((r) => !('hash' in r) || measured.includes(r));
   for (let i = 0; i < list.length; i += 200) {
     const slice = list.slice(i, i + 200);
@@ -391,7 +425,8 @@ async function exportBoard(kicad: KiCad, board: Board, args: Args, out: string):
     if (it.type === 'KOT_PCB_ZONE' && proto.type === ZoneType.ZT_RULE_AREA) continue;
     if (it.type === 'KOT_PCB_FOOTPRINT') decodeFootprintChildren(proto);
     if (it.type === 'KOT_PCB_PAD') padIds.add(it.id);
-    if (it.type === 'KOT_PCB_FOOTPRINT') for (const c of proto.definition?.items ?? []) if (c?.$typeName === 'kiapi.board.types.Pad' && c.id?.value) padIds.add(c.id.value);
+    if (it.type === 'KOT_PCB_FOOTPRINT')
+      for (const c of proto.definition?.items ?? []) if (c?.$typeName === 'kiapi.board.types.Pad' && c.id?.value) padIds.add(c.id.value);
     texts.push(...boardTexts(it));
     items.push({ id: it.id, type: it.type, layer: it.layer, net: it.net, parent: it.parent, proto } as StoredItem);
   }
@@ -447,12 +482,21 @@ async function exportSchematic(kicad: KiCad, schPath: string, args: Args, out: s
   }
   const measured = texts.filter((t) => t.measure).length;
   const textShapes = await fetchTextShapes(kicad, texts);
-  console.log(`schematic: ${items.length} items on the root sheet, ${texts.length} text requests (${measured} measured first), ${Object.keys(textShapes).length} text shapes`);
+  console.log(
+    `schematic: ${items.length} items on the root sheet, ${texts.length} text requests (${measured} measured first), ${Object.keys(textShapes).length} text shapes`,
+  );
   const dir = join(out, 'schematic-svg');
   await rm(dir, { recursive: true, force: true });
   await mkdir(dir, { recursive: true });
   const job = await schematic.jobs.exportSvg(dir, {
-    plotSettings: { plotDrawingSheet: false, plotAll: false, pageSize: SchematicJobPageSize.SJPS_AUTO, blackAndWhite: false, useBackgroundColor: false, minPenWidth: 0 },
+    plotSettings: {
+      plotDrawingSheet: false,
+      plotAll: false,
+      pageSize: SchematicJobPageSize.SJPS_AUTO,
+      blackAndWhite: false,
+      useBackgroundColor: false,
+      minPenWidth: 0,
+    },
   });
   const files = (await readdir(dir)).filter((f) => f.endsWith('.svg')).sort();
   console.log(`schematic: RunSchematicJobExportSvg -> ${files.join(', ') || job.outputPaths.join(', ')} (${job.message || job.status})`);
@@ -462,7 +506,10 @@ async function exportSchematic(kicad: KiCad, schPath: string, args: Args, out: s
   const svgPath = join(out, 'schematic.svg');
   await cp(join(dir, rootFile), svgPath);
   const snapshot = join(out, 'schematic.snapshot.json');
-  await writeFile(snapshot, JSON.stringify({ kind: 'schematic', copperLayers: [], layers: [], items, padPolygons: {}, textShapes, adapter }, replacer));
+  await writeFile(
+    snapshot,
+    JSON.stringify({ kind: 'schematic', copperLayers: [], layers: [], items, padPolygons: {}, textShapes, adapter }, replacer),
+  );
   return { snapshot, svg: svgPath };
 }
 
@@ -471,14 +518,23 @@ async function exportSchematic(kicad: KiCad, schPath: string, args: Args, out: s
 function parseViewBox(svg: string): { x: number; y: number; w: number; h: number } {
   const m = /viewBox="([^"]+)"/.exec(svg);
   if (!m) throw new Error('SVG has no viewBox');
-  const [x, y, w, h] = m[1]!.trim().split(/[\s,]+/).map(Number);
+  const [x, y, w, h] = m[1]!
+    .trim()
+    .split(/[\s,]+/)
+    .map(Number);
   if (![x, y, w, h].every((v) => Number.isFinite(v))) throw new Error(`bad viewBox ${m[1]}`);
   return { x: x!, y: y!, w: w!, h: h! };
 }
 
 const PAGE_HTML = `<!doctype html><meta charset="utf-8"><title>pixel-diff</title><style>html,body{margin:0;background:#fff}</style><script type="module" src="/page.js"></script>`;
 
-async function compare(kind: 'board' | 'schematic', snapshotPath: string, svgPath: string, args: Args, out: string): Promise<RunResult & { kind: string; viewBox: ReturnType<typeof parseViewBox> }> {
+async function compare(
+  kind: 'board' | 'schematic',
+  snapshotPath: string,
+  svgPath: string,
+  args: Args,
+  out: string,
+): Promise<RunResult & { kind: string; viewBox: ReturnType<typeof parseViewBox> }> {
   const svgText = await readFile(svgPath, 'utf8');
   const viewBox = parseViewBox(svgText);
   const snapJson = await readFile(snapshotPath, 'utf8');
@@ -489,7 +545,14 @@ async function compare(kind: 'board' | 'schematic', snapshotPath: string, svgPat
     pxPerMm = maxPx / Math.max(viewBox.w, viewBox.h);
     console.log(`${kind}: clamping to ${pxPerMm.toFixed(2)} px/mm (${maxPx} px max)`);
   }
-  const build = await Bun.build({ entrypoints: [join(here, 'pixel-diff', 'page.ts')], outdir: out, naming: 'page.js', target: 'browser', format: 'esm', minify: false });
+  const build = await Bun.build({
+    entrypoints: [join(here, 'pixel-diff', 'page.ts')],
+    outdir: out,
+    naming: 'page.js',
+    target: 'browser',
+    format: 'esm',
+    minify: false,
+  });
   if (!build.success) {
     for (const log of build.logs) console.error(log);
     throw new Error('page bundle failed');
@@ -505,7 +568,10 @@ async function compare(kind: 'board' | 'schematic', snapshotPath: string, svgPat
       return new Response('not found', { status: 404 });
     },
   });
-  const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-swiftshader', '--use-gl=angle', '--use-angle=swiftshader', '--ignore-gpu-blocklist'] });
+  const browser = await chromium.launch({
+    headless: true,
+    args: ['--enable-unsafe-swiftshader', '--use-gl=angle', '--use-angle=swiftshader', '--ignore-gpu-blocklist'],
+  });
   try {
     const context = await browser.newContext({ deviceScaleFactor: 1, viewport: { width: 800, height: 600 } });
     const page = await context.newPage();
@@ -515,17 +581,30 @@ async function compare(kind: 'board' | 'schematic', snapshotPath: string, svgPat
     page.on('pageerror', (e) => console.log(`  [browser error] ${e.message}`));
     await page.goto(`http://127.0.0.1:${server.port}/`);
     await page.waitForFunction(() => !!(window as unknown as { pixelDiff?: unknown }).pixelDiff, null, { timeout: 30_000 });
-    const layers = kind === 'board' ? [...(snap.layers ?? []), ...(args.whiteHoles ? ['board.via_hole', 'board.pad_plated_hole', 'board.plated_hole'] : [])] : [];
-    const opts: RunOptions = { pxPerMm, viewBox, layers, hide: [], inkThreshold: args.ink, tolerancePx: args.tolerance, whiteHoles: kind === 'board' && args.whiteHoles };
-    const result = (await page.evaluate(
-      async (o) => {
-        const snapshot = await (await fetch('/snapshot.json')).text();
-        const svg = await (await fetch('/doc.svg')).text();
-        return (window as unknown as { pixelDiff: { run: (s: string, v: string, o: unknown) => Promise<unknown> } }).pixelDiff.run(snapshot, svg, o);
-      },
-      opts as unknown,
-    )) as RunResult;
-    const png = async (name: string, dataUrl: string) => writeFile(join(out, `${kind}.${name}.png`), Buffer.from(dataUrl.split(',')[1]!, 'base64'));
+    const layers =
+      kind === 'board'
+        ? [...(snap.layers ?? []), ...(args.whiteHoles ? ['board.via_hole', 'board.pad_plated_hole', 'board.plated_hole'] : [])]
+        : [];
+    const opts: RunOptions = {
+      pxPerMm,
+      viewBox,
+      layers,
+      hide: [],
+      inkThreshold: args.ink,
+      tolerancePx: args.tolerance,
+      whiteHoles: kind === 'board' && args.whiteHoles,
+    };
+    const result = (await page.evaluate(async (o) => {
+      const snapshot = await (await fetch('/snapshot.json')).text();
+      const svg = await (await fetch('/doc.svg')).text();
+      return (window as unknown as { pixelDiff: { run: (s: string, v: string, o: unknown) => Promise<unknown> } }).pixelDiff.run(
+        snapshot,
+        svg,
+        o,
+      );
+    }, opts as unknown)) as RunResult;
+    const png = async (name: string, dataUrl: string) =>
+      writeFile(join(out, `${kind}.${name}.png`), Buffer.from(dataUrl.split(',')[1]!, 'base64'));
     await Promise.all([png('ours', result.ours), png('svg', result.svg), png('diff', result.diff)]);
     if (args.keepBrowser) await page.waitForTimeout(600_000);
     const { ours: _o, svg: _s, diff: _d, ...rest } = result;

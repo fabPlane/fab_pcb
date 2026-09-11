@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Bun bridge: WebSocket <-> kicad-cli api-server (nng ipc), process supervision, file API, static hosting",
+  "description": "Bun bridge: WebSocket <-> KiCad (a kicad-cli api-server process, or kicad_api.wasm in a Worker), process supervision, file API, static hosting",
   "exports": {
     ".": "./src/index.ts"
   },
@@ -17,6 +17,7 @@
   "dependencies": {
     "@fp-pcb/client": "workspace:*",
     "@fp-pcb/compile": "workspace:*",
+    "@fp-pcb/kicad-wasm": "workspace:*",
     "@fp-pcb/router": "workspace:*"
   },
   "devDependencies": {

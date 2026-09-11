@@ -97,7 +97,13 @@ export async function compile(source: CompileSource, board: Board, opts: Compile
 
   return done(
     diagnostics,
-    { ...counts, footprintsAdded: applied.footprintsAdded, footprintsPlaced: applied.footprintsPlaced, viasAdded: applied.viasAdded, holesAdded: applied.holesAdded },
+    {
+      ...counts,
+      footprintsAdded: applied.footprintsAdded,
+      footprintsPlaced: applied.footprintsPlaced,
+      viasAdded: applied.viasAdded,
+      holesAdded: applied.holesAdded,
+    },
     started,
     applied.netlistPath,
   );

@@ -42,7 +42,18 @@ export function NetclassesDialog() {
             onClick={() =>
               setDraft([
                 ...draft,
-                { name: `Class${draft.length}`, clearanceNm: mm(0.2), trackWidthNm: mm(0.25), viaDiameterNm: mm(0.8), viaDrillNm: mm(0.4), diffPairWidthNm: mm(0.2), diffPairGapNm: mm(0.25), wireWidthNm: mm(0.15), busWidthNm: mm(0.3), colour: '' },
+                {
+                  name: `Class${draft.length}`,
+                  clearanceNm: mm(0.2),
+                  trackWidthNm: mm(0.25),
+                  viaDiameterNm: mm(0.8),
+                  viaDrillNm: mm(0.4),
+                  diffPairWidthNm: mm(0.2),
+                  diffPairGapNm: mm(0.25),
+                  wireWidthNm: mm(0.15),
+                  busWidthNm: mm(0.3),
+                  colour: '',
+                },
               ])
             }
           >
@@ -99,7 +110,12 @@ export function NetclassesDialog() {
                   </td>
                 ))}
                 <td>
-                  <input type="color" value={n.colour || '#888888'} onChange={(e) => update(i, { colour: e.target.value })} style={{ width: 28, height: 18, padding: 0, border: '1px solid var(--border)', background: 'transparent' }} />
+                  <input
+                    type="color"
+                    value={n.colour || '#888888'}
+                    onChange={(e) => update(i, { colour: e.target.value })}
+                    style={{ width: 28, height: 18, padding: 0, border: '1px solid var(--border)', background: 'transparent' }}
+                  />
                 </td>
                 <td>
                   {n.name !== 'Default' && (

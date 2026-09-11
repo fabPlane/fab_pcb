@@ -12,16 +12,16 @@ schematic to a board. Footprint matching, field updates and net assignment are K
 
 ## What is here
 
-| file                            | role                                                                                             |
-| ------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `src/types.ts`                  | the contract: `Netlist` IR, `Frontend`, `LibrarySpec`, `Diagnostic`, `CompileResult`             |
-| `src/netlist.ts`                | `emitKicadNetlist` (IR → KiCad `.net`) and `validateNetlist`                                     |
+| file                            | role                                                                                                                         |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `src/types.ts`                  | the contract: `Netlist` IR, `Frontend`, `LibrarySpec`, `Diagnostic`, `CompileResult`                                         |
+| `src/netlist.ts`                | `emitKicadNetlist` (IR → KiCad `.net`) and `validateNetlist`                                                                 |
 | `src/apply.ts`                  | `applyNetlist`: write → dry-run `ImportNetlist` → outline (+ a blank's vias and holes) → `ImportNetlist` → autoplace → inset |
-| `src/rules.ts`                  | `applyBoardRules`: `BoardSpec.rules` → `SetBoardDesignRules` + the `Default` net class (`SetNetClasses`) |
-| `src/compile.ts`                | orchestration, with the stage and `beforeApply` hooks the job uses                               |
-| `src/frontends/netlist-json.ts` | the first frontend: `circuit.netlist.json` = `{ netlist, board?, libraries? }`, the IR as a file |
-| `src/libraries.ts`              | `LibrarySpec` → project `fp-lib-table` / `sym-lib-table` rows (`AddLibraryTableRow`)             |
-| `src/bridge-job.ts`             | the job the bridge mounts at `/sessions/:id/compile` (see `packages/bridge/README.md`)           |
+| `src/rules.ts`                  | `applyBoardRules`: `BoardSpec.rules` → `SetBoardDesignRules` + the `Default` net class (`SetNetClasses`)                     |
+| `src/compile.ts`                | orchestration, with the stage and `beforeApply` hooks the job uses                                                           |
+| `src/frontends/netlist-json.ts` | the first frontend: `circuit.netlist.json` = `{ netlist, board?, libraries? }`, the IR as a file                             |
+| `src/libraries.ts`              | `LibrarySpec` → project `fp-lib-table` / `sym-lib-table` rows (`AddLibraryTableRow`)                                         |
+| `src/bridge-job.ts`             | the job the bridge mounts at `/sessions/:id/compile` (see `packages/bridge/README.md`)                                       |
 
 The emitter, the validator, the frontend and the outline geometry are pure, so the package is
 unit-tested without a KiCad server (`bun test`).

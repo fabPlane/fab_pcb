@@ -58,13 +58,21 @@ describe("units", () => {
     expect(v.yNm).toBe(-20n);
     expect(vec2(v)).toEqual({ x: 10, y: -20 });
     expect(vec2(undefined)).toEqual({ x: 0, y: 0 });
-    const b = box2(create(Box2Schema, { position: create(Vector2Schema, { xNm: 1n, yNm: 2n }), size: create(Vector2Schema, { xNm: 3n, yNm: 4n }) }));
+    const b = box2(
+      create(Box2Schema, { position: create(Vector2Schema, { xNm: 1n, yNm: 2n }), size: create(Vector2Schema, { xNm: 3n, yNm: 4n }) }),
+    );
     expect(b).toEqual({ x: 1, y: 2, w: 3, h: 4 });
     expect(box2(toBox2(b))).toEqual(b);
   });
 
   test("box geometry", () => {
-    expect(boxFromPoints([{ x: 0, y: 0 }, { x: 10, y: 5 }, { x: -2, y: 8 }])).toEqual({ x: -2, y: 0, w: 12, h: 8 });
+    expect(
+      boxFromPoints([
+        { x: 0, y: 0 },
+        { x: 10, y: 5 },
+        { x: -2, y: 8 },
+      ]),
+    ).toEqual({ x: -2, y: 0, w: 12, h: 8 });
     expect(boxUnion({ x: 0, y: 0, w: 1, h: 1 }, { x: 5, y: 5, w: 1, h: 1 })).toEqual({ x: 0, y: 0, w: 6, h: 6 });
     expect(boxUnion({ x: 0, y: 0, w: 0, h: 0 }, { x: 5, y: 5, w: 1, h: 1 })).toEqual({ x: 5, y: 5, w: 1, h: 1 });
   });

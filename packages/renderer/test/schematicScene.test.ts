@@ -11,7 +11,17 @@ import { schematicItemToRenderItems } from '../src/schematic/schematicAdapter.js
 import { SCHEMATIC_DRAW_ORDER, SCH_LAYERS } from '../src/schematic/schematicLayers.js';
 import { SchematicCanvasHost } from '../src/schematic/SchematicCanvasHost.js';
 import { createTextGlyphBuilder } from '../src/schematic/textGlyphs.js';
-import { MemoryStore, MM, globalLabel, ic, localLabel, resistor, syntheticSchematic, syntheticSubSheet, wire } from './schematicFixtures.js';
+import {
+  MemoryStore,
+  MM,
+  globalLabel,
+  ic,
+  localLabel,
+  resistor,
+  syntheticSchematic,
+  syntheticSubSheet,
+  wire,
+} from './schematicFixtures.js';
 
 function pickerFor(items: RenderItem[]): Picker {
   return new Picker(() => items);
@@ -19,7 +29,10 @@ function pickerFor(items: RenderItem[]): Picker {
 
 describe('schematic picking', () => {
   test('pins are picked at their connection point and return <symbol>:<pin number>', () => {
-    const items = [...schematicItemToRenderItems(resistor('R1', 'R1', 50, 50)), ...schematicItemToRenderItems(wire('w', 50, 46.19, 50, 40))];
+    const items = [
+      ...schematicItemToRenderItems(resistor('R1', 'R1', 50, 50)),
+      ...schematicItemToRenderItems(wire('w', 50, 46.19, 50, 40)),
+    ];
     const picker = pickerFor(items);
     const hits = picker.pick({ x: 50 * MM, y: 46.19 * MM }, 0.1 * MM);
     expect(hits.length).toBeGreaterThan(0);
@@ -42,7 +55,10 @@ describe('schematic picking', () => {
   });
 
   test('labels are picked through their text-glyph boxes and flag outlines', () => {
-    const items = [...schematicItemToRenderItems(localLabel('lbl', 10, 10, 'NET_A', 3)), ...schematicItemToRenderItems(globalLabel('gl', 30, 30, 'IN', 1, 1))];
+    const items = [
+      ...schematicItemToRenderItems(localLabel('lbl', 10, 10, 'NET_A', 3)),
+      ...schematicItemToRenderItems(globalLabel('gl', 30, 30, 'IN', 1, 1)),
+    ];
     const picker = pickerFor(items);
     const g = items[0]!.prims[0] as Extract<Primitive, { kind: 'text-glyphs' }>;
     const centre = { x: (g.outline[0]!.x + g.outline[2]!.x) / 2, y: (g.outline[0]!.y + g.outline[2]!.y) / 2 };
@@ -118,7 +134,13 @@ describe('SchematicCanvasHost', () => {
     main.apply({ removed: ['R1'] }); // not current: ignored
     expect(host.currentStore).toBe(sub);
     // child items listed separately are skipped when their parent is in the store
-    const withPin = new MemoryStore([resistor('R9', 'R9', 0, 0), { id: 'R9-pin1', type: 'KOT_SCH_PIN', parent: 'R9', proto: { number: '1', position: { xNm: 0, yNm: 0 }, orientation: 1 } }], 'schematic');
+    const withPin = new MemoryStore(
+      [
+        resistor('R9', 'R9', 0, 0),
+        { id: 'R9-pin1', type: 'KOT_SCH_PIN', parent: 'R9', proto: { number: '1', position: { xNm: 0, yNm: 0 }, orientation: 1 } },
+      ],
+      'schematic',
+    );
     host.setStore(withPin);
     expect(host.scene.ownerItems('R9-pin1')).toEqual([]);
     expect(host.scene.ownerItems('R9').length).toBeGreaterThan(3);

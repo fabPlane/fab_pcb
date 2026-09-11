@@ -88,7 +88,10 @@ export class Project {
   }
 
   /** Replace (default) or merge net classes. */
-  async setNetClasses(netClasses: readonly MessageInitShape<typeof NetClassSchema>[], mergeMode: MapMergeMode = MapMergeMode.MMM_REPLACE): Promise<void> {
+  async setNetClasses(
+    netClasses: readonly MessageInitShape<typeof NetClassSchema>[],
+    mergeMode: MapMergeMode = MapMergeMode.MMM_REPLACE,
+  ): Promise<void> {
     await cmd.setNetClasses(this.client, { netClasses: netClasses.map((n) => create(NetClassSchema, n)), mergeMode });
   }
 
@@ -106,7 +109,11 @@ export class Project {
    */
   async setTextVariables(variables: EntryMapLike<string>, mergeMode: MapMergeMode = MapMergeMode.MMM_MERGE): Promise<void> {
     const map = toRecord(variables, "setTextVariables(variables)");
-    await cmd.setTextVariables(this.client, { document: this.specifier, variables: create(TextVariablesSchema, { variables: map }), mergeMode });
+    await cmd.setTextVariables(this.client, {
+      document: this.specifier,
+      variables: create(TextVariablesSchema, { variables: map }),
+      mergeMode,
+    });
   }
 
   async expandTextVariables(text: readonly string[], expandEnvVars = false): Promise<string[]> {

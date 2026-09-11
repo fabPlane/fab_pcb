@@ -285,10 +285,7 @@ export class NngIpcTransport implements Transport {
   private afterDisconnect(err: Error): void {
     if (this.closedByUser) return;
     if (this.reconnect && this.attempt < this.reconnect.maxAttempts) {
-      const delay = Math.min(
-        this.reconnect.maxDelayMs,
-        this.reconnect.initialDelayMs * Math.pow(this.reconnect.factor, this.attempt),
-      );
+      const delay = Math.min(this.reconnect.maxDelayMs, this.reconnect.initialDelayMs * Math.pow(this.reconnect.factor, this.attempt));
       this.attempt += 1;
       this.setState("connecting");
       this.log(`reconnect attempt ${this.attempt} in ${delay} ms`);

@@ -10,16 +10,16 @@ click; nothing here changes what the series does, it only keeps it building and 
 `tooling/upstream-sync/sync.sh`, in stages; it stops at the first broken one and leaves the
 state in place for repair:
 
-| Stage | Does | On failure |
-|---|---|---|
-| fetch | `git fetch upstream`; counts new upstream commits; lists those that touch `api/`, `common/api`, `pcbnew/api`, `eeschema/api`, `kicad/cli`, `qa/tests/api`, `libs/kinng` | exit 7 when nothing is new |
-| merge | merges `upstream/master` into `web-api` on a `web-api-sync-<date>` branch (a merge commit, never a rebase) | exit 2, merge left mid-way with the conflicted files listed in the report |
-| build | `build/dev` kicad-cli + kifaces, `build/qa` qa_api | exit 3 with the compiler's last lines |
-| qa_api | the fork's API QA suite (154+ cases) | exit 4 |
-| worktree | a git worktree of this repo at `.worktrees/sync-<date>` on branch `sync/<date>` from `main`, `bun install` | exit 5 |
-| bindings | `bun run gen` (proto), `bun run coverage`, client wrappers, typecheck; writes the planned tag to `packages/proto/KICAD_TAG` | exit 5: an unlisted command proto, a renamed handler, or a type break |
-| web suites | unit, integration against the live server (bridge, conformance, round trip, router), mock e2e | exit 6 |
-| publish | pushes `web-api-sync-<date>` and `sync/<date>`, opens (or updates) a PR on each repo with the report as the body; the report is committed as `docs/sync/<date>.md` on the sync branch | exit 8 |
+| Stage      | Does                                                                                                                                                                                  | On failure                                                                |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| fetch      | `git fetch upstream`; counts new upstream commits; lists those that touch `api/`, `common/api`, `pcbnew/api`, `eeschema/api`, `kicad/cli`, `qa/tests/api`, `libs/kinng`               | exit 7 when nothing is new                                                |
+| merge      | merges `upstream/master` into `web-api` on a `web-api-sync-<date>` branch (a merge commit, never a rebase)                                                                            | exit 2, merge left mid-way with the conflicted files listed in the report |
+| build      | `build/dev` kicad-cli + kifaces, `build/qa` qa_api                                                                                                                                    | exit 3 with the compiler's last lines                                     |
+| qa_api     | the fork's API QA suite (154+ cases)                                                                                                                                                  | exit 4                                                                    |
+| worktree   | a git worktree of this repo at `.worktrees/sync-<date>` on branch `sync/<date>` from `main`, `bun install`                                                                            | exit 5                                                                    |
+| bindings   | `bun run gen` (proto), `bun run coverage`, client wrappers, typecheck; writes the planned tag to `packages/proto/KICAD_TAG`                                                           | exit 5: an unlisted command proto, a renamed handler, or a type break     |
+| web suites | unit, integration against the live server (bridge, conformance, round trip, router), mock e2e                                                                                         | exit 6                                                                    |
+| publish    | pushes `web-api-sync-<date>` and `sync/<date>`, opens (or updates) a PR on each repo with the report as the body; the report is committed as `docs/sync/<date>.md` on the sync branch | exit 8                                                                    |
 
 The report is written to `.worktrees/<date>.md` while the run is in progress (the main checkout is
 never touched) and ends up in the bindings PR. The fork checkout is switched back to `web-api` at

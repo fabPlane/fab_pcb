@@ -281,11 +281,7 @@ export class KiCadClient {
     if (unpacked) return unpacked;
     const actual = stripTypeUrl(res.message.typeUrl);
     if (actual === EmptySchema.typeName) return create(resSchema);
-    throw new KiCadApiError(
-      ApiStatusCode.AS_UNKNOWN,
-      `expected response type ${resSchema.typeName}, got ${actual}`,
-      command,
-    );
+    throw new KiCadApiError(ApiStatusCode.AS_UNKNOWN, `expected response type ${resSchema.typeName}, got ${actual}`, command);
   }
 
   /**

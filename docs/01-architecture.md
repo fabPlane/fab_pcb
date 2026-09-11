@@ -12,19 +12,19 @@ kicad-cli api-server [PROJECT_OR_FILE] [--socket SOCKET_PATH]
 
 Facts that shape every decision below (all verified in the KiCad sources):
 
-| Fact | Where |
-|---|---|
-| Transport is nng **REQ/REP v0** over a **unix-domain socket**, URL `ipc://<path>`. No TCP, no WebSocket today. | `libs/kinng/src/kinng.cpp`, `common/api/api_server.cpp` |
-| Default socket: `/tmp/kicad/api.sock` on macOS, `$TMPDIR/kicad/api.sock` elsewhere. `--socket` overrides the *path* only; the scheme is hard-coded to `ipc://`. | `api_server.cpp:77-96` |
-| Wire payload is `kiapi.common.ApiRequest { header{kicad_token, client_name}, google.protobuf.Any message }` → `ApiResponse { header, status{code, error_message}, Any message }`. | `api/proto/common/envelope.proto` |
-| Every command is a protobuf message; the server dispatches on the `Any` type URL. 111 request messages are defined; 92 work headless, 15 are GUI-only, 3 are never registered. | [api-coverage.md](api-coverage.md) |
-| Headless server holds **one project** at a time, with up to one schematic, one board, and any number of footprint documents. | `kicad/cli/command_api_server.cpp` |
-| Requests are executed on the wx main thread, serially. Long jobs (gerbers, STEP) block the socket until done. | `KICAD_API_SERVER::onApiRequest` → wx event |
-| There is **no server→client push**. REQ/REP only. | no `nng_pub0` anywhere in the tree |
-| Commits (BeginCommit/Create/Update/Delete/EndCommit) work headless: `BOARD_COMMIT(toolManager, true, false)` is used when no frame exists. | `pcbnew/api/api_handler_board.cpp:134` |
-| Zone filling works headless (registers `ZONE_FILLER_TOOL` on the bare headless `TOOL_MANAGER` on first use). This is the pattern to copy for other tools. | `api_handler_pcb.cpp:1690` |
-| The installed `/Applications/KiCad` is 10.0.4 and has **no** `api-server` command. We must build 10.99 from this checkout. | `kicad-cli --help` |
-| All geometry is int64 nanometres (`Distance.value_nm`), angles in degrees (`Angle.value_degrees`). | `base_types.proto` |
+| Fact                                                                                                                                                                              | Where                                                   |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Transport is nng **REQ/REP v0** over a **unix-domain socket**, URL `ipc://<path>`. No TCP, no WebSocket today.                                                                    | `libs/kinng/src/kinng.cpp`, `common/api/api_server.cpp` |
+| Default socket: `/tmp/kicad/api.sock` on macOS, `$TMPDIR/kicad/api.sock` elsewhere. `--socket` overrides the _path_ only; the scheme is hard-coded to `ipc://`.                   | `api_server.cpp:77-96`                                  |
+| Wire payload is `kiapi.common.ApiRequest { header{kicad_token, client_name}, google.protobuf.Any message }` → `ApiResponse { header, status{code, error_message}, Any message }`. | `api/proto/common/envelope.proto`                       |
+| Every command is a protobuf message; the server dispatches on the `Any` type URL. 111 request messages are defined; 92 work headless, 15 are GUI-only, 3 are never registered.    | [api-coverage.md](api-coverage.md)                      |
+| Headless server holds **one project** at a time, with up to one schematic, one board, and any number of footprint documents.                                                      | `kicad/cli/command_api_server.cpp`                      |
+| Requests are executed on the wx main thread, serially. Long jobs (gerbers, STEP) block the socket until done.                                                                     | `KICAD_API_SERVER::onApiRequest` → wx event             |
+| There is **no server→client push**. REQ/REP only.                                                                                                                                 | no `nng_pub0` anywhere in the tree                      |
+| Commits (BeginCommit/Create/Update/Delete/EndCommit) work headless: `BOARD_COMMIT(toolManager, true, false)` is used when no frame exists.                                        | `pcbnew/api/api_handler_board.cpp:134`                  |
+| Zone filling works headless (registers `ZONE_FILLER_TOOL` on the bare headless `TOOL_MANAGER` on first use). This is the pattern to copy for other tools.                         | `api_handler_pcb.cpp:1690`                              |
+| The installed `/Applications/KiCad` is 10.0.4 and has **no** `api-server` command. We must build 10.99 from this checkout.                                                        | `kicad-cli --help`                                      |
+| All geometry is int64 nanometres (`Distance.value_nm`), angles in degrees (`Angle.value_degrees`).                                                                                | `base_types.proto`                                      |
 
 ## System shape
 
@@ -62,8 +62,8 @@ unix sockets. Two ways out, and we do both in order:
    - each message is a 9-byte header (type byte `0x01` + 8-byte big-endian length) followed by the body;
    - REQ0 bodies start with a 4-byte request id with the top bit set, and the reply
      echoes that id before the `ApiResponse` bytes.
-   Reference: `include/api/api_client.h` / `common/api/api_client.cpp` is the C++
-   client we mirror; `qa/tests/api/api_e2e_utils.h` shows the full round trip.
+     Reference: `include/api/api_client.h` / `common/api/api_client.cpp` is the C++
+     client we mirror; `qa/tests/api/api_e2e_utils.h` shows the full round trip.
 2. **Direct WebSocket later (patch G15).** nng has a `ws://` transport compiled in
    (`/opt/homebrew/opt/nng/include/nng/transport/ws`). A one-line change letting
    `--socket` accept a full URL lets the browser dial `ws://127.0.0.1:PORT` with
@@ -79,6 +79,11 @@ unix sockets. Two ways out, and we do both in order:
   KiCad keys in-flight commits by `client_name`, so one commit per tab is possible.
 - `kicad_token` from the first `GetVersion`/`Ping` is pinned; a mismatch means the
   server restarted and the UI reloads the document.
+- A session's KiCad does not have to be a process. `SESSION_BACKEND=wasm` gives it
+  one `kicad_api.wasm` instance in a worker thread instead, and `?wasm=1` puts the
+  same module in the browser tab with no bridge at all. Both keep the shape above —
+  one session, one project, one token — and trade the OS process boundary for a
+  sandbox with no sockets, no host disk and no `exec`. See `docs/08-wasm.md`.
 
 ## Document model in the browser
 
@@ -131,24 +136,24 @@ cd packages/proto && bun run gen && cd ../.. && bun run coverage && (cd packages
 git commit -am "Regenerate bindings at fp-pcb/2026-09-07-name" && git tag -a fp-pcb/2026-09-07-name -m "aligned with the fork tag"
 ```
 
-| Fork tag | Fork commit | What it marks |
-|---|---|---|
-| `fp-pcb/2026-09-06-p0` | 1ca7f148a5 | P0 gaps: discovery, wake-up loop, events, lifecycle, DRC/ERC |
-| `fp-pcb/2026-09-06-p1` | 022e45f6d2 | conformance fixes, headless actions, paging, async jobs, clipboard |
-| `fp-pcb/2026-09-07-parity` | 163dec0e39 | libraries, schematic/board ops, undo, settings, transports, render data |
-| `fp-pcb/2026-09-07-qa` | ab43ac2538 | QA suite compiled and run; six product bugs |
-| `fp-pcb/2026-09-07-drc` | a99a1a803e | DRC provider fix, async DRC, theme keys |
-| `fp-pcb/2026-09-07-routing` | 8cc9377988 | Specctra export/import for autorouters |
+| Fork tag                    | Fork commit | What it marks                                                           |
+| --------------------------- | ----------- | ----------------------------------------------------------------------- |
+| `fp-pcb/2026-09-06-p0`      | 1ca7f148a5  | P0 gaps: discovery, wake-up loop, events, lifecycle, DRC/ERC            |
+| `fp-pcb/2026-09-06-p1`      | 022e45f6d2  | conformance fixes, headless actions, paging, async jobs, clipboard      |
+| `fp-pcb/2026-09-07-parity`  | 163dec0e39  | libraries, schematic/board ops, undo, settings, transports, render data |
+| `fp-pcb/2026-09-07-qa`      | ab43ac2538  | QA suite compiled and run; six product bugs                             |
+| `fp-pcb/2026-09-07-drc`     | a99a1a803e  | DRC provider fix, async DRC, theme keys                                 |
+| `fp-pcb/2026-09-07-routing` | 8cc9377988  | Specctra export/import for autorouters                                  |
 
 ## Milestones
 
-| # | Milestone | Exit criterion |
-|---|---|---|
-| M0 ✅ 2026-09-06 | Build `kicad-cli` from this 10.99 checkout on macOS; `Ping` from a Bun script over the raw socket. | done: see [m0-runbook.md](m0-runbook.md); `Ping`, `GetVersion`, `OpenDocument`, `GetOpenDocuments` all `AS_OK` |
-| M1 ✅ | Codegen + bridge + client: open the kitchen-sink project from the browser, `GetVersion`, `GetOpenDocuments`, `GetItems(FOOTPRINT)`. | done 2026-09-06 |
-| M2 ✅ | Read-only board viewer and schematic viewer (WebGL), layer panel, pan/zoom, hover/hit-test, net highlight (client-side). | done 2026-09-06: see docs/screenshots/board.png, schematic.png |
-| M3 ✅ | Editing: selection, move/rotate/flip, properties panel, create/delete, commits, client-side undo. | done 2026-09-06: property edit committed, verified via SaveDocumentToString, undone (board-edited.png) |
-| M4 ✅ | Patch series P0 landed in the fork: events, headless RunAction, DRC/ERC, new project/document, capability discovery. DRC/ERC panels live. | done 2026-09-06: all P0 gaps closed; markers drawn on the canvas (board-drc-markers.png) |
-| M5 ✅ | Libraries, annotate, schematic→board sync, exports/jobs UI, 3D via GLB export + three.js. | done 2026-09-07: library browser on the real fp-lib-table, annotate, update-PCB, 13 export jobs, three.js 3D (library-browser.png, board-3d.png) |
-| M6 ◐ | P1 parity, `ws://` direct transport, upstream MRs for every patch. | parity and direct ws:// done 2026-09-07 (165 commands, 150 headless, 0 the UI needs); the ten merge requests are described in [upstream.md](upstream.md) but not yet submitted |
-| M7 ✅ | Real-board practice and routing: five demo boards built, routed and exported through the web UI; Freerouting and a JavaScript router integrated and compared. | done 2026-09-07: 12/12 steps on all five boards, six renderer/app bugs fixed ([board-practice.md](board-practice.md)); both routers benchmarked ([router-comparison.md](router-comparison.md)) |
+| #                | Milestone                                                                                                                                                     | Exit criterion                                                                                                                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| M0 ✅ 2026-09-06 | Build `kicad-cli` from this 10.99 checkout on macOS; `Ping` from a Bun script over the raw socket.                                                            | done: see [m0-runbook.md](m0-runbook.md); `Ping`, `GetVersion`, `OpenDocument`, `GetOpenDocuments` all `AS_OK`                                                                                 |
+| M1 ✅            | Codegen + bridge + client: open the kitchen-sink project from the browser, `GetVersion`, `GetOpenDocuments`, `GetItems(FOOTPRINT)`.                           | done 2026-09-06                                                                                                                                                                                |
+| M2 ✅            | Read-only board viewer and schematic viewer (WebGL), layer panel, pan/zoom, hover/hit-test, net highlight (client-side).                                      | done 2026-09-06: see docs/screenshots/board.png, schematic.png                                                                                                                                 |
+| M3 ✅            | Editing: selection, move/rotate/flip, properties panel, create/delete, commits, client-side undo.                                                             | done 2026-09-06: property edit committed, verified via SaveDocumentToString, undone (board-edited.png)                                                                                         |
+| M4 ✅            | Patch series P0 landed in the fork: events, headless RunAction, DRC/ERC, new project/document, capability discovery. DRC/ERC panels live.                     | done 2026-09-06: all P0 gaps closed; markers drawn on the canvas (board-drc-markers.png)                                                                                                       |
+| M5 ✅            | Libraries, annotate, schematic→board sync, exports/jobs UI, 3D via GLB export + three.js.                                                                     | done 2026-09-07: library browser on the real fp-lib-table, annotate, update-PCB, 13 export jobs, three.js 3D (library-browser.png, board-3d.png)                                               |
+| M6 ◐             | P1 parity, `ws://` direct transport, upstream MRs for every patch.                                                                                            | parity and direct ws:// done 2026-09-07 (165 commands, 150 headless, 0 the UI needs); the ten merge requests are described in [upstream.md](upstream.md) but not yet submitted                 |
+| M7 ✅            | Real-board practice and routing: five demo boards built, routed and exported through the web UI; Freerouting and a JavaScript router integrated and compared. | done 2026-09-07: 12/12 steps on all five boards, six renderer/app bugs fixed ([board-practice.md](board-practice.md)); both routers benchmarked ([router-comparison.md](router-comparison.md)) |

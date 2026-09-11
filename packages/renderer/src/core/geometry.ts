@@ -348,10 +348,11 @@ export function hatchPolygon(outline: Vec2[], holes: Vec2[][], pitch: number, an
   const rings = [outline, ...holes].map((r) => r.map((p) => vRotate(p, angleDeg)));
   let minY = Infinity;
   let maxY = -Infinity;
-  for (const r of rings) for (const p of r) {
-    if (p.y < minY) minY = p.y;
-    if (p.y > maxY) maxY = p.y;
-  }
+  for (const r of rings)
+    for (const p of r) {
+      if (p.y < minY) minY = p.y;
+      if (p.y > maxY) maxY = p.y;
+    }
   const count = Math.floor((maxY - minY) / pitch);
   if (count > maxLines) pitch = (maxY - minY) / maxLines;
   const y0 = Math.ceil(minY / pitch) * pitch;

@@ -37,7 +37,16 @@
  * that, so the library stays free of persistence the way the router's `applyRouteResult` is.
  */
 import { create } from "@bufbuild/protobuf";
-import { BoardGraphicShapeSchema, BoardLayer, DrillShape, KiCadObjectType, PadStackShape, PadStackType, ViaSchema, ViaType } from "@fp-pcb/proto";
+import {
+  BoardGraphicShapeSchema,
+  BoardLayer,
+  DrillShape,
+  KiCadObjectType,
+  PadStackShape,
+  PadStackType,
+  ViaSchema,
+  ViaType,
+} from "@fp-pcb/proto";
 import { BoardShape, Via, mm, toVector2, vec2, type Board, type Item, type Vec2 } from "@fp-pcb/client";
 import { CompileCancelled } from "./compile";
 import { emitKicadNetlist, type EmitOptions } from "./netlist";
@@ -162,7 +171,12 @@ export function holeItem(center: Vec2, diameterNm: number): BoardShape {
   return new BoardShape(
     create(BoardGraphicShapeSchema, {
       layer: BoardLayer.BL_Edge_Cuts,
-      shape: { geometry: { case: "circle", value: { center: toVector2(c), radiusPoint: toVector2({ x: c.x + Math.round(diameterNm / 2), y: c.y }) } } },
+      shape: {
+        geometry: {
+          case: "circle",
+          value: { center: toVector2(c), radiusPoint: toVector2({ x: c.x + Math.round(diameterNm / 2), y: c.y }) },
+        },
+      },
     }),
   );
 }
@@ -172,7 +186,9 @@ export function prefabItems(spec: BoardSpec | undefined): { vias: Via[]; holes: 
   const viaDiameter = spec?.rules?.viaDiameterMm ?? DEFAULT_VIA.diameterMm;
   const viaDrill = spec?.rules?.viaDrillMm ?? DEFAULT_VIA.drillMm;
   return {
-    vias: (spec?.vias ?? []).map((v) => freeViaItem({ x: mm(v.x), y: mm(v.y) }, mm(v.diameterMm ?? viaDiameter), mm(v.drillMm ?? viaDrill))),
+    vias: (spec?.vias ?? []).map((v) =>
+      freeViaItem({ x: mm(v.x), y: mm(v.y) }, mm(v.diameterMm ?? viaDiameter), mm(v.drillMm ?? viaDrill)),
+    ),
     holes: (spec?.holes ?? []).map((h) => holeItem({ x: mm(h.x), y: mm(h.y) }, mm(h.diameterMm))),
   };
 }
@@ -193,7 +209,11 @@ export interface OutlineOutcome {
  * has no vias at all) — the
  * author may have shaped it by hand, and a compile should not flatten that. `drew` says which.
  */
-export async function ensureOutline(board: Board, spec: BoardSpec | undefined, message = "Compile: board outline"): Promise<OutlineOutcome> {
+export async function ensureOutline(
+  board: Board,
+  spec: BoardSpec | undefined,
+  message = "Compile: board outline",
+): Promise<OutlineOutcome> {
   const none: OutlineOutcome = { diagnostics: [], drew: false, fixed: false, viasAdded: 0, holesAdded: 0 };
   const points = outlinePoints(spec);
   if (!points) return none;
@@ -212,10 +232,17 @@ export async function ensureOutline(board: Board, spec: BoardSpec | undefined, m
       };
     return none;
   }
-  if (points.length < 3) return { ...none, diagnostics: [diag("error", `Board outline needs at least 3 points, got ${points.length}.`, "bad_outline")] };
+  if (points.length < 3)
+    return { ...none, diagnostics: [diag("error", `Board outline needs at least 3 points, got ${points.length}.`, "bad_outline")] };
   const items: Item[] = [...outlineItems(points), ...blank.holes, ...blank.vias];
   await board.commit(message, (tx) => tx.create(items));
-  return { diagnostics: [], drew: true, fixed: blank.vias.length > 0 || blank.holes.length > 0, viasAdded: blank.vias.length, holesAdded: blank.holes.length };
+  return {
+    diagnostics: [],
+    drew: true,
+    fixed: blank.vias.length > 0 || blank.holes.length > 0,
+    viasAdded: blank.vias.length,
+    holesAdded: blank.holes.length,
+  };
 }
 
 /**
@@ -370,7 +397,13 @@ export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOp
     }));
     footprintsPlaced = outcome.placedCount;
     if ("error" in outcome) {
-      diagnostics.push(diag("warning", `Autoplace failed (${outcome.error}); the imported footprints were left where the import put them.`, "autoplace_failed"));
+      diagnostics.push(
+        diag(
+          "warning",
+          `Autoplace failed (${outcome.error}); the imported footprints were left where the import put them.`,
+          "autoplace_failed",
+        ),
+      );
     } else if (!outcome.ok) {
       // Every non-completed result comes back as APR_NO_BOARD_OUTLINE, so the wording stays broad.
       diagnostics.push(

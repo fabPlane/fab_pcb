@@ -20,7 +20,8 @@ import {
 } from "@fp-pcb/client/transport";
 import type { BridgeConfig } from "./config";
 import { handleFiles } from "./files";
-import { SessionManager, type Session, type WsData } from "./session";
+import { SessionManager, type SessionLike, type WsData } from "./session";
+import { isSessionBackend, type SessionBackend } from "./wasm-protocol";
 
 export interface BridgeServer {
   readonly port: number;
@@ -54,7 +55,8 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
   const kicadCliExists = await stat(cfg.kicadCli)
     .then((s) => s.isFile())
     .catch(() => false);
-  if (!kicadCliExists) cfg.log(`warning: kicad-cli not found at ${cfg.kicadCli} (set KICAD_CLI)`);
+  if (!kicadCliExists && cfg.sessionBackend === "process") cfg.log(`warning: kicad-cli not found at ${cfg.kicadCli} (set KICAD_CLI)`);
+  if (cfg.sessionBackend === "wasm") cfg.log(`session backend: wasm (${cfg.wasmModuleUrl})`);
   const routeJobs = createRouteJobs({ freerouting: cfg.freerouting, log: cfg.log });
   const compileJobs = createCompileJobs({ log: cfg.log });
   if (!cfg.freerouting.ok) cfg.log(`warning: ${cfg.freerouting.reason}`);
@@ -84,6 +86,8 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
           uptimeSec: Math.round((Date.now() - startedAt) / 1000),
           kicadCli: cfg.kicadCli,
           kicadCliExists,
+          sessionBackend: cfg.sessionBackend,
+          wasmModule: cfg.wasmModuleUrl,
           workspaceRoot: cfg.workspaceRoot,
           staticDir: cfg.staticDir,
           freerouting: cfg.freerouting,
@@ -95,7 +99,7 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
       if (path === "/sessions") {
         if (req.method === "GET") return json({ sessions: sessions.list() });
         if (req.method === "POST") {
-          let body: { path?: string | null; socket?: string; id?: string } = {};
+          let body: { path?: string | null; socket?: string; id?: string; backend?: SessionBackend } = {};
           const text = await req.text();
           if (text.trim()) {
             try {
@@ -104,12 +108,15 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
               return json({ error: "body must be JSON" }, 400);
             }
           }
+          if (body.backend !== undefined && !isSessionBackend(body.backend)) {
+            return json({ error: `backend must be "process" or "wasm", got "${String(body.backend)}"` }, 400);
+          }
           try {
-            const s = await sessions.create({ path: body.path ?? null, socket: body.socket, id: body.id });
+            const s = await sessions.create({ path: body.path ?? null, socket: body.socket, id: body.id, backend: body.backend });
             return json({ session: s.info(), wsUrl: `/ws?session=${encodeURIComponent(s.id)}` }, 201);
           } catch (e) {
             const msg = e instanceof Error ? e.message : String(e);
-            const status = /not found|invalid|already exists/.test(msg) ? 400 : 502;
+            const status = /not found|invalid|already exists|must be/.test(msg) ? 400 : 502;
             return json({ error: msg }, status);
           }
         }
@@ -265,7 +272,7 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
  *   event: error   data: {"message"}                                                  (frame failed to decode)
  *   ": keepalive" comment every 15 s. Holding the stream open counts as a client for idle reaping.
  */
-function eventStream(session: Session, cfg: BridgeConfig): Response {
+function eventStream(session: SessionLike, cfg: BridgeConfig): Response {
   const enc = new TextEncoder();
   let cleanup: (() => void) | undefined;
   const stream = new ReadableStream<Uint8Array>({

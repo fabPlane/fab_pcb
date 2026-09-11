@@ -16,6 +16,7 @@
       "dependencies": {
         "@bufbuild/protobuf": "2.14.1",
         "@fp-pcb/client": "workspace:*",
+        "@fp-pcb/kicad-wasm": "workspace:*",
         "@fp-pcb/proto": "workspace:*",
         "@fp-pcb/renderer": "workspace:*",
         "@fp-pcb/router": "workspace:*",
@@ -55,6 +56,7 @@
       "dependencies": {
         "@fp-pcb/client": "workspace:*",
         "@fp-pcb/compile": "workspace:*",
+        "@fp-pcb/kicad-wasm": "workspace:*",
         "@fp-pcb/router": "workspace:*",
       },
       "devDependencies": {
@@ -70,6 +72,7 @@
         "@fp-pcb/proto": "workspace:*",
       },
       "devDependencies": {
+        "@fp-pcb/kicad-wasm": "workspace:*",
         "@types/bun": "^1.2.0",
         "typescript": "^5.6.0",
       },
@@ -83,6 +86,16 @@
         "@fp-pcb/proto": "workspace:*",
       },
       "devDependencies": {
+        "@types/bun": "^1.2.0",
+        "typescript": "^5.6.0",
+      },
+    },
+    "packages/kicad-wasm": {
+      "name": "@fp-pcb/kicad-wasm",
+      "version": "0.0.1",
+      "devDependencies": {
+        "@bufbuild/protobuf": "2.14.1",
+        "@fp-pcb/proto": "workspace:*",
         "@types/bun": "^1.2.0",
         "typescript": "^5.6.0",
       },
@@ -301,6 +314,8 @@
     "@fp-pcb/e2e": ["@fp-pcb/e2e@workspace:e2e"],
 
     "@fp-pcb/kicad-cli": ["@fp-pcb/kicad-cli@workspace:tooling/kicad-cli"],
+
+    "@fp-pcb/kicad-wasm": ["@fp-pcb/kicad-wasm@workspace:packages/kicad-wasm"],
 
     "@fp-pcb/proto": ["@fp-pcb/proto@workspace:packages/proto"],
 

@@ -74,6 +74,11 @@ jobs:
           bun run coverage:check
           bun tooling/coverage/summary.ts --check
 
+      # Green as of "chore: format the repo once so format:check can gate"; before that it was red
+      # on 159 files, which is why it was never wired up here.
+      - name: Formatting
+        run: bun run format:check
+
       - name: Typecheck
         run: bun run typecheck
 
@@ -283,3 +288,129 @@ jobs:
         env:
           KICAD_INTEGRATION_REQUIRED: "1"
         run: bun run test:integration
+
+  # ----------------------------------------------------------------- wasm conformance (released module)
+  #
+  # The module is not built here: an Emscripten build of KiCad's headless core is ~80 minutes and
+  # needs a toolchain this repo does not own.  The KiCad fork builds it on every pushed `fp-pcb/*`
+  # alignment tag (kicad/.github/workflows/wasm-release.yml) and attaches a verified tarball to that
+  # release; this job downloads it and runs the wasm suites against it.
+  #
+  # Green-by-skip is deliberate.  Until the first wasm release is cut there is no asset to fetch, so
+  # the probe below reports `have=false` and every later step is skipped -- the job succeeds and does
+  # not block a PR.  As soon as a release for the tag exists the same job starts gating for real,
+  # with no workflow change.  Which tag: the repository variable KICAD_WASM_RELEASE if it is set,
+  # otherwise packages/proto/KICAD_TAG.
+  #
+  # Auth: the fork is public, so the release is readable with no credentials at all.  The job's own
+  # GITHUB_TOKEN is passed anyway, purely to lift the unauthenticated API rate limit that hosted
+  # runners share an IP for; nothing here needs a repository secret.  If the fork is ever made
+  # private again this stops working -- a repository's GITHUB_TOKEN cannot read another private
+  # repository -- and the fix is a PAT in a secret, passed as GITHUB_TOKEN to the two steps below.
+  # docs/08-wasm.md has the details.
+  wasm:
+    name: wasm (conformance)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      # Same owner as KICAD_REPO above, in the owner/name form the releases API and
+      # packages/kicad-wasm/scripts/fetch.ts (KICAD_WASM_REPO) both take.
+      KICAD_WASM_REPO: ${{ github.repository_owner }}/kicad
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Cache bun install cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      # Does a wasm release exist for the tag?  Nothing below runs if it does not.
+      - name: Look for a released wasm build
+        id: release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_VAR: ${{ vars.KICAD_WASM_RELEASE }}
+        run: |
+          set -euo pipefail
+          tag="${TAG_VAR:-$(cat packages/proto/KICAD_TAG)}"
+          asset="kicad-wasm-${tag//\//-}.tar.gz"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "asset=$asset" >> "$GITHUB_OUTPUT"
+          # The release API takes everything after /tags/ as the tag, slashes included.
+          names="$(gh api "repos/$KICAD_WASM_REPO/releases/tags/$tag" --jq '.assets[].name' 2>/dev/null || true)"
+          if printf '%s\n' "$names" | grep -qxF "$asset"; then
+            echo "have=true" >> "$GITHUB_OUTPUT"
+            echo "found $asset on release $tag"
+          else
+            echo "have=false" >> "$GITHUB_OUTPUT"
+            echo "no $asset on release $tag of $KICAD_WASM_REPO -- skipping the wasm suites."
+            echo "Cut one by pushing the alignment tag; the fork's wasm-release workflow builds and attaches it."
+            { echo "### wasm (conformance): skipped"; echo;
+              echo "No \`$asset\` on release \`$tag\` of \`$KICAD_WASM_REPO\` yet."; } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # Downloads the tarball, checks every file against its SHA256SUMS and unpacks kicad_api.{js,
+      # wasm,data} plus the provenance manifest into packages/kicad-wasm/dist.
+      - name: Fetch the released wasm build
+        if: steps.release.outputs.have == 'true'
+        env:
+          # Optional -- see the note above the job.  It only lifts the API rate limit here.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KICAD_WASM_RELEASE: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+          bun run --filter @fp-pcb/kicad-wasm fetch:release
+          dist="$GITHUB_WORKSPACE/packages/kicad-wasm/dist"
+          # The suites below skip themselves when the module is missing, so a fetch that quietly
+          # produced nothing would look like a pass.  Fail here instead.
+          test -f "$dist/kicad_api.js" && test -f "$dist/kicad_api.wasm"
+          echo "KICAD_WASM_DIR=$dist" >> "$GITHUB_ENV"
+
+      # The conformance fixtures are the fork's own qa/data at KICAD_COMMIT (the kitchen-sink board
+      # and schematic, the QA libraries), reached through KICAD_SRC.  Shallow, no build.
+      - name: Check out the KiCad fork at KICAD_COMMIT
+        if: steps.release.outputs.have == 'true'
+        run: |
+          set -euo pipefail
+          commit="$(cat packages/proto/KICAD_COMMIT)"
+          git init -q ../kicad
+          git -C ../kicad remote add origin "$KICAD_REPO"
+          git -C ../kicad fetch --depth 1 origin "$commit"
+          git -C ../kicad checkout -q FETCH_HEAD
+          echo "KICAD_SRC=$(cd ../kicad && pwd)" >> "$GITHUB_ENV"
+
+      # The loader and the two-instances-in-one-process isolation test, straight against the module.
+      - name: kicad-wasm (loader + isolation)
+        if: steps.release.outputs.have == 'true'
+        run: bun test --cwd packages/kicad-wasm
+
+      # The headless command conformance suite over WasmTransport.  KICAD_TRANSPORT picks the backend
+      # inside startKiCad(); the suites themselves are written against RunningKiCad, not a backend.
+      - name: Conformance (wasm)
+        if: steps.release.outputs.have == 'true'
+        env:
+          KICAD_TRANSPORT: wasm
+        run: bun run --cwd packages/client test:conformance
+
+      # The bridge running a session as a module in a Worker, against the real module.
+      - name: Bridge session backend (wasm)
+        if: steps.release.outputs.have == 'true'
+        run: bun test --cwd packages/bridge test/session-wasm.kicad.test.ts
+
+      - name: Provenance of the module that was tested
+        if: always() && steps.release.outputs.have == 'true'
+        run: |
+          { echo "### wasm (conformance)"; echo;
+            echo "Release \`${{ steps.release.outputs.tag }}\` of \`$KICAD_WASM_REPO\`."; echo;
+            echo '```json';
+            cat packages/kicad-wasm/dist/kicad-wasm.json 2>/dev/null || echo '(no manifest in the tarball)';
+            echo '```'; } >> "$GITHUB_STEP_SUMMARY"

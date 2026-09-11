@@ -227,7 +227,13 @@ describe("reportDiagnostics", () => {
   test("a clean import is silent, whatever the report says", () => {
     expect(reportDiagnostics("Added footprint R1\nAdded footprint D1", 0, 0)).toEqual([]);
     // A blank's free vias draw one "unknown net" warning each; they are not the author's problem.
-    expect(reportDiagnostics("Added R1\nVia connected to unknown net ().\nVia connected to unknown net ().\n\nTotal warnings: 2, errors: 0.", 0, 2)).toEqual([]);
+    expect(
+      reportDiagnostics(
+        "Added R1\nVia connected to unknown net ().\nVia connected to unknown net ().\n\nTotal warnings: 2, errors: 0.",
+        0,
+        2,
+      ),
+    ).toEqual([]);
     const mixed = reportDiagnostics("Via connected to unknown net ().\nSomething else.", 0, 2);
     expect(mixed.map((d) => d.code)).toEqual(["import_warnings"]);
     expect(mixed[0]!.message).toContain("1 warning(s)");

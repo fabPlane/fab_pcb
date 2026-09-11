@@ -8,7 +8,16 @@ import type { StoredItemLike } from '../src/core/host.js';
 const n = (v: bigint | number | undefined): number => Number(v ?? 0);
 const at = (r: SchTextRequest): { x: number; y: number; angle: number; h: number; v: number; text: string; pen: number; size: number } => {
   const t = r.text!;
-  return { x: n(t.position.xNm), y: n(t.position.yNm), angle: t.attributes.angle.valueDegrees, h: t.attributes.horizontalAlignment, v: t.attributes.verticalAlignment, text: t.text, pen: n(t.attributes.strokeWidth.valueNm), size: n(t.attributes.size.xNm) };
+  return {
+    x: n(t.position.xNm),
+    y: n(t.position.yNm),
+    angle: t.attributes.angle.valueDegrees,
+    h: t.attributes.horizontalAlignment,
+    v: t.attributes.verticalAlignment,
+    text: t.text,
+    pen: n(t.attributes.strokeWidth.valueNm),
+    size: n(t.attributes.size.xNm),
+  };
 };
 const byKey = (reqs: SchTextRequest[], key: string): SchTextRequest => {
   const r = reqs.find((q) => q.key === key);
@@ -56,20 +65,40 @@ describe('schematic text requests: pins', () => {
     const inNum = at(byKey(reqs, 'U:pin:U-pin1:number'));
     expect(inNum).toMatchObject({ text: '1', x: -6.35 * MM, y: -2.54 * MM - PIN_OFF, angle: 0, h: 2, v: 3 });
     // pin 3 ~{OUT}: PIN_LEFT at (7.62, -2.54), root (5.08, -2.54): right-justified inside
-    expect(at(byKey(reqs, 'U:pin:U-pin3:name'))).toMatchObject({ text: '~{OUT}', x: 5.08 * MM - 0.508 * MM, y: -2.54 * MM, angle: 0, h: 3, v: 2 });
+    expect(at(byKey(reqs, 'U:pin:U-pin3:name'))).toMatchObject({
+      text: '~{OUT}',
+      x: 5.08 * MM - 0.508 * MM,
+      y: -2.54 * MM,
+      angle: 0,
+      h: 3,
+      v: 2,
+    });
     // pin 4 GND: PIN_UP at (0, 7.62), root (0, 5.08): vertical, left-justified, number to the left
     expect(at(byKey(reqs, 'U:pin:U-pin4:name'))).toMatchObject({ text: 'GND', x: 0, y: 5.08 * MM - 0.508 * MM, angle: 90, h: 1, v: 2 });
     expect(at(byKey(reqs, 'U:pin:U-pin4:number'))).toMatchObject({ text: '4', x: -PIN_OFF, y: 6.35 * MM, angle: 90, h: 2, v: 3 });
   });
 
   test('names outside (offset 0) with numbers: name above, number below the pin; hidden pins and alternates', () => {
-    const item = symbol('S', 'S1', 'X', 0, 0, [], [{ number: '7', name: 'CLK', x: -5.08, y: 0, orientation: 1 }, { number: '8', name: 'NC', x: 5.08, y: 0, orientation: 2, visible: false }]);
+    const item = symbol(
+      'S',
+      'S1',
+      'X',
+      0,
+      0,
+      [],
+      [
+        { number: '7', name: 'CLK', x: -5.08, y: 0, orientation: 1 },
+        { number: '8', name: 'NC', x: 5.08, y: 0, orientation: 2, visible: false },
+      ],
+    );
     const reqs = schematicTextRequests(item, { symbolPinsAbsolute: true });
     // PIN_RIGHT at (-5.08, 0), root (-2.54, 0), mid x = -3.81
     expect(at(byKey(reqs, 'S:pin:S-pin1:name'))).toMatchObject({ text: 'CLK', x: -3.81 * MM, y: -PIN_OFF, angle: 0, h: 2, v: 3 });
     expect(at(byKey(reqs, 'S:pin:S-pin1:number'))).toMatchObject({ text: '7', x: -3.81 * MM, y: PIN_OFF, angle: 0, h: 2, v: 1 });
     expect(reqs.some((r) => r.key.includes('S-pin2'))).toBe(false);
-    expect(schematicTextRequests(item, { symbolPinsAbsolute: true, showHiddenPins: true }).some((r) => r.key === 'S:pin:S-pin2:name')).toBe(true);
+    expect(schematicTextRequests(item, { symbolPinsAbsolute: true, showHiddenPins: true }).some((r) => r.key === 'S:pin:S-pin2:name')).toBe(
+      true,
+    );
     // an active alternate replaces the shown name
     const p = item.proto as { definition: { items: Array<{ item: Record<string, unknown> }> } };
     const pin = p.definition.items[0]!.item;
@@ -89,17 +118,27 @@ describe('schematic text requests: symbol fields', () => {
     expect(at(ref)).toMatchObject({ text: 'R1', x: 12.54 * MM + DELTA, y: 8.73 * MM, angle: 0, h: 1, v: 2 });
     // hidden footprint / datasheet fields make no request unless hidden fields are shown
     expect(reqs.some((r) => r.key === 'R:field:Footprint')).toBe(false);
-    expect(schematicTextRequests(resistor('R', 'R1', 10, 10), { symbolPinsAbsolute: true, showHiddenFields: true }).some((r) => r.key === 'R:field:Footprint')).toBe(true);
+    expect(
+      schematicTextRequests(resistor('R', 'R1', 10, 10), { symbolPinsAbsolute: true, showHiddenFields: true }).some(
+        (r) => r.key === 'R:field:Footprint',
+      ),
+    ).toBe(true);
   });
 
   test('rotated symbol: the field turns vertical and δ points up; mirrored symbol: justification flips', () => {
-    const rot = at(byKey(schematicTextRequests(resistor('R', 'R1', 10, 10, { orientation: 2 }), { symbolPinsAbsolute: true }), 'R:field:Reference'));
+    const rot = at(
+      byKey(schematicTextRequests(resistor('R', 'R1', 10, 10, { orientation: 2 }), { symbolPinsAbsolute: true }), 'R:field:Reference'),
+    );
     expect(rot).toMatchObject({ x: 8.73 * MM, y: 7.46 * MM - DELTA, angle: 90, h: 1, v: 2 });
     // mirror Y (x -> -x): the reading direction is reversed, so a left-justified field is drawn right-justified, δ to the left
-    const my = at(byKey(schematicTextRequests(resistor('R', 'R1', 0, 0, { mirrorY: true }), { symbolPinsAbsolute: true }), 'R:field:Reference'));
+    const my = at(
+      byKey(schematicTextRequests(resistor('R', 'R1', 0, 0, { mirrorY: true }), { symbolPinsAbsolute: true }), 'R:field:Reference'),
+    );
     expect(my).toMatchObject({ x: -2.54 * MM - DELTA, y: -1.27 * MM, angle: 0, h: 3, v: 2 });
     // mirror X (y -> -y): reading direction kept, position mirrored
-    const mx = at(byKey(schematicTextRequests(resistor('R', 'R1', 0, 0, { mirrorX: true }), { symbolPinsAbsolute: true }), 'R:field:Reference'));
+    const mx = at(
+      byKey(schematicTextRequests(resistor('R', 'R1', 0, 0, { mirrorX: true }), { symbolPinsAbsolute: true }), 'R:field:Reference'),
+    );
     expect(mx).toMatchObject({ x: 2.54 * MM + DELTA, y: 1.27 * MM, angle: 0, h: 1, v: 2 });
   });
 
@@ -111,7 +150,11 @@ describe('schematic text requests: symbol fields', () => {
     p.unit.unit = 2;
     p.definition.unitCount = 4;
     expect(at(byKey(schematicTextRequests(item, { symbolPinsAbsolute: true }), 'R:field:Reference')).text).toBe('U2B');
-    expect(at(byKey(schematicTextRequests(item, { symbolPinsAbsolute: true, subpartFirstId: '1', subpartIdSeparator: '.' }), 'R:field:Reference')).text).toBe('U2.2');
+    expect(
+      at(
+        byKey(schematicTextRequests(item, { symbolPinsAbsolute: true, subpartFirstId: '1', subpartIdSeparator: '.' }), 'R:field:Reference'),
+      ).text,
+    ).toBe('U2.2');
   });
 
   test('a top-justified field is measured first: GetTextExtents box centre through the transform, drawn centred', async () => {
@@ -123,7 +166,14 @@ describe('schematic text requests: symbol fields', () => {
     expect(ref.text).toBeUndefined();
     expect(ref.measure).toBeDefined();
     // the measure request is the field as stored (position, justification, angle, stored pen width)
-    expect(at({ ...ref, text: ref.measure } as SchTextRequest)).toMatchObject({ x: 12.54 * MM, y: 8.73 * MM, angle: 0, h: 1, v: 1, pen: 0 });
+    expect(at({ ...ref, text: ref.measure } as SchTextRequest)).toMatchObject({
+      x: 12.54 * MM,
+      y: 8.73 * MM,
+      angle: 0,
+      h: 1,
+      v: 1,
+      pen: 0,
+    });
     const asked: RequestText[] = [];
     const ready = await resolveTextRequests(reqs, async (t) => {
       asked.push(t);
@@ -159,7 +209,10 @@ describe('schematic text requests: labels, sheets, text', () => {
 
   test('plain text is raised by the KiCad-6 fudge; text boxes carry their margins and the plotter pen', () => {
     expect(at(byKey(schematicTextRequests(schText('T', 3, 4, 'hi')), 'T'))).toMatchObject({ x: 3 * MM, y: 4 * MM - 250_000 });
-    const tb = byKey(schematicTextRequests(textBox('B', 0, 0, 10, 5, 'hello')), 'B').textbox as Record<string, { valueNm?: bigint; xNm?: bigint }>;
+    const tb = byKey(schematicTextRequests(textBox('B', 0, 0, 10, 5, 'hello')), 'B').textbox as Record<
+      string,
+      { valueNm?: bigint; xNm?: bigint }
+    >;
     expect(n(tb.marginLeft!.valueNm)).toBe(0.5 * MM);
     expect(n(tb.bottomRight!.xNm)).toBe(10 * MM);
     expect(n((tb.attributes as unknown as { strokeWidth: { valueNm: bigint } }).strokeWidth.valueNm)).toBe(SCH_DEFAULTS.lineWidth);

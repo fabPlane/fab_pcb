@@ -117,7 +117,10 @@ export class KicadMarkerService implements MarkerService {
       if (kind === 'drc') {
         const board = this.docs.boardDoc;
         if (!board) throw new Error('no board is open');
-        const res = await kicad.client.call(RunBoardJobDrcSchema, { board: board.specifier, refillZones: false, reportAllTrackErrors: false }, DrcResultsResponseSchema, { command: cmd, timeoutMs: 120_000 });
+        const res = await kicad.client.call(RunBoardJobDrcSchema, { board: board.specifier, refillZones: false, reportAllTrackErrors: false }, DrcResultsResponseSchema, {
+          command: cmd,
+          timeoutMs: 120_000,
+        });
         list = res.markers.map(fromDrc);
       } else {
         const sch = this.docs.schematicDoc;
@@ -134,7 +137,8 @@ export class KicadMarkerService implements MarkerService {
       return list;
     } catch (e) {
       if (e instanceof KiCadApiError && e.isUnsupported) throw new Error(`${kind.toUpperCase()} is not supported by this server (${e.codeName})`);
-      if (e instanceof TransportError && e.code === 'timeout') throw new Error(`${cmd} did not answer in time; the KiCad server is probably wedged (known headless bug) - reopen the project to restart it`);
+      if (e instanceof TransportError && e.code === 'timeout')
+        throw new Error(`${cmd} did not answer in time; the KiCad server is probably wedged (known headless bug) - reopen the project to restart it`);
       throw e;
     } finally {
       release();
@@ -173,11 +177,15 @@ export class KicadMarkerService implements MarkerService {
       if (!kicad) continue;
       if (kind === 'drc' && this.docs.boardDoc) {
         pending.push(
-          kicad.client.call(SetDrcMarkerExcludedSchema, { board: this.docs.boardDoc.specifier, markers: [{ value: id }], excluded, comment }, DrcResultsResponseSchema, { command: 'SetDrcMarkerExcluded' }),
+          kicad.client.call(SetDrcMarkerExcludedSchema, { board: this.docs.boardDoc.specifier, markers: [{ value: id }], excluded, comment }, DrcResultsResponseSchema, {
+            command: 'SetDrcMarkerExcluded',
+          }),
         );
       } else if (kind === 'erc' && this.docs.schematicDoc) {
         pending.push(
-          kicad.client.call(SetErcMarkerExcludedSchema, { schematic: this.docs.schematicDoc.specifier, markers: [{ value: id }], excluded, comment }, ErcResultsResponseSchema, { command: 'SetErcMarkerExcluded' }),
+          kicad.client.call(SetErcMarkerExcludedSchema, { schematic: this.docs.schematicDoc.specifier, markers: [{ value: id }], excluded, comment }, ErcResultsResponseSchema, {
+            command: 'SetErcMarkerExcluded',
+          }),
         );
       }
     }

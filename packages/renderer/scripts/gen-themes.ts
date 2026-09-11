@@ -93,7 +93,12 @@ for (let i = 0; i < GERBER_DRAWLAYERS_COUNT; i++) {
 }
 // 3d_viewer.user_N default to the matching PCB User_N colour; fab/courtyard likewise
 for (let i = 1; i <= 45; i++) keyToLayer.push([`3d_viewer.user_${i}`, `User_${i}`]);
-keyToLayer.push(['3d_viewer.f_fab', 'F_Fab'], ['3d_viewer.b_fab', 'B_Fab'], ['3d_viewer.f_courtyard', 'F_CrtYd'], ['3d_viewer.b_courtyard', 'B_CrtYd']);
+keyToLayer.push(
+  ['3d_viewer.f_fab', 'F_Fab'],
+  ['3d_viewer.b_fab', 'B_Fab'],
+  ['3d_viewer.f_courtyard', 'F_CrtYd'],
+  ['3d_viewer.b_courtyard', 'B_CrtYd'],
+);
 
 // ---------------------------------------------------------------------------
 // 4. Emit in KiCad's own JSON layout (nested objects, CSS colour strings)
@@ -132,7 +137,11 @@ function emit(displayName: string, file: string, colours: Map<string, Rgba>, req
 function sortKeys(v: unknown): unknown {
   if (v && typeof v === 'object' && !Array.isArray(v)) {
     const o = v as Record<string, unknown>;
-    return Object.fromEntries(Object.keys(o).sort().map((k) => [k, sortKeys(o[k])]));
+    return Object.fromEntries(
+      Object.keys(o)
+        .sort()
+        .map((k) => [k, sortKeys(o[k])]),
+    );
   }
   return v;
 }

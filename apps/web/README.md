@@ -9,13 +9,14 @@ bridge.
 
 ## Running
 
-Three service graphs implement the same `Services` interface (`src/services/types.ts`):
+Four service graphs implement the same `Services` interface (`src/services/types.ts`):
 
-| mode | when | what |
-|---|---|---|
-| **mock** (default) | `bun run dev` with nothing set, or `?mock=1`, or `VITE_SERVICES=mock` | in-memory kitchen-sink board/schematic, Canvas2D mock host; what the e2e smoke tests run against |
-| **kicad via bridge** (the default for real work) | `VITE_BRIDGE_URL=<bridge origin>` or `?bridge=<origin>` (`proxy` / `1` = same origin), or `VITE_SERVICES=kicad` | real KiCad through the bridge: `KicadSessionService`, `KicadDocumentService`, `KicadCommitBackend`, `KicadJobsService`, `KicadMarkerService` (`src/services/kicad/`) and the real `BoardCanvasHost` / `SchematicCanvasHost` |
-| **kicad direct ws** | `VITE_KICAD_WS=ws://host:port/path` or `?kicad-ws=<url>` | the same services, but `NngWsTransport` dials `kicad-cli api-server --socket ws://…` itself: **no bridge in the request path** ([below](#direct-websocket-mode-vite_kicad_ws)) |
+| mode                                             | when                                                                                                            | what                                                                                                                                                                                                                                                                                           |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **mock** (default)                               | `bun run dev` with nothing set, or `?mock=1`, or `VITE_SERVICES=mock`                                           | in-memory kitchen-sink board/schematic, Canvas2D mock host; what the e2e smoke tests run against                                                                                                                                                                                               |
+| **kicad via bridge** (the default for real work) | `VITE_BRIDGE_URL=<bridge origin>` or `?bridge=<origin>` (`proxy` / `1` = same origin), or `VITE_SERVICES=kicad` | real KiCad through the bridge: `KicadSessionService`, `KicadDocumentService`, `KicadCommitBackend`, `KicadJobsService`, `KicadMarkerService` (`src/services/kicad/`) and the real `BoardCanvasHost` / `SchematicCanvasHost`                                                                    |
+| **kicad direct ws**                              | `VITE_KICAD_WS=ws://host:port/path` or `?kicad-ws=<url>`                                                        | the same services, but `NngWsTransport` dials `kicad-cli api-server --socket ws://…` itself: **no bridge in the request path** ([below](#direct-websocket-mode-vite_kicad_ws))                                                                                                                 |
+| **kicad in the tab (wasm)**                      | `VITE_KICAD_WASM=1` / `VITE_KICAD_WASM_URL=<kicad_api.js>`, or `?wasm=1` / `?kicad-wasm=<url>`                  | the same services over `WasmTransport`: KiCad _is_ the page, compiled to WebAssembly and running in a Web Worker (`?wasm-main=1` for the main thread). No bridge, no server, no socket; the project is imported into the module's file system ([below](#in-browser-wasm-mode-vite_kicad_wasm)) |
 
 Real mode, step by step (macOS paths from this checkout):
 
@@ -35,6 +36,42 @@ VITE_BRIDGE_URL=http://127.0.0.1:4020 bun run --filter @fp-pcb/app dev
 
 `?project=<path>` opens a file straight away (a `.kicad_pro`, `.kicad_pcb` or `.kicad_sch`
 inside the bridge workspace root). The project screen's file browser is `GET /files/list`.
+
+### In-browser wasm mode (`VITE_KICAD_WASM`)
+
+KiCad's headless API core also compiles to WebAssembly, and `@fp-pcb/kicad-wasm` loads it straight
+into the page. There is nothing to start and nothing to dial:
+
+```sh
+# 1. the wasm build, into packages/kicad-wasm/dist (vite serves it at /kicad-wasm/)
+bun run --filter @fp-pcb/kicad-wasm fetch
+
+# 2. the app (or open http://localhost:5173/?wasm=1)
+VITE_KICAD_WASM=1 bun run --filter @fp-pcb/app dev
+```
+
+The package is optional: the loader is `import()`ed only when a wasm session connects, so the
+other modes never bundle it, and `vite build` without a wasm build still succeeds (with a warning).
+Events are the ones the module publishes (`WasmSubscriber`), not a relay.
+
+The module runs in a **Web Worker**, so a slow command no longer freezes the page: `kiapi_dispatch`
+is synchronous and single-threaded, and on the main thread it took paint with it. Requests, events
+and the MEMFS operations the app needs all travel as messages (a round trip costs ~0.04 ms). Add
+`?wasm-main=1` to run it on the main thread instead, which is what a debugger wants.
+
+The module is loaded **once per tab**, not once per project: opening another project — or reopening
+the same one — reuses it, and only a module that aborted is replaced (the files you imported are
+replayed into the new one). The first load fetches ~37 MB.
+
+**Opening a project.** The tab cannot read your disk and neither can the module, so the project
+screen offers a file picker and a drop target instead of the workspace browser: pick a `.kicad_pro`
+together with its `.kicad_pcb` / `.kicad_sch` and they are copied into the module's file system
+under `/project` before `OpenDocument`. Saves land there too and stay there — there is no export
+path yet. Adding `?bridge=…` brings the workspace browser and the library session back while KiCad
+still runs in the page.
+
+See `docs/08-wasm.md` for the C ABI, the file system rules and the bridge's own wasm backend
+(`SESSION_BACKEND=wasm`), which runs the same module server-side in a worker per session.
 
 ### Direct WebSocket mode (`VITE_KICAD_WS`)
 
@@ -62,14 +99,14 @@ a `ws://` request socket is the same host and port with `/events` appended
 (`ws://127.0.0.1:5599/kicad/events`) — one TCP port serves both. The bridge is then only needed for
 the things that are not KiCad API calls at all:
 
-| feature | needs the bridge | why |
-|---|---|---|
-| Ping, GetVersion, GetItems, commits, undo, DRC/ERC, jobs, canvas geometry | no | plain API requests on the direct socket |
-| document events (`DocumentChanged`, `JobProgress`, …) | no | `ws://…/events`, subscribed by the page |
-| project browser, `?project=` outside the server's own document, job output files | **yes** | `/files/*` — reading the filesystem is not part of the KiCad API |
-| opening a *different* project, creating one | **yes** | `POST /sessions` spawns a `kicad-cli` for it; a running server is bound to what it has open |
-| library browser and footprint editor | **yes** | they need a *second* `kicad-cli` process, which only the bridge can spawn |
-| stopping the server when the tab closes | n/a | the server was not spawned by the tab, so it is left running |
+| feature                                                                          | needs the bridge | why                                                                                         |
+| -------------------------------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------- |
+| Ping, GetVersion, GetItems, commits, undo, DRC/ERC, jobs, canvas geometry        | no               | plain API requests on the direct socket                                                     |
+| document events (`DocumentChanged`, `JobProgress`, …)                            | no               | `ws://…/events`, subscribed by the page                                                     |
+| project browser, `?project=` outside the server's own document, job output files | **yes**          | `/files/*` — reading the filesystem is not part of the KiCad API                            |
+| opening a _different_ project, creating one                                      | **yes**          | `POST /sessions` spawns a `kicad-cli` for it; a running server is bound to what it has open |
+| library browser and footprint editor                                             | **yes**          | they need a _second_ `kicad-cli` process, which only the bridge can spawn                   |
+| stopping the server when the tab closes                                          | n/a              | the server was not spawned by the tab, so it is left running                                |
 
 So there are two useful shapes:
 
@@ -93,10 +130,10 @@ Latency is not the reason to choose either one. Measured on this machine with
 `bun tooling/bench/transport-latency.ts` (500 sequential Pings on the kitchen-sink board, after 50
 warm-up requests), the three paths are within a tenth of a millisecond of each other:
 
-| path | mean | median | p95 |
-|---|---|---|---|
-| ipc (unix socket, Bun) | 0.035 ms | 0.034 ms | 0.043 ms |
-| bridge (ws → bridge → ipc) | 0.081 ms | 0.078 ms | 0.111 ms |
+| path                         | mean     | median   | p95      |
+| ---------------------------- | -------- | -------- | -------- |
+| ipc (unix socket, Bun)       | 0.035 ms | 0.034 ms | 0.043 ms |
+| bridge (ws → bridge → ipc)   | 0.081 ms | 0.078 ms | 0.111 ms |
 | direct ws (`NngWsTransport`) | 0.091 ms | 0.090 ms | 0.122 ms |
 
 The bridge's extra ipc hop is cheaper than the difference between nng's WebSocket implementation and
@@ -110,7 +147,7 @@ second process to run and supervise), not a speed-up.
   become `SessionInfo.state`; a dropped socket is re-dialled (backoff) while the bridge still
   lists the session; `pagehide` deletes the session so closed tabs do not leak `kicad-cli`
   processes. `/files/*` backs the browser and job outputs. In direct mode (`directWsUrl`) there is
-  no session to create: `NngWsTransport` dials KiCad's own `ws://` listener, the session id *is*
+  no session to create: `NngWsTransport` dials KiCad's own `ws://` listener, the session id _is_
   that URL, reconnect redials it without asking the bridge whether it still exists, and neither
   `pagehide` nor `disconnect()` stops a server the tab never started.
 - **Documents** (`KicadDocumentService`): the bridge preloads the file it was given
@@ -149,7 +186,7 @@ second process to run and supervise), not a speed-up.
   distances stay `bigint`, oneofs expose `case` / `value`; value-shape inference remains the
   fallback for the mock's plain objects.
 - **Jobs** (`KicadJobsService`): `RunBoardJobExport{Svg,Gerbers,Drill,Position,Pdf,Dxf,3D (STEP
-  and GLB),Ipc2581,ODB}` and `RunSchematicJobExport{Svg,Pdf,BOM,Netlist}` write into
+and GLB),Ipc2581,ODB}` and `RunSchematicJobExport{Svg,Pdf,BOM,Netlist}` write into
   `<project dir>/fp-pcb-out/<job>-<run>/` (created through `/files/mkdir`); outputs are listed
   through `/files/list` and downloadable through `/files/read`. Every job is started with
   `RunJobSettings.async`: the server answers `JS_RUNNING` + a job id and `Job.wait` polls
@@ -174,7 +211,7 @@ second process to run and supervise), not a speed-up.
 - **Board setup / page settings** (`KicadBoardSetup.ts`): the dialog writes only the pages that
   changed with `SetBoardDesignRules`, `UpdateBoardStackup`, `SetCustomDesignRules` (name /
   condition / comment / severity on the rules KiCad served) and `SetBoardOrigin`; `Tools → Page
-  settings` reads / writes `GetPageSettings` / `GetTitleBlockInfo` and their setters for the board
+settings` reads / writes `GetPageSettings` / `GetTitleBlockInfo` and their setters for the board
   and the schematic.
 - **3D** (`src/screens/ThreeDView.tsx`): `Window → Open 3D viewer` runs `RunBoardJobExport3D`
   (GLB) and shows it with three.js (`GLTFLoader` + `OrbitControls`); Refresh re-exports.

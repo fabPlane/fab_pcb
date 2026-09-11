@@ -150,7 +150,11 @@ export class MockSessionService implements SessionService {
   }
 
   async connect(projectPath: string): Promise<SessionInfo> {
-    const name = projectPath.split('/').pop()?.replace(/\.kicad_pro$/, '') ?? 'project';
+    const name =
+      projectPath
+        .split('/')
+        .pop()
+        ?.replace(/\.kicad_pro$/, '') ?? 'project';
     const id = `sess-${Math.random().toString(36).slice(2, 8)}`;
     // POST /sessions
     this.set({ id, projectPath, projectName: name, kicadVersion: '', kicadToken: '', state: 'connecting' });

@@ -19,7 +19,13 @@ export function KeymapEditor({ maxHeight = '60vh', autoFocus = true }: { maxHeig
   const [tick, setTick] = useState(0);
   useEffect(() => onRegistryChange(() => setTick((t) => t + 1)), []);
 
-  const commands = useMemo(() => allCommands().filter((c) => !c.hidden).sort((a, b) => a.group.localeCompare(b.group) || a.title.localeCompare(b.title)), [tick]);
+  const commands = useMemo(
+    () =>
+      allCommands()
+        .filter((c) => !c.hidden)
+        .sort((a, b) => a.group.localeCompare(b.group) || a.title.localeCompare(b.title)),
+    [tick],
+  );
   const bindings = useMemo(() => {
     const map = new Map<string, Command[]>();
     for (const c of allCommands()) {

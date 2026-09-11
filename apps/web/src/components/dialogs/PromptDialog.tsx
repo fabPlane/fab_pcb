@@ -82,7 +82,16 @@ export function PromptDialog() {
                 <textarea id={`prompt-${f.key}`} ref={ref} className="textarea" rows={4} value={String(v ?? '')} onChange={(e) => set(e.target.value)} data-prompt={f.key} />
               ) : (
                 <span className="field-with-unit">
-                  <input id={`prompt-${f.key}`} ref={ref} className={`input${f.type === 'distance' || f.type === 'number' ? ' num' : ''}`} value={String(v ?? '')} placeholder={f.placeholder} onChange={(e) => set(e.target.value)} data-prompt={f.key} autoComplete="off" />
+                  <input
+                    id={`prompt-${f.key}`}
+                    ref={ref}
+                    className={`input${f.type === 'distance' || f.type === 'number' ? ' num' : ''}`}
+                    value={String(v ?? '')}
+                    placeholder={f.placeholder}
+                    onChange={(e) => set(e.target.value)}
+                    data-prompt={f.key}
+                    autoComplete="off"
+                  />
                   {f.type === 'distance' && <span className="unit">{units}</span>}
                   {f.type === 'number' && f.help === '°' && <span className="unit">°</span>}
                 </span>
