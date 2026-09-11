@@ -12,7 +12,7 @@ import {
   packAny,
   unpackAnyAs,
 } from "@fp-pcb/proto";
-import { LibSymbol, mm, placeNativeSymbol, toDistance, toVector2 } from "../src";
+import { LibSymbol, mm, moveNativeSymbol, placeNativeSymbol, toVector2 } from "../src";
 
 function librarySymbol(): LibSymbol {
   const pin = (number: string, x: number, y: number, unit = 1) =>
@@ -32,9 +32,6 @@ function librarySymbol(): LibSymbol {
       referenceField: field("Reference", "R", 0, -2),
       valueField: field("Value", "R", 0, 2),
       footprintField: field("Footprint", "", 0, 3),
-      showPinNames: true,
-      showPinNumbers: false,
-      pinNameOffset: toDistance(mm(1.016)),
       items: [pin("1", -5, 0), pin("2", 5, 0), pin("3", 0, 5, 2)],
     }),
   );
@@ -54,9 +51,6 @@ describe("native schematic authoring", () => {
     expect(placed.symbol.value).toBe("10k");
     expect(placed.symbol.footprint).toBe("Resistor_SMD:R_0603_1608Metric");
     expect(placed.symbol.libraryId).toBe("Device:R");
-    expect(placed.symbol.proto.showPinNames).toBe(true);
-    expect(placed.symbol.proto.showPinNumbers).toBe(false);
-    expect(placed.symbol.proto.pinNameOffset).toEqual(toDistance(mm(1.016)));
     expect(placed.pins).toEqual(
       new Map([
         ["1", { x: mm(25), y: mm(40) }],
@@ -64,9 +58,47 @@ describe("native schematic authoring", () => {
       ]),
     );
     expect(placed.symbol.field("MPN")?.text).toBe("RC0603-10K");
-    const pins = placed.symbol.proto
-      .definition!.items.map((child) => child.item && unpackAnyAs(child.item, SchematicPinSchema))
+    const pins = placed.symbol.proto.definition!.items
+      .map((child) => child.item && unpackAnyAs(child.item, SchematicPinSchema))
       .filter(Boolean);
     expect(pins.map((pin) => pin!.id)).toEqual([undefined, undefined, undefined]);
+  });
+
+  test("rotates and mirrors pins and fields with the symbol transform", () => {
+    const placed = placeNativeSymbol(librarySymbol(), {
+      reference: "R8",
+      value: "1k",
+      footprint: "Resistor_SMD:R_0603_1608Metric",
+      position: { x: mm(30), y: mm(40) },
+      rotation: 90,
+      mirrorX: true,
+    });
+
+    expect(placed.symbol.rotation).toBe(90);
+    expect(placed.symbol.mirrorX).toBe(true);
+    expect(placed.pins).toEqual(
+      new Map([
+        ["1", { x: mm(30), y: mm(45) }],
+        ["2", { x: mm(30), y: mm(35) }],
+      ]),
+    );
+    expect(placed.symbol.field("Reference")?.position).toEqual({ x: mm(32), y: mm(40) });
+  });
+
+  test("moves a placed symbol, its absolute pins and fields together", () => {
+    const placed = placeNativeSymbol(librarySymbol(), {
+      reference: "R9",
+      value: "22k",
+      footprint: "Resistor_SMD:R_0603_1608Metric",
+      position: { x: mm(30), y: mm(40) },
+    });
+    moveNativeSymbol(placed.symbol, { x: mm(50), y: mm(60) });
+
+    expect(placed.symbol.position).toEqual({ x: mm(50), y: mm(60) });
+    expect(placed.symbol.pins.map((pin) => pin.position)).toEqual([
+      { x: mm(45), y: mm(60) },
+      { x: mm(55), y: mm(60) },
+    ]);
+    expect(placed.symbol.field("Reference")?.position).toEqual({ x: mm(50), y: mm(58) });
   });
 });

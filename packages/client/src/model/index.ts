@@ -78,6 +78,7 @@ export {
 export { FootprintDocument } from "./footprint-doc";
 export { SymbolDocument } from "./symbol-doc";
 export {
+  moveNativeSymbol,
   placeNativeSymbol,
   type NativeSymbolPlacement,
   type PlacedNativeSymbol,
