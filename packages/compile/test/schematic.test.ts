@@ -10,7 +10,7 @@ import {
   SchematicSymbolSchema,
   TextSchema,
 } from "@fp-pcb/proto";
-import { GlobalLabel, LibSymbol, mm, NoConnect, SchematicLine, SchematicSymbol, toVector2 } from "@fp-pcb/client";
+import { GlobalLabel, LibSymbol, mm, NoConnect, SchematicLine, SchematicSymbol, toDistance, toVector2 } from "@fp-pcb/client";
 import { buildGeneratedSchematic, GENERATED_SCHEMATIC_PROPERTY } from "../src/schematic";
 
 function deviceSymbol(): LibSymbol {
@@ -38,6 +38,9 @@ function deviceSymbol(): LibSymbol {
       datasheetField: field("Datasheet", "", 0, 0),
       descriptionField: field("Description", "resistor", 0, 0),
       unitCount: 1,
+      showPinNames: false,
+      showPinNumbers: false,
+      pinNameOffset: toDistance(mm(0.254)),
       items: [pin("1", -5, 0), pin("2", 5, 0)],
     }),
   );
@@ -59,6 +62,9 @@ describe("generated schematic", () => {
     const symbol = result.items.find((item): item is SchematicSymbol => item instanceof SchematicSymbol)!;
     expect(symbol.reference).toBe("R1");
     expect(symbol.value).toBe("10k");
+    expect(symbol.proto.showPinNames).toBe(false);
+    expect(symbol.proto.showPinNumbers).toBe(false);
+    expect(symbol.proto.pinNameOffset).toEqual(toDistance(mm(0.254)));
     expect(symbol.position).toEqual({ x: mm(30.48), y: mm(25.4) });
     expect(symbol.field("Reference")?.position).toEqual({ x: mm(30.48), y: mm(23.4) });
     expect(symbol.pins[0]?.position).toEqual({ x: mm(25.48), y: mm(25.4) });

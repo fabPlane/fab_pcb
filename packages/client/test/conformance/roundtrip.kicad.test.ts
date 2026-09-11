@@ -65,60 +65,15 @@ function normalise(text: string): string {
  */
 const KNOWN_LOSS_PATTERNS: { issue: string; pattern: RegExp }[] = [
   { issue: "FOOTPRINT: net_tie_pad_groups re-joined with ', '", pattern: /\(net_tie_pad_groups / },
-  { issue: "FOOTPRINT field: text angle rotated by the footprint orientation on every update", pattern: /^\t\t\t\(at -?[\d.]+ -?[\d.]+ -?[\d.]+\)$/ },
+  {
+    issue: "FOOTPRINT field: text angle rotated by the footprint orientation on every update",
+    pattern: /^\t\t\t\(at -?[\d.]+ -?[\d.]+ -?[\d.]+\)$/,
+  },
   { issue: "PCB_SHAPE arc: start/mid/end written as 0 0 after update", pattern: /^\t\t\((start|mid|end) / },
   { issue: "PCB_TEXT: rotation dropped after update", pattern: /^\t\t\(at -?[\d.]+ -?[\d.]+( -?[\d.]+)?\)$/ },
   { issue: "PCB_TEXTBOX: border stroke width/type reset to defaults", pattern: /^\t\t\(stroke \(width [\d.]+\) \(type \w+\)\)$/ },
   { issue: "ZONE: locked flag dropped", pattern: /^\t\t\(locked yes\)$/ },
 ];
-
-/** Line range (1-based, inclusive) of the top-level `(lib_symbols ...)` block of a .kicad_sch. */
-function libSymbolsRange(text: string): [number, number] | undefined {
-  const lines = text.split("\n");
-  const start = lines.findIndex((l) => /^\t\(lib_symbols/.test(l));
-  if (start < 0) return undefined;
-  const end = lines.findIndex((l, i) => i > start && /^\t\)/.test(l));
-  return [start + 1, end < 0 ? lines.length : end + 1];
-}
-
-/**
- * Differences KiCad introduces when a SchematicSymbol is written back unchanged: it re-unpacks the
- * embedded library definition and rewrites the sheet's `lib_symbols` cache (pin_names offset
- * dropped, multi-unit bodies renumbered, the updated instance re-linked to a duplicated `<name>_1`
- * entry). Every differing line inside that block is one known KiCad-side loss; anything outside
- * it fails the test.
- */
-function classifySchematic(diff: string[], before: string, after: string): { known: Map<string, number>; unknown: string[] } {
-  const known = new Map<string, number>();
-  const unknown: string[] = [];
-  const bump = (issue: string) => known.set(issue, (known.get(issue) ?? 0) + 1);
-  const b = libSymbolsRange(before);
-  const a = libSymbolsRange(after);
-  // Symbol instances' `(pin "n" (uuid ...))` entries come back in a different order after an update
-  // (same uuids). Collect both sides and accept them only when the multisets match.
-  const PIN_ENTRY = /^\t\t\(pin "|^\t\t\t\(uuid "|^\t\t\)$/;
-  const pinLines: { removed: string[]; added: string[]; lines: string[] } = { removed: [], added: [], lines: [] };
-  for (const line of diff) {
-    const m = /^([-+])(\d+): (.*)$/.exec(line);
-    const n = m ? Number(m[2]) : 0;
-    const text = m?.[3] ?? line;
-    const range = m?.[1] === "-" ? b : a;
-    if (range && n >= range[0] && n <= range[1]) {
-      bump("SCH_SYMBOL update rewrites the sheet's lib_symbols cache (pin_names offset dropped, multi-unit bodies renumbered, a duplicated <name>_1 definition added)");
-    } else if (/^\t\t\(lib_name "/.test(text)) {
-      bump("SCH_SYMBOL update re-links the instance to the duplicated <name>_1 definition (lib_name written)");
-    } else if (PIN_ENTRY.test(text)) {
-      (m?.[1] === "-" ? pinLines.removed : pinLines.added).push(text);
-      pinLines.lines.push(line);
-    } else unknown.push(line);
-  }
-  if (pinLines.lines.length) {
-    const same = pinLines.removed.length === pinLines.added.length && [...pinLines.removed].sort().join("\n") === [...pinLines.added].sort().join("\n");
-    if (same) known.set("SCH_SYMBOL update reorders the instance's (pin \"n\" (uuid ...)) entries (same uuids, order only)", pinLines.lines.length);
-    else unknown.push(...pinLines.lines);
-  }
-  return { known, unknown };
-}
 
 function classify(diff: string[]): { known: Map<string, number>; unknown: string[] } {
   const known = new Map<string, number>();
@@ -138,7 +93,8 @@ interface RoundTripReport {
 
 function fieldDiff(a: unknown, b: unknown, path = ""): string[] {
   if (a === b) return [];
-  if (typeof a !== "object" || typeof b !== "object" || a === null || b === null) return [`${path || "/"}: ${JSON.stringify(a)} -> ${JSON.stringify(b)}`];
+  if (typeof a !== "object" || typeof b !== "object" || a === null || b === null)
+    return [`${path || "/"}: ${JSON.stringify(a)} -> ${JSON.stringify(b)}`];
   const keys = new Set([...Object.keys(a as object), ...Object.keys(b as object)]);
   const out: string[] = [];
   for (const k of keys) {
@@ -193,7 +149,9 @@ async function roundTrip(
 function printReport(title: string, report: RoundTripReport): string[] {
   const lines = [`--- ${title} ---`];
   for (const [type, e] of [...report.byType].sort()) {
-    lines.push(`  ${type.padEnd(26)} sent ${String(e.sent).padStart(3)} ok ${String(e.ok).padStart(3)}${e.rejected.length ? ` rejected ${e.rejected.length}` : ""}${e.normalised.length ? ` normalised ${e.normalised.length}` : ""}`);
+    lines.push(
+      `  ${type.padEnd(26)} sent ${String(e.sent).padStart(3)} ok ${String(e.ok).padStart(3)}${e.rejected.length ? ` rejected ${e.rejected.length}` : ""}${e.normalised.length ? ` normalised ${e.normalised.length}` : ""}`,
+    );
     for (const r of e.rejected.slice(0, 3)) lines.push(`      rejected: ${r}`);
     for (const n of e.normalised.slice(0, 2)) lines.push(`      canonical differs: ${n}`);
   }
@@ -232,8 +190,12 @@ describe.skipIf(!haveKicad())("conformance: lossless item round trip", () => {
     expect(items.length).toBeGreaterThan(50);
     const report: RoundTripReport = { byType: new Map() };
     // Top-level items first; pads/fields/table cells are addressed through their parent container.
-    const topLevel = items.filter((i) => ![KiCadObjectType.KOT_PCB_PAD, KiCadObjectType.KOT_PCB_FIELD, KiCadObjectType.KOT_PCB_TABLECELL].includes(i.type));
-    const children = items.filter((i) => [KiCadObjectType.KOT_PCB_PAD, KiCadObjectType.KOT_PCB_FIELD, KiCadObjectType.KOT_PCB_TABLECELL].includes(i.type));
+    const topLevel = items.filter(
+      (i) => ![KiCadObjectType.KOT_PCB_PAD, KiCadObjectType.KOT_PCB_FIELD, KiCadObjectType.KOT_PCB_TABLECELL].includes(i.type),
+    );
+    const children = items.filter((i) =>
+      [KiCadObjectType.KOT_PCB_PAD, KiCadObjectType.KOT_PCB_FIELD, KiCadObjectType.KOT_PCB_TABLECELL].includes(i.type),
+    );
     await roundTrip(board, topLevel, report);
     await roundTrip(board, children, report);
 
@@ -249,7 +211,9 @@ describe.skipIf(!haveKicad())("conformance: lossless item round trip", () => {
     const lines = printReport(`board round trip: ${items.length} items, ${types.size} types`, report);
     lines.push(`  SaveDocumentToString: ${stringDiff.length ? `${stringDiff.length} differing lines` : "identical"}`);
     for (const l of stringDiff) lines.push(`    ${l}`);
-    lines.push(`  SaveCopyOfDocument:   ${canSave ? (fileDiff.length ? `${fileDiff.length} differing lines` : "identical") : "KICAD-BUG multi-handler dispatch blocked the board save; skipped"}`);
+    lines.push(
+      `  SaveCopyOfDocument:   ${canSave ? (fileDiff.length ? `${fileDiff.length} differing lines` : "identical") : "KICAD-BUG multi-handler dispatch blocked the board save; skipped"}`,
+    );
     for (const l of fileDiff.slice(0, 20)) lines.push(`    ${l}`);
     const { known, unknown } = classify(stringDiff);
     lines.push(`  known KiCad round-trip losses (reported, KICAD-BUG):`);
@@ -278,7 +242,9 @@ describe.skipIf(!haveKicad())("conformance: lossless item round trip", () => {
     expect(sheets.length).toBeGreaterThan(0);
     const snapshot = async () => {
       const m = new Map<string, { type: string; json: unknown; text: string }>();
-      for (const sheet of sheets) for (const it of await sheet.getAllItems()) if (it.id) m.set(`${sheet.key}/${it.id}`, { type: it.typeName, json: it.toJson(), text: JSON.stringify(it.toJson()) });
+      for (const sheet of sheets)
+        for (const it of await sheet.getAllItems())
+          if (it.id) m.set(`${sheet.key}/${it.id}`, { type: it.typeName, json: it.toJson(), text: JSON.stringify(it.toJson()) });
       return m;
     };
     const before = await snapshot();
@@ -293,38 +259,23 @@ describe.skipIf(!haveKicad())("conformance: lossless item round trip", () => {
     const changed = [...before].filter(([k, v]) => after.get(k)?.text !== v.text).map(([k]) => k);
     const missing = [...before.keys()].filter((k) => !after.has(k));
     const added = [...after.keys()].filter((k) => !before.has(k));
-    // A re-read symbol whose only differences are in its embedded library definition / lib id is the
-    // same lib_symbols rewrite seen in the file (KICAD-BUG); anything else is unexpected.
-    const unexpectedChanges: string[] = [];
-    const knownChanges: string[] = [];
-    for (const k of changed) {
-      const b = before.get(k)!;
-      const a = after.get(k)!;
-      const paths = fieldDiff(b.json, a.json);
-      const benign = b.type === "KOT_SCH_SYMBOL" && paths.every((p) => /^\.(definition|libId)\b/.test(p));
-      (benign ? knownChanges : unexpectedChanges).push(`${b.type} ${k}: ${paths.slice(0, 4).join("; ")}`);
-    }
-
     const lines = printReport(`schematic round trip: ${total} items over ${sheets.length} sheet(s)`, report);
     lines.push(`  GetItems snapshot: ${changed.length} changed, ${missing.length} missing, ${added.length} added`);
-    for (const c of knownChanges.slice(0, 10)) lines.push(`    changed (KICAD-BUG lib_symbols rewrite): ${c}`);
-    for (const c of unexpectedChanges.slice(0, 10)) lines.push(`    changed (UNEXPECTED): ${c}`);
+    for (const k of changed.slice(0, 10)) {
+      const b = before.get(k)!;
+      const a = after.get(k)!;
+      lines.push(`    changed (UNEXPECTED): ${b.type} ${k}: ${fieldDiff(b.json, a.json).slice(0, 4).join("; ")}`);
+    }
     let fileDiff: string[] = [];
-    let unknownFileDiff: string[] = [];
     if (canSave) {
       const copyAfter = join(tmp.dir, "after.kicad_sch");
       await sch.saveCopy(copyAfter, { overwrite: true });
       const beforeText = normalise(await readFile(copyBefore, "utf8"));
       const afterText = normalise(await readFile(copyAfter, "utf8"));
       fileDiff = lineDiff(beforeText, afterText, 400);
-      const { known, unknown } = classifySchematic(fileDiff, beforeText, afterText);
-      unknownFileDiff = unknown;
       lines.push(`  SaveCopyOfDocument: ${fileDiff.length ? `${fileDiff.length} differing lines` : "identical"}`);
       for (const l of fileDiff.slice(0, 30)) lines.push(`    ${l}`);
       if (fileDiff.length > 30) lines.push(`    ... ${fileDiff.length - 30} more`);
-      lines.push(`  known KiCad round-trip losses (reported, KICAD-BUG):`);
-      for (const [issue, n] of known) lines.push(`    - ${issue} (${n} line(s))`);
-      if (unknown.length) lines.push(`  UNEXPECTED differences outside lib_symbols: ${unknown.length}`);
     } else {
       lines.push("  SaveCopyOfDocument: KICAD-BUG multi-handler dispatch blocked the schematic save; file comparison skipped");
     }
@@ -332,9 +283,9 @@ describe.skipIf(!haveKicad())("conformance: lossless item round trip", () => {
 
     const rejected = [...report.byType.values()].flatMap((e) => e.rejected);
     expect(rejected).toEqual([]);
+    expect(changed).toEqual([]);
     expect(missing).toEqual([]);
     expect(added).toEqual([]);
-    expect(unexpectedChanges).toEqual([]);
-    expect(unknownFileDiff).toEqual([]);
+    if (canSave) expect(fileDiff).toEqual([]);
   }, 300_000);
 });

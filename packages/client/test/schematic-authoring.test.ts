@@ -12,7 +12,7 @@ import {
   packAny,
   unpackAnyAs,
 } from "@fp-pcb/proto";
-import { LibSymbol, mm, placeNativeSymbol, toVector2 } from "../src";
+import { LibSymbol, mm, placeNativeSymbol, toDistance, toVector2 } from "../src";
 
 function librarySymbol(): LibSymbol {
   const pin = (number: string, x: number, y: number, unit = 1) =>
@@ -32,6 +32,9 @@ function librarySymbol(): LibSymbol {
       referenceField: field("Reference", "R", 0, -2),
       valueField: field("Value", "R", 0, 2),
       footprintField: field("Footprint", "", 0, 3),
+      showPinNames: true,
+      showPinNumbers: false,
+      pinNameOffset: toDistance(mm(1.016)),
       items: [pin("1", -5, 0), pin("2", 5, 0), pin("3", 0, 5, 2)],
     }),
   );
@@ -51,6 +54,9 @@ describe("native schematic authoring", () => {
     expect(placed.symbol.value).toBe("10k");
     expect(placed.symbol.footprint).toBe("Resistor_SMD:R_0603_1608Metric");
     expect(placed.symbol.libraryId).toBe("Device:R");
+    expect(placed.symbol.proto.showPinNames).toBe(true);
+    expect(placed.symbol.proto.showPinNumbers).toBe(false);
+    expect(placed.symbol.proto.pinNameOffset).toEqual(toDistance(mm(1.016)));
     expect(placed.pins).toEqual(
       new Map([
         ["1", { x: mm(25), y: mm(40) }],
@@ -58,8 +64,8 @@ describe("native schematic authoring", () => {
       ]),
     );
     expect(placed.symbol.field("MPN")?.text).toBe("RC0603-10K");
-    const pins = placed.symbol.proto.definition!.items
-      .map((child) => child.item && unpackAnyAs(child.item, SchematicPinSchema))
+    const pins = placed.symbol.proto
+      .definition!.items.map((child) => child.item && unpackAnyAs(child.item, SchematicPinSchema))
       .filter(Boolean);
     expect(pins.map((pin) => pin!.id)).toEqual([undefined, undefined, undefined]);
   });
