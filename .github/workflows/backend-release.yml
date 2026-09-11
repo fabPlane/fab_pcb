@@ -380,6 +380,6 @@ jobs:
           set -euo pipefail
           tag="backend-${GITHUB_SHA:0:10}"
           test "$(find artifacts -name 'fp-pcb-backend-*.tar.gz' | wc -l | tr -d ' ')" = 4
-          gh release view "$tag" >/dev/null 2>&1 \
-            || gh release create "$tag" --title "$tag" --notes "Router-free FabPlane PCB native backends for $GITHUB_SHA."
-          gh release upload "$tag" artifacts/fp-pcb-backend-*.tar.gz --clobber
+          gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 \
+            || gh release create "$tag" --repo "$GITHUB_REPOSITORY" --title "$tag" --notes "Router-free FabPlane PCB native backends for $GITHUB_SHA."
+          gh release upload "$tag" artifacts/fp-pcb-backend-*.tar.gz --repo "$GITHUB_REPOSITORY" --clobber
