@@ -3,6 +3,7 @@
 import { mkdtemp, readFile, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { delimiter, dirname, join, resolve } from "node:path";
+import { validateRelocatableSymlinks } from "./bundle-lib";
 
 interface Manifest {
   format: 1;
@@ -25,6 +26,7 @@ if (!manifestArg || !expectedTarget) {
 }
 const manifestPath = resolve(manifestArg);
 const root = dirname(manifestPath);
+await validateRelocatableSymlinks(root);
 const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as Manifest;
 if (manifest.format !== 1) throw new Error(`unsupported bundle format ${String(manifest.format)}`);
 if (manifest.target !== expectedTarget) throw new Error(`bundle target ${manifest.target} != ${expectedTarget}`);

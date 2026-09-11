@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { mkdtemp, mkdir } from "node:fs/promises";
+import { mkdtemp, mkdir, symlink } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { findStockData, targetSpec, validateJsAutorouterSource } from "./bundle-lib";
+import { findStockData, targetSpec, validateJsAutorouterSource, validateRelocatableSymlinks } from "./bundle-lib";
 
 describe("backend bundle targets", () => {
   test("uses IPC on Unix and KiCad WebSockets on Windows", () => {
@@ -34,5 +34,27 @@ describe("KiCad stock data", () => {
     const mac = await mkdtemp(join(tmpdir(), "fp-pcb-stock-mac-"));
     await mkdir(join(mac, "KiCad.app", "Contents", "SharedSupport"), { recursive: true });
     expect(await findStockData(mac)).toBe(join(mac, "KiCad.app", "Contents", "SharedSupport"));
+  });
+});
+
+describe("relocatable backend links", () => {
+  test("accepts internal relative links and rejects absolute, escaping, and broken links", async () => {
+    const good = await mkdtemp(join(tmpdir(), "fp-pcb-links-good-"));
+    await Bun.write(join(good, "library.1"), "library\n");
+    await symlink("library.1", join(good, "library"));
+    await expect(validateRelocatableSymlinks(good)).resolves.toBeUndefined();
+
+    const absolute = await mkdtemp(join(tmpdir(), "fp-pcb-links-absolute-"));
+    await Bun.write(join(absolute, "library.1"), "library\n");
+    await symlink(join(absolute, "library.1"), join(absolute, "library"));
+    await expect(validateRelocatableSymlinks(absolute)).rejects.toThrow(/absolute symlink/);
+
+    const escaping = await mkdtemp(join(tmpdir(), "fp-pcb-links-escaping-"));
+    await symlink("../outside", join(escaping, "library"));
+    await expect(validateRelocatableSymlinks(escaping)).rejects.toThrow(/escapes bundle/);
+
+    const broken = await mkdtemp(join(tmpdir(), "fp-pcb-links-broken-"));
+    await symlink("missing", join(broken, "library"));
+    await expect(validateRelocatableSymlinks(broken)).rejects.toThrow(/broken symlink/);
   });
 });

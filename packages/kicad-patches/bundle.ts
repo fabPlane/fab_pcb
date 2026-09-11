@@ -2,7 +2,7 @@
 /** Assemble a relocatable FabPlane PCB backend: fork runtime, bridge executable, and libraries. */
 import { cp, mkdir, readdir, rm, stat } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
-import { findStockData, targetSpec, validateJsAutorouterSource, validateLibraryDirectory } from "./bundle-lib";
+import { findStockData, targetSpec, validateJsAutorouterSource, validateLibraryDirectory, validateRelocatableSymlinks } from "./bundle-lib";
 
 const [target, runtimeArg, footprintsArg, symbolsArg, outputArg] = process.argv.slice(2);
 if (!target || !runtimeArg || !footprintsArg || !symbolsArg || !outputArg) {
@@ -24,7 +24,9 @@ if (!(await stat(runtime).catch(() => null))?.isDirectory()) throw new Error(`Ki
 
 await rm(output, { recursive: true, force: true });
 await mkdir(join(output, "bin"), { recursive: true });
-await cp(runtime, join(output, "kicad"), { recursive: true, preserveTimestamps: true });
+// fs.cp otherwise rewrites relative runtime links into absolute links back to the
+// CI scratch directory. Materialize link targets so the archive is self-contained.
+await cp(runtime, join(output, "kicad"), { recursive: true, preserveTimestamps: true, dereference: true });
 await cp(footprints, join(output, "libraries", "footprints"), { recursive: true, preserveTimestamps: true });
 await cp(symbols, join(output, "libraries", "symbols"), { recursive: true, preserveTimestamps: true });
 if (jsAutorouterSource) {
@@ -33,6 +35,7 @@ if (jsAutorouterSource) {
   await cp(join(jsAutorouterSource, "package.json"), join(destination, "package.json"), { preserveTimestamps: true });
   await cp(join(jsAutorouterSource, "src"), join(destination, "src"), { recursive: true, preserveTimestamps: true });
 }
+await validateRelocatableSymlinks(output);
 
 const bridge = join(output, "bin", spec.bridgeName);
 const build = Bun.spawn(
