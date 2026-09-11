@@ -9,6 +9,7 @@
     "./transport": "./src/transport/index.ts",
     "./client": "./src/client.ts",
     "./commands": "./src/commands.ts",
+    "./ipc-catalog": "./src/ipc-catalog.ts",
     "./units": "./src/units.ts",
     "./errors": "./src/errors.ts",
     "./model": "./src/model/index.ts",
