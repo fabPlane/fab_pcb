@@ -410,7 +410,10 @@ export async function inspectBoardGeometry(board: Board): Promise<BoardGeometryS
     enabledLayers,
     pads: pads.map((pad) => ({
       id: pad.id,
-      ...(pad.parent ? { parent: pad.parent, reference: references.get(pad.parent) } : {}),
+      ...(pad.parent ? { parent: pad.parent } : {}),
+      ...(pad.parent && references.get(pad.parent) !== undefined
+        ? { reference: references.get(pad.parent)! }
+        : {}),
       number: pad.number,
       position: pad.position,
       size: pad.size,
