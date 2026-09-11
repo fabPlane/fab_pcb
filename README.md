@@ -17,7 +17,7 @@ itself; every headless command passes the conformance suite against a live serve
 Milestones M0–M4 are done: `kicad-cli` builds from the fork ([docs/m0-runbook.md](docs/m0-runbook.md)),
 the board and schematic render in the browser from live server data, edits commit back through
 KiCad's own commit API and undo, and DRC/ERC, exports and a 3D view run from the UI. See
-[docs/screenshots](docs/screenshots). The fork's `web-api` branch carries 21 API commits that closed
+[docs/screenshots](docs/screenshots). The fork's `main` branch carries 21 API commits that closed
 every P0 gap and most P1 gaps ([docs/04-ipc-gaps.md](docs/04-ipc-gaps.md)).
 
 ```bash
@@ -60,6 +60,6 @@ Ownership of every path is in [docs/ownership.md](docs/ownership.md). Start with
 
 `docs/plan.html` is the same plan as a single shareable page.
 
-Companion repo: the KiCad fork (branch `web-api`) that carries the API patches. This repo pins the
+Companion repo: the KiCad fork (branch `main`) that carries the API patches. This repo pins the
 fork commit in `packages/proto/KICAD_COMMIT` and the alignment tag in `packages/proto/KICAD_TAG`;
 every major change set is tagged `fp-pcb/<date>-<name>` on both repos (rule in docs/01-architecture.md).

@@ -1,5 +1,5 @@
 // MarkerService over RunBoardJobDrc / GetDrcMarkers / SetDrcMarkerExcluded and their ERC
-// twins. The commands exist only on the web-api KiCad fork; `client.capabilities()` (from
+// twins. The commands exist only on the KiCad fork (branch `main`, formerly `web-api`); `client.capabilities()` (from
 // GetSupportedCommands, which lists the handlers created for the open documents) decides
 // whether a check is offered, otherwise `run()` rejects with "not supported by this server".
 //
