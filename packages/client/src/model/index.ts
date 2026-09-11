@@ -77,12 +77,26 @@ export {
 } from "./settings";
 export { FootprintDocument } from "./footprint-doc";
 export { SymbolDocument } from "./symbol-doc";
+export { moveNativeSymbol, placeNativeSymbol, type NativeSymbolPlacement, type PlacedNativeSymbol } from "./schematic-authoring";
 export {
-  moveNativeSymbol,
-  placeNativeSymbol,
-  type NativeSymbolPlacement,
-  type PlacedNativeSymbol,
-} from "./schematic-authoring";
+  createBoardGraphic,
+  createBoardText,
+  createTrack,
+  createVia,
+  createZone,
+  inspectBoardGeometry,
+  type BoardGeometrySnapshot,
+  type BoardGraphicGeometry,
+  type BoardGraphicInput,
+  type BoardNetInput,
+  type BoardTextInput,
+  type CopperZoneInput,
+  type KeepoutInput,
+  type PolygonInput,
+  type TrackInput,
+  type ViaInput,
+  type ZoneInput,
+} from "./board-authoring";
 export { Commit, type CommitOptions, type CommitResult, type DeleteResult, type ItemInput } from "./commit";
 export { Variants } from "./variants";
 export {
