@@ -206,7 +206,9 @@ describe.skipIf(!haveKicad())("generated schematic + kicad-cli api-server", () =
       await generated.schematic.save();
       await generated.schematic.close();
       let schematic = await server.kicad.projectFrom(board.specifier).openSchematic();
-      expect((await schematic.erc.run()).errorCount).toBe(0);
+      let erc = await schematic.erc.run();
+      expect(erc.errorCount).toBe(0);
+      expect(erc.markers.filter((marker) => /doesn't match copy in library/i.test(marker.description))).toEqual([]);
 
       generated = await generateSchematic(server.kicad, usbPowerNetlist("USB_C_Receptacle_PowerOnly_6P"));
       expect(generated.diagnostics).toEqual([]);
@@ -217,7 +219,9 @@ describe.skipIf(!haveKicad())("generated schematic + kicad-cli api-server", () =
       const sheet = await schematic.rootSheet();
       expect((await sheet.getAllItems()).filter((item) => item instanceof NoConnect)).toHaveLength(0);
       expect((await sheet.getAllItems()).filter((item) => item instanceof GlobalLabel)).toHaveLength(11);
-      expect((await schematic.erc.run()).errorCount).toBe(0);
+      erc = await schematic.erc.run();
+      expect(erc.errorCount).toBe(0);
+      expect(erc.markers.filter((marker) => /doesn't match copy in library/i.test(marker.description))).toEqual([]);
     },
     60_000,
   );

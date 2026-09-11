@@ -34,9 +34,7 @@ export interface PlacedNativeSymbol {
 }
 
 function positionedField(source: SchematicField | undefined, name: string, value: string, origin: Vec2): SchematicField {
-  const field = source
-    ? clone(SchematicFieldSchema, source)
-    : create(SchematicFieldSchema, { name, visible: false, allowAutoPlace: true });
+  const field = source ? clone(SchematicFieldSchema, source) : create(SchematicFieldSchema, { name, visible: false, allowAutoPlace: true });
   field.name = name;
   field.text ??= create(TextSchema);
   field.text.text = value;
@@ -68,11 +66,7 @@ export function placeNativeSymbol(source: LibSymbol, placement: NativeSymbolPlac
     child.item = packAny(SchematicPinSchema, pin);
     const childUnit = child.unit?.unit ?? 0;
     const childStyle = child.bodyStyle?.style ?? 0;
-    if (
-      pin.number &&
-      (childUnit === 0 || childUnit === unit) &&
-      (childStyle === 0 || childStyle === bodyStyle)
-    )
+    if (pin.number && (childUnit === 0 || childUnit === unit) && (childStyle === 0 || childStyle === bodyStyle))
       pins.set(pin.number, absolute);
   }
 
@@ -100,8 +94,9 @@ export function placeNativeSymbol(source: LibSymbol, placement: NativeSymbolPlac
       ),
       unit: create(SchematicSymbolUnitSchema, { unit }),
       bodyStyle: create(SchematicSymbolBodyStyleSchema, { style: bodyStyle }),
-      showPinNames: true,
-      showPinNumbers: true,
+      showPinNames: definition.showPinNames,
+      showPinNumbers: definition.showPinNumbers,
+      pinNameOffset: definition.pinNameOffset,
       fieldsAutoplaced: false,
       userFields: Object.entries(fields)
         .filter(([name]) => !["Datasheet", "datasheet", "Description", "description"].includes(name))

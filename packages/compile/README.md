@@ -130,9 +130,11 @@ preserving anything a person added or explicitly adopted in KiCad.
 
 Placements stay on KiCad's default 50 mil electrical grid. Library pin geometry is converted from
 symbol-local coordinates to the sheet-coordinate form required by KiCad's placed-symbol API, and
-library pin ids are cleared so KiCad assigns independent instance ids. The bridge saves and
-reopens the generated schematic, then runs ERC. The real-server test also checks that the resulting
-board has zero schematic parity conflicts.
+library pin ids are cleared so KiCad assigns independent instance ids. Pin-name visibility,
+pin-number visibility, and pin-name offset are copied from the exact library definition instead of
+being guessed by the compiler; this keeps save/reopen ERC free of compiler-created library-copy
+mismatches. The bridge saves and reopens the generated schematic, then runs ERC. The real-server
+test also checks that the resulting board has zero schematic parity conflicts.
 
 Missing `libSource`, an unavailable symbol, or a connected pin absent from its symbol produces a
 `schematic` error. Once the schematic drives `SyncSchematicToBoard`, allowing one of those omissions

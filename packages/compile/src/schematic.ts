@@ -188,8 +188,9 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
       ),
       unit: create(SchematicSymbolUnitSchema, { unit: 1 }),
       bodyStyle: create(SchematicSymbolBodyStyleSchema, { style: 1 }),
-      showPinNames: true,
-      showPinNumbers: true,
+      showPinNames: definition.proto.showPinNames,
+      showPinNumbers: definition.proto.showPinNumbers,
+      pinNameOffset: definition.proto.pinNameOffset,
       fieldsAutoplaced: false,
       userFields: Object.entries(component.fields ?? {})
         .filter(([name]) => !["Datasheet", "datasheet"].includes(name))
