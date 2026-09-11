@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { ApiStatusCode, GetVersionResponseSchema, GetVersionSchema } from "@fp-pcb/proto";
+import { fromJson } from "@bufbuild/protobuf";
+import { ApiStatusCode, GetVersionResponseSchema, GetVersionSchema, kiapiRegistry } from "@fp-pcb/proto";
 import { KiCadClient } from "../src/client";
+import { commandSchemas } from "../src/commands";
 import {
   IPC_CATALOG,
   IPC_CATALOG_SHA256,
@@ -37,6 +39,19 @@ describe("versioned searchable IPC catalog", () => {
     expect(vector.fields.find((field) => field.name === "xNm")?.units).toBe("nanometres");
     expect(getItems.requestExample).toBeDefined();
     expect(getItems.catalog.sha256).toBe(IPC_CATALOG_SHA256);
+  });
+
+  test("publishes a protobuf-JSON-valid request example for every operation", () => {
+    for (const entry of IPC_CATALOG) {
+      const description = describeIpcOperation(entry.operation)!;
+      const schemas = commandSchemas(entry.operation)!;
+      expect(() =>
+        fromJson(schemas.request, description.requestExample, {
+          registry: kiapiRegistry,
+          ignoreUnknownFields: false,
+        }),
+      ).not.toThrow();
+    }
   });
 });
 

@@ -262,7 +262,16 @@ function sampleField(field: DescField, depth: number): JsonValue {
 }
 
 function sampleMessage(schema: DescMessage, depth: number): JsonValue {
-  if (depth < 0 || schema.typeName === "google.protobuf.Any") return {};
+  if (schema.typeName === "google.protobuf.FieldMask") return "";
+  if (schema.typeName === "google.protobuf.Timestamp") return "1970-01-01T00:00:00Z";
+  if (schema.typeName === "google.protobuf.Duration") return "0s";
+  if (schema.typeName === "google.protobuf.Struct") return {};
+  if (schema.typeName === "google.protobuf.Value") return null;
+  if (schema.typeName === "google.protobuf.ListValue") return [];
+  if (schema.typeName === "google.protobuf.Any") {
+    return { "@type": "type.googleapis.com/google.protobuf.Empty" };
+  }
+  if (depth < 0) return {};
   const out: Record<string, JsonValue> = {};
   const usedOneofs = new Set<string>();
   for (const field of schema.fields.slice(0, 4)) {

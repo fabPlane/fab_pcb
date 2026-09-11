@@ -60,18 +60,18 @@ function words(value: string): string[] {
     .filter(Boolean);
 }
 
-function referencedTypes(schema: DescMessage, depth = 4): string[] {
+function referencedTypes(schema: DescMessage): string[] {
   const out = new Set<string>();
-  const visit = (message: DescMessage, remaining: number) => {
-    if (remaining < 0 || out.has(message.typeName)) return;
+  const visit = (message: DescMessage) => {
+    if (out.has(message.typeName)) return;
     out.add(message.typeName);
     for (const field of message.fields) {
-      if (field.fieldKind === "message") visit(field.message, remaining - 1);
-      else if (field.fieldKind === "list" && field.listKind === "message") visit(field.message, remaining - 1);
-      else if (field.fieldKind === "map" && field.mapKind === "message") visit(field.message, remaining - 1);
+      if (field.fieldKind === "message") visit(field.message);
+      else if (field.fieldKind === "list" && field.listKind === "message") visit(field.message);
+      else if (field.fieldKind === "map" && field.mapKind === "message") visit(field.message);
     }
   };
-  visit(schema, depth);
+  visit(schema);
   return [...out].sort();
 }
 
