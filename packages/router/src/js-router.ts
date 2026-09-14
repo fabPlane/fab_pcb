@@ -24,7 +24,13 @@ export class JsRouter implements Autorouter {
     };
   }
 
-  async route(_input: RouteInput, _opts: RouteOptions = {}, _progress?: (progress: RouteProgress) => void): Promise<RouteResult> {
-    throw new Error("the in-tab capacity router was removed; choose the server-side JavaScript router");
+  async route(
+    _input: RouteInput,
+    _opts: RouteOptions = {},
+    _progress?: (progress: RouteProgress) => void,
+  ): Promise<RouteResult> {
+    throw new Error(
+      "the in-tab capacity router was removed; choose the server-side JavaScript router",
+    );
   }
 }
