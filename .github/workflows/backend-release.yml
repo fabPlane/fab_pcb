@@ -44,6 +44,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ env.BUN_VERSION }}
+          no-cache: true
       - name: Install JS dependencies
         run: bun install --frozen-lockfile
       - uses: docker/setup-buildx-action@v3
