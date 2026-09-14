@@ -15,7 +15,9 @@ coarse parallel bus. `gate` cases require termination, truthful completion and c
 checks. `observe` cases always gate liveness but only report their known output-quality failures;
 change a case to `gate` in the same PR that fixes it.
 
-The fast validator rejects malformed output, unknown nets, tracks outside the outline, crossings,
-and approximate pad/track clearance violations. It intentionally does not replace KiCad DRC. The
-real-board integration suite applies router output to a temporary KiCad board, measures the
-remaining ratsnest and treats KiCad DRC as the authoritative post-route result.
+The fast validator rejects malformed output, unknown nets, copper outside or too close to every
+board contour (including cutouts and concave edges), track crossings, and approximate pad/track,
+via/pad, via/track, via/via, and hole-to-hole clearance violations. It intentionally does not
+replace KiCad DRC. The real-board integration suite applies router output to a temporary KiCad
+board, measures the remaining ratsnest and treats KiCad DRC as the authoritative post-route
+result. Nightly runs also retain the complete JSON result as a workflow artifact for 30 days.

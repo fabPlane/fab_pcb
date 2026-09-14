@@ -17,7 +17,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  BUN_VERSION: "1.4.0"
   # The fork, not upstream KiCad: packages/proto/KICAD_COMMIT pins a commit that only exists there,
   # and the fork is also where the prebuilt nightly kicad-cli comes from (see kicad-integration).
   KICAD_REPO: https://github.com/${{ github.repository_owner }}/kicad.git
@@ -26,7 +25,7 @@ jobs:
   # ----------------------------------------------------------------- unit, typecheck, generated files
   bun:
     name: bun (unit)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     # Runs in ~1.5 min.  No job here may exceed 10: a hang should cost a tenth of an hour, not a
     # whole one, and nothing in this workflow legitimately takes that long any more.
     timeout-minutes: 10
@@ -35,7 +34,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: ${{ env.BUN_VERSION }}
+          bun-version-file: .bun-version
 
       - name: Cache bun install cache
         uses: actions/cache@v4
@@ -102,7 +101,7 @@ jobs:
   # ----------------------------------------------------------------- Playwright smoke (mock services)
   e2e:
     name: e2e (Playwright smoke)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     # Runs in ~1.2 min; see the bun job on the 10-minute ceiling.
     timeout-minutes: 10
     steps:
@@ -110,7 +109,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: ${{ env.BUN_VERSION }}
+          bun-version-file: .bun-version
 
       - name: Cache bun install cache
         uses: actions/cache@v4
@@ -183,7 +182,7 @@ jobs:
   # over by compiling, and not something to leave as a green run that tested nothing.
   kicad-integration:
     name: kicad-integration (nightly kicad-cli)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     # ~3 min: fixtures, a ~200 MB download and the suites.  See the bun job on the 10-minute ceiling.
     timeout-minutes: 10
     permissions:
@@ -193,7 +192,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: ${{ env.BUN_VERSION }}
+          bun-version-file: .bun-version
 
       - name: Cache bun install cache
         uses: actions/cache@v4
@@ -310,7 +309,7 @@ jobs:
   # docs/08-wasm.md has the details.
   wasm:
     name: wasm (conformance)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
       # Same owner as KICAD_REPO above, in the owner/name form the releases API and
@@ -321,7 +320,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: ${{ env.BUN_VERSION }}
+          bun-version-file: .bun-version
 
       - name: Cache bun install cache
         uses: actions/cache@v4
