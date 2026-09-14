@@ -109,6 +109,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install runner prerequisites
+        run: apt-get update && apt-get install -y --no-install-recommends unzip
+
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: .bun-version
@@ -193,6 +196,9 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install runner prerequisites
+        run: apt-get update && apt-get install -y --no-install-recommends unzip
 
       - uses: oven-sh/setup-bun@v2
         with:
