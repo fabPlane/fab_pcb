@@ -1,0 +1,29 @@
+name: Router corpus nightly
+
+on:
+  schedule:
+    - cron: "41 2 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: router-corpus-nightly
+  cancel-in-progress: true
+
+jobs:
+  corpus:
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+      - run: bun install --frozen-lockfile
+      - run: bun run --filter @fp-pcb/router corpus --nightly --output artifacts/router-corpus.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with:
+          name: router-corpus-${{ github.run_id }}
+          path: artifacts/router-corpus.json
+          retention-days: 30
