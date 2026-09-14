@@ -419,13 +419,22 @@ export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOp
       error: e instanceof Error ? e.message : String(e),
     }));
     const centresAfter = await padCentres(board, addedSet);
-    const moved = added.filter((id) => {
+    // What the autoplacer could not fit it either leaves where the import put it or moves onto
+    // one spot (the origin), so "placed" means: moved, and not sharing a position with another
+    // imported footprint.
+    const byPosition = new Map<string, string[]>();
+    for (const [id, c] of centresAfter) {
+      const key = `${c.x},${c.y}`;
+      byPosition.set(key, [...(byPosition.get(key) ?? []), id]);
+    }
+    const stacked = new Set([...byPosition.values()].filter((g) => g.length > 1).flat());
+    const placed = added.filter((id) => {
       const a = centresBefore.get(id);
       const b = centresAfter.get(id);
-      return a !== undefined && b !== undefined && (a.x !== b.x || a.y !== b.y);
+      return a !== undefined && b !== undefined && (a.x !== b.x || a.y !== b.y) && !stacked.has(id);
     });
-    footprintsPlaced = moved.length;
-    const unmoved = added.filter((id) => centresBefore.has(id) && !moved.includes(id));
+    footprintsPlaced = placed.length;
+    const unplaced = added.filter((id) => centresBefore.has(id) && !placed.includes(id));
     if ("error" in outcome) {
       diagnostics.push(
         diag(
@@ -439,13 +448,13 @@ export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOp
       diagnostics.push(
         diag("warning", "Autoplace did not complete (KiCad reports no board outline or a placement failure).", "autoplace_failed"),
       );
-    } else if (unmoved.length) {
-      // KiCad answered APR_COMPLETED but left these where the import put them: the outline has no
-      // room for them, and they now sit on top of each other.
+    } else if (unplaced.length) {
+      // KiCad answered APR_COMPLETED but found no room for these: they sit on top of each other
+      // (at the origin, or where the import put them).
       diagnostics.push(
         diag(
           "warning",
-          `${unmoved.length} of ${added.length} imported footprints did not move: the autoplacer found no room for them on this outline and left them where the import put them, on top of each other. Enlarge the board or place them.`,
+          `${unplaced.length} of ${added.length} imported footprints were not placed: the autoplacer found no room for them on this outline and left them stacked on one spot. Enlarge the board or place them.`,
           "autoplace_incomplete",
         ),
       );
