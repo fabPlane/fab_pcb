@@ -165,6 +165,8 @@ describe.skipIf(!haveKicad)("compile jobs + kicad-cli api-server", () => {
     expect((await root.getSymbols()).map((symbol) => symbol.reference).sort()).toEqual(["R1", "R2"]);
     const wires = await schematic.getWires(root.scope);
     expect(wires.length).toBe(4);
+    const erc = await schematic.erc.run();
+    expect(erc.errorCount).toBe(0);
     const preserved = wires[0]!;
     preserved.setCustomProperty("fp-pcb.generated", undefined);
     preservedWireId = (await root.commit("adopt generated wire as manual", (tx) => tx.update([preserved]))).updated[0]!.id;

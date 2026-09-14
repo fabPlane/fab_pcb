@@ -10,7 +10,7 @@
  * bench/results/<board>-<router>.json (+ .svg) and the table to docs/router-comparison.md.
  *
  * Router names (the second word of a result file):
- *   js                    the JS router (`@tscircuit/capacity-autorouter`), effort `--effort` (default 1, the app's)
+ *   js                    TensorFleet js_autorouter through the bridge, effort `--effort` (default 1)
  *   freerouting           Freerouting in the app's `kicad-dsn` mode (KiCad's DSN exporter, our SES reader,
  *                         our commit), `--passes` (default 20, the app's default)
  *   freerouting-kicad     Freerouting through KiCad's own importer (`kicad` mode) — what the first
@@ -25,7 +25,7 @@
  *   bun run bench/run.ts --report                           # only rebuild docs/router-comparison.md from the JSON
  *   KEEP_BENCH_DIRS=1 ...                                   # keep the temp board copies
  */
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { cpus, platform, release, totalmem } from "node:os";
 import { basename, join, relative } from "node:path";
@@ -58,7 +58,10 @@ export interface MeasuredWith {
   /** `GetVersion` of the server, e.g. `10.99.0-3711-g8cc9377988` (the commit is the `g` suffix). */
   kicad: string;
   freerouting: string;
-  capacityAutorouter: string;
+  /** Present on historical M7 results produced before the js_autorouter migration. */
+  capacityAutorouter?: string;
+  /** Runtime module used by the current bridge adapter. */
+  jsAutorouter?: string;
   /** First line of `java -version`, or "n/a" for JS-only runs. */
   java: string;
   bun: string;
@@ -200,19 +203,7 @@ export function jobRequest(routerName: string, cfg: Pick<Config, "timeSec" | "fr
 let measuredWithCache: Omit<MeasuredWith, "kicad" | "java"> | undefined;
 function measuredWith(kicad: string, java: string | undefined): MeasuredWith {
   if (!measuredWithCache) {
-    let capacityAutorouter = "?";
-    for (const p of [
-      join(REPO, "packages", "router", "node_modules", "@tscircuit", "capacity-autorouter", "package.json"),
-      join(REPO, "node_modules", "@tscircuit", "capacity-autorouter", "package.json"),
-    ]) {
-      if (!existsSync(p)) continue;
-      try {
-        capacityAutorouter = (JSON.parse(readFileSync(p, "utf8")) as { version: string }).version;
-        break;
-      } catch {
-        /* next */
-      }
-    }
+    const jsAutorouter = process.env.JS_AUTOROUTER_MODULE ?? "@tensorfleet/js-autorouter";
     let os = `${platform()} ${release()}`;
     if (platform() === "darwin") {
       const v = Bun.spawnSync(["sw_vers", "-productVersion"]);
@@ -220,7 +211,7 @@ function measuredWith(kicad: string, java: string | undefined): MeasuredWith {
     }
     measuredWithCache = {
       freerouting: FREEROUTING_VERSION,
-      capacityAutorouter,
+      jsAutorouter,
       bun: Bun.version,
       os,
       cpu: cpus()[0]?.model ?? "?",
@@ -476,7 +467,7 @@ export function renderReport(results: BenchResult[], boards: FixtureBoard[], rou
     const javas = [...new Set(jobRuns.map((r) => r.measuredWith?.java).filter((j) => j && j !== "n/a"))];
     lines.push(
       `**Measured with:** KiCad ${kicads.join(" / ")} (\`kicad-cli api-server\` from the fork; the commit is the \`g…\` suffix); ` +
-        `Freerouting ${w.freerouting}${javas.length ? ` on ${javas.join(" / ")}` : ""}; \`@tscircuit/capacity-autorouter\` ${w.capacityAutorouter}; ` +
+        `Freerouting ${w.freerouting}${javas.length ? ` on ${javas.join(" / ")}` : ""}; ${w.jsAutorouter ? `js_autorouter \`${w.jsAutorouter}\`` : `historical \`@tscircuit/capacity-autorouter\` ${w.capacityAutorouter ?? "?"}`}; ` +
         `Bun ${w.bun}; ${w.cpu}, ${w.memoryGb} GB, ${w.os}. ${dates[0] === dates[dates.length - 1] ? `Runs of ${dates[0]}` : `Runs from ${dates[0]} to ${dates[dates.length - 1]}`}.`,
     );
     lines.push("");

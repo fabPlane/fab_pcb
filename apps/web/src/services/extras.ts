@@ -206,9 +206,8 @@ export interface ServerSettingsService {
 // ---------------------------------------------------------------------------- autoroute
 
 /**
- * Where the router runs: the JS router in this tab (the solver's step loop yields to the UI),
- * the JS router on the bridge, or Freerouting (Java) on the bridge. The bridge job is
- * `POST /sessions/:id/route` from `@fp-pcb/router/bridge-job`.
+ * Where the router runs. `js-tab` is retained only so an older caller receives the compatibility
+ * error; the UI offers server-side js_autorouter or Freerouting through the bridge job.
  */
 export type AutorouterChoice = 'js-tab' | 'js-server' | 'freerouting';
 
@@ -285,6 +284,7 @@ export interface AutorouteRun {
 export interface AutorouteAvailability {
   /** The bridge job route is reachable (false in direct-WebSocket mode without a bridge). */
   server: boolean;
+  jsAutorouter: { ok: boolean; reason?: string };
   freerouting: { ok: boolean; reason?: string };
 }
 
@@ -295,7 +295,7 @@ export interface AutorouteService {
   available(): Promise<AutorouteAvailability>;
   /** Starts a run; resolves with the finished run (done, failed or cancelled). One run at a time. */
   start(request: AutorouteRequest): Promise<AutorouteRun>;
-  /** Cancels the running job (kills Freerouting on the bridge, stops the in-tab solver). */
+  /** Cancels the running bridge job (at js_autorouter's batch boundary, or by killing Freerouting). */
   cancel(): Promise<void>;
   /** True while a run is in flight. */
   running(): boolean;

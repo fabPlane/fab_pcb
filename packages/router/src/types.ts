@@ -185,19 +185,18 @@ export interface RouteOptions {
   nets?: string[];
   /** Seed for routers that randomise; the same seed gives the same result. */
   seed?: number;
-  /** Router effort / passes (JS router: `effort`, Freerouting: `-mp` max passes). */
+  /** Router effort / passes (js_autorouter: `maxPasses`, Freerouting: `-mp` max passes). */
   effort?: number;
   /**
-   * JS router solver preset. `laser-prefab` changes layers only through the board's free vias
-   * (vias on no net, e.g. a Viagrid blank's factory vias) and claims them for the net; `default`
-   * drills vias anywhere. Unset: `laser-prefab` when the board has free vias, else `default`.
+   * Solver preset. `laser-prefab` is reserved for routing through a blank's fixed free vias.
+   * js_autorouter currently rejects boards with free vias until safe via claiming is implemented.
    */
   preset?: RoutePreset;
   /** Anything router-specific; each adapter documents what it reads. */
   extra?: Record<string, unknown>;
   /**
-   * Cancels the run: the JS router stops at its next step, Freerouting's process is killed. The
-   * adapter rejects with a `RouteCancelled` error and nothing is applied.
+   * Cancels the run. Freerouting's process is killed; js_autorouter observes cancellation only at
+   * its batch-call boundaries until its solver API becomes interruptible. Nothing is applied.
    */
   signal?: AbortSignal;
 }

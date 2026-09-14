@@ -9,18 +9,18 @@
  *
  * The HTTP contract (JSON unless noted):
  *
- *   POST   /sessions/:id/route            body RouteJobRequest        -> 202 { job: RouteJobInfo }  (400 when Freerouting is asked for but missing)
- *                                          `options.preset: "laser-prefab"` routes through the board's free vias only (prefab blanks)
- *   GET    /sessions/:id/route            -> { jobs: RouteJobInfo[], freerouting }
+ *   POST   /sessions/:id/route            body RouteJobRequest        -> 202 { job: RouteJobInfo }  (400 when the requested router is missing)
+ *                                          js_autorouter currently refuses prefab free-via boards
+ *   GET    /sessions/:id/route            -> { jobs: RouteJobInfo[], jsAutorouter, freerouting }
  *   GET    /sessions/:id/route/:job       -> { job: RouteJobInfo }   (SSE: `event: state`, `progress`, `done`, `error`, `: keepalive` every 15 s)
- *   DELETE /sessions/:id/route/:job       -> { ok, job }             (cancels: the JS router stops at its next step, Freerouting's java is killed)
+ *   DELETE /sessions/:id/route/:job       -> { ok, job }             (js_autorouter: batch boundary; Freerouting: kills java)
  *
  * The job refills the zones (unless `refillZones: false`), saves the board (`SaveDocument`, so
  * KiCad's exporter reads the current state), runs `extractRouteInput` -> router.route ->
  * `applyRouteResult` (one commit, message "Autoroute (<router>): <n> connections"), then saves
  * again so the routed board is durable on disk. The browser only has to pick up the
  * `DocumentChanged` event as usual. Cancelling before the apply leaves the board untouched; a
- * failed router run (the JS router's precheck, a Freerouting crash) applies nothing and reports the
+ * failed router run (a js_autorouter error, a Freerouting crash) applies nothing and reports the
  * error. A failure of the final save reports the job as failed but leaves the applied route in
  * KiCad memory, where the caller can retry saving it.
  */
@@ -28,7 +28,7 @@ import { Arc, KiCad, KiCadClient, Track, Via, type Transport } from "@fp-pcb/cli
 import { applyRouteResult } from "./apply";
 import { extractRouteInput } from "./extract";
 import { FreeroutingRouter, alreadyApplied, resolveFreerouting, type FreeroutingOptions, type FreeroutingPaths } from "./freerouting";
-import { JsRouter } from "./js-router";
+import { JsAutorouter } from "./js-autorouter";
 import { RouteCancelled, type Autorouter, type RouteConnection, type RouteOptions, type RouteProgress, type RouteResult } from "./types";
 
 export type RouteJobState = "queued" | "saving" | "filling" | "extracting" | "routing" | "applying" | "done" | "failed" | "cancelled";
@@ -153,6 +153,8 @@ export interface RouteJobs {
   wait(id: string): Promise<RouteJobInfo>;
   /** Jar / Java the Freerouting jobs will use. */
   readonly freerouting: FreeroutingPaths;
+  /** Whether the private js_autorouter module can be loaded. */
+  jsAutorouter(): Promise<{ ok: boolean; reason?: string }>;
 }
 
 export interface RouteJobDeps {
@@ -160,6 +162,8 @@ export interface RouteJobDeps {
   routers?: (req: RouteJobRequest, kicad: KiCad, board: Awaited<ReturnType<KiCad["currentBoard"]>>) => Autorouter;
   /** Jar and Java for Freerouting; default `resolveFreerouting(process.env)`. */
   freerouting?: FreeroutingPaths;
+  /** Replaces the default dynamically loaded js_autorouter (tests and embedded hosts). */
+  jsAutorouter?: JsAutorouter;
   log?: (message: string) => void;
 }
 
@@ -232,6 +236,7 @@ export async function persistAppliedRoute(board: { save(): Promise<void> }): Pro
 export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
   const jobs = new Map<string, Job>();
   const freerouting = deps.freerouting ?? resolveFreerouting();
+  const jsAutorouter = deps.jsAutorouter ?? new JsAutorouter();
   const log = deps.log ?? (() => {});
 
   const emit = (job: Job, ev: string, data: unknown) => {
@@ -301,7 +306,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
                   ...request.freerouting,
                 },
               )
-            : new JsRouter());
+            : jsAutorouter);
         info.router = router.name;
         setState("routing");
         const result: RouteResult = await router.route(input, { ...request.options, signal: abort.signal }, (p) => {
@@ -447,6 +452,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
 
   return {
     freerouting,
+    jsAutorouter: () => jsAutorouter.available(),
     start,
     get: (id) => jobs.get(id)?.info,
     list: (sessionId) => [...jobs.values()].map((j) => j.info).filter((i) => !sessionId || i.sessionId === sessionId),
@@ -467,7 +473,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
     async handle(req, session, jobId) {
       if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
       if (!jobId) {
-        if (req.method === "GET") return json({ jobs: this.list(session.id), freerouting });
+        if (req.method === "GET") return json({ jobs: this.list(session.id), jsAutorouter: await this.jsAutorouter(), freerouting });
         if (req.method === "POST") {
           let body: RouteJobRequest;
           try {
@@ -479,6 +485,10 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           if (body.router === "freerouting" && !freerouting.ok)
             return json({ error: `Freerouting unavailable: ${freerouting.reason}` }, 400);
           if (!session.transport) return json({ error: "session has no running KiCad" }, 409);
+          if (body.router === "js") {
+            const available = await this.jsAutorouter();
+            if (!available.ok) return json({ error: `js_autorouter unavailable: ${available.reason}` }, 400);
+          }
           return json({ job: start(session, body) }, 202);
         }
         return json({ error: "method not allowed" }, 405);

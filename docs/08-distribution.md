@@ -41,8 +41,9 @@ platform, and inspect dynamic dependencies (`ldd`, `otool -L`, or `dumpbin /depe
 publishing. In particular, the current Linux Docker image is a complete OCI runtime, but extracting
 only `/opt/kicad` does not copy Debian runtime packages into a desktop AppImage.
 
-The bridge currently contains `@tscircuit/capacity-autorouter`; see the migration blocker in
-`packages/router/README.md` before treating a public backend artifact as tscircuit-free.
+The bridge no longer contains `@tscircuit/capacity-autorouter`. Its JavaScript route job loads the
+private GPL-derived `TensorFleet/js_autorouter` module at runtime. Do not publish a bundle carrying
+that module until its licensing/distribution decision is explicit; see `packages/router/README.md`.
 
 Linux bundles carry the non-glibc shared-library closure collected from the three KiCad binaries
 under `kicad/lib/runtime`; `bundle.json.libraryPaths` tells the desktop supervisor to prepend both

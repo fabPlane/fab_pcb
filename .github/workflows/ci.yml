@@ -47,6 +47,23 @@ jobs:
       - name: Install
         run: bun install --frozen-lockfile
 
+      - name: Resolve the private router pin
+        id: unit-private-router
+        run: echo "commit=$(tr -d '[:space:]' < packages/router/JS_AUTOROUTER_COMMIT)" >> "$GITHUB_OUTPUT"
+
+      - name: Check out the pinned private router for unit tests
+        uses: actions/checkout@v4
+        with:
+          repository: TensorFleet/js_autorouter
+          ref: ${{ steps.unit-private-router.outputs.commit }}
+          path: .ci-private/js_autorouter
+          token: ${{ secrets.JS_AUTOROUTER_READ_TOKEN }}
+          persist-credentials: false
+          sparse-checkout: |
+            package.json
+            src
+          sparse-checkout-cone-mode: false
+
       # gen:check and coverage:check need the KiCad fork's api/proto and C++ handler sources at the
       # pinned commit (no build).  Only those four directories are read, so the checkout is sparse
       # and blobless: ~5 MB in a few seconds, where the whole tree at depth 1 is ~600 MB, almost
@@ -83,6 +100,8 @@ jobs:
         run: bun run typecheck
 
       - name: Unit tests
+        env:
+          JS_AUTOROUTER_MODULE: ${{ github.workspace }}/.ci-private/js_autorouter/src/index.ts
         run: bun run test:unit
 
       - name: Cross-compile bridge entrypoint for desktop targets
@@ -224,6 +243,35 @@ jobs:
       - name: Install
         run: bun install --frozen-lockfile
 
+      - name: Resolve the private router pin
+        id: private-router
+        run: echo "commit=$(tr -d '[:space:]' < packages/router/JS_AUTOROUTER_COMMIT)" >> "$GITHUB_OUTPUT"
+
+      - name: Check out the pinned private router
+        uses: actions/checkout@v4
+        with:
+          repository: TensorFleet/js_autorouter
+          ref: ${{ steps.private-router.outputs.commit }}
+          path: .ci-private/js_autorouter
+          token: ${{ secrets.JS_AUTOROUTER_READ_TOKEN }}
+          persist-credentials: false
+          sparse-checkout: |
+            package.json
+            src
+          sparse-checkout-cone-mode: false
+
+      - name: Validate the private router package boundary
+        run: |
+          bun -e '
+            const pkg = await Bun.file(".ci-private/js_autorouter/package.json").json()
+            if (pkg.name !== "@tensorfleet/js-autorouter" || pkg.private !== true) {
+              throw new Error("unexpected private router package metadata")
+            }
+            if (Object.keys(pkg.dependencies ?? {}).length !== 0) {
+              throw new Error("private router gained runtime dependencies; update packaging explicitly")
+            }
+          '
+
       # The dated release `nightly-<date>-<sha10>` is the one that pins to a commit; the rolling
       # `nightly` tag moves and would silently test a different KiCad than the matrix and the
       # generated client were built from.  Match on the sha10 suffix and take no other release.
@@ -306,6 +354,7 @@ jobs:
       - name: Integration tests
         env:
           KICAD_INTEGRATION_REQUIRED: "1"
+          JS_AUTOROUTER_MODULE: ${{ github.workspace }}/.ci-private/js_autorouter/src/index.ts
         run: bun run test:integration
 
   # ----------------------------------------------------------------- wasm conformance (released module)

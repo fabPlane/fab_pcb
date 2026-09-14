@@ -4,12 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       rebuild_image:
-        description: Rebuild the pinned KiCad image even when its immutable tag exists
+        description: Rebuild the pinned Linux KiCad image even when its immutable tag exists
         type: boolean
         default: false
+      publish_release:
+        description: Publish the router-free archives as backend-<commit>
+        type: boolean
+        default: true
   push:
-    # Keep the WIP handoff branch releasable before either repository is merged. Remove the
-    # feature branch entry once Fabdesk consumes a release produced from main.
     branches: [main, feature/fabdesk-handoff-followups]
     paths:
       - packages/proto/KICAD_COMMIT
@@ -29,6 +31,7 @@ permissions:
   packages: write
 
 env:
+  BUN_VERSION: "1.4.0"
   KICAD_IMAGE: ghcr.io/${{ github.repository_owner }}/kicad-cli
   KICAD_REPO: https://github.com/${{ github.repository_owner }}/kicad.git
 
@@ -38,14 +41,27 @@ jobs:
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
-
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.4.0
-
+          bun-version: ${{ env.BUN_VERSION }}
       - name: Install JS dependencies
         run: bun install --frozen-lockfile
-
+      - name: Free runner disk space for the KiCad image build
+        shell: bash
+        run: |
+          set -euo pipefail
+          df -h /
+          # The hosted image carries large toolchains that this Linux/Docker job never uses.
+          # KiCad's native build and BuildKit layers otherwise exceed the runner's free disk.
+          sudo rm -rf \
+            /usr/local/lib/android \
+            /usr/share/dotnet \
+            /opt/ghc \
+            /usr/local/.ghcup \
+            /opt/hostedtoolcache/CodeQL
+          docker system prune --all --force --volumes
+          df -h /
+      - uses: docker/setup-buildx-action@v3
       - name: Resolve immutable versions
         id: versions
         shell: bash
@@ -54,18 +70,17 @@ jobs:
           kicad="$(tr -d '[:space:]' < packages/proto/KICAD_COMMIT)"
           image="$(printf '%s' "$KICAD_IMAGE" | tr '[:upper:]' '[:lower:]'):$kicad"
           image_short="$(printf '%s' "$KICAD_IMAGE" | tr '[:upper:]' '[:lower:]'):${kicad:0:10}"
-          echo "kicad=$kicad" >> "$GITHUB_OUTPUT"
-          echo "image=$image" >> "$GITHUB_OUTPUT"
-          echo "image_short=$image_short" >> "$GITHUB_OUTPUT"
-          echo "release=backend-${GITHUB_SHA:0:10}" >> "$GITHUB_OUTPUT"
-
+          {
+            echo "kicad=$kicad"
+            echo "image=$image"
+            echo "image_short=$image_short"
+          } >> "$GITHUB_OUTPUT"
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Check for the pinned image
         id: image
         continue-on-error: true
@@ -73,10 +88,6 @@ jobs:
         run: |
           if [ "${{ inputs.rebuild_image }}" = "true" ]; then exit 1; fi
           docker pull "${{ steps.versions.outputs.image }}"
-
-      - uses: docker/setup-buildx-action@v3
-        if: steps.image.outcome != 'success'
-
       - name: Build and publish the pinned KiCad image
         if: steps.image.outcome != 'success'
         uses: docker/build-push-action@v6
@@ -92,18 +103,15 @@ jobs:
           tags: |
             ${{ steps.versions.outputs.image }}
             ${{ steps.versions.outputs.image_short }}
+          # The immutable GHCR tag is the cache: successful builds are pulled above and skipped.
+          # Exporting the large native build cache doubles peak disk use on GitHub-hosted runners.
           push: true
-          cache-from: type=gha,scope=kicad-${{ steps.versions.outputs.kicad }}
-          cache-to: type=gha,mode=max,scope=kicad-${{ steps.versions.outputs.kicad }}
-
       - name: Free local BuildKit cache before pulling the published image
         if: steps.image.outcome != 'success'
         run: docker buildx prune --all --force
-
-      - name: Pull newly published image
+      - name: Pull the newly published image
         if: steps.image.outcome != 'success'
         run: docker pull "${{ steps.versions.outputs.image }}"
-
       - name: Check out pinned KiCad libraries
         shell: bash
         run: |
@@ -124,39 +132,18 @@ jobs:
             git -C "$RUNNER_TEMP/kicad-$name" fetch --depth 1 origin "$commit"
             git -C "$RUNNER_TEMP/kicad-$name" checkout -q FETCH_HEAD
           done
-
       - name: Assemble dependency-complete Linux backend
         shell: bash
         run: |
           set -euo pipefail
-          container="$(docker create "${{ steps.versions.outputs.image }}")"
+          container="$(docker create '${{ steps.versions.outputs.image }}')"
           trap 'docker rm -f "$container" >/dev/null 2>&1 || true' EXIT
           mkdir -p "$RUNNER_TEMP/runtime" dist/pcb
           docker cp "$container:/opt/kicad/." "$RUNNER_TEMP/runtime/"
           bun packages/kicad-patches/bundle.ts linux-x64 \
-            "$RUNNER_TEMP/runtime" \
-            "$RUNNER_TEMP/kicad-footprints" \
-            "$RUNNER_TEMP/kicad-symbols" \
-            dist/pcb/linux-x64
-          test -n "$(find dist/pcb/linux-x64/kicad/lib/runtime -maxdepth 1 -type f -print -quit)"
-
+            "$RUNNER_TEMP/runtime" "$RUNNER_TEMP/kicad-footprints" "$RUNNER_TEMP/kicad-symbols" dist/pcb/linux-x64
       - name: Native bundle smoke
-        shell: bash
-        run: |
-          set -euo pipefail
-          root="$PWD/dist/pcb/linux-x64"
-          export LD_LIBRARY_PATH="$root/kicad/lib:$root/kicad/lib/runtime"
-          "$root/kicad/bin/kicad-cli" version
-          PORT=4020 HOST=127.0.0.1 \
-            KICAD_CLI="$root/kicad/bin/kicad-cli" \
-            KICAD_FOOTPRINT_DIR="$root/libraries/footprints" \
-            KICAD_SYMBOL_DIR="$root/libraries/symbols" \
-            "$root/bin/fp-pcb-bridge" >"$RUNNER_TEMP/bridge.log" 2>&1 &
-          bridge_pid=$!
-          trap 'kill "$bridge_pid" >/dev/null 2>&1 || true' EXIT
-          for attempt in $(seq 1 60); do curl -fsS http://127.0.0.1:4020/health && break || sleep 1; done
-          curl -fsS http://127.0.0.1:4020/health | grep -q '"ok":true'
-
+        run: bun packages/kicad-patches/smoke-bundle.ts dist/pcb/linux-x64/bundle.json linux-x64
       - name: Native KiCad process-signal integration
         env:
           KICAD_CLI: ${{ github.workspace }}/dist/pcb/linux-x64/kicad/bin/kicad-cli
@@ -167,16 +154,232 @@ jobs:
           bun test packages/bridge/test/bridge.kicad.test.ts
           bun test packages/client/test/nng-ipc.kicad.test.ts \
             --test-name-pattern "server killed mid-request"
-
-      - name: Archive backend asset
-        shell: bash
+      - name: Archive backend
         run: tar -C dist/pcb/linux-x64 -czf fp-pcb-backend-linux-x64.tar.gz .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fp-pcb-backend-linux-x64
+          path: fp-pcb-backend-linux-x64.tar.gz
+          if-no-files-found: error
 
-      - name: Publish immutable backend release
+  macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: macos-15, target: darwin-arm64 }
+          - { os: macos-15-intel, target: darwin-x64 }
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - name: Install JS dependencies
+        run: bun install --frozen-lockfile
+      - name: Install native build dependencies
+        run: brew install cmake ninja ccache wxwidgets@3.2 boost protobuf nng glew glm cairo pixman harfbuzz freetype fontconfig gettext opencascade libngspice unixodbc libgit2 zstd
+      - name: Check out pinned KiCad source and libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          kicad="$(tr -d '[:space:]' < packages/proto/KICAD_COMMIT)"
+          git init -q "$RUNNER_TEMP/kicad"
+          git -C "$RUNNER_TEMP/kicad" remote add origin "$KICAD_REPO"
+          git -C "$RUNNER_TEMP/kicad" fetch --depth 1 origin "$kicad"
+          git -C "$RUNNER_TEMP/kicad" checkout -q FETCH_HEAD
+          for name in footprints symbols; do
+            case "$name" in
+              footprints) repo=https://gitlab.com/kicad/libraries/kicad-footprints.git; pin=packages/kicad-patches/KICAD_FOOTPRINTS_COMMIT ;;
+              symbols) repo=https://gitlab.com/kicad/libraries/kicad-symbols.git; pin=packages/kicad-patches/KICAD_SYMBOLS_COMMIT ;;
+            esac
+            commit="$(tr -d '[:space:]' < "$pin")"
+            git init -q "$RUNNER_TEMP/kicad-$name"
+            git -C "$RUNNER_TEMP/kicad-$name" remote add origin "$repo"
+            git -C "$RUNNER_TEMP/kicad-$name" fetch --depth 1 origin "$commit"
+            git -C "$RUNNER_TEMP/kicad-$name" checkout -q FETCH_HEAD
+          done
+      - name: Cache native objects
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: kicad-${{ matrix.target }}-${{ hashFiles('packages/proto/KICAD_COMMIT') }}
+          restore-keys: kicad-${{ matrix.target }}-
+      - name: Build patched KiCad
+        env:
+          CCACHE_DIR: ~/.cache/ccache
+        run: packages/kicad-patches/build-macos.sh "$RUNNER_TEMP/kicad" Release
+      - name: Stage relocatable runtime and assemble backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          bun packages/kicad-patches/stage-macos.ts \
+            "$RUNNER_TEMP/kicad/build/release/kicad/KiCad.app" "$RUNNER_TEMP/runtime" "$RUNNER_TEMP/kicad"
+          bun packages/kicad-patches/bundle.ts "${{ matrix.target }}" \
+            "$RUNNER_TEMP/runtime" "$RUNNER_TEMP/kicad-footprints" "$RUNNER_TEMP/kicad-symbols" "dist/pcb/${{ matrix.target }}"
+      - name: Native bundle smoke
+        run: bun packages/kicad-patches/smoke-bundle.ts "dist/pcb/${{ matrix.target }}/bundle.json" "${{ matrix.target }}"
+      - name: Reject non-relocatable dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          if find "dist/pcb/${{ matrix.target }}/kicad" -type f -perm -111 -print0 | xargs -0 otool -L 2>/dev/null \
+            | grep -E '/(opt/homebrew|usr/local|Users/runner|private/tmp)/'; then
+            echo '::error::backend still references a build-machine dependency'
+            exit 1
+          fi
+      - name: Archive backend
+        run: tar -C "dist/pcb/${{ matrix.target }}" -czf "fp-pcb-backend-${{ matrix.target }}.tar.gz" .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fp-pcb-backend-${{ matrix.target }}
+          path: fp-pcb-backend-${{ matrix.target }}.tar.gz
+          if-no-files-found: error
+
+  windows-x64:
+    runs-on: windows-2025
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Install JS dependencies
+        run: bun install --frozen-lockfile
+      - name: Check out pinned KiCad source and libraries
+        shell: pwsh
+        run: |
+          $kicad = (Get-Content packages/proto/KICAD_COMMIT -Raw).Trim()
+          git init -q "$env:RUNNER_TEMP/kicad"
+          git -C "$env:RUNNER_TEMP/kicad" remote add origin $env:KICAD_REPO
+          git -C "$env:RUNNER_TEMP/kicad" fetch --depth 1 origin $kicad
+          git -C "$env:RUNNER_TEMP/kicad" checkout -q FETCH_HEAD
+          $libraries = @(
+            @{ Name = "footprints"; Repo = "https://gitlab.com/kicad/libraries/kicad-footprints.git"; Pin = "packages/kicad-patches/KICAD_FOOTPRINTS_COMMIT" },
+            @{ Name = "symbols"; Repo = "https://gitlab.com/kicad/libraries/kicad-symbols.git"; Pin = "packages/kicad-patches/KICAD_SYMBOLS_COMMIT" }
+          )
+          foreach ($library in $libraries) {
+            $commit = (Get-Content $library.Pin -Raw).Trim()
+            $path = "$env:RUNNER_TEMP/kicad-$($library.Name)"
+            git init -q $path
+            git -C $path remote add origin $library.Repo
+            git -C $path fetch --depth 1 origin $commit
+            git -C $path checkout -q FETCH_HEAD
+          }
+      - name: Set up the KiCad-pinned vcpkg
+        shell: pwsh
+        run: |
+          $config = Get-Content "$env:RUNNER_TEMP/kicad/vcpkg-configuration.json" | ConvertFrom-Json
+          $baseline = $config."default-registry".baseline
+          $root = "$env:RUNNER_TEMP/vcpkg"
+          git clone --quiet --filter=tree:0 https://github.com/microsoft/vcpkg $root
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          git -C $root checkout --quiet $baseline
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          & "$root/bootstrap-vcpkg.bat" -disableMetrics
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $triplets = "$env:RUNNER_TEMP/kicad-release-triplets"
+          New-Item -ItemType Directory -Force $triplets | Out-Null
+          $baseTriplet = "$env:RUNNER_TEMP/kicad/tools/custom_vcpkg_triplets/x64-windows.cmake" -replace '\\', '/'
+          @"
+          include("$baseTriplet")
+          set(VCPKG_BUILD_TYPE release)
+          "@ | Set-Content "$triplets/x64-windows.cmake"
+          "VCPKG_ROOT=$root" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "KICAD_WINDOWS_TRIPLETS=$triplets" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "VCPKG_BINARY_SOURCES=clear;files,$env:RUNNER_TEMP/vcpkg-cache,readwrite" |
+            Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Restore vcpkg binary packages
+        id: vcpkg-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/vcpkg-cache
+          key: vcpkg-windows-x64-release-v1-${{ hashFiles('packages/proto/KICAD_COMMIT') }}
+          restore-keys: vcpkg-windows-x64-release-v1-
+
+      # A cold Windows dependency build can exceed one run. Save its completed ports before
+      # failing so a rerun resumes instead of restarting OpenCascade, wxWidgets, Boost, and ICU.
+      - name: Install vcpkg dependencies
+        id: vcpkg-install
+        timeout-minutes: 250
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force "$env:RUNNER_TEMP/vcpkg-cache" | Out-Null
+          & "$env:VCPKG_ROOT/vcpkg.exe" install `
+            --triplet=x64-windows `
+            "--x-manifest-root=$env:RUNNER_TEMP/kicad" `
+            "--x-install-root=$env:RUNNER_TEMP/kicad/build/release/vcpkg_installed" `
+            "--overlay-triplets=$env:KICAD_WINDOWS_TRIPLETS" `
+            --x-abi-tools-use-exact-versions `
+            --clean-after-build
+          exit $LASTEXITCODE
+
+      - name: Save complete vcpkg cache
+        if: steps.vcpkg-install.outcome == 'success' && steps.vcpkg-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/vcpkg-cache
+          key: ${{ steps.vcpkg-cache.outputs.cache-primary-key }}
+
+      - name: Save partial vcpkg cache
+        if: always() && steps.vcpkg-install.outcome != 'success'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/vcpkg-cache
+          key: ${{ steps.vcpkg-cache.outputs.cache-primary-key }}-partial-${{ github.run_id }}
+
+      - name: Require complete vcpkg dependencies
+        if: steps.vcpkg-install.outcome != 'success'
+        shell: bash
+        run: |
+          echo "::error::vcpkg did not finish inside its time budget. Partial packages were cached; rerun this workflow to continue."
+          exit 1
+
+      - name: Build patched KiCad and assemble backend
+        shell: pwsh
+        run: |
+          packages/kicad-patches/build-windows.ps1 `
+            -KicadSource "$env:RUNNER_TEMP/kicad" `
+            -VcpkgRoot $env:VCPKG_ROOT `
+            -VcpkgOverlayTriplets $env:KICAD_WINDOWS_TRIPLETS `
+            -Footprints "$env:RUNNER_TEMP/kicad-footprints" `
+            -Symbols "$env:RUNNER_TEMP/kicad-symbols" `
+            -Output "dist/pcb/windows-x64"
+      - name: Native bundle smoke
+        run: bun packages/kicad-patches/smoke-bundle.ts dist/pcb/windows-x64/bundle.json windows-x64
+      - name: Archive backend
+        shell: pwsh
+        run: tar -C dist/pcb/windows-x64 -czf fp-pcb-backend-windows-x64.tar.gz .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fp-pcb-backend-windows-x64
+          path: fp-pcb-backend-windows-x64.tar.gz
+          if-no-files-found: error
+
+  publish:
+    needs: [linux-x64, macos, windows-x64]
+    if: github.event_name == 'push' || inputs.publish_release == true
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: fp-pcb-backend-*
+          path: artifacts
+          merge-multiple: true
+      - name: Publish immutable router-free backend release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          tag="${{ steps.versions.outputs.release }}"
-          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --title "$tag" --notes "FabPlane PCB backend for $GITHUB_SHA (KiCad ${{ steps.versions.outputs.kicad }})."
-          gh release upload "$tag" fp-pcb-backend-linux-x64.tar.gz --clobber
+          set -euo pipefail
+          tag="backend-${GITHUB_SHA:0:10}"
+          test "$(find artifacts -name 'fp-pcb-backend-*.tar.gz' | wc -l | tr -d ' ')" = 4
+          gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 \
+            || gh release create "$tag" --repo "$GITHUB_REPOSITORY" --title "$tag" --notes "Router-free FabPlane PCB native backends for $GITHUB_SHA."
+          gh release upload "$tag" artifacts/fp-pcb-backend-*.tar.gz --repo "$GITHUB_REPOSITORY" --clobber

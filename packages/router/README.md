@@ -1,12 +1,12 @@
 # @fp-pcb/router
 
-Autorouting for FabPlane PCB (docs/06-routing.md, milestone M7). One interface, two routers:
+Autorouting for FabPlane PCB (docs/06-routing.md, milestone M7). One interface, two server routers:
 
 ```ts
-import { extractRouteInput, applyRouteResult, JsRouter, FreeroutingRouter } from "@fp-pcb/router";
+import { extractRouteInput, applyRouteResult, JsAutorouter, FreeroutingRouter } from "@fp-pcb/router";
 
 const input = await extractRouteInput(board); // Board from @fp-pcb/client
-const result = await new JsRouter().route(input, { maxTimeMs: 60_000 }, (p) => console.log(p.phase, p.percent));
+const result = await new JsAutorouter().route(input, { maxTimeMs: 60_000 }, (p) => console.log(p.phase, p.percent));
 await applyRouteResult(board, result); // one commit: BeginCommit + CreateItems + EndCommit
 ```
 
@@ -15,7 +15,8 @@ src/
   types.ts        RouteInput / RouteOptions / RouteResult / Autorouter — the contract
   extract.ts      extractRouteInput(board): outline, layers, pads, copper, keepouts, zones, rules, ratsnest
   apply.ts        applyRouteResult(board, result): tracks + vias in one CreateItems commit
-  js-router.ts    JsRouter — @tscircuit/capacity-autorouter behind a SimpleRouteJson translation
+  js-autorouter.ts JsAutorouter — private TensorFleet/js_autorouter, DSN in / SES out
+  js-router.ts    compatibility failure for the removed in-tab capacity router
   freerouting.ts  FreeroutingRouter — java -jar freerouting.jar, DSN in / SES out, three I/O modes (kicad, kicad-dsn, builtin)
   specctra/       s-expression reader, DSN writer, SES reader (the builtin I/O mode + tests)
   bridge-job.ts   createRouteJobs(): a routing job the bridge can mount under /sessions/:id/route
@@ -26,7 +27,28 @@ bench/
 vendor/           freerouting-<version>.jar and jdk/ — git-ignored, see "Freerouting"
 ```
 
-## Choosing a JavaScript router
+## Current JavaScript router
+
+Bridge jobs now use `TensorFleet/js_autorouter` through its `routeDsn()` API. Set
+`JS_AUTOROUTER_MODULE` to the package entry point during private development; `/health` and
+`GET /sessions/:id/route` report whether it loaded, and `POST ... {router:"js"}` refuses before
+starting a job when it did not. The old `@tscircuit/capacity-autorouter` package and browser-side
+solver have been removed.
+
+The adapter exports `RouteInput` as Specctra DSN, invokes js_autorouter, parses its SES, removes
+echoed existing copper, and applies only new tracks/vias through the normal one-commit path.
+`effort` maps to `maxPasses` and `maxTimeMs` to `maxTotalMs`; `seed`, `viaCost`, and targeted-net
+execution are not yet supported.
+
+Remaining blockers are explicit:
+
+- js_autorouter's batch API cannot be interrupted or stream fine-grained progress from the bridge;
+- `laser-prefab` is refused until the router can use and claim only the board's fixed free vias;
+- the GPL-derived private router cannot be put in a distributed backend until licensing is
+  accepted or the relevant implementation is replaced clean-room;
+- the backend bundle still needs an approved, pinned way to carry the runtime module.
+
+## Historical JavaScript router survey
 
 Surveyed 2026-09-07 for a router that runs in Bun and the browser, is open source, takes a generic
 input built from our `RouteInput` (not a per-board vendor schema) and reports progress.
@@ -41,12 +63,12 @@ input built from our `RouteInput` (not a per-board vendor schema) and reports pr
 | `vygr/JS-PCB` (GitHub)                                                           | GPL-2.0                                      | 2018                                | own JSON dialect (the C++ `pcb` router ported)                                                                                                                         | multilayer, vias                              | grid-based clearance                                                         | none                                                | small                                  | unmaintained 8 years, GPL, own format; would need a fork                       |
 | `zalo/interactive-router`, `SLWHX/pcb-autorouter-rbr`, misc. student projects    | mixed / none                                 | 2026                                | own                                                                                                                                                                    | 1-2 layers                                    | weak                                                                         | —                                                   | —                                      | experiments, no package, no stability                                          |
 
-**Pick: `@tscircuit/capacity-autorouter`.** It is the only maintained, MIT-licensed router with a
+**Historical pick: `@tscircuit/capacity-autorouter`.** It was the only maintained, MIT-licensed router with a
 generic input, multilayer vias, an incremental `step()` API (so a page can yield between steps and
 show progress) and a DRC-repair pipeline. Its input is built from `RouteInput` in
 `buildSimpleRouteJson()`; nothing in this package is written per board.
 
-### Why `js_autorouter` cannot replace it yet
+### Gaps recorded before the js_autorouter adapter
 
 The sibling `TensorFleet/js_autorouter` currently exposes a batch `routeSrj(input, options)` API,
 but not the incremental `step()`/phase/progress and cancellation contract this bridge streams. It
@@ -56,8 +78,8 @@ copper. Its repository is marked private/GPL-derived and non-redistributable pen
 clean-room decision, while the bridge executable is intended for distribution. The smallest viable
 migration is: expose an incremental cancellable solver; port fixed-via eligibility and claim
 semantics plus existing-copper tests; confirm Bun/browser packaging; and resolve redistribution
-licensing. Until all four exist, `@tscircuit/capacity-autorouter` remains a direct dependency and
-tscircuit has not been completely removed from fab_pcb.
+licensing. The server adapter now covers the DSN/SES and existing-copper path; the other gaps above
+remain release blockers rather than reasons to retain the tscircuit dependency.
 
 What it costs us, measured on the practice boards and documented in `js-router.ts`:
 
@@ -101,8 +123,8 @@ NORMAL pad stack's copper entry is keyed on `F_Cu`) and creates them in **one** 
 removes the whole routing pass. Positions are rounded to integer nm.
 
 `RouteOptions`: `layers`, `viaCost`, `maxTimeMs`, `nets`, `seed`, `effort`, `extra`, `signal` — each adapter
-logs which of these it cannot honour. `signal` (an `AbortSignal`) cancels a run: the JS router stops
-at its next `step()`, Freerouting's process is killed, and `route()` rejects with `RouteCancelled`
+logs which of these it cannot honour. `signal` (an `AbortSignal`) cancels Freerouting by killing its
+process; js_autorouter observes it only at batch-call boundaries. `route()` rejects with `RouteCancelled`
 (`RouteCancelled.is(e)`), so nothing is applied. `RouteResult`: `tracks`, `vias`, `unrouted` (the router's own
 view — a net counts as routed once it got a wire; the bridge job and the app re-measure with `GetRatsnest`
 after the apply and show both counts), `totalConnections`, `timedOut`, `elapsedMs`, `log`.
@@ -192,7 +214,7 @@ apply as one commit, `GetRatsnest` re-measure); then `RefillZones`, `GetUnrouted
 `kicad-dsn` mode); `freerouting-kicad` (KiCad's own importer — the first bench's path, `--passes 100` reproduces
 it); `freerouting-builtin`. Each JSON carries the job's own summary (`routerRouted` next to the ratsnest-measured
 `routed`), the options, and a `measuredWith` block (KiCad version and commit, Freerouting and Java, the
-capacity-autorouter version, Bun, CPU, memory, OS) that the report prints as its "Measured with" line. Results
+router runtime, Bun, CPU, memory, OS) that the report prints as its "Measured with" line. Results
 without a `harness: "job"` field are from the first, direct-adapter harness and are marked as such in the table.
 
 ## Tests

@@ -1,4 +1,5 @@
 node_modules
+.ci-private
 dist
 dist-tsc
 bun.lock

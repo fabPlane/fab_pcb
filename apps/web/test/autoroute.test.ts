@@ -331,7 +331,7 @@ describe('KicadAutorouteService on the bridge', () => {
       bridgeJson: async (path: string, init?: RequestInit) => {
         requests.push({ path, init });
         if (init?.method === 'POST') return { job: { id: 'j1', state: 'queued', log: [] } };
-        return { jobs: [], freerouting: { ok: true } };
+        return { jobs: [], jsAutorouter: { ok: true }, freerouting: { ok: true } };
       },
       bridgeFetch: async (path: string, init?: RequestInit) => {
         requests.push({ path, init });
@@ -359,7 +359,7 @@ describe('KicadAutorouteService on the bridge', () => {
     expect(seen).toContain('routing:pass 1');
     expect(f.calls).toContain('resync:board');
     expect(f.recorded).toEqual([{ message: 'Autoroute (freerouting): 2 connections', forward: 1, inverse: 1 }]);
-    expect(await svc.available()).toEqual({ server: true, freerouting: { ok: true } });
+    expect(await svc.available()).toEqual({ server: true, jsAutorouter: { ok: true }, freerouting: { ok: true } });
   });
 
   test('a failed job and a refused POST both end as failed runs', async () => {
