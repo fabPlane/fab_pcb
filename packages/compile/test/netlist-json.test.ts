@@ -85,7 +85,10 @@ describe("netlistJsonFrontend", () => {
     expect(diagnostics).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ code: "bad_placement_position", message: "/board/placements/0/position/x: must be a finite number" }),
-        expect.objectContaining({ code: "unknown_placement_reference", message: '/board/placements/1/ref: unknown component reference "U99"' }),
+        expect.objectContaining({
+          code: "unknown_placement_reference",
+          message: '/board/placements/1/ref: unknown component reference "U99"',
+        }),
       ]),
     );
   });

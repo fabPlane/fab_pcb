@@ -3,7 +3,16 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { FilesError, Session, configFromEnv, eventsSocketPathFor, kicadChildEnvironment, resolveInRoot, startBridge, type BridgeServer } from "../src/index";
+import {
+  FilesError,
+  Session,
+  configFromEnv,
+  eventsSocketPathFor,
+  kicadChildEnvironment,
+  resolveInRoot,
+  startBridge,
+  type BridgeServer,
+} from "../src/index";
 import { decodeApiResponse, encodeApiRequest, encodePing } from "../src/kicad-ping";
 
 describe("configFromEnv", () => {
@@ -20,7 +29,10 @@ describe("configFromEnv", () => {
     expect(d.kicadCli).toBe("/x/kicad-cli");
     expect(d.staticDir).toBe("/srv");
     expect(d.maxPayloadBytes).toBe(1024);
-    expect(configFromEnv({ KICAD_SOCKET_TRANSPORT: "ws", KICAD_WS_HOST: "localhost" })).toMatchObject({ socketTransport: "ws", wsHostname: "localhost" });
+    expect(configFromEnv({ KICAD_SOCKET_TRANSPORT: "ws", KICAD_WS_HOST: "localhost" })).toMatchObject({
+      socketTransport: "ws",
+      wsHostname: "localhost",
+    });
     expect(() => configFromEnv({ KICAD_SOCKET_TRANSPORT: "tcp" })).toThrow(/ipc.*ws/);
     expect(() => configFromEnv({ PORT: "abc" })).toThrow();
   });
