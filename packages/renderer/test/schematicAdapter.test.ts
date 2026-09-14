@@ -3,7 +3,27 @@ import { schematicItemToRenderItems, colorOf, schematicItemTypeOf } from '../src
 import { SCH_LAYERS, SCH_DEFAULTS, SCHEMATIC_DRAW_ORDER, SCHEMATIC_THEME_LAYERS, MIL } from '../src/schematic/schematicLayers.js';
 import { KICAD_CLASSIC_THEME, KICAD_DEFAULT_THEME } from '../src/core/theme.js';
 import { boxContains, type Primitive, type RenderItem } from '../src/core/model.js';
-import { MM, busEntry, directiveLabel, globalLabel, group, hierLabel, ic, junction, localLabel, noConnect, resistor, ruleArea, schImage, sheet, syntheticSchematic, wire, schText, textBox, type Spin } from './schematicFixtures.js';
+import {
+  MM,
+  busEntry,
+  directiveLabel,
+  globalLabel,
+  group,
+  hierLabel,
+  ic,
+  junction,
+  localLabel,
+  noConnect,
+  resistor,
+  ruleArea,
+  schImage,
+  sheet,
+  syntheticSchematic,
+  wire,
+  schText,
+  textBox,
+  type Spin,
+} from './schematicFixtures.js';
 
 const seg = (p: Primitive) => p as Extract<Primitive, { kind: 'segment' }>;
 const poly = (p: Primitive) => p as Extract<Primitive, { kind: 'polygon' }>;
@@ -27,14 +47,24 @@ describe('schematic adapter: wiring', () => {
     const [dashed] = schematicItemToRenderItems(wire('d', 0, 0, 20, 0, { graphic: true, style: 3 }));
     expect(dashed!.prims.length).toBeGreaterThan(3);
     // enum names are accepted too
-    const [named] = schematicItemToRenderItems({ id: 'n', type: 'KOT_SCH_LINE', proto: { start: { xNm: 0, yNm: 0 }, end: { xNm: 1000, yNm: 0 }, type: 'SLT_BUS' } });
+    const [named] = schematicItemToRenderItems({
+      id: 'n',
+      type: 'KOT_SCH_LINE',
+      proto: { start: { xNm: 0, yNm: 0 }, end: { xNm: 1000, yNm: 0 }, type: 'SLT_BUS' },
+    });
     expect(named!.layer).toBe(SCH_LAYERS.bus);
   });
 
   test('junction, no-connect, bus entries', () => {
     const [j] = schematicItemToRenderItems(junction('j', 1, 1));
     expect(j!.layer).toBe(SCH_LAYERS.junction);
-    expect(j!.prims[0]).toEqual({ kind: 'circle', c: { x: 1 * MM, y: 1 * MM }, r: SCH_DEFAULTS.junctionDiameter / 2, width: 0, fill: true });
+    expect(j!.prims[0]).toEqual({
+      kind: 'circle',
+      c: { x: 1 * MM, y: 1 * MM },
+      r: SCH_DEFAULTS.junctionDiameter / 2,
+      width: 0,
+      fill: true,
+    });
     const [j2] = schematicItemToRenderItems(junction('j2', 0, 0, 1));
     expect((j2!.prims[0] as { r: number }).r).toBe(0.5 * MM);
     const [nc] = schematicItemToRenderItems(noConnect('nc', 2, 2));
@@ -45,7 +75,9 @@ describe('schematic adapter: wiring', () => {
     expect(seg(nc!.prims[0]!).width).toBe(SCH_DEFAULTS.lineWidth);
     const [wb] = schematicItemToRenderItems(busEntry('be', 10, 10, false));
     expect(wb!.layer).toBe(SCH_LAYERS.wire);
-    expect(wb!.prims).toEqual([{ kind: 'segment', a: { x: 10 * MM, y: 10 * MM }, b: { x: 12.54 * MM, y: 12.54 * MM }, width: SCH_DEFAULTS.wireWidth }]);
+    expect(wb!.prims).toEqual([
+      { kind: 'segment', a: { x: 10 * MM, y: 10 * MM }, b: { x: 12.54 * MM, y: 12.54 * MM }, width: SCH_DEFAULTS.wireWidth },
+    ]);
     const [bb] = schematicItemToRenderItems(busEntry('bb', 10, 10, true));
     expect(bb!.layer).toBe(SCH_LAYERS.bus);
     expect(seg(bb!.prims[0]!).width).toBe(SCH_DEFAULTS.busWidth);
@@ -54,7 +86,12 @@ describe('schematic adapter: wiring', () => {
 
 describe('schematic adapter: wire + junction + label', () => {
   test('a labelled net: the label text sits on the wire end, the junction covers the wire width', () => {
-    const items = [wire('w', 10, 10, 30, 10), wire('w2', 20, 10, 20, 20), junction('j', 20, 10), localLabel('l', 10, 10, 'NET_A', 3)].flatMap((it) => schematicItemToRenderItems(it));
+    const items = [
+      wire('w', 10, 10, 30, 10),
+      wire('w2', 20, 10, 20, 20),
+      junction('j', 20, 10),
+      localLabel('l', 10, 10, 'NET_A', 3),
+    ].flatMap((it) => schematicItemToRenderItems(it));
     expect(items.map((i) => i.id)).toEqual(['w', 'w2', 'j', 'l']);
     const j = items[2]!.prims[0]!;
     expect(j.kind).toBe('circle');
@@ -125,7 +162,10 @@ describe('schematic adapter: labels', () => {
       }
     }
     // input / bidi / tristate have a pointed tip: the vertex at the anchor is unique; output / passive have a flat side
-    const tip = (shape: number) => poly(schematicItemToRenderItems(globalLabel('t', 0, 0, 'A', shape, 3))[0]!.prims[0]!).outline.filter((p) => near(p.x, 0) && near(p.y, 0)).length;
+    const tip = (shape: number) =>
+      poly(schematicItemToRenderItems(globalLabel('t', 0, 0, 'A', shape, 3))[0]!.prims[0]!).outline.filter(
+        (p) => near(p.x, 0) && near(p.y, 0),
+      ).length;
     expect(tip(1)).toBe(1);
     expect(tip(2)).toBe(1);
     expect(tip(5)).toBe(1);
@@ -269,7 +309,11 @@ describe('schematic adapter: symbols', () => {
     expect(dnp.prims.length).toBe(2);
     expect(seg(dnp.prims[0]!).width).toBe(SCH_DEFAULTS.dnpStroke);
     expect(boxContains(dnp.bbox, { x: 0, y: 0 })).toBe(true);
-    expect(schematicItemToRenderItems(resistor('R', 'R', 0, 0, { dnp: true }), { showDnpMarkers: false }).some((i) => i.layer === SCH_LAYERS.dnpMarker)).toBe(false);
+    expect(
+      schematicItemToRenderItems(resistor('R', 'R', 0, 0, { dnp: true }), { showDnpMarkers: false }).some(
+        (i) => i.layer === SCH_LAYERS.dnpMarker,
+      ),
+    ).toBe(false);
   });
 
   test('IC: pin names inside the body, decorations for inverted / clock pins, electrical types', () => {
@@ -317,7 +361,9 @@ describe('schematic adapter: symbols', () => {
     const r = resistor('R', 'R', 0, 0);
     const def = (r.proto as { definition: { items: Array<{ item: unknown }> } }).definition;
     const real = def.items.map((c) => c.item);
-    def.items.forEach((c, i) => (c.item = { $typeName: 'google.protobuf.Any', typeUrl: `type.googleapis.com/x${i}`, value: new Uint8Array() }));
+    def.items.forEach(
+      (c, i) => (c.item = { $typeName: 'google.protobuf.Any', typeUrl: `type.googleapis.com/x${i}`, value: new Uint8Array() }),
+    );
     expect(schematicItemToRenderItems(r).filter((i) => i.layer === SCH_LAYERS.pin).length).toBe(0);
     const decoded = schematicItemToRenderItems(r, { decodeAny: (any) => real[Number((any as { typeUrl: string }).typeUrl.slice(-1))] });
     expect(decoded.filter((i) => i.layer === SCH_LAYERS.pin).length).toBe(2);
@@ -367,8 +413,30 @@ describe('schematic adapter: sheets, text, shapes', () => {
     expect(l1!.text).toBe('line one');
     expect(l2!.pos.y).toBeGreaterThan(l1!.pos.y);
     expect(l1!.size).toEqual({ x: 2.54 * MM, y: 2.54 * MM });
-    const [shaped] = schematicItemToRenderItems(schText('t', 10, 10, 'x'), { textShapes: (id) => (id === 't' ? [[{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }]] : undefined) });
-    expect(shaped!.prims).toEqual([{ kind: 'text-shapes', polys: [[{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }]] }]);
+    const [shaped] = schematicItemToRenderItems(schText('t', 10, 10, 'x'), {
+      textShapes: (id) =>
+        id === 't'
+          ? [
+              [
+                { x: 0, y: 0 },
+                { x: 1, y: 0 },
+                { x: 1, y: 1 },
+              ],
+            ]
+          : undefined,
+    });
+    expect(shaped!.prims).toEqual([
+      {
+        kind: 'text-shapes',
+        polys: [
+          [
+            { x: 0, y: 0 },
+            { x: 1, y: 0 },
+            { x: 1, y: 1 },
+          ],
+        ],
+      },
+    ]);
     const [boxed] = schematicItemToRenderItems(schText('t', 10, 10, 'x'), { textFallback: 'box' });
     expect(boxed!.prims[0]!.kind).toBe('polygon');
     expect(schematicItemToRenderItems(schText('t', 10, 10, 'x'), { textFallback: 'none' })).toEqual([]);
@@ -400,7 +468,9 @@ describe('schematic adapter: sheets, text, shapes', () => {
     expect(bad!.prims[0]!.kind).toBe('polygon');
     // groups: bbox-only pick target over their members, nothing without an itemBBox lookup
     expect(schematicItemToRenderItems(group('g', 'G', ['a', 'b']))).toEqual([]);
-    const [grp] = schematicItemToRenderItems(group('g', 'G', ['a', 'b']), { itemBBox: (id) => (id === 'a' ? { x: 0, y: 0, w: 10, h: 10 } : { x: 20, y: 20, w: 5, h: 5 }) });
+    const [grp] = schematicItemToRenderItems(group('g', 'G', ['a', 'b']), {
+      itemBBox: (id) => (id === 'a' ? { x: 0, y: 0, w: 10, h: 10 } : { x: 20, y: 20, w: 5, h: 5 }),
+    });
     expect(grp!.bbox).toEqual({ x: 0, y: 0, w: 25, h: 25 });
     expect(grp!.prims).toEqual([]);
     expect(grp!.layer).toBe(SCH_LAYERS.auxItems);
@@ -427,7 +497,29 @@ describe('schematic adapter: sheets, text, shapes', () => {
     const all: RenderItem[] = syntheticSchematic().flatMap((it) => schematicItemToRenderItems(it));
     expect(all.length).toBeGreaterThan(80);
     const layers = new Set(all.map((i) => i.layer));
-    for (const l of [SCH_LAYERS.wire, SCH_LAYERS.bus, SCH_LAYERS.junction, SCH_LAYERS.labelLocal, SCH_LAYERS.labelGlobal, SCH_LAYERS.labelHier, SCH_LAYERS.netclassFlag, SCH_LAYERS.sheet, SCH_LAYERS.sheetLabel, SCH_LAYERS.pin, SCH_LAYERS.pinName, SCH_LAYERS.pinNumber, SCH_LAYERS.reference, SCH_LAYERS.value, SCH_LAYERS.device, SCH_LAYERS.deviceBackground, SCH_LAYERS.noConnect, SCH_LAYERS.note, SCH_LAYERS.noteBackground, SCH_LAYERS.ruleArea, SCH_LAYERS.dnpMarker]) {
+    for (const l of [
+      SCH_LAYERS.wire,
+      SCH_LAYERS.bus,
+      SCH_LAYERS.junction,
+      SCH_LAYERS.labelLocal,
+      SCH_LAYERS.labelGlobal,
+      SCH_LAYERS.labelHier,
+      SCH_LAYERS.netclassFlag,
+      SCH_LAYERS.sheet,
+      SCH_LAYERS.sheetLabel,
+      SCH_LAYERS.pin,
+      SCH_LAYERS.pinName,
+      SCH_LAYERS.pinNumber,
+      SCH_LAYERS.reference,
+      SCH_LAYERS.value,
+      SCH_LAYERS.device,
+      SCH_LAYERS.deviceBackground,
+      SCH_LAYERS.noConnect,
+      SCH_LAYERS.note,
+      SCH_LAYERS.noteBackground,
+      SCH_LAYERS.ruleArea,
+      SCH_LAYERS.dnpMarker,
+    ]) {
       expect(layers.has(l)).toBe(true);
     }
     for (const l of layers) expect(SCHEMATIC_DRAW_ORDER.includes(l)).toBe(true);

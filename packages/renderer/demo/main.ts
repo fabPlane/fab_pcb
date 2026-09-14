@@ -53,10 +53,38 @@ if (doc === 'board') {
       const x = 50 + (i % cols) * 2.5;
       const y = 5 + Math.floor(i / cols) * 2.5;
       items.push(footprint(`sfp-${i}`, `R${i}`, x, y, (i % 4) * 90, i % 3 === 0));
-      items.push(track(`st-${i}`, x + 1, y, x + 1 + rnd() * 2, y + rnd() * 2, 0.15 + rnd() * 0.2, i % 2 ? BOARD_LAYER_ENUM.BL_F_Cu! : BOARD_LAYER_ENUM.BL_B_Cu!, i % 5 ? 'GND' : 'VCC'));
+      items.push(
+        track(
+          `st-${i}`,
+          x + 1,
+          y,
+          x + 1 + rnd() * 2,
+          y + rnd() * 2,
+          0.15 + rnd() * 0.2,
+          i % 2 ? BOARD_LAYER_ENUM.BL_F_Cu! : BOARD_LAYER_ENUM.BL_B_Cu!,
+          i % 5 ? 'GND' : 'VCC',
+        ),
+      );
       items.push(via(`sv-${i}`, x + 1 + rnd() * 2, y + rnd() * 2, 0.6, 0.3));
     }
-    items.push(zone('big-zone', [BOARD_LAYER_ENUM.BL_B_Cu!], [[48, 3], [50 + cols * 2.5 + 2, 3], [50 + cols * 2.5 + 2, 8 + (n / 4 / cols) * 2.5], [48, 8 + (n / 4 / cols) * 2.5]], [[60, 10], [70, 10], [70, 20], [60, 20]]));
+    items.push(
+      zone(
+        'big-zone',
+        [BOARD_LAYER_ENUM.BL_B_Cu!],
+        [
+          [48, 3],
+          [50 + cols * 2.5 + 2, 3],
+          [50 + cols * 2.5 + 2, 8 + (n / 4 / cols) * 2.5],
+          [48, 8 + (n / 4 / cols) * 2.5],
+        ],
+        [
+          [60, 10],
+          [70, 10],
+          [70, 20],
+          [60, 20],
+        ],
+      ),
+    );
   }
   store = new MemoryStore(items);
   host = new BoardCanvasHost(KICAD_DEFAULT_THEME, {
@@ -64,7 +92,23 @@ if (doc === 'board') {
     leftDrag: 'rubberband',
     overlays: { gridUnit: 'mm' },
   });
-  layerList = ['BL_F_Cu', 'BL_B_Cu', 'BL_F_SilkS', 'BL_B_SilkS', 'BL_F_Mask', 'BL_B_Mask', 'BL_F_Paste', 'BL_F_CrtYd', 'BL_B_CrtYd', 'BL_F_Fab', 'BL_Edge_Cuts', 'BL_Dwgs_User', 'BL_Cmts_User', 'board.via_hole', 'board.anchor'];
+  layerList = [
+    'BL_F_Cu',
+    'BL_B_Cu',
+    'BL_F_SilkS',
+    'BL_B_SilkS',
+    'BL_F_Mask',
+    'BL_B_Mask',
+    'BL_F_Paste',
+    'BL_F_CrtYd',
+    'BL_B_CrtYd',
+    'BL_F_Fab',
+    'BL_Edge_Cuts',
+    'BL_Dwgs_User',
+    'BL_Cmts_User',
+    'board.via_hole',
+    'board.anchor',
+  ];
   layerName = boardLayerDisplayName;
   describe = (h) => `${h.ref}${h.net ? ` (${h.net})` : ''} on ${layerName(h.layer)} d=${h.distance.toFixed(1)}px`;
 } else {
@@ -74,7 +118,19 @@ if (doc === 'board') {
     overlays: { gridUnit: 'mil' },
     // adapter: { textShapes: (id) => textShapeCache.get(id) }  <- feed GetTextAsShapes results here for exact glyphs
   });
-  layerList = SCHEMATIC_DRAW_ORDER.filter((l) => ![SCH_LAYERS.hidden, SCH_LAYERS.ercWarning, SCH_LAYERS.ercError, SCH_LAYERS.ercExclusion, SCH_LAYERS.anchor, SCH_LAYERS.auxItems, SCH_LAYERS.excludedFromSim, SCH_LAYERS.bitmaps].includes(l));
+  layerList = SCHEMATIC_DRAW_ORDER.filter(
+    (l) =>
+      ![
+        SCH_LAYERS.hidden,
+        SCH_LAYERS.ercWarning,
+        SCH_LAYERS.ercError,
+        SCH_LAYERS.ercExclusion,
+        SCH_LAYERS.anchor,
+        SCH_LAYERS.auxItems,
+        SCH_LAYERS.excludedFromSim,
+        SCH_LAYERS.bitmaps,
+      ].includes(l),
+  );
   layerName = schematicLayerDisplayName;
   describe = (h) => `${h.ref}${h.owner !== h.ref ? ` of ${h.owner}` : ''} on ${layerName(h.layer)} d=${h.distance.toFixed(1)}px`;
 }
@@ -105,7 +161,8 @@ host.onBoxSelect(({ hits, touching }) => {
 });
 host.onCameraChange((cam) => {
   const w = host.screenToWorld(0, 0);
-  document.getElementById('cam')!.textContent = `zoom ${(cam.zoom * MM).toFixed(2)} px/mm · centre ${(cam.x / MM).toFixed(2)}, ${(cam.y / MM).toFixed(2)} mm · grid ${(host.overlays.gridPitch / MM).toFixed(3)} mm · tl ${(w.x / MM).toFixed(1)},${(w.y / MM).toFixed(1)}`;
+  document.getElementById('cam')!.textContent =
+    `zoom ${(cam.zoom * MM).toFixed(2)} px/mm · centre ${(cam.x / MM).toFixed(2)}, ${(cam.y / MM).toFixed(2)} mm · grid ${(host.overlays.gridPitch / MM).toFixed(3)} mm · tl ${(w.x / MM).toFixed(1)},${(w.y / MM).toFixed(1)}`;
 });
 
 // ---------------------------------------------------------------- controls
@@ -208,7 +265,10 @@ if (host instanceof BoardCanvasHost) {
 }
 
 host.ready.then(() => {
-  const summary = doc === 'board' ? `${store.byType('KOT_PCB_FOOTPRINT').length} footprints` : `${store.byType('KOT_SCH_SYMBOL').length} symbols, ${store.byType('KOT_SCH_LINE').length} lines`;
+  const summary =
+    doc === 'board'
+      ? `${store.byType('KOT_PCB_FOOTPRINT').length} footprints`
+      : `${store.byType('KOT_SCH_SYMBOL').length} symbols, ${store.byType('KOT_SCH_LINE').length} lines`;
   status.textContent = `ready: ${summary}, ${host.scene.itemCount} render items, ${host.scene.cachedContexts} shared contexts. Middle-drag / touch to pan, wheel to zoom, left-drag box-select, click to pick.`;
   // simple fps counter
   let frames = 0;

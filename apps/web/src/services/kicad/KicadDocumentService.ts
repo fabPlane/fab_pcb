@@ -132,7 +132,15 @@ export class KicadDocumentService implements DocumentService {
   rawCustomRules: CustomRule[] = [];
   private layerList: LayerInfo[] = [];
   private netList: NetInfo[] = [];
-  private setup: BoardSetup = { copperLayers: 2, thicknessNm: 1_600_000, stackup: [], rules: emptyRules(), customRules: '', customRuleList: [], origin: { grid: { x: 0, y: 0 }, drill: { x: 0, y: 0 } } };
+  private setup: BoardSetup = {
+    copperLayers: 2,
+    thicknessNm: 1_600_000,
+    stackup: [],
+    rules: emptyRules(),
+    customRules: '',
+    customRuleList: [],
+    origin: { grid: { x: 0, y: 0 }, drill: { x: 0, y: 0 } },
+  };
   private netclassList: NetclassInfo[] = [];
   private textVars: TextVariable[] = [];
   private variantList: VariantInfo[] = [];
@@ -325,7 +333,13 @@ export class KicadDocumentService implements DocumentService {
           minTextThicknessNm: dist(c?.minSilkTextThickness),
         },
         customRules: custom ? customRulesText(custom.rules) : '',
-        customRuleList: (custom?.rules ?? []).map<CustomRuleInfo>((r) => ({ name: r.name, condition: r.condition, comments: r.comments ?? '', severity: r.severity, constraints: r.constraints.length })),
+        customRuleList: (custom?.rules ?? []).map<CustomRuleInfo>((r) => ({
+          name: r.name,
+          condition: r.condition,
+          comments: r.comments ?? '',
+          severity: r.severity,
+          constraints: r.constraints.length,
+        })),
         customRulesError: custom?.errorText || undefined,
         origin: { grid: gridOrigin, drill: drillOrigin },
       };

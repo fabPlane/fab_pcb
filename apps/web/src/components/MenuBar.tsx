@@ -9,7 +9,9 @@ import { useUiStore } from '@/state/uiStore';
 type MenuEntry = string | '-' | { label: string };
 
 const MENUS: { label: string; items: MenuEntry[] }[] = [
-  { label: 'File', items: ['file.newProject', 'file.openProject', '-', 'file.save', 'file.saveAll', '-', 'file.exportJobs', '-', 'file.closeProject'] },
+  // `file.downloadProject` and `session.stopKicad` exist only in the in-browser wasm mode; anywhere
+  // else they are registered `hidden` and the loop below drops them, their separators with them.
+  { label: 'File', items: ['file.newProject', 'file.openProject', '-', 'file.save', 'file.saveAll', '-', 'file.exportJobs', 'file.downloadProject', '-', 'file.closeProject'] },
   {
     label: 'Edit',
     items: [
@@ -140,6 +142,8 @@ const MENUS: { label: string; items: MenuEntry[] }[] = [
       'tools.keymap',
       '-',
       'tools.settings',
+      '-',
+      'session.stopKicad',
     ],
   },
   { label: 'Window', items: ['window.project', 'window.board', 'window.schematic', 'window.view3d'] },

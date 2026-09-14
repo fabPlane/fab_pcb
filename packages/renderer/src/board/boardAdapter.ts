@@ -93,7 +93,14 @@ export interface GraphicShapeLike {
   polygon?: PolySetLike;
   bezier?: { start?: Vector2Like; control1?: Vector2Like; control2?: Vector2Like; end?: Vector2Like };
   ellipse?: { center?: Vector2Like; majorRadius?: DistanceLike; minorRadius?: DistanceLike; rotation?: AngleLike };
-  ellipseArc?: { center?: Vector2Like; majorRadius?: DistanceLike; minorRadius?: DistanceLike; rotation?: AngleLike; startAngle?: AngleLike; endAngle?: AngleLike };
+  ellipseArc?: {
+    center?: Vector2Like;
+    majorRadius?: DistanceLike;
+    minorRadius?: DistanceLike;
+    rotation?: AngleLike;
+    startAngle?: AngleLike;
+    endAngle?: AngleLike;
+  };
   startEnding?: LineEndingLike;
   endEnding?: LineEndingLike;
 }
@@ -200,13 +207,31 @@ export const deg = (a?: AngleLike | null): number => a?.valueDegrees ?? 0;
 export const kiid = (k?: KiidLike | string | null): string => (typeof k === 'string' ? k : (k?.value ?? ''));
 
 const ENUMS = {
-  PadStackShape: ['PSS_UNKNOWN', 'PSS_CIRCLE', 'PSS_RECTANGLE', 'PSS_OVAL', 'PSS_TRAPEZOID', 'PSS_ROUNDRECT', 'PSS_CHAMFEREDRECT', 'PSS_CUSTOM'],
+  PadStackShape: [
+    'PSS_UNKNOWN',
+    'PSS_CIRCLE',
+    'PSS_RECTANGLE',
+    'PSS_OVAL',
+    'PSS_TRAPEZOID',
+    'PSS_ROUNDRECT',
+    'PSS_CHAMFEREDRECT',
+    'PSS_CUSTOM',
+  ],
   PadStackType: ['PST_UNKNOWN', 'PST_NORMAL', 'PST_FRONT_INNER_BACK', 'PST_CUSTOM'],
   PadType: ['PT_UNKNOWN', 'PT_PTH', 'PT_SMD', 'PT_EDGE_CONNECTOR', 'PT_NPTH'],
   DrillShape: ['DS_UNKNOWN', 'DS_CIRCLE', 'DS_OBLONG', 'DS_UNDEFINED'],
   ZoneType: ['ZT_UNKNOWN', 'ZT_COPPER', 'ZT_GRAPHICAL', 'ZT_RULE_AREA', 'ZT_TEARDROP'],
   ZoneBorderStyle: ['ZBS_UNKNOWN', 'ZBS_SOLID', 'ZBS_DIAGONAL_FULL', 'ZBS_DIAGONAL_EDGE', 'ZBS_INVISIBLE'],
-  GraphicFillType: ['GFT_UNKNOWN', 'GFT_UNFILLED', 'GFT_FILLED', 'GFT_FILLED_WITH_COLOR', 'GFT_FILLED_WITH_BACKGROUND_BODY_COLOR', 'GFT_HATCH', 'GFT_REVERSE_HATCH', 'GFT_CROSS_HATCH'],
+  GraphicFillType: [
+    'GFT_UNKNOWN',
+    'GFT_UNFILLED',
+    'GFT_FILLED',
+    'GFT_FILLED_WITH_COLOR',
+    'GFT_FILLED_WITH_BACKGROUND_BODY_COLOR',
+    'GFT_HATCH',
+    'GFT_REVERSE_HATCH',
+    'GFT_CROSS_HATCH',
+  ],
   StrokeLineStyle: ['SLS_UNKNOWN', 'SLS_DEFAULT', 'SLS_SOLID', 'SLS_DASH', 'SLS_DOT', 'SLS_DASHDOT', 'SLS_DASHDOTDOT'],
   LineEndingStyle: ['LES_UNKNOWN', 'LES_NONE', 'LES_ARROW', 'LES_CIRCLE', 'LES_SQUARE', 'LES_ARROW_OPEN'],
   HorizontalAlignment: ['HA_UNKNOWN', 'HA_LEFT', 'HA_CENTER', 'HA_RIGHT', 'HA_INDETERMINATE'],
@@ -229,7 +254,11 @@ export function enumName(kind: EnumName, v: number | string | undefined | null):
 }
 
 /** Read a oneof in either protobuf-es `{case,value}` form or flat-field form. */
-export function oneof<T = unknown>(msg: Record<string, unknown> | undefined, field: string, cases: readonly string[]): { case: string; value: T } | undefined {
+export function oneof<T = unknown>(
+  msg: Record<string, unknown> | undefined,
+  field: string,
+  cases: readonly string[],
+): { case: string; value: T } | undefined {
   if (!msg) return undefined;
   const o = msg[field] as { case?: string; value?: unknown } | undefined;
   if (o && typeof o === 'object' && typeof o.case === 'string') return { case: o.case, value: o.value as T };
@@ -304,7 +333,10 @@ export function polyLineToPoints(pl: PolyLineLike | undefined, arcTol = 5000): V
 }
 
 export function polygonWithHoles(p: PolygonWithHolesLike | undefined, arcTol = 5000): { outline: Vec2[]; holes: Vec2[][] } {
-  return { outline: polyLineToPoints(p?.outline, arcTol), holes: (p?.holes ?? []).map((h) => polyLineToPoints(h, arcTol)).filter((h) => h.length >= 3) };
+  return {
+    outline: polyLineToPoints(p?.outline, arcTol),
+    holes: (p?.holes ?? []).map((h) => polyLineToPoints(h, arcTol)).filter((h) => h.length >= 3),
+  };
 }
 
 export function polySetToPrims(ps: PolySetLike | undefined, fill: boolean, width: number, arcTol = 5000, mesh = false): Primitive[] {
@@ -389,7 +421,16 @@ export function graphicShapeToPrims(shape: GraphicShapeLike | undefined, ctx: Bo
   const pattern = dashPattern(style, width);
   const fillType = enumName('GraphicFillType', shape.attributes?.fill?.fillType);
   const filled = fillType !== 'GFT_UNFILLED' && fillType !== 'GFT_UNKNOWN';
-  const g = oneof<Record<string, unknown>>(shape as Record<string, unknown>, 'geometry', ['segment', 'rectangle', 'arc', 'circle', 'polygon', 'bezier', 'ellipse', 'ellipseArc']);
+  const g = oneof<Record<string, unknown>>(shape as Record<string, unknown>, 'geometry', [
+    'segment',
+    'rectangle',
+    'arc',
+    'circle',
+    'polygon',
+    'bezier',
+    'ellipse',
+    'ellipseArc',
+  ]);
   if (!g) return [];
   const out: Primitive[] = [];
   switch (g.case) {
@@ -464,7 +505,14 @@ export function graphicShapeToPrims(shape: GraphicShapeLike | undefined, ctx: Bo
     }
     case 'ellipseArc': {
       const e = g.value as NonNullable<GraphicShapeLike['ellipseArc']>;
-      const poly = ellipseToPolygon(vec(e.center), dist(e.majorRadius), dist(e.minorRadius), deg(e.rotation), deg(e.startAngle), deg(e.endAngle));
+      const poly = ellipseToPolygon(
+        vec(e.center),
+        dist(e.majorRadius),
+        dist(e.minorRadius),
+        deg(e.rotation),
+        deg(e.startAngle),
+        deg(e.endAngle),
+      );
       out.push(...strokedPolyline(poly, width, pattern, false));
       break;
     }
@@ -554,7 +602,8 @@ export function padStackLayerPolygon(e: PadStackLayerLike, ctx: BoardAdapterCont
     case 'PSS_CUSTOM': {
       // anchor shape + custom primitives (relative to the pad position, unrotated)
       const anchor = enumName('PadStackShape', e.customAnchorShape);
-      const base = anchor === 'PSS_RECTANGLE' ? rectPolygon(size.x, size.y) : circleToPolygon({ x: 0, y: 0 }, size.x / 2, 0, ctx.arcTolerance ?? 2000);
+      const base =
+        anchor === 'PSS_RECTANGLE' ? rectPolygon(size.x, size.y) : circleToPolygon({ x: 0, y: 0 }, size.x / 2, 0, ctx.arcTolerance ?? 2000);
       // custom shapes are drawn separately by padPrims(); the anchor stands in for picking
       poly = base;
       break;
@@ -576,7 +625,14 @@ function hashPoints(pts: Vec2[], origin: Vec2): string {
   return (h >>> 0).toString(36) + ':' + pts.length;
 }
 
-function padPrims(pad: Record<string, unknown>, ps: PadStackLike, layer: string, pos: Vec2, angle: number, ctx: BoardAdapterContext): { prims: Primitive[]; key: string } | undefined {
+function padPrims(
+  pad: Record<string, unknown>,
+  ps: PadStackLike,
+  layer: string,
+  pos: Vec2,
+  angle: number,
+  ctx: BoardAdapterContext,
+): { prims: Primitive[]; key: string } | undefined {
   const padId = kiid(pad.id as KiidLike);
   const copper = ctx.copperLayers ?? copperLayerList(2);
   const external = ctx.padPolygons?.(padId, layer);
@@ -655,7 +711,13 @@ export function transformPrim(p: Primitive, angle: number, offset: Vec2, mirrorY
     case 'text-glyphs':
       // rotation only moves the anchor / outline here; the schematic adapter has the
       // justification-aware version (transformTextGlyphs)
-      return { ...p, pos: t(p.pos), outline: p.outline.map(t), angle: mirrorY ? -p.angle + angle : p.angle + angle, mirrored: mirrorY ? !p.mirrored : p.mirrored };
+      return {
+        ...p,
+        pos: t(p.pos),
+        outline: p.outline.map(t),
+        angle: mirrorY ? -p.angle + angle : p.angle + angle,
+        mirrored: mirrorY ? !p.mirrored : p.mirrored,
+      };
   }
 }
 
@@ -716,7 +778,13 @@ function labelPrim(text: string, pos: Vec2, size: Vec2, thickness: number, angle
  * Pad number (upper half) and net name (lower half) inside a pad, sized from the pad's
  * axis-aligned bounding box the way pcbnew does; the text turns 90° for tall pads.
  */
-export function padLabelPrims(padNumber: string, netname: string, box: Box, round: boolean, opts: BoardLabelOptions): { number?: Primitive; net?: Primitive } {
+export function padLabelPrims(
+  padNumber: string,
+  netname: string,
+  box: Box,
+  round: boolean,
+  opts: BoardLabelOptions,
+): { number?: Primitive; net?: Primitive } {
   const number = opts.padNumbers ? padNumber : '';
   const net = opts.netNames ? netname : '';
   if ((!number && !net) || boxIsEmptyBox(box)) return {};
@@ -744,7 +812,14 @@ export function padLabelPrims(padNumber: string, netname: string, box: Box, roun
     let tsize = (1.5 * padsize.x) / Math.max(charCount(net) + 1, 5);
     tsize = Math.min(tsize, size) * 0.85;
     if (round) tsize *= 0.9;
-    out.net = labelPrim(net, at(Math.min(tsize * 1.4, yNet)), { x: tsize * LABEL_X_SCALE, y: tsize }, (tsize * LABEL_X_SCALE) / 6, angle, true);
+    out.net = labelPrim(
+      net,
+      at(Math.min(tsize * 1.4, yNet)),
+      { x: tsize * LABEL_X_SCALE, y: tsize },
+      (tsize * LABEL_X_SCALE) / 6,
+      angle,
+      true,
+    );
   }
   if (number) {
     let tsize = (1.5 * padsize.x) / Math.max(charCount(number), 3);
@@ -772,7 +847,14 @@ export function trackLabelPrim(netname: string, a: Vec2, b: Vec2, width: number)
     while (angle <= -90) angle += 180;
   }
   const textSize = width;
-  return labelPrim(netname, { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, { x: textSize * 0.55, y: textSize * 0.55 }, textSize / 12, angle, false);
+  return labelPrim(
+    netname,
+    { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 },
+    { x: textSize * 0.55, y: textSize * 0.55 },
+    textSize / 12,
+    angle,
+    false,
+  );
 }
 
 /** Net name inside a via (layer ids are not drawn). */
@@ -784,7 +866,12 @@ export function viaLabelPrim(netname: string, pos: Vec2, diameter: number): Prim
   return labelPrim(netname, pos, { x: tsize, y: tsize }, tsize / 6, 0, false);
 }
 
-function textPrims(textId: string, t: TextLike | undefined, ctx: BoardAdapterContext, knockout = false): { prims: Primitive[]; cacheKey?: string } {
+function textPrims(
+  textId: string,
+  t: TextLike | undefined,
+  ctx: BoardAdapterContext,
+  knockout = false,
+): { prims: Primitive[]; cacheKey?: string } {
   if (!t) return { prims: [] };
   const shapes = ctx.textShapes?.(textId);
   if (shapes && shapes.length) return { prims: textShapesToPrims(shapes, ctx) };
@@ -864,7 +951,13 @@ export function stripTextBoxBorder(shapes: TextShapesInput, corners: Vec2[]): Te
  * false for table cells, which plot their text only -- `PCB_TABLE` draws every line
  * (`BRDITEMS_PLOTTER::Plot`, case `PCB_TABLE_T`), and a cell's own `border_enabled` is true.
  */
-function textBoxPrims(id: string, tb: TextBoxLike | undefined, ctx: BoardAdapterContext, borderStroke?: StrokeAttributesLike, drawBorder = true): Primitive[] {
+function textBoxPrims(
+  id: string,
+  tb: TextBoxLike | undefined,
+  ctx: BoardAdapterContext,
+  borderStroke?: StrokeAttributesLike,
+  drawBorder = true,
+): Primitive[] {
   if (!tb) return [];
   const corners = textBoxCorners(tb);
   const shapes = ctx.textShapes?.(id);
@@ -925,7 +1018,13 @@ function convertTrack(p: Record<string, unknown>, id: string, o: ConvertOpts, ct
 }
 
 function convertArc(p: Record<string, unknown>, id: string, o: ConvertOpts): RenderItem[] {
-  const prim: Primitive = { kind: 'arc', start: vec(p.start as Vector2Like), mid: vec(p.mid as Vector2Like), end: vec(p.end as Vector2Like), width: dist(p.width as DistanceLike) };
+  const prim: Primitive = {
+    kind: 'arc',
+    start: vec(p.start as Vector2Like),
+    mid: vec(p.mid as Vector2Like),
+    end: vec(p.end as Vector2Like),
+    width: dist(p.width as DistanceLike),
+  };
   return [finish(id, boardLayerName(p.layer as number), [prim], o, { net: netName(p.net as NetLike) })];
 }
 
@@ -955,11 +1054,34 @@ function convertVia(p: Record<string, unknown>, id: string, o: ConvertOpts, ctx:
     const prims: Primitive[] =
       shape === 'PSS_CIRCLE' || shape === 'PSS_UNKNOWN' || !entry
         ? [{ kind: 'circle', c: pos, r, width: 0, fill: true }]
-        : [{ kind: 'polygon', outline: transformPoly(padStackLayerPolygon(entry, ctx), deg(ps.angle), pos), holes: [], fill: true, width: 0 }];
-    out.push(finish(`${id}@${layer}`, layer, prims, o, { net, ref: id, cacheKey: `via|${shape}|${size.x}|${size.y}|${deg(ps.angle)}`, anchor: pos }));
+        : [
+            {
+              kind: 'polygon',
+              outline: transformPoly(padStackLayerPolygon(entry, ctx), deg(ps.angle), pos),
+              holes: [],
+              fill: true,
+              width: 0,
+            },
+          ];
+    out.push(
+      finish(`${id}@${layer}`, layer, prims, o, {
+        net,
+        ref: id,
+        cacheKey: `via|${shape}|${size.x}|${size.y}|${deg(ps.angle)}`,
+        anchor: pos,
+      }),
+    );
   }
   const hole = drillPrims(ps.drill, pos, deg(ps.angle));
-  if (hole.length) out.push(finish(`${id}@hole`, PSEUDO_LAYERS.viaHole, hole, o, { ref: id, pickable: false, cacheKey: `viahole|${nm(ps.drill?.diameter?.xNm)}|${nm(ps.drill?.diameter?.yNm)}`, anchor: pos }));
+  if (hole.length)
+    out.push(
+      finish(`${id}@hole`, PSEUDO_LAYERS.viaHole, hole, o, {
+        ref: id,
+        pickable: false,
+        cacheKey: `viahole|${nm(ps.drill?.diameter?.xNm)}|${nm(ps.drill?.diameter?.yNm)}`,
+        anchor: pos,
+      }),
+    );
   if (net && ctx.labels?.netNames && out.length) {
     const size = vec(padStackEntryFor(ps, viaLayers(ps, copper)[0] ?? 'BL_F_Cu', copper)?.size);
     const label = viaLabelPrim(net, pos, size.x || size.y);
@@ -999,11 +1121,26 @@ function convertPad(p: Record<string, unknown>, id: string, o: ConvertOpts, ctx:
   const hole = drillPrims(ps.drill, pos, angle);
   if (hole.length) {
     const layer = type === 'PT_NPTH' ? PSEUDO_LAYERS.nonPlatedHole : PSEUDO_LAYERS.padPlatedHole;
-    out.push(finish(`${id}@hole`, layer, hole, o, { ref: id, pickable: false, cacheKey: `hole|${nm(ps.drill?.diameter?.xNm)}|${nm(ps.drill?.diameter?.yNm)}|${angle}`, anchor: pos }));
+    out.push(
+      finish(`${id}@hole`, layer, hole, o, {
+        ref: id,
+        pickable: false,
+        cacheKey: `hole|${nm(ps.drill?.diameter?.xNm)}|${nm(ps.drill?.diameter?.yNm)}|${angle}`,
+        anchor: pos,
+      }),
+    );
   }
   if (ctx.labels && labelBox) {
     const labels = padLabelPrims(String(p.number ?? ''), net ?? '', labelBox, labelRound, ctx.labels);
-    if (labels.number) out.push(finish(`${id}@label:number`, PSEUDO_LAYERS.padNumbers, [labels.number], o, { net, ref: id, pickable: false, color: PSEUDO_LAYERS.padNetNames }));
+    if (labels.number)
+      out.push(
+        finish(`${id}@label:number`, PSEUDO_LAYERS.padNumbers, [labels.number], o, {
+          net,
+          ref: id,
+          pickable: false,
+          color: PSEUDO_LAYERS.padNetNames,
+        }),
+      );
     if (labels.net) out.push(finish(`${id}@label:net`, PSEUDO_LAYERS.padNetNames, [labels.net], o, { net, ref: id, pickable: false }));
   }
   return out;
@@ -1027,7 +1164,9 @@ function convertText(p: Record<string, unknown>, id: string, o: ConvertOpts, ctx
 
 function convertTextBox(p: Record<string, unknown>, id: string, o: ConvertOpts, ctx: BoardAdapterContext): RenderItem[] {
   const knockout = knockoutPrims(p, ctx);
-  const prims = knockout.length ? knockout : textBoxPrims(id, p.textbox as TextBoxLike, ctx, p.borderStroke as StrokeAttributesLike | undefined);
+  const prims = knockout.length
+    ? knockout
+    : textBoxPrims(id, p.textbox as TextBoxLike, ctx, p.borderStroke as StrokeAttributesLike | undefined);
   if (!prims.length) return [];
   return [finish(id, boardLayerName(p.layer as number), prims, o)];
 }
@@ -1327,7 +1466,9 @@ function convertImage(p: Record<string, unknown>, id: string, o: ConvertOpts, ct
   const layer = boardLayerName(p.layer as number);
   if (!bytes || !info) {
     const s = 5_000_000;
-    return [finish(id, layer, [{ kind: 'polygon', outline: transformPoly(rectPolygon(s, s), 0, pos), holes: [], fill: false, width: 0 }], o)];
+    return [
+      finish(id, layer, [{ kind: 'polygon', outline: transformPoly(rectPolygon(s, s), 0, pos), holes: [], fill: false, width: 0 }], o),
+    ];
   }
   const w = info.w * pxNm * scale;
   const h = info.h * pxNm * scale;
@@ -1362,7 +1503,17 @@ function convertBarcode(p: Record<string, unknown>, id: string, o: ConvertOpts, 
   for (let i = 0; i < bars; i++) {
     const x = -w / 2 + ((i + 0.5) * w) / bars;
     const bw = (w / bars) * (i % 3 === 0 ? 0.6 : 0.3);
-    prims.push({ kind: 'polygon', outline: transformPoly(rectPolygon(bw, h * 0.8).map((q) => ({ x: q.x + x, y: q.y })), angle, pos), holes: [], fill: true, width: 0 });
+    prims.push({
+      kind: 'polygon',
+      outline: transformPoly(
+        rectPolygon(bw, h * 0.8).map((q) => ({ x: q.x + x, y: q.y })),
+        angle,
+        pos,
+      ),
+      holes: [],
+      fill: true,
+      width: 0,
+    });
   }
   return [finish(id, boardLayerName(p.layer as number), prims, o)];
 }
@@ -1397,12 +1548,26 @@ function convertGridItem(p: Record<string, unknown>, id: string, o: ConvertOpts)
     const ny = sp.y > 0 ? Math.min(200, Math.floor(ext.y / sp.y)) : 0;
     for (let i = 1; i < nx; i++) {
       const x = -ext.x / 2 + i * sp.x;
-      const [a, b] = transformPoly([{ x, y: -ext.y / 2 }, { x, y: ext.y / 2 }], angle, pos) as [Vec2, Vec2];
+      const [a, b] = transformPoly(
+        [
+          { x, y: -ext.y / 2 },
+          { x, y: ext.y / 2 },
+        ],
+        angle,
+        pos,
+      ) as [Vec2, Vec2];
       prims.push({ kind: 'segment', a, b, width: 0 });
     }
     for (let j = 1; j < ny; j++) {
       const y = -ext.y / 2 + j * sp.y;
-      const [a, b] = transformPoly([{ x: -ext.x / 2, y }, { x: ext.x / 2, y }], angle, pos) as [Vec2, Vec2];
+      const [a, b] = transformPoly(
+        [
+          { x: -ext.x / 2, y },
+          { x: ext.x / 2, y },
+        ],
+        angle,
+        pos,
+      ) as [Vec2, Vec2];
       prims.push({ kind: 'segment', a, b, width: 0 });
     }
   } else if (g?.case === 'polar') {
@@ -1469,7 +1634,12 @@ function tableBorderPrims(p: Record<string, unknown>, cells: TableCellLike[], co
   const bl = at(rows - 1, 0);
   const br = at(rows - 1, cols - 1);
   if (strokeEnabled(p.externalBorder as number | string | undefined) && tl && tr && bl && br) {
-    out.push(...strokeSeg(tl[0]!, tr[1]!, border), ...strokeSeg(tr[1]!, br[2]!, border), ...strokeSeg(br[2]!, bl[3]!, border), ...strokeSeg(bl[3]!, tl[0]!, border));
+    out.push(
+      ...strokeSeg(tl[0]!, tr[1]!, border),
+      ...strokeSeg(tr[1]!, br[2]!, border),
+      ...strokeSeg(br[2]!, bl[3]!, border),
+      ...strokeSeg(bl[3]!, tl[0]!, border),
+    );
   }
   return out;
 }

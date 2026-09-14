@@ -70,7 +70,15 @@ export function bboxOf(points: Pt[], pad = 0): StoredItem['bbox'] {
 // ---------------------------------------------------------------------------- board
 
 export function makeTrack(a: Pt, b: Pt, widthNm: number, layer: string, net?: string): StoredItem {
-  const proto = create(TrackSchema, { id: { value: newKiid() }, start: V(a), end: V(b), width: D(widthNm), layer: layerEnum(layer), locked: LockedState.LS_UNLOCKED, net: net ? { name: net } : undefined });
+  const proto = create(TrackSchema, {
+    id: { value: newKiid() },
+    start: V(a),
+    end: V(b),
+    width: D(widthNm),
+    layer: layerEnum(layer),
+    locked: LockedState.LS_UNLOCKED,
+    net: net ? { name: net } : undefined,
+  });
   return stored('KOT_PCB_TRACE', proto, { layer, net, bbox: bboxOf([a, b], widthNm / 2) });
 }
 
@@ -134,7 +142,10 @@ export function geometryPoints(g: ShapeGeometry): Pt[] {
     case 'rect':
       return [g.a, g.b];
     case 'circle':
-      return [{ x: g.c.x - g.r, y: g.c.y - g.r }, { x: g.c.x + g.r, y: g.c.y + g.r }];
+      return [
+        { x: g.c.x - g.r, y: g.c.y - g.r },
+        { x: g.c.x + g.r, y: g.c.y + g.r },
+      ];
     case 'arc':
       return [g.start, g.mid, g.end];
     case 'polygon':
@@ -166,7 +177,18 @@ export function makeBoardText(at: Pt, layer: string, spec: TextSpec): StoredItem
     id: { value: newKiid() },
     layer: layerEnum(layer),
     locked: LockedState.LS_UNLOCKED,
-    text: { text: spec.text, position: V(at), attributes: { size: { xNm: BigInt(size), yNm: BigInt(size) }, strokeWidth: D(spec.thicknessNm ?? Math.round(size * 0.15)), angle: { valueDegrees: spec.angleDeg ?? 0 }, visible: true, horizontalAlignment: 2, verticalAlignment: 2 } },
+    text: {
+      text: spec.text,
+      position: V(at),
+      attributes: {
+        size: { xNm: BigInt(size), yNm: BigInt(size) },
+        strokeWidth: D(spec.thicknessNm ?? Math.round(size * 0.15)),
+        angle: { valueDegrees: spec.angleDeg ?? 0 },
+        visible: true,
+        horizontalAlignment: 2,
+        verticalAlignment: 2,
+      },
+    },
   });
   const w = size * 0.8 * Math.max(1, spec.text.length);
   return stored('KOT_PCB_TEXT', proto, { layer, bbox: { x: at.x - w / 2, y: at.y - size / 2, w, h: size } });
@@ -192,7 +214,10 @@ export function makeZone(pts: Pt[], layers: string[], spec: ZoneSpec = {}): Stor
     border: { style: ZoneBorderStyle.ZBS_DIAGONAL_EDGE, pitch: D(500_000) },
     settings: spec.keepout
       ? { case: 'ruleAreaSettings', value: { keepoutCopper: true, keepoutTracks: true, keepoutVias: true } }
-      : { case: 'copperSettings', value: { net: spec.net ? { name: spec.net } : undefined, clearance: D(spec.clearanceNm ?? 200_000), minThickness: D(spec.minThicknessNm ?? 250_000), fillMode: ZoneFillMode.ZFM_SOLID } },
+      : {
+          case: 'copperSettings',
+          value: { net: spec.net ? { name: spec.net } : undefined, clearance: D(spec.clearanceNm ?? 200_000), minThickness: D(spec.minThicknessNm ?? 250_000), fillMode: ZoneFillMode.ZFM_SOLID },
+        },
   });
   return stored('KOT_PCB_ZONE', proto, { layer: layers[0], net: spec.net, bbox: bboxOf(pts) });
 }
@@ -257,9 +282,23 @@ export function makeFootprintInstance(at: Pt, layer: string, lib: LibraryFootpri
     }
     return moved;
   };
-  const ref = fieldByName('Reference') ?? { name: 'Reference', visible: true, text: { layer: BoardLayer.BL_F_SilkS, text: { text: '', position: V({ x: at.x, y: at.y - 1_500_000 }), attributes: { size: { xNm: 1_000_000n, yNm: 1_000_000n }, strokeWidth: D(150_000), visible: true } } } };
+  const ref = fieldByName('Reference') ?? {
+    name: 'Reference',
+    visible: true,
+    text: {
+      layer: BoardLayer.BL_F_SilkS,
+      text: { text: '', position: V({ x: at.x, y: at.y - 1_500_000 }), attributes: { size: { xNm: 1_000_000n, yNm: 1_000_000n }, strokeWidth: D(150_000), visible: true } },
+    },
+  };
   if (ref.text?.text) ref.text.text.text = reference;
-  const val = fieldByName('Value') ?? { name: 'Value', visible: true, text: { layer: BoardLayer.BL_F_Fab, text: { text: '', position: V({ x: at.x, y: at.y + 1_500_000 }), attributes: { size: { xNm: 1_000_000n, yNm: 1_000_000n }, strokeWidth: D(150_000), visible: true } } } };
+  const val = fieldByName('Value') ?? {
+    name: 'Value',
+    visible: true,
+    text: {
+      layer: BoardLayer.BL_F_Fab,
+      text: { text: '', position: V({ x: at.x, y: at.y + 1_500_000 }), attributes: { size: { xNm: 1_000_000n, yNm: 1_000_000n }, strokeWidth: D(150_000), visible: true } },
+    },
+  };
   if (val.text?.text && value !== undefined) val.text.text.text = value;
   const proto: FootprintInstance = create(FootprintInstanceSchema, {
     id: { value: newKiid() },
@@ -325,7 +364,9 @@ const LABEL_SHAPES: Record<LabelShape, SchematicLabelShape> = {
 };
 
 export function makeLabel(at: Pt, kind: LabelKind, text: string, opts: { shape?: LabelShape; sizeNm?: number; spin?: 'left' | 'up' | 'right' | 'bottom' } = {}): StoredItem {
-  const spin = { left: SchematicLabelSpinStyle.SLSS_LEFT, up: SchematicLabelSpinStyle.SLSS_UP, right: SchematicLabelSpinStyle.SLSS_RIGHT, bottom: SchematicLabelSpinStyle.SLSS_BOTTOM }[opts.spin ?? 'right'];
+  const spin = { left: SchematicLabelSpinStyle.SLSS_LEFT, up: SchematicLabelSpinStyle.SLSS_UP, right: SchematicLabelSpinStyle.SLSS_RIGHT, bottom: SchematicLabelSpinStyle.SLSS_BOTTOM }[
+    opts.spin ?? 'right'
+  ];
   const base = { id: { value: newKiid() }, position: V(at), text: { text, position: V(at), attributes: textAttrs(opts.sizeNm) }, spinStyle: spin, locked: LockedState.LS_UNLOCKED };
   const shape = LABEL_SHAPES[opts.shape ?? 'input'];
   const size = opts.sizeNm ?? TEXT_SIZE;

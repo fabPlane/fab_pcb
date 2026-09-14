@@ -64,9 +64,16 @@ export function orientationFromEnum(v: number | string | undefined | null): Symb
  * counter-clockwise step on screen, 270 = one clockwise), then mirror X (y -> -y, "mirror
  * vertically"), then mirror Y (x -> -x) — the order SCH_SYMBOL::SetOrientation applies them.
  */
-export function symbolTransform(orientation: SymbolOrientation | number | string | undefined, mirrorX = false, mirrorY = false): SymTransform {
+export function symbolTransform(
+  orientation: SymbolOrientation | number | string | undefined,
+  mirrorX = false,
+  mirrorY = false,
+): SymTransform {
   let t: SymTransform = { ...IDENTITY_TRANSFORM };
-  const o = typeof orientation === 'number' && (orientation === 90 || orientation === 180 || orientation === 270 || orientation === 0) ? orientation : orientationFromEnum(orientation);
+  const o =
+    typeof orientation === 'number' && (orientation === 90 || orientation === 180 || orientation === 270 || orientation === 0)
+      ? orientation
+      : orientationFromEnum(orientation);
   if (o === 90) t = composeTransform(ROTATE_CCW, t);
   else if (o === 180) t = composeTransform(ROTATE_CCW, composeTransform(ROTATE_CCW, t));
   else if (o === 270) t = composeTransform(ROTATE_CW, t);

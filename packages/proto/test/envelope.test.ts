@@ -17,7 +17,13 @@ import {
   unpackAnyAs,
 } from "../src/index.js";
 
-const hex = (s: string) => Uint8Array.from(s.replace(/\s+/g, "").match(/../g)!.map((b) => parseInt(b, 16)));
+const hex = (s: string) =>
+  Uint8Array.from(
+    s
+      .replace(/\s+/g, "")
+      .match(/../g)!
+      .map((b) => parseInt(b, 16)),
+  );
 const toHex = (b: Uint8Array) => Buffer.from(b).toString("hex");
 
 // Captured from a working client talking to `kicad-cli api-server` (KiCad 10.99).
@@ -73,7 +79,9 @@ describe("ApiRequest round trip", () => {
     // The hand-rolled M0 client always wrote Any.value, even when empty (`12 00` at the end);
     // protobuf-es omits proto3 default values, so the Any submessage is two bytes shorter (0x30 vs 0x32).
     // Both decode to the same message and KiCad accepts either.
-    const capturedWithoutEmptyValue = toHex(PING_REQUEST).replace(/1200$/, "").replace(/^(0a13.{38})1232/, "$11230");
+    const capturedWithoutEmptyValue = toHex(PING_REQUEST)
+      .replace(/1200$/, "")
+      .replace(/^(0a13.{38})1232/, "$11230");
     expect(toHex(ours)).toBe(capturedWithoutEmptyValue);
     expect(equals(ApiRequestSchema, req, fromBinary(ApiRequestSchema, PING_REQUEST))).toBe(true);
   });

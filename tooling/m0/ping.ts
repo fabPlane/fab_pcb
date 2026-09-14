@@ -23,7 +23,10 @@ const dec = new TextDecoder();
 
 function varint(n: number): number[] {
   const out: number[] = [];
-  while (n > 0x7f) { out.push((n & 0x7f) | 0x80); n >>>= 7; }
+  while (n > 0x7f) {
+    out.push((n & 0x7f) | 0x80);
+    n >>>= 7;
+  }
   out.push(n);
   return out;
 }
@@ -36,7 +39,10 @@ function stringField(field: number, s: string): Uint8Array {
 function concat(...parts: Uint8Array[]): Uint8Array {
   const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
   let o = 0;
-  for (const p of parts) { out.set(p, o); o += p.length; }
+  for (const p of parts) {
+    out.set(p, o);
+    o += p.length;
+  }
   return out;
 }
 
@@ -44,31 +50,62 @@ type Field = { wire: number; varint?: number; bytes?: Uint8Array };
 function decode(buf: Uint8Array): Map<number, Field[]> {
   const fields = new Map<number, Field[]>();
   let i = 0;
-  const readVarint = () => { let r = 0, s = 0, b: number; do { b = buf[i++]; r += (b & 0x7f) * 2 ** s; s += 7; } while (b & 0x80); return r; };
+  const readVarint = () => {
+    let r = 0,
+      s = 0,
+      b: number;
+    do {
+      b = buf[i++];
+      r += (b & 0x7f) * 2 ** s;
+      s += 7;
+    } while (b & 0x80);
+    return r;
+  };
   while (i < buf.length) {
     const key = readVarint();
-    const field = key >>> 3, wire = key & 7;
+    const field = key >>> 3,
+      wire = key & 7;
     let f: Field;
     if (wire === 0) f = { wire, varint: readVarint() };
-    else if (wire === 2) { const len = readVarint(); f = { wire, bytes: buf.subarray(i, i + len) }; i += len; }
-    else if (wire === 1) { i += 8; f = { wire }; }
-    else if (wire === 5) { i += 4; f = { wire }; }
-    else throw new Error(`unsupported wire type ${wire}`);
+    else if (wire === 2) {
+      const len = readVarint();
+      f = { wire, bytes: buf.subarray(i, i + len) };
+      i += len;
+    } else if (wire === 1) {
+      i += 8;
+      f = { wire };
+    } else if (wire === 5) {
+      i += 4;
+      f = { wire };
+    } else throw new Error(`unsupported wire type ${wire}`);
     (fields.get(field) ?? fields.set(field, []).get(field)!).push(f);
   }
   return fields;
 }
 const first = (m: Map<number, Field[]>, n: number) => m.get(n)?.[0];
-const str = (m: Map<number, Field[]>, n: number) => { const f = first(m, n); return f?.bytes ? dec.decode(f.bytes) : ""; };
+const str = (m: Map<number, Field[]>, n: number) => {
+  const f = first(m, n);
+  return f?.bytes ? dec.decode(f.bytes) : "";
+};
 const sub = (m: Map<number, Field[]>, n: number) => decode(first(m, n)?.bytes ?? new Uint8Array());
 
 // ---------- kiapi envelope ----------
 function apiRequest(typeName: string, payload: Uint8Array = new Uint8Array()): Uint8Array {
-  const header = stringField(2, "fp-pcb/m0-ping");                                   // ApiRequestHeader.client_name
+  const header = stringField(2, "fp-pcb/m0-ping"); // ApiRequestHeader.client_name
   const any = concat(stringField(1, `type.googleapis.com/${typeName}`), bytesField(2, payload)); // google.protobuf.Any
-  return concat(bytesField(1, header), bytesField(2, any));                             // ApiRequest
+  return concat(bytesField(1, header), bytesField(2, any)); // ApiRequest
 }
-const STATUS = ["AS_UNKNOWN", "AS_OK", "AS_TIMEOUT", "AS_BAD_REQUEST", "AS_NOT_READY", "AS_UNHANDLED", "AS_TOKEN_MISMATCH", "AS_BUSY", "AS_UNIMPLEMENTED"];
+const STATUS = [
+  "AS_UNKNOWN",
+  "AS_OK",
+  "AS_TIMEOUT",
+  "AS_BAD_REQUEST",
+  "AS_NOT_READY",
+  "AS_UNHANDLED",
+  "AS_TOKEN_MISMATCH",
+  "AS_BUSY",
+  "AS_UNIMPLEMENTED",
+];
 
 // ---------- nng SP transport ----------
 class NngReq {
@@ -115,7 +152,8 @@ class NngReq {
       this.buf = this.buf.subarray(9 + len);
       const id = new DataView(body.buffer, body.byteOffset, 4).getUint32(0);
       if (this.pending && id === this.pending.id) {
-        const p = this.pending; this.pending = null;
+        const p = this.pending;
+        this.pending = null;
         p.resolve(body.subarray(4));
       }
     }
@@ -132,13 +170,28 @@ class NngReq {
     new DataView(frame.buffer).setBigUint64(1, BigInt(body.length));
     frame.set(body, 9);
     return new Promise((resolve, reject) => {
-      const t = setTimeout(() => { this.pending = null; reject(new Error(`timeout after ${timeoutMs} ms`)); }, timeoutMs);
-      this.pending = { id, resolve: (b) => { clearTimeout(t); resolve(b); }, reject: (e) => { clearTimeout(t); reject(e); } };
+      const t = setTimeout(() => {
+        this.pending = null;
+        reject(new Error(`timeout after ${timeoutMs} ms`));
+      }, timeoutMs);
+      this.pending = {
+        id,
+        resolve: (b) => {
+          clearTimeout(t);
+          resolve(b);
+        },
+        reject: (e) => {
+          clearTimeout(t);
+          reject(e);
+        },
+      };
       const n = this.sock.write(frame);
       if (process.env.DEBUG) console.log("sent", n, "/", frame.length, Buffer.from(frame).toString("hex"));
     });
   }
-  close() { this.sock.end(); }
+  close() {
+    this.sock.end();
+  }
 }
 
 // ---------- main ----------
@@ -168,12 +221,13 @@ console.log(`  KiCad ${first(ver, 1)?.varint}.${first(ver, 2)?.varint}.${first(v
 if (boardPath) {
   // OpenDocument{ type = DOCTYPE_PCB (3), path }
   const open = await call("kiapi.common.commands.OpenDocument", concat(Uint8Array.from([0x08, 0x03]), stringField(2, boardPath)));
-  const spec = sub(sub(sub(open, 3), 2), 1);                   // OpenDocumentResponse.document
+  const spec = sub(sub(sub(open, 3), 2), 1); // OpenDocumentResponse.document
   console.log(`  opened: ${str(spec, 4)} in project "${str(sub(spec, 5), 1)}"`);
 }
 // GetOpenDocuments{ type = DOCTYPE_PCB (3) }; answers AS_UNHANDLED when no board is open
 const docs = await call("kiapi.common.commands.GetOpenDocuments", Uint8Array.from([0x08, 0x03]));
-for (const d of sub(sub(docs, 3), 2).get(1) ?? []) {           // GetOpenDocumentsResponse.documents[]
+for (const d of sub(sub(docs, 3), 2).get(1) ?? []) {
+  // GetOpenDocumentsResponse.documents[]
   const spec = decode(d.bytes!);
   const proj = sub(spec, 5);
   console.log(`  open PCB: ${str(spec, 4)}  project "${str(proj, 1)}" at ${str(proj, 2)}`);

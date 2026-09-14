@@ -41,8 +41,15 @@ test.describe("real KiCad: library browser and annotate", () => {
       await waitRevisionAbove(page, r0);
       expect(await countType(page, "KOT_PCB_FOOTPRINT")).toBe(fps0 + 1);
       const placed = await page.evaluate((reference) => {
-        const f = [...(window as any).__fpPcb.services.documents.board().byType("KOT_PCB_FOOTPRINT")].find((x: any) => x.proto.referenceField?.text?.text?.text === reference);
-        return f ? { lib: `${f.proto.definition?.id?.libraryNickname}:${f.proto.definition?.id?.entryName}`, items: f.proto.definition?.items?.length ?? 0 } : null;
+        const f = [...(window as any).__fpPcb.services.documents.board().byType("KOT_PCB_FOOTPRINT")].find(
+          (x: any) => x.proto.referenceField?.text?.text?.text === reference,
+        );
+        return f
+          ? {
+              lib: `${f.proto.definition?.id?.libraryNickname}:${f.proto.definition?.id?.entryName}`,
+              items: f.proto.definition?.items?.length ?? 0,
+            }
+          : null;
       }, reference);
       expect(placed?.lib).toBe("Resistor_SMD:R_0603_1608Metric");
       expect(placed?.items).toBeGreaterThan(1);
@@ -68,7 +75,10 @@ test.describe("real KiCad: library browser and annotate", () => {
     const before = await page.evaluate(() => {
       const d = (window as any).__fpPcb.services.documents;
       const sheet = d.sheet(d.sheets()[0].path);
-      return [...sheet.byType("KOT_SCH_SYMBOL")].map((s: any) => s.proto.referenceField?.text?.text).filter(Boolean).sort();
+      return [...sheet.byType("KOT_SCH_SYMBOL")]
+        .map((s: any) => s.proto.referenceField?.text?.text)
+        .filter(Boolean)
+        .sort();
     });
 
     await runCommand(page, "schematic.annotate");
@@ -86,7 +96,10 @@ test.describe("real KiCad: library browser and annotate", () => {
     const after = await page.evaluate(() => {
       const d = (window as any).__fpPcb.services.documents;
       const sheet = d.sheet(d.sheets()[0].path);
-      return [...sheet.byType("KOT_SCH_SYMBOL")].map((s: any) => s.proto.referenceField?.text?.text).filter(Boolean).sort();
+      return [...sheet.byType("KOT_SCH_SYMBOL")]
+        .map((s: any) => s.proto.referenceField?.text?.text)
+        .filter(Boolean)
+        .sort();
     });
     expect(after.length).toBe(before.length);
     expect(after.every((r: string) => /^[A-Za-z#_]+\d+$/.test(r))).toBe(true);

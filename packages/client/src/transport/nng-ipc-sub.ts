@@ -84,7 +84,8 @@ export class NngIpcSubscriber implements Subscriber {
   /** Resolves when the subscriber is open; rejects if it closes first. */
   ready(): Promise<void> {
     if (this._state === "open") return Promise.resolve();
-    if (this._state === "closed") return Promise.reject(this.lastError ?? new TransportError("closed", `subscriber to ${this.path} is closed`));
+    if (this._state === "closed")
+      return Promise.reject(this.lastError ?? new TransportError("closed", `subscriber to ${this.path} is closed`));
     return new Promise((resolve, reject) => {
       const off = this.onStateChange((s, err) => {
         if (s === "open") (off(), resolve());
@@ -125,7 +126,8 @@ export class NngIpcSubscriber implements Subscriber {
     const parser = new NngFrameParser({ expectPeerProto: SP_PROTO_PUB0, maxFrameBytes: this.maxFrameBytes });
     this.parser = parser;
     const connectTimer = setTimeout(() => {
-      if (this.parser === parser && this._state !== "open") this.fail(parser, new TransportError("connect", `connect to ${this.path} timed out`));
+      if (this.parser === parser && this._state !== "open")
+        this.fail(parser, new TransportError("connect", `connect to ${this.path} timed out`));
     }, this.connectTimeoutMs);
     try {
       const sock = await Bun.connect({
@@ -152,7 +154,8 @@ export class NngIpcSubscriber implements Subscriber {
           },
           close: () => this.fail(parser, new TransportError("closed", `events socket ${this.path} closed by peer`)),
           error: (_s, e) => this.fail(parser, new TransportError("closed", `events socket ${this.path} error: ${String(e)}`, { cause: e })),
-          connectError: (_s, e) => this.fail(parser, new TransportError("connect", `connect to ${this.path} failed: ${String(e)}`, { cause: e })),
+          connectError: (_s, e) =>
+            this.fail(parser, new TransportError("connect", `connect to ${this.path} failed: ${String(e)}`, { cause: e })),
           end: () => this.fail(parser, new TransportError("closed", `events socket ${this.path} ended`)),
         },
       });
@@ -164,7 +167,10 @@ export class NngIpcSubscriber implements Subscriber {
       this.sock = sock;
     } catch (e) {
       clearTimeout(connectTimer);
-      this.fail(parser, e instanceof TransportError ? e : new TransportError("connect", `connect to ${this.path} failed: ${String(e)}`, { cause: e }));
+      this.fail(
+        parser,
+        e instanceof TransportError ? e : new TransportError("connect", `connect to ${this.path} failed: ${String(e)}`, { cause: e }),
+      );
     }
   }
 

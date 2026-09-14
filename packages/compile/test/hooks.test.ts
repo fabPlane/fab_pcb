@@ -37,6 +37,13 @@ function board(log: string[]) {
       log.push("getItems");
       return log.includes("importNetlist") ? [fp] : [];
     },
+    async getPads() {
+      log.push("getPads");
+      if (!log.includes("importNetlist")) return [];
+      // The import spreads the footprint out; the autoplacer brings it to (0.5 mm, 0.5 mm).
+      const placed = log.includes("autoplace");
+      return [{ parent: "fp1", position: { x: placed ? 500_000 : 40_000_000, y: 500_000 } }];
+    },
     async commit(
       message: string,
       fn: (tx: { create: (i: unknown[]) => Promise<unknown[]>; update: (i: unknown[]) => Promise<unknown[]> }) => Promise<unknown>,

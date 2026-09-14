@@ -1,8 +1,36 @@
 import { describe, expect, test } from 'bun:test';
-import { boardItemToRenderItems, dimensionText, graphicShapeToPrims, imageInfo, renderIdToKiid, textFallbackPolygon } from '../src/board/boardAdapter.js';
+import {
+  boardItemToRenderItems,
+  dimensionText,
+  graphicShapeToPrims,
+  imageInfo,
+  renderIdToKiid,
+  textFallbackPolygon,
+} from '../src/board/boardAdapter.js';
 import { BOARD_LAYER_ENUM, boardDrawOrder, boardLayerName, copperLayerList, flipLayer } from '../src/board/boardLayers.js';
 import { boxContains } from '../src/core/model.js';
-import { MM, arc, barcode, circle, d, dimension, footprint, graphic, pad, polySet, rect, seg, syntheticBoard, table, text, textBox, track, v, via, zone } from './fixtures.js';
+import {
+  MM,
+  arc,
+  barcode,
+  circle,
+  d,
+  dimension,
+  footprint,
+  graphic,
+  pad,
+  polySet,
+  rect,
+  seg,
+  syntheticBoard,
+  table,
+  text,
+  textBox,
+  track,
+  v,
+  via,
+  zone,
+} from './fixtures.js';
 import type { StoredItemLike } from '../src/core/host.js';
 
 const L = BOARD_LAYER_ENUM;
@@ -86,7 +114,14 @@ describe('board adapter', () => {
     const p = pad('JP1-1', '1', 5, 5, 0.3, 0.3, { shape: 7, net: 'JUMPER' });
     (p.padStack as { layers: number[] }).layers = [34, 41];
     (p.padStack.copperLayers[0] as Record<string, unknown>).customShapes = [
-      { $typeName: 'kiapi.board.types.BoardGraphicShape', layer: 3, shape: { geometry: { case: 'polygon', value: polySet([[-1, -0.75, 1, 0]]) }, attributes: { stroke: { width: d(0) }, fill: { fillType: 2 } } } },
+      {
+        $typeName: 'kiapi.board.types.BoardGraphicShape',
+        layer: 3,
+        shape: {
+          geometry: { case: 'polygon', value: polySet([[-1, -0.75, 1, 0]]) },
+          attributes: { stroke: { width: d(0) }, fill: { fillType: 2 } },
+        },
+      },
     ];
     const item: StoredItemLike = { id: 'JP1-1', type: 'KOT_PCB_PAD', layer: 'BL_B_Cu', net: 'JUMPER', proto: p };
     const items = boardItemToRenderItems(item, { copperLayers: ['BL_F_Cu', 'BL_B_Cu'] });
@@ -146,13 +181,32 @@ describe('board adapter', () => {
     expect((p1mask.prims[0] as { outline: unknown[] }).outline.length).toBeGreaterThan(4);
     // protobuf-es PolygonWithHoles form
     const items2 = boardItemToRenderItems(footprint('R1', 'R1', 10, 10, 0), {
-      padPolygons: () => [{ outline: { nodes: tri.map((p) => ({ geometry: { case: 'point' as const, value: { xNm: p.x, yNm: p.y } } })) }, holes: [] }],
+      padPolygons: () => [
+        { outline: { nodes: tri.map((p) => ({ geometry: { case: 'point' as const, value: { xNm: p.x, yNm: p.y } } })) }, holes: [] },
+      ],
     });
     expect((items2.find((i) => i.id === 'R1-p1@BL_F_Cu')!.prims[0] as { outline: unknown[] }).outline).toEqual(tri);
   });
 
   test('zone with a hole: filled mesh polygon per layer, outline, net; rule area hatched', () => {
-    const items = boardItemToRenderItems(zone('z', [L.BL_B_Cu!, L.BL_In1_Cu!], [[0, 0], [10, 0], [10, 10], [0, 10]], [[4, 4], [6, 4], [6, 6], [4, 6]]));
+    const items = boardItemToRenderItems(
+      zone(
+        'z',
+        [L.BL_B_Cu!, L.BL_In1_Cu!],
+        [
+          [0, 0],
+          [10, 0],
+          [10, 10],
+          [0, 10],
+        ],
+        [
+          [4, 4],
+          [6, 4],
+          [6, 6],
+          [4, 6],
+        ],
+      ),
+    );
     const fills = items.filter((i) => i.prims[0]!.kind === 'polygon' && (i.prims[0] as { fill: boolean }).fill);
     expect(fills.map((i) => i.layer).sort()).toEqual(['BL_B_Cu', 'BL_In1_Cu']);
     const fill = fills[0]!.prims[0]!;
@@ -168,7 +222,22 @@ describe('board adapter', () => {
     expect(outlines.length).toBe(2);
     expect((outlines[0]!.prims[0] as { fill: boolean; width: number }).fill).toBe(false);
 
-    const ra = boardItemToRenderItems(zone('ra', [L.BL_F_Cu!], [[0, 0], [10, 0], [10, 10], [0, 10]], undefined, false, '', true));
+    const ra = boardItemToRenderItems(
+      zone(
+        'ra',
+        [L.BL_F_Cu!],
+        [
+          [0, 0],
+          [10, 0],
+          [10, 10],
+          [0, 10],
+        ],
+        undefined,
+        false,
+        '',
+        true,
+      ),
+    );
     expect(ra.length).toBe(1);
     const segs = ra[0]!.prims.filter((p) => p.kind === 'segment');
     expect(segs.length).toBeGreaterThan(3); // hatch lines
@@ -198,7 +267,11 @@ describe('board adapter', () => {
     expect(dashed.length).toBeGreaterThan(3);
     expect(dashed.every((p) => p.kind === 'segment')).toBe(true);
     // arrow ending
-    const arrow = graphicShapeToPrims({ attributes: { stroke: { width: { valueNm: 100_000 } } }, geometry: seg(0, 0, 10, 0), endEnding: { style: 2 } });
+    const arrow = graphicShapeToPrims({
+      attributes: { stroke: { width: { valueNm: 100_000 } } },
+      geometry: seg(0, 0, 10, 0),
+      endEnding: { style: 2 },
+    });
     expect(arrow.length).toBe(2);
     expect(arrow[1]!.kind).toBe('polygon');
     // flat-field oneof form also works
@@ -216,7 +289,11 @@ describe('board adapter', () => {
       expect(poly.outline[0]!.x).toBeCloseTo(3 * MM, 0); // left aligned
       expect(poly.outline[2]!.y).toBeCloseTo(28 * MM, 0); // bottom aligned
     }
-    const box = textFallbackPolygon({ position: { xNm: 0, yNm: 0 }, text: 'ab', attributes: { size: { xNm: 1000, yNm: 1000 }, horizontalAlignment: 2, verticalAlignment: 2 } });
+    const box = textFallbackPolygon({
+      position: { xNm: 0, yNm: 0 },
+      text: 'ab',
+      attributes: { size: { xNm: 1000, yNm: 1000 }, horizontalAlignment: 2, verticalAlignment: 2 },
+    });
     expect(box[0]!.x).toBeCloseTo(-box[1]!.x, 6); // centred
     const glyphs = [
       [
@@ -229,7 +306,9 @@ describe('board adapter', () => {
     expect(shaped!.prims).toEqual([{ kind: 'text-shapes', polys: glyphs }]);
     expect(shaped!.cacheKey).toBeUndefined();
     // GetTextAsShapes CompoundShape form (stroke font -> segments)
-    const [stroked] = boardItemToRenderItems(t, { textShapes: () => [{ attributes: { stroke: { width: { valueNm: 1000 } } }, geometry: seg(0, 0, 1, 1) }] });
+    const [stroked] = boardItemToRenderItems(t, {
+      textShapes: () => [{ attributes: { stroke: { width: { valueNm: 1000 } } }, geometry: seg(0, 0, 1, 1) }],
+    });
     expect(stroked!.prims[0]!.kind).toBe('segment');
   });
 
@@ -270,7 +349,12 @@ describe('board adapter', () => {
 
   test('dimension: resolved_text is the plotted string, empty means no text at all', () => {
     // `text.text` is the bare measurement; field 26 carries what the plotter draws
-    const shapes = [{ attributes: { stroke: { width: { valueNm: 150_000 } } }, segment: { start: { xNm: 4 * MM, yNm: -4 * MM }, end: { xNm: 6 * MM, yNm: -4 * MM } } }];
+    const shapes = [
+      {
+        attributes: { stroke: { width: { valueNm: 150_000 } } },
+        segment: { start: { xNm: 4 * MM, yNm: -4 * MM }, end: { xNm: 6 * MM, yNm: -4 * MM } },
+      },
+    ];
     const withGlyphs = (item: ReturnType<typeof dimension>) => boardItemToRenderItems(item, { textShapes: () => shapes as never })[0]!;
 
     const resolved = dimension('d', 0, 0, 10, 0, -3, undefined, { resolvedText: '10.00 mm' });
@@ -315,7 +399,10 @@ describe('board adapter', () => {
   test('knockout text and text boxes are filled from knockout_shapes, with the old drawing as fallback', () => {
     // BoardText.knockout_shapes (field 8) / BoardTextBox.knockout_shapes (field 9): the margin
     // box minus the glyphs, which no amount of GetTextAsShapes glyph strokes can reproduce.
-    const glyph = { attributes: { stroke: { width: { valueNm: 150_000 } } }, segment: { start: { xNm: 11 * MM, yNm: 11 * MM }, end: { xNm: 12 * MM, yNm: 11 * MM } } };
+    const glyph = {
+      attributes: { stroke: { width: { valueNm: 150_000 } } },
+      segment: { start: { xNm: 11 * MM, yNm: 11 * MM }, end: { xNm: 12 * MM, yNm: 11 * MM } },
+    };
     const shapes = () => [glyph] as never;
 
     const ko = text('t', L.BL_F_Cu!, 10, 10, 'Knocked out');
@@ -335,7 +422,10 @@ describe('board adapter', () => {
     // a text box knocks out the box *and its border*, so the border stroke goes too
     const kb = textBox('tb', 10, 10, 20, 15, 'Multiline\nknockout\nbox');
     (kb.proto as Record<string, unknown>).knockout = true;
-    (kb.proto as Record<string, unknown>).knockoutShapes = polySet([[10, 10, 20, 15], [12, 12, 13, 13]]);
+    (kb.proto as Record<string, unknown>).knockoutShapes = polySet([
+      [10, 10, 20, 15],
+      [12, 12, 13, 13],
+    ]);
     const box = boardItemToRenderItems(kb, { textShapes: shapes })[0]!;
     expect(box.prims.length).toBe(2);
     expect(box.prims.every((p) => p.kind === 'polygon' && p.fill)).toBe(true);
@@ -354,7 +444,11 @@ describe('board adapter', () => {
   });
 
   test('misc items: point, group via itemBBox, image header parsing, unknown types', () => {
-    const [pt] = boardItemToRenderItems({ id: 'p', type: 'KOT_PCB_POINT', proto: { position: { xNm: 1000, yNm: 1000 }, size: { valueNm: 200 }, layer: 3 } });
+    const [pt] = boardItemToRenderItems({
+      id: 'p',
+      type: 'KOT_PCB_POINT',
+      proto: { position: { xNm: 1000, yNm: 1000 }, size: { valueNm: 200 }, layer: 3 },
+    });
     expect(pt!.layer).toBe('board.points');
     expect(pt!.prims.length).toBe(3);
     const [grp] = boardItemToRenderItems(
@@ -367,7 +461,11 @@ describe('board adapter', () => {
     const png = new Uint8Array(32);
     png.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52, 0, 0, 1, 0x2c, 0, 0, 0, 0x64]);
     expect(imageInfo(png)).toEqual({ w: 300, h: 100, mime: 'image/png' });
-    const [img] = boardItemToRenderItems({ id: 'i', type: 'KOT_PCB_REFERENCE_IMAGE', proto: { layer: 43, position: { xNm: 0, yNm: 0 }, imageScale: { value: 2 }, imageData: png } });
+    const [img] = boardItemToRenderItems({
+      id: 'i',
+      type: 'KOT_PCB_REFERENCE_IMAGE',
+      proto: { layer: 43, position: { xNm: 0, yNm: 0 }, imageScale: { value: 2 }, imageData: png },
+    });
     expect(img!.prims[0]!.kind).toBe('image');
     if (img!.prims[0]!.kind === 'image') {
       expect(img!.prims[0]!.w).toBeCloseTo(300 * (25.4e6 / 300) * 2, 3);
@@ -412,9 +510,15 @@ describe('board adapter', () => {
       { x: 20 * MM, y: 15 * MM },
       { x: 10 * MM, y: 15 * MM },
     ];
-    const glyph = { attributes: { stroke: { width: { valueNm: 150_000 } } }, segment: { start: { xNm: 11 * MM, yNm: 11 * MM }, end: { xNm: 12 * MM, yNm: 11 * MM } } };
+    const glyph = {
+      attributes: { stroke: { width: { valueNm: 150_000 } } },
+      segment: { start: { xNm: 11 * MM, yNm: 11 * MM }, end: { xNm: 12 * MM, yNm: 11 * MM } },
+    };
     // GetTextAsShapes appends the four box edges whatever border_enabled says
-    const edges = corners.map((c, i) => ({ attributes: { stroke: { width: { valueNm: 150_000 } } }, segment: { start: { xNm: c.x, yNm: c.y }, end: { xNm: corners[(i + 1) % 4]!.x, yNm: corners[(i + 1) % 4]!.y } } }));
+    const edges = corners.map((c, i) => ({
+      attributes: { stroke: { width: { valueNm: 150_000 } } },
+      segment: { start: { xNm: c.x, yNm: c.y }, end: { xNm: corners[(i + 1) % 4]!.x, yNm: corners[(i + 1) % 4]!.y } },
+    }));
     const shapes = [glyph, ...edges];
 
     // no server shapes: only the border rectangle, which stands in for the text
@@ -425,7 +529,9 @@ describe('board adapter', () => {
     const ri = boardItemToRenderItems(box, { textShapes: () => shapes as never })[0]!;
     // the glyph survives; the four edges do not (the border comes from border_stroke instead)
     expect(ri.prims.length).toBe(2);
-    expect(ri.prims.filter((p) => p.kind === 'segment')).toEqual([{ kind: 'segment', a: { x: 11 * MM, y: 11 * MM }, b: { x: 12 * MM, y: 11 * MM }, width: 150_000 }]);
+    expect(ri.prims.filter((p) => p.kind === 'segment')).toEqual([
+      { kind: 'segment', a: { x: 11 * MM, y: 11 * MM }, b: { x: 12 * MM, y: 11 * MM }, width: 150_000 },
+    ]);
     expect(ri.prims[0]!.kind).toBe('polygon'); // the border, from the box corners
 
     // border_enabled false -> nothing but the glyphs once they are real
@@ -445,9 +551,13 @@ describe('board adapter', () => {
     expect(pts[1]!.x).toBeCloseTo(12 * MM, -3);
     expect(pts[1]!.y).toBeCloseTo(8 * MM, -3);
     // the same corners are what a server reply's border edges are matched against
-    const edges = pts.map((c, i) => ({ segment: { start: { xNm: c.x, yNm: c.y }, end: { xNm: pts[(i + 1) % 4]!.x, yNm: pts[(i + 1) % 4]!.y } } }));
+    const edges = pts.map((c, i) => ({
+      segment: { start: { xNm: c.x, yNm: c.y }, end: { xNm: pts[(i + 1) % 4]!.x, yNm: pts[(i + 1) % 4]!.y } },
+    }));
     // a reply that is nothing but those edges leaves no glyphs, so the stand-in outline is kept
-    const withShapes = boardItemToRenderItems(textBox('tb', 10, 10, 20, 16, 'Hi', { angle: 90, border: false }), { textShapes: () => edges as never })[0]!;
+    const withShapes = boardItemToRenderItems(textBox('tb', 10, 10, 20, 16, 'Hi', { angle: 90, border: false }), {
+      textShapes: () => edges as never,
+    })[0]!;
     expect(withShapes.prims.length).toBe(1);
     expect((withShapes.prims[0] as { outline: Array<{ x: number; y: number }> }).outline).toEqual(pts);
   });
@@ -468,7 +578,19 @@ describe('board adapter', () => {
   test('synthetic board converts without errors and covers many layers', () => {
     const all = syntheticBoard().flatMap((it) => boardItemToRenderItems(it));
     const layers = new Set(all.map((i) => i.layer));
-    for (const l of ['BL_F_Cu', 'BL_B_Cu', 'BL_F_SilkS', 'BL_B_SilkS', 'BL_Edge_Cuts', 'BL_F_CrtYd', 'BL_B_CrtYd', 'board.via_hole', 'BL_Dwgs_User', 'BL_Cmts_User', 'BL_F_Fab']) {
+    for (const l of [
+      'BL_F_Cu',
+      'BL_B_Cu',
+      'BL_F_SilkS',
+      'BL_B_SilkS',
+      'BL_Edge_Cuts',
+      'BL_F_CrtYd',
+      'BL_B_CrtYd',
+      'board.via_hole',
+      'BL_Dwgs_User',
+      'BL_Cmts_User',
+      'BL_F_Fab',
+    ]) {
       expect(layers.has(l)).toBe(true);
     }
     expect(all.length).toBeGreaterThan(30);

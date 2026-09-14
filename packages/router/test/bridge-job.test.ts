@@ -31,18 +31,35 @@ describe("persistAppliedRoute", () => {
 
 describe("routeGeometry", () => {
   test("serializes traces, arcs and vias without losing KiCad identity or units", () => {
-    const track = new Track(create(TrackSchema, {
-      id: { value: "track-1" }, start: toVector2({ x: 1, y: 2 }), end: toVector2({ x: 3, y: 4 }),
-      width: toDistance(5), layer: BoardLayer.BL_F_Cu, net: { name: "N", code: { value: 7 } },
-    }));
-    const arc = new Arc(create(ArcSchema, {
-      id: { value: "arc-1" }, start: toVector2({ x: 10, y: 20 }), mid: toVector2({ x: 15, y: 25 }), end: toVector2({ x: 20, y: 20 }),
-      width: toDistance(6), layer: BoardLayer.BL_B_Cu, net: { name: "M", code: { value: 8 } },
-    }));
-    const via = new Via(create(ViaSchema, {
-      id: { value: "via-1" }, position: toVector2({ x: 100, y: 200 }), net: { name: "N", code: { value: 7 } },
-      padStack: { copperLayers: [{ size: toVector2({ x: 20, y: 20 }) }] },
-    }));
+    const track = new Track(
+      create(TrackSchema, {
+        id: { value: "track-1" },
+        start: toVector2({ x: 1, y: 2 }),
+        end: toVector2({ x: 3, y: 4 }),
+        width: toDistance(5),
+        layer: BoardLayer.BL_F_Cu,
+        net: { name: "N", code: { value: 7 } },
+      }),
+    );
+    const arc = new Arc(
+      create(ArcSchema, {
+        id: { value: "arc-1" },
+        start: toVector2({ x: 10, y: 20 }),
+        mid: toVector2({ x: 15, y: 25 }),
+        end: toVector2({ x: 20, y: 20 }),
+        width: toDistance(6),
+        layer: BoardLayer.BL_B_Cu,
+        net: { name: "M", code: { value: 8 } },
+      }),
+    );
+    const via = new Via(
+      create(ViaSchema, {
+        id: { value: "via-1" },
+        position: toVector2({ x: 100, y: 200 }),
+        net: { name: "N", code: { value: 7 } },
+        padStack: { copperLayers: [{ size: toVector2({ x: 20, y: 20 }) }] },
+      }),
+    );
 
     expect(routeGeometry([track, arc, via])).toEqual([
       { kind: "trace", id: "track-1", layer: BoardLayer.BL_F_Cu, net: 7, points: [1, 2, 3, 4], width: 5 },

@@ -77,11 +77,7 @@ export {
 } from "./settings";
 export { FootprintDocument } from "./footprint-doc";
 export { SymbolDocument } from "./symbol-doc";
-export {
-  placeNativeSymbol,
-  type NativeSymbolPlacement,
-  type PlacedNativeSymbol,
-} from "./schematic-authoring";
+export { placeNativeSymbol, type NativeSymbolPlacement, type PlacedNativeSymbol } from "./schematic-authoring";
 export { Commit, type CommitOptions, type CommitResult, type DeleteResult, type ItemInput } from "./commit";
 export { Variants } from "./variants";
 export {

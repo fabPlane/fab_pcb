@@ -3,7 +3,16 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { FilesError, Session, configFromEnv, eventsSocketPathFor, kicadChildEnvironment, resolveInRoot, startBridge, type BridgeServer } from "../src/index";
+import {
+  FilesError,
+  Session,
+  configFromEnv,
+  eventsSocketPathFor,
+  kicadChildEnvironment,
+  resolveInRoot,
+  startBridge,
+  type BridgeServer,
+} from "../src/index";
 import { decodeApiResponse, encodeApiRequest, encodePing } from "../src/kicad-ping";
 
 describe("configFromEnv", () => {
@@ -20,7 +29,10 @@ describe("configFromEnv", () => {
     expect(d.kicadCli).toBe("/x/kicad-cli");
     expect(d.staticDir).toBe("/srv");
     expect(d.maxPayloadBytes).toBe(1024);
-    expect(configFromEnv({ KICAD_SOCKET_TRANSPORT: "ws", KICAD_WS_HOST: "localhost" })).toMatchObject({ socketTransport: "ws", wsHostname: "localhost" });
+    expect(configFromEnv({ KICAD_SOCKET_TRANSPORT: "ws", KICAD_WS_HOST: "localhost" })).toMatchObject({
+      socketTransport: "ws",
+      wsHostname: "localhost",
+    });
     expect(() => configFromEnv({ KICAD_SOCKET_TRANSPORT: "tcp" })).toThrow(/ipc.*ws/);
     expect(() => configFromEnv({ PORT: "abc" })).toThrow();
   });
@@ -28,7 +40,9 @@ describe("configFromEnv", () => {
 
 describe("kicad-ping envelope", () => {
   test("encodes the same bytes as the M0 script", () => {
-    const hex = Array.from(encodePing("kicad-web/m0-ping") /* the M0 capture predates the rename */, (b) => b.toString(16).padStart(2, "0")).join("");
+    const hex = Array.from(encodePing("kicad-web/m0-ping") /* the M0 capture predates the rename */, (b) =>
+      b.toString(16).padStart(2, "0"),
+    ).join("");
     expect(hex).toBe(
       "0a1312116b696361642d7765622f6d302d70696e6712320a2e747970652e676f6f676c65617069732e636f6d2f6b696170692e636f6d6d6f6e2e636f6d6d616e64732e50696e671200",
     );
@@ -112,7 +126,9 @@ describe("bridge HTTP without KiCad", () => {
     await writeFile(join(staticDir, "index.html"), "<h1>app</h1>");
     await mkdir(join(staticDir, "assets"));
     await writeFile(join(staticDir, "assets", "a.js"), "console.log(1)");
-    bridge = await startBridge(configFromEnv({}, { port: 0, kicadCli: "/nonexistent/kicad-cli", staticDir, workspaceRoot: staticDir, log: () => {} }));
+    bridge = await startBridge(
+      configFromEnv({}, { port: 0, kicadCli: "/nonexistent/kicad-cli", staticDir, workspaceRoot: staticDir, log: () => {} }),
+    );
   });
   afterAll(async () => {
     await bridge.stop();

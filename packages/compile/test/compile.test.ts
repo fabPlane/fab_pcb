@@ -49,13 +49,29 @@ interface StubOptions {
   /** What the real import reports. */
   imported?: { errorCount?: number; warningCount?: number; report?: string };
   autoplaceOk?: boolean;
+  /** Which of the added footprints the (stub) autoplacer finds room for; the rest go onto one spot, like KiCad. Default all of them. */
+  autoplaceMoves?: string[];
 }
 
 function board(o: StubOptions = {}): { board: Board; log: string[]; autoplaceArgs: unknown[] } {
   const log: string[] = [];
   const autoplaceArgs: unknown[] = [];
   let footprints = [...(o.existing ?? [])];
+  const placed = new Set<string>();
+  const dumped = new Set<string>();
   const stub = {
+    async getPads() {
+      log.push("getPads");
+      // Two pads per footprint, side by side, spread by the import; a placed footprint sits 5 mm
+      // further along, one the autoplacer had no room for is dumped at the origin with the others.
+      return footprints.flatMap((id, i) => {
+        const x = dumped.has(id) ? 0 : i * 10_000_000 + (placed.has(id) ? 5_000_000 : 0);
+        return [
+          { parent: id, position: { x: x - 500_000, y: 0 } },
+          { parent: id, position: { x: x + 500_000, y: 0 } },
+        ];
+      });
+    },
     async importNetlist(_path: string, opts: { dryRun?: boolean }) {
       if (opts.dryRun) {
         log.push("importNetlist:dry");
@@ -81,6 +97,7 @@ function board(o: StubOptions = {}): { board: Board; log: string[]; autoplaceArg
       log.push("autoplace");
       autoplaceArgs.push(...args);
       const ok = o.autoplaceOk ?? true;
+      if (ok) for (const id of o.adds ?? []) (o.autoplaceMoves?.includes(id) ?? true) ? placed.add(id) : dumped.add(id);
       return {
         result: ok ? AutoplaceResult.APR_COMPLETED : AutoplaceResult.APR_NO_BOARD_OUTLINE,
         placedCount: ok ? (o.adds?.length ?? 0) : 0,
@@ -109,10 +126,31 @@ describe("compile", () => {
     const res = await compile(SOURCE, b, { frontend: frontend(), netlistPath: netlistPath("ok"), autoplace: true, board: spec });
 
     expect(res.ok).toBe(true);
-    expect(log).toEqual(["importNetlist:dry", "getShapes", "commit", "getItems", "importNetlist", "getItems", "autoplace"]);
+    expect(log).toEqual([
+      "importNetlist:dry",
+      "getShapes",
+      "commit",
+      "getItems",
+      "importNetlist",
+      "getItems",
+      "getPads",
+      "autoplace",
+      "getPads",
+    ]);
     expect(autoplaceArgs).toEqual([["fp-r1", "fp-d1"], { includeOffboard: true }]);
     expect(res.counts).toEqual({ components: 2, nets: 1, footprintsAdded: 2, footprintsPlaced: 2, viasAdded: 0, holesAdded: 0 });
     expect(await Bun.file(res.netlistPath!).text()).toContain('(comp (ref "R1")');
+  });
+
+  test("counts placed footprints from their pads, not KiCad's number, and names the ones left stacked (G32)", async () => {
+    const { board: b } = board({ adds: ["fp-r1", "fp-d1", "fp-c1"], autoplaceMoves: ["fp-r1"] });
+    const res = await compile(SOURCE, b, { frontend: frontend(), netlistPath: netlistPath("stacked"), autoplace: true, board: spec });
+
+    expect(res.ok).toBe(true);
+    expect(res.counts.footprintsPlaced).toBe(1);
+    const warning = res.diagnostics.find((d) => d.code === "autoplace_incomplete");
+    expect(warning).toMatchObject({ severity: "warning", stage: "apply" });
+    expect(warning!.message).toContain("2 of 3 imported footprints were not placed");
   });
 
   test("a dry-run error stops before anything changes and carries KiCad's report", async () => {
@@ -256,10 +294,7 @@ describe("compile", () => {
       netlistPath: netlistPath("bad-placement"),
     });
     expect(res.ok).toBe(false);
-    expect(res.diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
-      "bad_placement_position",
-      "unknown_placement_reference",
-    ]);
+    expect(res.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["bad_placement_position", "unknown_placement_reference"]);
     expect(log).toEqual([]);
   });
 });
@@ -306,7 +341,13 @@ describe("reportDiagnostics", () => {
   test("a clean import is silent, whatever the report says", () => {
     expect(reportDiagnostics("Added footprint R1\nAdded footprint D1", 0, 0)).toEqual([]);
     // A blank's free vias draw one "unknown net" warning each; they are not the author's problem.
-    expect(reportDiagnostics("Added R1\nVia connected to unknown net ().\nVia connected to unknown net ().\n\nTotal warnings: 2, errors: 0.", 0, 2)).toEqual([]);
+    expect(
+      reportDiagnostics(
+        "Added R1\nVia connected to unknown net ().\nVia connected to unknown net ().\n\nTotal warnings: 2, errors: 0.",
+        0,
+        2,
+      ),
+    ).toEqual([]);
     const mixed = reportDiagnostics("Via connected to unknown net ().\nSomething else.", 0, 2);
     expect(mixed.map((d) => d.code)).toEqual(["import_warnings"]);
     expect(mixed[0]!.message).toContain("1 warning(s)");

@@ -129,7 +129,9 @@ export async function generate(): Promise<{ data: string; commands: string; rows
       "}",
       "",
     );
-    schemaEntries.push(`  ${r.command}: { request: ${reqSchema}, response: ${resSchema}, info: COMMAND_BY_NAME.get(${JSON.stringify(r.command)})! },`);
+    schemaEntries.push(
+      `  ${r.command}: { request: ${reqSchema}, response: ${resSchema}, info: COMMAND_BY_NAME.get(${JSON.stringify(r.command)})! },`,
+    );
   }
   const commands = [
     header,

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Land a merged upstream sync: once the two pull requests sync.sh opened are merged, tag both repos
-# with the alignment tag the bindings PR recorded, fast-forward the local branches, keep the fork's
-# `master` mirroring `web-api`, and clean up the sync branches and worktree.
+# with the alignment tag the bindings PR recorded, fast-forward the local branches, and clean up
+# the sync branches and worktree.
 #
 # Usage: tooling/upstream-sync/land.sh [YYYY-MM-DD]   (default: today)
 # Env:   KICAD_SRC (default ../kicad), FP_PCB_WEB_HEAD (the merged bindings commit, when neither
@@ -13,7 +13,7 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WEB="$(cd "$HERE/../.." && pwd)"
 KICAD_SRC="${KICAD_SRC:-$(cd "$WEB/../kicad" && pwd)}"
 DATE="${1:-$(date +%Y-%m-%d)}"
-SYNC_BRANCH="web-api-sync-$DATE"
+SYNC_BRANCH="upstream-sync-$DATE"
 WEB_BRANCH="sync/$DATE"
 WT="$WEB/.worktrees/sync-$DATE"
 kg() { git -C "$KICAD_SRC" "$@"; }
@@ -44,18 +44,17 @@ case "$TAG" in fp-pcb/*) ;; *) die "KICAD_TAG at $WEB_HEAD_REF is '$TAG', not an
 
 kg cat-file -e "$FORK_COMMIT^{commit}" 2>/dev/null || die "fork commit $FORK_COMMIT (from KICAD_COMMIT) is not in the fork checkout"
 if kg rev-parse -q --verify "origin/$SYNC_BRANCH" >/dev/null; then
-  kg merge-base --is-ancestor "origin/$SYNC_BRANCH" origin/web-api || die "the fork PR ($SYNC_BRANCH) is not merged into web-api yet" 1
+  kg merge-base --is-ancestor "origin/$SYNC_BRANCH" origin/main || die "the fork PR ($SYNC_BRANCH) is not merged into main yet" 1
 fi
-kg merge-base --is-ancestor "$FORK_COMMIT" origin/web-api || die "fork commit $FORK_COMMIT is not on origin/web-api" 1
+kg merge-base --is-ancestor "$FORK_COMMIT" origin/main || die "fork commit $FORK_COMMIT is not on origin/main" 1
 
 # Tags go on the exact commits that were tested: the fork commit the bindings pin, and the bindings commit.
-kg tag -a "$TAG" "$FORK_COMMIT" -m "web-api synced with upstream KiCad ($DATE); qa_api and the FabPlane PCB suites green" 2>/dev/null || echo "fork already has $TAG"
+kg tag -a "$TAG" "$FORK_COMMIT" -m "main synced with upstream KiCad ($DATE); qa_api and the FabPlane PCB suites green" 2>/dev/null || echo "fork already has $TAG"
 wg tag -a "$TAG" "$WEB_HEAD" -m "aligned with fork $TAG ($FORK_COMMIT)" 2>/dev/null || echo "web already has $TAG"
 kg push -q origin "refs/tags/$TAG" && wg push -q origin "refs/tags/$TAG" || die "could not push the tags"
 
-# Fast-forward local branches; keep the fork's master mirroring web-api.
-kg checkout -q web-api && kg merge -q --ff-only origin/web-api || die "local web-api did not fast-forward"
-kg branch -f master web-api && kg push -q origin master || echo "land: could not fast-forward origin/master (left as is)"
+# Fast-forward the local branches.
+kg checkout -q main && kg merge -q --ff-only origin/main || die "the fork's local main did not fast-forward"
 CUR="$(wg branch --show-current)"
 if [ "$CUR" = "main" ]; then wg merge -q --ff-only origin/main || die "local main did not fast-forward"; else wg fetch -q origin main:main || true; fi
 
@@ -63,4 +62,4 @@ if [ "$CUR" = "main" ]; then wg merge -q --ff-only origin/main || die "local mai
 [ -e "$WT" ] && wg worktree remove --force "$WT"; wg worktree prune
 wg branch -q -D "$WEB_BRANCH" 2>/dev/null; wg push -q origin --delete "$WEB_BRANCH" 2>/dev/null || true
 kg branch -q -D "$SYNC_BRANCH" 2>/dev/null; kg push -q origin --delete "$SYNC_BRANCH" 2>/dev/null || true
-echo "landed $DATE: tagged $TAG on fork $FORK_COMMIT and web $(wg rev-parse --short "$WEB_HEAD"); web-api/master and main are current"
+echo "landed $DATE: tagged $TAG on fork $FORK_COMMIT and web $(wg rev-parse --short "$WEB_HEAD"); main is current on both repos"

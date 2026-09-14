@@ -459,7 +459,16 @@ export function buildGraphics(
       case 'image': {
         const sprite = buildSprite(p, ax, ay);
         if (sprite) host.addChild(sprite);
-        else hairline([{ x: p.c.x - p.w / 2, y: p.c.y - p.h / 2 }, { x: p.c.x + p.w / 2, y: p.c.y - p.h / 2 }, { x: p.c.x + p.w / 2, y: p.c.y + p.h / 2 }, { x: p.c.x - p.w / 2, y: p.c.y + p.h / 2 }], true);
+        else
+          hairline(
+            [
+              { x: p.c.x - p.w / 2, y: p.c.y - p.h / 2 },
+              { x: p.c.x + p.w / 2, y: p.c.y - p.h / 2 },
+              { x: p.c.x + p.w / 2, y: p.c.y + p.h / 2 },
+              { x: p.c.x - p.w / 2, y: p.c.y + p.h / 2 },
+            ],
+            true,
+          );
         break;
       }
       case 'text-glyphs':

@@ -8,7 +8,9 @@ import { clickWorld, expect, haveKicad, openBoard, runCommand, test } from "./fi
 const schRevision = (page: import("@playwright/test").Page): Promise<number> =>
   page.evaluate(async () => Number(await (window as any).__fpPcb.services.documents.schematicDoc.revision()));
 const waitSchRevisionAbove = (page: import("@playwright/test").Page, r: number) =>
-  page.waitForFunction((r) => (window as any).__fpPcb.services.documents.schematicDoc.revision().then((v: bigint) => Number(v) > r), r, { timeout: 30_000 });
+  page.waitForFunction((r) => (window as any).__fpPcb.services.documents.schematicDoc.revision().then((v: bigint) => Number(v) > r), r, {
+    timeout: 30_000,
+  });
 
 test.describe("real KiCad: schematic", () => {
   test.skip(!haveKicad, "set KICAD_CLI to run against a real kicad-cli api-server");
@@ -24,7 +26,11 @@ test.describe("real KiCad: schematic", () => {
     await page.evaluate((k) => (window as any).__fpPcb.host(k).setCamera({ x: 80e6, y: 140e6, zoom: 4e-6 }), rootKey);
     await page.waitForTimeout(300);
     const sheetPath = rootKey.slice("schematic:".length);
-    const count = (type: string) => page.evaluate(({ sheetPath, type }) => [...(window as any).__fpPcb.services.documents.sheet(sheetPath).byType(type)].length, { sheetPath, type });
+    const count = (type: string) =>
+      page.evaluate(({ sheetPath, type }) => [...(window as any).__fpPcb.services.documents.sheet(sheetPath).byType(type)].length, {
+        sheetPath,
+        type,
+      });
 
     await test.step("wire with a 90° bend", async () => {
       const lines0 = await count("KOT_SCH_LINE");
@@ -83,7 +89,9 @@ test.describe("real KiCad: schematic", () => {
     await test.step("run ERC", async () => {
       await page.getByRole("tab", { name: "ERC" }).click();
       await page.locator(".filter-bar button", { hasText: "Run ERC" }).click();
-      await page.waitForFunction(() => document.querySelector("[role=alert]") || document.querySelector(".marker-row"), null, { timeout: 120_000 });
+      await page.waitForFunction(() => document.querySelector("[role=alert]") || document.querySelector(".marker-row"), null, {
+        timeout: 120_000,
+      });
       expect(await page.locator(".marker-row").count()).toBeGreaterThan(0);
     });
   });

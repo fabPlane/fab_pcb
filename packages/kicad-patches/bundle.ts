@@ -2,7 +2,7 @@
 /** Assemble a relocatable FabPlane PCB backend: fork runtime, bridge executable, and libraries. */
 import { cp, mkdir, readdir, rm, stat } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
-import { targetSpec, validateJsAutorouterSource, validateLibraryDirectory } from "./bundle-lib";
+import { findStockData, targetSpec, validateJsAutorouterSource, validateLibraryDirectory, validateRelocatableSymlinks } from "./bundle-lib";
 
 const [target, runtimeArg, footprintsArg, symbolsArg, outputArg] = process.argv.slice(2);
 if (!target || !runtimeArg || !footprintsArg || !symbolsArg || !outputArg) {
@@ -16,9 +16,7 @@ const runtime = resolve(runtimeArg);
 const footprints = resolve(footprintsArg);
 const symbols = resolve(symbolsArg);
 const output = resolve(outputArg);
-const jsAutorouterSource = process.env.FP_PCB_JS_AUTOROUTER_SOURCE
-  ? resolve(process.env.FP_PCB_JS_AUTOROUTER_SOURCE)
-  : null;
+const jsAutorouterSource = process.env.FP_PCB_JS_AUTOROUTER_SOURCE ? resolve(process.env.FP_PCB_JS_AUTOROUTER_SOURCE) : null;
 await validateLibraryDirectory("footprint", footprints);
 await validateLibraryDirectory("symbol", symbols);
 if (jsAutorouterSource) await validateJsAutorouterSource(jsAutorouterSource);
@@ -26,7 +24,9 @@ if (!(await stat(runtime).catch(() => null))?.isDirectory()) throw new Error(`Ki
 
 await rm(output, { recursive: true, force: true });
 await mkdir(join(output, "bin"), { recursive: true });
-await cp(runtime, join(output, "kicad"), { recursive: true, preserveTimestamps: true });
+// fs.cp otherwise rewrites relative runtime links into absolute links back to the
+// CI scratch directory. Materialize link targets so the archive is self-contained.
+await cp(runtime, join(output, "kicad"), { recursive: true, preserveTimestamps: true, dereference: true });
 await cp(footprints, join(output, "libraries", "footprints"), { recursive: true, preserveTimestamps: true });
 await cp(symbols, join(output, "libraries", "symbols"), { recursive: true, preserveTimestamps: true });
 if (jsAutorouterSource) {
@@ -35,6 +35,7 @@ if (jsAutorouterSource) {
   await cp(join(jsAutorouterSource, "package.json"), join(destination, "package.json"), { preserveTimestamps: true });
   await cp(join(jsAutorouterSource, "src"), join(destination, "src"), { recursive: true, preserveTimestamps: true });
 }
+await validateRelocatableSymlinks(output);
 
 const bridge = join(output, "bin", spec.bridgeName);
 const build = Bun.spawn(
@@ -53,6 +54,9 @@ if (await build.exited) throw new Error(`bridge compilation failed for ${spec.bu
 const cli = await findFile(join(output, "kicad"), spec.kicadCliName);
 if (!cli) throw new Error(`${spec.kicadCliName} is absent from ${runtime}`);
 const relativeCli = cli.slice(output.length + 1).replaceAll("\\", "/");
+const stockData = await findStockData(join(output, "kicad"));
+if (!stockData) throw new Error(`KiCad stock data is absent from ${runtime}`);
+const relativeStockData = stockData.slice(output.length + 1).replaceAll("\\", "/");
 await Bun.write(
   join(output, "bundle.json"),
   JSON.stringify(
@@ -60,6 +64,7 @@ await Bun.write(
       format: 1,
       target,
       kicadCli: relativeCli,
+      stockData: relativeStockData,
       bridge: `bin/${spec.bridgeName}`,
       footprints: "libraries/footprints",
       symbols: "libraries/symbols",

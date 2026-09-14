@@ -101,11 +101,24 @@ export const PSEUDO_LAYERS = Object.freeze({
 });
 
 /** Zoom-gated label layers emitted with `BoardAdapterContext.labels` (see BoardCanvasHost.setLabelOptions). */
-export const LABEL_LAYERS: readonly string[] = Object.freeze([PSEUDO_LAYERS.padNumbers, PSEUDO_LAYERS.padNetNames, PSEUDO_LAYERS.trackNetNames, PSEUDO_LAYERS.viaNetNames]);
+export const LABEL_LAYERS: readonly string[] = Object.freeze([
+  PSEUDO_LAYERS.padNumbers,
+  PSEUDO_LAYERS.padNetNames,
+  PSEUDO_LAYERS.trackNetNames,
+  PSEUDO_LAYERS.viaNetNames,
+]);
 
 const FRONT_TECH = ['BL_F_Cu', 'BL_F_Mask', 'BL_F_SilkS', 'BL_F_Paste', 'BL_F_Adhes', 'BL_F_CrtYd', 'BL_F_Fab'];
 const BACK_TECH = ['BL_B_Cu', 'BL_B_Mask', 'BL_B_SilkS', 'BL_B_Paste', 'BL_B_Adhes', 'BL_B_CrtYd', 'BL_B_Fab'];
-const USER_TOP = ['BL_Dwgs_User', 'BL_Cmts_User', 'BL_Eco1_User', 'BL_Eco2_User', 'BL_Edge_Cuts', 'BL_Margin', ...Array.from({ length: 45 }, (_, i) => `BL_User_${i + 1}`)];
+const USER_TOP = [
+  'BL_Dwgs_User',
+  'BL_Cmts_User',
+  'BL_Eco1_User',
+  'BL_Eco2_User',
+  'BL_Edge_Cuts',
+  'BL_Margin',
+  ...Array.from({ length: 45 }, (_, i) => `BL_User_${i + 1}`),
+];
 const HOLES = [PSEUDO_LAYERS.viaHole, PSEUDO_LAYERS.viaHoleWalls, PSEUDO_LAYERS.padPlatedHole, PSEUDO_LAYERS.nonPlatedHole];
 const ALWAYS_TOP = [
   PSEUDO_LAYERS.trackNetNames,

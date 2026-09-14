@@ -111,9 +111,7 @@ export class BusEntry extends Item<BusEntryProto> {
   }
 
   override get type(): KiCadObjectType {
-    return this.proto.type === BusEntryType.BET_BUS_TO_BUS
-      ? KiCadObjectType.KOT_SCH_BUS_BUS_ENTRY
-      : KiCadObjectType.KOT_SCH_BUS_WIRE_ENTRY;
+    return this.proto.type === BusEntryType.BET_BUS_TO_BUS ? KiCadObjectType.KOT_SCH_BUS_BUS_ENTRY : KiCadObjectType.KOT_SCH_BUS_WIRE_ENTRY;
   }
   get position(): Vec2 {
     return this.vec(this.proto.position);

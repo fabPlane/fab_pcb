@@ -140,7 +140,11 @@ export class Overlays {
     if (o.x >= -20 && o.x <= camera.width + 20 && o.y >= -20 && o.y <= camera.height + 20) {
       // origin marker: circle + cross
       g.circle(o.x, o.y, 6).stroke({ width: 1, color, alpha });
-      g.moveTo(o.x - 14, o.y).lineTo(o.x + 14, o.y).moveTo(o.x, o.y - 14).lineTo(o.x, o.y + 14).stroke({ width: 1, color, alpha });
+      g.moveTo(o.x - 14, o.y)
+        .lineTo(o.x + 14, o.y)
+        .moveTo(o.x, o.y - 14)
+        .lineTo(o.x, o.y + 14)
+        .stroke({ width: 1, color, alpha });
     }
     // faint full axes
     if (o.x >= 0 && o.x <= camera.width) g.moveTo(o.x + 0.5, 0).lineTo(o.x + 0.5, camera.height);
@@ -211,8 +215,15 @@ function drawPrimScreen(g: Graphics, p: Primitive, camera: Camera, zoom: number,
     case 'polygon': {
       const pts = p.outline.map(s);
       if (p.fill) {
-        g.poly(pts.flatMap((q) => [q.x, q.y]), true);
-        for (const h of p.holes) g.poly(h.map(s).flatMap((q) => [q.x, q.y]), true).cut();
+        g.poly(
+          pts.flatMap((q) => [q.x, q.y]),
+          true,
+        );
+        for (const h of p.holes)
+          g.poly(
+            h.map(s).flatMap((q) => [q.x, q.y]),
+            true,
+          ).cut();
       } else strokeAsFill(g, [...pts, pts[0]!], W(p.width));
       break;
     }
@@ -220,7 +231,12 @@ function drawPrimScreen(g: Graphics, p: Primitive, camera: Camera, zoom: number,
       strokeAsFill(g, bezierToPolyline(p.p0, p.p1, p.p2, p.p3, 16).map(s), W(p.width));
       break;
     case 'text-shapes':
-      for (const poly of p.polys) if (poly.length >= 3) g.poly(poly.map(s).flatMap((q) => [q.x, q.y]), true);
+      for (const poly of p.polys)
+        if (poly.length >= 3)
+          g.poly(
+            poly.map(s).flatMap((q) => [q.x, q.y]),
+            true,
+          );
       break;
     case 'image': {
       const a = s({ x: p.c.x - p.w / 2, y: p.c.y - p.h / 2 });
@@ -229,7 +245,11 @@ function drawPrimScreen(g: Graphics, p: Primitive, camera: Camera, zoom: number,
       break;
     }
     case 'text-glyphs':
-      if (p.outline.length >= 3) g.poly(p.outline.map(s).flatMap((q) => [q.x, q.y]), true);
+      if (p.outline.length >= 3)
+        g.poly(
+          p.outline.map(s).flatMap((q) => [q.x, q.y]),
+          true,
+        );
       break;
   }
 }

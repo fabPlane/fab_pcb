@@ -1,4 +1,5 @@
-import { readdir, stat } from "node:fs/promises";
+import { lstat, readlink, readdir, stat } from "node:fs/promises";
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 export interface BundleTarget {
   bunTarget: string;
@@ -38,4 +39,36 @@ export async function validateJsAutorouterSource(root: string): Promise<void> {
   if (!(await stat(`${root}/src/index.ts`).catch(() => null))?.isFile()) {
     throw new Error(`js_autorouter entry point not found: ${root}/src/index.ts`);
   }
+}
+
+/** Reject links that will break or escape after the bundle is moved to another machine. */
+export async function validateRelocatableSymlinks(root: string): Promise<void> {
+  const bundleRoot = resolve(root);
+  async function visit(directory: string): Promise<void> {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const path = join(directory, entry.name);
+      const info = await lstat(path);
+      if (info.isSymbolicLink()) {
+        const target = await readlink(path);
+        if (isAbsolute(target)) throw new Error(`non-relocatable absolute symlink: ${path} -> ${target}`);
+        const resolvedTarget = resolve(dirname(path), target);
+        const fromRoot = relative(bundleRoot, resolvedTarget);
+        if (fromRoot === ".." || fromRoot.startsWith(`..${sep}`) || isAbsolute(fromRoot)) {
+          throw new Error(`symlink escapes bundle: ${path} -> ${target}`);
+        }
+        if (!(await stat(path).catch(() => null))) throw new Error(`broken symlink: ${path} -> ${target}`);
+      } else if (info.isDirectory()) {
+        await visit(path);
+      }
+    }
+  }
+  await visit(bundleRoot);
+}
+
+/** Locate KiCad's stock-data root in an installed prefix or a macOS application bundle. */
+export async function findStockData(root: string): Promise<string | null> {
+  for (const candidate of [join(root, "share", "kicad"), join(root, "KiCad.app", "Contents", "SharedSupport")]) {
+    if ((await stat(candidate).catch(() => null))?.isDirectory()) return candidate;
+  }
+  return null;
 }

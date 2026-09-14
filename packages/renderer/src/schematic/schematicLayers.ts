@@ -7,11 +7,42 @@
  */
 
 export type SchLayerKey =
-  | 'wire' | 'bus' | 'junction' | 'busJunction' | 'labelLocal' | 'labelGlobal' | 'labelHier' | 'netclassFlag'
-  | 'pinNumber' | 'pinName' | 'reference' | 'value' | 'fields' | 'ruleArea' | 'device' | 'deviceBackground'
-  | 'note' | 'privateNote' | 'noteBackground' | 'pin' | 'sheet' | 'sheetBackground' | 'sheetName' | 'sheetFilename'
-  | 'sheetFields' | 'sheetLabel' | 'noConnect' | 'dnpMarker' | 'excludedFromSim' | 'hidden' | 'ercWarning' | 'ercError'
-  | 'ercExclusion' | 'anchor' | 'auxItems' | 'bitmaps';
+  | 'wire'
+  | 'bus'
+  | 'junction'
+  | 'busJunction'
+  | 'labelLocal'
+  | 'labelGlobal'
+  | 'labelHier'
+  | 'netclassFlag'
+  | 'pinNumber'
+  | 'pinName'
+  | 'reference'
+  | 'value'
+  | 'fields'
+  | 'ruleArea'
+  | 'device'
+  | 'deviceBackground'
+  | 'note'
+  | 'privateNote'
+  | 'noteBackground'
+  | 'pin'
+  | 'sheet'
+  | 'sheetBackground'
+  | 'sheetName'
+  | 'sheetFilename'
+  | 'sheetFields'
+  | 'sheetLabel'
+  | 'noConnect'
+  | 'dnpMarker'
+  | 'excludedFromSim'
+  | 'hidden'
+  | 'ercWarning'
+  | 'ercError'
+  | 'ercExclusion'
+  | 'anchor'
+  | 'auxItems'
+  | 'bitmaps';
 
 /** Theme key per eeschema SCH_LAYER_ID the adapter emits. */
 export const SCH_LAYERS: Readonly<Record<SchLayerKey, string>> = Object.freeze({
@@ -111,9 +142,23 @@ export function schematicLayerDisplayName(l: string): string {
 // ---------------------------------------------------------------------------
 
 export type SchDefaultKey =
-  | 'lineWidth' | 'wireWidth' | 'busWidth' | 'junctionDiameter' | 'noConnectSize' | 'busEntrySize' | 'textSize'
-  | 'pinLength' | 'pinTextSize' | 'textOffsetRatio' | 'labelSizeRatio' | 'danglingSize' | 'pinTargetRadius'
-  | 'pinTextMargin' | 'directivePinLength' | 'directiveSymbolSize' | 'dnpStroke';
+  | 'lineWidth'
+  | 'wireWidth'
+  | 'busWidth'
+  | 'junctionDiameter'
+  | 'noConnectSize'
+  | 'busEntrySize'
+  | 'textSize'
+  | 'pinLength'
+  | 'pinTextSize'
+  | 'textOffsetRatio'
+  | 'labelSizeRatio'
+  | 'danglingSize'
+  | 'pinTargetRadius'
+  | 'pinTextMargin'
+  | 'directivePinLength'
+  | 'directiveSymbolSize'
+  | 'dnpStroke';
 
 export const MIL = 25_400;
 export const SCH_DEFAULTS: Readonly<Record<SchDefaultKey, number>> = Object.freeze({

@@ -108,7 +108,13 @@ export function wirePenWidth(stored: SchTextAttributesLike | undefined, resolved
   return stored?.bold ? 0 : resolved;
 }
 
-function textMessage(text: string, pos: Vec2, a: TextAttrs, stored: SchTextAttributesLike | undefined, penWidth = wirePenWidth(stored, a.thickness)): RequestText {
+function textMessage(
+  text: string,
+  pos: Vec2,
+  a: TextAttrs,
+  stored: SchTextAttributesLike | undefined,
+  penWidth = wirePenWidth(stored, a.thickness),
+): RequestText {
   return {
     position: { xNm: big(pos.x), yNm: big(pos.y) },
     text,
@@ -147,7 +153,12 @@ type Margins = { marginLeft?: DistanceLike; marginTop?: DistanceLike; marginRigh
  * the schematic API keeps the margins there, while `layOutTextBox` reads them from the
  * `TextBox` message, so they are copied in (the adapter's `textBoxPrims` reads both too).
  */
-function textBoxRequest(key: string, tb: TextBoxLike & { attributes?: SchTextAttributesLike } & Margins, c: Ctx, outer: Margins = {}): SchTextRequest | undefined {
+function textBoxRequest(
+  key: string,
+  tb: TextBoxLike & { attributes?: SchTextAttributesLike } & Margins,
+  c: Ctx,
+  outer: Margins = {},
+): SchTextRequest | undefined {
   if (!tb.text) return undefined;
   const margin = (k: keyof Margins): number => dist(outer[k] ?? tb[k]);
   const size = readTextSize(tb.attributes, c.d);
@@ -185,7 +196,13 @@ function textBoxRequest(key: string, tb: TextBoxLike & { attributes?: SchTextAtt
 // ---------------------------------------------------------------------------
 
 /** A field drawn as stored (labels, sheets, standalone fields), optionally shifted. */
-function plainFieldRequest(key: string, f: SchFieldLike | undefined, c: Ctx, offset?: Vec2, kind: 'field' | 'sheetfile' = 'field'): SchTextRequest | undefined {
+function plainFieldRequest(
+  key: string,
+  f: SchFieldLike | undefined,
+  c: Ctx,
+  offset?: Vec2,
+  kind: 'field' | 'sheetfile' = 'field',
+): SchTextRequest | undefined {
   const text = fieldShownText(f, !!c.ctx.showHiddenFields, kind);
   if (!text || !f?.text) return undefined;
   const a = readTextAttrs(f.text.attributes, c.d);
@@ -197,7 +214,13 @@ function plainFieldRequest(key: string, f: SchFieldLike | undefined, c: Ctx, off
  * measured placement (`GetTextExtents` of the field at its stored position / attributes, the
  * box centre through the symbol transform, drawn centred at the draw rotation).
  */
-export function symbolFieldRequest(key: string, f: SchFieldLike | undefined, t: Parameters<typeof symbolFieldPlacement>[2], origin: Vec2, c: Ctx): SchTextRequest | undefined {
+export function symbolFieldRequest(
+  key: string,
+  f: SchFieldLike | undefined,
+  t: Parameters<typeof symbolFieldPlacement>[2],
+  origin: Vec2,
+  c: Ctx,
+): SchTextRequest | undefined {
   const text = fieldShownText(f, !!c.ctx.showHiddenFields);
   if (!text || !f?.text) return undefined;
   const stored = f.text.attributes;
@@ -212,7 +235,10 @@ export function symbolFieldRequest(key: string, f: SchFieldLike | undefined, t: 
   })();
   const placed = symbolFieldPlacement(a, pos, t, origin, boxPen);
   if (placed.exact) {
-    return textRequest(key, textMessage(text, placed.pos, { ...a, angle: placed.angle, halign: placed.halign, valign: placed.valign }, stored));
+    return textRequest(
+      key,
+      textMessage(text, placed.pos, { ...a, angle: placed.angle, halign: placed.halign, valign: placed.valign }, stored),
+    );
   }
   const measure = textMessage(text, pos, a, stored, dist(stored?.strokeWidth));
   const place = (box: Box): RequestText => {
@@ -231,7 +257,14 @@ function symbolRequests(p: Record<string, unknown>, id: string, c: Ctx): SchText
     for (const which of ['number', 'name'] as const) {
       const lay = l.texts[which];
       if (!lay) continue;
-      const a: TextAttrs = { size: { x: lay.size, y: lay.size }, thickness: lay.thickness, angle: lay.angle, halign: lay.halign, valign: lay.valign, lineSpacing: 1 };
+      const a: TextAttrs = {
+        size: { x: lay.size, y: lay.size },
+        thickness: lay.thickness,
+        angle: lay.angle,
+        halign: lay.halign,
+        valign: lay.valign,
+        lineSpacing: 1,
+      };
       out.push(textRequest(`${id}:pin:${l.pinKiid}:${which}`, textMessage(lay.text, lay.pos, a, undefined, lay.thickness)));
     }
   });
@@ -245,9 +278,16 @@ function symbolRequests(p: Record<string, unknown>, id: string, c: Ctx): SchText
       if (!txt?.text) continue;
       const a = readTextAttrs(txt.attributes, c.d);
       const placed = symbolTextPlacement(a, vec(txt.position), info.t, info.pos);
-      out.push(textRequest(`${id}:text:${d.cid}`, textMessage(txt.text, placed.pos, { ...a, angle: placed.angle, halign: placed.halign, valign: placed.valign }, txt.attributes)));
+      out.push(
+        textRequest(
+          `${id}:text:${d.cid}`,
+          textMessage(txt.text, placed.pos, { ...a, angle: placed.angle, halign: placed.halign, valign: placed.valign }, txt.attributes),
+        ),
+      );
     } else if (d.type === 'KOT_SCH_TEXTBOX') {
-      const tb = symbolTextBoxProto(d.proto, info.t, info.pos).textbox as (TextBoxLike & { attributes?: SchTextAttributesLike }) | undefined;
+      const tb = symbolTextBoxProto(d.proto, info.t, info.pos).textbox as
+        | (TextBoxLike & { attributes?: SchTextAttributesLike })
+        | undefined;
       const r = tb ? textBoxRequest(`${id}:textbox:${d.cid}`, tb, c, d.proto as Margins) : undefined;
       if (r) out.push(r);
     }
@@ -270,7 +310,13 @@ function sheetRequests(p: Record<string, unknown>, id: string, c: Ctx): SchTextR
   return out;
 }
 
-function sheetPinRequest(pin: SchSheetPinLike, index: number, sheetId: string, c: Ctx, vars?: Record<string, string>): SchTextRequest | undefined {
+function sheetPinRequest(
+  pin: SchSheetPinLike,
+  index: number,
+  sheetId: string,
+  c: Ctx,
+  vars?: Record<string, string>,
+): SchTextRequest | undefined {
   const l = sheetPinLayout(pin, index, sheetId, c, vars);
   if (!l.text) return undefined;
   return textRequest(l.key, textMessage(l.text, l.anchor, l.a, pin.text?.attributes));
@@ -308,7 +354,8 @@ export function schematicTextRequests(item: StoredItemLike, ctx: SchematicAdapte
   switch (type) {
     case 'KOT_SCH_TEXT': {
       const t = p.text as SchTextLike | undefined;
-      if (t?.text) push(textRequest(id, textMessage(t.text, vAdd(vec(t.position), SCH_TEXT_OFFSET), readTextAttrs(t.attributes, c.d), t.attributes)));
+      if (t?.text)
+        push(textRequest(id, textMessage(t.text, vAdd(vec(t.position), SCH_TEXT_OFFSET), readTextAttrs(t.attributes, c.d), t.attributes)));
       break;
     }
     case 'KOT_SCH_TEXTBOX': {
@@ -346,13 +393,27 @@ export function schematicTextRequests(item: StoredItemLike, ctx: SchematicAdapte
       break;
     case 'KOT_SCH_PIN': {
       // standalone pin: identity transform, as convertStandalonePin draws it
-      const info = { id, pos: { x: 0, y: 0 }, t: { x1: 1, y1: 0, x2: 0, y2: 1 }, showPinNames: true, showPinNumbers: true, pinNameOffset: 0 };
+      const info = {
+        id,
+        pos: { x: 0, y: 0 },
+        t: { x1: 1, y1: 0, x2: 0, y2: 1 },
+        showPinNames: true,
+        showPinNumbers: true,
+        pinNameOffset: 0,
+      };
       const l = pinLayout({ ...(p as SchPinLike), id: { value: id } }, 0, info, c);
       if (!l) break;
       for (const which of ['number', 'name'] as const) {
         const lay = l.texts[which];
         if (!lay) continue;
-        const a: TextAttrs = { size: { x: lay.size, y: lay.size }, thickness: lay.thickness, angle: lay.angle, halign: lay.halign, valign: lay.valign, lineSpacing: 1 };
+        const a: TextAttrs = {
+          size: { x: lay.size, y: lay.size },
+          thickness: lay.thickness,
+          angle: lay.angle,
+          halign: lay.halign,
+          valign: lay.valign,
+          lineSpacing: 1,
+        };
         push(textRequest(`${id}:pin:${l.pinKiid}:${which}`, textMessage(lay.text, lay.pos, a, undefined, lay.thickness)));
       }
       break;
@@ -371,7 +432,10 @@ export function schematicTextRequests(item: StoredItemLike, ctx: SchematicAdapte
  * (`GetTextExtents`; one round trip per request). Requests that already carry `text` /
  * `textbox` are left alone. Returns the requests that are ready for `GetTextAsShapes`.
  */
-export async function resolveTextRequests(requests: SchTextRequest[], textExtents: (text: RequestText) => Promise<Box>): Promise<SchTextRequest[]> {
+export async function resolveTextRequests(
+  requests: SchTextRequest[],
+  textExtents: (text: RequestText) => Promise<Box>,
+): Promise<SchTextRequest[]> {
   for (const r of requests) {
     if (r.text || r.textbox || !r.measure || !r.place) continue;
     r.text = r.place(await textExtents(r.measure));

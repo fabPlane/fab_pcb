@@ -108,6 +108,37 @@ export async function applyDefaultNetClass(kicad: KiCad, rules: BoardRules): Pro
   return lines;
 }
 
+/**
+ * The `Default` net class into `<project>.kicad_pro` on disk. `SetNetClasses` changes the class the
+ * session holds, but the fork's project save writes `"classes": []` (gap G33), so `kicad-cli pcb drc`
+ * and every other file-based reader judge the board at KiCad's stock 0.2 mm. Called after the job's
+ * save; only the fields the rules name change, other classes and keys stay. `false` when there is no
+ * readable project file.
+ */
+export async function persistNetClassFile(proPath: string, rules: BoardRules): Promise<boolean> {
+  const file = Bun.file(proPath);
+  if (!(await file.exists())) return false;
+  let pro: Record<string, unknown>;
+  try {
+    pro = (await file.json()) as Record<string, unknown>;
+  } catch {
+    return false;
+  }
+  const settings = (pro["net_settings"] ??= {}) as Record<string, unknown>;
+  const classes = (settings["classes"] ??= []) as Array<Record<string, unknown>>;
+  let cls = classes.find((c) => c["name"] === "Default");
+  if (!cls) {
+    cls = { name: "Default", priority: 2147483647 };
+    classes.unshift(cls);
+  }
+  if (rules.clearanceMm !== undefined) cls["clearance"] = rules.clearanceMm;
+  if (rules.trackWidthMm !== undefined) cls["track_width"] = rules.trackWidthMm;
+  if (rules.viaDiameterMm !== undefined) cls["via_diameter"] = rules.viaDiameterMm;
+  if (rules.viaDrillMm !== undefined) cls["via_drill"] = rules.viaDrillMm;
+  await Bun.write(proPath, `${JSON.stringify(pro, null, 2)}\n`);
+  return true;
+}
+
 /** Both halves, for callers with nothing to place afterwards (tests, scripts). */
 export async function applyBoardRules(kicad: KiCad, board: Board, rules: BoardRules): Promise<string[]> {
   await applyBoardConstraints(board, rules);

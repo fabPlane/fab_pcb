@@ -7,34 +7,34 @@ on:
   workflow_dispatch:
 
 concurrency:
+  # Superseded runs are cancelled on every branch, the default one included.  The default branch
+  # used to be exempt to protect the KiCad image build its pushes carried, and that had the
+  # opposite of its intended effect: runs did not supersede, so they queued, and a two-hour build
+  # that was going to time out anyway sat behind another one (run 26 waited two hours to start,
+  # then spent two more failing).  No job here runs longer than a few minutes now, so there is
+  # nothing left to protect and no reason for a stale run to keep a runner.
   group: ci-${{ github.ref }}
-  # Superseding a branch push is the point of this; superseding the default branch is not.  Its
-  # run is the only one that builds and publishes the kicad-cli image, and that takes about an
-  # hour, so cancelling it whenever the next thing merges means it never finishes and every later
-  # run rebuilds KiCad from source.  Let those queue instead.
-  cancel-in-progress: ${{ github.ref_name != github.event.repository.default_branch }}
+  cancel-in-progress: true
 
 env:
-  BUN_VERSION: "1.4.0"
-  # Image with kicad-cli + kifaces built from the fork (packages/kicad-patches/docker). Until the
-  # first image is published to GHCR the kicad-integration job builds it from KICAD_REPO/KICAD_REF.
-  # KICAD_REPO is the fork, not upstream KiCad: KICAD_COMMIT pins a commit that only exists there.
-  KICAD_IMAGE: ghcr.io/${{ github.repository_owner }}/kicad-cli
+  # The fork, not upstream KiCad: packages/proto/KICAD_COMMIT pins a commit that only exists there,
+  # and the fork is also where the prebuilt nightly kicad-cli comes from (see kicad-integration).
   KICAD_REPO: https://github.com/${{ github.repository_owner }}/kicad.git
-  KICAD_REF: web-api
 
 jobs:
   # ----------------------------------------------------------------- unit, typecheck, generated files
   bun:
     name: bun (unit)
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    # Runs in ~1.5 min.  No job here may exceed 10: a hang should cost a tenth of an hour, not a
+    # whole one, and nothing in this workflow legitimately takes that long any more.
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: ${{ env.BUN_VERSION }}
+          bun-version-file: .bun-version
 
       - name: Cache bun install cache
         uses: actions/cache@v4
@@ -46,15 +46,41 @@ jobs:
       - name: Install
         run: bun install --frozen-lockfile
 
+      - name: Resolve the private router pin
+        id: unit-private-router
+        run: echo "commit=$(tr -d '[:space:]' < packages/router/JS_AUTOROUTER_COMMIT)" >> "$GITHUB_OUTPUT"
+
+      - name: Check out the pinned private router for unit tests
+        uses: actions/checkout@v4
+        with:
+          repository: TensorFleet/js_autorouter
+          ref: ${{ steps.unit-private-router.outputs.commit }}
+          path: .ci-private/js_autorouter
+          token: ${{ secrets.JS_AUTOROUTER_READ_TOKEN }}
+          persist-credentials: false
+          sparse-checkout: |
+            package.json
+            src
+          sparse-checkout-cone-mode: false
+
       # gen:check and coverage:check need the KiCad fork's api/proto and C++ handler sources at the
-      # pinned commit. A shallow checkout of that one commit is enough (no build).
-      - name: Check out the KiCad fork at KICAD_COMMIT
+      # pinned commit (no build).  Only those four directories are read, so the checkout is sparse
+      # and blobless: ~5 MB in a few seconds, where the whole tree at depth 1 is ~600 MB, almost
+      # all of it the qa/ fixtures that only the integration job below opens.
+      #
+      # The path list is the one tooling/coverage/run.ts walks (COMMAND_FILES under api/proto,
+      # HANDLER_FILES under common|pcbnew|eeschema/api).  It cannot silently go stale: a source
+      # this misses is a command missing from the matrix, which is exactly the drift coverage:check
+      # fails on.  --filter=blob:none also leaves `git show HEAD:<path>` able to fetch a file from
+      # outside the set on demand, so a new handler directory degrades to slow, not broken.
+      - name: Check out the KiCad fork at KICAD_COMMIT (api sources only)
         run: |
           set -euo pipefail
           commit="$(cat packages/proto/KICAD_COMMIT)"
           git init -q ../kicad
           git -C ../kicad remote add origin "$KICAD_REPO"
-          git -C ../kicad fetch --depth 1 origin "$commit"
+          git -C ../kicad sparse-checkout set --no-cone api/proto common/api pcbnew/api eeschema/api
+          git -C ../kicad fetch --depth 1 --filter=blob:none origin "$commit"
           git -C ../kicad checkout -q FETCH_HEAD
           echo "KICAD_SRC=$(cd ../kicad && pwd)" >> "$GITHUB_ENV"
 
@@ -64,10 +90,17 @@ jobs:
           bun run coverage:check
           bun tooling/coverage/summary.ts --check
 
+      # Green as of "chore: format the repo once so format:check can gate"; before that it was red
+      # on 159 files, which is why it was never wired up here.
+      - name: Formatting
+        run: bun run format:check
+
       - name: Typecheck
         run: bun run typecheck
 
       - name: Unit tests
+        env:
+          JS_AUTOROUTER_MODULE: ${{ github.workspace }}/.ci-private/js_autorouter/src/index.ts
         run: bun run test:unit
 
       - name: Cross-compile bridge entrypoint for desktop targets
@@ -85,18 +118,20 @@ jobs:
             coverage-summary.md
             docs/coverage-badge.json
             docs/api-coverage.md
+          retention-days: 7
 
   # ----------------------------------------------------------------- Playwright smoke (mock services)
   e2e:
     name: e2e (Playwright smoke)
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    # Runs in ~1.2 min; see the bun job on the 10-minute ceiling.
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: ${{ env.BUN_VERSION }}
+          bun-version-file: .bun-version
 
       - name: Cache bun install cache
         uses: actions/cache@v4
@@ -132,8 +167,10 @@ jobs:
           E2E_SERVER: preview
         run: cd e2e && bunx playwright test
 
+      # Only when something failed: a green run's report is never opened, and artifact storage on
+      # a private repository is billed for every day it is kept.
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
           name: playwright-report
           path: |
@@ -143,24 +180,41 @@ jobs:
 
   # ----------------------------------------------------------------- integration against the fork's kicad-cli
   #
-  # Pulls the Linux image with `kicad-cli api-server` from the fork and runs the
-  # *.kicad.test.ts suites with KICAD_CLI pointing at a wrapper that execs into the container.
+  # Downloads the fork's prebuilt nightly `kicad-cli` for the commit in
+  # packages/proto/KICAD_COMMIT and runs the *.kicad.test.ts suites against it.  Whole job: about
+  # three minutes, all of it download and fixtures.
   #
-  # Native compilation belongs to backend-release.yml, keyed by KICAD_COMMIT. Routine CI never
-  # spends hours rebuilding KiCad; a missing immutable image is an actionable release error.
+  # This used to build a Docker image with kicad-cli in it, compiling KiCad from source whenever
+  # the image for the pin was missing from GHCR.  That compile is ~3 h (it reached [1618/2333] in
+  # the two hours it was given before being killed), so it never finished, never published, and ran
+  # again on the next push.  The fork now publishes the same three kifaces as a relocatable archive
+  # from its own nightly workflow -- tools/nightly/README.md over there -- so there is nothing left
+  # for this repository's CI to compile.  packages/kicad-patches/docker still builds the image for
+  # local and macOS work; it is just not on the CI path any more.
+  #
+  # The bundle carries every non-platform library in kicad-cli/lib (RUNPATH $ORIGIN/../lib) and
+  # expects the GTK/GLib/font/GL stack from the host, listed in the fork's
+  # tools/nightly/linux/runtime-packages.txt.  That file is read from the checkout rather than
+  # copied here, so the two cannot drift.
+  #
+  # This job requires the build to be there and fails when it is not.  It does not build one: no
+  # amount of CI time is allowed to turn into a KiCad compile again.  A missing build means the pin
+  # and the fork's releases have drifted apart, which is a thing to fix in one of the two ways the
+  # failure message names -- publish a build for the pin, or move the pin -- not something to paper
+  # over by compiling, and not something to leave as a green run that tested nothing.
   kicad-integration:
-    name: kicad-integration (Docker kicad-cli)
+    name: kicad-integration (nightly kicad-cli)
     runs-on: blacksmith-4vcpu-ubuntu-2404
-    timeout-minutes: 30
+    # ~3 min: fixtures, a ~200 MB download and the suites.  See the bun job on the 10-minute ceiling.
+    timeout-minutes: 10
     permissions:
       contents: read
-      packages: read
     steps:
       - uses: actions/checkout@v4
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: ${{ env.BUN_VERSION }}
+          bun-version-file: .bun-version
 
       - name: Cache bun install cache
         uses: actions/cache@v4
@@ -172,55 +226,242 @@ jobs:
       - name: Install
         run: bun install --frozen-lockfile
 
-      - name: Log in to GHCR
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-        uses: docker/login-action@v3
+      - name: Resolve the private router pin
+        id: private-router
+        run: echo "commit=$(tr -d '[:space:]' < packages/router/JS_AUTOROUTER_COMMIT)" >> "$GITHUB_OUTPUT"
+
+      - name: Check out the pinned private router
+        uses: actions/checkout@v4
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          repository: TensorFleet/js_autorouter
+          ref: ${{ steps.private-router.outputs.commit }}
+          path: .ci-private/js_autorouter
+          token: ${{ secrets.JS_AUTOROUTER_READ_TOKEN }}
+          persist-credentials: false
+          sparse-checkout: |
+            package.json
+            src
+          sparse-checkout-cone-mode: false
 
-      - name: Resolve image tag
-        id: tag
+      - name: Validate the private router package boundary
         run: |
-          commit="$(cat packages/proto/KICAD_COMMIT)"
-          # GHCR rejects a tag whose repository name is not all lowercase, and the owner is not.
-          image="$(printf '%s' "$KICAD_IMAGE" | tr '[:upper:]' '[:lower:]')"
-          echo "commit=$commit" >> "$GITHUB_OUTPUT"
-          echo "tag=${image}:${commit:0:10}" >> "$GITHUB_OUTPUT"
+          bun -e '
+            const pkg = await Bun.file(".ci-private/js_autorouter/package.json").json()
+            if (pkg.name !== "@tensorfleet/js-autorouter" || pkg.private !== true) {
+              throw new Error("unexpected private router package metadata")
+            }
+            if (Object.keys(pkg.dependencies ?? {}).length !== 0) {
+              throw new Error("private router gained runtime dependencies; update packaging explicitly")
+            }
+          '
 
-      - name: Pull the prebuilt image
-        run: |
-          docker pull "${{ steps.tag.outputs.tag }}" || {
-            echo "::error::Pinned KiCad image is missing. Run the Backend release workflow for this branch/commit first."
-            exit 1
-          }
-
-      - name: kicad-cli version
-        run: docker run --rm "${{ steps.tag.outputs.tag }}" version
-
-      # The integration tests spawn `$KICAD_CLI api-server <file> --socket <path>` and expect the
-      # socket to appear on the host, so KICAD_CLI is a wrapper that runs the container with the
-      # host's /tmp/kicad and the checkout mounted at the same paths.
-      - name: Check out the KiCad fork (fixtures) and write the kicad-cli wrapper
+      # The dated release `nightly-<date>-<sha10>` is the one that pins to a commit; the rolling
+      # `nightly` tag moves and would silently test a different KiCad than the matrix and the
+      # generated client were built from.  Match on the sha10 suffix and take no other release.
+      - name: Resolve the nightly build for KICAD_COMMIT
+        id: nightly
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          commit="${{ steps.tag.outputs.commit }}"
+          commit="$(cat packages/proto/KICAD_COMMIT)"
+          sha10="${commit:0:10}"
+          releases="$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${{ github.repository_owner }}/kicad/releases?per_page=100")"
+          tag="$(printf '%s' "$releases" | jq -r --arg s "$sha10" \
+            '.[] | .tag_name | select(startswith("nightly-") and endswith("-" + $s))' | head -1)"
+          # What the fork does publish, so a miss can say so instead of just "not found".
+          newest="$(printf '%s' "$releases" | jq -r \
+            '[.[] | .tag_name | select(startswith("nightly-"))] | sort | reverse | .[0] // ""')"
+          if [ -z "$tag" ]; then
+            {
+              echo "### kicad-integration failed: no kicad-cli for this pin"
+              echo
+              echo "\`packages/proto/KICAD_COMMIT\` is \`$sha10\`, and the fork publishes no"
+              echo "\`nightly-*-$sha10\` release, so there is no kicad-cli to test against."
+              echo
+              echo "The newest build the fork has is \`${newest:-none}\`."
+              echo
+              echo "CI does not build KiCad -- a compile is ~3 h and will not run here. Line the pin"
+              echo "and the releases up instead, either way round:"
+              echo
+              echo "- run the fork's nightly workflow (\`workflow_dispatch\`, \`ref: $sha10\`) to publish a build for this pin, or"
+              echo "- repin \`KICAD_COMMIT\` to the commit that release carries and regenerate (\`bun run gen\`, \`bun run coverage\`)."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error title=no kicad-cli for KICAD_COMMIT::KICAD_COMMIT is $sha10 but the fork's newest build is ${newest:-none}; publish a nightly for this ref or repin"
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "kicad-cli nightly for $sha10: $tag"
+
+      # qa/data holds the fixtures the suites open; tools/nightly/linux carries the host package
+      # list the archive expects.  Blobless and sparse, but qa/data is most of the fork's weight,
+      # so this is ~25 s and there is no point trimming further.
+      - name: Check out the KiCad fork (fixtures and the runtime package list)
+        run: |
+          set -euo pipefail
+          commit="$(cat packages/proto/KICAD_COMMIT)"
           git init -q ../kicad
           git -C ../kicad remote add origin "$KICAD_REPO"
-          git -C ../kicad fetch --depth 1 origin "$commit"
+          git -C ../kicad sparse-checkout set --no-cone qa/data tools/nightly
+          git -C ../kicad fetch --depth 1 --filter=blob:none origin "$commit"
           git -C ../kicad checkout -q FETCH_HEAD
+          echo "KICAD_SRC=$(cd ../kicad && pwd)" >> "$GITHUB_ENV"
+
+      - name: Runtime libraries the bundle expects from the host
+        run: |
+          set -euo pipefail
+          list="$KICAD_SRC/tools/nightly/linux/runtime-packages.txt"
+          test -s "$list"
+          sudo apt-get update -qq
+          # shellcheck disable=SC2046
+          sudo apt-get install -y -qq --no-install-recommends $(grep -v '^#' "$list" | tr '\n' ' ')
+
+      # Prints the launcher's path on stdout; it sets KICAD_STOCK_DATA_HOME and execs bin/kicad-cli,
+      # so the suites can spawn it directly -- no container, so no wrapper and no path mapping.
+      - name: Download the nightly kicad-cli
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
           mkdir -p /tmp/kicad
-          cat > /tmp/kicad-cli <<EOS
-          #!/bin/sh
-          exec docker run --rm -i --user "\$(id -u):\$(id -g)" -e HOME=/tmp \
-            -v /tmp/kicad:/tmp/kicad -v "$(cd .. && pwd):$(cd .. && pwd)" \
-            "${{ steps.tag.outputs.tag }}" "\$@"
-          EOS
-          chmod +x /tmp/kicad-cli
-          echo "KICAD_CLI=/tmp/kicad-cli" >> "$GITHUB_ENV"
+          cli="$(bun tooling/kicad-cli/fetch.ts --tag '${{ steps.nightly.outputs.tag }}')"
+          echo "KICAD_CLI=$cli" >> "$GITHUB_ENV"
+
+      - name: kicad-cli version
+        run: |
+          "$KICAD_CLI" version
+          cat "$(dirname "$KICAD_CLI")/KICAD_COMMIT"
 
       - name: Integration tests
         env:
           KICAD_INTEGRATION_REQUIRED: "1"
+          JS_AUTOROUTER_MODULE: ${{ github.workspace }}/.ci-private/js_autorouter/src/index.ts
         run: bun run test:integration
+
+  # ----------------------------------------------------------------- wasm conformance (released module)
+  #
+  # The module is not built here: an Emscripten build of KiCad's headless core is ~80 minutes and
+  # needs a toolchain this repo does not own.  The KiCad fork builds it on every pushed `fp-pcb/*`
+  # alignment tag (kicad/.github/workflows/wasm-release.yml) and attaches a verified tarball to that
+  # release; this job downloads it and runs the wasm suites against it.
+  #
+  # Green-by-skip is deliberate.  Until the first wasm release is cut there is no asset to fetch, so
+  # the probe below reports `have=false` and every later step is skipped -- the job succeeds and does
+  # not block a PR.  As soon as a release for the tag exists the same job starts gating for real,
+  # with no workflow change.  Which tag: the repository variable KICAD_WASM_RELEASE if it is set,
+  # otherwise packages/proto/KICAD_TAG.
+  #
+  # Auth: the fork is public, so the release is readable with no credentials at all.  The job's own
+  # GITHUB_TOKEN is passed anyway, purely to lift the unauthenticated API rate limit that hosted
+  # runners share an IP for; nothing here needs a repository secret.  If the fork is ever made
+  # private again this stops working -- a repository's GITHUB_TOKEN cannot read another private
+  # repository -- and the fix is a PAT in a secret, passed as GITHUB_TOKEN to the two steps below.
+  # docs/08-wasm.md has the details.
+  wasm:
+    name: wasm (conformance)
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    timeout-minutes: 30
+    env:
+      # Same owner as KICAD_REPO above, in the owner/name form the releases API and
+      # packages/kicad-wasm/scripts/fetch.ts (KICAD_WASM_REPO) both take.
+      KICAD_WASM_REPO: ${{ github.repository_owner }}/kicad
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+
+      - name: Cache bun install cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      # Does a wasm release exist for the tag?  Nothing below runs if it does not.
+      - name: Look for a released wasm build
+        id: release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_VAR: ${{ vars.KICAD_WASM_RELEASE }}
+        run: |
+          set -euo pipefail
+          tag="${TAG_VAR:-$(cat packages/proto/KICAD_TAG)}"
+          asset="kicad-wasm-${tag//\//-}.tar.gz"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "asset=$asset" >> "$GITHUB_OUTPUT"
+          # The release API takes everything after /tags/ as the tag, slashes included.
+          names="$(gh api "repos/$KICAD_WASM_REPO/releases/tags/$tag" --jq '.assets[].name' 2>/dev/null || true)"
+          if printf '%s\n' "$names" | grep -qxF "$asset"; then
+            echo "have=true" >> "$GITHUB_OUTPUT"
+            echo "found $asset on release $tag"
+          else
+            echo "have=false" >> "$GITHUB_OUTPUT"
+            echo "no $asset on release $tag of $KICAD_WASM_REPO -- skipping the wasm suites."
+            echo "Cut one by pushing the alignment tag; the fork's wasm-release workflow builds and attaches it."
+            { echo "### wasm (conformance): skipped"; echo;
+              echo "No \`$asset\` on release \`$tag\` of \`$KICAD_WASM_REPO\` yet."; } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # Downloads the tarball, checks every file against its SHA256SUMS and unpacks kicad_api.{js,
+      # wasm,data} plus the provenance manifest into packages/kicad-wasm/dist.
+      - name: Fetch the released wasm build
+        if: steps.release.outputs.have == 'true'
+        env:
+          # Optional -- see the note above the job.  It only lifts the API rate limit here.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KICAD_WASM_RELEASE: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+          bun run --filter @fp-pcb/kicad-wasm fetch:release
+          dist="$GITHUB_WORKSPACE/packages/kicad-wasm/dist"
+          # The suites below skip themselves when the module is missing, so a fetch that quietly
+          # produced nothing would look like a pass.  Fail here instead.
+          test -f "$dist/kicad_api.js" && test -f "$dist/kicad_api.wasm"
+          echo "KICAD_WASM_DIR=$dist" >> "$GITHUB_ENV"
+
+      # The conformance fixtures are the fork's own qa/data at KICAD_COMMIT (the kitchen-sink board
+      # and schematic, the QA libraries), reached through KICAD_SRC.  Shallow, no build.
+      - name: Check out the KiCad fork at KICAD_COMMIT
+        if: steps.release.outputs.have == 'true'
+        run: |
+          set -euo pipefail
+          commit="$(cat packages/proto/KICAD_COMMIT)"
+          git init -q ../kicad
+          git -C ../kicad remote add origin "$KICAD_REPO"
+          git -C ../kicad fetch --depth 1 origin "$commit"
+          git -C ../kicad checkout -q FETCH_HEAD
+          echo "KICAD_SRC=$(cd ../kicad && pwd)" >> "$GITHUB_ENV"
+
+      # The loader and the two-instances-in-one-process isolation test, straight against the module.
+      - name: kicad-wasm (loader + isolation)
+        if: steps.release.outputs.have == 'true'
+        run: bun test --cwd packages/kicad-wasm
+
+      # The headless command conformance suite over WasmTransport.  KICAD_TRANSPORT picks the backend
+      # inside startKiCad(); the suites themselves are written against RunningKiCad, not a backend.
+      - name: Conformance (wasm)
+        if: steps.release.outputs.have == 'true'
+        env:
+          KICAD_TRANSPORT: wasm
+        run: bun run --cwd packages/client test:conformance
+
+      # The bridge running a session as a module in a Worker, against the real module.
+      - name: Bridge session backend (wasm)
+        if: steps.release.outputs.have == 'true'
+        run: bun test --cwd packages/bridge test/session-wasm.kicad.test.ts
+
+      - name: Provenance of the module that was tested
+        if: always() && steps.release.outputs.have == 'true'
+        run: |
+          { echo "### wasm (conformance)"; echo;
+            echo "Release \`${{ steps.release.outputs.tag }}\` of \`$KICAD_WASM_REPO\`."; echo;
+            echo '```json';
+            cat packages/kicad-wasm/dist/kicad-wasm.json 2>/dev/null || echo '(no manifest in the tarball)';
+            echo '```'; } >> "$GITHUB_STEP_SUMMARY"

@@ -29,7 +29,17 @@ const PREVIEW: Record<'dark' | 'light', Record<string, string>> = {
 
 function previewVars(t: 'dark' | 'light'): CSSProperties {
   const p = PREVIEW[t];
-  return { '--p-app': p.app, '--p-panel': p.panel, '--p-border': p.border, '--p-fg': p.fg, '--p-accent': p.accent, '--p-canvas': p.canvas, '--p-grid': p.grid, '--p-cu-f': p.cuF, '--p-cu-b': p.cuB } as CSSProperties;
+  return {
+    '--p-app': p.app,
+    '--p-panel': p.panel,
+    '--p-border': p.border,
+    '--p-fg': p.fg,
+    '--p-accent': p.accent,
+    '--p-canvas': p.canvas,
+    '--p-grid': p.grid,
+    '--p-cu-f': p.cuF,
+    '--p-cu-b': p.cuB,
+  } as CSSProperties;
 }
 
 function PreviewWindow({ theme, className }: { theme: 'dark' | 'light'; className?: string }) {
@@ -76,7 +86,17 @@ function ThemeSwitch() {
       {THEME_MODES.map((m, i) => {
         const checked = theme === m.id;
         return (
-          <button key={m.id} type="button" role="radio" aria-checked={checked} tabIndex={checked ? 0 : -1} data-mode={m.id} className="seg" onClick={() => setTheme(m.id)} onKeyDown={(e) => onKey(e, i)}>
+          <button
+            key={m.id}
+            type="button"
+            role="radio"
+            aria-checked={checked}
+            tabIndex={checked ? 0 : -1}
+            data-mode={m.id}
+            className="seg"
+            onClick={() => setTheme(m.id)}
+            onKeyDown={(e) => onKey(e, i)}
+          >
             {m.id === 'system' ? (
               <div className="theme-preview-split" aria-hidden>
                 <PreviewWindow theme="light" />

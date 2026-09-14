@@ -1,6 +1,13 @@
 import { describe, expect, test } from 'bun:test';
 import { GraphicsContext, Container } from 'pixi.js';
-import { arcToPolylineFixed, circleSegments, offsetPathPolygon, pointInPolygon, polygonArea, stadiumPolygon } from '../src/core/geometry.js';
+import {
+  arcToPolylineFixed,
+  circleSegments,
+  offsetPathPolygon,
+  pointInPolygon,
+  polygonArea,
+  stadiumPolygon,
+} from '../src/core/geometry.js';
 import { buildGraphics } from '../src/core/scene.js';
 
 const MM = 1_000_000;

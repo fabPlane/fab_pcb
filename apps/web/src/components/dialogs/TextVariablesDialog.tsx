@@ -53,7 +53,12 @@ export function TextVariablesDialog() {
           {draft.map((v, i) => (
             <tr key={i}>
               <td>
-                <input className={`input mono${dupes.has(v.name) ? ' invalid' : ''}`} value={v.name} placeholder="NAME" onChange={(e) => setDraft(draft.map((x, j) => (j === i ? { ...x, name: e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '') } : x)))} />
+                <input
+                  className={`input mono${dupes.has(v.name) ? ' invalid' : ''}`}
+                  value={v.name}
+                  placeholder="NAME"
+                  onChange={(e) => setDraft(draft.map((x, j) => (j === i ? { ...x, name: e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '') } : x)))}
+                />
               </td>
               <td>
                 <input className="input" value={v.value} onChange={(e) => setDraft(draft.map((x, j) => (j === i ? { ...x, value: e.target.value } : x)))} />

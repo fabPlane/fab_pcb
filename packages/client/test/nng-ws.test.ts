@@ -106,7 +106,7 @@ describe("NngWsTransport against a fake REP0 WebSocket server", () => {
     const t = await NngWsTransport.connect(srv.url);
     await Promise.all(Array.from({ length: 5 }, (_, i) => t.send(Uint8Array.from([i]))));
     expect(new Set(ids).size).toBe(5);
-    expect(ids.every((id) => ((id & REQ_ID_FLAG) >>> 0) === REQ_ID_FLAG)).toBe(true);
+    expect(ids.every((id) => (id & REQ_ID_FLAG) >>> 0 === REQ_ID_FLAG)).toBe(true);
     await t.close();
   });
 

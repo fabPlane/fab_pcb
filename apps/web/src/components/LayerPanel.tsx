@@ -37,10 +37,30 @@ export function LayerPanel({ storeKey, layers, theme, counts }: LayerPanelProps)
       title="Layers"
       actions={
         <>
-          <button className="btn ghost sm" onClick={() => setAll(storeKey, layers.map((l) => l.id), true)} title="Show all layers">
+          <button
+            className="btn ghost sm"
+            onClick={() =>
+              setAll(
+                storeKey,
+                layers.map((l) => l.id),
+                true,
+              )
+            }
+            title="Show all layers"
+          >
             all
           </button>
-          <button className="btn ghost sm" onClick={() => setAll(storeKey, layers.filter((l) => l.id !== doc.activeLayer).map((l) => l.id), false)} title="Hide all but the active layer">
+          <button
+            className="btn ghost sm"
+            onClick={() =>
+              setAll(
+                storeKey,
+                layers.filter((l) => l.id !== doc.activeLayer).map((l) => l.id),
+                false,
+              )
+            }
+            title="Hide all but the active layer"
+          >
             only active
           </button>
         </>
@@ -57,7 +77,13 @@ export function LayerPanel({ storeKey, layers, theme, counts }: LayerPanelProps)
                 key={l.id}
                 className={`layer-row${l.id === doc.activeLayer ? ' active' : ''}${isHidden ? ' hidden-layer' : ''}`}
                 onClick={() => setActive(storeKey, l.id)}
-                onDoubleClick={() => setAll(storeKey, layers.filter((x) => x.id !== l.id).map((x) => x.id), false)}
+                onDoubleClick={() =>
+                  setAll(
+                    storeKey,
+                    layers.filter((x) => x.id !== l.id).map((x) => x.id),
+                    false,
+                  )
+                }
                 title={`${l.id}${hotkey(l.id) ? ` — ${hotkey(l.id)}` : ''} · double-click to solo`}
               >
                 <button
