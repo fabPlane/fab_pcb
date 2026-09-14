@@ -26,7 +26,7 @@ jobs:
   # ----------------------------------------------------------------- unit, typecheck, generated files
   bun:
     name: bun (unit)
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     # Runs in ~1.5 min.  No job here may exceed 10: a hang should cost a tenth of an hour, not a
     # whole one, and nothing in this workflow legitimately takes that long any more.
     timeout-minutes: 10
@@ -102,7 +102,7 @@ jobs:
   # ----------------------------------------------------------------- Playwright smoke (mock services)
   e2e:
     name: e2e (Playwright smoke)
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     # Runs in ~1.2 min; see the bun job on the 10-minute ceiling.
     timeout-minutes: 10
     steps:
@@ -183,7 +183,7 @@ jobs:
   # over by compiling, and not something to leave as a green run that tested nothing.
   kicad-integration:
     name: kicad-integration (nightly kicad-cli)
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     # ~3 min: fixtures, a ~200 MB download and the suites.  See the bun job on the 10-minute ceiling.
     timeout-minutes: 10
     permissions:
@@ -310,7 +310,7 @@ jobs:
   # docs/08-wasm.md has the details.
   wasm:
     name: wasm (conformance)
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     timeout-minutes: 30
     env:
       # Same owner as KICAD_REPO above, in the owner/name form the releases API and
