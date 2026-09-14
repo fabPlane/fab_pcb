@@ -1,7 +1,8 @@
 /** Rebuild the generated part of a project's root schematic from the compile netlist. */
 import { clone, create } from "@bufbuild/protobuf";
 import {
-  LocalLabelSchema,
+  GlobalLabelSchema,
+  NoConnectMarkerSchema,
   packAny,
   SchematicSymbolSchema,
   SchematicFieldSchema,
@@ -20,10 +21,13 @@ import {
 } from "@fp-pcb/proto";
 import {
   KiCad,
-  LocalLabel,
+  GlobalLabel,
   mm,
+  mil,
+  NoConnect,
   SchematicLine,
   SchematicSymbol,
+  toDistance,
   toVector2,
   vec2,
   type Item,
@@ -43,6 +47,7 @@ export interface GeneratedSchematic {
   symbolsCreated: number;
   wiresCreated: number;
   labelsCreated: number;
+  noConnectsCreated: number;
 }
 
 export interface GenerateSchematicResult extends GeneratedSchematic {
@@ -52,6 +57,30 @@ export interface GenerateSchematicResult extends GeneratedSchematic {
 function generated<T extends Item>(item: T): T {
   item.setCustomProperty(GENERATED_SCHEMATIC_PROPERTY, GENERATED_SCHEMATIC_VALUE);
   return item;
+}
+
+function generatedLabelField(position: Vec2): SchematicFieldProto {
+  return create(SchematicFieldSchema, {
+    name: GENERATED_SCHEMATIC_PROPERTY,
+    visible: false,
+    allowAutoPlace: true,
+    text: create(TextSchema, { text: GENERATED_SCHEMATIC_VALUE, position: toVector2(position) }),
+  });
+}
+
+function isGeneratedLabel(item: Item): item is GlobalLabel {
+  return (
+    item instanceof GlobalLabel &&
+    item.fields.some((field) => field.name === GENERATED_SCHEMATIC_PROPERTY && field.text === GENERATED_SCHEMATIC_VALUE)
+  );
+}
+
+function positionKey(position: Vec2): string {
+  return `${position.x}:${position.y}`;
+}
+
+function referenceClass(reference: string): string {
+  return reference.match(/^[^0-9?]+/)?.[0] ?? reference.replace(/\?+$/, "");
 }
 
 function positionedField(source: SchematicFieldProto | undefined, name: string, value: string, origin: Vec2): SchematicFieldProto {
@@ -78,6 +107,9 @@ function placedDefinition(source: LibSymbol, origin: Vec2, pins: Map<string, Vec
     if (!pin) continue;
     const relative = vec2(pin.position);
     const absolute = { x: origin.x + relative.x, y: origin.y + relative.y };
+    // Library pin KIIDs belong to the library definition. Each placed instance must receive
+    // independent pin identities from KiCad rather than aliasing pins across repeated symbols.
+    pin.id = undefined;
     pin.position = toVector2(absolute);
     child.item = packAny(SchematicPinSchema, pin);
     if (pin.number) pins.set(`${reference}:${pin.number}`, absolute);
@@ -94,11 +126,12 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
   let symbolsCreated = 0;
   let wiresCreated = 0;
   let labelsCreated = 0;
+  let noConnectsCreated = 0;
 
   for (const [index, component] of netlist.components.entries()) {
     if (!component.libSource) {
       diagnostics.push({
-        severity: "warning",
+        severity: "error",
         stage: "schematic",
         code: "missing_symbol",
         message: `${component.ref}: libSource is required to draw this component in the generated schematic.`,
@@ -109,12 +142,23 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
     const definition = definitions.get(libId);
     if (!definition) {
       diagnostics.push({
-        severity: "warning",
+        severity: "error",
         stage: "schematic",
         code: "unknown_symbol",
         message: `${component.ref}: symbol ${libId} could not be loaded; the board compile is unchanged.`,
       });
       continue;
+    }
+    const symbolReference = definition.proto.referenceField?.text?.text ?? "";
+    const expectedReferenceClass = referenceClass(symbolReference);
+    const actualReferenceClass = referenceClass(component.ref);
+    if (expectedReferenceClass && actualReferenceClass !== expectedReferenceClass) {
+      diagnostics.push({
+        severity: "error",
+        stage: "schematic",
+        code: "symbol_reference_mismatch",
+        message: `${component.ref}: symbol ${libId} declares reference class ${expectedReferenceClass}, not ${actualReferenceClass}; choose a symbol whose electrical function matches the component.`,
+      });
     }
 
     // Keep generated symbols and their labelled stubs on KiCad's default 50 mil grid.
@@ -139,13 +183,14 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
       descriptionField: positionedField(
         definition.proto.descriptionField,
         "Description",
-        component.libSource.description ?? definition.description,
+        component.fields?.Description ?? component.fields?.description ?? "",
         position,
       ),
       unit: create(SchematicSymbolUnitSchema, { unit: 1 }),
       bodyStyle: create(SchematicSymbolBodyStyleSchema, { style: 1 }),
-      showPinNames: true,
-      showPinNumbers: true,
+      showPinNames: definition.proto.showPinNames,
+      showPinNumbers: definition.proto.showPinNumbers,
+      pinNameOffset: definition.proto.pinNameOffset,
       fieldsAutoplaced: false,
       userFields: Object.entries(component.fields ?? {})
         .filter(([name]) => !["Datasheet", "datasheet"].includes(name))
@@ -157,29 +202,35 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
   }
 
   // A labelled stub at every connected pin produces correct KiCad connectivity without routing
-  // long wires through unrelated symbols. Equal local-label text joins all nodes of one net.
+  // long wires through unrelated symbols. Global labels keep the root schematic's net names
+  // identical to the board updater's names instead of path-qualifying them as `/NAME`.
+  const connectedPositions = new Set<string>();
   for (const net of netlist.nets) {
     for (const node of net.nodes) {
       const start = pins.get(`${node.ref}:${node.pin}`);
       if (!start) {
         diagnostics.push({
-          severity: "warning",
+          severity: "error",
           stage: "schematic",
           code: "unknown_symbol_pin",
           message: `${node.ref} pin ${node.pin} (${net.name}) could not be drawn because the symbol or pin is unavailable.`,
         });
         continue;
       }
+      connectedPositions.add(positionKey(start));
       const end = { x: start.x - mm(5.08), y: start.y };
       const wire = generated(
         new SchematicLine(create(SchematicLineSchema, { start: toVector2(start), end: toVector2(end), type: SchematicLineType.SLT_WIRE })),
       );
       const label = generated(
-        new LocalLabel(
-          create(LocalLabelSchema, {
+        new GlobalLabel(
+          create(GlobalLabelSchema, {
             position: toVector2(end),
             text: create(TextSchema, { text: net.name, position: toVector2(end) }),
             spinStyle: SchematicLabelSpinStyle.SLSS_LEFT,
+            // KiCad currently serialises custom properties on global labels but does not return
+            // them through GetItems after reopen. A hidden field is the durable ownership marker.
+            fields: [generatedLabelField(end)],
           }),
         ),
       );
@@ -189,7 +240,45 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
     }
   }
 
-  return { items, diagnostics, symbolsCreated, wiresCreated, labelsCreated };
+  const noConnectPositions = new Set<string>();
+  for (const declaration of netlist.noConnects ?? []) {
+    const position = pins.get(`${declaration.ref}:${declaration.pin}`);
+    if (!position) {
+      diagnostics.push({
+        severity: "error",
+        stage: "schematic",
+        code: "unknown_no_connect_pin",
+        message: `${declaration.ref} pin ${declaration.pin} could not be marked no-connect because the symbol or pin is unavailable.`,
+      });
+      continue;
+    }
+    const key = positionKey(position);
+    if (connectedPositions.has(key)) {
+      diagnostics.push({
+        severity: "error",
+        stage: "schematic",
+        code: "no_connect_on_connected_position",
+        message: `${declaration.ref} pin ${declaration.pin} shares a symbol position with a connected pin and cannot be marked no-connect.`,
+      });
+      continue;
+    }
+    // Stacked symbol pins (common on USB connectors) share one electrical position and need one X.
+    if (noConnectPositions.has(key)) continue;
+    noConnectPositions.add(key);
+    items.push(
+      generated(
+        new NoConnect(
+          create(NoConnectMarkerSchema, {
+            position: toVector2(position),
+            size: toDistance(mil(48)),
+          }),
+        ),
+      ),
+    );
+    noConnectsCreated++;
+  }
+
+  return { items, diagnostics, symbolsCreated, wiresCreated, labelsCreated, noConnectsCreated };
 }
 
 /** Load referenced symbols, replace only our marked root-sheet items, and leave manual work intact. */
@@ -210,8 +299,24 @@ export async function generateSchematic(kicad: KiCad, netlist: Netlist): Promise
     if (definition) definitions.set(libId, definition);
   }
   const generatedItems = buildGeneratedSchematic(netlist, definitions);
-  const oldIds = (await root.getAllItems())
-    .filter((item) => item.customProperties[GENERATED_SCHEMATIC_PROPERTY] === GENERATED_SCHEMATIC_VALUE)
+  const existingItems = await root.getAllItems();
+  const generatedWireEnds = new Set(
+    existingItems
+      .filter(
+        (item): item is SchematicLine =>
+          item instanceof SchematicLine && item.customProperties[GENERATED_SCHEMATIC_PROPERTY] === GENERATED_SCHEMATIC_VALUE,
+      )
+      .map((wire) => positionKey(wire.end)),
+  );
+  const oldIds = existingItems
+    .filter(
+      (item) =>
+        item.customProperties[GENERATED_SCHEMATIC_PROPERTY] === GENERATED_SCHEMATIC_VALUE ||
+        isGeneratedLabel(item) ||
+        // One-time migration for schematics written before global labels had a durable field.
+        // Such labels can only be recovered through their still-marked generated wire endpoint.
+        (item instanceof GlobalLabel && generatedWireEnds.has(positionKey(item.position))),
+    )
     .map((item) => item.id)
     .filter(Boolean);
   if (oldIds.length || generatedItems.items.length) {

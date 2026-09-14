@@ -100,8 +100,36 @@ describe("compile hooks", () => {
         log.push("beforeApply");
       },
     });
-    expect(stages).toEqual(["frontend", "validating", "checking", "outlining", "importing", "placing"]);
+    expect(stages).toEqual(["frontend", "validating", "schematic", "checking", "outlining", "importing", "placing"]);
     expect(log[0]).toBe("beforeApply");
+  });
+
+  test("a pre-apply electrical error fails before any board operation", async () => {
+    const log: string[] = [];
+    const b = board(log);
+    const res = await compile(SOURCE, b as unknown as Board, {
+      frontend,
+      netlistPath: await netlistPath(),
+      beforeApply: async () => [{ severity: "error", stage: "schematic", code: "erc_errors", message: "ERC failed" }],
+    });
+    expect(res.ok).toBe(false);
+    expect(res.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["erc_errors"]);
+    expect(log).toEqual([]);
+  });
+
+  test("a post-update parity error fails the compile", async () => {
+    const log: string[] = [];
+    const b = board(log);
+    const stages: CompileStageName[] = [];
+    const res = await compile(SOURCE, b as unknown as Board, {
+      frontend,
+      netlistPath: await netlistPath(),
+      onStage: (stage) => stages.push(stage),
+      afterApply: async () => [{ severity: "error", stage: "apply", code: "schematic_parity", message: "board and schematic differ" }],
+    });
+    expect(res.ok).toBe(false);
+    expect(res.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["schematic_parity"]);
+    expect(stages.at(-1)).toBe("parity");
   });
 
   test("aborting between stages throws CompileCancelled and stops the board work", async () => {
@@ -135,9 +163,10 @@ describe("compile hooks", () => {
     expect(await insetOutline(b as unknown as Board, ["fp1"], 500_000)).toBeNull();
   });
 
-  test("a pre-existing outline is not moved: the compile reports edge_clearance_unchecked", async () => {
+  test("a differing user-authored outline fails closed instead of ignoring source dimensions", async () => {
     const log: string[] = [];
     const b = board(log);
+    for (const edge of b.edges) edge.setCustomProperty("fp-pcb.generated-outline", undefined);
     const res = await compile(SOURCE, b as unknown as Board, {
       frontend,
       netlistPath: await netlistPath(),
@@ -145,8 +174,23 @@ describe("compile hooks", () => {
       edgeMarginNm: 500_000,
       board: { widthMm: 20, heightMm: 10 },
     });
-    expect(res.ok).toBe(true);
-    expect(res.diagnostics.map((d) => d.code)).toEqual(["edge_clearance_unchecked"]);
+    expect(res.ok).toBe(false);
+    expect(res.diagnostics.map((d) => d.code)).toEqual(["outline_conflict"]);
+    expect(log.filter((l) => l.startsWith("commit:"))).toEqual([]);
+  });
+
+  test("a partially owned generated outline fails closed instead of duplicating its contour", async () => {
+    const log: string[] = [];
+    const b = board(log);
+    b.edges.pop();
+    const res = await compile(SOURCE, b as unknown as Board, {
+      frontend,
+      netlistPath: await netlistPath(),
+      autoplace: true,
+      board: { widthMm: 20, heightMm: 10 },
+    });
+    expect(res.ok).toBe(false);
+    expect(res.diagnostics.map((d) => d.code)).toEqual(["outline_conflict"]);
     expect(log.filter((l) => l.startsWith("commit:"))).toEqual([]);
   });
 

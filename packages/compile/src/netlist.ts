@@ -107,6 +107,7 @@ export function validateNetlist(netlist: Netlist): Diagnostic[] {
   }
 
   const netNames = new Set<string>();
+  const connectedPins = new Map<string, string>();
   for (const net of netlist.nets) {
     if (!net.name) {
       err("Net with no name.", "unnamed_net");
@@ -129,7 +130,22 @@ export function validateNetlist(netlist: Netlist): Diagnostic[] {
     }
     for (const n of net.nodes) {
       if (!seen.has(n.ref)) err(`Net ${net.name} references unknown component ${n.ref}.`, "unknown_ref");
+      const pin = `${n.ref}:${n.pin}`;
+      const priorNet = connectedPins.get(pin);
+      if (priorNet && priorNet !== net.name)
+        err(`${n.ref} pin ${n.pin} belongs to both ${priorNet} and ${net.name}.`, "pin_in_multiple_nets");
+      else connectedPins.set(pin, net.name);
     }
+  }
+
+  const noConnectPins = new Set<string>();
+  for (const n of netlist.noConnects ?? []) {
+    const pin = `${n.ref}:${n.pin}`;
+    if (!seen.has(n.ref)) err(`No-connect references unknown component ${n.ref}.`, "unknown_no_connect_ref");
+    if (noConnectPins.has(pin)) err(`Duplicate no-connect declaration for ${n.ref} pin ${n.pin}.`, "duplicate_no_connect");
+    noConnectPins.add(pin);
+    const net = connectedPins.get(pin);
+    if (net) err(`${n.ref} pin ${n.pin} is both on net ${net} and marked no-connect.`, "connected_no_connect");
   }
 
   return diagnostics;

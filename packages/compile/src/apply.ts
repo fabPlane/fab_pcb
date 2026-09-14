@@ -7,7 +7,9 @@
  *
  *   1. `ImportNetlist` with `dryRun`. It resolves every footprint against the real `fp-lib-table`,
  *      which `validateNetlist` cannot. Any error stops here and the board is untouched.
- *   2. The outline commit, when the board has none. It must come before placing:
+ *   2. Outline reconciliation. A missing outline is created, a compiler-owned outline is updated
+ *      from changed source dimensions, and a conflicting user-authored outline is rejected. This
+ *      must happen before placing:
  *      `AutoplaceFootprints` answers `APR_NO_BOARD_OUTLINE` without one — the outline *is* the
  *      placement box; there is no bounding-box parameter.
  *   3. `ImportNetlist` for real. Headless KiCad spreads the new footprints from the origin
@@ -54,6 +56,9 @@ import { hasErrors, type BoardSpec, type Diagnostic, type MatchMode, type Netlis
 
 export type ApplyStage = "checking" | "outlining" | "importing" | "placing";
 
+export const GENERATED_OUTLINE_PROPERTY = "fp-pcb.generated-outline";
+const GENERATED_OUTLINE_VALUE = "circuit.netlist.json";
+
 export interface ApplyOptions extends EmitOptions {
   /** Where the netlist is written, on our filesystem. */
   netlistPath: string;
@@ -88,6 +93,17 @@ export interface ApplyOptions extends EmitOptions {
   edgeMarginNm?: number;
   /** Commit message for the outline commit, shown in KiCad's undo history. */
   message?: string;
+  /**
+   * Override the board netlist updater. The bridge supplies the open schematic's
+   * `SyncSchematicToBoard` operation so its saved electrical design, rather than a sibling export,
+   * is authoritative. Other callers retain the file-based `ImportNetlist` default.
+   */
+  updateBoard?: (opts: {
+    dryRun?: boolean;
+    matchMode: MatchMode;
+    deleteExtraFootprints: boolean;
+    updateFootprints: boolean;
+  }) => Promise<{ errorCount: number; warningCount: number; newFootprintCount: number; report: string }>;
 }
 
 export interface ApplyOutcome {
@@ -134,13 +150,168 @@ export async function hasOutline(board: Board): Promise<boolean> {
 export function outlineItems(points: readonly Vec2[]): BoardShape[] {
   return points.map((start, i) => {
     const end = points[(i + 1) % points.length]!;
-    return new BoardShape(
+    const shape = new BoardShape(
       create(BoardGraphicShapeSchema, {
         layer: BoardLayer.BL_Edge_Cuts,
         shape: { geometry: { case: "segment", value: { start: toVector2(start), end: toVector2(end) } } },
       }),
     );
+    shape.setCustomProperty(GENERATED_OUTLINE_PROPERTY, GENERATED_OUTLINE_VALUE);
+    return shape;
   });
+}
+
+function pointKey(point: Vec2): string {
+  return `${point.x},${point.y}`;
+}
+
+function segmentKey(a: Vec2, b: Vec2): string {
+  const first = pointKey(a);
+  const second = pointKey(b);
+  return first < second ? `${first}|${second}` : `${second}|${first}`;
+}
+
+function segmentCounts(edges: readonly BoardShape[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const key of edges
+    .map((edge) => edge.proto.shape?.geometry)
+    .filter((geometry) => geometry?.case === "segment")
+    .map((geometry) => segmentKey(vec2(geometry.value.start), vec2(geometry.value.end))))
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  return counts;
+}
+
+function expectedSegmentCounts(points: readonly Vec2[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  points.forEach((start, index) => {
+    const key = segmentKey(start, points[(index + 1) % points.length]!);
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  });
+  return counts;
+}
+
+function outlineMatches(edges: readonly BoardShape[], points: readonly Vec2[]): boolean {
+  const actual = segmentCounts(edges);
+  const expected = expectedSegmentCounts(points);
+  return actual.size === expected.size && [...expected].every(([key, count]) => actual.get(key) === count);
+}
+
+/** True only for one complete segment loop; rejects partial ownership and multiple contours. */
+function isSingleClosedContour(edges: readonly BoardShape[]): boolean {
+  const adjacency = new Map<string, Set<string>>();
+  const neighborsFor = (point: string): Set<string> => {
+    const existing = adjacency.get(point);
+    if (existing) return existing;
+    const created = new Set<string>();
+    adjacency.set(point, created);
+    return created;
+  };
+  let segmentCount = 0;
+  for (const edge of edges) {
+    const geometry = edge.proto.shape?.geometry;
+    if (geometry?.case !== "segment") continue;
+    const start = pointKey(vec2(geometry.value.start));
+    const end = pointKey(vec2(geometry.value.end));
+    if (start === end) return false;
+    neighborsFor(start).add(end);
+    neighborsFor(end).add(start);
+    segmentCount++;
+  }
+  if (segmentCount < 3 || [...adjacency.values()].some((neighbors) => neighbors.size !== 2)) return false;
+  const first = adjacency.keys().next().value as string | undefined;
+  if (!first) return false;
+  const seen = new Set([first]);
+  const pending = [first];
+  while (pending.length) {
+    for (const neighbor of adjacency.get(pending.pop()!) ?? []) {
+      if (seen.has(neighbor)) continue;
+      seen.add(neighbor);
+      pending.push(neighbor);
+    }
+  }
+  return seen.size === adjacency.size && segmentCount === adjacency.size;
+}
+
+function segmentEndpoints(edge: BoardShape): [string, string] | undefined {
+  const geometry = edge.proto.shape?.geometry;
+  if (geometry?.case !== "segment") return undefined;
+  return [pointKey(vec2(geometry.value.start)), pointKey(vec2(geometry.value.end))];
+}
+
+function contourArea(edges: readonly BoardShape[]): number {
+  const points = new Map<string, Vec2>();
+  const neighbors = new Map<string, string[]>();
+  const connect = (from: string, to: string) => {
+    const connected = neighbors.get(from) ?? [];
+    connected.push(to);
+    neighbors.set(from, connected);
+  };
+  for (const edge of edges) {
+    const geometry = edge.proto.shape?.geometry;
+    if (geometry?.case !== "segment") continue;
+    const start = vec2(geometry.value.start);
+    const end = vec2(geometry.value.end);
+    const startKey = pointKey(start);
+    const endKey = pointKey(end);
+    points.set(startKey, start);
+    points.set(endKey, end);
+    connect(startKey, endKey);
+    connect(endKey, startKey);
+  }
+  const first = points.keys().next().value as string | undefined;
+  if (!first) return 0;
+  const ordered: Vec2[] = [];
+  let previous: string | undefined;
+  let current = first;
+  do {
+    ordered.push(points.get(current)!);
+    const options = neighbors.get(current)!;
+    const next = options[0] === previous ? options[1] : options[0];
+    if (!next) return 0;
+    previous = current;
+    current = next;
+  } while (current !== first && ordered.length <= edges.length);
+  if (current !== first || ordered.length !== edges.length) return 0;
+  return Math.abs(
+    ordered.reduce((sum, point, index) => {
+      const next = ordered[(index + 1) % ordered.length]!;
+      return sum + point.x * next.y - next.x * point.y;
+    }, 0) / 2,
+  );
+}
+
+/** Finds the largest complete segment loop; smaller loops are independent board cutouts. */
+function outerSegmentContour(edges: readonly BoardShape[]): BoardShape[] | undefined {
+  const edgeIndexesByPoint = new Map<string, number[]>();
+  edges.forEach((edge, index) => {
+    for (const point of segmentEndpoints(edge) ?? []) {
+      const indexes = edgeIndexesByPoint.get(point) ?? [];
+      indexes.push(index);
+      edgeIndexesByPoint.set(point, indexes);
+    }
+  });
+  const remaining = new Set(edges.map((_, index) => index));
+  const contours: BoardShape[][] = [];
+  while (remaining.size) {
+    const first = remaining.values().next().value as number;
+    const pending = [first];
+    const indexes: number[] = [];
+    remaining.delete(first);
+    while (pending.length) {
+      const index = pending.pop()!;
+      indexes.push(index);
+      for (const point of segmentEndpoints(edges[index]!) ?? []) {
+        for (const neighbor of edgeIndexesByPoint.get(point) ?? []) {
+          if (!remaining.delete(neighbor)) continue;
+          pending.push(neighbor);
+        }
+      }
+    }
+    const contour = indexes.map((index) => edges[index]!);
+    if (!isSingleClosedContour(contour)) return undefined;
+    contours.push(contour);
+  }
+  return contours.sort((a, b) => contourArea(b) - contourArea(a))[0];
 }
 
 /** KiCad's own defaults for a new project, used for a blank's vias when neither the via nor the rules say. */
@@ -204,10 +375,10 @@ export interface OutlineOutcome {
 }
 
 /**
- * Draws the outline when the board has none, and with it a blank's vias and holes. A board that
- * already has an outline is left alone (a warning says so when the spec has a blank but the board
- * has no vias at all) — the
- * author may have shaped it by hand, and a compile should not flatten that. `drew` says which.
+ * Draws the outline when the board has none, and with it a blank's vias and holes. A matching
+ * existing outline is accepted. A differing outline previously generated by this compiler is
+ * replaced; a differing user-authored outline fails with an actionable conflict instead of
+ * silently ignoring the source dimensions. `drew` says whether this call created a new outline.
  */
 export async function ensureOutline(
   board: Board,
@@ -217,8 +388,44 @@ export async function ensureOutline(
   const none: OutlineOutcome = { diagnostics: [], drew: false, fixed: false, viasAdded: 0, holesAdded: 0 };
   const points = outlinePoints(spec);
   if (!points) return none;
+  if (points.length < 3)
+    return { ...none, diagnostics: [diag("error", `Board outline needs at least 3 points, got ${points.length}.`, "bad_outline")] };
   const blank = prefabItems(spec);
-  if (await hasOutline(board)) {
+  const edges = (await board.getShapes()).filter((shape) => shape.proto.layer === BoardLayer.BL_Edge_Cuts);
+  if (edges.length) {
+    const boundary = edges.filter((edge) => edge.proto.shape?.geometry.case === "segment");
+    const generatedBoundary = boundary.filter((edge) => edge.customProperties[GENERATED_OUTLINE_PROPERTY] === GENERATED_OUTLINE_VALUE);
+    if (generatedBoundary.length) {
+      if (!outlineMatches(generatedBoundary, points)) {
+        if (!isSingleClosedContour(generatedBoundary)) {
+          return {
+            ...none,
+            diagnostics: [
+              diag(
+                "error",
+                "The compiler owns only part of the existing Edge.Cuts boundary. Repair or remove the incomplete generated contour before rebuilding.",
+                "outline_conflict",
+              ),
+            ],
+          };
+        }
+        await board.commit(message, async (tx) => {
+          await tx.delete(generatedBoundary);
+          await tx.create(outlineItems(points));
+        });
+      }
+    } else if (!outlineMatches(outerSegmentContour(boundary) ?? [], points)) {
+      return {
+        ...none,
+        diagnostics: [
+          diag(
+            "error",
+            "The requested board outline differs from the existing user-authored Edge.Cuts. Update or remove the KiCad outline, or make the source board dimensions match it.",
+            "outline_conflict",
+          ),
+        ],
+      };
+    }
     if (blank.vias.length && !(await board.getTracks()).some((t) => t instanceof Via))
       return {
         ...none,
@@ -232,8 +439,6 @@ export async function ensureOutline(
       };
     return none;
   }
-  if (points.length < 3)
-    return { ...none, diagnostics: [diag("error", `Board outline needs at least 3 points, got ${points.length}.`, "bad_outline")] };
   const items: Item[] = [...outlineItems(points), ...blank.holes, ...blank.vias];
   await board.commit(message, (tx) => tx.create(items));
   return {
@@ -399,11 +604,12 @@ export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOp
     deleteExtraFootprints: opts.deleteExtraFootprints ?? true,
     updateFootprints: opts.updateFootprints ?? true,
   } as const;
+  const updateBoard = opts.updateBoard ?? ((options) => board.importNetlist(serverPath, options));
 
   // 1. Dry run: the only check that sees the server's library tables.
   cancelled();
   opts.onStage?.("checking");
-  const dry = await board.importNetlist(serverPath, { ...importOptions, dryRun: true });
+  const dry = await updateBoard({ ...importOptions, dryRun: true });
   if (dry.errorCount > 0) return untouched(reportDiagnostics(dry.report, dry.errorCount, dry.warningCount), dry.report);
 
   // 2. Outline, before anything is placed.
@@ -417,7 +623,7 @@ export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOp
   cancelled();
   opts.onStage?.("importing");
   const before = new Set(await footprintIds(board));
-  const imported = await board.importNetlist(serverPath, importOptions);
+  const imported = await updateBoard(importOptions);
   diagnostics.push(...reportDiagnostics(imported.report, imported.errorCount, imported.warningCount));
   const added = (await footprintIds(board)).filter((id) => !before.has(id));
 

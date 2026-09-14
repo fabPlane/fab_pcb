@@ -101,6 +101,7 @@ export function checkNetlistJson(value: unknown, file: string): { file: NetlistJ
     netlist: obj({
       components: arr(component),
       nets: arr(net),
+      noConnects: (v, path) => v !== undefined && arr(node)(v, path),
       design: obj({ source: str(false), date: str(false), tool: str(false) }, false),
     }),
     board: obj(

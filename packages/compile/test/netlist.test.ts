@@ -197,6 +197,30 @@ describe("validateNetlist", () => {
     expect(validateNetlist(bad).filter((d) => d.code === "duplicate_net")).toHaveLength(1);
   });
 
+  test("requires no-connect declarations to be unique, known, and absent from nets", () => {
+    const bad = netlist({
+      noConnects: [
+        { ref: "R1", pin: "1" },
+        { ref: "R1", pin: "1" },
+        { ref: "U99", pin: "3" },
+      ],
+    });
+    const codes = validateNetlist(bad).map((diagnostic) => diagnostic.code);
+    expect(codes).toContain("connected_no_connect");
+    expect(codes).toContain("duplicate_no_connect");
+    expect(codes).toContain("unknown_no_connect_ref");
+  });
+
+  test("rejects one component pin assigned to different nets", () => {
+    const bad = netlist({
+      nets: [
+        { name: "A", nodes: [{ ref: "R1", pin: "1" }] },
+        { name: "B", nodes: [{ ref: "R1", pin: "1" }] },
+      ],
+    });
+    expect(validateNetlist(bad).map((diagnostic) => diagnostic.code)).toContain("pin_in_multiple_nets");
+  });
+
   test("a missing footprint is a warning, not an error", () => {
     const d = validateNetlist(netlist({ components: [{ ref: "R1", value: "1k", footprint: "" }], nets: [] }));
     const fp = d.filter((x) => x.code === "missing_footprint");

@@ -28,9 +28,12 @@ function source(text: string, entrypoint = NETLIST_JSON_ENTRYPOINT): CompileSour
 
 describe("netlistJsonFrontend", () => {
   test("hands a well-formed file over as IR plus board spec", async () => {
-    const res = await netlistJsonFrontend.build(source(JSON.stringify(GOOD)));
+    const res = await netlistJsonFrontend.build(
+      source(JSON.stringify({ ...GOOD, netlist: { ...GOOD.netlist, noConnects: [{ ref: "D1", pin: "2" }] } })),
+    );
     expect(res.diagnostics).toEqual([]);
     expect(res.netlist?.components.map((c) => c.ref)).toEqual(["R1", "D1"]);
+    expect(res.netlist?.noConnects).toEqual([{ ref: "D1", pin: "2" }]);
     expect(res.board).toEqual({ widthMm: 20, heightMm: 10 });
   });
 
@@ -48,13 +51,14 @@ describe("netlistJsonFrontend", () => {
   });
 
   test("shape problems come back one per field with a JSON pointer", () => {
-    const bad = { netlist: { components: [{ ref: 1, value: "1k" }], nets: "no" } };
+    const bad = { netlist: { components: [{ ref: 1, value: "1k" }], nets: "no", noConnects: [{ ref: "R1", pin: 2 }] } };
     const { file, diagnostics } = checkNetlistJson(bad, "f.json");
     expect(file).toBeNull();
     const messages = diagnostics.map((d) => d.message);
     expect(messages).toContain("/netlist/components/0/ref: must be a string");
     expect(messages).toContain("/netlist/components/0/footprint: is required");
     expect(messages).toContain("/netlist/nets: must be an array");
+    expect(messages).toContain("/netlist/noConnects/0/pin: must be a string");
   });
 
   test("board is optional and outline points are checked", () => {
