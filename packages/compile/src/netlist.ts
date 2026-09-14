@@ -112,6 +112,15 @@ export function validateNetlist(netlist: Netlist): Diagnostic[] {
       err("Net with no name.", "unnamed_net");
     } else if (netNames.has(net.name)) {
       err(`Duplicate net name ${net.name}.`, "duplicate_net");
+    } else if (/[{}]/.test(net.name)) {
+      // KiCad's own netlist export writes a label's "/" as {slash} (and {colon}, {space}, …). The
+      // fork imports such a name, but once SetNetClasses has run in the session its next
+      // SaveDocument fails with nothing more than "basic_string" (gap G30). The IR carries literal
+      // names; a converter from KiCad's format has to unescape or rename before it gets here.
+      err(
+        `Net name ${net.name} contains "{" or "}" (KiCad's escape sequences such as {slash}); after SetNetClasses the fork cannot save a board with such a net. Use the literal character or "_".`,
+        "net_name_escape",
+      );
     }
     netNames.add(net.name);
 

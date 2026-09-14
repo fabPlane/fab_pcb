@@ -32,7 +32,7 @@ import { edgeClearanceNm } from "./apply";
 import { compile, CompileCancelled } from "./compile";
 import { netlistJsonFrontend } from "./frontends/netlist-json";
 import { registerLibraries } from "./libraries";
-import { applyBoardConstraints, applyDefaultNetClass, hasRules } from "./rules";
+import { applyBoardConstraints, applyDefaultNetClass, hasRules, persistNetClassFile } from "./rules";
 import type { BoardRules, BoardSpec, CompileResult, CompileSource, Frontend, MatchMode } from "./types";
 
 export type CompileJobState =
@@ -204,7 +204,8 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
         const board = await boardFor(kicad, request, pushLog);
         abort.signal.throwIfAborted();
 
-        const projectDir = dirname((await kicad.projectInfo()).kicadProPath);
+        const kicadProPath = (await kicad.projectInfo()).kicadProPath;
+        const projectDir = dirname(kicadProPath);
         const rel = request.netlistPath ?? DEFAULT_NETLIST_PATH;
         const netlistPath = isAbsolute(rel) ? rel : resolve(projectDir, rel);
         await mkdir(dirname(netlistPath), { recursive: true });
@@ -242,6 +243,8 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
         if (result.ok && request.save !== false) {
           setState("saving");
           await board.save();
+          // The save drops the net class the session holds (G33): put it back into the file.
+          if (hasRules(rules) && (await persistNetClassFile(kicadProPath, rules))) pushLog("net class written to the project file");
         }
         const rev = await board.revision().catch(() => undefined);
         if (rev !== undefined) info.revision = Number(rev);
