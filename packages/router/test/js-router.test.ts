@@ -3,7 +3,15 @@ import { describe, expect, test } from "bun:test";
 import { BoardLayer } from "@fp-pcb/proto";
 import { mm, toMm } from "@fp-pcb/client";
 import { segmentDistance } from "../src/geometry";
-import { JsRouter, LayerNames, buildSimpleRouteJson, describeSolverErrorEndpoints, tracesToItems, type SrjTrace, type SrjWire } from "../src/js-router";
+import {
+  JsRouter,
+  LayerNames,
+  buildSimpleRouteJson,
+  describeSolverErrorEndpoints,
+  tracesToItems,
+  type SrjTrace,
+  type SrjWire,
+} from "../src/js-router";
 import type { RouteProgress, RouteVia } from "../src/types";
 import { twoNetBoard, F, B } from "./fixtures";
 

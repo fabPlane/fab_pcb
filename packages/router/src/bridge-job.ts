@@ -190,9 +190,10 @@ export function routeGeometry(items: readonly (Track | Arc | Via)[]): RouteJobGe
         points: [item.position.x - r, item.position.y - r, item.position.x + r, item.position.y + r],
       };
     }
-    const points = item instanceof Arc
-      ? [item.start.x, item.start.y, item.mid.x, item.mid.y, item.end.x, item.end.y]
-      : [item.start.x, item.start.y, item.end.x, item.end.y];
+    const points =
+      item instanceof Arc
+        ? [item.start.x, item.start.y, item.mid.x, item.mid.y, item.end.x, item.end.y]
+        : [item.start.x, item.start.y, item.end.x, item.end.y];
     return { kind: "trace", id: item.id, layer: item.layerId, net: item.netCode ?? 0, points, width: item.width };
   });
 }
@@ -222,10 +223,9 @@ export async function persistAppliedRoute(board: { save(): Promise<void> }): Pro
     await board.save();
   } catch (e) {
     const detail = e instanceof Error ? e.message : String(e);
-    throw new Error(
-      `route was applied in KiCad memory but SaveDocument failed; retry saving before closing the session: ${detail}`,
-      { cause: e },
-    );
+    throw new Error(`route was applied in KiCad memory but SaveDocument failed; retry saving before closing the session: ${detail}`, {
+      cause: e,
+    });
   }
 }
 

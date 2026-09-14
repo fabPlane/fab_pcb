@@ -119,7 +119,13 @@ export function checkNetlistJson(value: unknown, file: string): { file: NetlistJ
     libraries: (v, path) => v !== undefined && arr(library)(v, path),
   })(value, "");
 
-  if (isRecord(value) && isRecord(value.netlist) && Array.isArray(value.netlist.components) && isRecord(value.board) && Array.isArray(value.board.placements)) {
+  if (
+    isRecord(value) &&
+    isRecord(value.netlist) &&
+    Array.isArray(value.netlist.components) &&
+    isRecord(value.board) &&
+    Array.isArray(value.board.placements)
+  ) {
     const refs = new Set(
       value.netlist.components.flatMap((component) => (isRecord(component) && typeof component.ref === "string" ? [component.ref] : [])),
     );

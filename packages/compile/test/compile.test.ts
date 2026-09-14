@@ -256,10 +256,7 @@ describe("compile", () => {
       netlistPath: netlistPath("bad-placement"),
     });
     expect(res.ok).toBe(false);
-    expect(res.diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
-      "bad_placement_position",
-      "unknown_placement_reference",
-    ]);
+    expect(res.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["bad_placement_position", "unknown_placement_reference"]);
     expect(log).toEqual([]);
   });
 });

@@ -153,9 +153,7 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
       }
       const end = { x: start.x - mm(5.08), y: start.y };
       const wire = generated(
-        new SchematicLine(
-          create(SchematicLineSchema, { start: toVector2(start), end: toVector2(end), type: SchematicLineType.SLT_WIRE }),
-        ),
+        new SchematicLine(create(SchematicLineSchema, { start: toVector2(start), end: toVector2(end), type: SchematicLineType.SLT_WIRE })),
       );
       const label = generated(
         new LocalLabel(

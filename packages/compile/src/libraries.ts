@@ -34,10 +34,20 @@ export async function discoverLibraries(kind: LibrarySpec["kind"], root: string)
     return entries
       .filter((entry) => entry.isDirectory() && entry.name.endsWith(".pretty"))
       .sort((a, b) => a.name.localeCompare(b.name))
-      .map((entry) => ({ kind, nickname: entry.name.slice(0, -".pretty".length), uri: join(root, entry.name), description: "Bundled KiCad footprint library" }));
+      .map((entry) => ({
+        kind,
+        nickname: entry.name.slice(0, -".pretty".length),
+        uri: join(root, entry.name),
+        description: "Bundled KiCad footprint library",
+      }));
   }
   return entries
     .filter((entry) => entry.isFile() && entry.name.endsWith(".kicad_sym"))
     .sort((a, b) => a.name.localeCompare(b.name))
-    .map((entry) => ({ kind, nickname: entry.name.slice(0, -".kicad_sym".length), uri: join(root, entry.name), description: "Bundled KiCad symbol library" }));
+    .map((entry) => ({
+      kind,
+      nickname: entry.name.slice(0, -".kicad_sym".length),
+      uri: join(root, entry.name),
+      description: "Bundled KiCad symbol library",
+    }));
 }

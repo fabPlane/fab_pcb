@@ -138,9 +138,10 @@ describe.skipIf(!haveKicad())("applyNetlist + kicad-cli api-server", () => {
     expect(outcome.diagnostics).toEqual([]);
     expect(outcome.footprintsPlaced).toBe(2);
     expect(await outlineOrigin(board)).toEqual({ x: 0, y: 0 });
-    expect(
-      Object.fromEntries((await board.getFootprints()).map((footprint) => [footprint.reference, footprint.position])),
-    ).toEqual({ R1: { x: 10_000_000, y: 8_000_000 }, R2: { x: 20_000_000, y: 12_000_000 } });
+    expect(Object.fromEntries((await board.getFootprints()).map((footprint) => [footprint.reference, footprint.position]))).toEqual({
+      R1: { x: 10_000_000, y: 8_000_000 },
+      R2: { x: 20_000_000, y: 12_000_000 },
+    });
     expect((await board.getTracks()).filter((track) => track instanceof Via).map((via) => via.position)).toEqual([
       { x: 5_000_000, y: 5_000_000 },
     ]);

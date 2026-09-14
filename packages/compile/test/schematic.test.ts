@@ -67,7 +67,15 @@ describe("generated schematic", () => {
           { ref: "R1", value: "10k", footprint: "x" },
           { ref: "C1", value: "1u", footprint: "x", libSource: { lib: "Missing", part: "C" } },
         ],
-        nets: [{ name: "GND", nodes: [{ ref: "R1", pin: "1" }, { ref: "C1", pin: "2" }] }],
+        nets: [
+          {
+            name: "GND",
+            nodes: [
+              { ref: "R1", pin: "1" },
+              { ref: "C1", pin: "2" },
+            ],
+          },
+        ],
       },
       new Map(),
     );

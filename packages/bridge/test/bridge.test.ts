@@ -20,7 +20,10 @@ describe("configFromEnv", () => {
     expect(d.kicadCli).toBe("/x/kicad-cli");
     expect(d.staticDir).toBe("/srv");
     expect(d.maxPayloadBytes).toBe(1024);
-    expect(configFromEnv({ KICAD_SOCKET_TRANSPORT: "ws", KICAD_WS_HOST: "localhost" })).toMatchObject({ socketTransport: "ws", wsHostname: "localhost" });
+    expect(configFromEnv({ KICAD_SOCKET_TRANSPORT: "ws", KICAD_WS_HOST: "localhost" })).toMatchObject({
+      socketTransport: "ws",
+      wsHostname: "localhost",
+    });
     expect(() => configFromEnv({ KICAD_SOCKET_TRANSPORT: "tcp" })).toThrow(/ipc.*ws/);
     expect(() => configFromEnv({ PORT: "abc" })).toThrow();
   });

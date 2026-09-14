@@ -20,8 +20,7 @@ const text = (value: string, x: number, y: number) =>
     layer: BoardLayer.BL_F_SilkS,
     text: { text: value, position: point(x, y), attributes: { angle: { valueDegrees: 37 } } },
   });
-const field = (name: string, x: number, y: number) =>
-  create(FieldSchema, { id: { id: 5 }, name, visible: true, text: text(name, x, y) });
+const field = (name: string, x: number, y: number) => create(FieldSchema, { id: { id: 5 }, name, visible: true, text: text(name, x, y) });
 
 function fixture(): Footprint {
   const pad = create(PadSchema, {

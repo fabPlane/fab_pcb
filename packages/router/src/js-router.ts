@@ -138,12 +138,7 @@ export function describeSolverErrorEndpoints(error: string, input: RouteInput): 
   const required = input.rules.edgeClearance;
   const labels = pads.map((pad) => {
     const box = pad.bounds ?? rotatedRectBounds(pad.position, pad.size, pad.rotation);
-    const edgeGap = Math.min(
-      box.x - b.x,
-      box.y - b.y,
-      b.x + b.w - (box.x + box.w),
-      b.y + b.h - (box.y + box.h),
-    );
+    const edgeGap = Math.min(box.x - b.x, box.y - b.y, b.x + b.w - (box.x + box.w), b.y + b.h - (box.y + box.h));
     const where = `${pad.footprint} pad ${pad.number} (${pad.net || "no net"}) at (${toMm(pad.position.x).toFixed(3)}, ${toMm(pad.position.y).toFixed(3)}) mm`;
     return edgeGap < required
       ? `${where}; copper edge gap ${toMm(edgeGap).toFixed(3)} mm is below the ${toMm(required).toFixed(3)} mm board-edge rule`
