@@ -17,6 +17,9 @@
   },
   "scripts": {
     "test": "bun test",
+    "test:corpus": "bun test test/corpus.test.ts",
+    "test:corpus:nightly": "ROUTER_CORPUS_TIER=nightly bun test test/corpus.test.ts",
+    "corpus": "bun run corpus/run.ts",
     "bench": "bun run bench/run.ts",
     "typecheck": "tsc -b"
   },
