@@ -26,7 +26,7 @@ jobs:
   # ----------------------------------------------------------------- unit, typecheck, generated files
   bun:
     name: bun (unit)
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, Linux, X64, tf-nas-ephemeral, fab-pcb]
     # Runs in ~1.5 min.  No job here may exceed 10: a hang should cost a tenth of an hour, not a
     # whole one, and nothing in this workflow legitimately takes that long any more.
     timeout-minutes: 10
@@ -102,7 +102,8 @@ jobs:
   # ----------------------------------------------------------------- Playwright smoke (mock services)
   e2e:
     name: e2e (Playwright smoke)
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, Linux, X64, tf-nas-ephemeral, fab-pcb]
+    container: ubuntu:24.04
     # Runs in ~1.2 min; see the bun job on the 10-minute ceiling.
     timeout-minutes: 10
     steps:
@@ -183,7 +184,8 @@ jobs:
   # over by compiling, and not something to leave as a green run that tested nothing.
   kicad-integration:
     name: kicad-integration (nightly kicad-cli)
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, Linux, X64, tf-nas-ephemeral, fab-pcb]
+    container: ubuntu:24.04
     # ~3 min: fixtures, a ~200 MB download and the suites.  See the bun job on the 10-minute ceiling.
     timeout-minutes: 10
     permissions:
@@ -264,9 +266,9 @@ jobs:
           set -euo pipefail
           list="$KICAD_SRC/tools/nightly/linux/runtime-packages.txt"
           test -s "$list"
-          sudo apt-get update -qq
+          apt-get update -qq
           # shellcheck disable=SC2046
-          sudo apt-get install -y -qq --no-install-recommends $(grep -v '^#' "$list" | tr '\n' ' ')
+          apt-get install -y -qq --no-install-recommends $(grep -v '^#' "$list" | tr '\n' ' ')
 
       # Prints the launcher's path on stdout; it sets KICAD_STOCK_DATA_HOME and execs bin/kicad-cli,
       # so the suites can spawn it directly -- no container, so no wrapper and no path mapping.
@@ -310,7 +312,7 @@ jobs:
   # docs/08-wasm.md has the details.
   wasm:
     name: wasm (conformance)
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, Linux, X64, tf-nas-ephemeral, fab-pcb]
     timeout-minutes: 30
     env:
       # Same owner as KICAD_REPO above, in the owner/name form the releases API and
@@ -346,7 +348,13 @@ jobs:
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "asset=$asset" >> "$GITHUB_OUTPUT"
           # The release API takes everything after /tags/ as the tag, slashes included.
-          names="$(gh api "repos/$KICAD_WASM_REPO/releases/tags/$tag" --jq '.assets[].name' 2>/dev/null || true)"
+          encoded_tag="$(jq -rn --arg tag "$tag" '$tag | @uri')"
+          names="$(curl -fsSL \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/$KICAD_WASM_REPO/releases/tags/$encoded_tag" \
+            2>/dev/null | jq -r '.assets[].name' || true)"
           if printf '%s\n' "$names" | grep -qxF "$asset"; then
             echo "have=true" >> "$GITHUB_OUTPUT"
             echo "found $asset on release $tag"
