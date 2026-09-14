@@ -240,7 +240,16 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         const router: Autorouter =
           deps.routers?.(request, kicad, board) ??
           (request.router === "freerouting"
-            ? new FreeroutingRouter({ board }, { mode: "kicad-dsn", jar: freerouting.jar, java: freerouting.java, ...request.freerouting })
+            ? new FreeroutingRouter(
+                { board },
+                {
+                  mode: "kicad-dsn",
+                  jar: freerouting.jar,
+                  java: freerouting.java,
+                  ...(freerouting.kicadCli ? { kicadCli: freerouting.kicadCli } : {}),
+                  ...request.freerouting,
+                },
+              )
             : new JsRouter());
         info.router = router.name;
         setState("routing");
