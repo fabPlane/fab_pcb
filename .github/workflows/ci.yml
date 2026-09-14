@@ -104,13 +104,16 @@ jobs:
     name: e2e (Playwright smoke)
     runs-on: [self-hosted, Linux, X64, tf-nas-ephemeral, fab-pcb]
     container: ubuntu:24.04
+    defaults:
+      run:
+        shell: bash
     # Runs in ~1.2 min; see the bun job on the 10-minute ceiling.
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
       - name: Install runner prerequisites
-        run: apt-get update && apt-get install -y --no-install-recommends unzip
+        run: apt-get update && apt-get install -y --no-install-recommends ca-certificates curl git jq unzip
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -190,6 +193,9 @@ jobs:
     name: kicad-integration (nightly kicad-cli)
     runs-on: [self-hosted, Linux, X64, tf-nas-ephemeral, fab-pcb]
     container: ubuntu:24.04
+    defaults:
+      run:
+        shell: bash
     # ~3 min: fixtures, a ~200 MB download and the suites.  See the bun job on the 10-minute ceiling.
     timeout-minutes: 10
     permissions:
@@ -198,7 +204,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install runner prerequisites
-        run: apt-get update && apt-get install -y --no-install-recommends unzip
+        run: apt-get update && apt-get install -y --no-install-recommends ca-certificates curl git jq unzip
 
       - uses: oven-sh/setup-bun@v2
         with:
