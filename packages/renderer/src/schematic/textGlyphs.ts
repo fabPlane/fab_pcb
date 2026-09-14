@@ -38,7 +38,13 @@ export function createTextGlyphBuilder(opts: TextGlyphOptions = {}): PrimitiveBu
     try {
       text = new BitmapText({
         text: prim.text,
-        style: { fontFamily, fontSize, fill: 0xffffff, fontWeight: prim.bold ? 'bold' : 'normal', fontStyle: prim.italic ? 'italic' : 'normal' },
+        style: {
+          fontFamily,
+          fontSize,
+          fill: 0xffffff,
+          fontWeight: prim.bold ? 'bold' : 'normal',
+          fontStyle: prim.italic ? 'italic' : 'normal',
+        },
       });
     } catch {
       return true; // no canvas / font support: leave the text out rather than fail the item

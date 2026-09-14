@@ -23,11 +23,15 @@ export function VariantsDialog() {
           <button className="btn" onClick={() => setDraft([...draft, { name: `Variant ${draft.length + 1}`, description: '', current: false }])}>
             Add variant
           </button>
-          <button className="btn" disabled={!draft.some((v) => v.current && v.name !== 'Default')} onClick={() => {
-            const cur = draft.find((v) => v.current);
-            if (!cur) return;
-            setDraft([...draft, { ...cur, name: `${cur.name} copy`, current: false }]);
-          }}>
+          <button
+            className="btn"
+            disabled={!draft.some((v) => v.current && v.name !== 'Default')}
+            onClick={() => {
+              const cur = draft.find((v) => v.current);
+              if (!cur) return;
+              setDraft([...draft, { ...cur, name: `${cur.name} copy`, current: false }]);
+            }}
+          >
             Copy current
           </button>
           <span className="spacer" />
@@ -69,7 +73,11 @@ export function VariantsDialog() {
               </td>
               <td>
                 {v.name !== 'Default' && (
-                  <button className="btn ghost sm" onClick={() => setDraft(draft.filter((_, j) => j !== i).map((x, j, a) => (v.current && j === 0 ? { ...x, current: true } : x)))} title="Delete variant">
+                  <button
+                    className="btn ghost sm"
+                    onClick={() => setDraft(draft.filter((_, j) => j !== i).map((x, j, a) => (v.current && j === 0 ? { ...x, current: true } : x)))}
+                    title="Delete variant"
+                  >
                     ×
                   </button>
                 )}

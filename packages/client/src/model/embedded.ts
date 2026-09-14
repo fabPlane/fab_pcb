@@ -14,7 +14,9 @@ interface ZstdApi {
 }
 
 function zstd(): ZstdApi | undefined {
-  const b = (globalThis as { Bun?: { zstdCompressSync?: (d: Uint8Array) => Uint8Array; zstdDecompressSync?: (d: Uint8Array) => Uint8Array } }).Bun;
+  const b = (
+    globalThis as { Bun?: { zstdCompressSync?: (d: Uint8Array) => Uint8Array; zstdDecompressSync?: (d: Uint8Array) => Uint8Array } }
+  ).Bun;
   if (b?.zstdCompressSync && b.zstdDecompressSync) {
     return { compress: (d) => b.zstdCompressSync!(d), decompress: (d) => b.zstdDecompressSync!(d) };
   }

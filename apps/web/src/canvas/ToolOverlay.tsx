@@ -33,7 +33,17 @@ export function ToolOverlay({ storeKey, host }: { storeKey: string; host: () => 
           case 'rect': {
             const a = w2s(s.a);
             const b = w2s(s.b);
-            return <rect key={i} x={Math.min(a.x, b.x)} y={Math.min(a.y, b.y)} width={Math.abs(b.x - a.x)} height={Math.abs(b.y - a.y)} strokeWidth={s.width ? px(s.width) : 1.5} strokeDasharray={s.width ? undefined : '6 4'} />;
+            return (
+              <rect
+                key={i}
+                x={Math.min(a.x, b.x)}
+                y={Math.min(a.y, b.y)}
+                width={Math.abs(b.x - a.x)}
+                height={Math.abs(b.y - a.y)}
+                strokeWidth={s.width ? px(s.width) : 1.5}
+                strokeDasharray={s.width ? undefined : '6 4'}
+              />
+            );
           }
           case 'marker': {
             const c = w2s(s.c);

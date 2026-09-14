@@ -9,7 +9,8 @@ export function AboutDialog() {
   return (
     <Dialog open={open} onOpenChange={(o) => !o && openDialog(null)} title="About fp-pcb" size="narrow">
       <p style={{ marginTop: 0 }}>
-        A browser front end for KiCad 10.99 running headless as <span className="mono">kicad-cli api-server</span>. Everything on screen comes from the IPC API; there is no desktop KiCad window behind it.
+        A browser front end for KiCad 10.99 running headless as <span className="mono">kicad-cli api-server</span>. Everything on screen comes from the IPC API; there is no desktop KiCad window behind
+        it.
       </p>
       <div className="form-grid">
         <label>App</label>

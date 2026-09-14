@@ -28,7 +28,9 @@ describe("configFromEnv", () => {
 
 describe("kicad-ping envelope", () => {
   test("encodes the same bytes as the M0 script", () => {
-    const hex = Array.from(encodePing("kicad-web/m0-ping") /* the M0 capture predates the rename */, (b) => b.toString(16).padStart(2, "0")).join("");
+    const hex = Array.from(encodePing("kicad-web/m0-ping") /* the M0 capture predates the rename */, (b) =>
+      b.toString(16).padStart(2, "0"),
+    ).join("");
     expect(hex).toBe(
       "0a1312116b696361642d7765622f6d302d70696e6712320a2e747970652e676f6f676c65617069732e636f6d2f6b696170692e636f6d6d6f6e2e636f6d6d616e64732e50696e671200",
     );
@@ -112,7 +114,9 @@ describe("bridge HTTP without KiCad", () => {
     await writeFile(join(staticDir, "index.html"), "<h1>app</h1>");
     await mkdir(join(staticDir, "assets"));
     await writeFile(join(staticDir, "assets", "a.js"), "console.log(1)");
-    bridge = await startBridge(configFromEnv({}, { port: 0, kicadCli: "/nonexistent/kicad-cli", staticDir, workspaceRoot: staticDir, log: () => {} }));
+    bridge = await startBridge(
+      configFromEnv({}, { port: 0, kicadCli: "/nonexistent/kicad-cli", staticDir, workspaceRoot: staticDir, log: () => {} }),
+    );
   });
   afterAll(async () => {
     await bridge.stop();

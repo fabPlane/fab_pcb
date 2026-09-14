@@ -244,16 +244,18 @@ export function CanvasSlot({ kind, storeKey, store, layers }: CanvasSlotProps) {
     <div className="canvas-slot" ref={ref} data-store={storeKey} data-tool={activeSession?.id ?? tool}>
       <ToolOverlay storeKey={storeKey} host={() => hostRef.current ?? undefined} />
       <div className="canvas-overlay">
-        {tool === 'move' && <div className="hint tool">Moving {selCount} item{selCount === 1 ? '' : 's'} — click to place, Esc to cancel, R rotates</div>}
+        {tool === 'move' && (
+          <div className="hint tool">
+            Moving {selCount} item{selCount === 1 ? '' : 's'} — click to place, Esc to cancel, R rotates
+          </div>
+        )}
         {activeSession && (
           <div className="hint tool" data-testid="tool-hint">
             {activeSession.hint}
             {activeSession.points.length ? ` · ${activeSession.points.length} point${activeSession.points.length === 1 ? '' : 's'}` : ''}
           </div>
         )}
-        {tool === 'select' && selCount === 0 && !activeSession && (
-          <div className="hint">Click to select · Shift+click adds · Wheel zooms · Middle-drag or Alt-drag pans · Right-click for actions</div>
-        )}
+        {tool === 'select' && selCount === 0 && !activeSession && <div className="hint">Click to select · Shift+click adds · Wheel zooms · Middle-drag or Alt-drag pans · Right-click for actions</div>}
       </div>
       {menu && <CanvasContextMenu state={menu} storeKey={storeKey} store={store} kind={kind} onClose={() => setMenu(null)} />}
     </div>

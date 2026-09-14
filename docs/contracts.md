@@ -12,28 +12,28 @@ this file first.
 ## ItemStore (`@fp-pcb/client/store`) — producer A4, consumers A5/A6/A8
 
 ```ts
-type DocumentKind = 'board' | 'schematic' | 'footprint' | 'symbol';   // 'symbol' = headless library symbol (DOCTYPE_SYMBOL)
+type DocumentKind = "board" | "schematic" | "footprint" | "symbol"; // 'symbol' = headless library symbol (DOCTYPE_SYMBOL)
 
 interface StoredItem {
-  id: string;                       // KIID
-  type: string;                     // kiapi KiCadObjectType enum name, e.g. 'KOT_PCB_FOOTPRINT'
-  layer?: string;                   // primary layer id, e.g. 'BL_F_Cu' (board) — undefined for schematic
-  net?: string;                     // net name, when applicable
-  parent?: string;                  // KIID of the containing footprint/group/sheet, if any
-  proto: unknown;                   // the decoded protobuf message (protobuf-es Message)
+  id: string; // KIID
+  type: string; // kiapi KiCadObjectType enum name, e.g. 'KOT_PCB_FOOTPRINT'
+  layer?: string; // primary layer id, e.g. 'BL_F_Cu' (board) — undefined for schematic
+  net?: string; // net name, when applicable
+  parent?: string; // KIID of the containing footprint/group/sheet, if any
+  proto: unknown; // the decoded protobuf message (protobuf-es Message)
   bbox?: { x: number; y: number; w: number; h: number }; // nm, filled lazily by consumers
 }
 
 interface StoreDiff {
   added: StoredItem[];
-  updated: StoredItem[];            // same id, new proto
-  removed: string[];                // KIIDs
-  revision: number;                 // monotonic, per document
+  updated: StoredItem[]; // same id, new proto
+  removed: string[]; // KIIDs
+  revision: number; // monotonic, per document
 }
 
 interface ItemStore {
   readonly kind: DocumentKind;
-  readonly document: unknown;       // kiapi DocumentSpecifier
+  readonly document: unknown; // kiapi DocumentSpecifier
   readonly revision: number;
   get(id: string): StoredItem | undefined;
   all(): Iterable<StoredItem>;
@@ -50,17 +50,24 @@ Schematic stores are per sheet: `schematic.sheet(path).store`.
 ## CanvasHost (`@fp-pcb/renderer`) — producer A5/A6, consumer A8
 
 ```ts
-interface Theme { /* KiCad colour theme: per-layer colours + ui colours; see renderer/core/theme */ }
+interface Theme {
+  /* KiCad colour theme: per-layer colours + ui colours; see renderer/core/theme */
+}
 
-interface Camera { x: number; y: number; zoom: number }  // world nm at viewport centre; zoom = px per nm
+interface Camera {
+  x: number;
+  y: number;
+  zoom: number;
+} // world nm at viewport centre; zoom = px per nm
 
-interface PickResult {                                   // nearest first
-  id: string;        // render item id: the KIID, or `<kiid>@<suffix>` for per-layer / child geometry
-  distance: number;  // screen px from the pointer (0 = inside)
-  owner: string;     // store item that produced the hit: footprint / symbol / sheet KIID for their children, else == ref
-  ref: string;       // what the UI should treat as picked: object KIID without suffix; schematic pins use `<symbol kiid>:<pin number>`
-  layer: string;     // render-model layer id (`BL_F_Cu`, `schematic.wire`, ...)
-  net?: string;      // net name when the item carries one
+interface PickResult {
+  // nearest first
+  id: string; // render item id: the KIID, or `<kiid>@<suffix>` for per-layer / child geometry
+  distance: number; // screen px from the pointer (0 = inside)
+  owner: string; // store item that produced the hit: footprint / symbol / sheet KIID for their children, else == ref
+  ref: string; // what the UI should treat as picked: object KIID without suffix; schematic pins use `<symbol kiid>:<pin number>`
+  layer: string; // render-model layer id (`BL_F_Cu`, `schematic.wire`, ...)
+  net?: string; // net name when the item carries one
 }
 
 interface CanvasHost {
@@ -72,7 +79,7 @@ interface CanvasHost {
   zoomToFit(): void;
   setLayerVisible(layer: string, visible: boolean): void;
   setLayerOpacity(layer: string, alpha: number): void;
-  setActiveLayer(layer: string): void;                   // board only: draw order + ratsnest emphasis
+  setActiveLayer(layer: string): void; // board only: draw order + ratsnest emphasis
   setSelection(ids: string[]): void;
   setHighlightNets(nets: string[]): void;
   pick(screenX: number, screenY: number, tolerancePx?: number): PickResult[];
@@ -81,31 +88,33 @@ interface CanvasHost {
   onPick(cb: (hits: PickResult[], ev: PointerEvent) => void): () => void;
   onHover(cb: (hit: PickResult | null, ev: PointerEvent) => void): () => void;
   onCameraChange(cb: (cam: Camera) => void): () => void;
-  setStore(store: ItemStore): void;                      // switch documents (schematic sheets) without remounting
+  setStore(store: ItemStore): void; // switch documents (schematic sheets) without remounting
   // move preview: the app moves items optimistically by patching the store; no renderer API needed
 
   // --- overlays (A5): world-space, above the scene; a theme switch never rebuilds geometry
-  setRatsnest(edges: RatsnestEdge[]): void;              // GetRatsnest airlines
+  setRatsnest(edges: RatsnestEdge[]): void; // GetRatsnest airlines
   setRatsnestVisible(visible: boolean): void;
-  setMarkers(markers: MarkerSpec[]): void;               // DRC / ERC violations
+  setMarkers(markers: MarkerSpec[]): void; // DRC / ERC violations
   setMarkersVisible(visible: boolean): void;
   focusMarker(id: string | null, opts?: { durationMs?: number; reducedMotion?: boolean; zoom?: number; onDone?: () => void }): boolean;
   readonly focusedMarker: string | null;
 }
 
 interface RatsnestEdge {
-  net: string;                 // net name; edges of highlighted nets draw at full alpha
-  a: Vec2; b: Vec2;            // GetRatsnest source_position / target_position, nm
-  source?: string; target?: string;   // KIIDs at each end; edges touching a selected item are emphasised
+  net: string; // net name; edges of highlighted nets draw at full alpha
+  a: Vec2;
+  b: Vec2; // GetRatsnest source_position / target_position, nm
+  source?: string;
+  target?: string; // KIIDs at each end; edges touching a selected item are emphasised
 }
 
 interface MarkerSpec {
-  id: string;                  // PCB_MARKER / SCH_MARKER KIID; becomes PickResult.ref
+  id: string; // PCB_MARKER / SCH_MARKER KIID; becomes PickResult.ref
   position: Vec2;
-  severity: 'error' | 'warning' | 'exclusion';
+  severity: "error" | "warning" | "exclusion";
   description: string;
-  layer?: string;              // board layer of the violation, informational
-  endPosition?: Vec2;          // far end of the violation, for the focused marker's legend
+  layer?: string; // board layer of the violation, informational
+  endPosition?: Vec2; // far end of the violation, for the focused marker's legend
 }
 ```
 
@@ -139,15 +148,21 @@ Adapters convert protobuf items into a neutral `RenderItem` set so the core neve
 
 ```ts
 type Primitive =
-  | { kind: 'segment'; a: Vec2; b: Vec2; width: number }
-  | { kind: 'arc'; start: Vec2; mid: Vec2; end: Vec2; width: number }
-  | { kind: 'circle'; c: Vec2; r: number; width: number; fill: boolean }
-  | { kind: 'polygon'; outline: Vec2[]; holes: Vec2[][]; fill: boolean; width: number }
-  | { kind: 'bezier'; p0: Vec2; p1: Vec2; p2: Vec2; p3: Vec2; width: number }
-  | { kind: 'text-shapes'; polys: Vec2[][] }        // from GetTextAsShapes
-  | { kind: 'image'; c: Vec2; w: number; h: number; dataUrl: string };
+  | { kind: "segment"; a: Vec2; b: Vec2; width: number }
+  | { kind: "arc"; start: Vec2; mid: Vec2; end: Vec2; width: number }
+  | { kind: "circle"; c: Vec2; r: number; width: number; fill: boolean }
+  | { kind: "polygon"; outline: Vec2[]; holes: Vec2[][]; fill: boolean; width: number }
+  | { kind: "bezier"; p0: Vec2; p1: Vec2; p2: Vec2; p3: Vec2; width: number }
+  | { kind: "text-shapes"; polys: Vec2[][] } // from GetTextAsShapes
+  | { kind: "image"; c: Vec2; w: number; h: number; dataUrl: string };
 
-interface RenderItem { id: string; layer: string; net?: string; prims: Primitive[]; bbox: Box }
+interface RenderItem {
+  id: string;
+  layer: string;
+  net?: string;
+  prims: Primitive[];
+  bbox: Box;
+}
 ```
 
 ## Bridge WebSocket protocol (`@fp-pcb/client/transport/ws-bridge-protocol`) — producer A3

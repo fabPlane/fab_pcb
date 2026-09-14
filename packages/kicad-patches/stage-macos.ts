@@ -2,6 +2,7 @@
 /** Copy a headless KiCad.app build and make its non-system dylib closure relocatable. */
 import { chmod, cp, mkdir, readdir, realpath, rm, stat } from "node:fs/promises";
 import { basename, dirname, join, relative, resolve } from "node:path";
+import { validateRelocatableSymlinks } from "./bundle-lib";
 
 const [appArg, outputArg, sourceArg] = process.argv.slice(2);
 if (!appArg || !outputArg || !sourceArg) {
@@ -19,7 +20,11 @@ if (!(await stat(sourceApp).catch(() => null))?.isDirectory()) throw new Error(`
 if (!(await stat(source).catch(() => null))?.isDirectory()) throw new Error(`KiCad source not found: ${source}`);
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
-await cp(sourceApp, app, { recursive: true, preserveTimestamps: true });
+// Preserve the app's relative dylib aliases. The default fs.cp behaviour resolves their targets
+// against sourceApp and writes absolute links back into the CI build tree. bundle.ts later
+// materializes aliases, so an absolute link would copy the original, un-rewritten Homebrew dylib
+// and reintroduce /opt/homebrew or /usr/local dependencies into the final backend archive.
+await cp(sourceApp, app, { recursive: true, preserveTimestamps: true, verbatimSymlinks: true });
 await mkdir(frameworks, { recursive: true });
 
 // The build tree does not populate SharedSupport. Match KiCad's macOS bundle
@@ -77,6 +82,7 @@ for (const file of staged) {
     run("install_name_tool", ["-id", `@rpath/${basename(file)}`, file]);
   }
 }
+await validateRelocatableSymlinks(app);
 
 const cli = join(app, "Contents", "MacOS", "kicad-cli");
 const pcbnew = join(app, "Contents", "PlugIns", "_pcbnew.kiface");

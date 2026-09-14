@@ -91,7 +91,18 @@ describe.skipIf(!ecc83)("router pipeline on ecc83 (real KiCad)", () => {
     const board = run.board;
     const net = (await board.nets()).find((n) => n.name && (n.code?.value ?? 0) > 0)!;
     const created = await board.commit("free via", (tx) =>
-      tx.create([new Via(viaProto({ net: "", netCode: 0, position: { x: mm(120), y: mm(80) }, diameter: mm(1), drill: mm(0.3), layers: [BoardLayer.BL_F_Cu, BoardLayer.BL_B_Cu] }))]),
+      tx.create([
+        new Via(
+          viaProto({
+            net: "",
+            netCode: 0,
+            position: { x: mm(120), y: mm(80) },
+            diameter: mm(1),
+            drill: mm(0.3),
+            layers: [BoardLayer.BL_F_Cu, BoardLayer.BL_B_Cu],
+          }),
+        ),
+      ]),
     );
     const free = created.created[0] as Via;
     expect(free.net ?? "").toBe("");

@@ -60,7 +60,10 @@ export class FakeTransport implements Transport {
     this.on(PingSchema, () => ok());
   }
 
-  on<Desc extends DescMessage>(schema: Desc, handler: (req: MessageShape<Desc>, envelope: ApiRequest) => FakeReply | Promise<FakeReply>): this {
+  on<Desc extends DescMessage>(
+    schema: Desc,
+    handler: (req: MessageShape<Desc>, envelope: ApiRequest) => FakeReply | Promise<FakeReply>,
+  ): this {
     this.handlers.set(schema.typeName, handler as FakeHandler);
     return this;
   }
@@ -121,7 +124,8 @@ export class FakeTransport implements Transport {
     const res = create(ApiResponseSchema, {
       header: { kicadToken: r.token ?? this.token },
       status: { status: r.status ?? ApiStatusCode.AS_OK, errorMessage: r.errorMessage ?? "" },
-      message: r.message ?? (r.status === undefined || r.status === ApiStatusCode.AS_OK ? packAny(EmptySchema, create(EmptySchema)) : undefined),
+      message:
+        r.message ?? (r.status === undefined || r.status === ApiStatusCode.AS_OK ? packAny(EmptySchema, create(EmptySchema)) : undefined),
     });
     return toBinary(ApiResponseSchema, res);
   }

@@ -86,7 +86,10 @@ export function textGlyphOutline(pos: Vec2, w: number, h: number, angle: number,
 /** Width / height of a glyph outline produced by textGlyphOutline (rotation-invariant). */
 export function outlineExtents(outline: Vec2[]): { w: number; h: number } {
   if (outline.length < 4) return { w: 0, h: 0 };
-  return { w: Math.hypot(outline[1]!.x - outline[0]!.x, outline[1]!.y - outline[0]!.y), h: Math.hypot(outline[3]!.x - outline[0]!.x, outline[3]!.y - outline[0]!.y) };
+  return {
+    w: Math.hypot(outline[1]!.x - outline[0]!.x, outline[1]!.y - outline[0]!.y),
+    h: Math.hypot(outline[3]!.x - outline[0]!.x, outline[3]!.y - outline[0]!.y),
+  };
 }
 
 /**

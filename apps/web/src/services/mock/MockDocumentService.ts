@@ -2,16 +2,7 @@ import type { DocumentKind, ItemStore } from '@/contracts';
 import { mm } from '@/lib/units';
 import { isCopperLayer, layerDisplayName, BOARD_LAYERS } from '@/lib/enums';
 import type { MemoryItemStore } from '../MemoryItemStore';
-import type {
-  BoardSetup,
-  DocumentService,
-  LayerInfo,
-  NetclassInfo,
-  NetInfo,
-  SheetInfo,
-  TextVariable,
-  VariantInfo,
-} from '../types';
+import type { BoardSetup, DocumentService, LayerInfo, NetclassInfo, NetInfo, SheetInfo, TextVariable, VariantInfo } from '../types';
 import { buildBoard, buildFootprintDoc, buildSchematic } from './kitchenSink';
 
 export class MockDocumentService implements DocumentService {
@@ -71,9 +62,42 @@ export class MockDocumentService implements DocumentService {
       origin: { grid: { x: 0, y: 0 }, drill: { x: 0, y: 0 } },
     };
     this.netclassList = [
-      { name: 'Default', clearanceNm: mm(0.2), trackWidthNm: mm(0.25), viaDiameterNm: mm(0.8), viaDrillNm: mm(0.4), diffPairWidthNm: mm(0.2), diffPairGapNm: mm(0.25), wireWidthNm: mm(0.15), busWidthNm: mm(0.3), colour: '' },
-      { name: 'Power', clearanceNm: mm(0.3), trackWidthNm: mm(0.5), viaDiameterNm: mm(1.0), viaDrillNm: mm(0.5), diffPairWidthNm: mm(0.2), diffPairGapNm: mm(0.25), wireWidthNm: mm(0.15), busWidthNm: mm(0.3), colour: '#d0342c' },
-      { name: 'HV', clearanceNm: mm(1.5), trackWidthNm: mm(0.8), viaDiameterNm: mm(1.2), viaDrillNm: mm(0.6), diffPairWidthNm: mm(0.2), diffPairGapNm: mm(0.25), wireWidthNm: mm(0.15), busWidthNm: mm(0.3), colour: '#e5a50a' },
+      {
+        name: 'Default',
+        clearanceNm: mm(0.2),
+        trackWidthNm: mm(0.25),
+        viaDiameterNm: mm(0.8),
+        viaDrillNm: mm(0.4),
+        diffPairWidthNm: mm(0.2),
+        diffPairGapNm: mm(0.25),
+        wireWidthNm: mm(0.15),
+        busWidthNm: mm(0.3),
+        colour: '',
+      },
+      {
+        name: 'Power',
+        clearanceNm: mm(0.3),
+        trackWidthNm: mm(0.5),
+        viaDiameterNm: mm(1.0),
+        viaDrillNm: mm(0.5),
+        diffPairWidthNm: mm(0.2),
+        diffPairGapNm: mm(0.25),
+        wireWidthNm: mm(0.15),
+        busWidthNm: mm(0.3),
+        colour: '#d0342c',
+      },
+      {
+        name: 'HV',
+        clearanceNm: mm(1.5),
+        trackWidthNm: mm(0.8),
+        viaDiameterNm: mm(1.2),
+        viaDrillNm: mm(0.6),
+        diffPairWidthNm: mm(0.2),
+        diffPairGapNm: mm(0.25),
+        wireWidthNm: mm(0.15),
+        busWidthNm: mm(0.3),
+        colour: '#e5a50a',
+      },
     ];
     this.textVars = [
       { name: 'REVISION', value: 'B2' },
@@ -143,9 +167,7 @@ export class MockDocumentService implements DocumentService {
     const counts = new Map<string, number>();
     for (const it of this.boardStore.all()) if (it.net) counts.set(it.net, (counts.get(it.net) ?? 0) + 1);
     const netclassOf = (n: string) => (n === 'VCC' || n === 'GND' ? 'Power' : 'Default');
-    return [...counts.entries()]
-      .map(([name, items]) => ({ name, items, netclass: netclassOf(name) }))
-      .sort((a, b) => a.name.localeCompare(b.name));
+    return [...counts.entries()].map(([name, items]) => ({ name, items, netclass: netclassOf(name) })).sort((a, b) => a.name.localeCompare(b.name));
   }
 
   boardSetup(): BoardSetup {

@@ -36,13 +36,19 @@ export function field(name: string, text: string, xMm: number, yMm: number, visi
 export const rectShape = (x0: number, y0: number, x1: number, y1: number, widthMm = 0.254, fillType = 4) => ({
   $typeName: 'kiapi.schematic.types.SchematicGraphicShape',
   id: id(`shape-${x0}-${y0}`),
-  shape: { attributes: { stroke: { width: d(widthMm), style: 1 }, fill: { fillType } }, geometry: { case: 'rectangle' as const, value: { topLeft: v(x0, y0), bottomRight: v(x1, y1) } } },
+  shape: {
+    attributes: { stroke: { width: d(widthMm), style: 1 }, fill: { fillType } },
+    geometry: { case: 'rectangle' as const, value: { topLeft: v(x0, y0), bottomRight: v(x1, y1) } },
+  },
 });
 
 export const circleShape = (cx: number, cy: number, r: number, widthMm = 0.254, fillType = 1) => ({
   $typeName: 'kiapi.schematic.types.SchematicGraphicShape',
   id: id(`circle-${cx}-${cy}`),
-  shape: { attributes: { stroke: { width: d(widthMm), style: 1 }, fill: { fillType } }, geometry: { case: 'circle' as const, value: { center: v(cx, cy), radiusPoint: v(cx + r, cy) } } },
+  shape: {
+    attributes: { stroke: { width: d(widthMm), style: 1 }, fill: { fillType } },
+    geometry: { case: 'circle' as const, value: { center: v(cx, cy), radiusPoint: v(cx + r, cy) } },
+  },
 });
 
 export interface PinSpec {
@@ -106,11 +112,25 @@ export interface SymbolOpts {
 }
 
 /** A generic symbol instance: body shapes + pins (library coordinates) + reference / value fields. */
-export function symbol(kiid: string, ref: string, value: string, xMm: number, yMm: number, shapes: unknown[], pins: PinSpec[], opts: SymbolOpts = {}): StoredItemLike {
+export function symbol(
+  kiid: string,
+  ref: string,
+  value: string,
+  xMm: number,
+  yMm: number,
+  shapes: unknown[],
+  pins: PinSpec[],
+  opts: SymbolOpts = {},
+): StoredItemLike {
   const orientation = opts.orientation ?? 1;
   const pinItems = pins.map((p, i) => {
     const [tx, ty] = opts.pinsRelative ? [p.x, p.y] : kicadTransformPoint(p.x, p.y, orientation, !!opts.mirrorX, !!opts.mirrorY);
-    return { item: pin(`${kiid}-pin${i + 1}`, p, opts.pinsRelative ? tx : xMm + tx, opts.pinsRelative ? ty : yMm + ty), unit: { unit: 0 }, bodyStyle: { style: 0 }, isPrivate: false };
+    return {
+      item: pin(`${kiid}-pin${i + 1}`, p, opts.pinsRelative ? tx : xMm + tx, opts.pinsRelative ? ty : yMm + ty),
+      unit: { unit: 0 },
+      bodyStyle: { style: 0 },
+      isPrivate: false,
+    };
   });
   return {
     id: kiid,
@@ -178,9 +198,20 @@ export function ic(kiid: string, ref: string, xMm: number, yMm: number, opts: Sy
   );
 }
 
-const strokeOf = (widthMm: number, style = 1, color?: { r: number; g: number; b: number; a: number }) => ({ width: d(widthMm), style, ...(color ? { color } : {}) });
+const strokeOf = (widthMm: number, style = 1, color?: { r: number; g: number; b: number; a: number }) => ({
+  width: d(widthMm),
+  style,
+  ...(color ? { color } : {}),
+});
 
-export function wire(kiid: string, ax: number, ay: number, bx: number, by: number, opts: { widthMm?: number; bus?: boolean; graphic?: boolean; color?: { r: number; g: number; b: number; a: number }; style?: number } = {}): StoredItemLike {
+export function wire(
+  kiid: string,
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+  opts: { widthMm?: number; bus?: boolean; graphic?: boolean; color?: { r: number; g: number; b: number; a: number }; style?: number } = {},
+): StoredItemLike {
   return {
     id: kiid,
     type: 'KOT_SCH_LINE',
@@ -197,18 +228,33 @@ export function wire(kiid: string, ax: number, ay: number, bx: number, by: numbe
 }
 
 export function junction(kiid: string, x: number, y: number, diameterMm = 0): StoredItemLike {
-  return { id: kiid, type: 'KOT_SCH_JUNCTION', proto: { $typeName: 'kiapi.schematic.types.Junction', id: id(kiid), position: v(x, y), diameter: d(diameterMm) } };
+  return {
+    id: kiid,
+    type: 'KOT_SCH_JUNCTION',
+    proto: { $typeName: 'kiapi.schematic.types.Junction', id: id(kiid), position: v(x, y), diameter: d(diameterMm) },
+  };
 }
 
 export function noConnect(kiid: string, x: number, y: number): StoredItemLike {
-  return { id: kiid, type: 'KOT_SCH_NO_CONNECT', proto: { $typeName: 'kiapi.schematic.types.NoConnectMarker', id: id(kiid), position: v(x, y), size: d(0) } };
+  return {
+    id: kiid,
+    type: 'KOT_SCH_NO_CONNECT',
+    proto: { $typeName: 'kiapi.schematic.types.NoConnectMarker', id: id(kiid), position: v(x, y), size: d(0) },
+  };
 }
 
 export function busEntry(kiid: string, x: number, y: number, busToBus = false, sizeMm = 2.54): StoredItemLike {
   return {
     id: kiid,
     type: busToBus ? 'KOT_SCH_BUS_BUS_ENTRY' : 'KOT_SCH_BUS_WIRE_ENTRY',
-    proto: { $typeName: 'kiapi.schematic.types.BusEntry', id: id(kiid), position: v(x, y), size: v(sizeMm, sizeMm), stroke: strokeOf(0), type: busToBus ? 2 : 1 },
+    proto: {
+      $typeName: 'kiapi.schematic.types.BusEntry',
+      id: id(kiid),
+      position: v(x, y),
+      size: v(sizeMm, sizeMm),
+      stroke: strokeOf(0),
+      type: busToBus ? 2 : 1,
+    },
   };
 }
 
@@ -218,20 +264,59 @@ export type Spin = 1 | 2 | 3 | 4;
 function labelText(text: string, x: number, y: number, spin: Spin, sizeMm: number, valign: number) {
   const vertical = spin === 2 || spin === 4;
   const right = spin === 1 || spin === 4;
-  return { position: v(x, y), text, attributes: textAttrs(sizeMm, { angle: a(vertical ? 90 : 0), horizontalAlignment: right ? 3 : 1, verticalAlignment: valign }) };
+  return {
+    position: v(x, y),
+    text,
+    attributes: textAttrs(sizeMm, { angle: a(vertical ? 90 : 0), horizontalAlignment: right ? 3 : 1, verticalAlignment: valign }),
+  };
 }
 
 export function localLabel(kiid: string, x: number, y: number, text: string, spin: Spin = 3, sizeMm = 1.27): StoredItemLike {
-  return { id: kiid, type: 'KOT_SCH_LABEL', proto: { $typeName: 'kiapi.schematic.types.LocalLabel', id: id(kiid), position: v(x, y), text: labelText(text, x, y, spin, sizeMm, 3), spinStyle: spin, fields: [] } };
+  return {
+    id: kiid,
+    type: 'KOT_SCH_LABEL',
+    proto: {
+      $typeName: 'kiapi.schematic.types.LocalLabel',
+      id: id(kiid),
+      position: v(x, y),
+      text: labelText(text, x, y, spin, sizeMm, 3),
+      spinStyle: spin,
+      fields: [],
+    },
+  };
 }
 
 /** SLSH_INPUT = 1, OUTPUT = 2, BIDI = 3, TRISTATE = 4, PASSIVE = 5 */
 export function globalLabel(kiid: string, x: number, y: number, text: string, shape = 1, spin: Spin = 3, sizeMm = 1.27): StoredItemLike {
-  return { id: kiid, type: 'KOT_SCH_GLOBAL_LABEL', proto: { $typeName: 'kiapi.schematic.types.GlobalLabel', id: id(kiid), position: v(x, y), text: labelText(text, x, y, spin, sizeMm, 2), spinStyle: spin, shape, fields: [] } };
+  return {
+    id: kiid,
+    type: 'KOT_SCH_GLOBAL_LABEL',
+    proto: {
+      $typeName: 'kiapi.schematic.types.GlobalLabel',
+      id: id(kiid),
+      position: v(x, y),
+      text: labelText(text, x, y, spin, sizeMm, 2),
+      spinStyle: spin,
+      shape,
+      fields: [],
+    },
+  };
 }
 
 export function hierLabel(kiid: string, x: number, y: number, text: string, shape = 1, spin: Spin = 3, sizeMm = 1.27): StoredItemLike {
-  return { id: kiid, type: 'KOT_SCH_HIER_LABEL', proto: { $typeName: 'kiapi.schematic.types.HierarchicalLabel', id: id(kiid), position: v(x, y), text: labelText(text, x, y, spin, sizeMm, 2), spinStyle: spin, shape, fields: [] } };
+  return {
+    id: kiid,
+    type: 'KOT_SCH_HIER_LABEL',
+    proto: {
+      $typeName: 'kiapi.schematic.types.HierarchicalLabel',
+      id: id(kiid),
+      position: v(x, y),
+      text: labelText(text, x, y, spin, sizeMm, 2),
+      spinStyle: spin,
+      shape,
+      fields: [],
+    },
+  };
 }
 
 /**
@@ -265,7 +350,16 @@ export interface SheetPinSpec {
   at: number;
 }
 
-export function sheet(kiid: string, x: number, y: number, w: number, h: number, name: string, file: string, pins: SheetPinSpec[]): StoredItemLike {
+export function sheet(
+  kiid: string,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  name: string,
+  file: string,
+  pins: SheetPinSpec[],
+): StoredItemLike {
   const sideSpin: Record<number, Spin> = { 1: 3, 2: 1, 3: 4, 4: 2 };
   return {
     id: kiid,
@@ -298,8 +392,23 @@ export function sheet(kiid: string, x: number, y: number, w: number, h: number, 
   };
 }
 
-export function schText(kiid: string, x: number, y: number, text: string, sizeMm = 1.27, extra: Record<string, unknown> = {}): StoredItemLike {
-  return { id: kiid, type: 'KOT_SCH_TEXT', proto: { $typeName: 'kiapi.schematic.types.SchematicText', id: id(kiid), text: { position: v(x, y), text, attributes: textAttrs(sizeMm, extra) } } };
+export function schText(
+  kiid: string,
+  x: number,
+  y: number,
+  text: string,
+  sizeMm = 1.27,
+  extra: Record<string, unknown> = {},
+): StoredItemLike {
+  return {
+    id: kiid,
+    type: 'KOT_SCH_TEXT',
+    proto: {
+      $typeName: 'kiapi.schematic.types.SchematicText',
+      id: id(kiid),
+      text: { position: v(x, y), text, attributes: textAttrs(sizeMm, extra) },
+    },
+  };
 }
 
 export function textBox(kiid: string, x0: number, y0: number, x1: number, y1: number, text: string): StoredItemLike {
@@ -309,7 +418,13 @@ export function textBox(kiid: string, x0: number, y0: number, x1: number, y1: nu
     proto: {
       $typeName: 'kiapi.schematic.types.SchematicTextBox',
       id: id(kiid),
-      textbox: { topLeft: v(x0, y0), bottomRight: v(x1, y1), text, attributes: textAttrs(1.27, { horizontalAlignment: 1, verticalAlignment: 1 }), borderEnabled: true },
+      textbox: {
+        topLeft: v(x0, y0),
+        bottomRight: v(x1, y1),
+        text,
+        attributes: textAttrs(1.27, { horizontalAlignment: 1, verticalAlignment: 1 }),
+        borderEnabled: true,
+      },
       graphicAttributes: { stroke: strokeOf(0), fill: { fillType: 3, color: { r: 1, g: 1, b: 0.8, a: 1 } } },
       marginLeft: d(0.5),
       marginTop: d(0.5),
@@ -331,11 +446,19 @@ export function pngHeader(): Uint8Array {
 }
 
 export function schImage(kiid: string, x: number, y: number, scale = 1, imageData: Uint8Array = pngHeader()): StoredItemLike {
-  return { id: kiid, type: 'KOT_SCH_BITMAP', proto: { $typeName: 'kiapi.schematic.types.SchematicImage', id: id(kiid), position: v(x, y), imageScale: { value: scale }, imageData } };
+  return {
+    id: kiid,
+    type: 'KOT_SCH_BITMAP',
+    proto: { $typeName: 'kiapi.schematic.types.SchematicImage', id: id(kiid), position: v(x, y), imageScale: { value: scale }, imageData },
+  };
 }
 
 export function group(kiid: string, name: string, members: string[]): StoredItemLike {
-  return { id: kiid, type: 'KOT_SCH_GROUP', proto: { $typeName: 'kiapi.schematic.types.Group', id: id(kiid), name, items: members.map((m) => id(m)) } };
+  return {
+    id: kiid,
+    type: 'KOT_SCH_GROUP',
+    proto: { $typeName: 'kiapi.schematic.types.Group', id: id(kiid), name, items: members.map((m) => id(m)) },
+  };
 }
 
 export function ruleArea(kiid: string, pts: Array<[number, number]>): StoredItemLike {
@@ -345,7 +468,17 @@ export function ruleArea(kiid: string, pts: Array<[number, number]>): StoredItem
     proto: {
       $typeName: 'kiapi.schematic.types.SchematicRuleArea',
       id: id(kiid),
-      shape: { attributes: { stroke: strokeOf(0), fill: { fillType: 1 } }, geometry: { case: 'polygon', value: { polygons: [{ outline: { nodes: pts.map(([px, py]) => ({ geometry: { case: 'point', value: v(px, py) } })), closed: true }, holes: [] }] } } },
+      shape: {
+        attributes: { stroke: strokeOf(0), fill: { fillType: 1 } },
+        geometry: {
+          case: 'polygon',
+          value: {
+            polygons: [
+              { outline: { nodes: pts.map(([px, py]) => ({ geometry: { case: 'point', value: v(px, py) } })), closed: true }, holes: [] },
+            ],
+          },
+        },
+      },
     },
   };
 }
