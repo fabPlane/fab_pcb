@@ -6,7 +6,15 @@
  *
  * Everything is exposed on `window.pixelDiff.run(snapshot, svgText, options)`.
  */
-import { BoardCanvasHost, KICAD_DEFAULT_THEME, SchematicCanvasHost, type BaseCanvasHost, type StoredItemLike, type StoreDiffLike, type Theme } from '../../src/index.js';
+import {
+  BoardCanvasHost,
+  KICAD_DEFAULT_THEME,
+  SchematicCanvasHost,
+  type BaseCanvasHost,
+  type StoredItemLike,
+  type StoreDiffLike,
+  type Theme,
+} from '../../src/index.js';
 
 const MM = 1_000_000;
 
@@ -92,7 +100,12 @@ class SnapshotStore {
   }
 }
 
-async function renderOurs(snapshot: Snapshot, o: RunOptions, width: number, height: number): Promise<{ canvas: HTMLCanvasElement; renderItems: number }> {
+async function renderOurs(
+  snapshot: Snapshot,
+  o: RunOptions,
+  width: number,
+  height: number,
+): Promise<{ canvas: HTMLCanvasElement; renderItems: number }> {
   const el = document.createElement('div');
   el.style.cssText = `position:absolute;left:0;top:0;width:${width}px;height:${height}px;`;
   document.body.appendChild(el);
@@ -100,7 +113,10 @@ async function renderOurs(snapshot: Snapshot, o: RunOptions, width: number, heig
   const common = { overlays: { showGrid: false, showAxes: false }, background: 0xffffff, antialias: true, preference: 'webgl' as const };
   const white = { r: 255, g: 255, b: 255, a: 1 };
   const theme: Theme = o.whiteHoles
-    ? { ...KICAD_DEFAULT_THEME, colors: { ...KICAD_DEFAULT_THEME.colors, 'board.via_hole': white, 'board.pad_plated_hole': white, 'board.plated_hole': white } }
+    ? {
+        ...KICAD_DEFAULT_THEME,
+        colors: { ...KICAD_DEFAULT_THEME.colors, 'board.via_hole': white, 'board.pad_plated_hole': white, 'board.plated_hole': white },
+      }
     : KICAD_DEFAULT_THEME;
   let host: BaseCanvasHost;
   if (snapshot.kind === 'board') {

@@ -60,18 +60,15 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     if (!get().docs[key]) set({ docs: { ...get().docs, [key]: fresh(kind) } });
   },
   setSelection: (key, ids) => update(set, key, () => ({ selection: ids })),
-  toggleSelection: (key, id) =>
-    update(set, key, (d) => ({ selection: d.selection.includes(id) ? d.selection.filter((x) => x !== id) : [...d.selection, id] })),
+  toggleSelection: (key, id) => update(set, key, (d) => ({ selection: d.selection.includes(id) ? d.selection.filter((x) => x !== id) : [...d.selection, id] })),
   setHover: (key, id) => update(set, key, (d) => (d.hover === id ? {} : { hover: id })),
   setActiveLayer: (key, layer) => update(set, key, () => ({ activeLayer: layer })),
-  setLayerVisible: (key, layer, visible) =>
-    update(set, key, (d) => ({ hiddenLayers: visible ? d.hiddenLayers.filter((l) => l !== layer) : [...new Set([...d.hiddenLayers, layer])] })),
+  setLayerVisible: (key, layer, visible) => update(set, key, (d) => ({ hiddenLayers: visible ? d.hiddenLayers.filter((l) => l !== layer) : [...new Set([...d.hiddenLayers, layer])] })),
   setAllLayersVisible: (key, layers, visible) =>
     update(set, key, (d) => ({ hiddenLayers: visible ? d.hiddenLayers.filter((l) => !layers.includes(l)) : [...new Set([...d.hiddenLayers, ...layers])] })),
   setLayerOpacity: (key, layer, alpha) => update(set, key, (d) => ({ layerOpacity: { ...d.layerOpacity, [layer]: alpha } })),
   setHighlightNets: (key, nets) => update(set, key, () => ({ highlightNets: nets })),
-  toggleHighlightNet: (key, net) =>
-    update(set, key, (d) => ({ highlightNets: d.highlightNets.includes(net) ? d.highlightNets.filter((n) => n !== net) : [...d.highlightNets, net] })),
+  toggleHighlightNet: (key, net) => update(set, key, (d) => ({ highlightNets: d.highlightNets.includes(net) ? d.highlightNets.filter((n) => n !== net) : [...d.highlightNets, net] })),
   setCamera: (key, camera) => update(set, key, () => ({ camera })),
   setCursor: (key, cursor) => update(set, key, () => ({ cursor })),
   setTool: (key, tool) => update(set, key, () => ({ tool })),

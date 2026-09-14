@@ -16,7 +16,11 @@ import { MM, footprint, fpShape, pad, seg } from './fixtures.js';
 import { BOARD_LAYER_ENUM } from '../src/board/boardLayers.js';
 
 /** Wraps a definition child the way the API delivers it: an Any with the message as payload. */
-const asAny = (msg: Record<string, unknown>) => ({ $typeName: 'google.protobuf.Any', typeUrl: `type.googleapis.com/${msg.$typeName}`, value: msg });
+const asAny = (msg: Record<string, unknown>) => ({
+  $typeName: 'google.protobuf.Any',
+  typeUrl: `type.googleapis.com/${msg.$typeName}`,
+  value: msg,
+});
 const decodeAny = (a: unknown) => (a as { value: unknown }).value;
 
 class FakeStore implements ItemStoreLike {
@@ -79,7 +83,8 @@ describe('BoardCanvasHost footprint children', () => {
     expect(boxContains(body.bbox, { x: 10.8 * MM, y: 10 * MM })).toBe(true);
     // one pad-1 copper item in the whole scene
     let copies = 0;
-    for (const it of (host as unknown as { scene: { items(): Iterable<{ id: string }> } }).scene.items()) if (it.id === 'R1-p1@BL_F_Cu') copies++;
+    for (const it of (host as unknown as { scene: { items(): Iterable<{ id: string }> } }).scene.items())
+      if (it.id === 'R1-p1@BL_F_Cu') copies++;
     expect(copies).toBe(1);
   });
 
@@ -120,7 +125,8 @@ describe('BoardCanvasHost footprint children', () => {
     const host = new BoardCanvasHost(undefined, { copperLayers: ['BL_F_Cu', 'BL_B_Cu'] });
     host.setStore(store);
     const copper: string[] = [];
-    for (const it of (host as unknown as { scene: { items(): Iterable<{ id: string; layer: string }> } }).scene.items()) if (/_Cu$/.test(it.layer)) copper.push(it.layer);
+    for (const it of (host as unknown as { scene: { items(): Iterable<{ id: string; layer: string }> } }).scene.items())
+      if (/_Cu$/.test(it.layer)) copper.push(it.layer);
     expect(copper.sort()).toEqual(['BL_B_Cu', 'BL_F_Cu']);
   });
 });

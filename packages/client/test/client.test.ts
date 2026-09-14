@@ -18,7 +18,9 @@ import { KiCadApiError } from "../src/errors";
 import { FakeTransport, fail, reply } from "./fake-transport";
 
 function versionTransport(): FakeTransport {
-  return new FakeTransport().on(GetVersionSchema, () => reply(GetVersionResponseSchema, { version: { major: 10, minor: 99, patch: 0, fullVersion: "10.99.0-test" } }));
+  return new FakeTransport().on(GetVersionSchema, () =>
+    reply(GetVersionResponseSchema, { version: { major: 10, minor: 99, patch: 0, fullVersion: "10.99.0-test" } }),
+  );
 }
 
 describe("KiCadClient envelope", () => {
@@ -60,7 +62,10 @@ describe("KiCadClient envelope", () => {
   });
 
   test("mismatched response type is an error, not a silent empty message", async () => {
-    const t = new FakeTransport().on(GetVersionSchema, () => ({ status: ApiStatusCode.AS_OK, message: packAny(PingSchema, create(PingSchema)) }));
+    const t = new FakeTransport().on(GetVersionSchema, () => ({
+      status: ApiStatusCode.AS_OK,
+      message: packAny(PingSchema, create(PingSchema)),
+    }));
     const c = await KiCadClient.connect(t, { clientName: "x" });
     await expect(commands.getVersion(c)).rejects.toThrow(/expected response type/);
   });
@@ -111,8 +116,16 @@ describe("capabilities", () => {
     const t = versionTransport().on(GetSupportedCommandsSchema, () =>
       reply(GetSupportedCommandsResponseSchema, {
         commands: [
-          { typeUrl: "type.googleapis.com/kiapi.common.commands.GetVersion", responseTypeUrl: "type.googleapis.com/kiapi.common.commands.GetVersionResponse", headless: true },
-          { typeUrl: "type.googleapis.com/kiapi.common.commands.GetSelection", responseTypeUrl: "type.googleapis.com/kiapi.common.commands.SelectionResponse", headless: false },
+          {
+            typeUrl: "type.googleapis.com/kiapi.common.commands.GetVersion",
+            responseTypeUrl: "type.googleapis.com/kiapi.common.commands.GetVersionResponse",
+            headless: true,
+          },
+          {
+            typeUrl: "type.googleapis.com/kiapi.common.commands.GetSelection",
+            responseTypeUrl: "type.googleapis.com/kiapi.common.commands.SelectionResponse",
+            headless: false,
+          },
         ],
       }),
     );

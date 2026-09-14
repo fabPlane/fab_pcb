@@ -6,28 +6,22 @@
     "tsBuildInfoFile": "dist-tsc/tsconfig.tsbuildinfo",
     "emitDeclarationOnly": true,
     "jsx": "react-jsx",
-    "types": [
-      "bun",
-      "vite/client"
-    ],
+    "types": ["bun", "vite/client"],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     },
     "resolveJsonModule": true
   },
-  "include": [
-    "src",
-    "test",
-    "vite.config.ts"
-  ],
+  "include": ["src", "test", "vite.config.ts"],
   "references": [
     {
       "path": "../../packages/proto"
     },
     {
       "path": "../../packages/client"
+    },
+    {
+      "path": "../../packages/kicad-wasm"
     },
     {
       "path": "../../packages/renderer"

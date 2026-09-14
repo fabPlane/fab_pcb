@@ -355,7 +355,8 @@ export function tracesToItems(
             claimedById.set(existing.id, claim);
             claimedVias.push(claim);
           } else if (prior.net !== net) conflicts++;
-          if (existing.position.x !== position.x || existing.position.y !== position.y) snaps.push({ from: position, to: existing.position });
+          if (existing.position.x !== position.x || existing.position.y !== position.y)
+            snaps.push({ from: position, to: existing.position });
         } else {
           vias.push({ net, netCode, position, diameter: rules.viaDiameter, drill: rules.viaDrill, layers: [...layers.layers] });
         }
@@ -422,7 +423,9 @@ export class JsRouter implements Autorouter {
         // Solver8 is the "laser prefab" pipeline: vias only where an obstacle is `netIsAssignable`.
         solver =
           preset === "laser-prefab"
-            ? (new AutoroutingPipelineSolver8(srjIn as never, { effort: opts.effort ?? 1 } as never) as unknown as InstanceType<typeof AutoroutingPipelineSolver>)
+            ? (new AutoroutingPipelineSolver8(srjIn as never, { effort: opts.effort ?? 1 } as never) as unknown as InstanceType<
+                typeof AutoroutingPipelineSolver
+              >)
             : new AutoroutingPipelineSolver(srjIn as never, { effort: opts.effort ?? 1 });
       } catch (e) {
         return { traces: [], error: e instanceof Error ? e.message : String(e), iterations: 0 };
@@ -514,6 +517,17 @@ export class JsRouter implements Autorouter {
       );
     if (conflicts) log.push(`warning: ${conflicts} free via(s) wanted by more than one net; only the first net got each`);
     progress?.({ phase: "done", percent: 100, routed: input.connections.length - unrouted.length, total: input.connections.length });
-    return { router: this.name, tracks, vias, claimedVias, preset, unrouted, totalConnections: input.connections.length, timedOut, elapsedMs, log };
+    return {
+      router: this.name,
+      tracks,
+      vias,
+      claimedVias,
+      preset,
+      unrouted,
+      totalConnections: input.connections.length,
+      timedOut,
+      elapsedMs,
+      log,
+    };
   }
 }

@@ -1268,6 +1268,23 @@ h3.section:first-child {
   font-size: var(--fs-xs);
   color: var(--fg-muted);
 }
+/* In-browser wasm mode: the file picker that stands in for the workspace browser. */
+.project-screen .import-project {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.project-screen .import-project.dropping {
+  outline: 2px dashed var(--accent, currentColor);
+  outline-offset: -8px;
+}
+.project-screen .import-project .empty-state {
+  flex: 0 0 auto;
+}
+.project-screen .import-project .project-actions {
+  margin-top: auto;
+}
+
 .project-screen .browser {
   display: flex;
   flex-direction: column;
@@ -1647,7 +1664,7 @@ h3.section:first-child {
   font-size: 11px;
   font-family: var(--font-mono, monospace);
 }
-.canvas-slot[data-tool]:not([data-tool='select']):not([data-tool='move']) canvas {
+.canvas-slot[data-tool]:not([data-tool="select"]):not([data-tool="move"]) canvas {
   cursor: crosshair;
 }
 

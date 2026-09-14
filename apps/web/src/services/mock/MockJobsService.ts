@@ -14,7 +14,16 @@ export const JOB_DEFINITIONS: JobDefinition[] = [
       { key: 'useProtelExtensions', label: 'Use Protel filename extensions', type: 'boolean', default: false },
       { key: 'includeNetlistAttributes', label: 'Include netlist attributes (X2)', type: 'boolean', default: true },
       { key: 'subtractSoldermask', label: 'Subtract soldermask from silkscreen', type: 'boolean', default: true },
-      { key: 'precision', label: 'Coordinate format', type: 'select', default: '4.6', choices: [{ value: '4.5', label: '4.5 (unit mm)' }, { value: '4.6', label: '4.6 (unit mm)' }] },
+      {
+        key: 'precision',
+        label: 'Coordinate format',
+        type: 'select',
+        default: '4.6',
+        choices: [
+          { value: '4.5', label: '4.5 (unit mm)' },
+          { value: '4.6', label: '4.6 (unit mm)' },
+        ],
+      },
     ],
   },
   {
@@ -24,11 +33,29 @@ export const JOB_DEFINITIONS: JobDefinition[] = [
     document: 'board',
     command: 'RunBoardJobExportDrill',
     options: [
-      { key: 'format', label: 'Format', type: 'select', default: 'excellon', choices: [{ value: 'excellon', label: 'Excellon' }, { value: 'gerber', label: 'Gerber X2' }] },
+      {
+        key: 'format',
+        label: 'Format',
+        type: 'select',
+        default: 'excellon',
+        choices: [
+          { value: 'excellon', label: 'Excellon' },
+          { value: 'gerber', label: 'Gerber X2' },
+        ],
+      },
       { key: 'mirrorY', label: 'Mirror Y axis', type: 'boolean', default: false },
       { key: 'minimalHeader', label: 'Minimal header', type: 'boolean', default: false },
       { key: 'generateMap', label: 'Generate drill map (PDF)', type: 'boolean', default: true },
-      { key: 'origin', label: 'Drill origin', type: 'select', default: 'absolute', choices: [{ value: 'absolute', label: 'Absolute' }, { value: 'plot', label: 'Drill/place file origin' }] },
+      {
+        key: 'origin',
+        label: 'Drill origin',
+        type: 'select',
+        default: 'absolute',
+        choices: [
+          { value: 'absolute', label: 'Absolute' },
+          { value: 'plot', label: 'Drill/place file origin' },
+        ],
+      },
     ],
   },
   {
@@ -38,9 +65,38 @@ export const JOB_DEFINITIONS: JobDefinition[] = [
     document: 'board',
     command: 'RunBoardJobExportPos',
     options: [
-      { key: 'format', label: 'Format', type: 'select', default: 'csv', choices: [{ value: 'csv', label: 'CSV' }, { value: 'ascii', label: 'ASCII' }, { value: 'gerber', label: 'Gerber X3' }] },
-      { key: 'units', label: 'Units', type: 'select', default: 'mm', choices: [{ value: 'mm', label: 'Millimetres' }, { value: 'in', label: 'Inches' }] },
-      { key: 'side', label: 'Side', type: 'select', default: 'both', choices: [{ value: 'front', label: 'Front' }, { value: 'back', label: 'Back' }, { value: 'both', label: 'Both' }] },
+      {
+        key: 'format',
+        label: 'Format',
+        type: 'select',
+        default: 'csv',
+        choices: [
+          { value: 'csv', label: 'CSV' },
+          { value: 'ascii', label: 'ASCII' },
+          { value: 'gerber', label: 'Gerber X3' },
+        ],
+      },
+      {
+        key: 'units',
+        label: 'Units',
+        type: 'select',
+        default: 'mm',
+        choices: [
+          { value: 'mm', label: 'Millimetres' },
+          { value: 'in', label: 'Inches' },
+        ],
+      },
+      {
+        key: 'side',
+        label: 'Side',
+        type: 'select',
+        default: 'both',
+        choices: [
+          { value: 'front', label: 'Front' },
+          { value: 'back', label: 'Back' },
+          { value: 'both', label: 'Both' },
+        ],
+      },
       { key: 'smdOnly', label: 'SMD footprints only', type: 'boolean', default: true },
       { key: 'excludeDnp', label: 'Exclude DNP', type: 'boolean', default: true },
     ],
@@ -52,7 +108,17 @@ export const JOB_DEFINITIONS: JobDefinition[] = [
     document: 'board',
     command: 'RunBoardJobExport3D',
     options: [
-      { key: 'format', label: 'Format', type: 'select', default: 'step', choices: [{ value: 'step', label: 'STEP' }, { value: 'glb', label: 'GLB (binary glTF)' }, { value: 'xao', label: 'XAO' }] },
+      {
+        key: 'format',
+        label: 'Format',
+        type: 'select',
+        default: 'step',
+        choices: [
+          { value: 'step', label: 'STEP' },
+          { value: 'glb', label: 'GLB (binary glTF)' },
+          { value: 'xao', label: 'XAO' },
+        ],
+      },
       { key: 'includeTracks', label: 'Include tracks and vias', type: 'boolean', default: false },
       { key: 'includeZones', label: 'Include zones', type: 'boolean', default: false },
       { key: 'substituteModels', label: 'Substitute STEP for VRML models', type: 'boolean', default: true },
@@ -66,10 +132,25 @@ export const JOB_DEFINITIONS: JobDefinition[] = [
     document: 'board',
     command: 'RunBoardJobExportSvg',
     options: [
-      { key: 'layers', label: 'Layers', type: 'layers', default: ['BL_F_Cu', 'BL_F_SilkS', 'BL_Edge_Cuts'], choices: LAYER_CHOICES.map((l) => ({ value: l, label: l.replace('BL_', '').replace('_', '.') })) },
+      {
+        key: 'layers',
+        label: 'Layers',
+        type: 'layers',
+        default: ['BL_F_Cu', 'BL_F_SilkS', 'BL_Edge_Cuts'],
+        choices: LAYER_CHOICES.map((l) => ({ value: l, label: l.replace('BL_', '').replace('_', '.') })),
+      },
       { key: 'blackAndWhite', label: 'Black and white', type: 'boolean', default: false },
       { key: 'mirror', label: 'Mirror', type: 'boolean', default: false },
-      { key: 'pageSize', label: 'Page', type: 'select', default: 'board', choices: [{ value: 'board', label: 'Board area' }, { value: 'page', label: 'Full page' }] },
+      {
+        key: 'pageSize',
+        label: 'Page',
+        type: 'select',
+        default: 'board',
+        choices: [
+          { value: 'board', label: 'Board area' },
+          { value: 'page', label: 'Full page' },
+        ],
+      },
     ],
   },
   {
@@ -79,7 +160,16 @@ export const JOB_DEFINITIONS: JobDefinition[] = [
     document: 'board',
     command: 'RunBoardJobExportIpc2581',
     options: [
-      { key: 'version', label: 'IPC-2581 revision', type: 'select', default: 'C', choices: [{ value: 'B', label: 'Revision B' }, { value: 'C', label: 'Revision C' }] },
+      {
+        key: 'version',
+        label: 'IPC-2581 revision',
+        type: 'select',
+        default: 'C',
+        choices: [
+          { value: 'B', label: 'Revision B' },
+          { value: 'C', label: 'Revision C' },
+        ],
+      },
       { key: 'compress', label: 'Compress output', type: 'boolean', default: true },
       { key: 'bomMpn', label: 'BOM MPN field', type: 'string', default: 'MPN' },
     ],
@@ -93,7 +183,16 @@ export const JOB_DEFINITIONS: JobDefinition[] = [
     options: [
       { key: 'blackAndWhite', label: 'Black and white', type: 'boolean', default: false },
       { key: 'excludeDrawingSheet', label: 'Exclude drawing sheet (frame)', type: 'boolean', default: false },
-      { key: 'theme', label: 'Colour theme', type: 'select', default: 'kicad_classic', choices: [{ value: 'kicad_classic', label: 'KiCad Classic' }, { value: 'kicad_default', label: 'KiCad Default' }] },
+      {
+        key: 'theme',
+        label: 'Colour theme',
+        type: 'select',
+        default: 'kicad_classic',
+        choices: [
+          { value: 'kicad_classic', label: 'KiCad Classic' },
+          { value: 'kicad_default', label: 'KiCad Default' },
+        ],
+      },
     ],
   },
   {
@@ -103,7 +202,19 @@ export const JOB_DEFINITIONS: JobDefinition[] = [
     document: 'schematic',
     command: 'RunSchematicJobExportNetlist',
     options: [
-      { key: 'format', label: 'Format', type: 'select', default: 'kicadsexpr', choices: [{ value: 'kicadsexpr', label: 'KiCad s-expression' }, { value: 'kicadxml', label: 'KiCad XML' }, { value: 'spice', label: 'SPICE' }, { value: 'cadstar', label: 'Cadstar' }, { value: 'orcadpcb2', label: 'OrCAD PCB2' }] },
+      {
+        key: 'format',
+        label: 'Format',
+        type: 'select',
+        default: 'kicadsexpr',
+        choices: [
+          { value: 'kicadsexpr', label: 'KiCad s-expression' },
+          { value: 'kicadxml', label: 'KiCad XML' },
+          { value: 'spice', label: 'SPICE' },
+          { value: 'cadstar', label: 'Cadstar' },
+          { value: 'orcadpcb2', label: 'OrCAD PCB2' },
+        ],
+      },
     ],
   },
   {
@@ -116,7 +227,17 @@ export const JOB_DEFINITIONS: JobDefinition[] = [
       { key: 'fields', label: 'Fields', type: 'string', default: 'Reference,Value,Footprint,${QUANTITY},${DNP}' },
       { key: 'groupBy', label: 'Group by', type: 'string', default: 'Value,Footprint' },
       { key: 'excludeDnp', label: 'Exclude DNP', type: 'boolean', default: true },
-      { key: 'delimiter', label: 'Field delimiter', type: 'select', default: ',', choices: [{ value: ',', label: 'Comma' }, { value: ';', label: 'Semicolon' }, { value: '\t', label: 'Tab' }] },
+      {
+        key: 'delimiter',
+        label: 'Field delimiter',
+        type: 'select',
+        default: ',',
+        choices: [
+          { value: ',', label: 'Comma' },
+          { value: ';', label: 'Semicolon' },
+          { value: '\t', label: 'Tab' },
+        ],
+      },
     ],
   },
 ];
@@ -219,7 +340,12 @@ export class MockJobsService implements JobsService {
     switch (def.id) {
       case 'board.gerbers':
         return [
-          ...((options.layers as string[] | undefined) ?? []).map((l) => ({ name: `api_kitchen_sink-${l.replace('BL_', '').replace('_', '_')}.gbr`, path: `${base}/gerbers`, bytes: 4_000 + Math.floor(Math.random() * 20_000), mime: 'application/vnd.gerber' })),
+          ...((options.layers as string[] | undefined) ?? []).map((l) => ({
+            name: `api_kitchen_sink-${l.replace('BL_', '').replace('_', '_')}.gbr`,
+            path: `${base}/gerbers`,
+            bytes: 4_000 + Math.floor(Math.random() * 20_000),
+            mime: 'application/vnd.gerber',
+          })),
           { name: 'api_kitchen_sink-job.gbrjob', path: `${base}/gerbers`, bytes: 1_902, mime: 'application/json' },
         ];
       case 'board.drill':
@@ -231,7 +357,14 @@ export class MockJobsService implements JobsService {
       case 'board.position':
         return [{ name: `api_kitchen_sink-${String(options.side)}-pos.${options.format === 'ascii' ? 'pos' : 'csv'}`, path: base, bytes: 610, mime: 'text/csv' }];
       case 'board.step':
-        return [{ name: `api_kitchen_sink.${String(options.format)}`, path: base, bytes: options.format === 'glb' ? 291_004 : 1_402_310, mime: options.format === 'glb' ? 'model/gltf-binary' : 'model/step' }];
+        return [
+          {
+            name: `api_kitchen_sink.${String(options.format)}`,
+            path: base,
+            bytes: options.format === 'glb' ? 291_004 : 1_402_310,
+            mime: options.format === 'glb' ? 'model/gltf-binary' : 'model/step',
+          },
+        ];
       case 'board.svg':
         return [{ name: 'api_kitchen_sink.svg', path: base, bytes: 74_220, mime: 'image/svg+xml' }];
       case 'board.ipc2581':

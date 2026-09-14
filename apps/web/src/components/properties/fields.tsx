@@ -25,7 +25,15 @@ function useDraft<T>(external: T, format: (v: T) => string) {
   return { draft, setDraft, dirty: dirtyState, dirtyRef, setDirty };
 }
 
-export function DistanceField({ path, valueNm, unit, onChange, onCycleUnit, readonly, showNm = true }: Common & { valueNm: number; unit: Unit; onChange(nm: number): void; onCycleUnit?(): void; showNm?: boolean }) {
+export function DistanceField({
+  path,
+  valueNm,
+  unit,
+  onChange,
+  onCycleUnit,
+  readonly,
+  showNm = true,
+}: Common & { valueNm: number; unit: Unit; onChange(nm: number): void; onCycleUnit?(): void; showNm?: boolean }) {
   const { draft, setDraft, dirtyRef, setDirty } = useDraft(valueNm, (v) => formatDistance(v, unit));
   useEffect(() => {
     setDraft(formatDistance(valueNm, unit));
@@ -220,7 +228,15 @@ export function BoolField({ path, value, onChange, readonly }: Common & { value:
 }
 
 export function ColorField({ path, value, onChange, readonly }: Common & { value: { r: number; g: number; b: number; a: number }; onChange(v: { r: number; g: number; b: number; a: number }): void }) {
-  const hex = '#' + [value.r, value.g, value.b].map((c) => Math.round(c * 255).toString(16).padStart(2, '0')).join('');
+  const hex =
+    '#' +
+    [value.r, value.g, value.b]
+      .map((c) =>
+        Math.round(c * 255)
+          .toString(16)
+          .padStart(2, '0'),
+      )
+      .join('');
   return (
     <>
       <input

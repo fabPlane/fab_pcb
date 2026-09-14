@@ -16,6 +16,7 @@ them in parallel.
 ## Wave 1 — foundations (parallel, ~1 week)
 
 ### A1 · KiCad build & server agent
+
 - Build `kicad-cli` from the 10.99 checkout on macOS (and a Linux Docker image for
   CI); script it in `packages/kicad-patches/build.sh`.
 - Prove `kicad-cli api-server qa/data/pcbnew/api_kitchen_sink.kicad_pro` starts,
@@ -24,6 +25,7 @@ them in parallel.
   nng framing (this script becomes A3's first test).
 
 ### A2 · Proto & codegen agent
+
 - `packages/proto`: buf config, protobuf-es generation from `../kicad/api/proto`,
   `Any` registry, int64 policy, `KICAD_COMMIT` pin, drift check in CI.
 - `tooling/coverage`: the script that diffs `.proto` request messages against
@@ -33,6 +35,7 @@ them in parallel.
 - **Done 2026-09-06.** Generated protobuf-es package with Any registry and drift check; coverage tool found 113 commands (two the hand analysis missed plus GetSupportedCommands).
 
 ### A3 · Transport & bridge agent
+
 - `NngIpcTransport` (Bun, `Bun.connect` unix socket) with the SP handshake, length framing, REQ0 ids,
   FIFO queue, timeouts, reconnect.
 - `packages/bridge`: Bun WebSocket server (`Bun.serve`), session = one `kicad-cli api-server`
@@ -45,6 +48,7 @@ them in parallel.
 ## Wave 2 — client, renderers, first patches (parallel, ~3 weeks)
 
 ### A4 · Client SDK agent
+
 - `packages/client`: `KiCadClient`, generated `commands.ts` from `commands.json`,
   object model (`KiCad`, `Project`, `Board`, `Schematic`, `FootprintDocument`,
   item wrappers, `commit()`), units, errors, capability flags.
@@ -54,6 +58,7 @@ them in parallel.
   both kitchen-sink files without data loss (`SaveDocumentToString` diff).
 
 ### A5 · Board renderer agent
+
 - `packages/renderer/board`: Pixi scene, layer containers, item views for every
   board type, pad/text shape cache, zone fill triangulation, theme, picker, camera.
 - Exit: kitchen-sink board visually matches `RunBoardJobExportSvg` output in a
@@ -61,13 +66,15 @@ them in parallel.
 - **Done 2026-09-06** except the SVG pixel-diff harness (open): 52 tests, 60 fps at 187k render items, themes ported from KiCad's headers.
 
 ### A6 · Schematic renderer agent
+
 - `packages/renderer/schematic`: symbol rendering through transforms and units,
   wires/buses/junctions/labels/sheets/fields, hierarchy navigation.
 - Exit: kitchen-sink schematic matches `RunSchematicJobExportSvg`; every label and
   pin is pickable.
 
 ### A7 · KiCad API-gap agent (C++)
-- Works in the KiCad fork, branch `web-api`, in the order given in
+
+- Works in the KiCad fork, branch `main`, in the order given in
   [04-ipc-gaps.md](04-ipc-gaps.md): G13, G6, G1, G5, G4, G3, then G16, G17.
 - Every patch: proto + handler + `qa/tests/api` test + note in `api-coverage.md`
   via A2's script + a conformance test handed to A4.
@@ -75,6 +82,7 @@ them in parallel.
 - **Batch 1 done 2026-09-06:** G13, G6, G18, interim G1 (GetDocumentRevision). Batch 2 (events socket, lifecycle, DRC/ERC) in progress.
 
 ### A8 · App shell agent
+
 - `apps/web`: layout, project screen, panels, command palette, properties editor
   (schema-driven from protobuf descriptors so new fields appear automatically),
   keyboard map, light/dark themes, item store + optimistic commits + client undo.
@@ -87,10 +95,13 @@ them in parallel.
 ## Wave 3 — parity (parallel, ~4 weeks)
 
 ### A7 (continued) · G7 libraries, G8 schematic ops, G9 board ops, G10 undo, G11 settings, G15 transport, G3 for schematic.
+
 ### A8 (continued) · library browser, place-symbol/footprint flows, annotate, sync to board, DRC/ERC panels, exports/jobs UI, 3D view (three.js + GLB).
+
 ### A5/A6 (continued) · ratsnest overlay, DRC marker glyphs, routing preview, snapping.
 
 ### A9 · QA & CI agent
+
 - GitHub Actions: build fork in Docker, cache it, run conformance + Playwright UI
   tests on every PR; publish `api-coverage.md` as a status badge.
 - Owns fixtures beyond kitchen-sink (a real multi-sheet project, a large board).
@@ -105,14 +116,14 @@ them in parallel.
 
 ## Contracts between agents (the only things that are allowed to block)
 
-| Producer → Consumer | Artifact | Ready by |
-|---|---|---|
-| A2 → A4 | `packages/proto` build, `commands.json` | end of wave 1 |
-| A3 → A4, A8 | `Transport` interface + `WebSocketTransport` | end of wave 1 |
-| A4 → A5, A6, A8 | item wrappers + `ItemStore` diff events | wave 2, week 1 |
-| A5/A6 → A8 | `CanvasHost` contract | wave 2, week 1 |
-| A7 → A2 → A4 | proto changes regenerate; conformance test per gap | per patch |
-| A9 ← all | test hooks: every package exposes `bun test` | continuous |
+| Producer → Consumer | Artifact                                           | Ready by       |
+| ------------------- | -------------------------------------------------- | -------------- |
+| A2 → A4             | `packages/proto` build, `commands.json`            | end of wave 1  |
+| A3 → A4, A8         | `Transport` interface + `WebSocketTransport`       | end of wave 1  |
+| A4 → A5, A6, A8     | item wrappers + `ItemStore` diff events            | wave 2, week 1 |
+| A5/A6 → A8          | `CanvasHost` contract                              | wave 2, week 1 |
+| A7 → A2 → A4        | proto changes regenerate; conformance test per gap | per patch      |
+| A9 ← all            | test hooks: every package exposes `bun test`       | continuous     |
 
 ## Agent count and shape
 

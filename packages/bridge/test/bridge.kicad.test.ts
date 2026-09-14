@@ -9,7 +9,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Footprint, KiCad, KiCadEvents } from "@fp-pcb/client";
 import { WebSocketTransport, bridgeWsUrl, type BridgeControlMessage } from "@fp-pcb/client/transport";
-import { configFromEnv, KICAD_CHECKOUT, eventsSocketPathFor, startBridge, type BridgeServer } from "../src/index";
+import { Session, configFromEnv, KICAD_CHECKOUT, eventsSocketPathFor, startBridge, type BridgeServer } from "../src/index";
 import { decodeApiResponse, encodePing } from "../src/kicad-ping";
 
 const cfg = configFromEnv(process.env, { port: 0, log: () => {} });
@@ -265,6 +265,7 @@ describe.skipIf(!haveKicad)("bridge + kicad-cli api-server + WebSocketTransport"
       ws2.onControl((m) => m.type === "server-state" && states2.push(m));
 
       const session = bridge.sessions.get(sessionId)!;
+      if (!(session instanceof Session)) throw new Error("this test kills the kicad-cli process, so it needs the process backend");
       const inflight = ws.send(PING, { timeoutMs: 10_000 }).catch((e: unknown) => e);
       session.proc!.kill("SIGKILL");
       const err = (await inflight) as { code?: string };

@@ -191,7 +191,9 @@ describe.skipIf(!haveKicad())("NngWsTransport against kicad-cli api-server --soc
       const t1 = performance.now();
       for (let i = 0; i < N; i++) expect(decodeApiResponse(await ipcTransport.send(PING_REQUEST)).status).toBe(1);
       const ipcMs = performance.now() - t1;
-      console.log(`  [timing] NngIpcTransport (unix socket): ${N} sequential Pings in ${ipcMs.toFixed(1)} ms (${(ipcMs / N).toFixed(2)} ms/req)`);
+      console.log(
+        `  [timing] NngIpcTransport (unix socket): ${N} sequential Pings in ${ipcMs.toFixed(1)} ms (${(ipcMs / N).toFixed(2)} ms/req)`,
+      );
     } finally {
       await ipcTransport?.close().catch(() => {});
       await ipc?.stop();
