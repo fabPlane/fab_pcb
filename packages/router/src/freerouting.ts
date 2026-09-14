@@ -67,6 +67,8 @@ export interface FreeroutingPaths {
   ok: boolean;
   /** Why Freerouting cannot run (jar or java missing), with the fix. */
   reason?: string;
+  /** `kicad-cli`, for the DSN export fallback when the API's export job returns nothing (G34). */
+  kicadCli?: string;
 }
 
 /**
@@ -115,6 +117,8 @@ export interface FreeroutingOptions {
   workDir?: string;
   /** Default `-mp` when `RouteOptions.effort` is not given. Freerouting's own default is 100. */
   passes?: number;
+  /** `kicad-cli`, so the DSN can come from `pcb export specctra` when the export job returns nothing (G34). */
+  kicadCli?: string;
 }
 
 /** Names of the two API commands this adapter needs in `kicad` mode. */
@@ -183,11 +187,21 @@ export async function serverHasSpecctra(board: Board): Promise<boolean> {
 
 type AnyCommands = Record<string, ((client: unknown, req: unknown) => Promise<unknown>) | undefined>;
 
+/** The DSN export fallback: KiCad's CLI on the saved board file (gap G34). */
+export interface DsnCliFallback {
+  kicadCli: string;
+  /** Absolute path of the board file; derived from the open project and `board.fileName` when omitted. */
+  boardPath?: string;
+  log?: (line: string) => void;
+}
+
 /**
  * Exports the DSN through `RunBoardJobExportSpecctra` (inline output). Throws when the client
- * bindings predate the command (regenerate with `bun run gen` in packages/client).
+ * bindings predate the command (regenerate with `bun run gen` in packages/client). On the nightly
+ * `20260912-5e09a6e3be` the job answers with neither inline data nor a file (gap G34); with a
+ * `fallback` the DSN then comes from `kicad-cli pcb export specctra` on the saved board.
  */
-export async function exportDsnViaKicad(board: Board, outputPath: string): Promise<string> {
+export async function exportDsnViaKicad(board: Board, outputPath: string, fallback?: DsnCliFallback): Promise<string> {
   const fn = (generatedCommands as unknown as AnyCommands)["runBoardJobExportSpecctra"];
   if (!fn)
     throw new Error(
@@ -201,7 +215,22 @@ export async function exportDsnViaKicad(board: Board, outputPath: string): Promi
   const inline = res.outputs?.[0]?.data;
   if (inline && inline.length) return new TextDecoder().decode(inline);
   const path = res.outputPaths?.[0] ?? outputPath;
-  return readFile(path, "utf8");
+  if (existsSync(path)) return readFile(path, "utf8");
+  const nothing = `${SPECCTRA_COMMANDS.export} returned no output (status ${res.status}${res.message ? `: ${res.message}` : ""}) and wrote no file (gap G34)`;
+  if (!fallback) throw new Error(`${nothing}; no kicad-cli is configured for the export fallback`);
+  const boardPath = fallback.boardPath ?? join(dirname((await board.kicad.projectInfo()).kicadProPath), board.fileName);
+  fallback.log?.(`${nothing}; exporting with kicad-cli instead`);
+  const proc = Bun.spawn([fallback.kicadCli, "pcb", "export", "specctra", "-o", outputPath, boardPath], { stdout: "pipe", stderr: "pipe" });
+  const [code, stderr] = await Promise.all([proc.exited, new Response(proc.stderr).text()]);
+  if (code !== 0 || !existsSync(outputPath)) {
+    const tail = stderr
+      .split("\n")
+      .filter((l) => l.trim() && !/objc\[/.test(l))
+      .slice(-3)
+      .join(" | ");
+    throw new Error(`kicad-cli pcb export specctra ${boardPath} failed (exit ${code})${tail ? `: ${tail}` : ""}`);
+  }
+  return readFile(outputPath, "utf8");
 }
 
 export interface SesImportSummary {
@@ -418,7 +447,11 @@ export class FreeroutingRouter implements Autorouter {
     let dsn: string;
     if (opts.signal?.aborted) throw new RouteCancelled();
     if (mode !== "builtin") {
-      dsn = await exportDsnViaKicad(this.ctx.board!, dsnPath);
+      dsn = await exportDsnViaKicad(
+        this.ctx.board!,
+        dsnPath,
+        this.fr.kicadCli ? { kicadCli: this.fr.kicadCli, log: (l) => log.push(l) } : undefined,
+      );
     } else {
       dsn = writeDsn(input, { layers });
     }

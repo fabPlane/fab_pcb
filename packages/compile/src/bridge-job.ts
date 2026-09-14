@@ -32,7 +32,7 @@ import { edgeClearanceNm } from "./apply";
 import { compile, CompileCancelled } from "./compile";
 import { netlistJsonFrontend } from "./frontends/netlist-json";
 import { registerLibraries } from "./libraries";
-import { applyBoardConstraints, applyDefaultNetClass, hasRules } from "./rules";
+import { applyBoardConstraints, applyDefaultNetClass, hasRules, persistNetClassFile } from "./rules";
 import { generateSchematic } from "./schematic";
 import type { BoardRules, BoardSpec, CompileResult, CompileSource, Frontend, LibrarySpec, MatchMode } from "./types";
 
@@ -224,6 +224,7 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
         abort.signal.throwIfAborted();
 
         const projectInfo = await kicad.projectInfo();
+        const kicadProPath = projectInfo.kicadProPath;
         const projectDir = dirname(projectInfo.kicadProPath);
         const rel = request.netlistPath ?? DEFAULT_NETLIST_PATH;
         const netlistPath = isAbsolute(rel) ? rel : resolve(projectDir, rel);
@@ -282,6 +283,8 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
           setState("saving");
           await board.save();
           await schematic?.save();
+          // The save drops the net class the session holds (G33): put it back into the file.
+          if (hasRules(rules) && (await persistNetClassFile(kicadProPath, rules))) pushLog("net class written to the project file");
         }
         const rev = await board.revision().catch(() => undefined);
         if (rev !== undefined) info.revision = Number(rev);

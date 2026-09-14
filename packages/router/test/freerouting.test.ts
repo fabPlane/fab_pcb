@@ -4,7 +4,11 @@
  */
 import { describe, expect, test } from "bun:test";
 import { existsSync } from "node:fs";
-import { DEFAULT_JAR, FreeroutingRouter, findJava, parseFreeroutingLine, resolveFreerouting } from "../src/freerouting";
+import { chmod, mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import type { Board } from "@fp-pcb/client";
+import { DEFAULT_JAR, FreeroutingRouter, exportDsnViaKicad, findJava, parseFreeroutingLine, resolveFreerouting } from "../src/freerouting";
 import type { RouteProgress } from "../src/types";
 import { twoNetBoard, F, B } from "./fixtures";
 
@@ -125,4 +129,60 @@ describe("runFreerouting cancellation", () => {
     },
     30_000,
   );
+});
+
+describe("exportDsnViaKicad", () => {
+  /** A board whose export job answers `res`, on a project in `dir`. */
+  const fakeBoard = (dir: string, res: unknown, calls: string[]) =>
+    ({
+      client: { call: async () => res },
+      specifier: {},
+      fileName: "b.kicad_pcb",
+      kicad: { projectInfo: async () => ({ kicadProPath: join(dir, "b.kicad_pro") }) },
+      save: async () => {
+        calls.push("save");
+      },
+    }) as unknown as Board;
+
+  test("inline output from the job wins; a file the job wrote is read", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "fp-pcb-dsn-"));
+    try {
+      const calls: string[] = [];
+      const inline = fakeBoard(dir, { status: 0, outputs: [{ path: "", data: new TextEncoder().encode("(pcb inline)") }] }, calls);
+      expect(await exportDsnViaKicad(inline, join(dir, "a.dsn"))).toBe("(pcb inline)");
+      expect(calls).toEqual(["save"]);
+      await Bun.write(join(dir, "b.dsn"), "(pcb file)");
+      const file = fakeBoard(dir, { status: 0, outputPaths: [join(dir, "b.dsn")] }, calls);
+      expect(await exportDsnViaKicad(file, join(dir, "other.dsn"))).toBe("(pcb file)");
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("a job that returns nothing falls back to kicad-cli on the saved board (G34)", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "fp-pcb-dsn-"));
+    try {
+      const cli = join(dir, "kicad-cli");
+      await Bun.write(
+        cli,
+        '#!/bin/sh\nout=""; while [ $# -gt 0 ]; do [ "$1" = "-o" ] && { out="$2"; shift; }; board="$1"; shift; done\nprintf "(pcb from-cli %s %s)" "$out" "$board" > "$out"\n',
+      );
+      await chmod(cli, 0o755);
+      const calls: string[] = [];
+      const board = fakeBoard(dir, { status: 0 }, calls);
+      const out = join(dir, "board.dsn");
+      const log: string[] = [];
+      expect(await exportDsnViaKicad(board, out, { kicadCli: cli, log: (l) => log.push(l) })).toBe(
+        `(pcb from-cli ${out} ${join(dir, "b.kicad_pcb")})`,
+      );
+      expect(log[0]).toMatch(/returned no output .*G34.*kicad-cli instead/);
+      // Without a fallback the failure names the gap instead of an ENOENT on the missing file.
+      await expect(exportDsnViaKicad(board, join(dir, "none.dsn"))).rejects.toThrow(/G34.*no kicad-cli/);
+      // A CLI that fails is reported with its exit code.
+      await Bun.write(cli, "#!/bin/sh\necho 'no board' >&2; exit 3\n");
+      await expect(exportDsnViaKicad(board, join(dir, "fail.dsn"), { kicadCli: cli })).rejects.toThrow(/failed \(exit 3\): no board/);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
 });
