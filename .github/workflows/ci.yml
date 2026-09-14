@@ -35,6 +35,8 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: .bun-version
+          # Some persistent runners restored a cached Bun archive without the executable.
+          no-cache: true
 
       - name: Cache bun install cache
         uses: actions/cache@v4
@@ -132,6 +134,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: .bun-version
+          no-cache: true
 
       - name: Cache bun install cache
         uses: actions/cache@v4
@@ -154,13 +157,18 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
 
-      - name: Install chromium (+ OS deps)
+      - name: Install chromium
         if: steps.pw-cache.outputs.cache-hit != 'true'
-        run: cd e2e && bunx playwright install --with-deps chromium
+        run: cd e2e && bunx playwright install chromium
 
-      - name: Install chromium OS deps only (browser cached)
-        if: steps.pw-cache.outputs.cache-hit == 'true'
-        run: cd e2e && bunx playwright install-deps chromium
+      - name: Install chromium OS deps when the runner permits it
+        run: |
+          if [ "$(id -u)" -eq 0 ] || sudo -n true 2>/dev/null; then
+            cd e2e
+            bunx playwright install-deps chromium
+          else
+            echo "::notice::Skipping Playwright's OS package installer; this runner has no passwordless sudo"
+          fi
 
       - name: Smoke tests (vite build + preview)
         env:
@@ -215,6 +223,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: .bun-version
+          no-cache: true
 
       - name: Cache bun install cache
         uses: actions/cache@v4
@@ -373,6 +382,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: .bun-version
+          no-cache: true
 
       - name: Cache bun install cache
         uses: actions/cache@v4
