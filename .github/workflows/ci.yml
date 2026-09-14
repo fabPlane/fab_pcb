@@ -144,18 +144,13 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
 
-      - name: Install chromium
+      - name: Install chromium (+ OS deps)
         if: steps.pw-cache.outputs.cache-hit != 'true'
-        run: cd e2e && bunx playwright install chromium
+        run: cd e2e && bunx playwright install --with-deps chromium
 
-      - name: Install chromium OS deps when the runner permits it
-        run: |
-          if [ "$(id -u)" -eq 0 ] || sudo -n true 2>/dev/null; then
-            cd e2e
-            bunx playwright install-deps chromium
-          else
-            echo "::notice::Skipping Playwright's OS package installer; this runner has no passwordless sudo"
-          fi
+      - name: Install chromium OS deps only (browser cached)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: cd e2e && bunx playwright install-deps chromium
 
       - name: Smoke tests (vite build + preview)
         env:
