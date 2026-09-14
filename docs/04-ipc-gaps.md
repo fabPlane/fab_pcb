@@ -85,6 +85,43 @@ imported footprints keep the import's spread positions) so a rebuild in the same
 compiles. Fix belongs in the fork's `SetNetClasses` handler (resynchronise nets and the effective
 net-class cache after replacing the classes).
 
+### G30–G34 · Found by the PCBGolf board (fabdesk, 2026-09-14)
+
+commaai's PCBGolf board (238 parts, 196 nets, an LQFP-144 and four vertical USB-C ports; the
+first real KiCad design through `@fp-pcb/compile`) on the nightly `20260912-5e09a6e3be`. Details
+and reproductions in fabdesk's `docs/pcbgolf.md`.
+
+**G30 · Braces in a net name break the project save after `SetNetClasses`.** A net named with
+`{…}` — `Net-(J2-CD{slash}DAT3)` as KiCad's own netlist export writes a label with a `/`, but also
+`A{colon}B` or a plain `CD{x}DAT3` — imports fine; once `SetNetClasses` (merge, the `Default` class
+alone) has run in the session, the next `SaveDocument` answers `AS_BAD_REQUEST: request failed:
+basic_string`. Without the net-class call the same board saves; with the nets renamed it saves.
+Repro: any two-part netlist with such a net and `board.rules.clearanceMm`. **Workaround:**
+`validateNetlist` refuses net names with `{` or `}` (`net_name_escape`). Fix belongs where the
+project's net-class assignment map is serialised with the (un)escaped name.
+
+**G31 · `FootprintInstance.position` is not the v10 transform.** After `ImportNetlist` +
+`AutoplaceFootprints`, `GetItems` reports every footprint at 0,0 while the saved file's
+`(transform (translate x y))` and the pads' positions are right. Reopening the board from disk
+fixes the reads. Clients that need positions after a compile reopen the document (fabdesk does).
+
+**G32 · `AutoplaceFootprints.placed_count` is meaningless.** 238 with 198 of the imported
+footprints never moved (a 60 × 45 mm outline with no room), `APR_COMPLETED`; 0 with all 238 moved
+on 120 × 100 mm and a non-completed result. **Workaround:** the compile counts placed footprints
+from pad positions before and after the call and warns when imported footprints did not move.
+
+**G33 · The project save writes no `net_settings.classes`.** After `SetNetClasses` the session
+holds the class (the router and `GetNetClassForNets` see it) but `<project>.kicad_pro` on disk has
+`"classes": []` after every `SaveDocument`, so `kicad-cli pcb drc` and everything else file-based
+runs at KiCad's stock 0.2 mm. **Workaround:** the compile job writes the `Default` class into the
+project file after its save.
+
+**G34 · `RunBoardJobExportSpecctra` returns nothing.** With `returnInline: true, async: false` the
+job answers with neither inline data nor an output path and writes no file, so the Freerouting
+adapter fails with `ENOENT …/board.dsn` before routing. `kicad-cli pcb export specctra` on the
+same binary and board writes a valid DSN. **Workaround:** the adapter falls back to the CLI export
+when the job returns nothing.
+
 ### G26 · Found by the five-board practice pass
 
 `GetDocumentRevision` reads non-monotonically right after `EndCommit` (1, then 0, 1, 1, 1 within
