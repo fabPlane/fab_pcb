@@ -357,23 +357,23 @@ jobs:
     runs-on: [self-hosted, Linux, X64, tf-nas-ephemeral, fab-pcb]
     container: ubuntu:24.04
     steps:
-      - name: Install GitHub CLI
-        run: |
-          apt-get update -qq
-          apt-get install -y -qq --no-install-recommends gh
       - uses: actions/download-artifact@v4
         with:
           pattern: fp-pcb-backend-*
           path: artifacts
           merge-multiple: true
-      - name: Publish immutable router-free backend release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Resolve immutable release tag
+        id: release
         shell: bash
         run: |
           set -euo pipefail
-          tag="backend-${GITHUB_SHA:0:10}"
           test "$(find artifacts -name 'fp-pcb-backend-*.tar.gz' | wc -l | tr -d ' ')" = 4
-          gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 \
-            || gh release create "$tag" --repo "$GITHUB_REPOSITORY" --title "$tag" --notes "Router-free FabPlane PCB native backends for $GITHUB_SHA."
-          gh release upload "$tag" artifacts/fp-pcb-backend-*.tar.gz --repo "$GITHUB_REPOSITORY" --clobber
+          echo "tag=backend-${GITHUB_SHA:0:10}" >> "$GITHUB_OUTPUT"
+      - name: Publish immutable router-free backend release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release.outputs.tag }}
+          name: ${{ steps.release.outputs.tag }}
+          body: Router-free FabPlane PCB native backends for ${{ github.sha }}.
+          files: artifacts/fp-pcb-backend-*.tar.gz
+          fail_on_unmatched_files: true
