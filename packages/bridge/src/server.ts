@@ -57,7 +57,10 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
     .catch(() => false);
   if (!kicadCliExists && cfg.sessionBackend === "process") cfg.log(`warning: kicad-cli not found at ${cfg.kicadCli} (set KICAD_CLI)`);
   if (cfg.sessionBackend === "wasm") cfg.log(`session backend: wasm (${cfg.wasmModuleUrl})`);
-  const routeJobs = createRouteJobs({ freerouting: cfg.freerouting, log: cfg.log });
+  const routeJobs = createRouteJobs({
+    freerouting: { ...cfg.freerouting, ...(kicadCliExists ? { kicadCli: cfg.kicadCli } : {}) },
+    log: cfg.log,
+  });
   const compileJobs = createCompileJobs({ log: cfg.log });
   if (!cfg.freerouting.ok) cfg.log(`warning: ${cfg.freerouting.reason}`);
 
