@@ -336,6 +336,25 @@ export async function footprintIds(board: Board): Promise<string[]> {
   return (await board.getItems(KiCadObjectType.KOT_PCB_FOOTPRINT)).map((i) => i.id);
 }
 
+/**
+ * The centre of each footprint's pads, for the footprints named. Pads are the one position the API
+ * keeps right after an autoplace (`FootprintInstance.position` reads 0,0 until the board is reopened,
+ * gap G31), so this is how the compile tells what actually moved. Footprints without pads are absent.
+ */
+export async function padCentres(board: Board, ids: ReadonlySet<string>): Promise<Map<string, Vec2>> {
+  const sums = new Map<string, { x: number; y: number; n: number }>();
+  for (const pad of await board.getPads()) {
+    const parent = pad.parent;
+    if (!parent || !ids.has(parent)) continue;
+    const s = sums.get(parent) ?? { x: 0, y: 0, n: 0 };
+    s.x += pad.position.x;
+    s.y += pad.position.y;
+    s.n += 1;
+    sums.set(parent, s);
+  }
+  return new Map([...sums].map(([id, s]) => [id, { x: s.x / s.n, y: s.y / s.n }]));
+}
+
 export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOptions): Promise<ApplyOutcome> {
   const serverPath = opts.serverNetlistPath ?? opts.netlistPath;
   const untouched = (diagnostics: Diagnostic[], report: string): ApplyOutcome => ({
@@ -390,12 +409,23 @@ export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOp
     // The request itself can fail: after `SetNetClasses` in the session the fork answers
     // `basic_string` for newly imported footprints (G29). The footprints then stay where the
     // import spread them, inside the outline, and the compile goes on.
+    // KiCad's own placed_count is meaningless (238 with 198 footprints never moved; 0 with all of
+    // them moved, gap G32): count from where the pads were and are.
+    const addedSet = new Set(added);
+    const centresBefore = await padCentres(board, addedSet);
     const outcome = await board.autoplace(added, { includeOffboard: true }).catch((e: unknown) => ({
       ok: false,
       placedCount: 0,
       error: e instanceof Error ? e.message : String(e),
     }));
-    footprintsPlaced = outcome.placedCount;
+    const centresAfter = await padCentres(board, addedSet);
+    const moved = added.filter((id) => {
+      const a = centresBefore.get(id);
+      const b = centresAfter.get(id);
+      return a !== undefined && b !== undefined && (a.x !== b.x || a.y !== b.y);
+    });
+    footprintsPlaced = moved.length;
+    const unmoved = added.filter((id) => centresBefore.has(id) && !moved.includes(id));
     if ("error" in outcome) {
       diagnostics.push(
         diag(
@@ -408,6 +438,16 @@ export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOp
       // Every non-completed result comes back as APR_NO_BOARD_OUTLINE, so the wording stays broad.
       diagnostics.push(
         diag("warning", "Autoplace did not complete (KiCad reports no board outline or a placement failure).", "autoplace_failed"),
+      );
+    } else if (unmoved.length) {
+      // KiCad answered APR_COMPLETED but left these where the import put them: the outline has no
+      // room for them, and they now sit on top of each other.
+      diagnostics.push(
+        diag(
+          "warning",
+          `${unmoved.length} of ${added.length} imported footprints did not move: the autoplacer found no room for them on this outline and left them where the import put them, on top of each other. Enlarge the board or place them.`,
+          "autoplace_incomplete",
+        ),
       );
     } else if (opts.edgeMarginNm) {
       // 5. Keep the placed group off the edge — by moving the outline we drew, or by saying we could not.

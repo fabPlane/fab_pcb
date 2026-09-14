@@ -48,13 +48,27 @@ interface StubOptions {
   /** What the real import reports. */
   imported?: { errorCount?: number; warningCount?: number; report?: string };
   autoplaceOk?: boolean;
+  /** Which of the added footprints the (stub) autoplacer actually moves; default all of them. */
+  autoplaceMoves?: string[];
 }
 
 function board(o: StubOptions = {}): { board: Board; log: string[]; autoplaceArgs: unknown[] } {
   const log: string[] = [];
   const autoplaceArgs: unknown[] = [];
   let footprints = [...(o.existing ?? [])];
+  const placed = new Set<string>();
   const stub = {
+    async getPads() {
+      log.push("getPads");
+      // Two pads per footprint, side by side; a placed footprint sits 5 mm further along.
+      return footprints.flatMap((id, i) => {
+        const x = i * 10_000_000 + (placed.has(id) ? 5_000_000 : 0);
+        return [
+          { parent: id, position: { x: x - 500_000, y: 0 } },
+          { parent: id, position: { x: x + 500_000, y: 0 } },
+        ];
+      });
+    },
     async importNetlist(_path: string, opts: { dryRun?: boolean }) {
       if (opts.dryRun) {
         log.push("importNetlist:dry");
@@ -80,6 +94,7 @@ function board(o: StubOptions = {}): { board: Board; log: string[]; autoplaceArg
       log.push("autoplace");
       autoplaceArgs.push(...args);
       const ok = o.autoplaceOk ?? true;
+      if (ok) for (const id of o.autoplaceMoves ?? o.adds ?? []) placed.add(id);
       return {
         result: ok ? AutoplaceResult.APR_COMPLETED : AutoplaceResult.APR_NO_BOARD_OUTLINE,
         placedCount: ok ? (o.adds?.length ?? 0) : 0,
@@ -108,10 +123,31 @@ describe("compile", () => {
     const res = await compile(SOURCE, b, { frontend: frontend(), netlistPath: netlistPath("ok"), autoplace: true, board: spec });
 
     expect(res.ok).toBe(true);
-    expect(log).toEqual(["importNetlist:dry", "getShapes", "commit", "getItems", "importNetlist", "getItems", "autoplace"]);
+    expect(log).toEqual([
+      "importNetlist:dry",
+      "getShapes",
+      "commit",
+      "getItems",
+      "importNetlist",
+      "getItems",
+      "getPads",
+      "autoplace",
+      "getPads",
+    ]);
     expect(autoplaceArgs).toEqual([["fp-r1", "fp-d1"], { includeOffboard: true }]);
     expect(res.counts).toEqual({ components: 2, nets: 1, footprintsAdded: 2, footprintsPlaced: 2, viasAdded: 0, holesAdded: 0 });
     expect(await Bun.file(res.netlistPath!).text()).toContain('(comp (ref "R1")');
+  });
+
+  test("counts placed footprints from their pads, not KiCad's number, and names what did not move (G32)", async () => {
+    const { board: b } = board({ adds: ["fp-r1", "fp-d1"], autoplaceMoves: ["fp-r1"] });
+    const res = await compile(SOURCE, b, { frontend: frontend(), netlistPath: netlistPath("unmoved"), autoplace: true, board: spec });
+
+    expect(res.ok).toBe(true);
+    expect(res.counts.footprintsPlaced).toBe(1);
+    const warning = res.diagnostics.find((d) => d.code === "autoplace_incomplete");
+    expect(warning).toMatchObject({ severity: "warning", stage: "apply" });
+    expect(warning!.message).toContain("1 of 2 imported footprints did not move");
   });
 
   test("a dry-run error stops before anything changes and carries KiCad's report", async () => {
