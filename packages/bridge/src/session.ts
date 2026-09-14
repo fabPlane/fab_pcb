@@ -5,17 +5,21 @@
  * `SessionManager` spawns, supervises and tears sessions down, and reaps idle ones.
  */
 import { mkdir, readdir, rm, stat } from "node:fs/promises";
+import { createServer } from "node:net";
 import { join, resolve } from "node:path";
 import type { ServerWebSocket } from "bun";
 import { KiCadClient, commands } from "@fp-pcb/client";
 import {
   NngIpcSubscriber,
   NngIpcTransport,
+  NngWsSubscriber,
+  NngWsTransport,
   encodeControl,
   encodeEventFrame,
   type BridgeControlMessage,
   type BridgeEventsState,
   type KiCadServerState,
+  type Subscriber,
   type Transport,
 } from "@fp-pcb/client/transport";
 import type { BridgeConfig } from "./config";
@@ -58,6 +62,8 @@ export interface SessionLike {
   /** No WebSocket client and no SSE listener attached. */
   readonly idle: boolean;
   readonly lastClientAt: Date;
+  /** Refresh discovery metadata after a compile creates a project in a bare session. */
+  updateProjectPath(path: string): void;
   info(): SessionInfo;
   touch(): void;
   onEvent(cb: (event: Uint8Array) => void): () => void;
@@ -97,6 +103,7 @@ export interface SessionInfo {
 
 /** Derive KiCad's events socket path from its request socket path (`api-x.sock` -> `api-x-events.sock`). */
 export function eventsSocketPathFor(socketPath: string): string {
+  if (/^wss?:\/\//i.test(socketPath)) return `${socketPath.replace(/\/$/, "")}/events`;
   return socketPath.endsWith(".sock") ? `${socketPath.slice(0, -5)}-events.sock` : `${socketPath}-events`;
 }
 
@@ -117,7 +124,7 @@ const SESSION_ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
 export class Session implements SessionLike {
   readonly backend = "process" as const;
   readonly id: string;
-  readonly path: string | null;
+  path: string | null;
   readonly socketPath: string;
   readonly startedAt = new Date();
   readyAt: Date | null = null;
@@ -127,8 +134,8 @@ export class Session implements SessionLike {
   signal: string | null = null;
   error: string | null = null;
   proc: ReturnType<typeof Bun.spawn> | null = null;
-  transport: NngIpcTransport | null = null;
-  subscriber: NngIpcSubscriber | null = null;
+  transport: Transport | null = null;
+  subscriber: Subscriber | null = null;
   eventsSocketPath: string | null = null;
   eventsState: BridgeEventsState = "disconnected";
   eventsRelayed = 0;
@@ -154,6 +161,11 @@ export class Session implements SessionLike {
     return this.proc?.pid ?? null;
   }
 
+  /** Refresh discovery metadata after a job creates a project in a previously bare session. */
+  updateProjectPath(path: string): void {
+    this.path = resolve(path);
+  }
+
   info(): SessionInfo {
     return {
       id: this.id,
@@ -174,7 +186,7 @@ export class Session implements SessionLike {
       lastClientAt: this.lastClientAt.toISOString(),
       clients: this.clients.size,
       listeners: this.eventListeners.size,
-      queued: this.transport?.queued ?? 0,
+      queued: this.transport && "queued" in this.transport ? Number(this.transport.queued) : 0,
     };
   }
 
@@ -214,7 +226,7 @@ export class Session implements SessionLike {
     const { cfg } = this;
     const transport = this.transport;
     if (!cfg.relayEvents || !transport) return;
-    let path = eventsSocketPathFor(transport.path);
+    let path = eventsSocketPathFor(this.socketPath);
     try {
       const client = new KiCadClient(transport, {
         clientName: `fp-pcb/bridge/${this.id}`,
@@ -222,20 +234,23 @@ export class Session implements SessionLike {
         waitForReady: false,
       });
       const info = await commands.getServerInfo(client, {}, { timeoutMs: 5000 });
-      if (info.eventsSocketUrl) path = info.eventsSocketUrl.replace(/^ipc:\/\//, "");
+      if (info.eventsSocketUrl)
+        path = /^wss?:\/\//i.test(info.eventsSocketUrl) ? info.eventsSocketUrl : info.eventsSocketUrl.replace(/^ipc:\/\//, "");
       else cfg.log(`session ${this.id}: GetServerInfo reports no events socket; trying ${path}`);
     } catch (e) {
       cfg.log(`session ${this.id}: GetServerInfo failed (${errorMessage(e)}); trying ${path}`);
     }
     if (this.state !== "running" || this.stopping) return;
     this.eventsSocketPath = path;
-    const sub = new NngIpcSubscriber({
-      path,
+    const subscriberOptions = {
       connectTimeoutMs: 5000,
       reconnect: { initialDelayMs: 100, maxDelayMs: 2000 },
       maxFrameBytes: cfg.maxPayloadBytes,
-      log: (m) => cfg.log(`session ${this.id}: events: ${m}`),
-    });
+      log: (m: string) => cfg.log(`session ${this.id}: events: ${m}`),
+    } as const;
+    const sub = /^wss?:\/\//i.test(path)
+      ? new NngWsSubscriber({ url: path, ...subscriberOptions })
+      : new NngIpcSubscriber({ path, ...subscriberOptions });
     this.subscriber = sub;
     sub.onMessage((body) => {
       if (this.subscriber !== sub) return;
@@ -294,10 +309,11 @@ export class Session implements SessionLike {
   /** Spawn KiCad, wait for its socket, connect, and Ping until AS_OK. Throws (after cleanup) on failure. */
   async start(): Promise<void> {
     const { cfg } = this;
-    await mkdir(cfg.socketDir, { recursive: true });
+    const websocket = /^wss?:\/\//i.test(this.socketPath);
+    if (!websocket) await mkdir(cfg.socketDir, { recursive: true });
     // If a stale socket sits at our path KiCad would silently fall back to api-<pid>.sock (when
     // another KiCad holds the directory's api.lock), so make sure the path is free first.
-    await rm(this.socketPath, { force: true });
+    if (!websocket) await rm(this.socketPath, { force: true });
 
     const args = [cfg.kicadCli, "api-server", ...(this.path ? [this.path] : []), "--socket", this.socketPath];
     cfg.log(`session ${this.id}: spawning ${args.map((a) => (a.includes(" ") ? JSON.stringify(a) : a)).join(" ")}`);
@@ -320,16 +336,18 @@ export class Session implements SessionLike {
 
     const deadline = Date.now() + cfg.startTimeoutMs;
     try {
-      const socketPath = await this.waitForSocket(deadline);
-      if (socketPath !== this.socketPath) {
+      const socketPath = websocket ? this.socketPath : await this.waitForSocket(deadline);
+      if (!websocket && socketPath !== this.socketPath)
         cfg.log(`session ${this.id}: KiCad listened on ${socketPath} instead of ${this.socketPath}`);
-      }
-      const transport = new NngIpcTransport({
-        path: socketPath,
+      const transportOptions = {
         defaultTimeoutMs: cfg.requestTimeoutMs,
         connectTimeoutMs: Math.max(1000, deadline - Date.now()),
-        log: (m) => cfg.log(`session ${this.id}: transport: ${m}`),
-      });
+        reconnect: { initialDelayMs: 20, maxDelayMs: 200, maxAttempts: Math.max(1, Math.ceil(cfg.startTimeoutMs / 20)) },
+        log: (m: string) => cfg.log(`session ${this.id}: transport: ${m}`),
+      } as const;
+      const transport = websocket
+        ? new NngWsTransport({ url: socketPath, ...transportOptions })
+        : new NngIpcTransport({ path: socketPath, ...transportOptions });
       this.transport = transport;
       transport.onStateChange((s) => {
         if (s === "closed" && this.state === "running" && !this.stopping) {
@@ -369,7 +387,7 @@ export class Session implements SessionLike {
       await proc.exited;
       clearTimeout(killer);
     }
-    await rm(this.socketPath, { force: true });
+    if (!/^wss?:\/\//i.test(this.socketPath)) await rm(this.socketPath, { force: true });
     for (const ws of this.clients) {
       try {
         ws.close(1001, "session closed");
@@ -417,8 +435,8 @@ export class Session implements SessionLike {
     this.cfg.log(`session ${this.id}: kicad-cli exited (code ${code}, signal ${signal}) -> ${this.state}`);
     void this.stopEvents();
     void this.transport?.close();
-    void rm(this.socketPath, { force: true });
-    if (this.eventsSocketPath) void rm(this.eventsSocketPath, { force: true });
+    if (!/^wss?:\/\//i.test(this.socketPath)) void rm(this.socketPath, { force: true });
+    if (this.eventsSocketPath && !/^wss?:\/\//i.test(this.eventsSocketPath)) void rm(this.eventsSocketPath, { force: true });
     if (wasRunning) {
       this.broadcast({
         type: "server-state",
@@ -539,7 +557,13 @@ export class SessionManager {
         throw new Error(`file not found: ${path}`);
       }
     }
-    const socketPath = opts.socket ? resolve(opts.socket) : join(this.cfg.socketDir, `api-${id}.sock`);
+    const socketPath = opts.socket
+      ? /^wss?:\/\//i.test(opts.socket)
+        ? opts.socket
+        : resolve(opts.socket)
+      : this.cfg.socketTransport === "ws"
+        ? `ws://${this.cfg.wsHostname}:${await availablePort(this.cfg.wsHostname)}/kicad/${id}`
+        : join(this.cfg.socketDir, `api-${id}.sock`);
     const session: SessionLike = backend === "wasm" ? new WasmSession(this.cfg, id, path) : new Session(this.cfg, id, path, socketPath);
     this.sessions.set(id, session);
     try {
@@ -589,6 +613,22 @@ export class SessionManager {
     if (removed.length) this.cfg.log(`removed ${removed.length} stale socket(s): ${removed.join(", ")}`);
     return removed;
   }
+}
+
+/** Ask the OS for an unused loopback TCP port, then release it for the KiCad child. */
+async function availablePort(hostname: string): Promise<number> {
+  return new Promise((resolvePort, reject) => {
+    const server = createServer();
+    server.unref();
+    server.once("error", reject);
+    server.listen(0, hostname, () => {
+      const address = server.address();
+      const port = typeof address === "object" && address ? address.port : 0;
+      server.close((error) =>
+        error ? reject(error) : port ? resolvePort(port) : reject(new Error("could not allocate a KiCad WebSocket port")),
+      );
+    });
+  });
 }
 
 async function socketIsDead(path: string): Promise<boolean> {

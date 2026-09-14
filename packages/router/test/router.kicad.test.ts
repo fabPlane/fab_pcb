@@ -116,6 +116,8 @@ describe.skipIf(!ecc83)("router pipeline on ecc83 (real KiCad)", () => {
     const after = (await board.getTracks()).find((t) => t.id === free.id) as Via;
     expect(after.net).toBe(net.name);
     expect((await board.itemsByNet([net.name])).some((i) => i.id === free.id)).toBe(true);
+    // Keep the next live test independent: an isolated claimed via is itself an unrouted node.
+    await board.commit("remove free via fixture", (tx) => tx.delete([after]));
   }, 60_000);
 
   test("Freerouting through the KiCad Specctra commands (or the builtin DSN/SES path) routes the board", async () => {

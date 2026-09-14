@@ -1,5 +1,5 @@
 export * from "./types";
-export { compile, CompileCancelled, type CompileOptions, type CompileStageName } from "./compile";
+export { compile, CompileCancelled, validatePlacements, type CompileOptions, type CompileStageName } from "./compile";
 export { emitKicadNetlist, validateNetlist, NETLIST_VERSION, TOOL_NAME, type EmitOptions } from "./netlist";
 export {
   applyNetlist,
@@ -13,6 +13,7 @@ export {
   outlineItems,
   outlineOrigin,
   outlinePoints,
+  placeFootprints,
   prefabItems,
   reportDiagnostics,
   shiftedSegment,
@@ -36,6 +37,13 @@ export {
   type CompileJobs,
 } from "./bridge-job";
 export { libraryRow, registerLibraries } from "./libraries";
+export {
+  GENERATED_SCHEMATIC_PROPERTY,
+  buildGeneratedSchematic,
+  generateSchematic,
+  type GeneratedSchematic,
+  type GenerateSchematicResult,
+} from "./schematic";
 export {
   NETLIST_JSON_ENTRYPOINT,
   NETLIST_JSON_KIND,

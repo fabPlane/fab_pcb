@@ -17,7 +17,7 @@
  * What it does not buy: the module shares the process's address space limits and its crash is
  * still a process-wide `abort()` if Emscripten traps hard. See `docs/08-wasm.md`.
  */
-import { dirname } from "node:path";
+import { dirname, resolve } from "node:path";
 import type { ServerWebSocket } from "bun";
 import {
   TransportError,
@@ -145,7 +145,7 @@ export interface WasmSessionOptions {
 export class WasmSession implements SessionLike {
   readonly backend = "wasm" as const;
   readonly id: string;
-  readonly path: string | null;
+  path: string | null;
   /** There is no socket; the label is what `GetServerInfo` reports and what the UI shows. */
   readonly socketPath: string;
   readonly eventsSocketPath: string | null = "inproc://kicad-events";
@@ -178,6 +178,11 @@ export class WasmSession implements SessionLike {
     this.id = id;
     this.path = path;
     this.socketPath = `inproc://kicad-${id}`;
+  }
+
+  /** Refresh discovery metadata after a compile creates a project in a bare session. */
+  updateProjectPath(path: string): void {
+    this.path = resolve(path);
   }
 
   info(): SessionInfo {

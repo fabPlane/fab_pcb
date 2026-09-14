@@ -16,10 +16,12 @@ import {
   type Diagnostic,
   type Frontend,
   type FrontendResult,
+  type BoardSpec,
+  type Netlist,
 } from "./types";
 import type { Board } from "@fp-pcb/client";
 
-export type CompileStageName = "frontend" | "validating" | ApplyStage;
+export type CompileStageName = "frontend" | "validating" | ApplyStage | "schematic";
 
 export interface CompileOptions extends ApplyOptions {
   /** Turns `source` into a netlist. See `Frontend` in `types.ts`. */
@@ -31,6 +33,8 @@ export interface CompileOptions extends ApplyOptions {
    * registers the frontend's libraries so the dry run can resolve them.
    */
   beforeApply?: (built: FrontendResult) => Promise<void>;
+  /** Runs after a successful board import; the bridge uses it to rebuild generated schematic items. */
+  afterApply?: (built: FrontendResult) => Promise<Diagnostic[]>;
 }
 
 /** Thrown when `signal` aborts between stages; `CompileCancelled.is(e)` for callers that rethrow. */
@@ -54,6 +58,54 @@ function done(diagnostics: Diagnostic[], counts: CompileCounts, started: number,
     ...(netlistPath ? { netlistPath } : {}),
     durationMs: Math.round(performance.now() - started),
   };
+}
+
+/** Validate optional author placement even when `BoardSpec` came from a bridge override. */
+export function validatePlacements(netlist: Netlist, board: BoardSpec | undefined): Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
+  const refs = new Set(netlist.components.map((component) => component.ref));
+  const seen = new Set<string>();
+  for (const [index, placement] of (board?.placements ?? []).entries()) {
+    const prefix = `/board/placements/${index}`;
+    if (!placement || typeof placement !== "object" || typeof placement.ref !== "string") {
+      diagnostics.push({ severity: "error", stage: "netlist", code: "bad_placement", message: `${prefix}: ref must be a string.` });
+      continue;
+    }
+    const position = placement.position;
+    if (
+      !position ||
+      typeof position !== "object" ||
+      typeof position.x !== "number" ||
+      !Number.isFinite(position.x) ||
+      typeof position.y !== "number" ||
+      !Number.isFinite(position.y)
+    ) {
+      diagnostics.push({
+        severity: "error",
+        stage: "netlist",
+        code: "bad_placement_position",
+        message: `${prefix}/position: x and y must be finite numbers in millimetres.`,
+      });
+    }
+    if (!refs.has(placement.ref)) {
+      diagnostics.push({
+        severity: "error",
+        stage: "netlist",
+        code: "unknown_placement_reference",
+        message: `${prefix}/ref: unknown component reference ${JSON.stringify(placement.ref)}.`,
+      });
+    }
+    if (seen.has(placement.ref)) {
+      diagnostics.push({
+        severity: "error",
+        stage: "netlist",
+        code: "duplicate_placement_reference",
+        message: `${prefix}/ref: ${JSON.stringify(placement.ref)} is placed more than once.`,
+      });
+    }
+    seen.add(placement.ref);
+  }
+  return diagnostics;
 }
 
 export async function compile(source: CompileSource, board: Board, opts: CompileOptions): Promise<CompileResult> {
@@ -83,7 +135,8 @@ export async function compile(source: CompileSource, board: Board, opts: Compile
   const counts: CompileCounts = { ...ZERO, components: netlist.components.length, nets: netlist.nets.length };
 
   opts.onStage?.("validating");
-  diagnostics.push(...validateNetlist(netlist));
+  const boardSpec = opts.board ?? built.board;
+  diagnostics.push(...validateNetlist(netlist), ...validatePlacements(netlist, boardSpec));
   if (hasErrors(diagnostics)) return done(diagnostics, counts, started);
 
   cancelled();
@@ -91,9 +144,14 @@ export async function compile(source: CompileSource, board: Board, opts: Compile
   cancelled();
   const applied = await applyNetlist(board, netlist, {
     ...opts,
-    ...((opts.board ?? built.board) ? { board: opts.board ?? built.board } : {}),
+    ...(boardSpec ? { board: boardSpec } : {}),
   });
   diagnostics.push(...applied.diagnostics);
+  if (!hasErrors(diagnostics) && opts.afterApply) {
+    cancelled();
+    opts.onStage?.("schematic");
+    diagnostics.push(...(await opts.afterApply(built)));
+  }
 
   return done(
     diagnostics,

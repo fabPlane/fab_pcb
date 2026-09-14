@@ -3,7 +3,15 @@ import { describe, expect, test } from "bun:test";
 import { BoardLayer } from "@fp-pcb/proto";
 import { mm, toMm } from "@fp-pcb/client";
 import { segmentDistance } from "../src/geometry";
-import { JsRouter, LayerNames, buildSimpleRouteJson, tracesToItems, type SrjTrace, type SrjWire } from "../src/js-router";
+import {
+  JsRouter,
+  LayerNames,
+  buildSimpleRouteJson,
+  describeSolverErrorEndpoints,
+  tracesToItems,
+  type SrjTrace,
+  type SrjWire,
+} from "../src/js-router";
 import type { RouteProgress, RouteVia } from "../src/types";
 import { twoNetBoard, F, B } from "./fixtures";
 
@@ -57,6 +65,16 @@ describe("buildSimpleRouteJson", () => {
     expect(names.layers.map((l) => names.name(l))).toEqual(["top", "inner1", "inner2", "bottom"]);
     expect(names.layer("inner2")).toBe(BoardLayer.BL_In2_Cu);
   });
+});
+
+test("solver endpoint diagnostics identify pads and board-edge violations", () => {
+  const input = twoNetBoard();
+  const pad = input.pads[0]!;
+  pad.position = { x: mm(0.1), y: mm(5) };
+  const detail = describeSolverErrorEndpoints(`no legal path A_mst0 (${pad.id}->other)`, input);
+  expect(detail).toContain(`${pad.footprint} pad ${pad.number} (A)`);
+  expect(detail).toContain("copper edge gap -0.700 mm is below the 0.200 mm board-edge rule");
+  expect(describeSolverErrorEndpoints("HB ran out of iterations", input)).toBeUndefined();
 });
 
 describe("tracesToItems", () => {

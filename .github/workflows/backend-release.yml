@@ -1,0 +1,182 @@
+name: Backend release
+
+on:
+  workflow_dispatch:
+    inputs:
+      rebuild_image:
+        description: Rebuild the pinned KiCad image even when its immutable tag exists
+        type: boolean
+        default: false
+  push:
+    # Keep the WIP handoff branch releasable before either repository is merged. Remove the
+    # feature branch entry once Fabdesk consumes a release produced from main.
+    branches: [main, feature/fabdesk-handoff-followups]
+    paths:
+      - packages/proto/KICAD_COMMIT
+      - packages/kicad-patches/**
+      - packages/bridge/**
+      - packages/client/**
+      - packages/compile/**
+      - packages/router/**
+      - .github/workflows/backend-release.yml
+
+concurrency:
+  group: backend-release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  KICAD_IMAGE: ghcr.io/${{ github.repository_owner }}/kicad-cli
+  KICAD_REPO: https://github.com/${{ github.repository_owner }}/kicad.git
+
+jobs:
+  linux-x64:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - name: Install JS dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Resolve immutable versions
+        id: versions
+        shell: bash
+        run: |
+          set -euo pipefail
+          kicad="$(tr -d '[:space:]' < packages/proto/KICAD_COMMIT)"
+          image="$(printf '%s' "$KICAD_IMAGE" | tr '[:upper:]' '[:lower:]'):$kicad"
+          image_short="$(printf '%s' "$KICAD_IMAGE" | tr '[:upper:]' '[:lower:]'):${kicad:0:10}"
+          echo "kicad=$kicad" >> "$GITHUB_OUTPUT"
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+          echo "image_short=$image_short" >> "$GITHUB_OUTPUT"
+          echo "release=backend-${GITHUB_SHA:0:10}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for the pinned image
+        id: image
+        continue-on-error: true
+        shell: bash
+        run: |
+          if [ "${{ inputs.rebuild_image }}" = "true" ]; then exit 1; fi
+          docker pull "${{ steps.versions.outputs.image }}"
+
+      - uses: docker/setup-buildx-action@v3
+        if: steps.image.outcome != 'success'
+
+      - name: Build and publish the pinned KiCad image
+        if: steps.image.outcome != 'success'
+        uses: docker/build-push-action@v6
+        with:
+          context: packages/kicad-patches/docker
+          file: packages/kicad-patches/docker/Dockerfile
+          build-args: |
+            KICAD_SOURCE=git
+            KICAD_REPO=${{ env.KICAD_REPO }}
+            KICAD_REF=${{ steps.versions.outputs.kicad }}
+            JOBS=3
+            BASE=ubuntu:24.04
+          tags: |
+            ${{ steps.versions.outputs.image }}
+            ${{ steps.versions.outputs.image_short }}
+          push: true
+          cache-from: type=gha,scope=kicad-${{ steps.versions.outputs.kicad }}
+          cache-to: type=gha,mode=max,scope=kicad-${{ steps.versions.outputs.kicad }}
+
+      - name: Free local BuildKit cache before pulling the published image
+        if: steps.image.outcome != 'success'
+        run: docker buildx prune --all --force
+
+      - name: Pull newly published image
+        if: steps.image.outcome != 'success'
+        run: docker pull "${{ steps.versions.outputs.image }}"
+
+      - name: Check out pinned KiCad libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          kicad="$(tr -d '[:space:]' < packages/proto/KICAD_COMMIT)"
+          git init -q "$RUNNER_TEMP/kicad-source"
+          git -C "$RUNNER_TEMP/kicad-source" remote add origin "$KICAD_REPO"
+          git -C "$RUNNER_TEMP/kicad-source" fetch --depth 1 origin "$kicad"
+          git -C "$RUNNER_TEMP/kicad-source" checkout -q FETCH_HEAD
+          for name in footprints symbols; do
+            case "$name" in
+              footprints) repo=https://gitlab.com/kicad/libraries/kicad-footprints.git; pin=packages/kicad-patches/KICAD_FOOTPRINTS_COMMIT ;;
+              symbols) repo=https://gitlab.com/kicad/libraries/kicad-symbols.git; pin=packages/kicad-patches/KICAD_SYMBOLS_COMMIT ;;
+            esac
+            commit="$(tr -d '[:space:]' < "$pin")"
+            git init -q "$RUNNER_TEMP/kicad-$name"
+            git -C "$RUNNER_TEMP/kicad-$name" remote add origin "$repo"
+            git -C "$RUNNER_TEMP/kicad-$name" fetch --depth 1 origin "$commit"
+            git -C "$RUNNER_TEMP/kicad-$name" checkout -q FETCH_HEAD
+          done
+
+      - name: Assemble dependency-complete Linux backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          container="$(docker create "${{ steps.versions.outputs.image }}")"
+          trap 'docker rm -f "$container" >/dev/null 2>&1 || true' EXIT
+          mkdir -p "$RUNNER_TEMP/runtime" dist/pcb
+          docker cp "$container:/opt/kicad/." "$RUNNER_TEMP/runtime/"
+          bun packages/kicad-patches/bundle.ts linux-x64 \
+            "$RUNNER_TEMP/runtime" \
+            "$RUNNER_TEMP/kicad-footprints" \
+            "$RUNNER_TEMP/kicad-symbols" \
+            dist/pcb/linux-x64
+          test -n "$(find dist/pcb/linux-x64/kicad/lib/runtime -maxdepth 1 -type f -print -quit)"
+
+      - name: Native bundle smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$PWD/dist/pcb/linux-x64"
+          export LD_LIBRARY_PATH="$root/kicad/lib:$root/kicad/lib/runtime"
+          "$root/kicad/bin/kicad-cli" version
+          PORT=4020 HOST=127.0.0.1 \
+            KICAD_CLI="$root/kicad/bin/kicad-cli" \
+            KICAD_FOOTPRINT_DIR="$root/libraries/footprints" \
+            KICAD_SYMBOL_DIR="$root/libraries/symbols" \
+            "$root/bin/fp-pcb-bridge" >"$RUNNER_TEMP/bridge.log" 2>&1 &
+          bridge_pid=$!
+          trap 'kill "$bridge_pid" >/dev/null 2>&1 || true' EXIT
+          for attempt in $(seq 1 60); do curl -fsS http://127.0.0.1:4020/health && break || sleep 1; done
+          curl -fsS http://127.0.0.1:4020/health | grep -q '"ok":true'
+
+      - name: Native KiCad process-signal integration
+        env:
+          KICAD_CLI: ${{ github.workspace }}/dist/pcb/linux-x64/kicad/bin/kicad-cli
+          KICAD_SRC: ${{ runner.temp }}/kicad-source
+          KICAD_INTEGRATION_REQUIRED: "1"
+          LD_LIBRARY_PATH: ${{ github.workspace }}/dist/pcb/linux-x64/kicad/lib:${{ github.workspace }}/dist/pcb/linux-x64/kicad/lib/runtime
+        run: |
+          bun test packages/bridge/test/bridge.kicad.test.ts
+          bun test packages/client/test/nng-ipc.kicad.test.ts \
+            --test-name-pattern "server killed mid-request"
+
+      - name: Archive backend asset
+        shell: bash
+        run: tar -C dist/pcb/linux-x64 -czf fp-pcb-backend-linux-x64.tar.gz .
+
+      - name: Publish immutable backend release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          tag="${{ steps.versions.outputs.release }}"
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --title "$tag" --notes "FabPlane PCB backend for $GITHUB_SHA (KiCad ${{ steps.versions.outputs.kicad }})."
+          gh release upload "$tag" fp-pcb-backend-linux-x64.tar.gz --clobber

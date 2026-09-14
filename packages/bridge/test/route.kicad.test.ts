@@ -7,7 +7,7 @@
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { cpSync, existsSync } from "node:fs";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { KiCad } from "@fp-pcb/client";
@@ -92,6 +92,9 @@ describe.skipIf(!haveKicad)("route jobs + kicad-cli api-server", () => {
     expect(polled.job.state).toBe("done");
     const list = (await (await api(`/sessions/${sessionId}/route`)).json()) as { jobs: RouteJobInfo[] };
     expect(list.jobs.map((j) => j.id)).toContain(job.id);
+    // Job completion means the route is durable, not merely present in KiCad's in-memory board.
+    const saved = await readFile(join(workspace, "ecc83", "ecc83-pp.unrouted.kicad_pcb"), "utf8");
+    expect(saved.match(/\n\s*\(segment\b/g)?.length ?? 0).toBeGreaterThan(0);
     // one undo entry for the whole pass
     const stack = await board.undoStack();
     expect(stack.undo[stack.undo.length - 1]?.description).toBe("Autoroute (js): 14 connections");

@@ -8,8 +8,9 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { AutoplaceResult, BoardLayer } from "@fp-pcb/proto";
-import type { Board } from "@fp-pcb/client";
+import { create } from "@bufbuild/protobuf";
+import { AutoplaceResult, BoardLayer, FootprintInstanceSchema } from "@fp-pcb/proto";
+import { Footprint, type Board } from "@fp-pcb/client";
 import { compile } from "../src/compile";
 import { outlineItems, outlinePoints, reportDiagnostics } from "../src/apply";
 import type { CompileSource, Frontend, Netlist } from "../src/types";
@@ -220,6 +221,81 @@ describe("compile", () => {
     const res = await compile(SOURCE, b, { frontend: frontend(), netlistPath: netlistPath("place"), autoplace: true, board: spec });
     expect(res.ok).toBe(true);
     expect(res.diagnostics.map((d) => d.code)).toContain("autoplace_failed");
+  });
+
+  test("source placement is applied after import and omitted placement preserves manual position", async () => {
+    const log: string[] = [];
+    let imported = false;
+    const footprint = new Footprint(
+      create(FootprintInstanceSchema, {
+        id: { value: "fp-r1" },
+        position: { xNm: 1_000_000n, yNm: 2_000_000n },
+        orientation: { valueDegrees: 90 },
+        referenceField: { text: { text: { text: "R1", position: { xNm: 1_000_000n, yNm: 2_000_000n } } } },
+      }),
+    );
+    const placedBoard = {
+      async importNetlist(_path: string, options: { dryRun?: boolean }) {
+        log.push(options.dryRun ? "importNetlist:dry" : "importNetlist");
+        if (!options.dryRun) imported = true;
+        return { errorCount: 0, warningCount: 0, newFootprintCount: imported ? 1 : 0, report: "" };
+      },
+      async getShapes() {
+        return [{ proto: { layer: BoardLayer.BL_Edge_Cuts } }];
+      },
+      async getItems() {
+        return imported ? [footprint] : [];
+      },
+      async getFootprints() {
+        return imported ? [footprint] : [];
+      },
+      async commit(message: string, fn: (tx: { update(items: Footprint[]): Promise<Footprint[]> }) => Promise<unknown>) {
+        log.push(`commit:${message}`);
+        return fn({ update: async (items) => items });
+      },
+      async autoplace() {
+        throw new Error("explicitly placed additions must not be autoplaced");
+      },
+    } as unknown as Board;
+    const withPlacement = frontend({ board: { widthMm: 20, heightMm: 10, placements: [{ ref: "R1", position: { x: 8, y: 6 } }] } });
+    const first = await compile(SOURCE, placedBoard, {
+      frontend: withPlacement,
+      netlistPath: netlistPath("explicit-placement"),
+      autoplace: true,
+    });
+    expect(first.ok).toBe(true);
+    expect(first.counts.footprintsPlaced).toBe(1);
+    expect(footprint.position).toEqual({ x: 8_000_000, y: 6_000_000 });
+    expect(footprint.orientation).toBe(90);
+    expect(log).toContain("commit:Compile: source placement");
+
+    footprint.translate({ x: 500_000, y: 250_000 });
+    const manual = footprint.position;
+    const second = await compile(SOURCE, placedBoard, {
+      frontend: frontend({ board: { widthMm: 20, heightMm: 10 } }),
+      netlistPath: netlistPath("preserve-placement"),
+      autoplace: true,
+    });
+    expect(second.ok).toBe(true);
+    expect(second.counts.footprintsPlaced).toBe(0);
+    expect(footprint.position).toEqual(manual);
+  });
+
+  test("placement validation stops malformed and unknown references before board work", async () => {
+    const { board: b, log } = board();
+    const badBoard = {
+      placements: [
+        { ref: "R1", position: { x: Number.NaN, y: 1 } },
+        { ref: "U99", position: { x: 1, y: 2 } },
+      ],
+    };
+    const res = await compile(SOURCE, b, {
+      frontend: frontend({ board: badBoard }),
+      netlistPath: netlistPath("bad-placement"),
+    });
+    expect(res.ok).toBe(false);
+    expect(res.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(["bad_placement_position", "unknown_placement_reference"]);
+    expect(log).toEqual([]);
   });
 });
 

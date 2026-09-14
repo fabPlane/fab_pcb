@@ -252,42 +252,46 @@ describe.skipIf(!haveKicad)("bridge + kicad-cli api-server + WebSocketTransport"
     expect(root.entries.map((e) => e.name)).toEqual(["proj"]);
   });
 
-  test("a second client on the same session works and both see the server die", async () => {
-    const ws2 = await WebSocketTransport.connect(bridgeWsUrl(bridge.url, sessionId), { keepaliveMs: 0 });
-    const both = await Promise.all([ws.send(PING), ws2.send(PING), ws.send(PING)]);
-    expect(both.map((b) => decodeApiResponse(b).statusName)).toEqual(["AS_OK", "AS_OK", "AS_OK"]);
+  test.skipIf(process.env.KICAD_CLI_WRAPPED === "1")(
+    "a second client on the same session works and both see the server die",
+    async () => {
+      const ws2 = await WebSocketTransport.connect(bridgeWsUrl(bridge.url, sessionId), { keepaliveMs: 0 });
+      const both = await Promise.all([ws.send(PING), ws2.send(PING), ws.send(PING)]);
+      expect(both.map((b) => decodeApiResponse(b).statusName)).toEqual(["AS_OK", "AS_OK", "AS_OK"]);
 
-    const states1: BridgeControlMessage[] = [];
-    const states2: BridgeControlMessage[] = [];
-    ws.onControl((m) => m.type === "server-state" && states1.push(m));
-    ws2.onControl((m) => m.type === "server-state" && states2.push(m));
+      const states1: BridgeControlMessage[] = [];
+      const states2: BridgeControlMessage[] = [];
+      ws.onControl((m) => m.type === "server-state" && states1.push(m));
+      ws2.onControl((m) => m.type === "server-state" && states2.push(m));
 
-    const session = bridge.sessions.get(sessionId)!;
-    if (!(session instanceof Session)) throw new Error("this test kills the kicad-cli process, so it needs the process backend");
-    const inflight = ws.send(PING, { timeoutMs: 10_000 }).catch((e: unknown) => e);
-    session.proc!.kill("SIGKILL");
-    const err = (await inflight) as { code?: string };
-    expect(err).toMatchObject({ name: "TransportError", code: "closed" });
+      const session = bridge.sessions.get(sessionId)!;
+      if (!(session instanceof Session)) throw new Error("this test kills the kicad-cli process, so it needs the process backend");
+      const inflight = ws.send(PING, { timeoutMs: 10_000 }).catch((e: unknown) => e);
+      session.proc!.kill("SIGKILL");
+      const err = (await inflight) as { code?: string };
+      expect(err).toMatchObject({ name: "TransportError", code: "closed" });
 
-    const deadline = Date.now() + 5000;
-    while ((states1.length === 0 || states2.length === 0) && Date.now() < deadline) await Bun.sleep(10);
-    expect(states1[0]).toMatchObject({ type: "server-state", state: "failed", signal: "SIGKILL" });
-    expect(states2[0]).toMatchObject({ type: "server-state", state: "failed", signal: "SIGKILL" });
-    expect(ws.serverState).toBe("failed");
+      const deadline = Date.now() + 5000;
+      while ((states1.length === 0 || states2.length === 0) && Date.now() < deadline) await Bun.sleep(10);
+      expect(states1[0]).toMatchObject({ type: "server-state", state: "failed", signal: "SIGKILL" });
+      expect(states2[0]).toMatchObject({ type: "server-state", state: "failed", signal: "SIGKILL" });
+      expect(ws.serverState).toBe("failed");
 
-    // requests after the crash are refused by the bridge, the WebSocket itself stays open
-    const after = (await ws.send(PING).catch((e: unknown) => e)) as { code?: string; message?: string };
-    expect(after).toMatchObject({ code: "closed" });
-    expect(after.message).toContain("failed");
-    expect(ws.state).toBe("open");
+      // requests after the crash are refused by the bridge, the WebSocket itself stays open
+      const after = (await ws.send(PING).catch((e: unknown) => e)) as { code?: string; message?: string };
+      expect(after).toMatchObject({ code: "closed" });
+      expect(after.message).toContain("failed");
+      expect(ws.state).toBe("open");
 
-    const info = (await (await api(`/sessions/${sessionId}`)).json()) as { session: { state: string; signal: string } };
-    expect(info.session.state).toBe("failed");
-    expect(info.session.signal).toBe("SIGKILL");
-    const log = (await (await api(`/sessions/${sessionId}/log`)).json()) as { lines: string[] };
-    expect(Array.isArray(log.lines)).toBe(true);
-    await ws2.close();
-  }, 20_000);
+      const info = (await (await api(`/sessions/${sessionId}`)).json()) as { session: { state: string; signal: string } };
+      expect(info.session.state).toBe("failed");
+      expect(info.session.signal).toBe("SIGKILL");
+      const log = (await (await api(`/sessions/${sessionId}/log`)).json()) as { lines: string[] };
+      expect(Array.isArray(log.lines)).toBe(true);
+      await ws2.close();
+    },
+    20_000,
+  );
 
   test("DELETE /sessions/:id removes the session and unlinks the socket", async () => {
     const socketPath = bridge.sessions.get(sessionId)!.socketPath;

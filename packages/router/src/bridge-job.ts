@@ -17,12 +17,14 @@
  *
  * The job refills the zones (unless `refillZones: false`), saves the board (`SaveDocument`, so
  * KiCad's exporter reads the current state), runs `extractRouteInput` -> router.route ->
- * `applyRouteResult` (one commit, message "Autoroute (<router>): <n> connections") against the
- * session's open board, so the browser only has to pick up the `DocumentChanged` event as usual.
- * Cancelling before the apply leaves the board untouched; a failed router run (the JS router's
- * precheck, a Freerouting crash) applies nothing and reports the error.
+ * `applyRouteResult` (one commit, message "Autoroute (<router>): <n> connections"), then saves
+ * again so the routed board is durable on disk. The browser only has to pick up the
+ * `DocumentChanged` event as usual. Cancelling before the apply leaves the board untouched; a
+ * failed router run (the JS router's precheck, a Freerouting crash) applies nothing and reports the
+ * error. A failure of the final save reports the job as failed but leaves the applied route in
+ * KiCad memory, where the caller can retry saving it.
  */
-import { KiCad, KiCadClient, type Transport } from "@fp-pcb/client";
+import { Arc, KiCad, KiCadClient, Track, Via, type Transport } from "@fp-pcb/client";
 import { applyRouteResult } from "./apply";
 import { extractRouteInput } from "./extract";
 import { FreeroutingRouter, alreadyApplied, resolveFreerouting, type FreeroutingOptions, type FreeroutingPaths } from "./freerouting";
@@ -80,7 +82,22 @@ export interface RouteJobSummary {
   message: string;
   /** The airlines left after the apply (`GetRatsnest`, filtered to the requested nets). */
   unrouted: RouteJobUnrouted[];
+  /** Copper added or claimed by this run, in nm, for clients such as Route Cinema. */
+  geometry: RouteJobGeometry[];
   log: string[];
+}
+
+export interface RouteJobGeometry {
+  kind: "trace" | "via";
+  /** KiCad KIID; stable across progress consumers and later board queries. */
+  id: string;
+  /** KiCad BoardLayer enum. Through vias use -1. */
+  layer: number;
+  net: number;
+  /** Trace centreline points, or a via bounding box. */
+  points: number[];
+  /** Trace width in nm. */
+  width?: number;
 }
 
 export interface RouteJobInfo {
@@ -160,6 +177,27 @@ export function trackLength(result: Pick<RouteResult, "tracks">): number {
   return Math.round(sum);
 }
 
+/** Compact, renderer-neutral copper geometry for a completed routing run. */
+export function routeGeometry(items: readonly (Track | Arc | Via)[]): RouteJobGeometry[] {
+  return items.map((item) => {
+    if (item instanceof Via) {
+      const r = item.diameter / 2;
+      return {
+        kind: "via",
+        id: item.id,
+        layer: -1,
+        net: item.netCode ?? 0,
+        points: [item.position.x - r, item.position.y - r, item.position.x + r, item.position.y + r],
+      };
+    }
+    const points =
+      item instanceof Arc
+        ? [item.start.x, item.start.y, item.mid.x, item.mid.y, item.end.x, item.end.y]
+        : [item.start.x, item.start.y, item.end.x, item.end.y];
+    return { kind: "trace", id: item.id, layer: item.layerId, net: item.netCode ?? 0, points, width: item.width };
+  });
+}
+
 /**
  * A run that routed nothing is reported as failed, with the router's own reason: the JS router's
  * retries swallow its precheck errors into `log` and hand back an empty result, and a killed
@@ -177,6 +215,18 @@ export function emptyResultReason(
 /** The commit message for a finished run; what the History panel shows. */
 export function autorouteMessage(router: "js" | "freerouting", routed: number): string {
   return `Autoroute (${router}): ${routed} connection${routed === 1 ? "" : "s"}`;
+}
+
+/** Persist a route that has already been committed to KiCad's in-memory board. */
+export async function persistAppliedRoute(board: { save(): Promise<void> }): Promise<void> {
+  try {
+    await board.save();
+  } catch (e) {
+    const detail = e instanceof Error ? e.message : String(e);
+    throw new Error(`route was applied in KiCad memory but SaveDocument failed; retry saving before closing the session: ${detail}`, {
+      cause: e,
+    });
+  }
 }
 
 export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
@@ -234,6 +284,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         await board.save();
         checkCancelled();
         setState("extracting");
+        const copperBefore = new Set((await board.getTracks()).map((item) => item.id));
         const input = await extractRouteInput(board, { nets: request.options?.nets, warn: pushLog });
         pushLog(`extract: ${input.pads.length} pads, ${input.connections.length} connections, ${input.copperLayers.length} copper layers`);
         checkCancelled();
@@ -274,6 +325,10 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           applied = true;
         }
         const appliedByKicad = (result as RouteResult & { applied?: { tracksAdded: number; viasAdded: number } }).applied;
+        if (applied || appliedByKicad) {
+          setState("saving");
+          await persistAppliedRoute(board);
+        }
         // Re-measure with KiCad's connectivity: what is still an airline after the apply.
         let unrouted = unroutedOf(result);
         let measured = routed;
@@ -299,6 +354,8 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         info.state = "done";
         info.finishedAt = new Date().toISOString();
         info.log = result.log.slice(-LOG_TAIL);
+        const claimedIds = new Set(result.claimedVias?.map((via) => via.id) ?? []);
+        const geometry = routeGeometry((await board.getTracks()).filter((item) => !copperBefore.has(item.id) || claimedIds.has(item.id)));
         info.summary = {
           tracks: appliedByKicad?.tracksAdded ?? result.tracks.length,
           vias: appliedByKicad?.viasAdded ?? result.vias.length,
@@ -313,6 +370,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           timedOut: result.timedOut,
           message: applied || appliedByKicad ? message : "",
           unrouted,
+          geometry,
           log: result.log,
         };
         log(`route job ${id}: done, ${measured}/${result.totalConnections} in ${info.summary.wallMs} ms`);

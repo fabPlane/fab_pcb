@@ -22,27 +22,30 @@
  * `failed` with `error` and no `result`. Cancelling before the import leaves the board with at
  * most the outline commit; after it, KiCad's own "Update Netlist" commit stays.
  *
- * `done` events carry `revision` because `ImportNetlist` does not publish `DocumentChanged` on
- * the fork today; a browser tab on the same session should re-read on it.
+ * `done` events carry `revision` as a compatibility fallback for older fork builds that do not
+ * publish `DocumentChanged` from `ImportNetlist`.
  */
 import { mkdir } from "node:fs/promises";
 import { dirname, isAbsolute, resolve } from "node:path";
-import { KiCad, KiCadClient, type Board, type Transport } from "@fp-pcb/client";
+import { KiCad, KiCadClient, Via, type Board, type Schematic, type Transport } from "@fp-pcb/client";
 import { edgeClearanceNm } from "./apply";
 import { compile, CompileCancelled } from "./compile";
 import { netlistJsonFrontend } from "./frontends/netlist-json";
 import { registerLibraries } from "./libraries";
 import { applyBoardConstraints, applyDefaultNetClass, hasRules, persistNetClassFile } from "./rules";
-import type { BoardRules, BoardSpec, CompileResult, CompileSource, Frontend, MatchMode } from "./types";
+import { generateSchematic } from "./schematic";
+import type { BoardRules, BoardSpec, CompileResult, CompileSource, Frontend, LibrarySpec, MatchMode } from "./types";
 
 export type CompileJobState =
   | "queued"
   | "frontend"
   | "validating"
   | "checking"
+  | "cleaning"
   | "outlining"
   | "importing"
   | "placing"
+  | "schematic"
   | "saving"
   | "done"
   | "failed"
@@ -57,6 +60,8 @@ export interface CompileJobRequest {
   project?: { path: string };
   /** Overrides the frontend's board spec. */
   board?: BoardSpec;
+  /** Preserve compatible copper (default), or remove routed copper after validation and before import. */
+  rebuild?: "preserve" | "clean";
   matchMode?: MatchMode;
   deleteExtraFootprints?: boolean;
   updateFootprints?: boolean;
@@ -84,6 +89,8 @@ export interface CompileJobInfo {
   error?: string;
   /** Board revision after the job, for clients that cannot rely on `DocumentChanged`. */
   revision?: number;
+  /** Copper removed by a clean rebuild. Free, unassigned prefab vias are preserved. */
+  removedCopper?: { tracks: number; vias: number };
 }
 
 export interface CompileJobSession {
@@ -91,6 +98,8 @@ export interface CompileJobSession {
   /** The session's transport to KiCad (the bridge's `Session.transport`). */
   transport: Transport | null;
   clientName?: string;
+  /** Lets the bridge keep its session discovery metadata authoritative after project creation. */
+  updateProjectPath?(path: string): void;
 }
 
 export interface CompileJobDeps {
@@ -99,6 +108,8 @@ export interface CompileJobDeps {
   /** Placement margin from the board edge in nm; default the board's copper-to-edge clearance rule. */
   edgeMargin?: (board: Board) => Promise<number>;
   log?: (message: string) => void;
+  /** Standard libraries bundled with the bridge, registered together with frontend-local rows. */
+  libraries?: readonly LibrarySpec[];
 }
 
 export interface CompileJobs {
@@ -147,15 +158,23 @@ export function checkRequest(
   if (typeof s.entrypoint !== "string" || !s.entrypoint) return { ok: false, error: "source.entrypoint is required" };
   if (b!.project !== undefined && (typeof b!.project !== "object" || typeof b!.project?.path !== "string"))
     return { ok: false, error: "project.path must be a string" };
+  if (b!.rebuild !== undefined && b!.rebuild !== "preserve" && b!.rebuild !== "clean")
+    return { ok: false, error: 'rebuild must be "preserve" or "clean"' };
   return { ok: true, request: b as CompileJobRequest };
 }
 
 /** The board of the session, or a new project's board when the session was started bare. */
-export async function boardFor(kicad: KiCad, request: Pick<CompileJobRequest, "project">, log: (l: string) => void): Promise<Board> {
+export async function boardFor(
+  kicad: KiCad,
+  request: Pick<CompileJobRequest, "project">,
+  log: (l: string) => void,
+  onProjectCreated?: (path: string) => void,
+): Promise<Board> {
   const open = await kicad.currentBoard();
   if (open) return open;
   if (!request.project?.path) throw new Error("no board is open in this session and the request names no project.path to create one");
   const project = await kicad.newProject(request.project.path);
+  onProjectCreated?.((await project.info()).kicadProPath);
   log(`created project ${request.project.path}`);
   return (await kicad.currentBoard()) ?? (await project.openBoard());
 }
@@ -201,16 +220,18 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
         if (!frontend) throw new Error(`unknown frontend "${request.source.kind}"`);
         const client = new KiCadClient(session.transport, { clientName: session.clientName ?? `fp-pcb/compile-job-${id}` });
         const kicad = new KiCad(client);
-        const board = await boardFor(kicad, request, pushLog);
+        const board = await boardFor(kicad, request, pushLog, session.updateProjectPath);
         abort.signal.throwIfAborted();
 
-        const kicadProPath = (await kicad.projectInfo()).kicadProPath;
-        const projectDir = dirname(kicadProPath);
+        const projectInfo = await kicad.projectInfo();
+        const kicadProPath = projectInfo.kicadProPath;
+        const projectDir = dirname(projectInfo.kicadProPath);
         const rel = request.netlistPath ?? DEFAULT_NETLIST_PATH;
         const netlistPath = isAbsolute(rel) ? rel : resolve(projectDir, rel);
         await mkdir(dirname(netlistPath), { recursive: true });
         const autoplace = request.autoplace ?? true;
         let rules: BoardRules | undefined;
+        let schematic: Schematic | undefined;
         const edgeMarginNm = autoplace ? await (deps.edgeMargin ?? edgeClearanceNm)(board) : 0;
 
         const result = await compile(request.source, board, {
@@ -226,14 +247,32 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
           signal: abort.signal,
           onStage: setState,
           beforeApply: async (built) => {
+            if (request.rebuild === "clean") {
+              setState("cleaning");
+              const routed = (await board.getTracks()).filter((item) => !(item instanceof Via) || Boolean(item.net));
+              const vias = routed.filter((item) => item instanceof Via).length;
+              if (routed.length) {
+                await board.commit("Clean rebuild: remove routed copper", (tx) => tx.delete(routed));
+              }
+              info.removedCopper = { tracks: routed.length - vias, vias };
+              pushLog(`clean rebuild: removed ${routed.length - vias} tracks/arcs and ${vias} routed vias`);
+            }
             rules = (request.board ?? built.board)?.rules;
             if (hasRules(rules)) pushLog(`rules: ${(await applyBoardConstraints(board, rules)).join(", ")}`);
-            if (built.libraries?.length) {
-              await registerLibraries(kicad, built.libraries);
-              pushLog(
-                `registered ${built.libraries.length} project librar${built.libraries.length === 1 ? "y" : "ies"}: ${built.libraries.map((l) => l.nickname).join(", ")}`,
-              );
+            const libraries = [...(deps.libraries ?? []), ...(built.libraries ?? [])];
+            const uniqueLibraries = [...new Map(libraries.map((library) => [`${library.kind}:${library.nickname}`, library])).values()];
+            if (uniqueLibraries.length) {
+              await registerLibraries(kicad, uniqueLibraries);
+              const names = uniqueLibraries.map((library) => library.nickname);
+              const shown = names.slice(0, 12).join(", ") + (names.length > 12 ? `, … +${names.length - 12}` : "");
+              pushLog(`registered ${uniqueLibraries.length} project librar${uniqueLibraries.length === 1 ? "y" : "ies"}: ${shown}`);
             }
+          },
+          afterApply: async (built) => {
+            const generated = await generateSchematic(kicad, built.netlist!);
+            schematic = generated.schematic;
+            pushLog(`schematic: ${generated.symbolsCreated} symbols, ${generated.wiresCreated} wires, ${generated.labelsCreated} labels`);
+            return generated.diagnostics;
           },
         });
         for (const d of result.diagnostics) pushLog(`${d.severity} [${d.stage}${d.code ? `/${d.code}` : ""}] ${d.message.split("\n")[0]}`);
@@ -243,6 +282,7 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
         if (result.ok && request.save !== false) {
           setState("saving");
           await board.save();
+          await schematic?.save();
           // The save drops the net class the session holds (G33): put it back into the file.
           if (hasRules(rules) && (await persistNetClassFile(kicadProPath, rules))) pushLog("net class written to the project file");
         }

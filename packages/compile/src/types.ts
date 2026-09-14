@@ -12,15 +12,14 @@
  * frontend was.
  *
  * `Netlist` deliberately carries no geometry. A netlist says what exists and what connects to
- * what; where things sit on the board is KiCad's job (`AutoplaceFootprints`) or the author's.
- * Board *outline* is the exception — the autoplacer needs one — so it rides along in `BoardSpec`.
+ * what; optional author placement and the outline ride alongside it in `BoardSpec`.
  *
  * Lengths in `BoardSpec` are millimetres (this is authoring input, written by humans and agents).
  * Everything past `apply.ts` is nanometres, the client's convention.
  */
 
 /** Where a diagnostic came from, so a UI can group them and a tool can decide what to retry. */
-export type CompileStage = "frontend" | "netlist" | "apply";
+export type CompileStage = "frontend" | "netlist" | "apply" | "schematic";
 
 /**
  * One problem, placed in the source when the frontend knows where. Shaped for an editor squiggle
@@ -115,6 +114,15 @@ export interface BoardSpec {
   vias?: PrefabVia[];
   /** Holes through the blank (mounting holes), drawn as circles on `Edge.Cuts` so DRC keeps copper clear of them. */
   holes?: PrefabHole[];
+  /** Explicit component positions in the board/blank coordinate frame, mm. Unnamed components keep their current placement. */
+  placements?: ComponentPlacement[];
+}
+
+export interface ComponentPlacement {
+  /** Reference designator of a component in the netlist. */
+  ref: string;
+  /** Absolute board position in mm, in the same frame as `outline`, `vias`, and `holes`. */
+  position: { x: number; y: number };
 }
 
 /** Rules in mm. Only the fields given change; the rest keep KiCad's project defaults. */
@@ -193,7 +201,7 @@ export interface CompileCounts {
   nets: number;
   /** Footprints `ImportNetlist` added to the board. */
   footprintsAdded: number;
-  /** Footprints the autoplacer moved; `0` when `autoplace` is off. */
+  /** Footprints moved by the autoplacer or explicit source placement. */
   footprintsPlaced: number;
   /** Free vias drawn for a prefabricated blank (`BoardSpec.vias`), with the outline. */
   viasAdded: number;

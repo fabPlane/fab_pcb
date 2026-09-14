@@ -9,6 +9,7 @@ import { extname, resolve } from "node:path";
 import { decodeEvent, eventToJson } from "@fp-pcb/client";
 import { createRouteJobs, matchRouteJobPath, type RouteJobs } from "@fp-pcb/router/bridge-job";
 import { createCompileJobs, matchCompileJobPath, type CompileJobs } from "@fp-pcb/compile/bridge-job";
+import { discoverLibraries } from "@fp-pcb/compile/libraries";
 import {
   TransportError,
   WS_BRIDGE_PROTOCOL_VERSION,
@@ -61,7 +62,12 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
     freerouting: { ...cfg.freerouting, ...(kicadCliExists ? { kicadCli: cfg.kicadCli } : {}) },
     log: cfg.log,
   });
-  const compileJobs = createCompileJobs({ log: cfg.log });
+  const bundledLibraries = [
+    ...(cfg.footprintDir ? await discoverLibraries("footprint", cfg.footprintDir) : []),
+    ...(cfg.symbolDir ? await discoverLibraries("symbol", cfg.symbolDir) : []),
+  ];
+  if (bundledLibraries.length) cfg.log(`bundled libraries: ${bundledLibraries.length} rows`);
+  const compileJobs = createCompileJobs({ log: cfg.log, libraries: bundledLibraries });
   if (!cfg.freerouting.ok) cfg.log(`warning: ${cfg.freerouting.reason}`);
 
   const server = Bun.serve<WsData>({
@@ -145,7 +151,12 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
         session.touch();
         return compileJobs.handle(
           req,
-          { id: session.id, transport: session.transport, clientName: `fp-pcb/bridge/${session.id}/compile` },
+          {
+            id: session.id,
+            transport: session.transport,
+            clientName: `fp-pcb/bridge/${session.id}/compile`,
+            updateProjectPath: (path) => session.updateProjectPath(path),
+          },
           compileRoute.jobId,
         );
       }
