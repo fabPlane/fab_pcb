@@ -10,25 +10,26 @@
  * The HTTP contract (JSON unless noted):
  *
  *   POST   /sessions/:id/route            body RouteJobRequest        -> 202 { job: RouteJobInfo }  (400 when the requested router is missing)
- *                                          js_autorouter currently refuses prefab free-via boards
- *   GET    /sessions/:id/route            -> { jobs: RouteJobInfo[], jsAutorouter, freerouting }
+ *                                          the capacity router currently refuses prefab free-via boards
+ *   GET    /sessions/:id/route            -> { jobs: RouteJobInfo[], capacityRouter, freerouting }
  *   GET    /sessions/:id/route/:job       -> { job: RouteJobInfo }   (SSE: `event: state`, `progress`, `done`, `error`, `: keepalive` every 15 s)
- *   DELETE /sessions/:id/route/:job       -> { ok, job }             (js_autorouter: batch boundary; Freerouting: kills java)
+ *   DELETE /sessions/:id/route/:job       -> { ok, job }             (fab_router: cooperative signal; Freerouting: kills java)
  *
  * The job refills the zones (unless `refillZones: false`), saves the board (`SaveDocument`, so
  * KiCad's exporter reads the current state), runs `extractRouteInput` -> router.route ->
  * `applyRouteResult` (one commit, message "Autoroute (<router>): <n> connections"), then saves
  * again so the routed board is durable on disk. The browser only has to pick up the
  * `DocumentChanged` event as usual. Cancelling before the apply leaves the board untouched; a
- * failed router run (a js_autorouter error, a Freerouting crash) applies nothing and reports the
+ * failed router run (a fab_router error, a Freerouting crash) applies nothing and reports the
  * error. A failure of the final save reports the job as failed but leaves the applied route in
  * KiCad memory, where the caller can retry saving it.
  */
 import { Arc, KiCad, KiCadClient, Track, Via, type Transport } from "@fp-pcb/client";
+import { DrcErrorType } from "@fp-pcb/proto";
 import { applyRouteResult } from "./apply";
 import { extractRouteInput } from "./extract";
 import { FreeroutingRouter, alreadyApplied, resolveFreerouting, type FreeroutingOptions, type FreeroutingPaths } from "./freerouting";
-import { JsAutorouter } from "./js-autorouter";
+import { FabRouter } from "./fab-router";
 import { RouteCancelled, type Autorouter, type RouteConnection, type RouteOptions, type RouteProgress, type RouteResult } from "./types";
 
 export type RouteJobState = "queued" | "saving" | "filling" | "extracting" | "routing" | "applying" | "done" | "failed" | "cancelled";
@@ -153,8 +154,8 @@ export interface RouteJobs {
   wait(id: string): Promise<RouteJobInfo>;
   /** Jar / Java the Freerouting jobs will use. */
   readonly freerouting: FreeroutingPaths;
-  /** Whether the private js_autorouter module can be loaded. */
-  jsAutorouter(): Promise<{ ok: boolean; reason?: string }>;
+  /** The selected implementation behind the stable `router: "js"` capacity slot. */
+  capacityRouter(): Promise<{ name: string; ok: boolean; reason?: string }>;
 }
 
 export interface RouteJobDeps {
@@ -162,8 +163,8 @@ export interface RouteJobDeps {
   routers?: (req: RouteJobRequest, kicad: KiCad, board: Awaited<ReturnType<KiCad["currentBoard"]>>) => Autorouter;
   /** Jar and Java for Freerouting; default `resolveFreerouting(process.env)`. */
   freerouting?: FreeroutingPaths;
-  /** Replaces the default dynamically loaded js_autorouter (tests and embedded hosts). */
-  jsAutorouter?: JsAutorouter;
+  /** Replaces the selected capacity router (tests and embedded hosts). */
+  capacityRouter?: Autorouter;
   log?: (message: string) => void;
 }
 
@@ -179,6 +180,25 @@ export function trackLength(result: Pick<RouteResult, "tracks">): number {
   let sum = 0;
   for (const t of result.tracks) sum += Math.hypot(t.end.x - t.start.x, t.end.y - t.start.y);
   return Math.round(sum);
+}
+
+/** Remove created tracks/vias named by a DRC marker after undoing their tentative commit. */
+export function withoutRejectedCreatedCopper(
+  result: RouteResult,
+  created: readonly (Track | Arc | Via)[],
+  rejectedIds: ReadonlySet<string>,
+): RouteResult {
+  let createdIndex = 0;
+  const tracks = result.tracks.filter((track) => {
+    if (Math.round(track.start.x) === Math.round(track.end.x) && Math.round(track.start.y) === Math.round(track.end.y)) return false;
+    return !rejectedIds.has(created[createdIndex++]?.id ?? "");
+  });
+  const vias = result.vias.filter(() => !rejectedIds.has(created[createdIndex++]?.id ?? ""));
+  return {
+    ...result,
+    tracks,
+    vias,
+  };
 }
 
 /** Compact, renderer-neutral copper geometry for a completed routing run. */
@@ -203,7 +223,7 @@ export function routeGeometry(items: readonly (Track | Arc | Via)[]): RouteJobGe
 }
 
 /**
- * A run that routed nothing is reported as failed, with the router's own reason: the JS router's
+ * A run that routed nothing is reported as failed, with the router's own reason: a router's
  * retries swallow its precheck errors into `log` and hand back an empty result, and a killed
  * Freerouting writes no session. Null when something was routed or there was nothing to route.
  */
@@ -236,7 +256,7 @@ export async function persistAppliedRoute(board: { save(): Promise<void> }): Pro
 export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
   const jobs = new Map<string, Job>();
   const freerouting = deps.freerouting ?? resolveFreerouting();
-  const jsAutorouter = deps.jsAutorouter ?? new JsAutorouter();
+  const capacityRouter: Autorouter = deps.capacityRouter ?? new FabRouter();
   const log = deps.log ?? (() => {});
 
   const emit = (job: Job, ev: string, data: unknown) => {
@@ -306,10 +326,10 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
                   ...request.freerouting,
                 },
               )
-            : jsAutorouter);
+            : capacityRouter);
         info.router = router.name;
         setState("routing");
-        const result: RouteResult = await router.route(input, { ...request.options, signal: abort.signal }, (p) => {
+        let result: RouteResult = await router.route(input, { ...request.options, signal: abort.signal }, (p) => {
           info.progress = p;
           if (p.message) pushLog(`${p.phase}: ${p.message}`);
           else if (p.phase && p.phase !== info.log[info.log.length - 1]) pushLog(p.phase);
@@ -322,12 +342,55 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           throw new Error(empty);
         }
         const routed = result.totalConnections - result.unrouted.length;
-        const message = request.message ?? autorouteMessage(request.router, routed);
+        let message = request.message ?? autorouteMessage(request.router, routed);
         setState("applying");
         let applied = false;
         if (!alreadyApplied(result) && (result.tracks.length || result.vias.length || result.claimedVias?.length)) {
-          await applyRouteResult(board, result, { message });
-          applied = true;
+          const maxCleanupPasses = Math.min(20, result.tracks.length + result.vias.length + 1);
+          for (let cleanupPass = 0; cleanupPass < maxCleanupPasses; cleanupPass++) {
+            const committed = await applyRouteResult(board, result, { message });
+            if (result.router !== "fab-router") {
+              applied = true;
+              break;
+            }
+            const createdIds = new Set(committed.created.map((item) => item.id));
+            const drc = await board.drc.run({ refillZones: false });
+            const rejectedIds = new Set(
+              drc.markers
+                .filter(
+                  (marker) =>
+                    marker.errorType === DrcErrorType.DRCET_DANGLING_TRACK || marker.errorType === DrcErrorType.DRCET_DANGLING_VIA,
+                )
+                .flatMap((marker) => marker.items.map((item) => item.value))
+                .filter((id) => createdIds.has(id)),
+            );
+            if (!rejectedIds.size) {
+              if (!request.message) {
+                const nativeOpen = (await board.ratsnest(request.options?.nets ?? [])).edges.length;
+                const nativeMessage = autorouteMessage(request.router, Math.max(0, result.totalConnections - nativeOpen));
+                if (nativeMessage !== message) {
+                  const undone = await board.undo(1);
+                  if (undone.applied !== 1) throw new Error("could not relabel fab_router's tentative route commit");
+                  message = nativeMessage;
+                  await applyRouteResult(board, result, { message });
+                }
+              }
+              applied = true;
+              break;
+            }
+            const undone = await board.undo(1);
+            if (undone.applied !== 1) throw new Error("could not undo fab_router's tentative dangling-copper commit");
+            const before = result.tracks.length + result.vias.length;
+            result = withoutRejectedCreatedCopper(result, committed.created as (Track | Arc | Via)[], rejectedIds);
+            const removed = before - result.tracks.length - result.vias.length;
+            result.log.push(
+              `KiCad rejected ${removed} dangling fab_router item(s) before the durable commit (cleanup pass ${cleanupPass + 1})`,
+            );
+            if (!removed)
+              throw new Error("KiCad identified dangling fab_router copper but it could not be mapped back to the route result");
+            if (!result.tracks.length && !result.vias.length && !result.claimedVias?.length) break;
+            if (cleanupPass + 1 === maxCleanupPasses) throw new Error("fab_router dangling-copper cleanup did not converge");
+          }
         }
         const appliedByKicad = (result as RouteResult & { applied?: { tracksAdded: number; viasAdded: number } }).applied;
         if (applied || appliedByKicad) {
@@ -452,7 +515,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
 
   return {
     freerouting,
-    jsAutorouter: () => jsAutorouter.available(),
+    capacityRouter: async () => ({ name: capacityRouter.name, ...(await (capacityRouter.available?.() ?? Promise.resolve({ ok: true }))) }),
     start,
     get: (id) => jobs.get(id)?.info,
     list: (sessionId) => [...jobs.values()].map((j) => j.info).filter((i) => !sessionId || i.sessionId === sessionId),
@@ -473,7 +536,12 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
     async handle(req, session, jobId) {
       if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
       if (!jobId) {
-        if (req.method === "GET") return json({ jobs: this.list(session.id), jsAutorouter: await this.jsAutorouter(), freerouting });
+        if (req.method === "GET")
+          return json({
+            jobs: this.list(session.id),
+            capacityRouter: await this.capacityRouter(),
+            freerouting,
+          });
         if (req.method === "POST") {
           let body: RouteJobRequest;
           try {
@@ -486,8 +554,8 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
             return json({ error: `Freerouting unavailable: ${freerouting.reason}` }, 400);
           if (!session.transport) return json({ error: "session has no running KiCad" }, 409);
           if (body.router === "js") {
-            const available = await this.jsAutorouter();
-            if (!available.ok) return json({ error: `js_autorouter unavailable: ${available.reason}` }, 400);
+            const available = await this.capacityRouter();
+            if (!available.ok) return json({ error: `${available.name} unavailable: ${available.reason}` }, 400);
           }
           return json({ job: start(session, body) }, 202);
         }

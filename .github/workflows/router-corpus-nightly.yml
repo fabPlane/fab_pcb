@@ -19,24 +19,24 @@ jobs:
         with:
           bun-version-file: .bun-version
       - run: bun install --frozen-lockfile
-      - name: Resolve the private router pin
-        id: private-router
-        run: echo "commit=$(tr -d '[:space:]' < packages/router/JS_AUTOROUTER_COMMIT)" >> "$GITHUB_OUTPUT"
-      - name: Check out the pinned private router
+      - name: Resolve the fab_router pin
+        id: fab-router
+        run: echo "commit=$(tr -d '[:space:]' < packages/router/FAB_ROUTER_COMMIT)" >> "$GITHUB_OUTPUT"
+      - name: Check out the pinned fab_router
         uses: actions/checkout@v4
         with:
-          repository: TensorFleet/js_autorouter
-          ref: ${{ steps.private-router.outputs.commit }}
-          path: .ci-private/js_autorouter
-          token: ${{ secrets.JS_AUTOROUTER_READ_TOKEN }}
+          repository: fabPlane/fab_router
+          ref: ${{ steps.fab-router.outputs.commit }}
+          path: .ci-private/fab_router
           persist-credentials: false
           sparse-checkout: |
             package.json
             src
+            spec/types
           sparse-checkout-cone-mode: false
       - name: Run the nightly corpus
         env:
-          JS_AUTOROUTER_MODULE: ${{ github.workspace }}/.ci-private/js_autorouter/src/index.ts
+          FAB_ROUTER_MODULE: ${{ github.workspace }}/.ci-private/fab_router/src/api.ts
         run: bun run --filter @fp-pcb/router corpus --nightly --output artifacts/router-corpus.json
       - uses: actions/upload-artifact@v4
         if: always()

@@ -1,8 +1,9 @@
 import { describe, expect, test } from "bun:test";
+import { readFileSync } from "node:fs";
 import { mkdtemp, mkdir, symlink } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { findStockData, targetSpec, validateJsAutorouterSource, validateRelocatableSymlinks } from "./bundle-lib";
+import { findStockData, targetSpec, validateFabRouterSource, validateRelocatableSymlinks } from "./bundle-lib";
 
 describe("backend bundle targets", () => {
   test("uses IPC on Unix and KiCad WebSockets on Windows", () => {
@@ -13,15 +14,29 @@ describe("backend bundle targets", () => {
   });
 });
 
-describe("private js_autorouter source", () => {
-  test("requires the package manifest and TypeScript entry point", async () => {
-    const root = await mkdtemp(join(tmpdir(), "fp-pcb-js-autorouter-"));
-    await expect(validateJsAutorouterSource(root)).rejects.toThrow(/package.json/);
-    await Bun.write(join(root, "package.json"), "{}\n");
-    await expect(validateJsAutorouterSource(root)).rejects.toThrow(/src\/index.ts/);
+describe("fab_router source", () => {
+  test("requires its manifest, entry point and runtime settings module", async () => {
+    const root = await mkdtemp(join(tmpdir(), "fp-pcb-fab-router-"));
+    await expect(validateFabRouterSource(root)).rejects.toThrow(/package.json/);
+    await Bun.write(join(root, "package.json"), '{"name":"@fabplane/fab-router","private":true}\n');
+    await expect(validateFabRouterSource(root)).rejects.toThrow(/src\/api.ts/);
     await mkdir(join(root, "src"));
-    await Bun.write(join(root, "src", "index.ts"), "export {};\n");
-    await expect(validateJsAutorouterSource(root)).resolves.toBeUndefined();
+    await Bun.write(join(root, "src", "api.ts"), "export {};\n");
+    await expect(validateFabRouterSource(root)).rejects.toThrow(/spec\/types\/settings.ts/);
+    await mkdir(join(root, "spec", "types"), { recursive: true });
+    await Bun.write(join(root, "spec", "types", "settings.ts"), "export {};\n");
+    await expect(validateFabRouterSource(root)).resolves.toBeUndefined();
+  });
+
+  test("the backend release checks out and bundles the pin on every native platform", () => {
+    const workflow = readFileSync(join(import.meta.dir, "../../.github/workflows/backend-release.yml"), "utf8");
+    expect(workflow.match(/packages\/router\/FAB_ROUTER_COMMIT/g)).toHaveLength(3);
+    expect(workflow.match(/FP_PCB_FAB_ROUTER_SOURCE:/g)).toHaveLength(3);
+    expect(workflow.match(/repository: fabPlane\/fab_router/g)).toHaveLength(3);
+    expect(workflow).not.toContain("FAB_ROUTER_READ_TOKEN");
+    expect(workflow).toContain("FabRouter-enabled FabPlane PCB native backends");
+    expect(workflow).not.toContain("router-free");
+    expect(workflow).not.toMatch(/js[_-]autorouter/i);
   });
 });
 

@@ -2,7 +2,12 @@ import { describe, expect, test } from "bun:test";
 import { create } from "@bufbuild/protobuf";
 import { ArcSchema, BoardLayer, TrackSchema, ViaSchema } from "@fp-pcb/proto";
 import { Arc, Track, Via, toDistance, toVector2 } from "@fp-pcb/client";
-import { persistAppliedRoute, routeGeometry } from "../src/bridge-job";
+import { createRouteJobs, persistAppliedRoute, routeGeometry, withoutRejectedCreatedCopper } from "../src/bridge-job";
+
+test("the stable capacity slot uses fab_router", async () => {
+  const freerouting = { jar: "/missing/router.jar", java: "/missing/java", ok: false as const, reason: "test" };
+  expect((await createRouteJobs({ freerouting }).capacityRouter()).name).toBe("fab-router");
+});
 
 describe("persistAppliedRoute", () => {
   test("saves a route after it has been applied", async () => {
@@ -67,4 +72,28 @@ describe("routeGeometry", () => {
       { kind: "via", id: "via-1", layer: -1, net: 7, points: [90, 190, 110, 210] },
     ]);
   });
+});
+
+test("withoutRejectedCreatedCopper maps rejected KiCad ids back to generated copper", () => {
+  const result = {
+    router: "fab-router",
+    tracks: [
+      { net: "A", netCode: 1, start: { x: 0, y: 0 }, end: { x: 1, y: 1 }, width: 1, layer: BoardLayer.BL_F_Cu },
+      { net: "B", netCode: 2, start: { x: 0, y: 0 }, end: { x: 1, y: 1 }, width: 1, layer: BoardLayer.BL_B_Cu },
+    ],
+    vias: [{ net: "B", netCode: 2, position: { x: 1, y: 1 }, diameter: 2, drill: 1, layers: [BoardLayer.BL_F_Cu, BoardLayer.BL_B_Cu] }],
+    unrouted: [],
+    totalConnections: 2,
+    timedOut: false,
+    elapsedMs: 1,
+    log: [],
+  };
+  const created = [
+    new Track(create(TrackSchema, { id: { value: "keep" } })),
+    new Track(create(TrackSchema, { id: { value: "reject-track" } })),
+    new Via(create(ViaSchema, { id: { value: "reject-via" } })),
+  ];
+  const clean = withoutRejectedCreatedCopper(result, created, new Set(["reject-track", "reject-via"]));
+  expect(clean.tracks.map((track) => track.net)).toEqual(["A"]);
+  expect(clean.vias).toEqual([]);
 });

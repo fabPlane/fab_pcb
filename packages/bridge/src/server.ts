@@ -62,7 +62,7 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
     freerouting: { ...cfg.freerouting, ...(kicadCliExists ? { kicadCli: cfg.kicadCli } : {}) },
     log: cfg.log,
   });
-  const jsAutorouter = await routeJobs.jsAutorouter();
+  const capacityRouter = await routeJobs.capacityRouter();
   const bundledLibraries = [
     ...(cfg.footprintDir ? await discoverLibraries("footprint", cfg.footprintDir) : []),
     ...(cfg.symbolDir ? await discoverLibraries("symbol", cfg.symbolDir) : []),
@@ -70,7 +70,7 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
   if (bundledLibraries.length) cfg.log(`bundled libraries: ${bundledLibraries.length} rows`);
   const compileJobs = createCompileJobs({ log: cfg.log, libraries: bundledLibraries });
   if (!cfg.freerouting.ok) cfg.log(`warning: ${cfg.freerouting.reason}`);
-  if (!jsAutorouter.ok) cfg.log(`warning: ${jsAutorouter.reason}`);
+  if (!capacityRouter.ok) cfg.log(`warning: ${capacityRouter.reason}`);
 
   const server = Bun.serve<WsData>({
     port: cfg.port,
@@ -101,7 +101,7 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
           wasmModule: cfg.wasmModuleUrl,
           workspaceRoot: cfg.workspaceRoot,
           staticDir: cfg.staticDir,
-          jsAutorouter,
+          capacityRouter,
           freerouting: cfg.freerouting,
           compile: { frontends: compileJobs.frontends },
           sessions: sessions.list().map((s) => ({ id: s.id, state: s.state, path: s.path, clients: s.clients })),

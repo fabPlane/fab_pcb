@@ -8,7 +8,7 @@ on:
         type: boolean
         default: false
       publish_release:
-        description: Publish the router-free archives as backend-<commit>
+        description: Publish the FabRouter-enabled archives as backend-<commit>
         type: boolean
         default: true
   push:
@@ -47,6 +47,16 @@ jobs:
           no-cache: true
       - name: Install JS dependencies
         run: bun install --frozen-lockfile
+      - name: Resolve the fab_router pin
+        id: linux-fab-router
+        run: echo "commit=$(tr -d '[:space:]' < packages/router/FAB_ROUTER_COMMIT)" >> "$GITHUB_OUTPUT"
+      - name: Check out the pinned fab_router
+        uses: actions/checkout@v4
+        with:
+          repository: fabPlane/fab_router
+          ref: ${{ steps.linux-fab-router.outputs.commit }}
+          path: .release-private/fab_router
+          persist-credentials: false
       - uses: docker/setup-buildx-action@v3
       - name: Resolve immutable versions
         id: versions
@@ -98,7 +108,7 @@ jobs:
       - name: Pull the newly published image
         if: steps.image.outcome != 'success'
         run: docker pull "${{ steps.versions.outputs.image }}"
-      - name: Check out pinned KiCad libraries
+      - name: Check out pinned KiCad source and libraries
         shell: bash
         run: |
           set -euo pipefail
@@ -120,6 +130,8 @@ jobs:
           done
       - name: Assemble dependency-complete Linux backend
         shell: bash
+        env:
+          FP_PCB_FAB_ROUTER_SOURCE: ${{ github.workspace }}/.release-private/fab_router
         run: |
           set -euo pipefail
           container="$(docker create '${{ steps.versions.outputs.image }}')"
@@ -165,6 +177,16 @@ jobs:
           bun-version: ${{ env.BUN_VERSION }}
       - name: Install JS dependencies
         run: bun install --frozen-lockfile
+      - name: Resolve the fab_router pin
+        id: macos-fab-router
+        run: echo "commit=$(tr -d '[:space:]' < packages/router/FAB_ROUTER_COMMIT)" >> "$GITHUB_OUTPUT"
+      - name: Check out the pinned fab_router
+        uses: actions/checkout@v4
+        with:
+          repository: fabPlane/fab_router
+          ref: ${{ steps.macos-fab-router.outputs.commit }}
+          path: .release-private/fab_router
+          persist-credentials: false
       - name: Install native build dependencies
         run: brew install cmake ninja ccache wxwidgets@3.2 boost protobuf nng glew glm cairo pixman harfbuzz freetype fontconfig gettext opencascade libngspice unixodbc libgit2 zstd
       - name: Check out pinned KiCad source and libraries
@@ -199,6 +221,8 @@ jobs:
         run: packages/kicad-patches/build-macos.sh "$RUNNER_TEMP/kicad" Release
       - name: Stage relocatable runtime and assemble backend
         shell: bash
+        env:
+          FP_PCB_FAB_ROUTER_SOURCE: ${{ github.workspace }}/.release-private/fab_router
         run: |
           set -euo pipefail
           bun packages/kicad-patches/stage-macos.ts \
@@ -238,6 +262,17 @@ jobs:
           arch: x64
       - name: Install JS dependencies
         run: bun install --frozen-lockfile
+      - name: Resolve the fab_router pin
+        id: windows-fab-router
+        shell: pwsh
+        run: '"commit=$((Get-Content packages/router/FAB_ROUTER_COMMIT -Raw).Trim())" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8'
+      - name: Check out the pinned fab_router
+        uses: actions/checkout@v4
+        with:
+          repository: fabPlane/fab_router
+          ref: ${{ steps.windows-fab-router.outputs.commit }}
+          path: .release-private/fab_router
+          persist-credentials: false
       - name: Check out pinned KiCad source and libraries
         shell: pwsh
         run: |
@@ -331,6 +366,8 @@ jobs:
 
       - name: Build patched KiCad and assemble backend
         shell: pwsh
+        env:
+          FP_PCB_FAB_ROUTER_SOURCE: ${{ github.workspace }}/.release-private/fab_router
         run: |
           packages/kicad-patches/build-windows.ps1 `
             -KicadSource "$env:RUNNER_TEMP/kicad" `
@@ -369,11 +406,11 @@ jobs:
           set -euo pipefail
           test "$(find artifacts -name 'fp-pcb-backend-*.tar.gz' | wc -l | tr -d ' ')" = 4
           echo "tag=backend-${GITHUB_SHA:0:10}" >> "$GITHUB_OUTPUT"
-      - name: Publish immutable router-free backend release
+      - name: Publish immutable FabRouter-enabled backend release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.release.outputs.tag }}
           name: ${{ steps.release.outputs.tag }}
-          body: Router-free FabPlane PCB native backends for ${{ github.sha }}.
+          body: FabRouter-enabled FabPlane PCB native backends for ${{ github.sha }}.
           files: artifacts/fp-pcb-backend-*.tar.gz
           fail_on_unmatched_files: true
