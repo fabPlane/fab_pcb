@@ -34,6 +34,11 @@ describe("fab_router source", () => {
     expect(workflow.match(/FP_PCB_FAB_ROUTER_SOURCE:/g)).toHaveLength(3);
     expect(workflow.match(/repository: fabPlane\/fab_router/g)).toHaveLength(3);
     expect(workflow).not.toContain("FAB_ROUTER_READ_TOKEN");
+    expect(workflow).toContain("options: [auto, local, blacksmith, github]");
+    expect(workflow).toContain(`runner='["self-hosted","Linux","X64","tf-nas-ephemeral","fab-pcb"]'`);
+    expect(workflow).toContain(`runner='"blacksmith-4vcpu-ubuntu-2404"'`);
+    expect(workflow).toContain(`runner='"ubuntu-24.04"'`);
+    expect(workflow).toContain("BLACKSMITH_ENABLED");
     expect(workflow).toContain("FabRouter-enabled FabPlane PCB native backends");
     expect(workflow).not.toContain("router-free");
     expect(workflow).not.toMatch(/js[_-]autorouter/i);

@@ -3,6 +3,11 @@ name: Backend release
 on:
   workflow_dispatch:
     inputs:
+      runner:
+        description: Linux runner selection (auto prefers NAS, then Blacksmith, then GitHub)
+        type: choice
+        options: [auto, local, blacksmith, github]
+        default: auto
       rebuild_image:
         description: Rebuild the pinned Linux KiCad image even when its immutable tag exists
         type: boolean
@@ -36,8 +41,82 @@ env:
   KICAD_REPO: https://github.com/${{ github.repository_owner }}/kicad.git
 
 jobs:
+  select-linux-runner:
+    runs-on: ubuntu-24.04
+    outputs:
+      runner: ${{ steps.select.outputs.runner }}
+      choice: ${{ steps.select.outputs.choice }}
+    steps:
+      - name: Select Linux runner
+        id: select
+        shell: bash
+        env:
+          RUNNER_MODE: ${{ inputs.runner || 'auto' }}
+          RUNNER_STATUS_TOKEN: ${{ secrets.RUNNER_STATUS_TOKEN }}
+          BLACKSMITH_ENABLED: ${{ vars.BLACKSMITH_ENABLED || 'false' }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          select_runner() {
+            case "$1" in
+              local)
+                runner='["self-hosted","Linux","X64","tf-nas-ephemeral","fab-pcb"]'
+                ;;
+              blacksmith)
+                runner='"blacksmith-4vcpu-ubuntu-2404"'
+                ;;
+              github)
+                runner='"ubuntu-24.04"'
+                ;;
+              *)
+                echo "unknown runner mode: $1" >&2
+                exit 1
+                ;;
+            esac
+            echo "runner=$runner" >> "$GITHUB_OUTPUT"
+            echo "choice=$1" >> "$GITHUB_OUTPUT"
+            echo "Selected Linux runner: $1"
+            echo "Linux runner: $1" >> "$GITHUB_STEP_SUMMARY"
+          }
+
+          if [ "$RUNNER_MODE" != auto ]; then
+            select_runner "$RUNNER_MODE"
+            exit 0
+          fi
+
+          if [ -n "$RUNNER_STATUS_TOKEN" ]; then
+            runners="$(curl -fsSL \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer $RUNNER_STATUS_TOKEN" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/$REPOSITORY/actions/runners?per_page=100" || true)"
+            if printf '%s' "$runners" | jq -e '
+              .runners[]
+              | select(.status == "online" and (.busy | not))
+              | [.labels[].name] as $labels
+              | select(["self-hosted", "Linux", "X64", "tf-nas-ephemeral", "fab-pcb"]
+                  | all(. as $label | $labels | index($label)))
+            ' >/dev/null 2>&1; then
+              select_runner local
+              exit 0
+            fi
+          else
+            echo "RUNNER_STATUS_TOKEN is unset; skipping NAS availability check"
+          fi
+
+          if [ "$BLACKSMITH_ENABLED" = true ] \
+            && curl -fsSL https://status.blacksmith.sh/v3/summary.json \
+            | jq -e '.page.status == "UP"' >/dev/null; then
+            select_runner blacksmith
+          else
+            echo "Blacksmith is disabled or its status is not UP; falling back to GitHub-hosted Linux"
+            select_runner github
+          fi
+
   linux-x64:
-    runs-on: [self-hosted, Linux, X64, tf-nas-ephemeral, fab-pcb]
+    needs: select-linux-runner
+    runs-on: ${{ fromJSON(needs.select-linux-runner.outputs.runner) }}
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
@@ -389,9 +468,9 @@ jobs:
           retention-days: 1
 
   publish:
-    needs: [linux-x64, macos, windows-x64]
+    needs: [select-linux-runner, linux-x64, macos, windows-x64]
     if: github.event_name == 'push' || inputs.publish_release == true
-    runs-on: [self-hosted, Linux, X64, tf-nas-ephemeral, fab-pcb]
+    runs-on: ${{ fromJSON(needs.select-linux-runner.outputs.runner) }}
     container: ubuntu:24.04
     steps:
       - uses: actions/download-artifact@v4
