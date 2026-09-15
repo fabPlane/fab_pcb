@@ -28,7 +28,7 @@ describe("fab_router source", () => {
     await expect(validateFabRouterSource(root)).resolves.toBeUndefined();
   });
 
-  test("the backend release checks out and bundles the pin on every native platform", () => {
+  test("the backend release downloads and bundles pinned runtimes on every native platform", () => {
     const workflow = readFileSync(join(import.meta.dir, "../../.github/workflows/backend-release.yml"), "utf8");
     expect(workflow.match(/packages\/router\/FAB_ROUTER_COMMIT/g)).toHaveLength(3);
     expect(workflow.match(/FP_PCB_FAB_ROUTER_SOURCE:/g)).toHaveLength(3);
@@ -38,7 +38,13 @@ describe("fab_router source", () => {
     expect(workflow).toContain(`runner='["self-hosted","Linux","X64","tf-nas-ephemeral","fab-pcb"]'`);
     expect(workflow).toContain(`runner='"blacksmith-4vcpu-ubuntu-2404"'`);
     expect(workflow).toContain(`runner='"ubuntu-24.04"'`);
-    expect(workflow).toContain("BLACKSMITH_ENABLED");
+    expect(workflow.match(/tooling\/kicad-cli\/fetch\.ts/g)).toHaveLength(3);
+    expect(workflow).toContain("--platform linux-x86_64");
+    expect(workflow).toContain("--platform '${{ matrix.kicad-platform }}'");
+    expect(workflow).toContain("--platform windows-x86_64");
+    expect(workflow).not.toContain("docker/build-push-action");
+    expect(workflow).not.toContain("packages/kicad-patches/build-macos.sh");
+    expect(workflow).not.toContain("packages/kicad-patches/build-windows.ps1");
     expect(workflow).toContain("FabRouter-enabled FabPlane PCB native backends");
     expect(workflow).not.toContain("router-free");
     expect(workflow).not.toMatch(/js[_-]autorouter/i);
