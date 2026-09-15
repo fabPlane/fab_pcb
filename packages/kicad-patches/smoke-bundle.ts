@@ -13,6 +13,7 @@ interface Manifest {
   bridge: string;
   footprints: string;
   symbols: string;
+  fabRouter?: string;
   jsAutorouter?: string;
   libraryPaths?: string[];
   environment?: Record<string, string>;
@@ -54,6 +55,7 @@ const env = {
   KICAD_FOOTPRINT_DIR: paths.footprints,
   KICAD_SYMBOL_DIR: paths.symbols,
   WORKSPACE_ROOT: workspace,
+  ...(manifest.fabRouter ? { FAB_ROUTER_MODULE: resolve(root, manifest.fabRouter) } : {}),
   ...(manifest.jsAutorouter ? { JS_AUTOROUTER_MODULE: resolve(root, manifest.jsAutorouter) } : {}),
 };
 const version = Bun.spawnSync([paths.cli, "version"], { env, stdout: "pipe", stderr: "pipe" });
@@ -75,6 +77,10 @@ try {
   }
   if (!health) throw new Error("bridge did not become healthy within 60 seconds");
   if (health.ok !== true || health.kicadCliExists !== true) throw new Error(`unhealthy bridge: ${JSON.stringify(health)}`);
+  if (manifest.fabRouter) {
+    const router = health.capacityRouter as { name?: string; ok?: boolean } | undefined;
+    if (router?.name !== "fab-router" || router.ok !== true) throw new Error(`fab_router unavailable: ${JSON.stringify(router)}`);
+  }
   if (resolve(String(health.workspaceRoot)) !== resolve(workspace)) {
     throw new Error(`bridge workspace ${String(health.workspaceRoot)} != ${workspace}`);
   }

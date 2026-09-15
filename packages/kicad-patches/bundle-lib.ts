@@ -1,4 +1,4 @@
-import { lstat, readlink, readdir, stat } from "node:fs/promises";
+import { lstat, readFile, readlink, readdir, stat } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 export interface BundleTarget {
@@ -38,6 +38,32 @@ export async function validateJsAutorouterSource(root: string): Promise<void> {
   }
   if (!(await stat(`${root}/src/index.ts`).catch(() => null))?.isFile()) {
     throw new Error(`js_autorouter entry point not found: ${root}/src/index.ts`);
+  }
+}
+
+export async function validateFabRouterSource(root: string): Promise<void> {
+  if (!(await stat(root).catch(() => null))?.isDirectory()) {
+    throw new Error(`fab_router source directory not found: ${root}`);
+  }
+  if (!(await stat(`${root}/package.json`).catch(() => null))?.isFile()) {
+    throw new Error(`fab_router package.json not found in ${root}`);
+  }
+  const pkg = JSON.parse(await readFile(`${root}/package.json`, "utf8")) as {
+    name?: string;
+    private?: boolean;
+    dependencies?: Record<string, string>;
+  };
+  if (pkg.name !== "@fabplane/fab-router" || pkg.private !== true) {
+    throw new Error(`unexpected fab_router package metadata in ${root}/package.json`);
+  }
+  if (Object.keys(pkg.dependencies ?? {}).length) {
+    throw new Error("fab_router gained runtime dependencies; update packaging explicitly");
+  }
+  if (!(await stat(`${root}/src/api.ts`).catch(() => null))?.isFile()) {
+    throw new Error(`fab_router entry point not found: ${root}/src/api.ts`);
+  }
+  if (!(await stat(`${root}/spec/types/settings.ts`).catch(() => null))?.isFile()) {
+    throw new Error(`fab_router runtime types not found: ${root}/spec/types/settings.ts`);
   }
 }
 

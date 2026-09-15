@@ -8,7 +8,7 @@ on:
         type: boolean
         default: false
       publish_release:
-        description: Publish the router-free archives as backend-<commit>
+        description: Publish the FabRouter-enabled archives as backend-<commit>
         type: boolean
         default: true
   push:
@@ -34,6 +34,7 @@ env:
   BUN_VERSION: "1.4.0"
   KICAD_IMAGE: ghcr.io/${{ github.repository_owner }}/kicad-cli
   KICAD_REPO: https://github.com/${{ github.repository_owner }}/kicad.git
+  FAB_ROUTER_REPO: https://github.com/${{ github.repository_owner }}/fab_router.git
 
 jobs:
   linux-x64:
@@ -98,10 +99,16 @@ jobs:
       - name: Pull the newly published image
         if: steps.image.outcome != 'success'
         run: docker pull "${{ steps.versions.outputs.image }}"
-      - name: Check out pinned KiCad libraries
+      - name: Check out pinned fab_router, KiCad source and libraries
         shell: bash
         run: |
           set -euo pipefail
+          fab_router="$(tr -d '[:space:]' < packages/router/FAB_ROUTER_COMMIT)"
+          git init -q "$RUNNER_TEMP/fab_router"
+          git -C "$RUNNER_TEMP/fab_router" remote add origin "$FAB_ROUTER_REPO"
+          git -C "$RUNNER_TEMP/fab_router" fetch --depth 1 origin "$fab_router"
+          git -C "$RUNNER_TEMP/fab_router" checkout -q FETCH_HEAD
+          echo "FP_PCB_FAB_ROUTER_SOURCE=$RUNNER_TEMP/fab_router" >> "$GITHUB_ENV"
           kicad="$(tr -d '[:space:]' < packages/proto/KICAD_COMMIT)"
           git init -q "$RUNNER_TEMP/kicad-source"
           git -C "$RUNNER_TEMP/kicad-source" remote add origin "$KICAD_REPO"
@@ -167,10 +174,16 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Install native build dependencies
         run: brew install cmake ninja ccache wxwidgets@3.2 boost protobuf nng glew glm cairo pixman harfbuzz freetype fontconfig gettext opencascade libngspice unixodbc libgit2 zstd
-      - name: Check out pinned KiCad source and libraries
+      - name: Check out pinned fab_router, KiCad source and libraries
         shell: bash
         run: |
           set -euo pipefail
+          fab_router="$(tr -d '[:space:]' < packages/router/FAB_ROUTER_COMMIT)"
+          git init -q "$RUNNER_TEMP/fab_router"
+          git -C "$RUNNER_TEMP/fab_router" remote add origin "$FAB_ROUTER_REPO"
+          git -C "$RUNNER_TEMP/fab_router" fetch --depth 1 origin "$fab_router"
+          git -C "$RUNNER_TEMP/fab_router" checkout -q FETCH_HEAD
+          echo "FP_PCB_FAB_ROUTER_SOURCE=$RUNNER_TEMP/fab_router" >> "$GITHUB_ENV"
           kicad="$(tr -d '[:space:]' < packages/proto/KICAD_COMMIT)"
           git init -q "$RUNNER_TEMP/kicad"
           git -C "$RUNNER_TEMP/kicad" remote add origin "$KICAD_REPO"
@@ -238,9 +251,16 @@ jobs:
           arch: x64
       - name: Install JS dependencies
         run: bun install --frozen-lockfile
-      - name: Check out pinned KiCad source and libraries
+      - name: Check out pinned fab_router, KiCad source and libraries
         shell: pwsh
         run: |
+          $fabRouter = (Get-Content packages/router/FAB_ROUTER_COMMIT -Raw).Trim()
+          $fabRouterPath = "$env:RUNNER_TEMP/fab_router"
+          git init -q $fabRouterPath
+          git -C $fabRouterPath remote add origin $env:FAB_ROUTER_REPO
+          git -C $fabRouterPath fetch --depth 1 origin $fabRouter
+          git -C $fabRouterPath checkout -q FETCH_HEAD
+          "FP_PCB_FAB_ROUTER_SOURCE=$fabRouterPath" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           $kicad = (Get-Content packages/proto/KICAD_COMMIT -Raw).Trim()
           git init -q "$env:RUNNER_TEMP/kicad"
           git -C "$env:RUNNER_TEMP/kicad" remote add origin $env:KICAD_REPO
@@ -369,11 +389,11 @@ jobs:
           set -euo pipefail
           test "$(find artifacts -name 'fp-pcb-backend-*.tar.gz' | wc -l | tr -d ' ')" = 4
           echo "tag=backend-${GITHUB_SHA:0:10}" >> "$GITHUB_OUTPUT"
-      - name: Publish immutable router-free backend release
+      - name: Publish immutable FabRouter-enabled backend release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.release.outputs.tag }}
           name: ${{ steps.release.outputs.tag }}
-          body: Router-free FabPlane PCB native backends for ${{ github.sha }}.
+          body: FabRouter-enabled FabPlane PCB native backends for ${{ github.sha }}.
           files: artifacts/fp-pcb-backend-*.tar.gz
           fail_on_unmatched_files: true

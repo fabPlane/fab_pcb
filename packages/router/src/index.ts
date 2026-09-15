@@ -4,6 +4,15 @@ export { applyRouteResult, claimedViaItems, itemsFor, trackProto, viaProto, type
 export { JsRouter, type JsRouterOptions } from "./js-router";
 export { JsAutorouter, type JsAutorouterOptions, type JsAutorouterRouteOptions, type RouteDsn } from "./js-autorouter";
 export {
+  FabRouter,
+  type FabRouterHooks,
+  type FabRouterOptions,
+  type FabRouterReport,
+  type FabRouterSettings,
+  type FabRouterTextResult,
+  type FabRouteDsn,
+} from "./fab-router";
+export {
   FreeroutingRouter,
   alreadyApplied,
   exportDsnViaKicad,
@@ -31,6 +40,7 @@ export {
   matchRouteJobPath,
   trackLength,
   unroutedOf,
+  withoutRejectedCreatedCopper,
   type RouteJobDeps,
   type RouteJobInfo,
   type RouteJobRequest,

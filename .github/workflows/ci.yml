@@ -47,21 +47,21 @@ jobs:
       - name: Install
         run: bun install --frozen-lockfile
 
-      - name: Resolve the private router pin
-        id: unit-private-router
-        run: echo "commit=$(tr -d '[:space:]' < packages/router/JS_AUTOROUTER_COMMIT)" >> "$GITHUB_OUTPUT"
+      - name: Resolve the fab_router pin
+        id: unit-fab-router
+        run: echo "commit=$(tr -d '[:space:]' < packages/router/FAB_ROUTER_COMMIT)" >> "$GITHUB_OUTPUT"
 
-      - name: Check out the pinned private router for unit tests
+      - name: Check out the pinned fab_router for unit tests
         uses: actions/checkout@v4
         with:
-          repository: TensorFleet/js_autorouter
-          ref: ${{ steps.unit-private-router.outputs.commit }}
-          path: .ci-private/js_autorouter
-          token: ${{ secrets.JS_AUTOROUTER_READ_TOKEN }}
+          repository: TensorFleet/fab_router
+          ref: ${{ steps.unit-fab-router.outputs.commit }}
+          path: .ci-private/fab_router
           persist-credentials: false
           sparse-checkout: |
             package.json
             src
+            spec/types
           sparse-checkout-cone-mode: false
 
       # gen:check and coverage:check need the KiCad fork's api/proto and C++ handler sources at the
@@ -101,7 +101,7 @@ jobs:
 
       - name: Unit tests
         env:
-          JS_AUTOROUTER_MODULE: ${{ github.workspace }}/.ci-private/js_autorouter/src/index.ts
+          FAB_ROUTER_MODULE: ${{ github.workspace }}/.ci-private/fab_router/src/api.ts
         run: bun run test:unit
 
       - name: Cross-compile bridge entrypoint for desktop targets
@@ -243,32 +243,32 @@ jobs:
       - name: Install
         run: bun install --frozen-lockfile
 
-      - name: Resolve the private router pin
-        id: private-router
-        run: echo "commit=$(tr -d '[:space:]' < packages/router/JS_AUTOROUTER_COMMIT)" >> "$GITHUB_OUTPUT"
+      - name: Resolve the fab_router pin
+        id: fab-router
+        run: echo "commit=$(tr -d '[:space:]' < packages/router/FAB_ROUTER_COMMIT)" >> "$GITHUB_OUTPUT"
 
-      - name: Check out the pinned private router
+      - name: Check out the pinned fab_router
         uses: actions/checkout@v4
         with:
-          repository: TensorFleet/js_autorouter
-          ref: ${{ steps.private-router.outputs.commit }}
-          path: .ci-private/js_autorouter
-          token: ${{ secrets.JS_AUTOROUTER_READ_TOKEN }}
+          repository: TensorFleet/fab_router
+          ref: ${{ steps.fab-router.outputs.commit }}
+          path: .ci-private/fab_router
           persist-credentials: false
           sparse-checkout: |
             package.json
             src
+            spec/types
           sparse-checkout-cone-mode: false
 
-      - name: Validate the private router package boundary
+      - name: Validate the fab_router package boundary
         run: |
           bun -e '
-            const pkg = await Bun.file(".ci-private/js_autorouter/package.json").json()
-            if (pkg.name !== "@tensorfleet/js-autorouter" || pkg.private !== true) {
-              throw new Error("unexpected private router package metadata")
+            const pkg = await Bun.file(".ci-private/fab_router/package.json").json()
+            if (pkg.name !== "@fabplane/fab-router" || pkg.private !== true) {
+              throw new Error("unexpected fab_router package metadata")
             }
             if (Object.keys(pkg.dependencies ?? {}).length !== 0) {
-              throw new Error("private router gained runtime dependencies; update packaging explicitly")
+              throw new Error("fab_router gained runtime dependencies; update packaging explicitly")
             }
           '
 
@@ -354,7 +354,7 @@ jobs:
       - name: Integration tests
         env:
           KICAD_INTEGRATION_REQUIRED: "1"
-          JS_AUTOROUTER_MODULE: ${{ github.workspace }}/.ci-private/js_autorouter/src/index.ts
+          FAB_ROUTER_MODULE: ${{ github.workspace }}/.ci-private/fab_router/src/api.ts
         run: bun run test:integration
 
   # ----------------------------------------------------------------- wasm conformance (released module)
