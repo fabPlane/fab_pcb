@@ -34,7 +34,6 @@ env:
   BUN_VERSION: "1.4.0"
   KICAD_IMAGE: ghcr.io/${{ github.repository_owner }}/kicad-cli
   KICAD_REPO: https://github.com/${{ github.repository_owner }}/kicad.git
-  FAB_ROUTER_REPO: https://github.com/${{ github.repository_owner }}/fab_router.git
 
 jobs:
   linux-x64:
@@ -48,6 +47,17 @@ jobs:
           no-cache: true
       - name: Install JS dependencies
         run: bun install --frozen-lockfile
+      - name: Resolve the fab_router pin
+        id: linux-fab-router
+        run: echo "commit=$(tr -d '[:space:]' < packages/router/FAB_ROUTER_COMMIT)" >> "$GITHUB_OUTPUT"
+      - name: Check out the pinned fab_router
+        uses: actions/checkout@v4
+        with:
+          repository: TensorFleet/fab_router
+          ref: ${{ steps.linux-fab-router.outputs.commit }}
+          path: .release-private/fab_router
+          token: ${{ secrets.JS_AUTOROUTER_READ_TOKEN }}
+          persist-credentials: false
       - uses: docker/setup-buildx-action@v3
       - name: Resolve immutable versions
         id: versions
@@ -99,16 +109,10 @@ jobs:
       - name: Pull the newly published image
         if: steps.image.outcome != 'success'
         run: docker pull "${{ steps.versions.outputs.image }}"
-      - name: Check out pinned fab_router, KiCad source and libraries
+      - name: Check out pinned KiCad source and libraries
         shell: bash
         run: |
           set -euo pipefail
-          fab_router="$(tr -d '[:space:]' < packages/router/FAB_ROUTER_COMMIT)"
-          git init -q "$RUNNER_TEMP/fab_router"
-          git -C "$RUNNER_TEMP/fab_router" remote add origin "$FAB_ROUTER_REPO"
-          git -C "$RUNNER_TEMP/fab_router" fetch --depth 1 origin "$fab_router"
-          git -C "$RUNNER_TEMP/fab_router" checkout -q FETCH_HEAD
-          echo "FP_PCB_FAB_ROUTER_SOURCE=$RUNNER_TEMP/fab_router" >> "$GITHUB_ENV"
           kicad="$(tr -d '[:space:]' < packages/proto/KICAD_COMMIT)"
           git init -q "$RUNNER_TEMP/kicad-source"
           git -C "$RUNNER_TEMP/kicad-source" remote add origin "$KICAD_REPO"
@@ -127,6 +131,8 @@ jobs:
           done
       - name: Assemble dependency-complete Linux backend
         shell: bash
+        env:
+          FP_PCB_FAB_ROUTER_SOURCE: ${{ github.workspace }}/.release-private/fab_router
         run: |
           set -euo pipefail
           container="$(docker create '${{ steps.versions.outputs.image }}')"
@@ -172,18 +178,23 @@ jobs:
           bun-version: ${{ env.BUN_VERSION }}
       - name: Install JS dependencies
         run: bun install --frozen-lockfile
+      - name: Resolve the fab_router pin
+        id: macos-fab-router
+        run: echo "commit=$(tr -d '[:space:]' < packages/router/FAB_ROUTER_COMMIT)" >> "$GITHUB_OUTPUT"
+      - name: Check out the pinned fab_router
+        uses: actions/checkout@v4
+        with:
+          repository: TensorFleet/fab_router
+          ref: ${{ steps.macos-fab-router.outputs.commit }}
+          path: .release-private/fab_router
+          token: ${{ secrets.JS_AUTOROUTER_READ_TOKEN }}
+          persist-credentials: false
       - name: Install native build dependencies
         run: brew install cmake ninja ccache wxwidgets@3.2 boost protobuf nng glew glm cairo pixman harfbuzz freetype fontconfig gettext opencascade libngspice unixodbc libgit2 zstd
-      - name: Check out pinned fab_router, KiCad source and libraries
+      - name: Check out pinned KiCad source and libraries
         shell: bash
         run: |
           set -euo pipefail
-          fab_router="$(tr -d '[:space:]' < packages/router/FAB_ROUTER_COMMIT)"
-          git init -q "$RUNNER_TEMP/fab_router"
-          git -C "$RUNNER_TEMP/fab_router" remote add origin "$FAB_ROUTER_REPO"
-          git -C "$RUNNER_TEMP/fab_router" fetch --depth 1 origin "$fab_router"
-          git -C "$RUNNER_TEMP/fab_router" checkout -q FETCH_HEAD
-          echo "FP_PCB_FAB_ROUTER_SOURCE=$RUNNER_TEMP/fab_router" >> "$GITHUB_ENV"
           kicad="$(tr -d '[:space:]' < packages/proto/KICAD_COMMIT)"
           git init -q "$RUNNER_TEMP/kicad"
           git -C "$RUNNER_TEMP/kicad" remote add origin "$KICAD_REPO"
@@ -212,6 +223,8 @@ jobs:
         run: packages/kicad-patches/build-macos.sh "$RUNNER_TEMP/kicad" Release
       - name: Stage relocatable runtime and assemble backend
         shell: bash
+        env:
+          FP_PCB_FAB_ROUTER_SOURCE: ${{ github.workspace }}/.release-private/fab_router
         run: |
           set -euo pipefail
           bun packages/kicad-patches/stage-macos.ts \
@@ -251,16 +264,21 @@ jobs:
           arch: x64
       - name: Install JS dependencies
         run: bun install --frozen-lockfile
-      - name: Check out pinned fab_router, KiCad source and libraries
+      - name: Resolve the fab_router pin
+        id: windows-fab-router
+        shell: pwsh
+        run: '"commit=$((Get-Content packages/router/FAB_ROUTER_COMMIT -Raw).Trim())" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8'
+      - name: Check out the pinned fab_router
+        uses: actions/checkout@v4
+        with:
+          repository: TensorFleet/fab_router
+          ref: ${{ steps.windows-fab-router.outputs.commit }}
+          path: .release-private/fab_router
+          token: ${{ secrets.JS_AUTOROUTER_READ_TOKEN }}
+          persist-credentials: false
+      - name: Check out pinned KiCad source and libraries
         shell: pwsh
         run: |
-          $fabRouter = (Get-Content packages/router/FAB_ROUTER_COMMIT -Raw).Trim()
-          $fabRouterPath = "$env:RUNNER_TEMP/fab_router"
-          git init -q $fabRouterPath
-          git -C $fabRouterPath remote add origin $env:FAB_ROUTER_REPO
-          git -C $fabRouterPath fetch --depth 1 origin $fabRouter
-          git -C $fabRouterPath checkout -q FETCH_HEAD
-          "FP_PCB_FAB_ROUTER_SOURCE=$fabRouterPath" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           $kicad = (Get-Content packages/proto/KICAD_COMMIT -Raw).Trim()
           git init -q "$env:RUNNER_TEMP/kicad"
           git -C "$env:RUNNER_TEMP/kicad" remote add origin $env:KICAD_REPO
@@ -351,6 +369,8 @@ jobs:
 
       - name: Build patched KiCad and assemble backend
         shell: pwsh
+        env:
+          FP_PCB_FAB_ROUTER_SOURCE: ${{ github.workspace }}/.release-private/fab_router
         run: |
           packages/kicad-patches/build-windows.ps1 `
             -KicadSource "$env:RUNNER_TEMP/kicad" `

@@ -43,7 +43,9 @@ describe("fab_router source", () => {
   test("the backend release checks out and bundles the pin on every native platform", () => {
     const workflow = readFileSync(join(import.meta.dir, "../../.github/workflows/backend-release.yml"), "utf8");
     expect(workflow.match(/packages\/router\/FAB_ROUTER_COMMIT/g)).toHaveLength(3);
-    expect(workflow.match(/FP_PCB_FAB_ROUTER_SOURCE=/g)).toHaveLength(3);
+    expect(workflow.match(/FP_PCB_FAB_ROUTER_SOURCE:/g)).toHaveLength(3);
+    expect(workflow.match(/repository: TensorFleet\/fab_router/g)).toHaveLength(3);
+    expect(workflow.match(/token: \$\{\{ secrets\.JS_AUTOROUTER_READ_TOKEN \}\}/g)).toHaveLength(3);
     expect(workflow).toContain("FabRouter-enabled FabPlane PCB native backends");
     expect(workflow).not.toContain("router-free");
   });
