@@ -19,16 +19,15 @@ jobs:
         with:
           bun-version-file: .bun-version
       - run: bun install --frozen-lockfile
-      - name: Resolve the private router pin
-        id: private-router
+      - name: Resolve the fab_router pin
+        id: fab-router
         run: echo "commit=$(tr -d '[:space:]' < packages/router/FAB_ROUTER_COMMIT)" >> "$GITHUB_OUTPUT"
-      - name: Check out the pinned private router
+      - name: Check out the pinned fab_router
         uses: actions/checkout@v4
         with:
           repository: fabPlane/fab_router
-          ref: ${{ steps.private-router.outputs.commit }}
+          ref: ${{ steps.fab-router.outputs.commit }}
           path: .ci-private/fab_router
-          token: ${{ secrets.FAB_ROUTER_READ_TOKEN }}
           persist-credentials: false
           sparse-checkout: |
             package.json

@@ -33,7 +33,7 @@ describe("fab_router source", () => {
     expect(workflow.match(/packages\/router\/FAB_ROUTER_COMMIT/g)).toHaveLength(3);
     expect(workflow.match(/FP_PCB_FAB_ROUTER_SOURCE:/g)).toHaveLength(3);
     expect(workflow.match(/repository: fabPlane\/fab_router/g)).toHaveLength(3);
-    expect(workflow.match(/token: \$\{\{ secrets\.FAB_ROUTER_READ_TOKEN \}\}/g)).toHaveLength(3);
+    expect(workflow).not.toContain("FAB_ROUTER_READ_TOKEN");
     expect(workflow).toContain("FabRouter-enabled FabPlane PCB native backends");
     expect(workflow).not.toContain("router-free");
     expect(workflow).not.toMatch(/js[_-]autorouter/i);
