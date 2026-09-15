@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       runner:
-        description: Linux runner selection (auto prefers NAS, then Blacksmith, then GitHub)
+        description: Linux runner selection (auto uses the NAS)
         type: choice
         options: [auto, local, blacksmith, github]
         default: auto
@@ -42,7 +42,7 @@ env:
 
 jobs:
   select-linux-runner:
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, Linux, X64, tf-nas-ephemeral, fab-pcb]
     outputs:
       runner: ${{ steps.select.outputs.runner }}
       choice: ${{ steps.select.outputs.choice }}
@@ -52,9 +52,6 @@ jobs:
         shell: bash
         env:
           RUNNER_MODE: ${{ inputs.runner || 'auto' }}
-          RUNNER_STATUS_TOKEN: ${{ secrets.RUNNER_STATUS_TOKEN }}
-          BLACKSMITH_ENABLED: ${{ vars.BLACKSMITH_ENABLED || 'false' }}
-          REPOSITORY: ${{ github.repository }}
         run: |
           set -euo pipefail
 
@@ -85,34 +82,7 @@ jobs:
             exit 0
           fi
 
-          if [ -n "$RUNNER_STATUS_TOKEN" ]; then
-            runners="$(curl -fsSL \
-              -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer $RUNNER_STATUS_TOKEN" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              "https://api.github.com/repos/$REPOSITORY/actions/runners?per_page=100" || true)"
-            if printf '%s' "$runners" | jq -e '
-              .runners[]
-              | select(.status == "online" and (.busy | not))
-              | [.labels[].name] as $labels
-              | select(["self-hosted", "Linux", "X64", "tf-nas-ephemeral", "fab-pcb"]
-                  | all(. as $label | $labels | index($label)))
-            ' >/dev/null 2>&1; then
-              select_runner local
-              exit 0
-            fi
-          else
-            echo "RUNNER_STATUS_TOKEN is unset; skipping NAS availability check"
-          fi
-
-          if [ "$BLACKSMITH_ENABLED" = true ] \
-            && curl -fsSL https://status.blacksmith.sh/v3/summary.json \
-            | jq -e '.page.status == "UP"' >/dev/null; then
-            select_runner blacksmith
-          else
-            echo "Blacksmith is disabled or its status is not UP; falling back to GitHub-hosted Linux"
-            select_runner github
-          fi
+          select_runner local
 
   linux-x64:
     needs: select-linux-runner
