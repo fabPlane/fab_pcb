@@ -4,18 +4,9 @@ import { ArcSchema, BoardLayer, TrackSchema, ViaSchema } from "@fp-pcb/proto";
 import { Arc, Track, Via, toDistance, toVector2 } from "@fp-pcb/client";
 import { createRouteJobs, persistAppliedRoute, routeGeometry, withoutRejectedCreatedCopper } from "../src/bridge-job";
 
-test("the stable capacity slot defaults to fab_router and retains an explicit js_autorouter rollback", async () => {
-  const previous = process.env["FP_PCB_CAPACITY_ROUTER"];
+test("the stable capacity slot uses fab_router", async () => {
   const freerouting = { jar: "/missing/router.jar", java: "/missing/java", ok: false as const, reason: "test" };
-  try {
-    delete process.env["FP_PCB_CAPACITY_ROUTER"];
-    expect((await createRouteJobs({ freerouting }).capacityRouter()).name).toBe("fab-router");
-    process.env["FP_PCB_CAPACITY_ROUTER"] = "js-autorouter";
-    expect((await createRouteJobs({ freerouting }).capacityRouter()).name).toBe("js-autorouter");
-  } finally {
-    if (previous === undefined) delete process.env["FP_PCB_CAPACITY_ROUTER"];
-    else process.env["FP_PCB_CAPACITY_ROUTER"] = previous;
-  }
+  expect((await createRouteJobs({ freerouting }).capacityRouter()).name).toBe("fab-router");
 });
 
 describe("persistAppliedRoute", () => {

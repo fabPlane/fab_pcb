@@ -11,7 +11,6 @@
     "./extract": "./src/extract.ts",
     "./freerouting": "./src/freerouting.ts",
     "./fab-router": "./src/fab-router.ts",
-    "./js-autorouter": "./src/js-autorouter.ts",
     "./js-router": "./src/js-router.ts",
     "./specctra": "./src/specctra/index.ts",
     "./types": "./src/types.ts"

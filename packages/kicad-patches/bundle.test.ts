@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { mkdtemp, mkdir, symlink } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { findStockData, targetSpec, validateFabRouterSource, validateJsAutorouterSource, validateRelocatableSymlinks } from "./bundle-lib";
+import { findStockData, targetSpec, validateFabRouterSource, validateRelocatableSymlinks } from "./bundle-lib";
 
 describe("backend bundle targets", () => {
   test("uses IPC on Unix and KiCad WebSockets on Windows", () => {
@@ -11,18 +11,6 @@ describe("backend bundle targets", () => {
     expect(targetSpec("darwin-arm64")).toMatchObject({ bunTarget: "bun-darwin-arm64", socketTransport: "ipc" });
     expect(targetSpec("windows-x64")).toMatchObject({ bunTarget: "bun-windows-x64", socketTransport: "ws", kicadCliName: "kicad-cli.exe" });
     expect(() => targetSpec("plan9-x64")).toThrow(/unsupported bundle target/);
-  });
-});
-
-describe("private js_autorouter source", () => {
-  test("requires the package manifest and TypeScript entry point", async () => {
-    const root = await mkdtemp(join(tmpdir(), "fp-pcb-js-autorouter-"));
-    await expect(validateJsAutorouterSource(root)).rejects.toThrow(/package.json/);
-    await Bun.write(join(root, "package.json"), "{}\n");
-    await expect(validateJsAutorouterSource(root)).rejects.toThrow(/src\/index.ts/);
-    await mkdir(join(root, "src"));
-    await Bun.write(join(root, "src", "index.ts"), "export {};\n");
-    await expect(validateJsAutorouterSource(root)).resolves.toBeUndefined();
   });
 });
 
@@ -48,6 +36,7 @@ describe("fab_router source", () => {
     expect(workflow.match(/token: \$\{\{ secrets\.FAB_ROUTER_READ_TOKEN \}\}/g)).toHaveLength(3);
     expect(workflow).toContain("FabRouter-enabled FabPlane PCB native backends");
     expect(workflow).not.toContain("router-free");
+    expect(workflow).not.toMatch(/js[_-]autorouter/i);
   });
 });
 

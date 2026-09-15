@@ -62,7 +62,6 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
     freerouting: { ...cfg.freerouting, ...(kicadCliExists ? { kicadCli: cfg.kicadCli } : {}) },
     log: cfg.log,
   });
-  const jsAutorouter = await routeJobs.jsAutorouter();
   const capacityRouter = await routeJobs.capacityRouter();
   const bundledLibraries = [
     ...(cfg.footprintDir ? await discoverLibraries("footprint", cfg.footprintDir) : []),
@@ -103,8 +102,6 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
           workspaceRoot: cfg.workspaceRoot,
           staticDir: cfg.staticDir,
           capacityRouter,
-          // Retained for older FabDesk clients; it now reflects the selected capacity backend.
-          jsAutorouter,
           freerouting: cfg.freerouting,
           compile: { frontends: compileJobs.frontends },
           sessions: sessions.list().map((s) => ({ id: s.id, state: s.state, path: s.path, clients: s.clients })),

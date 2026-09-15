@@ -44,7 +44,7 @@ only `/opt/kicad` does not copy Debian runtime packages into a desktop AppImage.
 The bridge no longer contains `@tscircuit/capacity-autorouter`. Its JavaScript route job loads the
 clean-room `fabPlane/fab_router` module at runtime. Set `FP_PCB_FAB_ROUTER_SOURCE` when invoking
 `bundle.ts`; the builder copies its package manifest, `src`, and runtime `spec/types` into the
-relocatable bundle and records the entry point in `bundle.json`. `FP_PCB_JS_AUTOROUTER_SOURCE` is an
+relocatable bundle and records the entry point in `bundle.json`. `FP_PCB_FAB_ROUTER_SOURCE` is an
 optional rollback payload and is not needed for the default router.
 
 Linux bundles carry the non-glibc shared-library closure collected from the three KiCad binaries

@@ -11,7 +11,7 @@
  *
  *   POST   /sessions/:id/route            body RouteJobRequest        -> 202 { job: RouteJobInfo }  (400 when the requested router is missing)
  *                                          the capacity router currently refuses prefab free-via boards
- *   GET    /sessions/:id/route            -> { jobs: RouteJobInfo[], capacityRouter, jsAutorouter, freerouting }
+ *   GET    /sessions/:id/route            -> { jobs: RouteJobInfo[], capacityRouter, freerouting }
  *   GET    /sessions/:id/route/:job       -> { job: RouteJobInfo }   (SSE: `event: state`, `progress`, `done`, `error`, `: keepalive` every 15 s)
  *   DELETE /sessions/:id/route/:job       -> { ok, job }             (fab_router: cooperative signal; Freerouting: kills java)
  *
@@ -30,7 +30,6 @@ import { applyRouteResult } from "./apply";
 import { extractRouteInput } from "./extract";
 import { FreeroutingRouter, alreadyApplied, resolveFreerouting, type FreeroutingOptions, type FreeroutingPaths } from "./freerouting";
 import { FabRouter } from "./fab-router";
-import { JsAutorouter } from "./js-autorouter";
 import { RouteCancelled, type Autorouter, type RouteConnection, type RouteOptions, type RouteProgress, type RouteResult } from "./types";
 
 export type RouteJobState = "queued" | "saving" | "filling" | "extracting" | "routing" | "applying" | "done" | "failed" | "cancelled";
@@ -155,8 +154,6 @@ export interface RouteJobs {
   wait(id: string): Promise<RouteJobInfo>;
   /** Jar / Java the Freerouting jobs will use. */
   readonly freerouting: FreeroutingPaths;
-  /** Legacy readiness alias retained for older bridge clients. */
-  jsAutorouter(): Promise<{ ok: boolean; reason?: string }>;
   /** The selected implementation behind the stable `router: "js"` capacity slot. */
   capacityRouter(): Promise<{ name: string; ok: boolean; reason?: string }>;
 }
@@ -166,8 +163,6 @@ export interface RouteJobDeps {
   routers?: (req: RouteJobRequest, kicad: KiCad, board: Awaited<ReturnType<KiCad["currentBoard"]>>) => Autorouter;
   /** Jar and Java for Freerouting; default `resolveFreerouting(process.env)`. */
   freerouting?: FreeroutingPaths;
-  /** Legacy dependency injection retained for existing tests and embedded hosts. */
-  jsAutorouter?: JsAutorouter;
   /** Replaces the selected capacity router (tests and embedded hosts). */
   capacityRouter?: Autorouter;
   log?: (message: string) => void;
@@ -261,12 +256,7 @@ export async function persistAppliedRoute(board: { save(): Promise<void> }): Pro
 export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
   const jobs = new Map<string, Job>();
   const freerouting = deps.freerouting ?? resolveFreerouting();
-  const configuredCapacity = typeof process === "undefined" ? undefined : process.env.FP_PCB_CAPACITY_ROUTER;
-  if (configuredCapacity && configuredCapacity !== "fab-router" && configuredCapacity !== "js-autorouter") {
-    throw new Error(`FP_PCB_CAPACITY_ROUTER must be "fab-router" or "js-autorouter", got ${JSON.stringify(configuredCapacity)}`);
-  }
-  const capacityRouter: Autorouter =
-    deps.capacityRouter ?? deps.jsAutorouter ?? (configuredCapacity === "js-autorouter" ? new JsAutorouter() : new FabRouter());
+  const capacityRouter: Autorouter = deps.capacityRouter ?? new FabRouter();
   const log = deps.log ?? (() => {});
 
   const emit = (job: Job, ev: string, data: unknown) => {
@@ -525,7 +515,6 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
 
   return {
     freerouting,
-    jsAutorouter: () => capacityRouter.available?.() ?? Promise.resolve({ ok: true }),
     capacityRouter: async () => ({ name: capacityRouter.name, ...(await (capacityRouter.available?.() ?? Promise.resolve({ ok: true }))) }),
     start,
     get: (id) => jobs.get(id)?.info,
@@ -551,7 +540,6 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           return json({
             jobs: this.list(session.id),
             capacityRouter: await this.capacityRouter(),
-            jsAutorouter: await this.jsAutorouter(),
             freerouting,
           });
         if (req.method === "POST") {

@@ -2,7 +2,7 @@
 
 > **Current status (2026-09-09):** this chapter preserves the original M7 benchmark and design
 > record. The tscircuit capacity-router implementation described below has been removed. The
-> bridge now adapts TensorFleet `js_autorouter` through DSN/SES, and the browser no longer embeds
+> bridge now adapts `fabPlane/fab_router` through DSN/SES, and the browser no longer embeds
 > a router. See `packages/router/README.md` for the live contract and migration blockers.
 
 Everything so far was proven on the API kitchen-sink fixtures. This phase uses real designs
@@ -42,7 +42,7 @@ Board ──extractRouteInput()──▶ RouteInput ──▶ Autorouter.route(i
                                                  │ JsRouter        (@tscircuit/capacity-autorouter, in Bun or the browser)
                                                  │ FreeroutingRouter (java -jar freerouting.jar, DSN in / SES out)
         createRouteJobs()  =  RefillZones → SaveDocument → extract → route → apply → GetRatsnest re-measure   (the bridge job)
-        AutorouteDialog    =  js-tab (the same steps in the page, minus the save) | js-server | freerouting (both via the job)
+        AutorouteDialog    =  js-tab (compatibility error only) | fab-router | freerouting (both via the job)
 ```
 
 **The interface** (`src/types.ts`). `extractRouteInput(board, { nets?, warn? })` reads outline,

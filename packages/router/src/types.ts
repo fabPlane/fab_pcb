@@ -185,7 +185,7 @@ export interface RouteOptions {
   nets?: string[];
   /** Seed for routers that randomise; the same seed gives the same result. */
   seed?: number;
-  /** Router effort / passes (fab_router/js_autorouter: `maxPasses`, Freerouting: `-mp` max passes). */
+  /** Router effort / passes (fab_router: `maxPasses`, Freerouting: `-mp` max passes). */
   effort?: number;
   /**
    * Solver preset. `laser-prefab` is reserved for routing through a blank's fixed free vias.

@@ -2,7 +2,6 @@ export * from "./types";
 export { extractRouteInput, rulesForNet, copperLayersInOrder, isCopperLayer, type ExtractOptions } from "./extract";
 export { applyRouteResult, claimedViaItems, itemsFor, trackProto, viaProto, type ApplyOptions } from "./apply";
 export { JsRouter, type JsRouterOptions } from "./js-router";
-export { JsAutorouter, type JsAutorouterOptions, type JsAutorouterRouteOptions, type RouteDsn } from "./js-autorouter";
 export {
   FabRouter,
   type FabRouterHooks,

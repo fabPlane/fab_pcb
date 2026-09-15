@@ -14,7 +14,6 @@ interface Manifest {
   footprints: string;
   symbols: string;
   fabRouter?: string;
-  jsAutorouter?: string;
   libraryPaths?: string[];
   environment?: Record<string, string>;
 }
@@ -56,7 +55,6 @@ const env = {
   KICAD_SYMBOL_DIR: paths.symbols,
   WORKSPACE_ROOT: workspace,
   ...(manifest.fabRouter ? { FAB_ROUTER_MODULE: resolve(root, manifest.fabRouter) } : {}),
-  ...(manifest.jsAutorouter ? { JS_AUTOROUTER_MODULE: resolve(root, manifest.jsAutorouter) } : {}),
 };
 const version = Bun.spawnSync([paths.cli, "version"], { env, stdout: "pipe", stderr: "pipe" });
 if (version.exitCode !== 0) throw new Error(`kicad-cli version failed: ${version.stderr.toString().trim()}`);

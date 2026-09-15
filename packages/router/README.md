@@ -16,7 +16,6 @@ src/
   extract.ts      extractRouteInput(board): outline, layers, pads, copper, keepouts, zones, rules, ratsnest
   apply.ts        applyRouteResult(board, result): tracks + vias in one CreateItems commit
   fab-router.ts   FabRouter — fabPlane/fab_router, DSN text in / SES text out
-  js-autorouter.ts JsAutorouter — retained rollback adapter for TensorFleet/js_autorouter
   js-router.ts    compatibility failure for the removed in-tab capacity router
   freerouting.ts  FreeroutingRouter — java -jar freerouting.jar, DSN in / SES out, three I/O modes (kicad, kicad-dsn, builtin)
   specctra/       s-expression reader, DSN writer, SES reader (the builtin I/O mode + tests)
@@ -33,7 +32,7 @@ vendor/           freerouting-<version>.jar and jdk/ — git-ignored, see "Freer
 Bridge jobs use the clean-room `fabPlane/fab_router` text API behind the existing public
 `router: "js"` capacity slot. Set `FAB_ROUTER_MODULE` to its `src/api.ts` during development.
 `/health.capacityRouter` reports the selected implementation and readiness; the legacy
-`/health.jsAutorouter` field mirrors its readiness for older clients.
+route field remains `router: "js"` for wire compatibility.
 
 The native adapter exports `RouteInput` as Specctra DSN, passes progress and cancellation hooks,
 parses the returned SES, removes echoed existing copper, and applies only new tracks/vias through
@@ -45,9 +44,7 @@ Best-so-far output needs one product policy beyond the router API: new copper on
 incomplete is discarded before application. This prevents partial stubs from becoming KiCad
 `track_dangling` warnings and leaves that net visibly in the ratsnest for later repair.
 
-For rollback, set `FP_PCB_CAPACITY_ROUTER=js-autorouter` and provide `JS_AUTOROUTER_MODULE`. The old
-adapter remains present but is no longer the default. `laser-prefab` remains refused by both
-adapters until fixed free-via claiming is implemented.
+`laser-prefab` remains refused until fixed free-via claiming is implemented.
 
 ## Historical JavaScript router survey
 
@@ -68,19 +65,6 @@ input built from our `RouteInput` (not a per-board vendor schema) and reports pr
 generic input, multilayer vias, an incremental `step()` API (so a page can yield between steps and
 show progress) and a DRC-repair pipeline. Its input is built from `RouteInput` in
 `buildSimpleRouteJson()`; nothing in this package is written per board.
-
-### Gaps recorded before the js_autorouter adapter
-
-The sibling `TensorFleet/js_autorouter` currently exposes a batch `routeSrj(input, options)` API,
-but not the incremental `step()`/phase/progress and cancellation contract this bridge streams. It
-also lacks the Solver8 `netIsAssignable` behavior used by `preset: laser-prefab` to change layers
-only through and claim prefabricated free vias, and has no proven adapter for preserving existing
-copper. Its repository is marked private/GPL-derived and non-redistributable pending a licensing or
-clean-room decision, while the bridge executable is intended for distribution. The smallest viable
-migration is: expose an incremental cancellable solver; port fixed-via eligibility and claim
-semantics plus existing-copper tests; confirm Bun/browser packaging; and resolve redistribution
-licensing. The server adapter now covers the DSN/SES and existing-copper path; the other gaps above
-remain release blockers rather than reasons to retain the tscircuit dependency.
 
 What it costs us, measured on the practice boards and documented in `js-router.ts`:
 
@@ -125,7 +109,7 @@ removes the whole routing pass. Positions are rounded to integer nm.
 
 `RouteOptions`: `layers`, `viaCost`, `maxTimeMs`, `nets`, `seed`, `effort`, `extra`, `signal` — each adapter
 logs which of these it cannot honour. `signal` (an `AbortSignal`) cancels Freerouting by killing its
-process; js_autorouter observes it only at batch-call boundaries. `route()` rejects with `RouteCancelled`
+process and FabRouter cooperatively. `route()` rejects with `RouteCancelled`
 (`RouteCancelled.is(e)`), so nothing is applied. `RouteResult`: `tracks`, `vias`, `unrouted` (the router's own
 view — a net counts as routed once it got a wire; the bridge job and the app re-measure with `GetRatsnest`
 after the apply and show both counts), `totalConnections`, `timedOut`, `elapsedMs`, `log`.
