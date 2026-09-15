@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Autorouting for FabPlane PCB: RouteInput from a Board, TensorFleet/fab_router and Freerouting (Specctra DSN/SES), with results applied in one commit",
+  "description": "Autorouting for FabPlane PCB: RouteInput from a Board, fabPlane/fab_router and Freerouting (Specctra DSN/SES), with results applied in one commit",
   "exports": {
     ".": "./src/index.ts",
     "./apply": "./src/apply.ts",

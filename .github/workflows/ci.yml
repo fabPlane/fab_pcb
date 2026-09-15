@@ -54,7 +54,7 @@ jobs:
       - name: Check out the pinned fab_router for unit tests
         uses: actions/checkout@v4
         with:
-          repository: TensorFleet/fab_router
+          repository: fabPlane/fab_router
           ref: ${{ steps.unit-fab-router.outputs.commit }}
           path: .ci-private/fab_router
           token: ${{ secrets.JS_AUTOROUTER_READ_TOKEN }}
@@ -251,7 +251,7 @@ jobs:
       - name: Check out the pinned fab_router
         uses: actions/checkout@v4
         with:
-          repository: TensorFleet/fab_router
+          repository: fabPlane/fab_router
           ref: ${{ steps.fab-router.outputs.commit }}
           path: .ci-private/fab_router
           token: ${{ secrets.JS_AUTOROUTER_READ_TOKEN }}

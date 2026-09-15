@@ -15,7 +15,7 @@ src/
   types.ts        RouteInput / RouteOptions / RouteResult / Autorouter — the contract
   extract.ts      extractRouteInput(board): outline, layers, pads, copper, keepouts, zones, rules, ratsnest
   apply.ts        applyRouteResult(board, result): tracks + vias in one CreateItems commit
-  fab-router.ts   FabRouter — TensorFleet/fab_router, DSN text in / SES text out
+  fab-router.ts   FabRouter — fabPlane/fab_router, DSN text in / SES text out
   js-autorouter.ts JsAutorouter — retained rollback adapter for TensorFleet/js_autorouter
   js-router.ts    compatibility failure for the removed in-tab capacity router
   freerouting.ts  FreeroutingRouter — java -jar freerouting.jar, DSN in / SES out, three I/O modes (kicad, kicad-dsn, builtin)
@@ -30,7 +30,7 @@ vendor/           freerouting-<version>.jar and jdk/ — git-ignored, see "Freer
 
 ## Current JavaScript router
 
-Bridge jobs use the clean-room `TensorFleet/fab_router` text API behind the existing public
+Bridge jobs use the clean-room `fabPlane/fab_router` text API behind the existing public
 `router: "js"` capacity slot. Set `FAB_ROUTER_MODULE` to its `src/api.ts` during development.
 `/health.capacityRouter` reports the selected implementation and readiness; the legacy
 `/health.jsAutorouter` field mirrors its readiness for older clients.

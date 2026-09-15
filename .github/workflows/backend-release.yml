@@ -53,7 +53,7 @@ jobs:
       - name: Check out the pinned fab_router
         uses: actions/checkout@v4
         with:
-          repository: TensorFleet/fab_router
+          repository: fabPlane/fab_router
           ref: ${{ steps.linux-fab-router.outputs.commit }}
           path: .release-private/fab_router
           token: ${{ secrets.JS_AUTOROUTER_READ_TOKEN }}
@@ -184,7 +184,7 @@ jobs:
       - name: Check out the pinned fab_router
         uses: actions/checkout@v4
         with:
-          repository: TensorFleet/fab_router
+          repository: fabPlane/fab_router
           ref: ${{ steps.macos-fab-router.outputs.commit }}
           path: .release-private/fab_router
           token: ${{ secrets.JS_AUTOROUTER_READ_TOKEN }}
@@ -271,7 +271,7 @@ jobs:
       - name: Check out the pinned fab_router
         uses: actions/checkout@v4
         with:
-          repository: TensorFleet/fab_router
+          repository: fabPlane/fab_router
           ref: ${{ steps.windows-fab-router.outputs.commit }}
           path: .release-private/fab_router
           token: ${{ secrets.JS_AUTOROUTER_READ_TOKEN }}

@@ -1,4 +1,4 @@
-/** Native server-side adapter for TensorFleet/fab_router's text DSN/SES API. */
+/** Native server-side adapter for fabPlane/fab_router's text DSN/SES API. */
 import { dsnLayers, writeDsn } from "./specctra/dsn";
 import { parseSes, sesToItems } from "./specctra/ses";
 import {
