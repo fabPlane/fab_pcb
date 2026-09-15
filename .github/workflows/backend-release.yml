@@ -245,8 +245,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: macos-15, target: darwin-arm64 }
-          - { os: macos-15-intel, target: darwin-x64 }
+          - { os: [self-hosted, macOS, ARM64, macos-arm64, ios-builds, mac-mini], target: darwin-arm64 }
+          - { os: [self-hosted, macOS, ARM64, macos-arm64, ios-builds, mac-mini], target: darwin-x64 }
     runs-on: ${{ matrix.os }}
     timeout-minutes: 360
     steps:
@@ -329,7 +329,7 @@ jobs:
           retention-days: 1
 
   windows-x64:
-    runs-on: windows-2025
+    runs-on: [self-hosted, Windows, X64, tf-nas-ephemeral, fab-pcb, tf-nas-windows]
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
