@@ -4,7 +4,10 @@
 import type { StoredItem } from '@/contracts';
 import { beginMove, currentMoveTransaction, endMove, getCanvasHost, isMoving } from '@/canvas/CanvasSlot';
 import { childrenOf, flipItem, itemsCentre, rotateItem, translateItem } from '@/lib/geometry';
+import { downloadBytes } from '@/lib/download';
 import { newKiid } from '@/lib/id';
+import { zipStore } from '@/lib/zip';
+import { KicadSessionService } from '@/services/kicad';
 import type { Services } from '@/services/types';
 import { useAppStore } from '@/state/appStore';
 import { activeDocument } from '@/state/active';
@@ -20,6 +23,10 @@ const inSchematic = (ctx: CommandContext) => ctx.editor === 'schematic';
 
 export function registerBuiltinCommands(services: Services): () => void {
   const { commands, documents, markers } = services;
+  // In-browser wasm mode, or null. Fixed for the life of the tab (the composition root decides it
+  // from `VITE_KICAD_WASM` / `?wasm=1` before the services exist), so the two commands that only
+  // make sense there are registered `hidden` everywhere else rather than gated by `when`.
+  const wasmSession = services.session instanceof KicadSessionService && services.session.wasm ? services.session : null;
 
   const selectedItems = (): { key: string; store: NonNullable<ReturnType<typeof activeDocument>>['store']; items: StoredItem[] } | null => {
     const doc = activeDocument(services);
@@ -117,6 +124,37 @@ export function registerBuiltinCommands(services: Services): () => void {
       run: () => useUiStore.getState().setBottomTab('jobs'),
     },
     {
+      // Wasm mode only, and `hidden` rather than `when` because the mode is fixed for the life of
+      // the tab: with a bridge there is a real file system on the other end and nothing to export.
+      id: 'file.downloadProject',
+      title: 'Download project (.zip)',
+      group: 'File',
+      hidden: !wasmSession,
+      description: "Save everything under the project directory out of the module's file system",
+      keywords: ['export', 'save to disk', 'zip', 'memfs', 'wasm'],
+      run: async () => {
+        const s = wasmSession;
+        if (!s) return;
+        const notify = useAppStore.getState().notify;
+        try {
+          // Whatever is unsaved lives in the app's stores, not in MEMFS, so flush first: the point
+          // of this command is to get the edits out of a tab that cannot write to a disk.
+          await Promise.all((['board', 'schematic', 'footprint'] as const).filter((k) => documents.isDirty(k)).map((k) => documents.save(k)));
+          const files = await s.readProjectFiles();
+          if (files.length === 0) throw new Error('the project directory is empty');
+          const name = useAppStore.getState().session?.projectName || 'project';
+          downloadBytes(`${name}.zip`, zipStore(files), 'application/zip');
+          const bytes = files.reduce((n, f) => n + f.bytes.length, 0);
+          log(`Downloaded ${name}.zip (${files.length} file${files.length === 1 ? '' : 's'}, ${Math.max(1, Math.round(bytes / 1024))} KiB)`);
+          notify(`${name}.zip · ${files.length} file${files.length === 1 ? '' : 's'}`);
+        } catch (e) {
+          const m = e instanceof Error ? e.message : String(e);
+          log(`Download project: ${m}`, 'error');
+          notify(m, 'error');
+        }
+      },
+    },
+    {
       id: 'file.closeProject',
       title: 'Close project',
       group: 'File',
@@ -125,6 +163,25 @@ export function registerBuiltinCommands(services: Services): () => void {
         useAppStore.getState().setSession(null);
         commands.clearHistory();
         log('Project closed');
+      },
+    },
+    {
+      // The escape hatch the Worker exists for: `kiapi_dispatch` is synchronous inside a
+      // single-threaded module, so a command that never returns cannot be cancelled or even asked
+      // to stop. Killing the thread is the only way back, and it takes MEMFS with it.
+      id: 'session.stopKicad',
+      title: 'Stop KiCad',
+      group: 'Tools',
+      hidden: !wasmSession,
+      description: 'Kill the wasm module in this tab when it stops responding; imported files are replayed into the next one',
+      keywords: ['kill', 'terminate', 'hung', 'wedged', 'frozen', 'worker', 'wasm'],
+      run: async () => {
+        const s = wasmSession;
+        if (!s) return;
+        await s.stopKiCad('KiCad was stopped from the app');
+        commands.clearHistory();
+        useAppStore.getState().setActiveEditor('project');
+        useAppStore.getState().notify('KiCad stopped; reopen the project to start a fresh module', 'error');
       },
     },
     // ---------------------------------------------------------------- Edit

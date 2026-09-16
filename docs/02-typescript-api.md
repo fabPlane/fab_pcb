@@ -33,13 +33,19 @@ interface Transport {
 
 Implementations:
 
-| Transport                 | Runtime     | Notes                                                                                                                    |
-| ------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `NngIpcTransport(path)`   | Bun         | raw SP framing over `net.connect(path)`; REQ0 request id; strictly one request in flight, queued FIFO                    |
-| `WebSocketTransport(url)` | browser/Bun | to the bridge; frames are the same bytes, bridge adds a 4-byte correlation id so several tabs can pipeline               |
-| `NngWsTransport(url)`     | browser     | after patch G15: dial `ws://` with `Sec-WebSocket-Protocol: rep.sp.nanomsg.org`, prepend the 4-byte request id ourselves |
+| Transport                 | Runtime     | Notes                                                                                                                                                                                           |
+| ------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NngIpcTransport(path)`   | Bun         | raw SP framing over `net.connect(path)`; REQ0 request id; strictly one request in flight, queued FIFO                                                                                           |
+| `WebSocketTransport(url)` | browser/Bun | to the bridge; frames are the same bytes, bridge adds a 4-byte correlation id so several tabs can pipeline                                                                                      |
+| `NngWsTransport(url)`     | browser     | after patch G15: dial `ws://` with `Sec-WebSocket-Protocol: rep.sp.nanomsg.org`, prepend the 4-byte request id ourselves                                                                        |
+| `StdioTransport(cmd)`     | Bun         | spawns `kicad-api-host-native`: `uint32be length` frames on stdin/stdout, events on fd 3; one request in flight, replies matched by order (see `docs/08-wasm.md`)                               |
+| `WasmTransport(instance)` | Bun/browser | KiCad's API core compiled to wasm, in-process: `kiapi_dispatch` is synchronous, so requests are queued and run from a microtask and events raised during a dispatch are flushed after its reply |
 
 The transport only moves bytes. Everything protobuf lives above it.
+
+Each transport has a matching `Subscriber` for `KiCadEvents`: `NngIpcSubscriber` / `NngWsSubscriber`
+(their own SUB socket), `TransportEventSubscriber` (bridge frames on the same WebSocket),
+`StdioSubscriber` (fd 3) and `WasmSubscriber` (the module's `__kiapiEvent` callback).
 
 ## Layer 2 — `KiCadClient` (envelope + dispatch)
 

@@ -47,13 +47,16 @@ describe("route jobs without KiCad", () => {
     await rm(dir, { recursive: true, force: true });
   });
 
-  test("/health reports JavaScript and Freerouting readiness", async () => {
+  test("/health reports the selected capacity router and Freerouting readiness", async () => {
     const h = (await (await fetch(`${bridge.url}/health`)).json()) as {
-      jsAutorouter: { ok: boolean; reason?: string };
+      capacityRouter: { name: string; ok: boolean; reason?: string };
       freerouting: { ok: boolean; jar: string; reason?: string };
+      jsAutorouter?: unknown;
     };
-    expect(typeof h.jsAutorouter.ok).toBe("boolean");
-    if (!h.jsAutorouter.ok) expect(h.jsAutorouter.reason).toContain("js_autorouter unavailable");
+    expect(h.capacityRouter.name).toBe("fab-router");
+    expect(h.jsAutorouter).toBeUndefined();
+    expect(typeof h.capacityRouter.ok).toBe("boolean");
+    if (!h.capacityRouter.ok) expect(h.capacityRouter.reason).toContain("fab_router unavailable");
     expect(h.freerouting.ok).toBe(false);
     expect(h.freerouting.jar).toBe("/nonexistent/fr.jar");
     expect(h.freerouting.reason).toContain("fetch-freerouting");

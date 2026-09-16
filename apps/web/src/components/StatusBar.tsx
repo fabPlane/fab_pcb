@@ -33,7 +33,11 @@ function UnroutedCell({ store }: { store: ItemStore | null }) {
 
   if (!board || !info) return null;
   return (
-    <div className={`cell${info.unroutedCount ? ' warn' : ''}`} data-testid="unrouted-count" title={`${info.unroutedCount} unrouted connection(s) across ${info.unroutedNetCount} net(s) — GetUnroutedCount`}>
+    <div
+      className={`cell${info.unroutedCount ? ' warn' : ''}`}
+      data-testid="unrouted-count"
+      title={`${info.unroutedCount} unrouted connection(s) across ${info.unroutedNetCount} net(s) — GetUnroutedCount`}
+    >
       <span className="faint">unrouted</span> {info.unroutedCount}
       {info.unroutedNetCount ? ` / ${info.unroutedNetCount} nets` : ''}
     </div>
@@ -83,7 +87,11 @@ export function StatusBar({ storeKey, store }: { storeKey: string | null; store:
       )}
       {activeEditor === 'board' && <UnroutedCell store={store} />}
       <div className="cell msg">
-        {doc.selection.length > 0 ? `${doc.selection.length} selected` : hover ? `${typeLabel(hover.type)}${hover.net ? ` · ${hover.net}` : ''}${hover.layer ? ` · ${layerDisplayName(hover.layer)}` : ''}` : ''}
+        {doc.selection.length > 0
+          ? `${doc.selection.length} selected`
+          : hover
+            ? `${typeLabel(hover.type)}${hover.net ? ` · ${hover.net}` : ''}${hover.layer ? ` · ${layerDisplayName(hover.layer)}` : ''}`
+            : ''}
       </div>
       <span className="spacer" />
       {doc.highlightNets.length > 0 && <div className="cell">highlight: {doc.highlightNets.join(', ')}</div>}

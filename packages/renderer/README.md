@@ -85,6 +85,7 @@ plus the overlay APIs below (`setRatsnest`, `setMarkers`, `focusMarker`, `setLab
 ```ts
 { id, distance, owner, ref, layer, net? }
 ```
+
 - `id` — render item id, unique per (object, layer): `"<kiid>"` for single-layer items,
   `"<kiid>@BL_F_Cu"` for pads / vias / zones per layer, `"<kiid>@hole"` for drill decorations.
 - `ref` — the object KIID without suffix (pad, via, zone, track KIID). Use this for the UI.
@@ -116,19 +117,19 @@ after their children, so clicking a pad yields `[pad, footprint]`.
   skipped. Children are in absolute board coordinates (KiCad API semantics: `PAD::Serialize`
   uses `GetPosition()`); set `adapter.footprintChildrenAbsolute = false` for library
   footprints whose children are relative to the anchor (then rotation / back-side flip is applied).
-- If the store *also* lists pads/shapes/fields as separate items with `parent` set, they are
+- If the store _also_ lists pads/shapes/fields as separate items with `parent` set, they are
   skipped when the parent footprint carries `definition.items` (no double drawing).
 
 `BoardAdapterContext`:
 
-| field | purpose |
-|---|---|
-| `copperLayers` | board copper layers front→back (`copperLayerList(n)`); vias without a layer list span their drill range or all copper |
-| `padPolygons(padId, layer)` | `PolygonWithHoles[]` from `GetPadShapeAsPolygon` (or plain `Vec2[][]`); fallback draws circle/rect/oval/trapezoid/roundrect/chamfered/custom padstacks |
-| `textShapes(textId)` | `GraphicShape[]` (`CompoundShape.shapes` from `GetTextAsShapes`) or plain glyph polygons; ids: text KIID, textbox KIID, table-cell textbox KIID, `Field.text.id`, dimension KIID; fallback draws a metrics-estimated box. A `textbox` reply also carries the four box edges as segments — the adapter drops them and draws the border from `BoardTextBox.border_stroke`. Ask for a dimension's glyphs with `dimensionText(proto)`, not `text.text`; ignored for a knockout item, which is filled from `knockout_shapes` instead |
-| `itemBBox(id)` | bbox lookup for group outlines |
-| `imagePixelNm` | reference image pixel pitch (default 25.4e6 / 300 ppi) |
-| `arcTolerance` | polygon arc approximation, nm |
+| field                       | purpose                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `copperLayers`              | board copper layers front→back (`copperLayerList(n)`); vias without a layer list span their drill range or all copper                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `padPolygons(padId, layer)` | `PolygonWithHoles[]` from `GetPadShapeAsPolygon` (or plain `Vec2[][]`); fallback draws circle/rect/oval/trapezoid/roundrect/chamfered/custom padstacks                                                                                                                                                                                                                                                                                                                                                                          |
+| `textShapes(textId)`        | `GraphicShape[]` (`CompoundShape.shapes` from `GetTextAsShapes`) or plain glyph polygons; ids: text KIID, textbox KIID, table-cell textbox KIID, `Field.text.id`, dimension KIID; fallback draws a metrics-estimated box. A `textbox` reply also carries the four box edges as segments — the adapter drops them and draws the border from `BoardTextBox.border_stroke`. Ask for a dimension's glyphs with `dimensionText(proto)`, not `text.text`; ignored for a knockout item, which is filled from `knockout_shapes` instead |
+| `itemBBox(id)`              | bbox lookup for group outlines                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `imagePixelNm`              | reference image pixel pitch (default 25.4e6 / 300 ppi)                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `arcTolerance`              | polygon arc approximation, nm                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
 Covered types: Track, Arc, Via (ring per copper layer + drill), Pad (copper/mask/paste layers,
 PTH/NPTH holes), BoardGraphicShape (segment, rect + corner radius, arc, circle, polygon with
@@ -144,17 +145,17 @@ generators, constraints and 3D models produce nothing.
 ## Schematic host
 
 ```ts
-import { SchematicCanvasHost, KICAD_DEFAULT_THEME } from '@fp-pcb/renderer';
+import { SchematicCanvasHost, KICAD_DEFAULT_THEME } from "@fp-pcb/renderer";
 
 const host = new SchematicCanvasHost(KICAD_DEFAULT_THEME, {
-  adapter: { textShapes: (id) => textShapeCache.get(id) },   // GetTextAsShapes, keyed as below
-  textGlyphs: { fontFamily: 'Helvetica, Arial, sans-serif' },  // BitmapText fallback (false = draw no fallback text)
+  adapter: { textShapes: (id) => textShapeCache.get(id) }, // GetTextAsShapes, keyed as below
+  textGlyphs: { fontFamily: "Helvetica, Arial, sans-serif" }, // BitmapText fallback (false = draw no fallback text)
 });
 host.mount(div, schematic.sheet(rootPath).store, KICAD_DEFAULT_THEME);
-host.setStore(schematic.sheet(childPath).store);   // switch sheets; the camera is remembered per store
+host.setStore(schematic.sheet(childPath).store); // switch sheets; the camera is remembered per store
 host.onPick((hits) => {
-  const pin = hits.find(SchematicCanvasHost.isPinHit);   // pin.ref === '<symbol kiid>:<pin number>'
-  select(hits[0]?.owner);                                // symbol / sheet / label / wire KIID
+  const pin = hits.find(SchematicCanvasHost.isPinHit); // pin.ref === '<symbol kiid>:<pin number>'
+  select(hits[0]?.owner); // symbol / sheet / label / wire KIID
 });
 ```
 
@@ -173,19 +174,19 @@ switches never rebuild geometry.
 
 ### Render item ids (schematic)
 
-| item | id | ref | owner |
-|---|---|---|---|
-| wire / bus / junction / no-connect / bus entry / text / shape / label | `<kiid>` | `<kiid>` | `<kiid>` |
-| label / sheet field | `<kiid>:field:<name>` | `<kiid>` | `<kiid>` |
-| text box / sheet parts | `<kiid>@bg`, `<kiid>@border`, `<kiid>` | `<kiid>` | `<kiid>` |
-| hier label / sheet pin fill | `<id>@fill` (not pickable, `schematic.background`) | | |
-| sheet pin | `<sheet>:pin:<pin kiid>` | `<pin kiid>` | `<sheet>` |
-| symbol body shape / text | `<sym>:shape:<kiid>`, `<sym>:text:<kiid>` (not pickable) | `<sym>` | `<sym>` |
-| symbol pin | `<sym>@pin:<pin kiid>` | `<sym>:<pin number>` | `<sym>` |
-| pin number / name | `<sym>@pin:<pin kiid>:number` / `:name` (not pickable) | `<sym>:<pin number>` | `<sym>` |
-| symbol field | `<sym>:field:<name>` | `<sym>` | `<sym>` |
-| DNP cross | `<sym>@dnp` (not pickable) | `<sym>` | `<sym>` |
-| symbol / sheet body | `<kiid>` (bbox only, sorted after its children) | `<kiid>` | `<kiid>` |
+| item                                                                  | id                                                       | ref                  | owner     |
+| --------------------------------------------------------------------- | -------------------------------------------------------- | -------------------- | --------- |
+| wire / bus / junction / no-connect / bus entry / text / shape / label | `<kiid>`                                                 | `<kiid>`             | `<kiid>`  |
+| label / sheet field                                                   | `<kiid>:field:<name>`                                    | `<kiid>`             | `<kiid>`  |
+| text box / sheet parts                                                | `<kiid>@bg`, `<kiid>@border`, `<kiid>`                   | `<kiid>`             | `<kiid>`  |
+| hier label / sheet pin fill                                           | `<id>@fill` (not pickable, `schematic.background`)       |                      |           |
+| sheet pin                                                             | `<sheet>:pin:<pin kiid>`                                 | `<pin kiid>`         | `<sheet>` |
+| symbol body shape / text                                              | `<sym>:shape:<kiid>`, `<sym>:text:<kiid>` (not pickable) | `<sym>`              | `<sym>`   |
+| symbol pin                                                            | `<sym>@pin:<pin kiid>`                                   | `<sym>:<pin number>` | `<sym>`   |
+| pin number / name                                                     | `<sym>@pin:<pin kiid>:number` / `:name` (not pickable)   | `<sym>:<pin number>` | `<sym>`   |
+| symbol field                                                          | `<sym>:field:<name>`                                     | `<sym>`              | `<sym>`   |
+| DNP cross                                                             | `<sym>@dnp` (not pickable)                               | `<sym>`              | `<sym>`   |
+| symbol / sheet body                                                   | `<kiid>` (bbox only, sorted after its children)          | `<kiid>`             | `<kiid>`  |
 
 Clicking a pin yields `[pin, symbol body]`; `pickPin(x, y)` returns the nearest pin hit only.
 
@@ -210,19 +211,19 @@ parent is in the store.
 
 `SchematicAdapterContext`:
 
-| field | purpose |
-|---|---|
-| `textShapes(textId)` | `GraphicShape[]` (`CompoundShape.shapes` from `GetTextAsShapes`) or plain glyph polygons, in sheet coordinates. A `textbox` reply's four box edges are dropped, as on the board. Keys: the item KIID for text / labels / text boxes; the cell textbox KIID for table cells; `<sym>:field:<name>`, `<sym>:pin:<pin kiid>:name` / `:number`, `<sym>:text:<kiid>`, `<sym>:textbox:<kiid>` for symbols; `<sheet>:field:<name>`, `<sheet>:pin:<pin kiid>` for sheets; `<label>:field:<name>` for label fields. Build the requests with `schematicTextRequests(item, ctx)` (below) so they are placed exactly as drawn |
-| `assumePinNameOffset` | pin-name offset (nm) to use when a symbol instance reports 0 — the message always does, see "KiCad-side data gaps: open"; unset = names outside |
-| `subpartFirstId`, `subpartIdSeparator` | `LIB_SYMBOL::SubReference` settings for multi-unit references (`U2` → `U2A`); defaults `A` / none |
-| `decodeAny(any)` | decoder for `Any` symbol children (`unpackAny` from @fp-pcb/proto) |
-| `itemBBox(id)` | bbox lookup for group outlines |
-| `symbolPinsAbsolute` | default true; false = pins in library coordinates |
-| `showHiddenPins` / `showHiddenFields` | draw hidden pins / fields on `schematic.hidden` |
-| `showDnpMarkers` | DNP cross (default true) |
-| `textFallback` | `'glyphs'` (default: `text-glyphs` primitives for the BitmapText builder), `'box'` (metrics outline), `'none'` |
-| `imagePixelNm`, `arcTolerance` | as for the board adapter |
-| `defaults` | overrides for line / wire / bus widths, junction diameter, text sizes, offset ratios (`eeschema/default_values.h`) |
+| field                                  | purpose                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `textShapes(textId)`                   | `GraphicShape[]` (`CompoundShape.shapes` from `GetTextAsShapes`) or plain glyph polygons, in sheet coordinates. A `textbox` reply's four box edges are dropped, as on the board. Keys: the item KIID for text / labels / text boxes; the cell textbox KIID for table cells; `<sym>:field:<name>`, `<sym>:pin:<pin kiid>:name` / `:number`, `<sym>:text:<kiid>`, `<sym>:textbox:<kiid>` for symbols; `<sheet>:field:<name>`, `<sheet>:pin:<pin kiid>` for sheets; `<label>:field:<name>` for label fields. Build the requests with `schematicTextRequests(item, ctx)` (below) so they are placed exactly as drawn |
+| `assumePinNameOffset`                  | pin-name offset (nm) to use when a symbol instance reports 0 — the message always does, see "KiCad-side data gaps: open"; unset = names outside                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `subpartFirstId`, `subpartIdSeparator` | `LIB_SYMBOL::SubReference` settings for multi-unit references (`U2` → `U2A`); defaults `A` / none                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `decodeAny(any)`                       | decoder for `Any` symbol children (`unpackAny` from @fp-pcb/proto)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `itemBBox(id)`                         | bbox lookup for group outlines                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `symbolPinsAbsolute`                   | default true; false = pins in library coordinates                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `showHiddenPins` / `showHiddenFields`  | draw hidden pins / fields on `schematic.hidden`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `showDnpMarkers`                       | DNP cross (default true)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `textFallback`                         | `'glyphs'` (default: `text-glyphs` primitives for the BitmapText builder), `'box'` (metrics outline), `'none'`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `imagePixelNm`, `arcTolerance`         | as for the board adapter                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `defaults`                             | overrides for line / wire / bus widths, junction diameter, text sizes, offset ratios (`eeschema/default_values.h`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
 Text: with `textShapes` the server glyphs are drawn verbatim (exact output). Without them the
 adapter emits `text-glyphs` primitives sized by a stroke-font estimate (`textMetrics.ts`:
@@ -298,6 +299,7 @@ Measured in the demo (`?n=`, embedded Chromium, M-series Mac): n=5000 → 18.8k 
 128 MB heap, first frame 61 ms, pan frame 1.5 ms; n=20000 → 75k items, 437 MB, 60 fps,
 pan 1.4 ms; n=50000 → 187k items (≈ 400k primitives), 1.06 GB, 61 fps, pan 2.3 ms.
 Conversion (adapter + Graphics contexts) runs at ≈ 90k render items/s.
+
 - Draw order follows `pcbnew/pcb_draw_panel_gal.cpp` `GAL_LAYER_ORDER` + `SetTopLayer`.
 - Rendering is on demand (`requestRender`), no ticker when idle; `prefers-reduced-motion`
   disables inertial panning.
@@ -305,7 +307,7 @@ Conversion (adapter + Graphics contexts) runs at ≈ 90k render items/s.
   may be mounted and unmounted independently. Each host owns one Pixi `Application` with its
   own ticker (`sharedTicker: false`), and `unmount()` destroys only that renderer. In
   particular it must never pass `true` (or `releaseGlobalResources`) as the renderer destroy
-  options: Pixi's "global resources" are process-wide pools shared by *every* renderer
+  options: Pixi's "global resources" are process-wide pools shared by _every_ renderer
   (`BigPool`, `TexturePool`, `CanvasPool` and the batcher's `batchPool`), and releasing them
   destroys `Batch` objects other live renderers are still drawing with — which surfaced as
   `Cannot read properties of null (reading 'clear')` from `Batcher.break` on every frame of the
@@ -323,8 +325,8 @@ switch never rebuilds geometry.
 ### Ratsnest (`core/ratsnest.ts`, board + schematic host)
 
 ```ts
-host.setRatsnest(edges);                 // RatsnestEdge[]: { net, a, b, source?, target? }
-host.setRatsnestVisible(false);          // or setLayerVisible('board.ratsnest', false)
+host.setRatsnest(edges); // RatsnestEdge[]: { net, a, b, source?, target? }
+host.setRatsnestVisible(false); // or setLayerVisible('board.ratsnest', false)
 ```
 
 One hairline per edge in the theme's `board.ratsnest` colour. `a` / `b` are
@@ -360,8 +362,8 @@ glyph would otherwise be under ~12 px.
 ```ts
 new BoardCanvasHost(theme, { labels: { padNumbers: true, netNames: true, minPxPerMm: 20 } });
 host.setLabelOptions({ netNames: true, minPxPerMm: 40 });
-host.labelOptions;    // Readonly<BoardLabelOptions>
-host.labelsVisible;   // gate state at the current zoom
+host.labelOptions; // Readonly<BoardLabelOptions>
+host.labelsVisible; // gate state at the current zoom
 ```
 
 Pad numbers inside pads and net names on pads / vias / tracks, sized as `pcb_painter.cpp`
@@ -397,7 +399,7 @@ bun run pixel-diff -- --snapshot board.snapshot.json --svg board.svg   # two-ste
 2. writes `<out>/<kind>.snapshot.json` + `<kind>.svg` and kills the server;
 3. serves `pixel-diff/page.ts` to a headless Chromium (SwiftShader WebGL), which renders the
    snapshot with `BoardCanvasHost` / `SchematicCanvasHost` at `--px-per-mm` and rasterises the
-   SVG at the same scale — KiCad's SVG user unit is 1 mm at scale 1, so the viewBox *is* the
+   SVG at the same scale — KiCad's SVG user unit is 1 mm at scale 1, so the viewBox _is_ the
    world window — then compares the two as ink masks (any pixel more than `--ink` from white);
 4. writes `<kind>.ours.png`, `<kind>.svg.png`, `<kind>.diff.png` and `report.json`.
 
@@ -412,11 +414,11 @@ every anti-aliased edge counts twice.
 
 ### Results (`qa/data/{pcbnew,eeschema}/api_kitchen_sink.*`, 8 px/mm, ±1 px, ink 40)
 
-| document | size | render items | mismatch (all px) | ink mismatch | tolerant (all px) | tolerant ink |
-|---|---|---|---|---|---|---|
-| board `api_kitchen_sink.kicad_pcb` | 2079 × 1245 | 349 | 0.27 % | 1.35 % | 0.05 % | 0.26 % |
-| schematic `api_kitchen_sink.kicad_sch` | 2376 × 1680 | 156 | 0.27 % | 9.98 % | 0.15 % | 5.58 % |
-| schematic, `--pin-name-offset 0.508` (see data gaps) | 2376 × 1680 | 156 | 0.23 % | 8.48 % | 0.11 % | 4.05 % |
+| document                                             | size        | render items | mismatch (all px) | ink mismatch | tolerant (all px) | tolerant ink |
+| ---------------------------------------------------- | ----------- | ------------ | ----------------- | ------------ | ----------------- | ------------ |
+| board `api_kitchen_sink.kicad_pcb`                   | 2079 × 1245 | 349          | 0.27 %            | 1.35 %       | 0.05 %            | 0.26 %       |
+| schematic `api_kitchen_sink.kicad_sch`               | 2376 × 1680 | 156          | 0.27 %            | 9.98 %       | 0.15 %            | 5.58 %       |
+| schematic, `--pin-name-offset 0.508` (see data gaps) | 2376 × 1680 | 156          | 0.23 %            | 8.48 %       | 0.11 %            | 4.05 %       |
 
 (board previously 0.65 % / 3.28 % / 0.35 % / 1.78 %, before `BoardText.knockout_shapes`,
 `BoardTextBox.knockout_shapes` and `Dimension.resolved_text`; and 7.57 % / 34.88 % / 6.79 % /
@@ -427,11 +429,11 @@ every text the plotter draws.)
 
 Other schematics (root sheet, same settings):
 
-| document | items | render items | mismatch (all px) | ink mismatch | tolerant (all px) | tolerant ink |
-|---|---|---|---|---|---|---|
-| `e2e/fixtures/boards/pic_programmer` (hierarchical, 8 measured fields) | 295 | 959 | 0.46 % | 13.92 % | 0.10 % | 3.01 % |
-| same, `--pin-name-offset 0.508` | 295 | 959 | 0.46 % | 14.11 % | 0.06 % | 1.89 % |
-| `e2e/fixtures/boards/ecc83` | 75 | 243 | 0.08 % | 11.08 % | 0.01 % | 1.42 % |
+| document                                                               | items | render items | mismatch (all px) | ink mismatch | tolerant (all px) | tolerant ink |
+| ---------------------------------------------------------------------- | ----- | ------------ | ----------------- | ------------ | ----------------- | ------------ |
+| `e2e/fixtures/boards/pic_programmer` (hierarchical, 8 measured fields) | 295   | 959          | 0.46 %            | 13.92 %      | 0.10 %            | 3.01 %       |
+| same, `--pin-name-offset 0.508`                                        | 295   | 959          | 0.46 %            | 14.11 %      | 0.06 %            | 1.89 %       |
+| `e2e/fixtures/boards/ecc83`                                            | 75    | 243          | 0.08 %            | 11.08 %      | 0.01 %            | 1.42 %       |
 
 Their raw ink figures are dominated by hairline wires (a one-pixel offset of a one-pixel line
 is two pixels of XOR); the ±1 px figures are what the text work moves.
@@ -462,7 +464,7 @@ Those 1.3k, largest first:
   metrics, the same dependency as the text estimates below; the geometry itself is all
   reproducible from the message.
 - **Footprint fields with `keep_upright`** (~290 px — `P2` and `CONN_2` on the vertical
-  connectors). `Text.attributes.angle` is the *stored* angle (270°), but
+  connectors). `Text.attributes.angle` is the _stored_ angle (270°), but
   `PCB_TEXT::GetDrawRotation()` normalises a footprint child's angle into ]−90, 90] when the
   flag is set, so KiCad plots them at 90° and the strings read the other way round. **Renderer
   gap, not a data gap**: `keep_upright` is on the message, so the corrected angle just has to
@@ -490,7 +492,7 @@ Those 1.3k, largest first:
   points outward while `SCH_PAINTER` — and we — point it inward), the **arrowhead of the
   bezier leader** (0.9k / 0.7k, not drawn), the **dash phase** of the dashed circle and rule
   area (0.5k / 0.2k), the table's border widths (0.4k, all within tolerance), the `G` global
-  label's flag (0.1k: its width comes from the stroke-font *estimate* of the text width, not a
+  label's flag (0.1k: its width comes from the stroke-font _estimate_ of the text width, not a
   measured box) and anti-aliasing (1.1k, faint). pic_programmer adds the multi-unit
   references (`U2A`, now computed like `LIB_SYMBOL::SubReference`) and 0.25 mm footprint
   fields that KiCad plots and we draw, but whose 2 px glyphs fall under `--ink 40` in our
@@ -501,7 +503,7 @@ Those 1.3k, largest first:
 - **Not compared:** board reference images (`PCB_REFERENCE_IMAGE_T: // Not plotted at all`,
   `plot_brditems_plotter.cpp`) and rule-area zones (`if( zone->GetIsRuleArea() ) continue;`,
   `plot_board_layers.cpp`). The renderer draws both the way pcbnew does; no plot path emits
-  them, so the harness drops them from the board snapshot. Schematic bitmaps *are* plotted and
+  them, so the harness drops them from the board snapshot. Schematic bitmaps _are_ plotted and
   are compared — their textures load asynchronously, so the page waits before grabbing its
   single frame.
 - **Not drawn at all:** line-ending arrows on some bezier leaders. (Alternate pin functions
@@ -552,6 +554,7 @@ The two gaps that used to sit here are filled, both the same shape as the barcod
 cd packages/renderer
 bun run demo            # builds demo/dist/main.js and serves http://localhost:8787/
 ```
+
 Open the URL; middle-drag/touch to pan, wheel to zoom, click to pick (cycles through
 overlapping hits), left-drag to box-select, toggle layers / opacity / active layer, switch
 themes or upload a user theme JSON, highlight a net, move R1 through a store diff.
@@ -584,13 +587,13 @@ bun run pixel-diff # exit test against KiCad's SVG export (needs a KiCad build; 
 - Knockout texts, text boxes and table cells are filled from `knockout_shapes` (KiCad >= 11.0),
   the box-minus-glyphs polygons KiCad plots. Against an older server, which sends only the
   `knockout` flag, they fall back to the border plus the glyph strokes: the renderer cannot
-  build that shape itself (`GetTextAsShapes` returns glyph *strokes* and the render model has
+  build that shape itself (`GetTextAsShapes` returns glyph _strokes_ and the render model has
   no boolean subtraction).
 - Barcodes are drawn from `Barcode.shapes`, the encoded symbol KiCad packs into the message
   (since 11.0). Against an older server they fall back to a frame and a placeholder module
   pattern: there is no QR / DataMatrix / Code128 encoder in the renderer.
 - Dimension text is `Dimension.resolved_text` (KiCad >= 11.0), the string KiCad plots; an
-  older server falls back to `text.text`, the measurement without the unit label. What is *not*
+  older server falls back to `text.text`, the measurement without the unit label. What is _not_
   reproduced is the box KiCad cuts its own geometry against: the leader's border and knee, the
   radial dimension's text segment and the gap the text leaves in an aligned crossbar all need
   real font metrics (see "Known differences").

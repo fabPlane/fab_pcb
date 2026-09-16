@@ -1,6 +1,6 @@
 /**
  * Integration: the whole pipeline against a real `kicad-cli api-server` on the ecc83 practice board
- * (extract -> js_autorouter -> one commit -> ratsnest empty -> DRC clean), plus Freerouting through
+ * (extract -> fab_router -> one commit -> ratsnest empty -> DRC clean), plus Freerouting through
  * KiCad's Specctra commands when the server has them. Skips without KiCad (see bench/kicad.ts).
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
@@ -10,8 +10,8 @@ import { Via, mm } from "@fp-pcb/client";
 import { KICAD_CLI, fixtureBoards, haveKicad, openFixture, type FixtureBoard, type RunningBoard } from "../bench/kicad";
 import {
   DEFAULT_JAR,
+  FabRouter,
   FreeroutingRouter,
-  JsAutorouter,
   alreadyApplied,
   applyRouteResult,
   extractRouteInput,
@@ -41,8 +41,8 @@ describe.skipIf(!ecc83)("router pipeline on ecc83 (real KiCad)", () => {
     await run?.stop();
   });
 
-  test("extract -> js_autorouter -> one commit routes every connection without DRC errors", async () => {
-    const router = new JsAutorouter();
+  test("extract -> fab_router -> one commit routes every connection without DRC errors", async () => {
+    const router = new FabRouter();
     const available = await router.available();
     if (!available.ok) {
       console.log(`[skip] ${available.reason}`);
@@ -91,7 +91,18 @@ describe.skipIf(!ecc83)("router pipeline on ecc83 (real KiCad)", () => {
     const board = run.board;
     const net = (await board.nets()).find((n) => n.name && (n.code?.value ?? 0) > 0)!;
     const created = await board.commit("free via", (tx) =>
-      tx.create([new Via(viaProto({ net: "", netCode: 0, position: { x: mm(120), y: mm(80) }, diameter: mm(1), drill: mm(0.3), layers: [BoardLayer.BL_F_Cu, BoardLayer.BL_B_Cu] }))]),
+      tx.create([
+        new Via(
+          viaProto({
+            net: "",
+            netCode: 0,
+            position: { x: mm(120), y: mm(80) },
+            diameter: mm(1),
+            drill: mm(0.3),
+            layers: [BoardLayer.BL_F_Cu, BoardLayer.BL_B_Cu],
+          }),
+        ),
+      ]),
     );
     const free = created.created[0] as Via;
     expect(free.net ?? "").toBe("");

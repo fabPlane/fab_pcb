@@ -6,6 +6,6 @@
     "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo",
     "emitDeclarationOnly": true
   },
-  "include": ["src", "test", "bench/*.ts"],
+  "include": ["src", "test", "bench/*.ts", "corpus"],
   "references": [{ "path": "../proto" }, { "path": "../client" }]
 }

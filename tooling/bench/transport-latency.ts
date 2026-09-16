@@ -38,10 +38,10 @@ function parseArgs(argv: string[]): Args {
   for (let i = 0; i < argv.length; i++) {
     const flag = argv[i];
     const value = argv[i + 1];
-    if (flag === "--n" && value) (a.n = Number(value)), i++;
-    else if (flag === "--warmup" && value) (a.warmup = Number(value)), i++;
-    else if (flag === "--board" && value) (a.board = value), i++;
-    else if (flag === "--only" && value) (a.only = new Set(value.split(","))), i++;
+    if (flag === "--n" && value) ((a.n = Number(value)), i++);
+    else if (flag === "--warmup" && value) ((a.warmup = Number(value)), i++);
+    else if (flag === "--board" && value) ((a.board = value), i++);
+    else if (flag === "--only" && value) ((a.only = new Set(value.split(","))), i++);
     else if (flag === "--help") {
       console.log("usage: bun tooling/bench/transport-latency.ts [--n 500] [--warmup 50] [--board <path>] [--only ws,ipc,bridge]");
       process.exit(0);
@@ -64,7 +64,15 @@ function stats(samples: number[]): Stats {
   const sorted = [...samples].sort((x, y) => x - y);
   const total = samples.reduce((s, x) => s + x, 0);
   const at = (q: number) => sorted[Math.min(sorted.length - 1, Math.floor(q * sorted.length))]!;
-  return { n: samples.length, meanMs: total / samples.length, medianMs: at(0.5), p95Ms: at(0.95), minMs: sorted[0]!, maxMs: sorted.at(-1)!, totalMs: total };
+  return {
+    n: samples.length,
+    meanMs: total / samples.length,
+    medianMs: at(0.5),
+    p95Ms: at(0.95),
+    minMs: sorted[0]!,
+    maxMs: sorted.at(-1)!,
+    totalMs: total,
+  };
 }
 
 /** Ping until the server answers AS_OK (the board is still loading for the first ~0.5 s). */
@@ -152,7 +160,9 @@ if (args.only.has("bridge")) {
 
 const pad = (s: string, w: number) => s.padEnd(w);
 const num = (x: number) => x.toFixed(3).padStart(8);
-console.log(`${pad("path", 32)}${"mean".padStart(8)}${"median".padStart(9)}${"p95".padStart(9)}${"min".padStart(9)}${"max".padStart(9)}   (ms/request)`);
+console.log(
+  `${pad("path", 32)}${"mean".padStart(8)}${"median".padStart(9)}${"p95".padStart(9)}${"min".padStart(9)}${"max".padStart(9)}   (ms/request)`,
+);
 for (const [name, s] of results) {
   console.log(`${pad(name, 32)}${num(s.meanMs)}${num(s.medianMs)}${num(s.p95Ms)}${num(s.minMs)}${num(s.maxMs)}`);
 }
@@ -161,7 +171,9 @@ if (base) {
   for (const [name, s] of results) {
     if (s === base) continue;
     const delta = s.meanMs - base.meanMs;
-    console.log(`\n${name.trim().split(" ")[0]} vs ipc: ${delta >= 0 ? "+" : ""}${delta.toFixed(3)} ms/request (${((s.meanMs / base.meanMs) * 100).toFixed(0)}% of ipc)`);
+    console.log(
+      `\n${name.trim().split(" ")[0]} vs ipc: ${delta >= 0 ? "+" : ""}${delta.toFixed(3)} ms/request (${((s.meanMs / base.meanMs) * 100).toFixed(0)}% of ipc)`,
+    );
   }
 }
 process.exit(0);

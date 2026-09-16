@@ -21,7 +21,15 @@ export interface BoardCanvasHostOptions extends CanvasHostOptions {
   labels?: BoardLabelHostOptions;
 }
 
-const CHILD_TYPES = new Set(['KOT_PCB_PAD', 'KOT_PCB_SHAPE', 'KOT_PCB_TEXT', 'KOT_PCB_TEXTBOX', 'KOT_PCB_FIELD', 'KOT_PCB_ZONE', 'KOT_PCB_POINT']);
+const CHILD_TYPES = new Set([
+  'KOT_PCB_PAD',
+  'KOT_PCB_SHAPE',
+  'KOT_PCB_TEXT',
+  'KOT_PCB_TEXTBOX',
+  'KOT_PCB_FIELD',
+  'KOT_PCB_ZONE',
+  'KOT_PCB_POINT',
+]);
 const MM = 1_000_000;
 
 /**
@@ -48,7 +56,8 @@ export class BoardCanvasHost extends BaseCanvasHost {
     const scene = { ...(options.scene ?? {}) };
     // The font-free core draws nothing for `text-glyphs`; boards only emit them for labels,
     // so the BitmapText builder is installed here and gated by `labels` at the adapter.
-    if (options.labels?.textGlyphs !== false && !scene.primitiveBuilder) scene.primitiveBuilder = createTextGlyphBuilder(options.labels?.textGlyphs || {});
+    if (options.labels?.textGlyphs !== false && !scene.primitiveBuilder)
+      scene.primitiveBuilder = createTextGlyphBuilder(options.labels?.textGlyphs || {});
     super(theme, { ...options, scene });
     this.copperLayers = options.copperLayers ?? copperLayerList(2);
     this.activeLayer = boardLayerName(options.activeLayer ?? 'BL_F_Cu');
@@ -56,14 +65,16 @@ export class BoardCanvasHost extends BaseCanvasHost {
     const labels = options.labels;
     this.labelMinZoom = (labels?.minPxPerMm ?? 20) / MM;
     this.adapter = { copperLayers: this.copperLayers, ...(options.adapter ?? {}) };
-    if (labels && (labels.padNumbers || labels.netNames)) this.adapter.labels = { padNumbers: !!labels.padNumbers, netNames: !!labels.netNames };
+    if (labels && (labels.padNumbers || labels.netNames))
+      this.adapter.labels = { padNumbers: !!labels.padNumbers, netNames: !!labels.netNames };
     this.camera.onChange(() => this.updateLabelVisibility());
     this.updateLabelVisibility();
   }
 
   protected toRenderItems(item: StoredItemLike): RenderItem[] {
     const own = this.childrenOf.get(item.id);
-    if (item.type === 'KOT_PCB_FOOTPRINT' && own?.size) return boardItemToRenderItems(item, { ...this.adapter, storeChild: (kiid) => own.has(kiid) });
+    if (item.type === 'KOT_PCB_FOOTPRINT' && own?.size)
+      return boardItemToRenderItems(item, { ...this.adapter, storeChild: (kiid) => own.has(kiid) });
     const parent = this.parentOf.get(item.id);
     return boardItemToRenderItems(item, this.adapter, parent);
   }

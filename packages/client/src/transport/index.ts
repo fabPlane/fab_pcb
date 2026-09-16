@@ -55,3 +55,7 @@ export type {
   BridgeErrorCode,
   KiCadServerState,
 } from "./ws-bridge-protocol";
+export { StdioTransport, StdioSubscriber, StdioFrameParser, encodeStdioFrame, STDIO_FRAME_HEADER_LENGTH, STDIO_EVENTS_FD } from "./stdio";
+export type { StdioTransportOptions } from "./stdio";
+export { WasmTransport, WasmSubscriber } from "./wasm";
+export type { KiCadWasmInstance, WasmTransportOptions } from "./wasm";

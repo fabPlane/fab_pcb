@@ -155,7 +155,7 @@ export class Camera {
   }
 
   zoomToBox(box: Box, paddingPx = 24): void {
-    if (boxIsEmpty(box) || box.w <= 0 && box.h <= 0) return;
+    if (boxIsEmpty(box) || (box.w <= 0 && box.h <= 0)) return;
     const w = Math.max(box.w, 1);
     const h = Math.max(box.h, 1);
     const availW = Math.max(1, this.width - 2 * paddingPx);

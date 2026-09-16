@@ -6,7 +6,14 @@ import { Application } from 'pixi.js';
 import type { Box, RenderItem, Vec2 } from './model.js';
 import { EMPTY_BOX, boxUnion, boxIsEmpty } from './model.js';
 import { type Theme, colorToHex, uiColors } from './theme.js';
-import { Camera, CameraController, type CameraState, type CameraControllerOptions, type CameraAnimationOptions, animateCamera } from './camera.js';
+import {
+  Camera,
+  CameraController,
+  type CameraState,
+  type CameraControllerOptions,
+  type CameraAnimationOptions,
+  animateCamera,
+} from './camera.js';
 import { Scene, type SceneOptions } from './scene.js';
 import { Picker } from './picker.js';
 import { Overlays, type OverlayOptions } from './overlays.js';
@@ -490,7 +497,9 @@ export abstract class BaseCanvasHost implements CanvasHost {
     const tol = tolerancePx / this.camera.zoom;
     const zoom = this.camera.zoom;
     // markers are drawn above everything, so they come first
-    const markerHits: PickResult[] = this.markers.pick(w, tol).map((h) => ({ id: `marker:${h.id}`, owner: 'marker', ref: h.id, layer: h.layer, distance: h.distance * zoom }));
+    const markerHits: PickResult[] = this.markers
+      .pick(w, tol)
+      .map((h) => ({ id: `marker:${h.id}`, owner: 'marker', ref: h.id, layer: h.layer, distance: h.distance * zoom }));
     const hits = this.picker
       .pick(w, tol, { layers: (l) => this.scene.isLayerVisible(l) })
       .map((h) => ({ id: h.id, owner: h.owner, ref: h.ref, layer: h.layer, net: h.net, distance: h.distance * zoom }));
@@ -568,14 +577,18 @@ export abstract class BaseCanvasHost implements CanvasHost {
     this.fitPending = false;
     let zoom = opts.zoom;
     if (zoom === undefined && this.camera.zoom < 1e-5) zoom = 4e-5;
-    this.cancelAnimation = animateCamera(this.camera, { x: m.position.x, y: m.position.y, zoom }, {
-      durationMs: opts.durationMs,
-      reducedMotion: opts.reducedMotion,
-      onDone: () => {
-        this.cancelAnimation = null;
-        opts.onDone?.();
+    this.cancelAnimation = animateCamera(
+      this.camera,
+      { x: m.position.x, y: m.position.y, zoom },
+      {
+        durationMs: opts.durationMs,
+        reducedMotion: opts.reducedMotion,
+        onDone: () => {
+          this.cancelAnimation = null;
+          opts.onDone?.();
+        },
       },
-    });
+    );
     this.requestRender();
     return true;
   }
@@ -587,7 +600,9 @@ export abstract class BaseCanvasHost implements CanvasHost {
 
   /** Items in a world box (for the app's own box-select tools). */
   pickBox(box: Box, touching = false): PickResult[] {
-    const items = touching ? this.picker.queryBox(box, { layers: (l) => this.scene.isLayerVisible(l) }) : this.picker.queryInside(box, { layers: (l) => this.scene.isLayerVisible(l) });
+    const items = touching
+      ? this.picker.queryBox(box, { layers: (l) => this.scene.isLayerVisible(l) })
+      : this.picker.queryInside(box, { layers: (l) => this.scene.isLayerVisible(l) });
     return items.map((it) => ({ id: it.id, owner: it.owner ?? it.id, ref: it.ref ?? it.id, layer: it.layer, net: it.net, distance: 0 }));
   }
 

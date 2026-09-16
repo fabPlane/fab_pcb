@@ -40,7 +40,9 @@ async function drifted(): Promise<boolean> {
   const pinned = await pinnedCommit();
   const head = kicadHead();
   if (head !== pinned || process.env.KICAD_WORKTREE === "1") {
-    console.warn(`KiCad checkout is at ${head.slice(0, 10)}, KICAD_COMMIT pins ${pinned.slice(0, 10)}; skipping (regenerate with bun run gen && bun run coverage)`);
+    console.warn(
+      `KiCad checkout is at ${head.slice(0, 10)}, KICAD_COMMIT pins ${pinned.slice(0, 10)}; skipping (regenerate with bun run gen && bun run coverage)`,
+    );
     return true;
   }
   return false;

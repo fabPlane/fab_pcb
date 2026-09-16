@@ -95,7 +95,14 @@ describe('DRC / ERC markers', () => {
     host.camera.setViewport(800, 600);
     host.setCamera({ x: 20 * MM, y: 20 * MM, zoom: 1e-5 });
     host.setMarkers([
-      { id: 'm-err', position: { x: 20 * MM, y: 20 * MM }, severity: 'error', layer: 'BL_F_Cu', description: 'Clearance violation', endPosition: { x: 21 * MM, y: 20 * MM } },
+      {
+        id: 'm-err',
+        position: { x: 20 * MM, y: 20 * MM },
+        severity: 'error',
+        layer: 'BL_F_Cu',
+        description: 'Clearance violation',
+        endPosition: { x: 21 * MM, y: 20 * MM },
+      },
       { id: 'm-warn', position: { x: 25 * MM, y: 20 * MM }, severity: 'warning', description: 'Silk overlap' },
       { id: 'm-excl', position: { x: 30 * MM, y: 20 * MM }, severity: 'exclusion', description: 'Excluded' },
     ]);
@@ -104,7 +111,7 @@ describe('DRC / ERC markers', () => {
     host.markers.update(host.camera.zoom);
     const objs = host.markers.root.children.filter((c) => c.label?.startsWith('marker:'));
     expect(objs.length).toBe(3);
-    const errGlyph = (objs.find((o) => o.label === 'marker:m-err')!.children[0] as Graphics);
+    const errGlyph = objs.find((o) => o.label === 'marker:m-err')!.children[0] as Graphics;
     expect(errGlyph.tint).toBe(colorToHex(themeColor(KICAD_DEFAULT_THEME, 'board.drc_error')));
     expect(errGlyph.alpha).toBeCloseTo(0.8, 2);
     // the glyph extends right/down from the position: pick inside it
@@ -137,7 +144,9 @@ describe('DRC / ERC markers', () => {
     host.setStore(new MemoryStore(syntheticBoard()));
     host.camera.setViewport(800, 600);
     host.setCamera({ x: 0, y: 0, zoom: 5e-5 });
-    host.setMarkers([{ id: 'a', position: { x: 12 * MM, y: 34 * MM }, severity: 'error', description: 'x', endPosition: { x: 13 * MM, y: 34 * MM } }]);
+    host.setMarkers([
+      { id: 'a', position: { x: 12 * MM, y: 34 * MM }, severity: 'error', description: 'x', endPosition: { x: 13 * MM, y: 34 * MM } },
+    ]);
     expect(host.focusMarker('nope')).toBe(false);
     expect(host.focusMarker('a', { reducedMotion: true })).toBe(true);
     expect(host.getCamera()).toEqual({ x: 12 * MM, y: 34 * MM, zoom: 5e-5 });

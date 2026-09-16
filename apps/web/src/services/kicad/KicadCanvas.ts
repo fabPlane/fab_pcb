@@ -37,14 +37,28 @@ interface TextRef {
 }
 
 function hashAttrs(a: Text['attributes']): string {
-  return [a?.angle?.valueDegrees, a?.size?.xNm, a?.size?.yNm, a?.strokeWidth?.valueNm, a?.horizontalAlignment, a?.verticalAlignment, a?.italic, a?.bold, a?.mirrored, a?.fontName, a?.lineSpacing].join('|');
+  return [a?.angle?.valueDegrees, a?.size?.xNm, a?.size?.yNm, a?.strokeWidth?.valueNm, a?.horizontalAlignment, a?.verticalAlignment, a?.italic, a?.bold, a?.mirrored, a?.fontName, a?.lineSpacing].join(
+    '|',
+  );
 }
 
 function hashText(r: TextRef): string {
   if (r.hash) return r.hash;
   if (r.textbox) {
     const b = r.textbox;
-    return ['box', b.text, b.topLeft?.xNm, b.topLeft?.yNm, b.bottomRight?.xNm, b.bottomRight?.yNm, b.marginLeft?.valueNm, b.marginTop?.valueNm, b.marginRight?.valueNm, b.marginBottom?.valueNm, hashAttrs(b.attributes)].join('|');
+    return [
+      'box',
+      b.text,
+      b.topLeft?.xNm,
+      b.topLeft?.yNm,
+      b.bottomRight?.xNm,
+      b.bottomRight?.yNm,
+      b.marginLeft?.valueNm,
+      b.marginTop?.valueNm,
+      b.marginRight?.valueNm,
+      b.marginBottom?.valueNm,
+      hashAttrs(b.attributes),
+    ].join('|');
   }
   const t = r.text;
   return [t?.text, t?.position?.xNm, t?.position?.yNm, hashAttrs(t?.attributes)].join('|');
@@ -106,7 +120,14 @@ const SCH_ADAPTER: SchematicAdapterContext = { symbolPinsAbsolute: true, decodeA
  * harness makes.
  */
 function schematicTexts(it: StoredItem): TextRef[] {
-  return schematicTextRequests(it, SCH_ADAPTER).map((r) => ({ key: r.key, hash: r.hash, text: r.text as Text | undefined, textbox: r.textbox as TextBox | undefined, measure: r.measure, place: r.place }));
+  return schematicTextRequests(it, SCH_ADAPTER).map((r) => ({
+    key: r.key,
+    hash: r.hash,
+    text: r.text as Text | undefined,
+    textbox: r.textbox as TextBox | undefined,
+    measure: r.measure,
+    place: r.place,
+  }));
 }
 
 type TextCollector = (it: StoredItem) => TextRef[];

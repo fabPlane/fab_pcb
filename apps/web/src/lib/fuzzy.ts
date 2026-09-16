@@ -24,7 +24,8 @@ export function fuzzyMatch(query: string, text: string): FuzzyMatch | null {
     positions.push(idx);
     let s = 1;
     if (idx === prev + 1) s += 4; // contiguous
-    if (idx === 0 || /[\s\-_/:.]/.test(t[idx - 1] ?? '')) s += 6; // word start
+    if (idx === 0 || /[\s\-_/:.]/.test(t[idx - 1] ?? ''))
+      s += 6; // word start
     else if (t[idx] !== text[idx]) s += 2; // camelCase hump
     s -= Math.min(idx - ti, 10) * 0.3; // gap penalty
     score += s;

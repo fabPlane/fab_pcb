@@ -101,27 +101,24 @@ export function ThreeDView() {
   const [busy, setBusy] = useState(false);
   const started = useRef(false);
 
-  const load = useCallback(
-    async (url: string) => {
-      const v = viewer.current;
-      if (!v) return;
-      setStatus({ text: `Loading ${url.split('path=').pop()?.split('%2F').pop() ?? 'model'}…` });
-      const gltf = await new GLTFLoader().loadAsync(url);
-      if (v.model) v.scene.remove(v.model);
-      const model = gltf.scene;
-      // KiCad exports in millimetres with +Z up; glTF is +Y up, so lay the board flat.
-      model.rotation.x = Math.PI / 2;
-      let meshes = 0;
-      model.traverse((o) => {
-        if ((o as THREE.Mesh).isMesh) meshes++;
-      });
-      v.scene.add(model);
-      v.model = model;
-      fit(v, model);
-      setStatus({ text: `${meshes} mesh${meshes === 1 ? '' : 'es'} · drag to orbit, wheel to zoom, right-drag to pan` });
-    },
-    [],
-  );
+  const load = useCallback(async (url: string) => {
+    const v = viewer.current;
+    if (!v) return;
+    setStatus({ text: `Loading ${url.split('path=').pop()?.split('%2F').pop() ?? 'model'}…` });
+    const gltf = await new GLTFLoader().loadAsync(url);
+    if (v.model) v.scene.remove(v.model);
+    const model = gltf.scene;
+    // KiCad exports in millimetres with +Z up; glTF is +Y up, so lay the board flat.
+    model.rotation.x = Math.PI / 2;
+    let meshes = 0;
+    model.traverse((o) => {
+      if ((o as THREE.Mesh).isMesh) meshes++;
+    });
+    v.scene.add(model);
+    v.model = model;
+    fit(v, model);
+    setStatus({ text: `${meshes} mesh${meshes === 1 ? '' : 'es'} · drag to orbit, wheel to zoom, right-drag to pan` });
+  }, []);
 
   const refresh = useCallback(async () => {
     if (busy) return;

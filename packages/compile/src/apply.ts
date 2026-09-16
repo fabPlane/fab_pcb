@@ -562,6 +562,25 @@ export async function placeFootprints(
   return moved.map((footprint) => footprint.reference);
 }
 
+/**
+ * The centre of each footprint's pads, for the footprints named. Pads are the one position the API
+ * keeps right after an autoplace (`FootprintInstance.position` reads 0,0 until the board is reopened,
+ * gap G31), so this is how the compile tells what actually moved. Footprints without pads are absent.
+ */
+export async function padCentres(board: Board, ids: ReadonlySet<string>): Promise<Map<string, Vec2>> {
+  const sums = new Map<string, { x: number; y: number; n: number }>();
+  for (const pad of await board.getPads()) {
+    const parent = pad.parent;
+    if (!parent || !ids.has(parent)) continue;
+    const s = sums.get(parent) ?? { x: 0, y: 0, n: 0 };
+    s.x += pad.position.x;
+    s.y += pad.position.y;
+    s.n += 1;
+    sums.set(parent, s);
+  }
+  return new Map([...sums].map(([id, s]) => [id, { x: s.x / s.n, y: s.y / s.n }]));
+}
+
 export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOptions): Promise<ApplyOutcome> {
   const serverPath = opts.serverNetlistPath ?? opts.netlistPath;
   const untouched = (diagnostics: Diagnostic[], report: string): ApplyOutcome => ({
@@ -628,12 +647,32 @@ export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOp
     // The request itself can fail: after `SetNetClasses` in the session the fork answers
     // `basic_string` for newly imported footprints (G29). The footprints then stay where the
     // import spread them, inside the outline, and the compile goes on.
+    // KiCad's own placed_count is meaningless (238 with 198 footprints never moved; 0 with all of
+    // them moved, gap G32): count from where the pads were and are.
+    const autoSet = new Set(autoIds);
+    const centresBefore = await padCentres(board, autoSet);
     const outcome = await board.autoplace(autoIds, { includeOffboard: true }).catch((e: unknown) => ({
       ok: false,
       placedCount: 0,
       error: e instanceof Error ? e.message : String(e),
     }));
-    footprintsPlaced = outcome.placedCount;
+    const centresAfter = await padCentres(board, autoSet);
+    // What the autoplacer could not fit it either leaves where the import put it or moves onto
+    // one spot (the origin), so "placed" means: moved, and not sharing a position with another
+    // imported footprint.
+    const byPosition = new Map<string, string[]>();
+    for (const [id, c] of centresAfter) {
+      const key = `${c.x},${c.y}`;
+      byPosition.set(key, [...(byPosition.get(key) ?? []), id]);
+    }
+    const stacked = new Set([...byPosition.values()].filter((g) => g.length > 1).flat());
+    const placed = autoIds.filter((id) => {
+      const a = centresBefore.get(id);
+      const b = centresAfter.get(id);
+      return a !== undefined && b !== undefined && (a.x !== b.x || a.y !== b.y) && !stacked.has(id);
+    });
+    footprintsPlaced = placed.length;
+    const unplaced = autoIds.filter((id) => centresBefore.has(id) && !placed.includes(id));
     if ("error" in outcome) {
       diagnostics.push(
         diag(
@@ -646,6 +685,16 @@ export async function applyNetlist(board: Board, netlist: Netlist, opts: ApplyOp
       // Every non-completed result comes back as APR_NO_BOARD_OUTLINE, so the wording stays broad.
       diagnostics.push(
         diag("warning", "Autoplace did not complete (KiCad reports no board outline or a placement failure).", "autoplace_failed"),
+      );
+    } else if (unplaced.length) {
+      // KiCad answered APR_COMPLETED but found no room for these: they sit on top of each other
+      // (at the origin, or where the import put them).
+      diagnostics.push(
+        diag(
+          "warning",
+          `${unplaced.length} of ${autoIds.length} imported footprints were not placed: the autoplacer found no room for them on this outline and left them stacked on one spot. Enlarge the board or place them.`,
+          "autoplace_incomplete",
+        ),
       );
     } else if (opts.edgeMarginNm) {
       // 5. Keep the placed group off the edge — by moving the outline we drew, or by saying we could not.

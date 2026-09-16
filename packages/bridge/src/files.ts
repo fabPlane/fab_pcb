@@ -23,7 +23,26 @@ export class FilesError extends Error {
   }
 }
 
-const TEXT_EXT = new Set([".kicad_pro", ".kicad_pcb", ".kicad_sch", ".kicad_sym", ".kicad_mod", ".kicad_wks", ".kicad_dru", ".kicad_prl", ".json", ".txt", ".md", ".csv", ".lib", ".dcm", ".net", ".gbr", ".drl", ".svg"]);
+const TEXT_EXT = new Set([
+  ".kicad_pro",
+  ".kicad_pcb",
+  ".kicad_sch",
+  ".kicad_sym",
+  ".kicad_mod",
+  ".kicad_wks",
+  ".kicad_dru",
+  ".kicad_prl",
+  ".json",
+  ".txt",
+  ".md",
+  ".csv",
+  ".lib",
+  ".dcm",
+  ".net",
+  ".gbr",
+  ".drl",
+  ".svg",
+]);
 
 export function contentTypeFor(path: string): string {
   const ext = extname(path).toLowerCase();

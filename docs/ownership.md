@@ -20,7 +20,7 @@ the owner or by editing the contract in [contracts.md](contracts.md) first. The 
 | `tooling/m0/`                                                                        | A1 · KiCad build                                                                | the M0 raw-socket ping script (frozen reference)                                                                                                          |
 | `.github/workflows/`                                                                 | A9 · QA & CI                                                                    | `ci.yml`: bun (unit), e2e (Playwright), kicad-integration (Docker image + `KICAD_CLI`)                                                                    |
 | root `package.json`, `bunfig.toml`, `tsconfig*.json`, `.editorconfig`, `.prettierrc` | Coordinator (A9 maintains the scripts and formatting config)                    | workspace list, root scripts                                                                                                                              |
-| KiCad fork (`../kicad`, branch `web-api`)                                            | A7 · API gaps (C++)                                                             | every patch: proto + handler + `qa/tests/api` test + coverage rerun + conformance test for A4                                                             |
+| KiCad fork (`../kicad`, branch `main`)                                               | A7 · API gaps (C++)                                                             | every patch: proto + handler + `qa/tests/api` test + coverage rerun + conformance test for A4                                                             |
 
 ## Conventions the owners agreed on
 

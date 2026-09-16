@@ -7,7 +7,7 @@ import { cp, mkdir, mkdtemp, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
-const KICAD_ROOT = process.env.KICAD_SRC ? resolve(process.env.KICAD_SRC) : resolve(import.meta.dir, "../../../../kicad");
+export const KICAD_ROOT = process.env.KICAD_SRC ? resolve(process.env.KICAD_SRC) : resolve(import.meta.dir, "../../../../kicad");
 export const DEFAULT_KICAD_CLI = `${KICAD_ROOT}/build/release/kicad/KiCad.app/Contents/MacOS/kicad-cli`;
 export const KICAD_CLI = process.env.KICAD_CLI ?? DEFAULT_KICAD_CLI;
 export const KITCHEN_SINK_PCB = `${KICAD_ROOT}/qa/data/pcbnew/api_kitchen_sink.kicad_pcb`;

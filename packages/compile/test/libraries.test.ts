@@ -24,7 +24,10 @@ describe("bundled libraries", () => {
 
   test("rows are enabled and replaceable in a clean headless project", () => {
     expect(libraryRow({ kind: "footprint", nickname: "Device", uri: "/bundle/Device.pretty" })).toMatchObject({
-      nickname: "Device", type: "KiCad", enabled: true, hidden: false,
+      nickname: "Device",
+      type: "KiCad",
+      enabled: true,
+      hidden: false,
     });
   });
 });

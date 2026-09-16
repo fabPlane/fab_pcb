@@ -19,18 +19,7 @@ function like(orig: Nm, v: number): Nm {
 const num = (v: Nm): number => (typeof v === 'bigint' ? Number(v) : v);
 
 /** Keys whose Vector2 value is a size/offset rather than a coordinate. */
-const NON_POSITIONAL = new Set([
-  'size',
-  'diameter',
-  'spacing',
-  'extent',
-  'offset',
-  'trapezoidDelta',
-  'knockoutMargin',
-  'hatchingOffset',
-  'transformOriginOffset',
-  'anchor',
-]);
+const NON_POSITIONAL = new Set(['size', 'diameter', 'spacing', 'extent', 'offset', 'trapezoidDelta', 'knockoutMargin', 'hatchingOffset', 'transformOriginOffset', 'anchor']);
 
 const isNm = (v: unknown): v is Nm => typeof v === 'number' || typeof v === 'bigint';
 
@@ -110,7 +99,7 @@ export function rotateItem(item: StoredItem, cx: number, cy: number, deg: number
     vec.yNm = like(vec.yNm, cy - x * sin + y * cos);
   };
   const bump = (a: { valueDegrees?: number } | undefined) => {
-    if (a && typeof a.valueDegrees === 'number') a.valueDegrees = ((a.valueDegrees + deg) % 360 + 360) % 360;
+    if (a && typeof a.valueDegrees === 'number') a.valueDegrees = (((a.valueDegrees + deg) % 360) + 360) % 360;
   };
   walk(proto, rot);
   bump(proto.orientation as { valueDegrees?: number } | undefined);

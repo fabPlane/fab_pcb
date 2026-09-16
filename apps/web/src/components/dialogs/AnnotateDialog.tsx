@@ -107,7 +107,9 @@ export function AnnotateDialog() {
                 </option>
               ))}
             </select>
-            <span className="help">{scope === 'selection' ? `${selection.length} item(s) selected on ${activeSheet}` : scope === 'sheet' ? `Sheet ${activeSheet}` : 'Every sheet of the hierarchy'}</span>
+            <span className="help">
+              {scope === 'selection' ? `${selection.length} item(s) selected on ${activeSheet}` : scope === 'sheet' ? `Sheet ${activeSheet}` : 'Every sheet of the hierarchy'}
+            </span>
 
             <label htmlFor="annotate-order">Order</label>
             <select id="annotate-order" className="select" value={sortOrder} onChange={(e) => setSortOrder(e.target.value as AnnotateOptions['sortOrder'])}>

@@ -34,7 +34,10 @@ export interface CrossProbeHit {
 
 /** Finds the counterpart(s) of the current selection in the other document family. */
 export function findCounterpart(services: Services, from: { kind: 'board' | 'schematic'; storeKey: string; items: StoredItem[] }): CrossProbeHit | null {
-  const refs = from.items.filter((i) => i.type === (from.kind === 'board' ? 'KOT_PCB_FOOTPRINT' : 'KOT_SCH_SYMBOL')).map(refOf).filter(Boolean);
+  const refs = from.items
+    .filter((i) => i.type === (from.kind === 'board' ? 'KOT_PCB_FOOTPRINT' : 'KOT_SCH_SYMBOL'))
+    .map(refOf)
+    .filter(Boolean);
   if (!refs.length) return null;
   const want = new Set(refs);
   if (from.kind === 'board') {

@@ -24,7 +24,9 @@ export function ProjectTree({ projectName, projectPath, boardFile, sheets, footp
     <Panel title="Project">
       <div className="tree-item" title={projectPath}>
         <span className="twisty">▾</span>
-        <span className="icon" style={{ color: 'var(--accent)' }}>◆</span>
+        <span className="icon" style={{ color: 'var(--accent)' }}>
+          ◆
+        </span>
         <span className="truncate" style={{ fontWeight: 600 }}>
           {projectName}.kicad_pro
         </span>
@@ -33,7 +35,11 @@ export function ProjectTree({ projectName, projectPath, boardFile, sheets, footp
         <span className="twisty" />
         <span className="icon">▦</span>
         <span className="truncate">{boardFile}</span>
-        {dirty.board && <span className="tag" style={{ color: 'var(--warning)' }}>●</span>}
+        {dirty.board && (
+          <span className="tag" style={{ color: 'var(--warning)' }}>
+            ●
+          </span>
+        )}
       </div>
       {flat.map(({ sheet, depth }) => (
         <div
@@ -56,7 +62,11 @@ export function ProjectTree({ projectName, projectPath, boardFile, sheets, footp
           <span className="twisty" />
           <span className="icon">▣</span>
           <span className="truncate">{fp}</span>
-          {dirty.footprint && <span className="tag" style={{ color: 'var(--warning)' }}>●</span>}
+          {dirty.footprint && (
+            <span className="tag" style={{ color: 'var(--warning)' }}>
+              ●
+            </span>
+          )}
         </div>
       ))}
     </Panel>

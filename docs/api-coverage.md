@@ -1,4 +1,4 @@
-# IPC API coverage matrix (KiCad 10.99, commit 60146cfa3f)
+# IPC API coverage matrix (KiCad 10.99, commit fe66f4d6b5)
 
 Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the KiCad sources. "Handlers" names the C++ handler class that serves the command: server = API_HANDLER_SERVER (inside the API server, always loaded), common = API_HANDLER_COMMON (always loaded), editor = API_HANDLER_EDITOR, library = API_HANDLER_LIBRARY (base of the footprint and symbol library handlers), board = API_HANDLER_BOARD, pcb = API_HANDLER_PCB, footprint = API_HANDLER_FOOTPRINT, fplib = API_HANDLER_FOOTPRINT_LIBRARY, symlib = API_HANDLER_SYMBOL_LIBRARY, sch = API_HANDLER_SCH.
 

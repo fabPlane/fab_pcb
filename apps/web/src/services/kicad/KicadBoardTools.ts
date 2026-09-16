@@ -164,5 +164,8 @@ export class KicadBoardTools implements BoardToolsService {
 
 /** Human label for a `DRCET_*` / `ERCET_*` enum name. */
 export function ruleLabel(name: string): string {
-  return name.replace(/^(DRCET_|ERCET_)/, '').toLowerCase().replace(/_/g, ' ');
+  return name
+    .replace(/^(DRCET_|ERCET_)/, '')
+    .toLowerCase()
+    .replace(/_/g, ' ');
 }

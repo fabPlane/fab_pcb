@@ -17,7 +17,10 @@ afterAll(() => {
 
 const board: CommandContext = { editor: 'board' };
 const schematic: CommandContext = { editor: 'schematic' };
-const firstFor = (chord: string, ctx: CommandContext) => buildKeymap({}).get(chord)?.find((c) => !c.when || c.when(ctx))?.id;
+const firstFor = (chord: string, ctx: CommandContext) =>
+  buildKeymap({})
+    .get(chord)
+    ?.find((c) => !c.when || c.when(ctx))?.id;
 
 describe('default keymap', () => {
   test('Mod+Shift+Z and Mod+Y are redo in every editor; nothing else claims them', () => {

@@ -10,7 +10,10 @@
     ".": "./src/index.ts",
     "./gen/*": "./src/gen/*"
   },
-  "files": ["src", "KICAD_COMMIT"],
+  "files": [
+    "src",
+    "KICAD_COMMIT"
+  ],
   "scripts": {
     "gen": "bun run gen.ts",
     "check": "bun run check.ts",

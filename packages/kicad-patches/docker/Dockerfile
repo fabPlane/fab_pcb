@@ -8,7 +8,7 @@
 #   git                clone KICAD_REPO at KICAD_REF inside the build (CI without a local checkout)
 #
 #   docker build -f Dockerfile --build-arg KICAD_SOURCE=git \
-#       --build-arg KICAD_REPO=https://gitlab.com/<fork>/kicad.git --build-arg KICAD_REF=web-api \
+#       --build-arg KICAD_REPO=https://gitlab.com/<fork>/kicad.git --build-arg KICAD_REF=main \
 #       -t fp-pcb/kicad-cli .
 #
 # Dependency list: Debian trixie packages, mirroring KiCad's own qa/arm64/Dockerfile and
@@ -31,7 +31,7 @@ COPY . /src
 
 FROM ${BASE} AS src-git
 ARG KICAD_REPO=https://gitlab.com/kicad/code/kicad.git
-ARG KICAD_REF=web-api
+ARG KICAD_REF=main
 RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 # init + fetch works for branches, tags and bare commit ids alike (unlike `clone --branch`)
@@ -70,7 +70,7 @@ ARG BUILD_TYPE=Release
 # so keep JOBS*1.5 GB under the machine's memory (Docker Desktop defaults to a small VM).
 ARG JOBS=
 # Label only (the tree comes from git archive, so CMake cannot ask git itself)
-ARG KICAD_REF=web-api
+ARG KICAD_REF=main
 
 # resources/CMakeLists.txt reads translation/pofiles/LINGUAS and the top-level CMakeLists.txt
 # add_subdirectory(doxygen) even with I18N off; keep both present when the context trimmed them.

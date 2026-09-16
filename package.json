@@ -20,6 +20,7 @@
     "test:unit": "bun tooling/ci/run-tests.ts unit",
     "test:integration": "bun tooling/ci/run-tests.ts integration",
     "test:e2e": "bun run --filter @fp-pcb/e2e test",
+    "kicad:fetch": "bun tooling/kicad-cli/fetch.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "ci": "bun install --frozen-lockfile && bun run gen:check && bun run coverage:check && bun tooling/coverage/summary.ts --check && bun run typecheck && bun run test:unit",

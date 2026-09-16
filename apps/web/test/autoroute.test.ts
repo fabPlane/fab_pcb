@@ -23,7 +23,7 @@ describe('buildJobRequest', () => {
       freerouting: { passes: 20 },
       refillZones: false,
     });
-    expect(buildJobRequest({ router: 'js-server', viaCost: 1 }, LAYERS)).toEqual({ router: 'js', options: {} });
+    expect(buildJobRequest({ router: 'fab-router', viaCost: 1 }, LAYERS)).toEqual({ router: 'js', options: {} });
     expect(buildJobRequest({ router: 'js-tab', passes: 3, timeLimitMs: 0 }, LAYERS)).toEqual({ router: 'js', options: { effort: 3 } });
   });
 });
@@ -331,7 +331,7 @@ describe('KicadAutorouteService on the bridge', () => {
       bridgeJson: async (path: string, init?: RequestInit) => {
         requests.push({ path, init });
         if (init?.method === 'POST') return { job: { id: 'j1', state: 'queued', log: [] } };
-        return { jobs: [], jsAutorouter: { ok: true }, freerouting: { ok: true } };
+        return { jobs: [], capacityRouter: { name: 'fab-router', ok: true }, freerouting: { ok: true } };
       },
       bridgeFetch: async (path: string, init?: RequestInit) => {
         requests.push({ path, init });
@@ -359,7 +359,7 @@ describe('KicadAutorouteService on the bridge', () => {
     expect(seen).toContain('routing:pass 1');
     expect(f.calls).toContain('resync:board');
     expect(f.recorded).toEqual([{ message: 'Autoroute (freerouting): 2 connections', forward: 1, inverse: 1 }]);
-    expect(await svc.available()).toEqual({ server: true, jsAutorouter: { ok: true }, freerouting: { ok: true } });
+    expect(await svc.available()).toEqual({ server: true, fabRouter: { ok: true }, freerouting: { ok: true } });
   });
 
   test('a failed job and a refused POST both end as failed runs', async () => {
@@ -383,7 +383,7 @@ describe('KicadAutorouteService on the bridge', () => {
     const svc = new KicadAutorouteService(f.docs as never, session as never, f.commands as never);
     const failed = await svc.start({ router: 'freerouting' });
     expect(failed).toMatchObject({ state: 'failed', error: 'HB ran out of iterations' });
-    const refused = await svc.start({ router: 'js-server' });
+    const refused = await svc.start({ router: 'fab-router' });
     expect(refused.state).toBe('failed');
     expect(refused.error).toContain('no jar');
     expect(f.recorded).toEqual([]);
@@ -420,7 +420,7 @@ describe('KicadAutorouteService on the bridge', () => {
       }),
     };
     const svc = new KicadAutorouteService(f.docs as never, session as never, f.commands as never);
-    const p = svc.start({ router: 'js-server' });
+    const p = svc.start({ router: 'fab-router' });
     await new Promise((r) => setTimeout(r, 10));
     expect(svc.current()!.state).toBe('routing');
     await svc.cancel();

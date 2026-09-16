@@ -26,10 +26,11 @@ import { KicadJobsService } from './KicadJobsService';
 import { KicadLibraryService } from './KicadLibraryService';
 import { KicadMarkerService } from './KicadMarkerService';
 import { KicadSchematicTools } from './KicadSchematicTools';
-import { KicadSessionService } from './KicadSessionService';
+import { KicadSessionService, type WasmModeOptions } from './KicadSessionService';
 import { KicadSettingsService } from './KicadSettingsService';
 import { KicadUndoService } from './KicadUndoService';
 
+export type { WasmModeOptions };
 export { KicadSessionService, KicadDocumentService, KicadCommitBackend, KicadJobsService, KicadMarkerService, KicadLibraryService };
 export { KicadBoardTools, KicadSchematicTools, KicadSettingsService, KicadUndoService, KicadAutorouteService };
 export { toItem } from './KicadCommitBackend';
@@ -38,6 +39,11 @@ export interface KicadServicesOptions {
   bridgeUrl: string;
   /** `ws://host:port/path` of a running api-server; requests bypass the bridge (`VITE_KICAD_WS`). */
   directWsUrl?: string;
+  /**
+   * Run KiCad in this tab as WebAssembly (`VITE_KICAD_WASM=1` / `VITE_KICAD_WASM_URL=<kicad_api.js>`).
+   * No bridge, no server, no socket: the project is imported into the module's MEMFS.
+   */
+  wasm?: WasmModeOptions;
   /**
    * Direct mode with no bridge at all, so `/health`, `/files/*` and the library session are not
    * even attempted. Defaults to "`directWsUrl` set and no bridge was asked for": pass it explicitly
@@ -73,12 +79,15 @@ export async function createKicadServices(opts: KicadServicesOptions): Promise<K
   const session = new KicadSessionService({
     bridgeUrl: opts.bridgeUrl,
     directWsUrl: opts.directWsUrl,
+    wasm: opts.wasm,
     bridgeless: opts.bridgeless,
     log,
     onConnected: async (kicad, info) => {
-      // Direct mode owns its event subscriber (KiCad's ws events socket); `null` there means the
-      // server publishes none, so the document service polls GetDocumentRevision. Over the bridge
-      // `undefined` keeps the default (KiCadEvents.fromTransport, i.e. the bridge's relay).
+      // Direct and wasm modes own their event subscriber (KiCad's ws events socket, or the
+      // module's in-process `WasmSubscriber`); `null` there means nothing publishes, so the
+      // document service polls GetDocumentRevision. Over the bridge `undefined` keeps the default
+      // (KiCadEvents.fromTransport, i.e. the bridge's relay) — passing it explicitly is what keeps
+      // the `instanceof WebSocketTransport` check in the document service from having to widen.
       const events = session.direct ? session.events : undefined;
       await documents.open(kicad, info.projectPath, { exists: async (p) => (await session.stat(p))?.kind === 'file', events, log });
     },
@@ -111,9 +120,14 @@ export async function createKicadServices(opts: KicadServicesOptions): Promise<K
     setCanvasHostFactory(createKicadCanvasFactory({ docs: documents, theme: () => themeFor(resolveTheme(useUiStore.getState().theme)), log }));
   }
   if (opts.directWsUrl) log(`KiCad: direct nng WebSocket to ${opts.directWsUrl} (no bridge in the request path)`);
+  if (opts.wasm) log(`KiCad: WebAssembly in this tab (${opts.wasm.moduleUrl ?? 'the packaged kicad_api.js'}); open a project with the file picker`);
   if (!opts.skipInit) {
     if (session.bridgeless) {
-      log('no bridge configured: the project browser, project creation and the library session are unavailable');
+      log(
+        session.wasm
+          ? 'no bridge configured: import the project files into the wasm module; project creation and the library session are unavailable'
+          : 'no bridge configured: the project browser, project creation and the library session are unavailable',
+      );
     } else {
       try {
         const h = await session.init();

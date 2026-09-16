@@ -50,14 +50,14 @@ pass (`node apps/web/scripts/prove-kicad.mjs --board <name>`) and the router com
 
 ## Layout
 
-| Path                   | Contents                                                                                                                  |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `tests/`               | Playwright specs against the mock services (`*.spec.ts`)                                                                  |
-| `real/`                | specs against real KiCad through the bridge (`KICAD_CLI` required, see above)                                             |
-| `fixtures/`            | real KiCad projects for integration/conformance runs and future renderer pixel tests; see `fixtures/NOTICE` for licensing |
-| `conformance/`         | pointer to the IPC API conformance suite, which lives in `packages/client/test/conformance`                               |
-| `playwright.config.ts` | `webServer` = vite dev server or `vite preview` of the built dist                                                         |
-| `playwright.real.config.ts` | real-server config: `real/`, one worker, bridge started by `real/global-setup.ts`                                    |
+| Path                        | Contents                                                                                                                  |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `tests/`                    | Playwright specs against the mock services (`*.spec.ts`)                                                                  |
+| `real/`                     | specs against real KiCad through the bridge (`KICAD_CLI` required, see above)                                             |
+| `fixtures/`                 | real KiCad projects for integration/conformance runs and future renderer pixel tests; see `fixtures/NOTICE` for licensing |
+| `conformance/`              | pointer to the IPC API conformance suite, which lives in `packages/client/test/conformance`                               |
+| `playwright.config.ts`      | `webServer` = vite dev server or `vite preview` of the built dist                                                         |
+| `playwright.real.config.ts` | real-server config: `real/`, one worker, bridge started by `real/global-setup.ts`                                         |
 
 ## Conventions
 

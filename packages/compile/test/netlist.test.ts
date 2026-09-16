@@ -104,6 +104,39 @@ describe("emitKicadNetlist", () => {
 });
 
 describe("validateNetlist", () => {
+  test("refuses KiCad's brace escapes in net names (G30)", () => {
+    const bad = netlist({
+      nets: [
+        {
+          name: "Net-(J2-CD{slash}DAT3)",
+          nodes: [
+            { ref: "R1", pin: "1" },
+            { ref: "D1", pin: "1" },
+          ],
+        },
+        {
+          name: "A{colon}B",
+          nodes: [
+            { ref: "R1", pin: "2" },
+            { ref: "D1", pin: "2" },
+          ],
+        },
+        {
+          name: "Net-(J2-CD_DAT3)",
+          nodes: [
+            { ref: "R1", pin: "3" },
+            { ref: "D1", pin: "3" },
+          ],
+        },
+      ],
+    });
+    const escapes = validateNetlist(bad).filter((d) => d.code === "net_name_escape");
+    expect(escapes).toHaveLength(2);
+    expect(escapes[0]).toMatchObject({ severity: "error", stage: "netlist" });
+    expect(escapes[0]!.message).toContain("Net-(J2-CD{slash}DAT3)");
+    expect(escapes[0]!.message).toContain("{slash}");
+  });
+
   test("passes a well-formed netlist", () => {
     expect(validateNetlist(netlist())).toEqual([]);
   });

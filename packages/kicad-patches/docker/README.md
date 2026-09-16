@@ -3,7 +3,7 @@
 ```bash
 packages/kicad-patches/build-linux.sh --smoke          # git archive of ../kicad HEAD -> fp-pcb/kicad-cli:<sha>
 JOBS=3 packages/kicad-patches/build-linux.sh           # Docker Desktop with < 8 GB: ~1.5 GB per pcbnew TU with PCH
-KICAD_REF=web-api packages/kicad-patches/build-linux.sh
+KICAD_REF=main packages/kicad-patches/build-linux.sh
 KICAD_REPO=https://gitlab.com/<fork>/kicad.git KICAD_REF=<sha> packages/kicad-patches/build-linux.sh   # CI: clone inside the build
 packages/kicad-patches/docker/smoke.sh fp-pcb/kicad-cli:latest
 ```

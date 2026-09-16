@@ -321,6 +321,6 @@ export interface Services {
   schematic?: SchematicToolsService;
   settings?: ServerSettingsService;
   undo?: ServerUndoService;
-  /** Autorouting (Route -> Autoroute...): js_autorouter or Freerouting on the bridge. */
+  /** Autorouting (Route -> Autoroute...): FabRouter or Freerouting on the bridge. */
   autoroute?: AutorouteService;
 }

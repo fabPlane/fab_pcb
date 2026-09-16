@@ -277,7 +277,14 @@ export function LibraryBrowserDialog() {
           </div>
           <div className="lib-list" role="listbox" aria-label="Libraries">
             {visibleLibs.map((t) => (
-              <button key={`${t.scope}:${t.nickname}`} role="option" aria-selected={t.nickname === nickname} className={`lib-row${t.nickname === nickname ? ' selected' : ''}`} onClick={() => setNickname(kind, t.nickname)} title={t.uri}>
+              <button
+                key={`${t.scope}:${t.nickname}`}
+                role="option"
+                aria-selected={t.nickname === nickname}
+                className={`lib-row${t.nickname === nickname ? ' selected' : ''}`}
+                onClick={() => setNickname(kind, t.nickname)}
+                title={t.uri}
+              >
                 <span className="name">{t.nickname}</span>
                 <span className={`scope ${t.scope}`}>{t.scope === 'project' ? 'project' : 'global'}</span>
               </button>
@@ -288,7 +295,14 @@ export function LibraryBrowserDialog() {
 
         <div className="lib-col entries">
           <div className="filter-bar">
-            <input className="input" data-testid="library-search" placeholder={nickname ? `Search ${nickname}` : 'Search'} value={filter} onChange={(e) => setFilter(e.target.value)} aria-label="Search entries" />
+            <input
+              className="input"
+              data-testid="library-search"
+              placeholder={nickname ? `Search ${nickname}` : 'Search'}
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              aria-label="Search entries"
+            />
             <span className="muted">{loading ? 'loading…' : `${entries.length}`}</span>
           </div>
           <div className="lib-list" role="listbox" aria-label="Library entries">

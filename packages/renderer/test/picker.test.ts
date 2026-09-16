@@ -10,33 +10,33 @@ function items(): RenderItem[] {
     makeRenderItem('track', 'BL_F_Cu', [{ kind: 'segment', a: { x: 0, y: 0 }, b: { x: 10 * MM, y: 0 }, width: 0.5 * MM }], { net: 'GND' }),
     makeRenderItem('via', 'BL_F_Cu', [{ kind: 'circle', c: { x: 20 * MM, y: 0 }, r: 0.4 * MM, width: 0, fill: true }], { net: 'GND' }),
     makeRenderItem('ring', 'BL_B_Cu', [{ kind: 'circle', c: { x: 30 * MM, y: 0 }, r: 2 * MM, width: 0.2 * MM, fill: false }]),
-    makeRenderItem(
-      'zone',
-      'BL_B_Cu',
-      [
-        {
-          kind: 'polygon',
-          outline: [
-            { x: 0, y: 10 * MM },
-            { x: 10 * MM, y: 10 * MM },
-            { x: 10 * MM, y: 20 * MM },
-            { x: 0, y: 20 * MM },
+    makeRenderItem('zone', 'BL_B_Cu', [
+      {
+        kind: 'polygon',
+        outline: [
+          { x: 0, y: 10 * MM },
+          { x: 10 * MM, y: 10 * MM },
+          { x: 10 * MM, y: 20 * MM },
+          { x: 0, y: 20 * MM },
+        ],
+        holes: [
+          [
+            { x: 4 * MM, y: 14 * MM },
+            { x: 6 * MM, y: 14 * MM },
+            { x: 6 * MM, y: 16 * MM },
+            { x: 4 * MM, y: 16 * MM },
           ],
-          holes: [
-            [
-              { x: 4 * MM, y: 14 * MM },
-              { x: 6 * MM, y: 14 * MM },
-              { x: 6 * MM, y: 16 * MM },
-              { x: 4 * MM, y: 16 * MM },
-            ],
-          ],
-          fill: true,
-          width: 0,
-        },
-      ],
-    ),
-    makeRenderItem('arc', 'BL_F_Cu', [{ kind: 'arc', start: { x: 40 * MM, y: 0 }, mid: { x: 45 * MM, y: 5 * MM }, end: { x: 50 * MM, y: 0 }, width: 0.2 * MM }]),
-    makeRenderItem('hole', 'board.via_hole', [{ kind: 'circle', c: { x: 20 * MM, y: 0 }, r: 0.2 * MM, width: 0, fill: true }], { pickable: false }),
+        ],
+        fill: true,
+        width: 0,
+      },
+    ]),
+    makeRenderItem('arc', 'BL_F_Cu', [
+      { kind: 'arc', start: { x: 40 * MM, y: 0 }, mid: { x: 45 * MM, y: 5 * MM }, end: { x: 50 * MM, y: 0 }, width: 0.2 * MM },
+    ]),
+    makeRenderItem('hole', 'board.via_hole', [{ kind: 'circle', c: { x: 20 * MM, y: 0 }, r: 0.2 * MM, width: 0, fill: true }], {
+      pickable: false,
+    }),
     { id: 'fp', layer: 'BL_F_Cu', prims: [], bbox: { x: -1 * MM, y: -1 * MM, w: 12 * MM, h: 2 * MM }, owner: 'fp' },
   ];
 }

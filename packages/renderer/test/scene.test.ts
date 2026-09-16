@@ -68,7 +68,12 @@ describe('Scene', () => {
   test('instancing: identical pads share one GraphicsContext, released on removal', () => {
     const scene = new Scene(KICAD_DEFAULT_THEME);
     const items = [...boardItemToRenderItems(footprint('R1', 'R1', 10, 10)), ...boardItemToRenderItems(footprint('R2', 'R2', 30, 10))];
-    scene.apply({ upsert: [{ owner: 'R1', items: items.filter((i) => i.owner === 'R1') }, { owner: 'R2', items: items.filter((i) => i.owner === 'R2') }] });
+    scene.apply({
+      upsert: [
+        { owner: 'R1', items: items.filter((i) => i.owner === 'R1') },
+        { owner: 'R2', items: items.filter((i) => i.owner === 'R2') },
+      ],
+    });
     const g1 = scene.objectsOf('R1').find((o) => o.item.id === 'R1-p1@BL_F_Cu')!.children[0] as Graphics;
     const g2 = scene.objectsOf('R2').find((o) => o.item.id === 'R2-p2@BL_F_Cu')!.children[0] as Graphics;
     expect(g1.context).toBe(g2.context);
@@ -85,7 +90,24 @@ describe('Scene', () => {
 
   test('zone fills become meshes, moving the origin only re-positions objects', () => {
     const scene = new Scene(KICAD_DEFAULT_THEME, { meshThreshold: 100 });
-    const z = boardItemToRenderItems(zone('z', [34], [[0, 0], [10, 0], [10, 10], [0, 10]], [[4, 4], [6, 4], [6, 6], [4, 6]]));
+    const z = boardItemToRenderItems(
+      zone(
+        'z',
+        [34],
+        [
+          [0, 0],
+          [10, 0],
+          [10, 10],
+          [0, 10],
+        ],
+        [
+          [4, 4],
+          [6, 4],
+          [6, 6],
+          [4, 6],
+        ],
+      ),
+    );
     scene.apply({ upsert: [{ owner: 'z', items: z }] });
     const fillObj = scene.objectsOf('z').find((o) => o.item.id === 'z@BL_B_Cu')!;
     expect(fillObj.children.some((c) => c instanceof Mesh)).toBe(true);

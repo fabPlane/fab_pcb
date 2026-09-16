@@ -163,7 +163,17 @@ function fakeSchematicTools(rows: unknown[]) {
 
 describe('KicadSchematicTools', () => {
   const rows = [
-    { id: 'a', sheetPath: { path: [{ value: 'p1' }] }, sheet: '/', reference: 'R1', unit: 1, fields: { Reference: 'R1', Value: '10k', Zzz: 'x' }, excludedFromBom: false, excludedFromBoard: false, doNotPopulate: false },
+    {
+      id: 'a',
+      sheetPath: { path: [{ value: 'p1' }] },
+      sheet: '/',
+      reference: 'R1',
+      unit: 1,
+      fields: { Reference: 'R1', Value: '10k', Zzz: 'x' },
+      excludedFromBom: false,
+      excludedFromBoard: false,
+      doNotPopulate: false,
+    },
     { id: 'b', sheetPath: undefined, sheet: '', reference: 'C1', unit: 1, fields: { Reference: 'C1', Value: '1u', Aaa: 'y' }, excludedFromBom: true, excludedFromBoard: false, doNotPopulate: false },
   ];
 

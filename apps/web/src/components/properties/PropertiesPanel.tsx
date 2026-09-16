@@ -131,7 +131,12 @@ function Field({ name, value, path, units, onPatch, overrides, cycleUnit, depth,
         <div className="prop-row" style={style}>
           {label}
           <div className="value">
-            <AngleField path={`${dotted}.valueDegrees`} degrees={num((value as { valueDegrees?: number } | undefined)?.valueDegrees)} onChange={(d) => set(['valueDegrees'], d)} readonly={schema.readonly} />
+            <AngleField
+              path={`${dotted}.valueDegrees`}
+              degrees={num((value as { valueDegrees?: number } | undefined)?.valueDegrees)}
+              onChange={(d) => set(['valueDegrees'], d)}
+              readonly={schema.readonly}
+            />
           </div>
         </div>
       );
@@ -144,7 +149,9 @@ function Field({ name, value, path, units, onPatch, overrides, cycleUnit, depth,
           <div className="prop-row" style={style}>
             {label}
             <div className="value">
-              <span className="unit" style={{ width: 12 }}>X</span>
+              <span className="unit" style={{ width: 12 }}>
+                X
+              </span>
               <DistanceField path={`${dotted}.xNm`} valueNm={x} unit={units} onChange={(nm) => set(['xNm'], like(v.xNm, nm))} onCycleUnit={cycleUnit} readonly={schema.readonly} showNm={false} />
             </div>
             <span className="sub">{x.toLocaleString('en-US')} nm</span>
@@ -152,7 +159,9 @@ function Field({ name, value, path, units, onPatch, overrides, cycleUnit, depth,
           <div className="prop-row" style={style}>
             <span className="label" />
             <div className="value">
-              <span className="unit" style={{ width: 12 }}>Y</span>
+              <span className="unit" style={{ width: 12 }}>
+                Y
+              </span>
               <DistanceField path={`${dotted}.yNm`} valueNm={y} unit={units} onChange={(nm) => set(['yNm'], like(v.yNm, nm))} onCycleUnit={cycleUnit} readonly={schema.readonly} showNm={false} />
             </div>
             <span className="sub">{y.toLocaleString('en-US')} nm</span>
@@ -242,7 +251,21 @@ function Field({ name, value, path, units, onPatch, overrides, cycleUnit, depth,
           </div>
         );
       }
-      return <Group name={name} value={value} path={path} units={units} onPatch={onPatch} overrides={overrides} cycleUnit={cycleUnit} depth={depth} defaultOpen={false} desc={desc} schemaOverride={schemaOverride} />;
+      return (
+        <Group
+          name={name}
+          value={value}
+          path={path}
+          units={units}
+          onPatch={onPatch}
+          overrides={overrides}
+          cycleUnit={cycleUnit}
+          depth={depth}
+          defaultOpen={false}
+          desc={desc}
+          schemaOverride={schemaOverride}
+        />
+      );
     default:
       return (
         <div className="prop-row" style={style}>
@@ -260,9 +283,7 @@ function Group({ name, value, path, units, onPatch, overrides, cycleUnit, depth,
   if (schema.hidden) return null;
   const isArray = Array.isArray(value);
   const oneof = schema.oneof && isOneofValue(value) ? value : null;
-  const entries: [string | number, unknown][] = isArray
-    ? (value as unknown[]).map((v, i) => [i, v])
-    : Object.entries(value as Record<string, unknown>).filter(([k]) => k !== '$typeName');
+  const entries: [string | number, unknown][] = isArray ? (value as unknown[]).map((v, i) => [i, v]) : Object.entries(value as Record<string, unknown>).filter(([k]) => k !== '$typeName');
   const count = entries.length;
   const arr = value as unknown[];
   // descriptor for the children: list elements / nested message / the selected oneof member
@@ -298,12 +319,27 @@ function Group({ name, value, path, units, onPatch, overrides, cycleUnit, depth,
           )}
         </span>
       </summary>
-      {count === 0 && <div className="prop-row" style={{ ['--indent' as string]: `${(depth + 1) * 10}px` }}><span className="label faint">empty</span></div>}
+      {count === 0 && (
+        <div className="prop-row" style={{ ['--indent' as string]: `${(depth + 1) * 10}px` }}>
+          <span className="label faint">empty</span>
+        </div>
+      )}
       {entries.map(([k, v]) => (
         <Fragment key={String(k)}>
           {isArray && !isGroupKind(v) ? (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 22px', alignItems: 'center' }}>
-              <Field name={k} value={v} path={[...path, k]} units={units} onPatch={onPatch} overrides={overrides} cycleUnit={cycleUnit} depth={depth + 1} desc={childDescFor(k)} schemaOverride={childOverrideFor(k)} />
+              <Field
+                name={k}
+                value={v}
+                path={[...path, k]}
+                units={units}
+                onPatch={onPatch}
+                overrides={overrides}
+                cycleUnit={cycleUnit}
+                depth={depth + 1}
+                desc={childDescFor(k)}
+                schemaOverride={childOverrideFor(k)}
+              />
               {!schema.readonly && (
                 <button className="btn ghost sm" title="Remove" onClick={() => onPatch({ path: [...path, k], value: undefined })}>
                   ×
@@ -311,7 +347,18 @@ function Group({ name, value, path, units, onPatch, overrides, cycleUnit, depth,
               )}
             </div>
           ) : (
-            <Field name={k} value={v} path={[...path, k]} units={units} onPatch={onPatch} overrides={overrides} cycleUnit={cycleUnit} depth={depth + 1} desc={childDescFor(k)} schemaOverride={childOverrideFor(k)} />
+            <Field
+              name={k}
+              value={v}
+              path={[...path, k]}
+              units={units}
+              onPatch={onPatch}
+              overrides={overrides}
+              cycleUnit={cycleUnit}
+              depth={depth + 1}
+              desc={childDescFor(k)}
+              schemaOverride={childOverrideFor(k)}
+            />
           )}
         </Fragment>
       ))}

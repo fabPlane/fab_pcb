@@ -34,7 +34,7 @@ export function spinStyleFromEnum(v: number | string | undefined | null): SpinSt
 
 /** SCH_LABEL_BASE::GetSpinStyle from the text attributes (angle + horizontal justification). */
 export function spinStyleFromText(angle: number, halign: HAlign): SpinStyle {
-  const vertical = Math.abs(((angle % 180) + 180) % 180 - 90) < 1e-6;
+  const vertical = Math.abs((((angle % 180) + 180) % 180) - 90) < 1e-6;
   if (vertical) return halign === 'right' ? 'bottom' : 'up';
   return halign === 'right' ? 'left' : 'right';
 }
@@ -113,7 +113,14 @@ export const labelBoxExpansion = (textHeight: number, ratio = SCH_DEFAULTS.label
  * SCH_GLOBALLABEL::CreateGraphicShape. `textWidth` is the unrotated text box width.
  * Returns the closed outline (first point repeated at the end).
  */
-export function globalLabelShape(pos: Vec2, textHeight: number, textWidth: number, penWidth: number, shape: LabelShape, spin: SpinStyle): Vec2[] {
+export function globalLabelShape(
+  pos: Vec2,
+  textHeight: number,
+  textWidth: number,
+  penWidth: number,
+  shape: LabelShape,
+  spin: SpinStyle,
+): Vec2[] {
   const margin = labelBoxExpansion(textHeight);
   const halfSize = Math.round(textHeight / 2) + margin;
   const symbLen = textWidth + 2 * margin;
@@ -229,7 +236,12 @@ export function sheetPinShape(pos: Vec2, textHeight: number, shape: LabelShape, 
 }
 
 /** SCH_HIERLABEL::GetSchematicTextOffset (also used by sheet pins). */
-export function hierLabelTextOffset(textHeight: number, textWidth: number, spin: SpinStyle, offsetRatio = SCH_DEFAULTS.textOffsetRatio): Vec2 {
+export function hierLabelTextOffset(
+  textHeight: number,
+  textWidth: number,
+  spin: SpinStyle,
+  offsetRatio = SCH_DEFAULTS.textOffsetRatio,
+): Vec2 {
   const dist = Math.round(offsetRatio * textHeight) + textWidth;
   switch (spin) {
     case 'left':
@@ -244,7 +256,12 @@ export function hierLabelTextOffset(textHeight: number, textWidth: number, spin:
 }
 
 /** SCH_LABEL_BASE::GetSchematicTextOffset for local labels (raised off the wire). */
-export function localLabelTextOffset(textHeight: number, penWidth: number, spin: SpinStyle, offsetRatio = SCH_DEFAULTS.textOffsetRatio): Vec2 {
+export function localLabelTextOffset(
+  textHeight: number,
+  penWidth: number,
+  spin: SpinStyle,
+  offsetRatio = SCH_DEFAULTS.textOffsetRatio,
+): Vec2 {
   const dist = Math.round(offsetRatio * textHeight) + penWidth;
   return spin === 'up' || spin === 'bottom' ? { x: -dist, y: 0 } : { x: 0, y: -dist };
 }
@@ -281,7 +298,13 @@ export interface DirectiveShape {
 }
 
 /** SCH_DIRECTIVE_LABEL::CreateGraphicShape + the way SCH_PAINTER strokes it. */
-export function directiveLabelShape(pos: Vec2, shape: LabelShape, spin: SpinStyle, pinLength = SCH_DEFAULTS.directivePinLength, symbolSize = SCH_DEFAULTS.directiveSymbolSize): DirectiveShape {
+export function directiveLabelShape(
+  pos: Vec2,
+  shape: LabelShape,
+  spin: SpinStyle,
+  pinLength = SCH_DEFAULTS.directivePinLength,
+  symbolSize = SCH_DEFAULTS.directiveSymbolSize,
+): DirectiveShape {
   const place = (pts: Vec2[]): Vec2[] => pts.map((p) => vAdd(rotateForSpin(p, spin), pos));
   switch (shape) {
     case 'dot':
@@ -292,7 +315,10 @@ export function directiveLabelShape(pos: Vec2, shape: LabelShape, spin: SpinStyl
         { x: 0, y: pinLength - s },
         { x: 0, y: pinLength },
       ]);
-      return { line: [pts[0]!, pts[1]!], circle: { c: pts[2]!, r: Math.hypot(pts[2]!.x - pts[1]!.x, pts[2]!.y - pts[1]!.y), fill: shape === 'dot' } };
+      return {
+        line: [pts[0]!, pts[1]!],
+        circle: { c: pts[2]!, r: Math.hypot(pts[2]!.x - pts[1]!.x, pts[2]!.y - pts[1]!.y), fill: shape === 'dot' },
+      };
     }
     case 'diamond':
       return {

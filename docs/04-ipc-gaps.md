@@ -5,7 +5,7 @@ flow (project → schematic → board → outputs) can be done from a headless s
 exact per-command state of today's API is in [api-coverage.md](api-coverage.md).
 Below is everything that is missing, grouped, with the concrete fix in KiCad.
 
-All fixes go into our KiCad fork on branch `web-api` as a patch series (one commit
+All fixes go into our KiCad fork on branch `main` as a patch series (one commit
 per gap, each with a proto change, a handler, a QA test in `qa/tests/api`, and a
 client conformance test). Every patch is written to be upstreamable; KiCad marks new
 API fields with `// Since 11.0` comments, we follow that.
@@ -13,6 +13,7 @@ API fields with `// Since 11.0` comments, we follow that.
 ## Priority 0 — blocks the web UI
 
 ### G1 · Events / notifications
+
 **Status:** done. `GetDocumentRevision` (3c7ce604bf) and the PUB0 events socket with `GetServerInfo` discovery (e8cd61a2f2): DocumentChanged/Opened/Closed/Saved/ServerShutdown.
 **Today:** REQ/REP only; the UI cannot learn that a document changed (another
 client, a job finishing, a save).
@@ -25,10 +26,12 @@ same WebSocket. Cheap interim: `GetDocumentRevision` (monotonic counter bumped i
 `pushCurrentCommit`) so the UI can poll one small message.
 
 ### G1a · Event follow-ups (found by the bridge relay)
+
 **Status:** done (1c372484ca): replaced items are reported as `updated`, and `ProjectChanged` is
 published for project-level commands.
 
 ### G20 · Bugs found by the client conformance suite (batch 3)
+
 **Status:** done: `Undo` now refuses while any commit is open (ab6ac72d41), the ratsnest edge carries its net code (19435eef53), and `SetTeardropsResponse` counts only changed items (477c6922bb).
 `Undo` is documented as refused while a client has an open commit but only refuses when the commit
 has staged changes. `RatsnestEdge.net.code` is always 0 (the handler packs only the name).
@@ -36,12 +39,14 @@ has staged changes. `RatsnestEdge.net.code` is always 0 (the handler packs only 
 `RemoveTeardrops` always reports the same number instead of dropping to zero.
 
 ### G27 · `SchematicSymbolInstance.pin_name_offset` is always 0
+
 `SCH_SYMBOL::Serialize` packs the instance's never-populated `m_pinNameOffset`; the painter and
 plotter use the LIB_SYMBOL's offset, and the definition message has no such field. A client cannot
 place pin names where KiCad draws them without guessing (the harness assumes 0.508 mm). One-line
 fix in the serializer. Related: text variables in shown text are not expanded on the wire.
 
 ### G28 · Found by the compile job (`packages/compile`)
+
 **Status:** client/fork follow-ups implemented for 1 and 3; API default in 2 remains open. Three API behaviours the netlist compile ran into, each verified live against
 `280274cc3d` (`packages/compile/bench/experiment.ts`, `test/apply.kicad.test.ts`):
 
@@ -58,7 +63,7 @@ fix in the serializer. Related: text variables in shown text are not expanded on
    to enabled (or the proto should use `optional bool disabled`).
 3. **`UpdateItems` on a footprint moves only the anchor.** `FOOTPRINT::Deserialize` calls
    `SetPosition` (which moves the children) and then deserializes the fields and every
-   `definition.items` Any from the proto at their *old* absolute coordinates, snapping pads and
+   `definition.items` Any from the proto at their _old_ absolute coordinates, snapping pads and
    text back. Any client that sets `position` and updates gets a footprint whose anchor moved and
    whose copper did not (`GetPads`, DRC and the saved file all agree). Either the handler should
    apply a position delta to the children when only `position` changed, or the client must
@@ -82,13 +87,52 @@ imported footprints keep the import's spread positions) so a rebuild in the same
 compiles. Fix belongs in the fork's `SetNetClasses` handler (resynchronise nets and the effective
 net-class cache after replacing the classes).
 
+### G30–G34 · Found by the PCBGolf board (fabdesk, 2026-09-14)
+
+commaai's PCBGolf board (238 parts, 196 nets, an LQFP-144 and four vertical USB-C ports; the
+first real KiCad design through `@fp-pcb/compile`) on the nightly `20260912-5e09a6e3be`. Details
+and reproductions in fabdesk's `docs/pcbgolf.md`.
+
+**G30 · Braces in a net name break the project save after `SetNetClasses`.** A net named with
+`{…}` — `Net-(J2-CD{slash}DAT3)` as KiCad's own netlist export writes a label with a `/`, but also
+`A{colon}B` or a plain `CD{x}DAT3` — imports fine; once `SetNetClasses` (merge, the `Default` class
+alone) has run in the session, the next `SaveDocument` answers `AS_BAD_REQUEST: request failed:
+basic_string`. Without the net-class call the same board saves; with the nets renamed it saves.
+Repro: any two-part netlist with such a net and `board.rules.clearanceMm`. **Workaround:**
+`validateNetlist` refuses net names with `{` or `}` (`net_name_escape`). Fix belongs where the
+project's net-class assignment map is serialised with the (un)escaped name.
+
+**G31 · `FootprintInstance.position` is not the v10 transform.** After `ImportNetlist` +
+`AutoplaceFootprints`, `GetItems` reports every footprint at 0,0 while the saved file's
+`(transform (translate x y))` and the pads' positions are right. Reopening the board from disk
+fixes the reads. Clients that need positions after a compile reopen the document (fabdesk does).
+
+**G32 · `AutoplaceFootprints.placed_count` is meaningless.** 238 with 198 of the imported
+footprints never moved (a 60 × 45 mm outline with no room), `APR_COMPLETED`; 0 with all 238 moved
+on 120 × 100 mm and a non-completed result. **Workaround:** the compile counts placed footprints
+from pad positions before and after the call and warns when imported footprints did not move.
+
+**G33 · The project save writes no `net_settings.classes`.** After `SetNetClasses` the session
+holds the class (the router and `GetNetClassForNets` see it) but `<project>.kicad_pro` on disk has
+`"classes": []` after every `SaveDocument`, so `kicad-cli pcb drc` and everything else file-based
+runs at KiCad's stock 0.2 mm. **Workaround:** the compile job writes the `Default` class into the
+project file after its save.
+
+**G34 · `RunBoardJobExportSpecctra` returns nothing.** With `returnInline: true, async: false` the
+job answers with neither inline data nor an output path and writes no file, so the Freerouting
+adapter fails with `ENOENT …/board.dsn` before routing. `kicad-cli pcb export specctra` on the
+same binary and board writes a valid DSN. **Workaround:** the adapter falls back to the CLI export
+when the job returns nothing.
+
 ### G26 · Found by the five-board practice pass
+
 `GetDocumentRevision` reads non-monotonically right after `EndCommit` (1, then 0, 1, 1, 1 within
 600 ms on pic_programmer and stickhub), so a client cannot use it as a strict change counter
 without smoothing. `PadStack.layers` lists all 30 inner copper layers for a `*.Cu` through-hole
 pad regardless of the board's copper count; clients must intersect with the enabled layers.
 
 ### G25 · Autorouting through the API
+
 **Status:** done (487ce9d827, 1f6937d5e5, 8cc9377988): a Specctra DSN export job (also
 `kicad-cli pcb export specctra`) and `ImportSpecctraSession` running in an undoable commit. Found
 while verifying with Freerouting: KiCad's DSN exporter does not emit copper text as keepouts, so
@@ -96,6 +140,7 @@ a router happily runs tracks through copper silkscreen text and DRC flags it aft
 Freerouting 2.4.1 writes empty output for a board with filled zones, where 1.9.0 routes it.
 
 ### G24 · What a bridgeless browser client still cannot do
+
 **Status:** open, and partly by design. The bridge covers all of it today; these are what KiCad would need for a browser to run with no helper process at all.
 Found while proving the direct `ws://` path. No API command lists a directory or reads an arbitrary
 file, so a browser holding only a socket cannot show a project browser. A running server is bound to
@@ -104,6 +149,7 @@ any `Origin` and `--token` is the only control, which is fine on loopback and no
 the events publisher fails silently when its port is taken, leaving an empty `events_socket_url`.
 
 ### G23 · Two data gaps the renderer still cannot close
+
 **Status:** done (5a5f025d47, 163dec0e39): `knockout_shapes` on board text and text boxes, and
 `Dimension.resolved_text`.
 `BoardText.knockout` / `BoardTextBox.knockout` carry the flag but not the geometry. KiCad plots
@@ -114,6 +160,7 @@ client renders "26.5000" where KiCad plots "26.5000 mm": the prefix, suffix, uni
 separate fields but the composition rules live in KiCad.
 
 ### G22 · `RunBoardJobDrc` hangs after the async export jobs have run
+
 **Status:** done (d5886f9e60, a99a1a803e). Root cause: KiCad's DRC test providers are process-wide singletons, so the jobs handler's own board copy stole them from the open document and a later check ran against the wrong board. Providers are now bound to the engine that runs them, checks drain the job queue first, and DRC gained the async treatment as an exclusive job.
 Found by the app's browser proof: once the 13 async export jobs have run in a session, a
 subsequent `RunBoardJobDrc` never answers at all, so a client's timeout is the only way out.
@@ -121,11 +168,13 @@ Same class as the old `RunSchematicJobExportNetlist` wedge. Likely the job worke
 synchronous DRC path contending for the board.
 
 ### G21 · `GetColorTheme("KiCad Classic")` returns zero colours
+
 **Status:** done (a86517520d): a theme remembers its colour keys even when its parameters are cleared; both built-in themes return the same 301 keys.
 `COLOR_SETTINGS::CreateBuiltinColorSettings()` clears that theme's `m_params`, so `GetColorKeys()`
 is empty and the handler enumerates nothing. Only "KiCad Default" answers usefully.
 
 ### G19 · Bugs found by the renderer's pixel-diff harness
+
 **Status:** done: text-box glyphs are placed in the document (85d0dfa405) and barcodes carry their encoded geometry (cb80f7e100).
 `GetTextAsShapes` given a `TextBox` returns its glyphs around the origin instead of at the box
 position (the kitchen-sink "Hello" cell at 25, 24.5 mm comes back at 0.3, 0.6 mm), so a client
@@ -139,6 +188,7 @@ netclass/text-variable changes (needs a `ProjectChanged` event); `JobProgress` h
 publisher yet (pairs with G17).
 
 ### G3 · `RunAction` headless
+
 **Status:** done for the board (cb3f20808c): `GetActions` (602 board / 436 schematic actions with `headless_capable`), on-demand tool registration, zone fill/unfill and track/graphics cleanup run headless. Schematic allow-list still empty (all eeschema tools are frame-bound).
 **Today:** gated by `checkForHeadless`; the headless `TOOL_MANAGER` in
 `HEADLESS_PCB_CONTEXT` has no tools registered.
@@ -150,6 +200,7 @@ view (zoom, interactive move) stay excluded. Same for schematic with
 `SCH_CONTEXT`.
 
 ### G4 · DRC / ERC
+
 **Status:** done (1ca7f148a5): RunBoardJobDrc/GetDrcMarkers/SetDrcMarkerExcluded/Get+SetDrcSeverities and the ERC mirror; marker counts match `kicad-cli pcb drc` and `sch erc` exactly.
 **Today:** `DrcMarker`/`ErcMarker`/severity/exclusion messages exist in
 `board_rules.proto` and `schematic_rules.proto`; `InjectDrcError` exists; nothing
@@ -161,7 +212,8 @@ SetDrcSeverities`, `GetErcSeverities / SetErcSeverities`. Add `unconnected` and
 `footprint mismatch` categories as first-class fields.
 
 ### G5 · Project and document lifecycle
-**Status:** done (e118ed3f81). Drawing sheets are out of scope and now answer with a reason (6033d9ef42): their items implement neither Serialize nor Deserialize, no message types exist for the WSG_* kinds, and DS_DATA_MODEL is a process-wide singleton.
+
+**Status:** done (e118ed3f81). Drawing sheets are out of scope and now answer with a reason (6033d9ef42): their items implement neither Serialize nor Deserialize, no message types exist for the WSG\_\* kinds, and DS_DATA_MODEL is a process-wide singleton.
 **Today:** `OpenDocument` only opens existing files; no way to create a project,
 board, or schematic; `DOCTYPE_SYMBOL` and `DOCTYPE_DRAWING_SHEET` are rejected.
 **Fix:** `NewProject{path, template?}`, `NewDocument{project, type}`,
@@ -170,18 +222,21 @@ board, or schematic; `DOCTYPE_SYMBOL` and `DOCTYPE_DRAWING_SHEET` are rejected.
 `OpenDocument(DOCTYPE_SYMBOL, lib_id)` works. Drawing sheet is lower priority.
 
 ### G6 · Register what already exists
-**Status:** done (web-api 8b63c6b83e): `UpdateBoardStackup` implemented (with `BOARD_STACKUP::Deserialize`), `RefreshEditor`/`FocusOnItem` headless no-ops, `SaveItemsToString` added.
+
+**Status:** done (main 8b63c6b83e): `UpdateBoardStackup` implemented (with `BOARD_STACKUP::Deserialize`), `RefreshEditor`/`FocusOnItem` headless no-ops, `SaveItemsToString` added.
 `UpdateBoardStackup` (proto exists, no handler; wire to `BOARD_STACKUP` +
 `BOARD_DESIGN_SETTINGS`), `FocusOnItem` and `RefreshEditor` (no-op success headless
 so clients need no branching).
 
 ### G13 · Capability discovery
-**Status:** done (web-api ef0ed71606): `GetSupportedCommands` served by an internal handler; registrations carry a `HANDLER_MODE` (GUI-only flag).
+
+**Status:** done (main ef0ed71606): `GetSupportedCommands` served by an internal handler; registrations carry a `HANDLER_MODE` (GUI-only flag).
 **Fix:** `GetSupportedCommands → [{type_url, headless}]` enumerated from the
 registered handler tables in `KICAD_API_SERVER`. Trivial and makes every client
 future-proof.
 
 ### G16 · Large documents
+
 **Status:** done (c6bd1db405): `GetItems.page`, `since_revision` with a 256-step change log, `GetItemCounts`.
 **Today:** `GetItems` returns everything in one nng message; no paging, no
 "changed since". Large boards may exceed message limits and stall the UI.
@@ -191,6 +246,7 @@ and `GetItemCounts`.
 ## Priority 1 — full editing parity
 
 ### G7 · Library access
+
 **Status:** done (b4e01726d7): library tables, entry listing, get/save/delete items, create library, table rows, C++ footprint wizards.
 **Today:** only `OpenDocument(DOCTYPE_FOOTPRINT, lib_id)` and the GUI-only
 `OpenLibraryItem`. No listing, no symbol lookup, no writing.
@@ -202,6 +258,7 @@ open already uses the former). Footprint wizards: `wizards.proto` types exist;
 add `ListWizards` / `RunWizard` (Python-free wizards only).
 
 ### G8 · Schematic operations
+
 **Status:** done (c590f977e0): annotate/clear, sync to board, back-annotate, schematic settings, symbol fields table, assign footprints, sheet file creation.
 `Annotate{scope, options}`, `ClearAnnotation`, `SyncSchematicToBoard{options}`
 (server-side: schematic netlist → `BOARD_NETLIST_UPDATER`; today the client must
@@ -211,6 +268,7 @@ file management (`CreateItems` accepts `SCH_SHEET_T` but new sheet files are not
 created on disk — verify and fix), `AssignFootprints` (cvpcb equivalent).
 
 ### G9 · Board operations that live in tools today
+
 **Status:** done (1882aefba6): ratsnest, unrouted count, net lengths, update footprints from library, teardrops, autoplace, global deletion. Push-and-shove routing remains a separate spike.
 `GetRatsnest / GetUnroutedConnections` (from `CONNECTIVITY_DATA`; the UI needs this
 to draw the ratsnest), `GetNetLengths` (net inspector), `CleanupTracks`,
@@ -220,27 +278,32 @@ plan it as its own spike after everything else, with `RouteTrack{start, end, net
 layer, width}` as the API.
 
 ### G10 · Undo / redo
+
 **Status:** done (27aa7e67fa): `Undo`, `Redo`, `GetUndoStack` on the headless contexts.
 Undo stacks live on frames. Add an `UNDO_REDO_CONTAINER` to the headless contexts
 and `Undo`, `Redo`, `GetUndoStack`. Until then the client keeps history (see 01).
 
 ### G11 · Settings the UI needs to render like KiCad
+
 **Status:** done (b743d2b6bd): ListColorThemes, GetColorTheme, GetAppSettings, SetGraphicsDefaults.
 `ListColorThemes`, `GetColorTheme{name}`, `GetAppSettings{app}` (grid, units,
 defaults), `SetGraphicsDefaults`. Read-only first.
 
 ### G12 · 3D and raytrace render headless
+
 **Status:** settled as planned: the app loads the GLB from `RunBoardJobExport3D` in three.js. No KiCad change.
 `RunBoardJobExportRender` needs a GL context and will fail on a server. Decision: do
 3D in the browser (three.js) from `RunBoardJobExport3D` GLB output; leave the
 raytrace job for machines with a GPU. No KiCad change.
 
 ### G14 · Multi-document / multi-project
+
 **Status:** not needed. The bridge runs one server per project and the app opens a second session when a document belongs to another project.
 Not needed while the bridge runs one server per project. Revisit if the process
 model becomes a problem.
 
 ### G15 · Transport
+
 **Status:** done (8eafd9cf01): `--socket` accepts ipc/tcp/ws URLs, plus `--token` and `--no-events`.
 Let `--socket` accept a full nng URL (`ws://`, `tcp://`, `ipc://`) in
 `KICAD_API_SERVER::Start` and `command_api_server.cpp`. Enables browser-direct
@@ -248,6 +311,7 @@ WebSocket with nng's built-in `ws` transport. Also add a `--token` option so the
 `kicad_token` is known before connecting.
 
 ### G17 · Job ergonomics
+
 **Status:** done (5c34c5b2ac): `RunJobSettings.async/return_inline`, `GetJobStatus`, worker thread, `JobProgress` events. DRC stays synchronous.
 Jobs block the socket until finished and return only a status. Add
 `RunJob*.async=true → job id`, `GetJobStatus`, progress via G1, and let outputs be
@@ -255,7 +319,8 @@ returned inline (`bytes`) for small files (SVG, netlist, BOM) so the bridge does
 need filesystem access to the server's output directory.
 
 ### G18 · Request latency in `kicad-cli api-server`
-**Status:** done (web-api 72b2d2afe3): condition-variable wake-up; Ping went from 12.0 ms to 0.05 ms average, 1000 pings in 47 ms.
+
+**Status:** done (main 72b2d2afe3): condition-variable wake-up; Ping went from 12.0 ms to 0.05 ms average, 1000 pings in 47 ms.
 **Today:** the server loop is `while(!exit){ ProcessPendingEvents(); wxMilliSleep(10); }`,
 so every request waits up to 10 ms before dispatch (measured ~11 ms for `Ping`).
 **Fix:** wake the loop from `KICAD_API_SERVER::onApiRequest` with a condition variable
@@ -271,15 +336,15 @@ headless. In a web UI this state belongs to the page. We only add
 
 ## Order of work
 
-| Order | Gap | Why first |
-|---|---|---|
-| 1 | G13, G6 | trivial, unblocks client feature flags |
-| 2 | G1 | every panel depends on change notification |
-| 3 | G5 | you cannot demo without "New project" |
-| 4 | G4 | DRC/ERC panel is the first thing a user checks |
-| 5 | G3 | unlocks dozens of existing tool actions at once |
-| 6 | G16, G17, G18 | needed before real-size boards, long exports, and chatty UIs |
-| 7 | G7, G8 | schematic capture becomes possible end-to-end |
-| 8 | G9, G10, G11 | board editing parity |
-| 9 | G15 | drop the bridge from the hot path |
-| 10 | PNS routing spike | research item |
+| Order | Gap               | Why first                                                    |
+| ----- | ----------------- | ------------------------------------------------------------ |
+| 1     | G13, G6           | trivial, unblocks client feature flags                       |
+| 2     | G1                | every panel depends on change notification                   |
+| 3     | G5                | you cannot demo without "New project"                        |
+| 4     | G4                | DRC/ERC panel is the first thing a user checks               |
+| 5     | G3                | unlocks dozens of existing tool actions at once              |
+| 6     | G16, G17, G18     | needed before real-size boards, long exports, and chatty UIs |
+| 7     | G7, G8            | schematic capture becomes possible end-to-end                |
+| 8     | G9, G10, G11      | board editing parity                                         |
+| 9     | G15               | drop the bridge from the hot path                            |
+| 10    | PNS routing spike | research item                                                |

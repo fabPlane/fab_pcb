@@ -60,7 +60,17 @@ import {
   spinStyleFromText,
   spinTextAttrs,
 } from './labelShapes.js';
-import { type HAlign, type TextAttrs, type VAlign, flipHAlign, flipVAlign, halignFromEnum, textBlockExtents, textGlyphPrims, valignFromEnum } from './textMetrics.js';
+import {
+  type HAlign,
+  type TextAttrs,
+  type VAlign,
+  flipHAlign,
+  flipVAlign,
+  halignFromEnum,
+  textBlockExtents,
+  textGlyphPrims,
+  valignFromEnum,
+} from './textMetrics.js';
 import {
   type PinOrientation,
   type SymTransform,
@@ -262,7 +272,10 @@ const KOT_BY_TYPENAME: Record<string, string> = {
 };
 
 /** KOT_SCH_* type of a message / wrapper / (decoded) Any. Undecoded Anys yield undefined. */
-export function schematicItemTypeOf(x: unknown, ctx: SchematicAdapterContext = {}): { type: string; proto: Record<string, unknown> } | undefined {
+export function schematicItemTypeOf(
+  x: unknown,
+  ctx: SchematicAdapterContext = {},
+): { type: string; proto: Record<string, unknown> } | undefined {
   if (!x || typeof x !== 'object') return undefined;
   let o = x as Record<string, unknown>;
   if (o.$typeName === 'google.protobuf.Any') {
@@ -391,7 +404,10 @@ function rectPts(tl: Vec2, br: Vec2): Vec2[] {
  * A GraphicShape split the way SCH_PAINTER draws it: outline (+ same-colour fill for
  * FILLED_SHAPE) on the foreground layer, background fills / hatching on `bgLayer`.
  */
-function shapePrims(shape: GraphicShapeLike | undefined, c: Ctx): { fg: Primitive[]; bg: Primitive[]; bgColor?: ThemeColor | string; fgColor?: ThemeColor } {
+function shapePrims(
+  shape: GraphicShapeLike | undefined,
+  c: Ctx,
+): { fg: Primitive[]; bg: Primitive[]; bgColor?: ThemeColor | string; fgColor?: ThemeColor } {
   if (!shape) return { fg: [], bg: [] };
   const stroke = shape.attributes?.stroke as SchStrokeLike | undefined;
   let width = dist(stroke?.width);
@@ -402,10 +418,18 @@ function shapePrims(shape: GraphicShapeLike | undefined, c: Ctx): { fg: Primitiv
   const fillType = enumName('GraphicFillType', shape.attributes?.fill?.fillType);
   const fillColor = colorOf((shape.attributes?.fill as { color?: ColorLike } | undefined)?.color);
   const arcTol = c.ctx.arcTolerance;
-  const outlineShape: GraphicShapeLike = { ...shape, attributes: { stroke: { width: { valueNm: width }, style }, fill: { fillType: 'GFT_UNFILLED' } } };
-  const fillShape: GraphicShapeLike = { ...shape, attributes: { stroke: { width: { valueNm: 0 }, style: 'SLS_SOLID' }, fill: { fillType: 'GFT_FILLED' } } };
+  const outlineShape: GraphicShapeLike = {
+    ...shape,
+    attributes: { stroke: { width: { valueNm: width }, style }, fill: { fillType: 'GFT_UNFILLED' } },
+  };
+  const fillShape: GraphicShapeLike = {
+    ...shape,
+    attributes: { stroke: { width: { valueNm: 0 }, style: 'SLS_SOLID' }, fill: { fillType: 'GFT_FILLED' } },
+  };
   const fg: Primitive[] = noStroke ? [] : graphicShapeToPrims(outlineShape, { arcTolerance: arcTol });
-  const fills = graphicShapeToPrims(fillShape, { arcTolerance: arcTol }).filter((p) => (p.kind === 'polygon' || p.kind === 'circle') && p.fill);
+  const fills = graphicShapeToPrims(fillShape, { arcTolerance: arcTol }).filter(
+    (p) => (p.kind === 'polygon' || p.kind === 'circle') && p.fill,
+  );
   const bg: Primitive[] = [];
   let bgColor: ThemeColor | string | undefined;
   switch (fillType) {
@@ -428,7 +452,8 @@ function shapePrims(shape: GraphicShapeLike | undefined, c: Ctx): { fg: Primitiv
       for (const f of fills) {
         const outline = f.kind === 'polygon' ? f.outline : f.kind === 'circle' ? circleToPolygon(f.c, f.r, 0, arcTol) : [];
         const holes = f.kind === 'polygon' ? f.holes : [];
-        for (const ang of angles) for (const [a, b] of hatchPolygon(outline, holes, pitch, ang)) bg.push({ kind: 'segment', a, b, width: hw });
+        for (const ang of angles)
+          for (const [a, b] of hatchPolygon(outline, holes, pitch, ang)) bg.push({ kind: 'segment', a, b, width: hw });
       }
       bgColor = 'fg';
       break;
@@ -440,13 +465,28 @@ function shapePrims(shape: GraphicShapeLike | undefined, c: Ctx): { fg: Primitiv
 }
 
 /** Emit the fg / bg items for a shape. `transform` maps library primitives to the sheet. */
-function shapeItems(id: string, shape: GraphicShapeLike | undefined, fgLayer: string, bgLayer: string, c: Ctx, transform?: (p: Primitive) => Primitive, extra: Partial<RenderItem> = {}): RenderItem[] {
+function shapeItems(
+  id: string,
+  shape: GraphicShapeLike | undefined,
+  fgLayer: string,
+  bgLayer: string,
+  c: Ctx,
+  transform?: (p: Primitive) => Primitive,
+  extra: Partial<RenderItem> = {},
+): RenderItem[] {
   const s = shapePrims(shape, c);
   const t = transform ?? ((p) => p);
   const out: RenderItem[] = [];
   if (s.bg.length) {
     const color = s.bgColor === 'fg' ? s.fgColor : s.bgColor;
-    out.push(finish(`${id}@bg`, s.bgColor === 'fg' ? fgLayer : bgLayer, s.bg.map(t), c, { ...extra, ref: extra.ref ?? id, pickable: false, ...(color ? { color } : {}) }));
+    out.push(
+      finish(`${id}@bg`, s.bgColor === 'fg' ? fgLayer : bgLayer, s.bg.map(t), c, {
+        ...extra,
+        ref: extra.ref ?? id,
+        pickable: false,
+        ...(color ? { color } : {}),
+      }),
+    );
   }
   if (s.fg.length) out.push(finish(id, fgLayer, s.fg.map(t), c, { ...extra, ...(s.fgColor ? { color: s.fgColor } : {}) }));
   return out;
@@ -533,7 +573,15 @@ interface TextBoxOut {
 
 /** SCH_TEXTBOX: border, background fill and the text at SCH_TEXTBOX::GetDrawPos. */
 function textBoxPrims(textId: string, p: Record<string, unknown>, c: Ctx): TextBoxOut {
-  const tb = p.textbox as (TextBoxLike & { attributes?: SchTextAttributesLike; marginLeft?: DistanceLike; marginTop?: DistanceLike; marginRight?: DistanceLike; marginBottom?: DistanceLike }) | undefined;
+  const tb = p.textbox as
+    | (TextBoxLike & {
+        attributes?: SchTextAttributesLike;
+        marginLeft?: DistanceLike;
+        marginTop?: DistanceLike;
+        marginRight?: DistanceLike;
+        marginBottom?: DistanceLike;
+      })
+    | undefined;
   const out: TextBoxOut = { border: [], text: [], bg: [] };
   if (!tb) return out;
   const tl0 = vec(tb.topLeft);
@@ -546,7 +594,7 @@ function textBoxPrims(textId: string, p: Record<string, unknown>, c: Ctx): TextB
   const mt = m('marginTop');
   const mr = m('marginRight');
   const mb = m('marginBottom');
-  const vertical = Math.abs(((a.angle % 180) + 180) % 180 - 90) < 1e-6;
+  const vertical = Math.abs((((a.angle % 180) + 180) % 180) - 90) < 1e-6;
   const pos = { x: tl.x + ml, y: br.y - mb };
   if (vertical) {
     pos.y = a.halign === 'left' ? br.y - mb : a.halign === 'right' ? tl.y + mt : (tl.y + br.y) / 2;
@@ -574,12 +622,35 @@ function textBoxPrims(textId: string, p: Record<string, unknown>, c: Ctx): TextB
   return out;
 }
 
-function convertTextBox(p: Record<string, unknown>, id: string, c: Ctx, fgLayer = SCH_LAYERS.note, bgLayer = SCH_LAYERS.noteBackground, transform?: (q: Primitive) => Primitive, extra: Partial<RenderItem> = {}): RenderItem[] {
+function convertTextBox(
+  p: Record<string, unknown>,
+  id: string,
+  c: Ctx,
+  fgLayer = SCH_LAYERS.note,
+  bgLayer = SCH_LAYERS.noteBackground,
+  transform?: (q: Primitive) => Primitive,
+  extra: Partial<RenderItem> = {},
+): RenderItem[] {
   const tb = textBoxPrims(id, p, c);
   const t = transform ?? ((q) => q);
   const out: RenderItem[] = [];
-  if (tb.bg.length) out.push(finish(`${id}@bg`, bgLayer, tb.bg.map(t), c, { ...extra, ref: extra.ref ?? id, pickable: false, ...(tb.bgColor ? { color: tb.bgColor } : {}) }));
-  if (tb.border.length) out.push(finish(`${id}@border`, fgLayer, tb.border.map(t), c, { ...extra, ref: extra.ref ?? id, ...(tb.borderColor ? { color: tb.borderColor } : {}) }));
+  if (tb.bg.length)
+    out.push(
+      finish(`${id}@bg`, bgLayer, tb.bg.map(t), c, {
+        ...extra,
+        ref: extra.ref ?? id,
+        pickable: false,
+        ...(tb.bgColor ? { color: tb.bgColor } : {}),
+      }),
+    );
+  if (tb.border.length)
+    out.push(
+      finish(`${id}@border`, fgLayer, tb.border.map(t), c, {
+        ...extra,
+        ref: extra.ref ?? id,
+        ...(tb.borderColor ? { color: tb.borderColor } : {}),
+      }),
+    );
   if (tb.text.length) out.push(finish(id, fgLayer, tb.text.map(t), c, { ...extra, ...(tb.textColor ? { color: tb.textColor } : {}) }));
   return out;
 }
@@ -600,7 +671,22 @@ function convertImage(p: Record<string, unknown>, id: string, c: Ctx): RenderIte
   const info = bytes ? imageInfo(bytes) : undefined;
   if (!bytes || !info) {
     const s = 5_000_000;
-    return [finish(id, SCH_LAYERS.note, [{ kind: 'polygon', outline: rectPts({ x: pos.x - s / 2, y: pos.y - s / 2 }, { x: pos.x + s / 2, y: pos.y + s / 2 }), holes: [], fill: false, width: 0 }], c)];
+    return [
+      finish(
+        id,
+        SCH_LAYERS.note,
+        [
+          {
+            kind: 'polygon',
+            outline: rectPts({ x: pos.x - s / 2, y: pos.y - s / 2 }, { x: pos.x + s / 2, y: pos.y + s / 2 }),
+            holes: [],
+            fill: false,
+            width: 0,
+          },
+        ],
+        c,
+      ),
+    ];
   }
   const w = info.w * pxNm * scale;
   const h = info.h * pxNm * scale;
@@ -631,7 +717,22 @@ function convertTable(p: Record<string, unknown>, id: string, c: Ctx): RenderIte
   });
   if (boxIsEmpty(bbox)) return out;
   const borderW = dist((p.borderStroke as StrokeAttributesLike | undefined)?.width) || c.d.lineWidth;
-  out.push(finish(id, SCH_LAYERS.note, [{ kind: 'polygon', outline: rectPts({ x: bbox.x, y: bbox.y }, { x: bbox.x + bbox.w, y: bbox.y + bbox.h }), holes: [], fill: false, width: borderW }], c));
+  out.push(
+    finish(
+      id,
+      SCH_LAYERS.note,
+      [
+        {
+          kind: 'polygon',
+          outline: rectPts({ x: bbox.x, y: bbox.y }, { x: bbox.x + bbox.w, y: bbox.y + bbox.h }),
+          holes: [],
+          fill: false,
+          width: borderW,
+        },
+      ],
+      c,
+    ),
+  );
   return out;
 }
 
@@ -807,7 +908,8 @@ export function labelFieldRefs(p: Record<string, unknown>, id: string): Array<{ 
 
 function labelFields(p: Record<string, unknown>, id: string, c: Ctx, layer: string, offset?: Vec2): RenderItem[] {
   const out: RenderItem[] = [];
-  for (const { key, field } of labelFieldRefs(p, id)) out.push(...fieldItems(field, c, { id: key, layer, ref: id, pickable: true, offset }));
+  for (const { key, field } of labelFieldRefs(p, id))
+    out.push(...fieldItems(field, c, { id: key, layer, ref: id, pickable: true, offset }));
   return out;
 }
 
@@ -846,7 +948,13 @@ function convertLocalLabel(p: Record<string, unknown>, id: string, c: Ctx): Rend
   const l = labelTextLayout('local', p, c);
   const prims = textPrims(id, l.text, l.anchor, l.a, c);
   const out: RenderItem[] = [];
-  if (prims.length) out.push(finish(id, SCH_LAYERS.labelLocal, prims, c, { bbox: boxUnion(boxOfPrimitives(prims), boxFromPoints([l.pos])), ...(l.a.color ? { color: l.a.color } : {}) }));
+  if (prims.length)
+    out.push(
+      finish(id, SCH_LAYERS.labelLocal, prims, c, {
+        bbox: boxUnion(boxOfPrimitives(prims), boxFromPoints([l.pos])),
+        ...(l.a.color ? { color: l.a.color } : {}),
+      }),
+    );
   out.push(...labelFields(p, id, c, SCH_LAYERS.fields));
   return out;
 }
@@ -863,11 +971,26 @@ function convertGlobalLabel(p: Record<string, unknown>, id: string, c: Ctx): Ren
 }
 
 /** Hierarchical label / sheet pin body: background-filled flag plus stroked outline and text. */
-function flagItems(id: string, layer: string, outline: Vec2[], textAt: Vec2, l: LabelBase, c: Ctx, extra: Partial<RenderItem> = {}): RenderItem[] {
+function flagItems(
+  id: string,
+  layer: string,
+  outline: Vec2[],
+  textAt: Vec2,
+  l: LabelBase,
+  c: Ctx,
+  extra: Partial<RenderItem> = {},
+): RenderItem[] {
   const closed = outline.slice(0, -1);
   const out: RenderItem[] = [];
   if (closed.length >= 3) {
-    out.push(finish(`${id}@fill`, layer, [{ kind: 'polygon', outline: closed, holes: [], fill: true, width: 0 }], c, { ...extra, ref: extra.ref ?? id, pickable: false, color: 'schematic.background' }));
+    out.push(
+      finish(`${id}@fill`, layer, [{ kind: 'polygon', outline: closed, holes: [], fill: true, width: 0 }], c, {
+        ...extra,
+        ref: extra.ref ?? id,
+        pickable: false,
+        color: 'schematic.background',
+      }),
+    );
   }
   const prims: Primitive[] = polyline(outline, l.penWidth);
   prims.push(...textPrims(id, l.text, textAt, l.a, c));
@@ -911,7 +1034,13 @@ export interface SheetPinLayout extends LabelTextLayout {
  * A sheet pin is a hierarchical label (`SCH_SHEET_PIN` : `SCH_HIERLABEL`) whose spin style follows
  * the sheet side; `vars` (`sheetTextVars`) resolves `${field}` in its text as KiCad's shown text does.
  */
-export function sheetPinLayout(pin: SchSheetPinLike, index: number, sheetId: string, c: Ctx, vars?: Record<string, string>): SheetPinLayout {
+export function sheetPinLayout(
+  pin: SchSheetPinLike,
+  index: number,
+  sheetId: string,
+  c: Ctx,
+  vars?: Record<string, string>,
+): SheetPinLayout {
   const pinId = kiid(pin.id) || `${sheetId}:pin${index}`;
   const t = pin.text ?? {};
   const a = readTextAttrs(t.attributes, c.d);
@@ -922,7 +1051,17 @@ export function sheetPinLayout(pin: SchSheetPinLike, index: number, sheetId: str
   a.valign = 'center';
   const pos = pin.position ? vec(pin.position) : vec(t.position);
   const shape = labelShapeFromEnum(pin.shape, 'input');
-  return { key: `${sheetId}:pin:${pinId}`, pinId, pos, text: expandTextVars(t.text ?? '', vars), a, spin, penWidth: a.thickness, anchor: vAdd(pos, hierLabelTextOffset(a.size.y, a.size.x, spin, c.d.textOffsetRatio)), shape };
+  return {
+    key: `${sheetId}:pin:${pinId}`,
+    pinId,
+    pos,
+    text: expandTextVars(t.text ?? '', vars),
+    a,
+    spin,
+    penWidth: a.thickness,
+    anchor: vAdd(pos, hierLabelTextOffset(a.size.y, a.size.x, spin, c.d.textOffsetRatio)),
+    shape,
+  };
 }
 
 function sheetPinItems(pin: SchSheetPinLike, index: number, sheetId: string, c: Ctx, vars?: Record<string, string>): RenderItem[] {
@@ -969,16 +1108,45 @@ function convertSheet(p: Record<string, unknown>, id: string, c: Ctx): RenderIte
   const fill = p.fill as { fillType?: number | string; color?: ColorLike } | undefined;
   const fillType = enumName('GraphicFillType', fill?.fillType);
   const bgColor = fillType === 'GFT_FILLED_WITH_COLOR' ? colorOf(fill?.color) : undefined;
-  out.push(finish(`${id}@bg`, SCH_LAYERS.sheetBackground, [{ kind: 'polygon', outline: rect, holes: [], fill: true, width: 0 }], c, { ref: id, pickable: false, ...(bgColor ? { color: bgColor } : {}) }));
+  out.push(
+    finish(`${id}@bg`, SCH_LAYERS.sheetBackground, [{ kind: 'polygon', outline: rect, holes: [], fill: true, width: 0 }], c, {
+      ref: id,
+      pickable: false,
+      ...(bgColor ? { color: bgColor } : {}),
+    }),
+  );
   const stroke = p.borderStroke as SchStrokeLike | undefined;
   const w = dist(stroke?.width) || c.d.lineWidth;
   const borderColor = colorOf(stroke?.color);
-  out.push(finish(`${id}@border`, SCH_LAYERS.sheet, [{ kind: 'polygon', outline: rect, holes: [], fill: false, width: w }], c, { ref: id, pickable: false, ...(borderColor ? { color: borderColor } : {}) }));
+  out.push(
+    finish(`${id}@border`, SCH_LAYERS.sheet, [{ kind: 'polygon', outline: rect, holes: [], fill: false, width: w }], c, {
+      ref: id,
+      pickable: false,
+      ...(borderColor ? { color: borderColor } : {}),
+    }),
+  );
   const nameField = p.nameField as SchFieldLike | undefined;
   const fileField = p.filenameField as SchFieldLike | undefined;
-  out.push(...fieldItems(nameField, c, { id: `${id}:field:${nameField?.name || 'Sheetname'}`, layer: SCH_LAYERS.sheetName, ref: id, pickable: true }));
-  out.push(...fieldItems(fileField, c, { id: `${id}:field:${fileField?.name || 'Sheetfile'}`, layer: SCH_LAYERS.sheetFilename, ref: id, pickable: true, kind: 'sheetfile' }));
-  ((p.userFields as SchFieldLike[] | undefined) ?? []).forEach((f, i) => out.push(...fieldItems(f, c, { id: `${id}:field:${f.name || i}`, layer: SCH_LAYERS.sheetFields, ref: id, pickable: true })));
+  out.push(
+    ...fieldItems(nameField, c, {
+      id: `${id}:field:${nameField?.name || 'Sheetname'}`,
+      layer: SCH_LAYERS.sheetName,
+      ref: id,
+      pickable: true,
+    }),
+  );
+  out.push(
+    ...fieldItems(fileField, c, {
+      id: `${id}:field:${fileField?.name || 'Sheetfile'}`,
+      layer: SCH_LAYERS.sheetFilename,
+      ref: id,
+      pickable: true,
+      kind: 'sheetfile',
+    }),
+  );
+  ((p.userFields as SchFieldLike[] | undefined) ?? []).forEach((f, i) =>
+    out.push(...fieldItems(f, c, { id: `${id}:field:${f.name || i}`, layer: SCH_LAYERS.sheetFields, ref: id, pickable: true })),
+  );
   const vars = sheetTextVars(p);
   ((p.pins as SchSheetPinLike[] | undefined) ?? []).forEach((pin, i) => out.push(...sheetPinItems(pin, i, id, c, vars)));
   const body = boxFromPoints(rect);
@@ -996,8 +1164,20 @@ function convertSheet(p: Record<string, unknown>, id: string, c: Ctx): RenderIte
 // Symbols
 // ---------------------------------------------------------------------------
 
-const PIN_SHAPE_NAMES = ['SPS_UNKNOWN', 'SPS_LINE', 'SPS_INVERTED', 'SPS_CLOCK', 'SPS_INVERTED_CLOCK', 'SPS_INPUT_LOW', 'SPS_CLOCK_LOW', 'SPS_OUTPUT_LOW', 'SPS_FALLING_EDGE_CLOCK', 'SPS_NONLOGIC'];
-const pinShapeName = (v: number | string | undefined): string => (typeof v === 'number' ? (PIN_SHAPE_NAMES[v] ?? 'SPS_LINE') : (v ?? 'SPS_LINE'));
+const PIN_SHAPE_NAMES = [
+  'SPS_UNKNOWN',
+  'SPS_LINE',
+  'SPS_INVERTED',
+  'SPS_CLOCK',
+  'SPS_INVERTED_CLOCK',
+  'SPS_INPUT_LOW',
+  'SPS_CLOCK_LOW',
+  'SPS_OUTPUT_LOW',
+  'SPS_FALLING_EDGE_CLOCK',
+  'SPS_NONLOGIC',
+];
+const pinShapeName = (v: number | string | undefined): string =>
+  typeof v === 'number' ? (PIN_SHAPE_NAMES[v] ?? 'SPS_LINE') : (v ?? 'SPS_LINE');
 const isNoConnectPin = (v: number | string | undefined): boolean => v === 12 || v === 'EPT_NO_CONNECT';
 
 export interface PinGeom {
@@ -1024,7 +1204,11 @@ function pinBodyPrims(g: PinGeom, shape: string, noConnect: boolean, numSize: nu
   if (g.length === 0 && !noConnect && shape === 'SPS_LINE') return out;
   if (noConnect) {
     const r = SCH_DEFAULTS.pinTargetRadius;
-    out.push(seg(p0, pos), seg({ x: pos.x - r, y: pos.y - r }, { x: pos.x + r, y: pos.y + r }), seg({ x: pos.x + r, y: pos.y - r }, { x: pos.x - r, y: pos.y + r }));
+    out.push(
+      seg(p0, pos),
+      seg({ x: pos.x - r, y: pos.y - r }, { x: pos.x + r, y: pos.y + r }),
+      seg({ x: pos.x + r, y: pos.y - r }, { x: pos.x - r, y: pos.y + r }),
+    );
     return out;
   }
   switch (shape) {
@@ -1088,10 +1272,20 @@ export interface SchPinAlternateLike {
  * What a pin shows: `SCH_PIN::GetShownName` returns the active alternate's name (and the
  * alternate's shape / electrical type replace the pin's); a name of `~` is empty.
  */
-export function pinShown(pin: SchPinLike & { alternates?: SchPinAlternateLike[]; activeAlternate?: string }): { name: string; number: string; shape: number | string | undefined; electricalType: number | string | undefined } {
+export function pinShown(pin: SchPinLike & { alternates?: SchPinAlternateLike[]; activeAlternate?: string }): {
+  name: string;
+  number: string;
+  shape: number | string | undefined;
+  electricalType: number | string | undefined;
+} {
   const alt = pin.activeAlternate ? (pin.alternates ?? []).find((a) => a.name === pin.activeAlternate) : undefined;
   const raw = alt?.name ?? pin.name ?? '';
-  return { name: raw === '~' ? '' : raw, number: pin.number ?? '', shape: alt?.shape ?? pin.shape, electricalType: alt?.electricalType ?? pin.electricalType };
+  return {
+    name: raw === '~' ? '' : raw,
+    number: pin.number ?? '',
+    shape: alt?.shape ?? pin.shape,
+    electricalType: alt?.electricalType ?? pin.electricalType,
+  };
 }
 
 /**
@@ -1104,7 +1298,16 @@ export function pinShown(pin: SchPinLike & { alternates?: SchPinAlternateLike[];
  * plotted single-line when they fit along the pin and as a braced column otherwise -- that
  * decision needs KiCad's font metrics, so they are laid out single-line here.
  */
-export function pinTextLayouts(g: PinGeom, name: string, number: string, numSize: number, nameSize: number, penWidth: number, inside: number, d: SchematicDefaults): { number?: PinTextLayout; name?: PinTextLayout } {
+export function pinTextLayouts(
+  g: PinGeom,
+  name: string,
+  number: string,
+  numSize: number,
+  nameSize: number,
+  penWidth: number,
+  inside: number,
+  d: SchematicDefaults,
+): { number?: PinTextLayout; name?: PinTextLayout } {
   const drawName = !!name && nameSize > 0;
   const drawNum = !!number && numSize > 0;
   const out: { number?: PinTextLayout; name?: PinTextLayout } = {};
@@ -1112,24 +1315,46 @@ export function pinTextLayouts(g: PinGeom, name: string, number: string, numSize
   const offset = Math.round(24 * d.textOffsetRatio) * MIL + SCH_DEFAULTS.pinTextMargin + penWidth; // name_offset == num_offset
   const x1 = g.root.x;
   const y1 = g.root.y;
-  const mk = (text: string, pos: Vec2, size: number, angle: number, halign: HAlign, valign: VAlign): PinTextLayout => ({ text, pos, size, thickness: penWidth, angle, halign, valign });
+  const mk = (text: string, pos: Vec2, size: number, angle: number, halign: HAlign, valign: VAlign): PinTextLayout => ({
+    text,
+    pos,
+    size,
+    thickness: penWidth,
+    angle,
+    halign,
+    valign,
+  });
   const horizontal = g.orient === 'left' || g.orient === 'right';
   const midX = Math.trunc((x1 + g.pos.x) / 2);
   const midY = Math.trunc((y1 + g.pos.y) / 2);
   if (inside > 0) {
     if (horizontal) {
-      if (drawName) out.name = g.orient === 'right' ? mk(name, { x: x1 + inside, y: y1 }, nameSize, 0, 'left', 'center') : mk(name, { x: x1 - inside, y: y1 }, nameSize, 0, 'right', 'center');
+      if (drawName)
+        out.name =
+          g.orient === 'right'
+            ? mk(name, { x: x1 + inside, y: y1 }, nameSize, 0, 'left', 'center')
+            : mk(name, { x: x1 - inside, y: y1 }, nameSize, 0, 'right', 'center');
       if (drawNum) out.number = mk(number, { x: midX, y: y1 - offset }, numSize, 0, 'center', 'bottom');
     } else {
-      if (drawName) out.name = g.orient === 'down' ? mk(name, { x: x1, y: y1 + inside }, nameSize, 90, 'right', 'center') : mk(name, { x: x1, y: y1 - inside }, nameSize, 90, 'left', 'center');
+      if (drawName)
+        out.name =
+          g.orient === 'down'
+            ? mk(name, { x: x1, y: y1 + inside }, nameSize, 90, 'right', 'center')
+            : mk(name, { x: x1, y: y1 - inside }, nameSize, 90, 'left', 'center');
       if (drawNum) out.number = mk(number, { x: x1 - offset, y: midY }, numSize, 90, 'center', 'bottom');
     }
   } else if (horizontal) {
     if (drawName) out.name = mk(name, { x: midX, y: y1 - offset }, nameSize, 0, 'center', 'bottom');
-    if (drawNum) out.number = drawName ? mk(number, { x: midX, y: y1 + offset }, numSize, 0, 'center', 'top') : mk(number, { x: midX, y: y1 - offset }, numSize, 0, 'center', 'bottom');
+    if (drawNum)
+      out.number = drawName
+        ? mk(number, { x: midX, y: y1 + offset }, numSize, 0, 'center', 'top')
+        : mk(number, { x: midX, y: y1 - offset }, numSize, 0, 'center', 'bottom');
   } else {
     if (drawName) out.name = mk(name, { x: x1 - offset, y: midY }, nameSize, 90, 'center', 'bottom');
-    if (drawNum) out.number = drawName ? mk(number, { x: x1 + offset, y: midY }, numSize, 90, 'center', 'top') : mk(number, { x: x1 - offset, y: midY }, numSize, 90, 'center', 'bottom');
+    if (drawNum)
+      out.number = drawName
+        ? mk(number, { x: x1 + offset, y: midY }, numSize, 90, 'center', 'top')
+        : mk(number, { x: x1 - offset, y: midY }, numSize, 90, 'center', 'bottom');
   }
   return out;
 }
@@ -1160,14 +1385,26 @@ export function pinLayout(pin: SchPinLike, index: number, s: SymbolInfo, c: Ctx)
   const libOrient = pinOrientationFromEnum(pin.orientation);
   const orient = pinDrawOrientation(libOrient, s.t);
   const rawPos = vec(pin.position);
-  const pos = c.ctx.symbolPinsAbsolute === false ? vAdd(s.pos, { x: s.t.x1 * rawPos.x + s.t.y1 * rawPos.y, y: s.t.x2 * rawPos.x + s.t.y2 * rawPos.y }) : rawPos;
+  const pos =
+    c.ctx.symbolPinsAbsolute === false
+      ? vAdd(s.pos, { x: s.t.x1 * rawPos.x + s.t.y1 * rawPos.y, y: s.t.x2 * rawPos.x + s.t.y2 * rawPos.y })
+      : rawPos;
   const length = dist(pin.length);
   const root = vAdd(pos, vScale(pinDirection(orient), length));
   const shown = pinShown(pin);
   const numSize = dist(pin.numberTextSize) || c.d.pinTextSize;
   const nameSize = dist(pin.nameTextSize) || c.d.pinTextSize;
   const geom: PinGeom = { pos, root, orient, length };
-  const texts = pinTextLayouts(geom, s.showPinNames ? shown.name : '', s.showPinNumbers ? shown.number : '', numSize, nameSize, c.d.lineWidth, s.pinNameOffset, c.d);
+  const texts = pinTextLayouts(
+    geom,
+    s.showPinNames ? shown.name : '',
+    s.showPinNumbers ? shown.number : '',
+    numSize,
+    nameSize,
+    c.d.lineWidth,
+    s.pinNameOffset,
+    c.d,
+  );
   return { pinKiid: kiid(pin.id) || `${index}`, geom, numSize, nameSize, shown, texts, hidden };
 }
 
@@ -1178,14 +1415,22 @@ function pinItems(pin: SchPinLike, index: number, s: SymbolInfo, c: Ctx): { item
   const ref = `${s.id}:${l.shown.number}`;
   const baseId = `${s.id}@pin:${l.pinKiid}`;
   const layer = l.hidden ? SCH_LAYERS.hidden : SCH_LAYERS.pin;
-  const textLayers = l.hidden ? { num: SCH_LAYERS.hidden, name: SCH_LAYERS.hidden } : { num: SCH_LAYERS.pinNumber, name: SCH_LAYERS.pinName };
+  const textLayers = l.hidden
+    ? { num: SCH_LAYERS.hidden, name: SCH_LAYERS.hidden }
+    : { num: SCH_LAYERS.pinNumber, name: SCH_LAYERS.pinName };
   const width = c.d.lineWidth;
   const body = pinBodyPrims(l.geom, pinShapeName(l.shown.shape), isNoConnectPin(l.shown.electricalType), l.numSize, l.nameSize, width);
   const bbox = body.length ? boxOfPrimitives(body) : boxFromPoints([l.geom.pos, l.geom.root], width);
   items.push({ id: baseId, layer, prims: body, bbox, owner: c.owner, ref });
   const textItem = (layout: PinTextLayout | undefined, suffix: 'number' | 'name', lay: string): void => {
     if (!layout) return;
-    const a: TextAttrs = { size: { x: layout.size, y: layout.size }, thickness: layout.thickness, angle: layout.angle, halign: layout.halign, valign: layout.valign };
+    const a: TextAttrs = {
+      size: { x: layout.size, y: layout.size },
+      thickness: layout.thickness,
+      angle: layout.angle,
+      halign: layout.halign,
+      valign: layout.valign,
+    };
     const prims = textPrims(`${s.id}:pin:${l.pinKiid}:${suffix}`, layout.text, layout.pos, a, c);
     if (prims.length) items.push(finish(`${baseId}:${suffix}`, lay, prims, c, { ref, pickable: false }));
   };
@@ -1231,16 +1476,25 @@ export function symbolParts(p: Record<string, unknown>, id: string, c: Ctx): Sym
     pinNameOffset: dist(p.pinNameOffset as DistanceLike) || (c.ctx.assumePinNameOffset ?? 0),
   };
   const fields: SymbolParts['fields'] = [];
-  const fieldLayer: Record<string, string> = { referenceField: SCH_LAYERS.reference, valueField: SCH_LAYERS.value, footprintField: SCH_LAYERS.fields, datasheetField: SCH_LAYERS.fields, descriptionField: SCH_LAYERS.fields };
+  const fieldLayer: Record<string, string> = {
+    referenceField: SCH_LAYERS.reference,
+    valueField: SCH_LAYERS.value,
+    footprintField: SCH_LAYERS.fields,
+    datasheetField: SCH_LAYERS.fields,
+    descriptionField: SCH_LAYERS.fields,
+  };
   const unitCount = Number(def.unitCount ?? 1);
   for (const key of Object.keys(fieldLayer)) {
     let f = p[key] as SchFieldLike | undefined;
     if (!f) continue;
     // SCH_FIELD::GetShownText of the reference: GetRef( sheet, true ) appends the unit letter
-    if (key === 'referenceField' && unitCount > 1 && f.text?.text) f = { ...f, text: { ...f.text, text: f.text.text + subReference(unit, c.ctx.subpartFirstId, c.ctx.subpartIdSeparator) } };
+    if (key === 'referenceField' && unitCount > 1 && f.text?.text)
+      f = { ...f, text: { ...f.text, text: f.text.text + subReference(unit, c.ctx.subpartFirstId, c.ctx.subpartIdSeparator) } };
     fields.push({ key: `${id}:field:${f.name || key}`, field: f, layer: fieldLayer[key]! });
   }
-  ((p.userFields as SchFieldLike[] | undefined) ?? []).forEach((f, i) => fields.push({ key: `${id}:field:${f.name || `user${i}`}`, field: f, layer: SCH_LAYERS.fields }));
+  ((p.userFields as SchFieldLike[] | undefined) ?? []).forEach((f, i) =>
+    fields.push({ key: `${id}:field:${f.name || `user${i}`}`, field: f, layer: SCH_LAYERS.fields }),
+  );
   return { info, children, pins, fields };
 }
 
@@ -1264,13 +1518,23 @@ export function subReference(unit: number, firstId = 'A', separator = ''): strin
  * justification is flipped when the reading direction is reversed, and the vertical one when a
  * mirror would stack the lines the other way round.
  */
-export function symbolTextPlacement(a: TextAttrs, pos: Vec2, t: SymTransform, origin: Vec2): { pos: Vec2; angle: number; halign: HAlign; valign: VAlign } {
+export function symbolTextPlacement(
+  a: TextAttrs,
+  pos: Vec2,
+  t: SymTransform,
+  origin: Vec2,
+): { pos: Vec2; angle: number; halign: HAlign; valign: VAlign } {
   const origHoriz = Math.abs((((a.angle % 360) + 360) % 360) % 180) < 1e-6;
   const screenHoriz = (t.x1 !== 0) !== !origHoriz;
   const flipH = origHoriz ? (screenHoriz ? t.x1 < 0 : t.x2 > 0) : screenHoriz ? t.y1 > 0 : t.y2 < 0;
   const det = t.x1 * t.y2 - t.x2 * t.y1;
   const flipV = det < 0 && origHoriz === t.x1 > 0;
-  return { pos: toSheet(t, pos, origin), angle: screenHoriz ? 0 : 90, halign: flipH ? flipHAlign(a.halign) : a.halign, valign: flipV ? flipVAlign(a.valign) : a.valign };
+  return {
+    pos: toSheet(t, pos, origin),
+    angle: screenHoriz ? 0 : 90,
+    halign: flipH ? flipHAlign(a.halign) : a.halign,
+    valign: flipV ? flipVAlign(a.valign) : a.valign,
+  };
 }
 
 /** `SCH_TEXTBOX::Plot` inside a symbol: the box corners go through the transform and the angle is swapped when it turns the axes. */
@@ -1282,7 +1546,15 @@ export function symbolTextBoxProto(p: Record<string, unknown>, t: SymTransform, 
   const angle = deg(tb.attributes?.angle);
   const horizontal = Math.abs((((angle % 360) + 360) % 360) % 180) < 1e-6;
   const attributes = t.y1 !== 0 ? { ...(tb.attributes ?? {}), angle: { valueDegrees: horizontal ? 90 : 0 } } : tb.attributes;
-  return { ...p, textbox: { ...tb, topLeft: { xNm: Math.min(a.x, b.x), yNm: Math.min(a.y, b.y) }, bottomRight: { xNm: Math.max(a.x, b.x), yNm: Math.max(a.y, b.y) }, attributes } };
+  return {
+    ...p,
+    textbox: {
+      ...tb,
+      topLeft: { xNm: Math.min(a.x, b.x), yNm: Math.min(a.y, b.y) },
+      bottomRight: { xNm: Math.max(a.x, b.x), yNm: Math.max(a.y, b.y) },
+      attributes,
+    },
+  };
 }
 
 function convertSymbol(p: Record<string, unknown>, id: string, c: Ctx): RenderItem[] {
@@ -1296,7 +1568,15 @@ function convertSymbol(p: Record<string, unknown>, id: string, c: Ctx): RenderIt
     const cid = d.cid;
     switch (d.type) {
       case 'KOT_SCH_SHAPE': {
-        const items = shapeItems(`${id}:shape:${cid}`, d.proto.shape as GraphicShapeLike, SCH_LAYERS.device, SCH_LAYERS.deviceBackground, c, xf, { ref: id, pickable: false });
+        const items = shapeItems(
+          `${id}:shape:${cid}`,
+          d.proto.shape as GraphicShapeLike,
+          SCH_LAYERS.device,
+          SCH_LAYERS.deviceBackground,
+          c,
+          xf,
+          { ref: id, pickable: false },
+        );
         for (const it of items) bodyBox = boxUnion(bodyBox, it.bbox);
         out.push(...items);
         break;
@@ -1307,7 +1587,13 @@ function convertSymbol(p: Record<string, unknown>, id: string, c: Ctx): RenderIt
         const a = readTextAttrs(txt.attributes, c.d);
         const tid = `${id}:text:${cid}`;
         const placed = symbolTextPlacement(a, vec(txt.position), t, pos);
-        const prims = textPrims(tid, txt.text ?? '', placed.pos, { ...a, angle: placed.angle, halign: placed.halign, valign: placed.valign }, c);
+        const prims = textPrims(
+          tid,
+          txt.text ?? '',
+          placed.pos,
+          { ...a, angle: placed.angle, halign: placed.halign, valign: placed.valign },
+          c,
+        );
         if (!prims.length) break;
         const it = finish(tid, SCH_LAYERS.device, prims, c, { ref: id, pickable: false, ...(a.color ? { color: a.color } : {}) });
         bodyBox = boxUnion(bodyBox, it.bbox);
@@ -1316,7 +1602,15 @@ function convertSymbol(p: Record<string, unknown>, id: string, c: Ctx): RenderIt
       }
       case 'KOT_SCH_TEXTBOX': {
         // the box is laid out in sheet coordinates (like the `textbox` request for it), so no primitive transform
-        const items = convertTextBox(symbolTextBoxProto(d.proto, t, pos), `${id}:textbox:${cid}`, c, SCH_LAYERS.device, SCH_LAYERS.deviceBackground, undefined, { ref: id, pickable: false });
+        const items = convertTextBox(
+          symbolTextBoxProto(d.proto, t, pos),
+          `${id}:textbox:${cid}`,
+          c,
+          SCH_LAYERS.device,
+          SCH_LAYERS.deviceBackground,
+          undefined,
+          { ref: id, pickable: false },
+        );
         for (const it of items) bodyBox = boxUnion(bodyBox, it.bbox);
         out.push(...items);
         break;
@@ -1331,7 +1625,8 @@ function convertSymbol(p: Record<string, unknown>, id: string, c: Ctx): RenderIt
     pinsBox = boxUnion(pinsBox, r.bbox);
   });
   // instance fields (reference / value / footprint / datasheet / description / user)
-  for (const f of fields) out.push(...fieldItems(f.field, c, { id: f.key, layer: f.layer, transform: t, origin: pos, ref: id, pickable: true }));
+  for (const f of fields)
+    out.push(...fieldItems(f.field, c, { id: f.key, layer: f.layer, transform: t, origin: pos, ref: id, pickable: true }));
   // DNP cross (SCH_PAINTER::draw(SCH_SYMBOL))
   const attrs = p.attributes as { doNotPopulate?: boolean; excludeFromSimulation?: boolean } | undefined;
   if (attrs?.doNotPopulate && (c.ctx.showDnpMarkers ?? true)) out.push(...dnpCross(bodyBox, boxUnion(bodyBox, pinsBox), c, id, id));
@@ -1344,7 +1639,14 @@ function convertSymbol(p: Record<string, unknown>, id: string, c: Ctx): RenderIt
 
 /** A standalone SchematicPin item (identity transform, position as given). */
 function convertStandalonePin(p: Record<string, unknown>, id: string, c: Ctx): RenderItem[] {
-  const info: SymbolInfo = { id: c.owner, pos: { x: 0, y: 0 }, t: { ...IDENTITY_TRANSFORM }, showPinNames: true, showPinNumbers: true, pinNameOffset: 0 };
+  const info: SymbolInfo = {
+    id: c.owner,
+    pos: { x: 0, y: 0 },
+    t: { ...IDENTITY_TRANSFORM },
+    showPinNames: true,
+    showPinNumbers: true,
+    pinNameOffset: 0,
+  };
   const r = pinItems({ ...(p as SchPinLike), id: { value: id } }, 0, info, c);
   return r.items;
 }

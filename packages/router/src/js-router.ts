@@ -1,8 +1,8 @@
 /**
  * Compatibility facade for callers that still import the former browser-side `JsRouter`.
  *
- * TensorFleet/js_autorouter is server-only today. New code should submit `router: "js"` to the
- * bridge, which uses `JsAutorouter`. Keeping this small facade produces a useful failure for an
+ * The capacity router is server-only today. New code should submit `router: "js"` to the bridge,
+ * which defaults to `FabRouter`. Keeping this small facade produces a useful failure for an
  * older UI or third-party caller without pulling the retired tscircuit solver into browser builds.
  */
 import type { Autorouter, RouteInput, RouteOptions, RouteProgress, RouteResult } from "./types";
@@ -20,11 +20,11 @@ export class JsRouter implements Autorouter {
   async available(): Promise<{ ok: boolean; reason?: string }> {
     return {
       ok: false,
-      reason: "the in-tab capacity router was removed; run js_autorouter through the bridge",
+      reason: "the in-tab capacity router was removed; run fab_router through the bridge",
     };
   }
 
   async route(_input: RouteInput, _opts: RouteOptions = {}, _progress?: (progress: RouteProgress) => void): Promise<RouteResult> {
-    throw new Error("the in-tab capacity router was removed; choose the server-side JavaScript router");
+    throw new Error("the in-tab capacity router was removed; choose the server-side fab_router");
   }
 }

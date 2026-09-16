@@ -1,0 +1,23 @@
+{
+  "name": "@fp-pcb/kicad-wasm",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Loader for KiCad's headless API core compiled to WebAssembly: the kiapi_* C ABI, the event callback and MEMFS helpers behind a KiCadWasmInstance for @fp-pcb/client's WasmTransport",
+  "exports": {
+    ".": "./src/index.ts",
+    "./fs": "./src/fs.ts"
+  },
+  "scripts": {
+    "fetch": "bun run scripts/fetch.ts",
+    "fetch:release": "bun run scripts/fetch.ts --release",
+    "test": "bun test",
+    "typecheck": "tsc -b"
+  },
+  "devDependencies": {
+    "@bufbuild/protobuf": "2.14.1",
+    "@fp-pcb/proto": "workspace:*",
+    "@types/bun": "^1.2.0",
+    "typescript": "^5.6.0"
+  }
+}

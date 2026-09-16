@@ -64,14 +64,27 @@ export function HistoryPanel() {
         <button className="btn sm" data-testid="history-redo" disabled={busy || redoRows.length === 0} onClick={() => void step('redo')}>
           Redo
         </button>
-        <span className={`chip on undo-mode`} data-testid="undo-mode" title={server ? 'KiCad owns the undo stack; undo also reverts zone fills, connectivity and edits made outside a commit' : 'KiCad does not advertise Undo: the app replays the recorded inverse operations as new commits'}>
+        <span
+          className={`chip on undo-mode`}
+          data-testid="undo-mode"
+          title={
+            server
+              ? 'KiCad owns the undo stack; undo also reverts zone fills, connectivity and edits made outside a commit'
+              : 'KiCad does not advertise Undo: the app replays the recorded inverse operations as new commits'
+          }
+        >
           {mode === 'probing' ? 'checking…' : server ? 'server undo (KiCad)' : 'client undo'}
         </span>
         <span className="muted">
           {undoRows.length} undoable · {redoRows.length} redoable
         </span>
         <span className="spacer" />
-        <button className="btn ghost sm" onClick={() => commands.clearHistory()} disabled={clientUndo.length + clientRedo.length === 0} title="Clears the app's own history; KiCad's stack is untouched">
+        <button
+          className="btn ghost sm"
+          onClick={() => commands.clearHistory()}
+          disabled={clientUndo.length + clientRedo.length === 0}
+          title="Clears the app's own history; KiCad's stack is untouched"
+        >
           clear
         </button>
       </div>

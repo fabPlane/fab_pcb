@@ -36,7 +36,10 @@ import { Board, KiCad, Pad, Track, wrapAny, type Item } from "../src/model";
 import { mm } from "../src/units";
 import { FakeTransport, fail, reply } from "./fake-transport";
 
-const DOC = create(DocumentSpecifierSchema, { type: DocumentType.DOCTYPE_PCB, identifier: { case: "boardFilename", value: "x.kicad_pcb" } });
+const DOC = create(DocumentSpecifierSchema, {
+  type: DocumentType.DOCTYPE_PCB,
+  identifier: { case: "boardFilename", value: "x.kicad_pcb" },
+});
 
 /** A fake board server: a map of items, commit bookkeeping, and echo-style create/update/delete. */
 function boardServer() {
@@ -153,7 +156,9 @@ describe("Commit lifecycle", () => {
     expect(err).toBeInstanceOf(CommitDroppedError);
     const cause = (err as CommitDroppedError).cause as KiCadItemError;
     expect(cause).toBeInstanceOf(KiCadItemError);
-    expect(cause.failures).toEqual([{ id: "t1", index: 0, code: ItemStatusCode.ISC_EXISTING, codeName: "ISC_EXISTING", message: "exists" }]);
+    expect(cause.failures).toEqual([
+      { id: "t1", index: 0, code: ItemStatusCode.ISC_EXISTING, codeName: "ISC_EXISTING", message: "exists" },
+    ]);
     expect(log.at(-1)).toBe("end:drop:commit-1:");
 
     const res = await b.commit("dup", (tx) => tx.create([track("t1"), track("t3")]), undefined, { strict: false });
@@ -169,14 +174,19 @@ describe("Commit lifecycle", () => {
     items.set("p1", pad);
     const tr = (await b.getItems(KiCadObjectType.KOT_PCB_TRACE))[0] as Track;
     tr.width = mm(1);
-    await b.commit("edit", async (tx) => {
-      const u1 = tx.update([tr]);
-      const u2 = tx.update([pad]); // needs container = parent footprint -> separate request
-      const d = tx.delete(["t-missing"], undefined);
-      await Promise.all([u1, u2]).then(() => undefined);
-      const [res] = await d.catch(() => [{ id: "t-missing", ok: false }]);
-      expect(res!.ok).toBe(false);
-    }, undefined, { strict: false });
+    await b.commit(
+      "edit",
+      async (tx) => {
+        const u1 = tx.update([tr]);
+        const u2 = tx.update([pad]); // needs container = parent footprint -> separate request
+        const d = tx.delete(["t-missing"], undefined);
+        await Promise.all([u1, u2]).then(() => undefined);
+        const [res] = await d.catch(() => [{ id: "t-missing", ok: false }]);
+        expect(res!.ok).toBe(false);
+      },
+      undefined,
+      { strict: false },
+    );
     expect(log).toEqual(["begin", "update:1:", "update:1:fp1", "delete:1", "end:commit:commit-1:edit"]);
     expect((items.get("t1") as Track).width).toBe(mm(1));
     const updateReqs = t.requestsOf(UpdateItemsSchema);

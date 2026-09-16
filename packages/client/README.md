@@ -6,7 +6,7 @@ process — directly over its nng IPC socket in Bun, or through `@fp-pcb/bridge`
 
 ```
 src/
-  transport/      Layer 1  NngIpcTransport, WebSocketTransport, NngIpcSubscriber, framing
+  transport/      Layer 1  NngIpcTransport, WebSocketTransport, StdioTransport, WasmTransport, subscribers, framing
   client.ts       Layer 2  KiCadClient: ApiRequest/ApiResponse envelope, retries, capabilities
   commands.ts               one generated function per command (gen-commands.ts, do not edit)
   commands-data.ts          the bundled coverage table (COMMANDS, KICAD_COMMIT)
@@ -27,6 +27,19 @@ src/
 
 Each layer only depends on the ones below it, so a transport can be swapped without touching the
 model and the model can be exercised against a fake transport in unit tests.
+
+## Transports
+
+| Transport            | Runtime     | Talks to                                                    | Events                                         |
+| -------------------- | ----------- | ----------------------------------------------------------- | ---------------------------------------------- |
+| `NngIpcTransport`    | Bun         | `kicad-cli api-server --socket <path>` (nng REQ/REP)        | `NngIpcSubscriber` on the `-events.sock` peer  |
+| `NngWsTransport`     | browser/Bun | `kicad-cli api-server --socket ws://...`                    | `NngWsSubscriber` on the derived `/events` URL |
+| `WebSocketTransport` | browser/Bun | `@fp-pcb/bridge`                                            | `TransportEventSubscriber` (same socket)       |
+| `StdioTransport`     | Bun         | `kicad-api-host-native` over pipes                          | `StdioSubscriber` on fd 3                      |
+| `WasmTransport`      | browser/Bun | KiCad's API core as wasm, in-process (`@fp-pcb/kicad-wasm`) | `WasmSubscriber` (module callback)             |
+
+`StdioTransport` and `WasmTransport` speak the same envelope as the socket transports; the framing
+and the C ABI behind them are documented in `docs/08-wasm.md`.
 
 ## Worked example
 

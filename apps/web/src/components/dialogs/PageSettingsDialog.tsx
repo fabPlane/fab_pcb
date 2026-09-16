@@ -117,8 +117,16 @@ export function PageSettingsDialog() {
             <>
               <label>Custom size</label>
               <span style={{ display: 'flex', gap: 6 }}>
-                <input className="input num" defaultValue={formatDistance(draft.userWidthNm, units)} onBlur={(e) => setDraft({ ...draft, userWidthNm: parseDistance(e.target.value, units) ?? draft.userWidthNm })} />
-                <input className="input num" defaultValue={formatDistance(draft.userHeightNm, units)} onBlur={(e) => setDraft({ ...draft, userHeightNm: parseDistance(e.target.value, units) ?? draft.userHeightNm })} />
+                <input
+                  className="input num"
+                  defaultValue={formatDistance(draft.userWidthNm, units)}
+                  onBlur={(e) => setDraft({ ...draft, userWidthNm: parseDistance(e.target.value, units) ?? draft.userWidthNm })}
+                />
+                <input
+                  className="input num"
+                  defaultValue={formatDistance(draft.userHeightNm, units)}
+                  onBlur={(e) => setDraft({ ...draft, userHeightNm: parseDistance(e.target.value, units) ?? draft.userHeightNm })}
+                />
                 <span className="unit">{units}</span>
               </span>
             </>

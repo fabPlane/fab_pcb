@@ -13,8 +13,9 @@
  * packages/bridge/test); every test file under a `conformance/` directory is integration too
  * (packages/client/test/conformance, the API conformance suite). They skip themselves with a message
  * when the binary named by KICAD_CLI (or the default ../kicad/build/release/... path) does not exist;
- * `integration` additionally warns up front when KICAD_CLI is unset, so a CI job cannot silently pass
- * with every test skipped. Set KICAD_INTEGRATION_REQUIRED=1 to turn that warning into a failure.
+ * `integration` additionally warns up front when that binary's variable is unset, so a CI job cannot
+ * silently pass with every test skipped (KICAD_TRANSPORT=stdio|wasm move the check to KICAD_API_HOST
+ * / KICAD_WASM_DIR — see docs/08-wasm.md). Set KICAD_INTEGRATION_REQUIRED=1 to turn it into a failure.
  *
  *   bun tooling/ci/run-tests.ts unit [--filter <name>] [-- extra bun test args]
  *   bun tooling/ci/run-tests.ts integration
@@ -106,19 +107,24 @@ if (mode === "list") {
 }
 
 if (mode === "integration") {
-  const cli = process.env.KICAD_CLI;
-  if (!cli) {
-    const msg = "KICAD_CLI is not set; integration tests fall back to ../kicad/build/release/... and skip when it is missing";
+  // The conformance suites can run against another KiCad backend (KICAD_TRANSPORT, docs/08-wasm.md);
+  // each one is found through its own variable, so check the one that actually matters. (The
+  // ipc-only files — nng-ipc, nng-ws, the bridge — still need KICAD_CLI and skip without it.)
+  const backend = process.env.KICAD_TRANSPORT ?? "ipc";
+  const variable = backend === "stdio" ? "KICAD_API_HOST" : backend === "wasm" ? "KICAD_WASM_DIR" : "KICAD_CLI";
+  const value = process.env[variable];
+  if (!value) {
+    const msg = `${variable} is not set; ${backend} integration tests fall back to a default path under ../kicad and skip when it is missing`;
     if (process.env.KICAD_INTEGRATION_REQUIRED === "1") {
       console.error(`error: ${msg}`);
       process.exit(1);
     }
     console.warn(`warning: ${msg}`);
-  } else if (!existsSync(cli)) {
-    console.error(`error: KICAD_CLI=${cli} does not exist`);
+  } else if (!existsSync(value)) {
+    console.error(`error: ${variable}=${value} does not exist`);
     process.exit(1);
   } else {
-    console.log(`KICAD_CLI=${cli}`);
+    console.log(`${variable}=${value}${backend === "ipc" ? "" : ` (KICAD_TRANSPORT=${backend})`}`);
   }
 }
 

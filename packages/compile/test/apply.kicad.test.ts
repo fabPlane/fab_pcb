@@ -228,9 +228,10 @@ describe.skipIf(!haveKicad())("applyNetlist + kicad-cli api-server", () => {
     expect(outcome.diagnostics).toEqual([]);
     expect(outcome.footprintsPlaced).toBe(2);
     expect(await outlineOrigin(board)).toEqual({ x: 0, y: 0 });
-    expect(
-      Object.fromEntries((await board.getFootprints()).map((footprint) => [footprint.reference, footprint.position])),
-    ).toEqual({ R1: { x: 10_000_000, y: 8_000_000 }, R2: { x: 20_000_000, y: 12_000_000 } });
+    expect(Object.fromEntries((await board.getFootprints()).map((footprint) => [footprint.reference, footprint.position]))).toEqual({
+      R1: { x: 10_000_000, y: 8_000_000 },
+      R2: { x: 20_000_000, y: 12_000_000 },
+    });
     expect((await board.getTracks()).filter((track) => track instanceof Via).map((via) => via.position)).toEqual([
       { x: 5_000_000, y: 5_000_000 },
     ]);
@@ -291,7 +292,11 @@ describe.skipIf(!haveKicad())("applyNetlist + kicad-cli api-server", () => {
     expect(edges.filter((s) => s.proto.shape?.geometry.case === "circle")).toHaveLength(1);
 
     // A second compile sees the outline and leaves the blank alone.
-    const again = await applyNetlist(board, NETLIST, { netlistPath: join(projectDir, ".fp-pcb", "compile.net"), board: { widthMm: 30, heightMm: 20, vias: [{ x: 5, y: 5 }] }, autoplace: false });
+    const again = await applyNetlist(board, NETLIST, {
+      netlistPath: join(projectDir, ".fp-pcb", "compile.net"),
+      board: { widthMm: 30, heightMm: 20, vias: [{ x: 5, y: 5 }] },
+      autoplace: false,
+    });
     expect(again.viasAdded).toBe(0);
     expect(again.diagnostics).toEqual([]);
     expect((await board.getTracks()).filter((t) => t instanceof Via)).toHaveLength(2);

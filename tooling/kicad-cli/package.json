@@ -1,0 +1,13 @@
+{
+  "name": "@fp-pcb/kicad-cli",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Downloads a nightly kicad-cli build from the fork's GitHub Releases",
+  "scripts": {
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.0"
+  }
+}

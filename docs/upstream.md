@@ -1,14 +1,14 @@
 # 06 — Upstreaming the KiCad API patch series
 
-Branch `web-api` in our fork, 32 commits on top of upstream `cbd303d16b` (KiCad 10.99,
+Branch `main` (formerly `web-api`) in our fork, 32 commits on top of upstream `cbd303d16b` (KiCad 10.99,
 the development branch that becomes v11). Totals across the range:
 
-| Area | Added | Removed |
-|---|---:|---:|
-| `api/proto/**` | 1922 | 6 (all comment lines) |
-| C++ sources and headers | 13533 | 1933 |
-| `qa/**` | 15279 | 0 |
-| **Total** | **30734** | **1939** |
+| Area                    |     Added |               Removed |
+| ----------------------- | --------: | --------------------: |
+| `api/proto/**`          |      1922 | 6 (all comment lines) |
+| C++ sources and headers |     13533 |                  1933 |
+| `qa/**`                 |     15279 |                     0 |
+| **Total**               | **30734** |              **1939** |
 
 Of the 15279 QA lines, **10067 are a stray fixture directory** and **7110 are a stray
 generated SVG added and later deleted** — see [What must be fixed before
@@ -94,44 +94,44 @@ propose to upstream — the C++ QA tests in `qa/tests/api/` are.
 Ordered as they sit on the branch (oldest first). "Proto" says whether
 `api/proto/**` changes and whether the change is purely additive.
 
-| # | Hash | Subject | Gap closed | Files touched (areas) | Proto | QA test |
-|---:|---|---|---|---|---|---|
-| 1 | `ef0ed71606` | API: Add GetSupportedCommands for capability discovery | G13 | `api/proto/common/commands/base_commands.proto`, `common/api/api_handler.cpp`, `common/api/api_server.cpp`, `include/api/api_handler.h`, `include/api/api_server.h`, board/fp/pcb/sch handlers (11 files) | additive (new messages + `HANDLER_MODE` metadata) | yes — `qa/tests/api/test_api_server.cpp` (new, +195) |
-| 2 | `8b63c6b83e` | API: Register UpdateBoardStackup, SaveItemsToString, and headless no-ops | G6 | `editor_commands.proto`, `cross_probe_commands.proto`, `common/api/api_handler_editor.cpp`, `pcbnew/api/*`, `pcbnew/board_stackup_manager/board_stackup.cpp` (10 files) | additive (`SaveItemsToString`) | yes — `test_api_handler_pcb.cpp` (+337) |
-| 3 | `72b2d2afe3` | kicad-cli: Wake the api-server loop on request instead of polling | G18 | `common/api/api_server.cpp`, `include/api/api_server.h`, `kicad/cli/command_api_server.cpp` | none | yes — `test_api_e2e.cpp`, `test_api_server.cpp` |
-| 4 | `3c7ce604bf` | API: Add GetDocumentRevision for cheap change polling | G1 (interim) | `editor_commands.proto`, `common/api/api_handler_editor.cpp`, sch/fp/pcb handlers | additive | yes — `test_api_handler_pcb.cpp` (+73) |
-| 5 | `e8cd61a2f2` | API: Publish document events on a pub/sub socket | G1 | new `api/proto/common/events.proto`, `libs/kinng` (`KINNG_PUBLISHER`), `api_server.*`, `api_handler_editor.*`, `common/commit.cpp`, `include/commit.h`, `eeschema/files-io.cpp`, `pcbnew/files.cpp`, `command_api_server.cpp` (26 files) | additive (new file + `GetServerInfo` fields) | yes — `test_api_events.cpp` (new, +337), `qa/tests/libs/kinng/test_kinng.cpp` (new, +111) |
-| 6 | `e118ed3f81` | API: Add NewProject, NewDocument, GetProjectInfo and headless symbol documents | G5 | `project_commands.proto`, `common/api/api_handler_common.cpp`, new `eeschema/api/api_handler_symbol.*`, new `eeschema/api/headless_symbol_context.*`, `eeschema/eeschema.cpp`, `kicad/cli/command_api_server.cpp` (+396) (16 files) | additive | yes — `qa/tests/eeschema/test_sch_api_symbol_handler.cpp` (new, +334) |
-| 7 | `1ca7f148a5` | API: Add DRC and ERC commands | G4 | `board_commands.proto`, `board_rules.proto`, `schematic_commands.proto`, `schematic_rules.proto`, `api_handler_pcb.cpp` (+403), `api_handler_sch.cpp` (+293) | additive | yes — `test_api_handler_pcb.cpp`, `test_sch_api_handler.cpp` |
-| 8 | `9761ac77a8` | API: Dispatch requests to handlers in registration order | pre-existing bug | `common/api/api_server.cpp`, `api_handler_editor.*`, `api_handler_sch.*`, `api_handler_pcb.*`, `include/api/api_server.h` | none | yes — `test_api_server.cpp`, `test_sch_api_handler.cpp` |
-| 9 | `d5ffe03e2a` | API: Answer GetOpenDocuments with an empty list when no editor is open | pre-existing wart | `common/api/api_server.cpp`, `include/api/api_server.h` | none | yes — `test_api_server.cpp` (+38) |
-| 10 | `5d02b01fd3` | API: Fix OpenLibraryItem crash and board closure in headless footprint documents | pre-existing crash | `include/kiway.h`, `common/kiway.cpp`, `eeschema/eeschema.cpp`, `pcbnew/pcbnew.cpp`, `pcbnew/api/footprint_context.*`, `headless_footprint_context.*`, `command_api_server.cpp` | none (C++ enum gains `PROJECT_KIND`) | yes — `test_api_e2e.cpp` (+83) |
-| 11 | `a00cce1ac3` | API: Report handler exceptions instead of wedging the request socket | pre-existing wedge | `common/api/api_server.cpp`, `eeschema/netlist_exporters/netlist_exporter_base.cpp` | none | yes — `test_api_server.cpp` (+43) |
-| 12 | `3571e8b6c8` | API: Make unchanged UpdateItems round-trip board and schematic files exactly | G19-adjacent; pre-existing serialization bugs | `board_types.proto`, `pcbnew/footprint.cpp`, `pcb_text.cpp`, `pcb_textbox.cpp`, `pcb_shape.cpp`, `pcb_dimension.cpp`, `zone.cpp`, `eeschema/sch_symbol.cpp`, `api_sch_utils.*` | additive (`BoardTextBox.border_stroke`, `NetTieDefinition.group`) | yes — `test_api_proto.cpp` (+112), `test_sch_api_handler.cpp` (+68). **Also adds a stray 7110-line generated SVG** |
-| 13 | `bec9e423c2` | API: Implement ParseAndCreateItemsFromString and schematic clipboard-format commands | G6 / clipboard | `pcbnew/api/api_handler_board.cpp`, `eeschema/api/api_handler_sch.cpp` (+276) | none | yes. **Deletes the stray SVG from #12** |
-| 14 | `cb3f20808c` | API: Add GetActions and run headless-capable actions without an editor window | G3 | `editor_commands.proto`, `common/api/api_handler_editor.cpp`, `pcbnew/tools/global_edit_tool.cpp`, `pcbnew/tools/zone_filler_tool.cpp`, board/sch handlers | additive | yes — `test_api_handler_pcb.cpp`, `test_sch_api_handler.cpp` |
-| 15 | `c6bd1db405` | API: Add GetItems paging, since_revision, and GetItemCounts | G16 | `editor_commands.proto`, `api_handler_editor.*`, sch/symbol/fp/pcb handlers | additive | yes — `test_api_handler_pcb.cpp` (+108) |
-| 16 | `5c34c5b2ac` | API: Add asynchronous jobs, GetJobStatus, JobProgress events and inline outputs | G17 | `base_commands.proto`, `types/jobs.proto`, new `common/api/api_job_registry.cpp` (+334), new `common/api/api_jobs.cpp`, `api_handler_sch.cpp`, `api_handler_pcb.cpp`, `eeschema.cpp`, `pcbnew.cpp` | additive | yes — `test_api_jobs.cpp` (new, +87), `test_api_server.cpp` (+69) |
-| 17 | `022e45f6d2` | API: Accept container text without a header in ParseAndCreateItemsFromString | follow-up to #13 | `eeschema/api/api_handler_sch.cpp`, `pcbnew/api/api_handler_board.cpp` | none | **no** |
-| 18 | `b4e01726d7` | API: Add library commands and footprint wizards | G7 | new `library_commands.proto` (+310), `events.proto`, new `common/api/api_handler_library.cpp` (+428), new `pcbnew/api/api_handler_footprint_library.*` (+516), new `eeschema/api/api_handler_symbol_library.*` (+314), `symbol_library_adapter.cpp`, `sch_symbol.cpp`, `include/kiway.h` (22 files) | additive (new file + `ProjectChanged` kind) | yes — `test_api_libraries.cpp` (new, +452) |
-| 19 | `c590f977e0` | API: Add schematic operation commands and sheet file creation | G8 | `schematic_commands.proto` (+328), `board_commands.proto`, `api_handler_sch.cpp` (+1231) | additive | yes — `test_api_schematic_ops.cpp` (new, +542) |
-| 20 | `1882aefba6` | API: Add ratsnest, net length, footprint update, teardrop, autoplace and global deletion commands | G9 | `board_commands.proto` (+293), `api_handler_pcb.cpp` (+756), `headless_pcb_context.cpp`, `pcbnew/autorouter/ar_autoplacer.cpp` | additive | yes — `test_api_board_ops.cpp` (new, +398) |
-| 21 | `27aa7e67fa` | API: Add Undo, Redo and GetUndoStack | G10 | `editor_commands.proto`, new `common/api/api_undo_stack.cpp`, new `pcbnew/api/api_undo_pcb.*`, new `eeschema/api/api_undo_sch.*`, `board_commit.cpp`, `sch_commit.cpp`, `include/tool/tool_manager.h`, `include/eda_base_frame.h`, `include/undo_redo_container.h` (33 files) | additive | yes — `test_api_undo.cpp` (new, +400) |
-| 22 | `b743d2b6bd` | API: Add ListColorThemes, GetColorTheme, GetAppSettings and graphics defaults | G11 | new `settings_commands.proto` (+163), `board_commands.proto`, `api_handler_common.cpp` (+196), `common/settings/color_settings.cpp`, `settings_manager.cpp`, `api_handler_pcb.cpp`, `command_api_server.cpp` | additive | yes — `test_api_settings.cpp` (new, +275) |
-| 23 | `8eafd9cf01` | API: Accept nng URLs for the server socket, add --token and --no-events | G15 | `common/api/api_server.cpp`, `include/api/api_server.h`, `kicad/cli/command_api_server.cpp` | none | yes — `test_api_transport.cpp` (new, +51) |
-| 24 | `1c372484ca` | API: Report replaced items as updated and publish ProjectChanged | G1a | `api_handler_common.cpp`, `api_handler_editor.cpp`, `api_handler_sch.cpp`, `api_handler_pcb.cpp` | none | yes — `test_api_events.cpp` (+71) |
-| 25 | `269ceca153` | API: Give RunSchematicJobExportBOM the CLI's default columns | pre-existing bug | `schematic_jobs.proto`, `eeschema/api/api_handler_sch.cpp` | additive; **semantic change to existing fields** (unset now means CLI defaults) | yes — `test_api_jobs.cpp` (+64) |
-| 26 | `6033d9ef42` | API: Say why a drawing sheet cannot be opened as a document | G5 (scope note) | `base_types.proto` (comment), `kicad/cli/command_api_server.cpp` | comment only | **no** |
-| 27 | `bc8e733a20` | API: Name the client in ProjectChanged for library table edits | follow-up to #18 | `common/api/api_handler_library.cpp`, `include/api/api_handler_library.h` | none | **no** |
-| 28 | `ab6ac72d41` | API: Refuse Undo while any commit is open, as documented | follow-up to #21 | `editor_commands.proto` (comment), `common/api/api_handler_editor.cpp` | comment only; **behaviour change** (refusal widened) | yes — `test_api_undo.cpp` (+5) |
-| 29 | `19435eef53` | API: Fill in the net code of a ratsnest edge | follow-up to #20 (G20) | `board_commands.proto` (comment), `pcbnew/api/api_handler_pcb.cpp` (1 line) | comment only | yes — 1 assert. **Also adds 10067 lines of stray fixture data under `qa/data/.fp-pcb-probe/`** |
-| 30 | `477c6922bb` | API: Count only changed items in SetTeardropsResponse | follow-up to #20 (G20) | `board_commands.proto`, `pcbnew/api/api_handler_pcb.cpp` | additive comment; **semantic change to `item_count`** | yes — `test_api_board_ops.cpp` (+4) |
-| 31 | `85d0dfa405` | API: Place GetTextAsShapes glyphs of a text box in the document | G19, pre-existing bug | `common/api/api_handler_common.cpp` | none | yes — `test_api_handler_pcb.cpp` (+159) |
-| 32 | `cb80f7e100` | API: Give Barcode the encoded symbol geometry | G19 | `board_types.proto`, `pcbnew/pcb_barcode.cpp` | additive (`Barcode.shapes`, read-only) | yes — `test_api_handler_pcb.cpp` (+40) |
+|   # | Hash         | Subject                                                                                           | Gap closed                                    | Files touched (areas)                                                                                                                                                                                                                                                                               | Proto                                                                           | QA test                                                                                                            |
+| --: | ------------ | ------------------------------------------------------------------------------------------------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+|   1 | `ef0ed71606` | API: Add GetSupportedCommands for capability discovery                                            | G13                                           | `api/proto/common/commands/base_commands.proto`, `common/api/api_handler.cpp`, `common/api/api_server.cpp`, `include/api/api_handler.h`, `include/api/api_server.h`, board/fp/pcb/sch handlers (11 files)                                                                                           | additive (new messages + `HANDLER_MODE` metadata)                               | yes — `qa/tests/api/test_api_server.cpp` (new, +195)                                                               |
+|   2 | `8b63c6b83e` | API: Register UpdateBoardStackup, SaveItemsToString, and headless no-ops                          | G6                                            | `editor_commands.proto`, `cross_probe_commands.proto`, `common/api/api_handler_editor.cpp`, `pcbnew/api/*`, `pcbnew/board_stackup_manager/board_stackup.cpp` (10 files)                                                                                                                             | additive (`SaveItemsToString`)                                                  | yes — `test_api_handler_pcb.cpp` (+337)                                                                            |
+|   3 | `72b2d2afe3` | kicad-cli: Wake the api-server loop on request instead of polling                                 | G18                                           | `common/api/api_server.cpp`, `include/api/api_server.h`, `kicad/cli/command_api_server.cpp`                                                                                                                                                                                                         | none                                                                            | yes — `test_api_e2e.cpp`, `test_api_server.cpp`                                                                    |
+|   4 | `3c7ce604bf` | API: Add GetDocumentRevision for cheap change polling                                             | G1 (interim)                                  | `editor_commands.proto`, `common/api/api_handler_editor.cpp`, sch/fp/pcb handlers                                                                                                                                                                                                                   | additive                                                                        | yes — `test_api_handler_pcb.cpp` (+73)                                                                             |
+|   5 | `e8cd61a2f2` | API: Publish document events on a pub/sub socket                                                  | G1                                            | new `api/proto/common/events.proto`, `libs/kinng` (`KINNG_PUBLISHER`), `api_server.*`, `api_handler_editor.*`, `common/commit.cpp`, `include/commit.h`, `eeschema/files-io.cpp`, `pcbnew/files.cpp`, `command_api_server.cpp` (26 files)                                                            | additive (new file + `GetServerInfo` fields)                                    | yes — `test_api_events.cpp` (new, +337), `qa/tests/libs/kinng/test_kinng.cpp` (new, +111)                          |
+|   6 | `e118ed3f81` | API: Add NewProject, NewDocument, GetProjectInfo and headless symbol documents                    | G5                                            | `project_commands.proto`, `common/api/api_handler_common.cpp`, new `eeschema/api/api_handler_symbol.*`, new `eeschema/api/headless_symbol_context.*`, `eeschema/eeschema.cpp`, `kicad/cli/command_api_server.cpp` (+396) (16 files)                                                                 | additive                                                                        | yes — `qa/tests/eeschema/test_sch_api_symbol_handler.cpp` (new, +334)                                              |
+|   7 | `1ca7f148a5` | API: Add DRC and ERC commands                                                                     | G4                                            | `board_commands.proto`, `board_rules.proto`, `schematic_commands.proto`, `schematic_rules.proto`, `api_handler_pcb.cpp` (+403), `api_handler_sch.cpp` (+293)                                                                                                                                        | additive                                                                        | yes — `test_api_handler_pcb.cpp`, `test_sch_api_handler.cpp`                                                       |
+|   8 | `9761ac77a8` | API: Dispatch requests to handlers in registration order                                          | pre-existing bug                              | `common/api/api_server.cpp`, `api_handler_editor.*`, `api_handler_sch.*`, `api_handler_pcb.*`, `include/api/api_server.h`                                                                                                                                                                           | none                                                                            | yes — `test_api_server.cpp`, `test_sch_api_handler.cpp`                                                            |
+|   9 | `d5ffe03e2a` | API: Answer GetOpenDocuments with an empty list when no editor is open                            | pre-existing wart                             | `common/api/api_server.cpp`, `include/api/api_server.h`                                                                                                                                                                                                                                             | none                                                                            | yes — `test_api_server.cpp` (+38)                                                                                  |
+|  10 | `5d02b01fd3` | API: Fix OpenLibraryItem crash and board closure in headless footprint documents                  | pre-existing crash                            | `include/kiway.h`, `common/kiway.cpp`, `eeschema/eeschema.cpp`, `pcbnew/pcbnew.cpp`, `pcbnew/api/footprint_context.*`, `headless_footprint_context.*`, `command_api_server.cpp`                                                                                                                     | none (C++ enum gains `PROJECT_KIND`)                                            | yes — `test_api_e2e.cpp` (+83)                                                                                     |
+|  11 | `a00cce1ac3` | API: Report handler exceptions instead of wedging the request socket                              | pre-existing wedge                            | `common/api/api_server.cpp`, `eeschema/netlist_exporters/netlist_exporter_base.cpp`                                                                                                                                                                                                                 | none                                                                            | yes — `test_api_server.cpp` (+43)                                                                                  |
+|  12 | `3571e8b6c8` | API: Make unchanged UpdateItems round-trip board and schematic files exactly                      | G19-adjacent; pre-existing serialization bugs | `board_types.proto`, `pcbnew/footprint.cpp`, `pcb_text.cpp`, `pcb_textbox.cpp`, `pcb_shape.cpp`, `pcb_dimension.cpp`, `zone.cpp`, `eeschema/sch_symbol.cpp`, `api_sch_utils.*`                                                                                                                      | additive (`BoardTextBox.border_stroke`, `NetTieDefinition.group`)               | yes — `test_api_proto.cpp` (+112), `test_sch_api_handler.cpp` (+68). **Also adds a stray 7110-line generated SVG** |
+|  13 | `bec9e423c2` | API: Implement ParseAndCreateItemsFromString and schematic clipboard-format commands              | G6 / clipboard                                | `pcbnew/api/api_handler_board.cpp`, `eeschema/api/api_handler_sch.cpp` (+276)                                                                                                                                                                                                                       | none                                                                            | yes. **Deletes the stray SVG from #12**                                                                            |
+|  14 | `cb3f20808c` | API: Add GetActions and run headless-capable actions without an editor window                     | G3                                            | `editor_commands.proto`, `common/api/api_handler_editor.cpp`, `pcbnew/tools/global_edit_tool.cpp`, `pcbnew/tools/zone_filler_tool.cpp`, board/sch handlers                                                                                                                                          | additive                                                                        | yes — `test_api_handler_pcb.cpp`, `test_sch_api_handler.cpp`                                                       |
+|  15 | `c6bd1db405` | API: Add GetItems paging, since_revision, and GetItemCounts                                       | G16                                           | `editor_commands.proto`, `api_handler_editor.*`, sch/symbol/fp/pcb handlers                                                                                                                                                                                                                         | additive                                                                        | yes — `test_api_handler_pcb.cpp` (+108)                                                                            |
+|  16 | `5c34c5b2ac` | API: Add asynchronous jobs, GetJobStatus, JobProgress events and inline outputs                   | G17                                           | `base_commands.proto`, `types/jobs.proto`, new `common/api/api_job_registry.cpp` (+334), new `common/api/api_jobs.cpp`, `api_handler_sch.cpp`, `api_handler_pcb.cpp`, `eeschema.cpp`, `pcbnew.cpp`                                                                                                  | additive                                                                        | yes — `test_api_jobs.cpp` (new, +87), `test_api_server.cpp` (+69)                                                  |
+|  17 | `022e45f6d2` | API: Accept container text without a header in ParseAndCreateItemsFromString                      | follow-up to #13                              | `eeschema/api/api_handler_sch.cpp`, `pcbnew/api/api_handler_board.cpp`                                                                                                                                                                                                                              | none                                                                            | **no**                                                                                                             |
+|  18 | `b4e01726d7` | API: Add library commands and footprint wizards                                                   | G7                                            | new `library_commands.proto` (+310), `events.proto`, new `common/api/api_handler_library.cpp` (+428), new `pcbnew/api/api_handler_footprint_library.*` (+516), new `eeschema/api/api_handler_symbol_library.*` (+314), `symbol_library_adapter.cpp`, `sch_symbol.cpp`, `include/kiway.h` (22 files) | additive (new file + `ProjectChanged` kind)                                     | yes — `test_api_libraries.cpp` (new, +452)                                                                         |
+|  19 | `c590f977e0` | API: Add schematic operation commands and sheet file creation                                     | G8                                            | `schematic_commands.proto` (+328), `board_commands.proto`, `api_handler_sch.cpp` (+1231)                                                                                                                                                                                                            | additive                                                                        | yes — `test_api_schematic_ops.cpp` (new, +542)                                                                     |
+|  20 | `1882aefba6` | API: Add ratsnest, net length, footprint update, teardrop, autoplace and global deletion commands | G9                                            | `board_commands.proto` (+293), `api_handler_pcb.cpp` (+756), `headless_pcb_context.cpp`, `pcbnew/autorouter/ar_autoplacer.cpp`                                                                                                                                                                      | additive                                                                        | yes — `test_api_board_ops.cpp` (new, +398)                                                                         |
+|  21 | `27aa7e67fa` | API: Add Undo, Redo and GetUndoStack                                                              | G10                                           | `editor_commands.proto`, new `common/api/api_undo_stack.cpp`, new `pcbnew/api/api_undo_pcb.*`, new `eeschema/api/api_undo_sch.*`, `board_commit.cpp`, `sch_commit.cpp`, `include/tool/tool_manager.h`, `include/eda_base_frame.h`, `include/undo_redo_container.h` (33 files)                       | additive                                                                        | yes — `test_api_undo.cpp` (new, +400)                                                                              |
+|  22 | `b743d2b6bd` | API: Add ListColorThemes, GetColorTheme, GetAppSettings and graphics defaults                     | G11                                           | new `settings_commands.proto` (+163), `board_commands.proto`, `api_handler_common.cpp` (+196), `common/settings/color_settings.cpp`, `settings_manager.cpp`, `api_handler_pcb.cpp`, `command_api_server.cpp`                                                                                        | additive                                                                        | yes — `test_api_settings.cpp` (new, +275)                                                                          |
+|  23 | `8eafd9cf01` | API: Accept nng URLs for the server socket, add --token and --no-events                           | G15                                           | `common/api/api_server.cpp`, `include/api/api_server.h`, `kicad/cli/command_api_server.cpp`                                                                                                                                                                                                         | none                                                                            | yes — `test_api_transport.cpp` (new, +51)                                                                          |
+|  24 | `1c372484ca` | API: Report replaced items as updated and publish ProjectChanged                                  | G1a                                           | `api_handler_common.cpp`, `api_handler_editor.cpp`, `api_handler_sch.cpp`, `api_handler_pcb.cpp`                                                                                                                                                                                                    | none                                                                            | yes — `test_api_events.cpp` (+71)                                                                                  |
+|  25 | `269ceca153` | API: Give RunSchematicJobExportBOM the CLI's default columns                                      | pre-existing bug                              | `schematic_jobs.proto`, `eeschema/api/api_handler_sch.cpp`                                                                                                                                                                                                                                          | additive; **semantic change to existing fields** (unset now means CLI defaults) | yes — `test_api_jobs.cpp` (+64)                                                                                    |
+|  26 | `6033d9ef42` | API: Say why a drawing sheet cannot be opened as a document                                       | G5 (scope note)                               | `base_types.proto` (comment), `kicad/cli/command_api_server.cpp`                                                                                                                                                                                                                                    | comment only                                                                    | **no**                                                                                                             |
+|  27 | `bc8e733a20` | API: Name the client in ProjectChanged for library table edits                                    | follow-up to #18                              | `common/api/api_handler_library.cpp`, `include/api/api_handler_library.h`                                                                                                                                                                                                                           | none                                                                            | **no**                                                                                                             |
+|  28 | `ab6ac72d41` | API: Refuse Undo while any commit is open, as documented                                          | follow-up to #21                              | `editor_commands.proto` (comment), `common/api/api_handler_editor.cpp`                                                                                                                                                                                                                              | comment only; **behaviour change** (refusal widened)                            | yes — `test_api_undo.cpp` (+5)                                                                                     |
+|  29 | `19435eef53` | API: Fill in the net code of a ratsnest edge                                                      | follow-up to #20 (G20)                        | `board_commands.proto` (comment), `pcbnew/api/api_handler_pcb.cpp` (1 line)                                                                                                                                                                                                                         | comment only                                                                    | yes — 1 assert. **Also adds 10067 lines of stray fixture data under `qa/data/.fp-pcb-probe/`**                     |
+|  30 | `477c6922bb` | API: Count only changed items in SetTeardropsResponse                                             | follow-up to #20 (G20)                        | `board_commands.proto`, `pcbnew/api/api_handler_pcb.cpp`                                                                                                                                                                                                                                            | additive comment; **semantic change to `item_count`**                           | yes — `test_api_board_ops.cpp` (+4)                                                                                |
+|  31 | `85d0dfa405` | API: Place GetTextAsShapes glyphs of a text box in the document                                   | G19, pre-existing bug                         | `common/api/api_handler_common.cpp`                                                                                                                                                                                                                                                                 | none                                                                            | yes — `test_api_handler_pcb.cpp` (+159)                                                                            |
+|  32 | `cb80f7e100` | API: Give Barcode the encoded symbol geometry                                                     | G19                                           | `board_types.proto`, `pcbnew/pcb_barcode.cpp`                                                                                                                                                                                                                                                       | additive (`Barcode.shapes`, read-only)                                          | yes — `test_api_handler_pcb.cpp` (+40)                                                                             |
 
 ### Proto compatibility, verified
 
-`git diff cbd303d16b..web-api -- 'api/proto/*' | grep '^-'` produces **six lines, all
+`git diff cbd303d16b..main -- 'api/proto/*' | grep '^-'` produces **six lines, all
 comments**. Nothing is removed, renumbered or retyped anywhere in the series, so every
 change is wire-backward-compatible: three new `.proto` files, new messages, new fields
 with new numbers, new enum values, and comment edits. 147 `Since 11.0` annotations are
@@ -165,6 +165,7 @@ MR3  server plumbing + discovery ─────┴──> MR4 ──> MR5 ─�
 ```
 
 ### MR1 — Fix board and schematic item round-tripping through UpdateItems
+
 **Commits:** `3571e8b6c8` (with the stray SVG stripped). **Depends on:** nothing.
 **Pure bug fix.**
 
@@ -179,12 +180,13 @@ names. Two new fields (`BoardTextBox.border_stroke`, `NetTieDefinition.group`) c
 what the message could not express. With this the kitchen-sink board and schematic save
 byte-identically after every item type is updated unchanged.
 
-*Reviewers: this touches `pcbnew/footprint.cpp`, `pcb_text.cpp`, `pcb_textbox.cpp`,
+_Reviewers: this touches `pcbnew/footprint.cpp`, `pcb_text.cpp`, `pcb_textbox.cpp`,
 `pcb_shape.cpp`, `pcb_dimension.cpp`, `zone.cpp` and `eeschema/sch_symbol.cpp` — core
 item serialization, not API plumbing. Consider splitting into a pcbnew half and an
-eeschema half so the right maintainers review each.*
+eeschema half so the right maintainers review each._
 
 ### MR2 — Fix GetTextAsShapes, BOM export defaults, and add barcode geometry
+
 **Commits:** `85d0dfa405`, `269ceca153`, `cb80f7e100`, plus the
 `netlist_exporter_base.cpp` hunk split out of `a00cce1ac3`. **Depends on:** nothing.
 **Mostly pure bug fixes.**
@@ -201,9 +203,10 @@ throws when the cvpcb kiface is missing, falling back to the symbol pin numbers.
 `kiapi.board.types.Barcode` gains a read-only `PolySet` filled from
 `PCB_BARCODE::TransformShapeToPolySet` so a client need not bring its own QR encoder.
 
-*If reviewers want these strictly separate, MR2 splits cleanly into four one-commit MRs.*
+_If reviewers want these strictly separate, MR2 splits cleanly into four one-commit MRs._
 
 ### MR3 — Server plumbing, dispatch and capability discovery
+
 **Commits:** `ef0ed71606`, `9761ac77a8`, `d5ffe03e2a`, the server half of `a00cce1ac3`,
 `72b2d2afe3`, `8b63c6b83e`. **Depends on:** nothing. **Two-thirds bug fix.**
 
@@ -223,6 +226,7 @@ up: `UpdateBoardStackup` (with a new `BOARD_STACKUP::Deserialize`), `SaveItemsTo
 and `RefreshEditor` / `FocusOnItem` as headless no-ops.
 
 ### MR4 — Headless document lifecycle
+
 **Commits:** `e118ed3f81`, `5d02b01fd3`, `6033d9ef42`, `bec9e423c2` + `022e45f6d2`
 (squashed). **Depends on:** MR3.
 
@@ -240,6 +244,7 @@ with `SaveDocumentToString` and `SaveItemsToString`. `DOCTYPE_DRAWING_SHEET` now
 with the reason it is out of scope instead of a generic message.
 
 ### MR5 — Change notification: revisions, events, incremental reads
+
 **Commits:** `3c7ce604bf`, `e8cd61a2f2`, `1c372484ca`, `c6bd1db405`.
 **Depends on:** MR3, MR4.
 
@@ -257,6 +262,7 @@ bounded 256-step change log that degrades to "return everything" when a change c
 attributed — always correct, never wrong; `GetItemCounts` counts without serializing.
 
 ### MR6 — DRC and ERC
+
 **Commits:** `1ca7f148a5`. **Depends on:** MR5.
 
 `RunBoardJobDrc` and `RunSchematicJobErc` run the checkers the way the `kicad-cli`
@@ -270,6 +276,7 @@ pushes through `pushCurrentCommit`, so it publishes a proper event and no longer
 an empty commit behind.
 
 ### MR7 — Headless actions and asynchronous jobs
+
 **Commits:** `cb3f20808c`, `5c34c5b2ac`. **Depends on:** MR5.
 
 `GetActions{document}` lists the editor's actions from its `ACTION_MANAGER` with a
@@ -286,6 +293,7 @@ shared filesystem. A new `API_JOB_REGISTRY` in kicommon owns the job table and o
 worker thread; jobs run strictly one at a time.
 
 ### MR8 — Libraries and schematic operations
+
 **Commits:** `b4e01726d7` + `bc8e733a20` (squashed), `c590f977e0`.
 **Depends on:** MR4, MR5.
 
@@ -302,11 +310,12 @@ stub, is implemented. Then the schematic operations that only dialogs offered:
 `AssignFootprints`. `CreateItems(SCH_SHEET_T)` now attaches a screen the way the sheet
 dialog does, creating the file on disk when it is missing.
 
-*This is the largest MR (~5000 lines). Split into "libraries" and "schematic
+_This is the largest MR (~5000 lines). Split into "libraries" and "schematic
 operations" if reviewers prefer; they are independent apart from `UnpackLibSymbol`,
-which the library commit factors out of `SCH_SYMBOL::Deserialize`.*
+which the library commit factors out of `SCH_SYMBOL::Deserialize`._
 
 ### MR9 — Board operations and undo/redo
+
 **Commits:** `1882aefba6` + `19435eef53` + `477c6922bb` (squashed), `27aa7e67fa` +
 `ab6ac72d41` (squashed). **Depends on:** MR5, MR7.
 
@@ -323,6 +332,7 @@ frame-less ports of `PutDataInPreviousState`. `Undo` / `Redo` / `GetUndoStack` p
 `DocumentChanged` per step and are refused while any client has an open commit.
 
 ### MR10 — Settings, colour themes and transport
+
 **Commits:** `b743d2b6bd`, `8eafd9cf01`. **Depends on:** MR3, MR5.
 
 Read-only settings a client needs to render like KiCad: `ListColorThemes` /
@@ -340,8 +350,9 @@ request path; `--token` and `--no-events` are added to `kicad-cli api-server`.
 ## 4. Risk and review notes
 
 ### MR1 — serialization
+
 - Touches core item serialization outside `api/`. A regression here corrupts files for
-  *every* API client, not just ours. The QA evidence is a byte-identical save of the
+  _every_ API client, not just ours. The QA evidence is a byte-identical save of the
   kitchen sink after every item type is updated unchanged; that argument needs to be in
   the MR description, not only in the commit message.
 - `NetTieDefinition.group` carries the raw text and is used verbatim "when it still names
@@ -351,6 +362,7 @@ request path; `--token` and `--no-events` are added to `kicad-cli api-server`.
   (7110 lines of generated output), deleted again two commits later. **Must be stripped.**
 
 ### MR2 — behaviour changes to existing commands
+
 - **`GetTextAsShapes` is a behaviour change with no capability flag.** A client that
   worked around the origin-relative output by adding the item position itself will now
   double-count. There is no proto field to gate on and no version to test other than the
@@ -368,6 +380,7 @@ request path; `--token` and `--no-events` are added to `kicad-cli api-server`.
   The proto comment must be unambiguous that the field is output-only.
 
 ### MR3 — plumbing
+
 - **`std::set<API_HANDLER*>` → `std::vector<API_HANDLER*>`.** This is the change most
   likely to draw a question. Registration order becoming semantically significant is a
   real API contract change for anyone who registers handlers: a handler that serves a
@@ -386,7 +399,7 @@ request path; `--token` and `--no-events` are added to `kicad-cli api-server`.
   cannot deadlock against a waiter.
 - The exception catch is broad (`IO_ERROR` then `std::exception`). Some maintainers
   prefer letting real bugs crash. The counter-argument is concrete: a throwing handler
-  makes the REQ/REP socket unable to receive *any* further request, so one bug takes the
+  makes the REQ/REP socket unable to receive _any_ further request, so one bug takes the
   whole session down.
 - `BOARD_STACKUP::Deserialize` deletes content on layers dropped from the stackup, as the
   message documentation warns. That is destructive behaviour reachable from a single API
@@ -394,6 +407,7 @@ request path; `--token` and `--no-events` are added to `kicad-cli api-server`.
   entry.
 
 ### MR4 — lifecycle
+
 - **`KIFACE::HandleApiCloseDocument` changes signature** (`const wxString&` →
   `const DOCUMENT_SPEC&`) and `DOCUMENT_SPEC::KIND` gains `PROJECT_KIND`. `KIFACE_VERSION`
   is still `1`; any out-of-tree kiface overriding that virtual breaks silently at
@@ -408,6 +422,7 @@ request path; `--token` and `--no-events` are added to `kicad-cli api-server`.
   the CLI command and into `common/`.
 
 ### MR5 — events
+
 - A second nng socket per server changes the process's file/port footprint. For `ipc://`
   it is a sibling file; for `tcp://` it is **the next port number**, which is an
   assumption a reviewer may reject (port collisions). Consider making the events URL
@@ -424,6 +439,7 @@ request path; `--token` and `--no-events` are added to `kicad-cli api-server`.
   obvious in review.
 
 ### MR6 — DRC/ERC
+
 - **Known open defect, disclose it:** after the async export jobs have run in a session, a
   subsequent `RunBoardJobDrc` never answers at all (gap G22 in
   [04-ipc-gaps.md](04-ipc-gaps.md)) — most likely the job worker thread and the
@@ -438,6 +454,7 @@ request path; `--token` and `--no-events` are added to `kicad-cli api-server`.
   command. Worth flagging explicitly.
 
 ### MR7 — actions and jobs
+
 - **The async job worker is the single biggest threading risk in the series.** One
   `API_JOB_REGISTRY` per binary (host and each kiface), one worker thread, jobs
   serialized so they never overlap on the jobs handler's cached document, and the kifaces
@@ -446,7 +463,7 @@ request path; `--token` and `--no-events` are added to `kicad-cli api-server`.
   and a reviewer will want them written down in the header, not inferred from the code.
   The `RunBoardJobDrc` hang above is the evidence that the boundary is not yet airtight.
 - `API_JOB_REGISTRY::Instance()` is a singleton, one per module. KiCad has singletons but
-  a per-module one that is *also* a thread owner deserves an explicit lifetime note
+  a per-module one that is _also_ a thread owner deserves an explicit lifetime note
   (who joins the thread at shutdown, in what order relative to kiface unload).
 - 16 MiB inline outputs travel through an nng message. Check that against nng's message
   size limits and the server's own limits; a reviewer will.
@@ -458,6 +475,7 @@ request path; `--token` and `--no-events` are added to `kicad-cli api-server`.
 - `pcbnew/tools/global_edit_tool.cpp` and `zone_filler_tool.cpp` change outside `api/`.
 
 ### MR8 — libraries and schematic operations
+
 - Writing to library tables and to library files from an API call is the most
   security- and data-loss-sensitive surface in the series. `DeleteLibraryItem` and
   `RemoveLibraryTableRow` have no undo.
@@ -473,6 +491,7 @@ request path; `--token` and `--no-events` are added to `kicad-cli api-server`.
   say so in the MR so it is not read as an oversight.
 
 ### MR9 — board operations and undo
+
 - `pcbnew/autorouter/ar_autoplacer.cpp` is changed to tolerate a missing view overlay.
   Small, but it is autorouter code touched for an API reason.
 - Undo reaches deep: `include/tool/tool_manager.h`, `include/eda_base_frame.h`,
@@ -485,6 +504,7 @@ request path; `--token` and `--no-events` are added to `kicad-cli api-server`.
 - `SetTeardropsResponse.item_count` changes meaning (see §2).
 
 ### MR10 — settings and transport
+
 - `tcp://`, `ws://` and `wss://` listeners mean the API server can be reachable off the
   machine. Today's `ipc://` default is protected by filesystem permissions; a TCP
   listener is protected only by the `kicad_token`, which `--token` now lets the operator
@@ -499,13 +519,14 @@ request path; `--token` and `--no-events` are added to `kicad-cli api-server`.
   public API on settings classes, added for the API layer's benefit.
 
 ### Deviations from KiCad conventions, series-wide
+
 - **Commit trailers.** Every commit carries a `Co-Authored-By: Claude …` trailer. KiCad
   has a [policy on tool-generated contributions](https://dev-docs.kicad.org/en/rules-guidelines/tool-generated-content/index.html)
   linked from `CONTRIBUTING.md`; read it and comply before pushing anything. Do not
   quietly strip the trailers — the policy, not convenience, decides what the trailer
   should say.
 - **`Since 11.0` in commit messages** is inconsistent: some commits write "Since 11.0.",
-  some "Since 11.0", and commits 1–7 have none. The convention is a proto *comment*, not
+  some "Since 11.0", and commits 1–7 have none. The convention is a proto _comment_, not
   a commit-message line; the line should probably be dropped everywhere and only the
   proto comments kept.
 - **Line width.** The series wraps at ~100 columns; `_clang-format` sets
@@ -578,7 +599,7 @@ request path; `--token` and `--no-events` are added to `kicad-cli api-server`.
 
 ### Should fix
 
-8. **`Since 11.0` annotations.** 147 are present in `api/proto`. Audit that *every* new
+8. **`Since 11.0` annotations.** 147 are present in `api/proto`. Audit that _every_ new
    field, message and enum value has one, including the new files
    (`events.proto`, `library_commands.proto`, `settings_commands.proto`) whose members
    are new by definition but whose individual fields are what clients feature-detect.
@@ -606,7 +627,7 @@ request path; `--token` and `--no-events` are added to `kicad-cli api-server`.
 ## 6. `git format-patch`-ready recipe
 
 Assumes `upstream` points at `https://gitlab.com/kicad/code/kicad.git` and that steps 1–5
-of the checklist have been done on a *cleanup branch* (`web-api-clean`) produced with an
+of the checklist have been done on a _cleanup branch_ (`web-api-clean`) produced with an
 interactive rebase — do not cherry-pick from `web-api` itself while the stray files and
 mixed commits are still in it.
 
@@ -723,7 +744,7 @@ KICAD_CLI=/Users/hyper/projects/tensorfleet/kicad/build/mr5/kicad/KiCad.app/Cont
 The suite spawns its own `kicad-cli api-server` on a unique socket with the kitchen-sink
 project copied to a temp directory, one test per command, and writes
 `packages/client/dist/conformance-summary.txt`. On a partial branch, commands introduced
-by *later* MRs will be missing from `GetSupportedCommands`; run with the branch's own
+by _later_ MRs will be missing from `GetSupportedCommands`; run with the branch's own
 command table, or read the "command in the table has no test" failures as expected and
 compare the per-MR summary against the full-series baseline
 (`165 commands: 150 pass, 15 skip (gui-only), 0 fail`) rather than requiring it.

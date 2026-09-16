@@ -113,7 +113,12 @@ describe('CommandService undo/redo', () => {
     const { store, ids, commands } = setup();
     const t1 = ids.t1!;
     const before = store.get(t1)!;
-    await commands.run(store, 'Relayer', (tx) => tx.update(t1, [{ path: ['layer'], value: 'BL_B_Cu' }, { path: ['net', 'name'], value: 'GND' }]));
+    await commands.run(store, 'Relayer', (tx) =>
+      tx.update(t1, [
+        { path: ['layer'], value: 'BL_B_Cu' },
+        { path: ['net', 'name'], value: 'GND' },
+      ]),
+    );
     const after = store.get(t1)!;
     expect(after.layer).toBe('BL_B_Cu');
     expect(after.net).toBe('GND');

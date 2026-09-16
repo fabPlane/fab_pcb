@@ -55,14 +55,29 @@ function boardServer(): FakeTransport {
       layer: BoardLayer.BL_F_Cu,
       position: { xNm: 125_200_000n, yNm: 90_900_000n },
       orientation: { valueDegrees: 0 },
-      referenceField: { name: 'Reference', text: { id: { value: '7d789367-57eb-4a89-8956-2169b84c120e' }, layer: BoardLayer.BL_F_SilkS, text: { text: 'R1', position: { xNm: 125_200_000n, yNm: 89_000_000n } } } },
+      referenceField: {
+        name: 'Reference',
+        text: { id: { value: '7d789367-57eb-4a89-8956-2169b84c120e' }, layer: BoardLayer.BL_F_SilkS, text: { text: 'R1', position: { xNm: 125_200_000n, yNm: 89_000_000n } } },
+      },
     });
   const pad = () => create(PadSchema, { id: { value: P1 }, parent: { value: R1 }, number: '1', net: { name: 'A' }, position: { xNm: 124_400_000n, yNm: 90_900_000n } });
-  const track = () => create(TrackSchema, { id: { value: T1 }, layer: BoardLayer.BL_F_Cu, net: { name: 'A' }, start: { xNm: 100_000_000n, yNm: 100_000_000n }, end: { xNm: 110_000_000n, yNm: 100_000_000n }, width: { valueNm: 250_000n } });
+  const track = () =>
+    create(TrackSchema, {
+      id: { value: T1 },
+      layer: BoardLayer.BL_F_Cu,
+      net: { name: 'A' },
+      start: { xNm: 100_000_000n, yNm: 100_000_000n },
+      end: { xNm: 110_000_000n, yNm: 100_000_000n },
+      width: { valueNm: 250_000n },
+    });
   t.on(GetVersionSchema, () => reply(GetVersionResponseSchema, { version: { major: 10, minor: 99, patch: 0, fullVersion: '10.99.0-fake' } }));
   t.on(GetOpenDocumentsSchema, (req) => (req.type === DocumentType.DOCTYPE_PCB ? reply(GetOpenDocumentsResponseSchema, { documents: [boardSpec] }) : fail(ApiStatusCode.AS_UNHANDLED)));
-  t.on(GetItemsSchema, () => reply(GetItemsResponseSchema, { status: ItemRequestStatus.IRS_OK, items: [packAny(FootprintInstanceSchema, footprint()), packAny(PadSchema, pad()), packAny(TrackSchema, track())] }));
-  t.on(GetBoardEnabledLayersSchema, () => reply(BoardEnabledLayersResponseSchema, { copperLayerCount: 2, layers: [BoardLayer.BL_F_Cu, BoardLayer.BL_B_Cu, BoardLayer.BL_F_SilkS, BoardLayer.BL_Edge_Cuts] }));
+  t.on(GetItemsSchema, () =>
+    reply(GetItemsResponseSchema, { status: ItemRequestStatus.IRS_OK, items: [packAny(FootprintInstanceSchema, footprint()), packAny(PadSchema, pad()), packAny(TrackSchema, track())] }),
+  );
+  t.on(GetBoardEnabledLayersSchema, () =>
+    reply(BoardEnabledLayersResponseSchema, { copperLayerCount: 2, layers: [BoardLayer.BL_F_Cu, BoardLayer.BL_B_Cu, BoardLayer.BL_F_SilkS, BoardLayer.BL_Edge_Cuts] }),
+  );
   t.on(GetBoardLayerNameSchema, (req) => reply(BoardLayerNameResponseSchema, { name: req.layer === BoardLayer.BL_F_Cu ? 'Top copper' : BoardLayer[req.layer]!.replace('BL_', '').replace('_', '.') }));
   t.on(GetDocumentRevisionSchema, () => reply(DocumentRevisionResponseSchema, { revision }));
   t.on(BeginCommitSchema, () => reply(BeginCommitResponseSchema, { id: { value: `commit-${++commits}` } }));
@@ -87,12 +102,21 @@ function fetchStub(calls: { method: string; path: string; body?: unknown }[]) {
     calls.push({ method, path: url.pathname + url.search, body: init?.body ? JSON.parse(String(init.body)) : undefined });
     const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json' } });
     if (url.pathname === '/health') return json({ ok: true, workspaceRoot: '/ws', kicadCli: '/opt/kicad-cli', kicadCliExists: true });
-    if (url.pathname === '/sessions' && method === 'POST') return json({ session: { id: 'sess1', state: 'running', path: '/ws/pcbnew/api_kitchen_sink.kicad_pro', kicadToken: 'tok' }, wsUrl: '/ws?session=sess1' }, 201);
+    if (url.pathname === '/sessions' && method === 'POST')
+      return json({ session: { id: 'sess1', state: 'running', path: '/ws/pcbnew/api_kitchen_sink.kicad_pro', kicadToken: 'tok' }, wsUrl: '/ws?session=sess1' }, 201);
     if (url.pathname === '/sessions' && method === 'GET') return json({ sessions: [{ id: 'sess1', state: 'running' }] });
     if (url.pathname.startsWith('/sessions/') && method === 'DELETE') return json({ ok: true });
     if (url.pathname === '/files/list') {
       const p = url.searchParams.get('path');
-      return json({ path: 'pcbnew', absolutePath: p, entries: [{ name: 'sub', kind: 'dir', size: 96, mtime: '2026-09-06T10:00:00Z' }, { name: 'api_kitchen_sink.kicad_pro', kind: 'file', size: 2411, mtime: '2026-09-06T10:00:00Z' }, { name: 'api_kitchen_sink.kicad_pcb', kind: 'file', size: 100, mtime: '2026-09-06T10:00:00Z' }] });
+      return json({
+        path: 'pcbnew',
+        absolutePath: p,
+        entries: [
+          { name: 'sub', kind: 'dir', size: 96, mtime: '2026-09-06T10:00:00Z' },
+          { name: 'api_kitchen_sink.kicad_pro', kind: 'file', size: 2411, mtime: '2026-09-06T10:00:00Z' },
+          { name: 'api_kitchen_sink.kicad_pcb', kind: 'file', size: 100, mtime: '2026-09-06T10:00:00Z' },
+        ],
+      });
     }
     if (url.pathname === '/files/stat') return json({ error: 'not found' }, 404);
     return json({ error: `unexpected ${method} ${url.pathname}` }, 500);

@@ -1,26 +1,26 @@
 # 03 — Drawing the GUI on an HTML page
 
-Two independent problems: drawing the *design* (board, schematic) and drawing the
-*application* (panels, dialogs). The application is ordinary web UI. The design is a
+Two independent problems: drawing the _design_ (board, schematic) and drawing the
+_application_ (panels, dialogs). The application is ordinary web UI. The design is a
 CAD canvas and gets its own package.
 
 ## What data the server gives us to draw with
 
 Everything needed for a faithful render is already available headless:
 
-| Need | Source | Notes |
-|---|---|---|
-| Item geometry | `GetItems(types)` → `board_types` / `schematic_types` messages | tracks, arcs, vias, shapes, text, zones, footprints (with child pads/shapes/fields), dimensions, images, groups |
-| Zone fills | `Zone.filled_polygons` (`ZoneFilledPolygons` per layer) | after `RefillZones` (works headless) |
-| Pad outlines | `GetPadShapeAsPolygon(pad ids, layer)` | server tessellates custom/chamfered/rounded pads; cache by padstack hash |
-| Text outlines | `GetTextAsShapes(text items)` | server renders KiCad stroke and outline fonts to segments/polygons; we never ship font engines |
-| Layer set and names | `GetBoardEnabledLayers`, `GetBoardLayerName`, `GetBoardStackup` | order and copper count drive the layer panel |
-| Bounding box | `GetBoundingBox` | zoom-to-fit |
-| Netlist / nets | `GetNets`, `GetItemsByNet`, `GetConnectedItems` | net highlight is client-side |
-| Symbols | `SchematicSymbol.items` (lib pins/shapes/text), transform, fields, `unit`, `body_style` | render the lib definition through the symbol transform |
-| Wires/labels/sheets | `SchematicLine`, `LocalLabel`… , `SheetSymbol`, `SheetPin` | hierarchy from `GetSchematicHierarchy` |
-| Colours | none via API today (gap G11) | ship KiCad's default colour theme JSON (`resources` in the KiCad tree) and allow user theme upload |
-| Snapshot images | `RunBoardJobExportSvg`, `RunSchematicJobExportSvg` | early milestones, printing, thumbnails, side-by-side diff against our renderer |
+| Need                | Source                                                                                  | Notes                                                                                                           |
+| ------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Item geometry       | `GetItems(types)` → `board_types` / `schematic_types` messages                          | tracks, arcs, vias, shapes, text, zones, footprints (with child pads/shapes/fields), dimensions, images, groups |
+| Zone fills          | `Zone.filled_polygons` (`ZoneFilledPolygons` per layer)                                 | after `RefillZones` (works headless)                                                                            |
+| Pad outlines        | `GetPadShapeAsPolygon(pad ids, layer)`                                                  | server tessellates custom/chamfered/rounded pads; cache by padstack hash                                        |
+| Text outlines       | `GetTextAsShapes(text items)`                                                           | server renders KiCad stroke and outline fonts to segments/polygons; we never ship font engines                  |
+| Layer set and names | `GetBoardEnabledLayers`, `GetBoardLayerName`, `GetBoardStackup`                         | order and copper count drive the layer panel                                                                    |
+| Bounding box        | `GetBoundingBox`                                                                        | zoom-to-fit                                                                                                     |
+| Netlist / nets      | `GetNets`, `GetItemsByNet`, `GetConnectedItems`                                         | net highlight is client-side                                                                                    |
+| Symbols             | `SchematicSymbol.items` (lib pins/shapes/text), transform, fields, `unit`, `body_style` | render the lib definition through the symbol transform                                                          |
+| Wires/labels/sheets | `SchematicLine`, `LocalLabel`… , `SheetSymbol`, `SheetPin`                              | hierarchy from `GetSchematicHierarchy`                                                                          |
+| Colours             | none via API today (gap G11)                                                            | ship KiCad's default colour theme JSON (`resources` in the KiCad tree) and allow user theme upload              |
+| Snapshot images     | `RunBoardJobExportSvg`, `RunSchematicJobExportSvg`                                      | early milestones, printing, thumbnails, side-by-side diff against our renderer                                  |
 
 Not available and therefore drawn or computed client-side: ratsnest / unrouted
 connections (gap G9, computed from `GetNets` + `GetConnectedItems` until then),
@@ -51,8 +51,8 @@ Structure:
   KIIDs map to create/destroy/rebuild of that item's `DisplayObject`s. Rebuild is
   per item, never whole-layer.
 - `Camera` — pan/zoom with wheel/trackpad/touch, world units in nm as `number`,
-  a `Float64` model-to-screen transform; Pixi receives float32 coordinates *relative
-  to a moving origin* to avoid precision loss on large boards.
+  a `Float64` model-to-screen transform; Pixi receives float32 coordinates _relative
+  to a moving origin_ to avoid precision loss on large boards.
 - `Picker` — spatial index (flatbush / rbush) over item bounding boxes plus exact
   per-shape tests for hover/click; multi-hit disambiguation menu like pcbnew.
 - `Theme` — KiCad colour theme JSON → per-layer colour, plus selection / highlight /
@@ -90,5 +90,5 @@ Screens, each an independently buildable slice:
 
 Interaction model: the UI owns selection, hover, active layer, visible layers, and
 undo history. This matches the API's GUI-only list exactly — those 15 commands are
-GUI *state*, and in a web UI that state belongs to the page, not to KiCad. The only
+GUI _state_, and in a web UI that state belongs to the page, not to KiCad. The only
 GUI-only command we genuinely need from KiCad is `RunAction` (gap G3).

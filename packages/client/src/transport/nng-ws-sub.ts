@@ -97,7 +97,8 @@ export class NngWsSubscriber implements Subscriber {
   /** Resolves when the subscriber is open; rejects if it closes first. */
   ready(): Promise<void> {
     if (this._state === "open") return Promise.resolve();
-    if (this._state === "closed") return Promise.reject(this.lastError ?? new TransportError("closed", `subscriber to ${this.url} is closed`));
+    if (this._state === "closed")
+      return Promise.reject(this.lastError ?? new TransportError("closed", `subscriber to ${this.url} is closed`));
     return new Promise((resolve, reject) => {
       const off = this.onStateChange((s, err) => {
         if (s === "open") (off(), resolve());
@@ -160,7 +161,10 @@ export class NngWsSubscriber implements Subscriber {
       clearTimeout(connectTimer);
       const negotiated = ws.protocol;
       if (negotiated !== undefined && negotiated !== "" && negotiated !== this.subprotocol) {
-        this.fail(gen, new TransportError("protocol", `${this.url} negotiated subprotocol '${negotiated}', expected '${this.subprotocol}'`));
+        this.fail(
+          gen,
+          new TransportError("protocol", `${this.url} negotiated subprotocol '${negotiated}', expected '${this.subprotocol}'`),
+        );
         return;
       }
       this.attempt = 0;

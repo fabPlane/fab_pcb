@@ -125,7 +125,9 @@ export function App() {
         const hasBoard = !!services.documents.board();
         if (hasBoard) openDoc({ kind: 'board', id: 'board', title: `${s.projectName}.kicad_pcb` });
         if (root) {
-          if (hasBoard) useAppStore.getState().openDocs.some((d) => d.kind === 'schematic') || useAppStore.setState((st) => ({ openDocs: [...st.openDocs, { kind: 'schematic', id: root.path, title: root.file }] }));
+          if (hasBoard)
+            useAppStore.getState().openDocs.some((d) => d.kind === 'schematic') ||
+              useAppStore.setState((st) => ({ openDocs: [...st.openDocs, { kind: 'schematic', id: root.path, title: root.file }] }));
           else openDoc({ kind: 'schematic', id: root.path, title: root.file });
         }
         if (!hasBoard && !root) notify('The session opened but KiCad reports no board or schematic', 'error');
@@ -152,17 +154,18 @@ export function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const screen = !session || session.state !== 'open' || active === 'project' ? (
-    <ProjectScreen onOpen={openProject} busy={busy} />
-  ) : active === 'board' ? (
-    <BoardEditor />
-  ) : active === 'schematic' ? (
-    <SchematicEditor />
-  ) : active === '3d' ? (
-    <ThreeDView />
-  ) : (
-    <FootprintEditor />
-  );
+  const screen =
+    !session || session.state !== 'open' || active === 'project' ? (
+      <ProjectScreen onOpen={openProject} busy={busy} />
+    ) : active === 'board' ? (
+      <BoardEditor />
+    ) : active === 'schematic' ? (
+      <SchematicEditor />
+    ) : active === '3d' ? (
+      <ThreeDView />
+    ) : (
+      <FootprintEditor />
+    );
 
   return (
     <TipProvider>

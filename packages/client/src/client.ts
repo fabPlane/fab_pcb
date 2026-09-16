@@ -281,11 +281,7 @@ export class KiCadClient {
     if (unpacked) return unpacked;
     const actual = stripTypeUrl(res.message.typeUrl);
     if (actual === EmptySchema.typeName) return create(resSchema);
-    throw new KiCadApiError(
-      ApiStatusCode.AS_UNKNOWN,
-      `expected response type ${resSchema.typeName}, got ${actual}`,
-      command,
-    );
+    throw new KiCadApiError(ApiStatusCode.AS_UNKNOWN, `expected response type ${resSchema.typeName}, got ${actual}`, command);
   }
 
   /**
@@ -368,7 +364,7 @@ export class KiCadClient {
 
   /**
    * Commands the server supports. Uses `GetSupportedCommands` when the server implements it (KiCad
-   * >= the `web-api` branch), otherwise the coverage table bundled at build time. Cached.
+   * >= the fork's `main` branch, formerly `web-api`), otherwise the coverage table bundled at build time. Cached.
    */
   capabilities(): Promise<Capabilities> {
     this.caps ??= this.fetchCapabilities();

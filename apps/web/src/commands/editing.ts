@@ -81,7 +81,15 @@ export function registerEditingCommands(services: Services, extras: { library?: 
 
   const list: Command[] = [
     // ------------------------------------------------------------ board tools
-    { id: 'board.route', title: 'Route track', group: 'Route', shortcut: 'X', when: inBoard, description: 'Click-click segments on the active layer; V drops a via and switches layer', run: () => begin('route') },
+    {
+      id: 'board.route',
+      title: 'Route track',
+      group: 'Route',
+      shortcut: 'X',
+      when: inBoard,
+      description: 'Click-click segments on the active layer; V drops a via and switches layer',
+      run: () => begin('route'),
+    },
     { id: 'board.placeVia', title: 'Place via', group: 'Place', shortcut: 'Mod+Shift+V', when: inBoard, run: () => begin('via') },
     { id: 'board.drawLine', title: 'Draw line', group: 'Place', shortcut: 'Mod+Shift+L', when: inBoard, run: () => begin('line') },
     { id: 'board.drawRect', title: 'Draw rectangle', group: 'Place', shortcut: 'Mod+Shift+R', when: inBoard, run: () => begin('rect') },
@@ -95,7 +103,13 @@ export function registerEditingCommands(services: Services, extras: { library?: 
       shortcut: 'Mod+Shift+T',
       when: inBoard,
       run: async () => {
-        const r = await prompt({ title: 'Add text', fields: [{ key: 'text', label: 'Text', type: 'string', default: 'TEXT' }, { key: 'size', label: 'Size', type: 'distance', default: 1_000_000 }] });
+        const r = await prompt({
+          title: 'Add text',
+          fields: [
+            { key: 'text', label: 'Text', type: 'string', default: 'TEXT' },
+            { key: 'size', label: 'Size', type: 'distance', default: 1_000_000 },
+          ],
+        });
         if (!r || !String(r.text).trim()) return;
         begin('text', { text: String(r.text), sizeNm: Number(r.size) });
       },
@@ -150,7 +164,9 @@ export function registerEditingCommands(services: Services, extras: { library?: 
         const p = fp?.proto as { definition?: { id?: { libraryNickname?: string; entryName?: string } } } | undefined;
         let libId = p?.definition?.id ? `${p.definition.id.libraryNickname}:${p.definition.id.entryName}` : '';
         if (!libId) {
-          const v = services.library ? await pickLibraryEntry('footprint', { purpose: 'browse', title: 'Open footprint' }) : await promptValue<string>('Open footprint', { label: 'Footprint', type: 'string', default: 'Resistor_SMD:R_0603_1608Metric' });
+          const v = services.library
+            ? await pickLibraryEntry('footprint', { purpose: 'browse', title: 'Open footprint' })
+            : await promptValue<string>('Open footprint', { label: 'Footprint', type: 'string', default: 'Resistor_SMD:R_0603_1608Metric' });
           if (!v) return;
           libId = v.trim();
         }
@@ -174,7 +190,14 @@ export function registerEditingCommands(services: Services, extras: { library?: 
           { key: 'text', label: 'Label', type: 'string' as const, default: id === 'label' ? 'NET' : id === 'globalLabel' ? 'GLOBAL' : 'HIER' },
           { key: 'size', label: 'Size', type: 'distance' as const, default: 1_270_000 },
         ];
-        if (id !== 'label') fields.push({ key: 'shape', label: 'Shape', type: 'select' as never, default: 'input', choices: ['input', 'output', 'bidi', 'tristate', 'passive'].map((v) => ({ value: v, label: v })) } as never);
+        if (id !== 'label')
+          fields.push({
+            key: 'shape',
+            label: 'Shape',
+            type: 'select' as never,
+            default: 'input',
+            choices: ['input', 'output', 'bidi', 'tristate', 'passive'].map((v) => ({ value: v, label: v })),
+          } as never);
         const r = await prompt({ title: id === 'label' ? 'Net label' : id === 'globalLabel' ? 'Global label' : 'Hierarchical label', fields });
         if (!r || !String(r.text).trim()) return;
         begin(id, { text: String(r.text).trim(), sizeNm: Number(r.size), shape: r.shape });
@@ -187,7 +210,13 @@ export function registerEditingCommands(services: Services, extras: { library?: 
       shortcut: 'T',
       when: inSchematic,
       run: async () => {
-        const r = await prompt({ title: 'Add text', fields: [{ key: 'text', label: 'Text', type: 'multiline', default: 'Text' }, { key: 'size', label: 'Size', type: 'distance', default: 1_270_000 }] });
+        const r = await prompt({
+          title: 'Add text',
+          fields: [
+            { key: 'text', label: 'Text', type: 'multiline', default: 'Text' },
+            { key: 'size', label: 'Size', type: 'distance', default: 1_270_000 },
+          ],
+        });
         if (!r || !String(r.text).trim()) return;
         begin('schText', { text: String(r.text), sizeNm: Number(r.size) });
       },
@@ -233,7 +262,13 @@ export function registerEditingCommands(services: Services, extras: { library?: 
             walk([sheet]);
           }
           const reference = String(r.reference).trim() || nextReference(prefix, used);
-          begin('symbol', { definition: def, reference, value: String(r.value ?? '') || refOf(def.valueField?.text) || libId.split(':').pop(), footprint: String(r.footprint ?? ''), unit: Number(r.unit) || 1 });
+          begin('symbol', {
+            definition: def,
+            reference,
+            value: String(r.value ?? '') || refOf(def.valueField?.text) || libId.split(':').pop(),
+            footprint: String(r.footprint ?? ''),
+            unit: Number(r.unit) || 1,
+          });
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e);
           log(`OpenDocument(symbol ${libId}) failed: ${msg}`, 'error');
@@ -367,7 +402,13 @@ export function registerEditingCommands(services: Services, extras: { library?: 
         const r = await prompt({
           title: 'Set net',
           fields: [
-            { key: 'net', label: 'Net', type: 'select', default: sel.items[0]!.net ?? nets[0]?.name ?? '', choices: [{ value: '', label: '<no net>' }, ...nets.map((n) => ({ value: n.name, label: n.name }))] },
+            {
+              key: 'net',
+              label: 'Net',
+              type: 'select',
+              default: sel.items[0]!.net ?? nets[0]?.name ?? '',
+              choices: [{ value: '', label: '<no net>' }, ...nets.map((n) => ({ value: n.name, label: n.name }))],
+            },
             { key: 'custom', label: 'or new net name', type: 'string', default: '' },
           ],
         });
@@ -399,7 +440,11 @@ export function registerEditingCommands(services: Services, extras: { library?: 
         // KiCad's own clipboard format as well (pasteable into the desktop editors and `edit.pasteText`).
         if (clipDocs.saveItemsToString && sel.kind !== 'footprint') {
           void clipDocs
-            .saveItemsToString(sel.kind, sel.id, sel.items.map((i) => i.id))
+            .saveItemsToString(
+              sel.kind,
+              sel.id,
+              sel.items.map((i) => i.id),
+            )
             .then((text) => {
               clip.text = text;
               log(`SaveItemsToString: ${text.length} chars`);
@@ -490,7 +535,10 @@ export function registerEditingCommands(services: Services, extras: { library?: 
             created.map((item) => ({ kind: 'create' as const, item })),
             created.map((item) => ({ kind: 'delete' as const, item })),
           );
-          useEditorStore.getState().setSelection(doc.key, created.filter((i) => !i.parent).map((i) => i.id));
+          useEditorStore.getState().setSelection(
+            doc.key,
+            created.filter((i) => !i.parent).map((i) => i.id),
+          );
           notify(`Pasted ${created.length} item${created.length === 1 ? '' : 's'} from KiCad text`);
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e);
@@ -510,7 +558,14 @@ export function registerEditingCommands(services: Services, extras: { library?: 
       when: () => !!documents.board(),
       run: () => useAppStore.getState().openDoc({ kind: '3d', id: '3d', title: '3D view' }),
     },
-    { id: 'tools.pageSettings', title: 'Page settings / title block…', group: 'Tools', when: (ctx) => ctx.editor === 'board' || ctx.editor === 'schematic', keywords: ['drawing sheet', 'title'], run: () => useUiStore.getState().openDialog('page-settings') },
+    {
+      id: 'tools.pageSettings',
+      title: 'Page settings / title block…',
+      group: 'Tools',
+      when: (ctx) => ctx.editor === 'board' || ctx.editor === 'schematic',
+      keywords: ['drawing sheet', 'title'],
+      run: () => useUiStore.getState().openDialog('page-settings'),
+    },
     {
       id: 'inspect.crossProbe',
       title: 'Cross-probe: show in the other editor',
@@ -550,7 +605,12 @@ type Selected = () => (ReturnType<typeof activeDocument> & { items: StoredItem[]
 function alignCommands(services: Services, selected: Selected): Command[] {
   const { commands } = services;
   const box = (it: StoredItem) => it.bbox ?? (itemAnchor(it) ? { x: itemAnchor(it)!.x, y: itemAnchor(it)!.y, w: 0, h: 0 } : null);
-  const run = (id: string, title: string, shortcut: string | undefined, fn: (items: { it: StoredItem; b: NonNullable<ReturnType<typeof box>> }[]) => Map<string, { dx: number; dy: number }>): Command => ({
+  const run = (
+    id: string,
+    title: string,
+    shortcut: string | undefined,
+    fn: (items: { it: StoredItem; b: NonNullable<ReturnType<typeof box>> }[]) => Map<string, { dx: number; dy: number }>,
+  ): Command => ({
     id,
     title,
     group: 'Edit',
@@ -577,10 +637,12 @@ function alignCommands(services: Services, selected: Selected): Command[] {
       });
     },
   });
-  const edge = (pick: (b: { x: number; y: number; w: number; h: number }) => number, reduce: (a: number, b: number) => number, axis: 'x' | 'y') => (rows: { it: StoredItem; b: { x: number; y: number; w: number; h: number } }[]) => {
-    const target = rows.map((r) => pick(r.b)).reduce((a, b) => reduce(a, b));
-    return new Map(rows.map((r) => [r.it.id, axis === 'x' ? { dx: target - pick(r.b), dy: 0 } : { dx: 0, dy: target - pick(r.b) }]));
-  };
+  const edge =
+    (pick: (b: { x: number; y: number; w: number; h: number }) => number, reduce: (a: number, b: number) => number, axis: 'x' | 'y') =>
+    (rows: { it: StoredItem; b: { x: number; y: number; w: number; h: number } }[]) => {
+      const target = rows.map((r) => pick(r.b)).reduce((a, b) => reduce(a, b));
+      return new Map(rows.map((r) => [r.it.id, axis === 'x' ? { dx: target - pick(r.b), dy: 0 } : { dx: 0, dy: target - pick(r.b) }]));
+    };
   const distribute = (axis: 'x' | 'y') => (rows: { it: StoredItem; b: { x: number; y: number; w: number; h: number } }[]) => {
     const sorted = rows.slice().sort((a, b) => (axis === 'x' ? a.b.x + a.b.w / 2 - (b.b.x + b.b.w / 2) : a.b.y + a.b.h / 2 - (b.b.y + b.b.h / 2)));
     const first = sorted[0]!;
@@ -590,12 +652,50 @@ function alignCommands(services: Services, selected: Selected): Command[] {
     return new Map(sorted.map((r, i) => [r.it.id, axis === 'x' ? { dx: c(first) + i * step - c(r), dy: 0 } : { dx: 0, dy: c(first) + i * step - c(r) }]));
   };
   return [
-    run('edit.alignLeft', 'Align left', undefined, edge((b) => b.x, Math.min, 'x')),
-    run('edit.alignRight', 'Align right', undefined, edge((b) => b.x + b.w, Math.max, 'x')),
-    run('edit.alignTop', 'Align top', undefined, edge((b) => b.y, Math.min, 'y')),
-    run('edit.alignBottom', 'Align bottom', undefined, edge((b) => b.y + b.h, Math.max, 'y')),
-    run('edit.alignCenterX', 'Align centres vertically', undefined, edge((b) => b.x + b.w / 2, (a, b) => (a + b) / 2, 'x')),
-    run('edit.alignCenterY', 'Align centres horizontally', undefined, edge((b) => b.y + b.h / 2, (a, b) => (a + b) / 2, 'y')),
+    run(
+      'edit.alignLeft',
+      'Align left',
+      undefined,
+      edge((b) => b.x, Math.min, 'x'),
+    ),
+    run(
+      'edit.alignRight',
+      'Align right',
+      undefined,
+      edge((b) => b.x + b.w, Math.max, 'x'),
+    ),
+    run(
+      'edit.alignTop',
+      'Align top',
+      undefined,
+      edge((b) => b.y, Math.min, 'y'),
+    ),
+    run(
+      'edit.alignBottom',
+      'Align bottom',
+      undefined,
+      edge((b) => b.y + b.h, Math.max, 'y'),
+    ),
+    run(
+      'edit.alignCenterX',
+      'Align centres vertically',
+      undefined,
+      edge(
+        (b) => b.x + b.w / 2,
+        (a, b) => (a + b) / 2,
+        'x',
+      ),
+    ),
+    run(
+      'edit.alignCenterY',
+      'Align centres horizontally',
+      undefined,
+      edge(
+        (b) => b.y + b.h / 2,
+        (a, b) => (a + b) / 2,
+        'y',
+      ),
+    ),
     run('edit.distributeH', 'Distribute horizontally', undefined, distribute('x')),
     run('edit.distributeV', 'Distribute vertically', undefined, distribute('y')),
   ];

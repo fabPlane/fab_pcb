@@ -10,15 +10,15 @@
  * bench/results/<board>-<router>.json (+ .svg) and the table to docs/router-comparison.md.
  *
  * Router names (the second word of a result file):
- *   js                    TensorFleet js_autorouter through the bridge, effort `--effort` (default 1)
+ *   fab-router            TensorFleet fab_router through the bridge (the product default)
  *   freerouting           Freerouting in the app's `kicad-dsn` mode (KiCad's DSN exporter, our SES reader,
  *                         our commit), `--passes` (default 20, the app's default)
  *   freerouting-kicad     Freerouting through KiCad's own importer (`kicad` mode) — what the first
  *                         bench (2026-09-06) measured; `--routers freerouting-kicad --passes 100` reproduces it
  *   freerouting-builtin   Freerouting with the package's own DSN writer (`builtin` mode)
  *
- *   bun run bench/run.ts                                    # every board, routers js + freerouting
- *   bun run bench/run.ts --boards ecc83,pic_programmer --routers js
+ *   bun run bench/run.ts                                    # every board, routers fab-router + freerouting
+ *   bun run bench/run.ts --boards ecc83,pic_programmer --routers fab-router
  *   bun run bench/run.ts --passes 100 --effort 2            # Freerouting -mp / JS router effort
  *   bun run bench/run.ts --time 300 --freerouting-time 600  # JS router budget (s, default 600) and a Freerouting
  *                                                           # limit (default 0 = none: a limit kills it with nothing routed)
@@ -33,6 +33,7 @@ import { BoardLayer, DrcErrorType, RuleSeverity } from "@fp-pcb/proto";
 import { nm, toMm, type Board } from "@fp-pcb/client";
 import {
   FREEROUTING_VERSION,
+  FabRouter,
   createRouteJobs,
   resolveFreerouting,
   type FreeroutingMode,
@@ -58,10 +59,10 @@ export interface MeasuredWith {
   /** `GetVersion` of the server, e.g. `10.99.0-3711-g8cc9377988` (the commit is the `g` suffix). */
   kicad: string;
   freerouting: string;
-  /** Present on historical M7 results produced before the js_autorouter migration. */
+  /** Present on historical M7 results produced before the FabRouter migration. */
   capacityAutorouter?: string;
   /** Runtime module used by the current bridge adapter. */
-  jsAutorouter?: string;
+  fabRouter?: string;
   /** First line of `java -version`, or "n/a" for JS-only runs. */
   java: string;
   bun: string;
@@ -122,7 +123,7 @@ export interface BenchResult {
   error?: string;
 }
 
-export const ROUTER_ORDER = ["js", "freerouting", "freerouting-kicad", "freerouting-builtin"] as const;
+export const ROUTER_ORDER = ["fab-router", "freerouting", "freerouting-kicad", "freerouting-builtin"] as const;
 
 function parseArgs(argv: string[]) {
   const get = (flag: string) => {
@@ -131,8 +132,8 @@ function parseArgs(argv: string[]) {
   };
   return {
     boards: get("--boards")?.split(",").filter(Boolean),
-    routers: (get("--routers") ?? "js,freerouting").split(",").filter(Boolean),
-    /** JS router budget, seconds (it returns what it has). */
+    routers: (get("--routers") ?? "fab-router,freerouting").split(",").filter(Boolean),
+    /** Capacity-router budget, seconds (fab_router returns best-so-far output). */
     timeSec: Number(get("--time") ?? 600),
     /** Freerouting budget, seconds; 0 = none (the app's default). A limit kills the jar: nothing is routed. */
     freeroutingTimeSec: Number(get("--freerouting-time") ?? 0),
@@ -203,7 +204,7 @@ export function jobRequest(routerName: string, cfg: Pick<Config, "timeSec" | "fr
 let measuredWithCache: Omit<MeasuredWith, "kicad" | "java"> | undefined;
 function measuredWith(kicad: string, java: string | undefined): MeasuredWith {
   if (!measuredWithCache) {
-    const jsAutorouter = process.env.JS_AUTOROUTER_MODULE ?? "@tensorfleet/js-autorouter";
+    const fabRouter = process.env.FAB_ROUTER_MODULE ?? "@fabplane/fab-router";
     let os = `${platform()} ${release()}`;
     if (platform() === "darwin") {
       const v = Bun.spawnSync(["sw_vers", "-productVersion"]);
@@ -211,7 +212,7 @@ function measuredWith(kicad: string, java: string | undefined): MeasuredWith {
     }
     measuredWithCache = {
       freerouting: FREEROUTING_VERSION,
-      jsAutorouter,
+      fabRouter,
       bun: Bun.version,
       os,
       cpu: cpus()[0]?.model ?? "?",
@@ -301,7 +302,12 @@ export async function benchOne(fixture: FixtureBoard, routerName: string, cfg: C
 
     // The job, exactly as the bridge mounts it, on this server's transport; followed over SSE
     // like the browser does so every progress event and log line is seen.
-    const jobs = createRouteJobs({ freerouting, log: (m) => result.log.push(`job: ${m}`) });
+    const capacityRouter = routerName === "fab-router" ? new FabRouter() : undefined;
+    const jobs = createRouteJobs({
+      freerouting,
+      ...(capacityRouter ? { capacityRouter } : {}),
+      log: (m) => result.log.push(`job: ${m}`),
+    });
     const session = { id: `bench-${fixture.name}`, transport: run.transport, clientName: `fp-pcb/bench-${routerName}-${process.pid}` };
     const info = jobs.start(session, request);
     const seen = new Set<string>();
@@ -467,7 +473,7 @@ export function renderReport(results: BenchResult[], boards: FixtureBoard[], rou
     const javas = [...new Set(jobRuns.map((r) => r.measuredWith?.java).filter((j) => j && j !== "n/a"))];
     lines.push(
       `**Measured with:** KiCad ${kicads.join(" / ")} (\`kicad-cli api-server\` from the fork; the commit is the \`g…\` suffix); ` +
-        `Freerouting ${w.freerouting}${javas.length ? ` on ${javas.join(" / ")}` : ""}; ${w.jsAutorouter ? `js_autorouter \`${w.jsAutorouter}\`` : `historical \`@tscircuit/capacity-autorouter\` ${w.capacityAutorouter ?? "?"}`}; ` +
+        `Freerouting ${w.freerouting}${javas.length ? ` on ${javas.join(" / ")}` : ""}; ${w.fabRouter ? `fab_router \`${w.fabRouter}\`` : `historical \`@tscircuit/capacity-autorouter\` ${w.capacityAutorouter ?? "?"}`}; ` +
         `Bun ${w.bun}; ${w.cpu}, ${w.memoryGb} GB, ${w.os}. ${dates[0] === dates[dates.length - 1] ? `Runs of ${dates[0]}` : `Runs from ${dates[0]} to ${dates[dates.length - 1]}`}.`,
     );
     lines.push("");

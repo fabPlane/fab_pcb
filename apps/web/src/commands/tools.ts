@@ -131,7 +131,16 @@ export function registerToolCommands(services: Services): () => void {
           title: 'Autoplace footprints',
           description: sel.length ? `${sel.length} footprint(s) selected.` : 'Nothing selected — every footprint is placed. The board needs an Edge.Cuts outline.',
           fields: [
-            { key: 'scope', label: 'Scope', type: 'select', default: sel.length ? 'selection' : 'all', choices: [{ value: 'selection', label: `Selection (${sel.length})` }, { value: 'all', label: 'Every footprint' }] },
+            {
+              key: 'scope',
+              label: 'Scope',
+              type: 'select',
+              default: sel.length ? 'selection' : 'all',
+              choices: [
+                { value: 'selection', label: `Selection (${sel.length})` },
+                { value: 'all', label: 'Every footprint' },
+              ],
+            },
             { key: 'includeOffboard', label: 'Include footprints outside the outline', type: 'boolean', default: true },
           ],
         });
@@ -184,8 +193,27 @@ export function registerToolCommands(services: Services): () => void {
           description: 'Deletes every item of the chosen types. This is a board-wide edit — undo goes through KiCad.',
           fields: [
             ...GLOBAL_DELETE_TYPES.map((t) => ({ key: t.type, label: t.label, type: 'boolean' as const, default: false })),
-            { key: 'layer', label: 'Restrict to layer', type: 'select', default: '', choices: [{ value: '', label: 'Every layer' }, ...(layers.length ? layers : BOARD_LAYERS.map((id) => ({ id, name: layerDisplayName(id) }))).map((l) => ({ value: l.id, label: layerDisplayName(l.id) }))] },
-            { key: 'locked', label: 'Locked items', type: 'select', default: 'unlocked', choices: [{ value: 'unlocked', label: 'Skip locked items' }, { value: 'all', label: 'Include locked items' }, { value: 'locked', label: 'Only locked items' }] },
+            {
+              key: 'layer',
+              label: 'Restrict to layer',
+              type: 'select',
+              default: '',
+              choices: [
+                { value: '', label: 'Every layer' },
+                ...(layers.length ? layers : BOARD_LAYERS.map((id) => ({ id, name: layerDisplayName(id) }))).map((l) => ({ value: l.id, label: layerDisplayName(l.id) })),
+              ],
+            },
+            {
+              key: 'locked',
+              label: 'Locked items',
+              type: 'select',
+              default: 'unlocked',
+              choices: [
+                { value: 'unlocked', label: 'Skip locked items' },
+                { value: 'all', label: 'Include locked items' },
+                { value: 'locked', label: 'Only locked items' },
+              ],
+            },
             { key: 'boardEdges', label: 'Also board outline (Edge.Cuts)', type: 'boolean', default: false },
             { key: 'teardrops', label: 'Also teardrop zones', type: 'boolean', default: false },
           ],
@@ -207,11 +235,48 @@ export function registerToolCommands(services: Services): () => void {
     },
     { id: 'board.severities', title: 'DRC severities…', group: 'Board', when: inBoard, keywords: ['rules', 'ignore', 'warning'], run: () => useUiStore.getState().openDialog('severities') },
     // --------------------------------------------------------------- schematic
-    { id: 'schematic.annotate', title: 'Annotate schematic…', group: 'Schematic', when: inSchematic, keywords: ['reference', 'designator', 'renumber'], run: () => useUiStore.getState().openDialog('annotate') },
-    { id: 'schematic.fieldsTable', title: 'Symbol fields table…', group: 'Schematic', when: inSchematic, keywords: ['bom', 'fields', 'values'], run: () => useUiStore.getState().openDialog('fields-table') },
-    { id: 'schematic.assignFootprints', title: 'Assign footprints…', group: 'Schematic', when: inSchematic, keywords: ['cvpcb', 'footprint'], run: () => useUiStore.getState().openDialog('fields-table') },
-    { id: 'schematic.updatePcb', title: 'Update PCB from schematic…', group: 'Schematic', shortcut: 'F8', when: inSchematic, keywords: ['netlist', 'sync'], run: () => useUiStore.getState().openDialog('update-pcb') },
-    { id: 'board.updateFromSchematic', title: 'Update PCB from schematic…', group: 'Board', shortcut: 'F8', when: inBoard, keywords: ['netlist', 'import'], run: () => useUiStore.getState().openDialog('update-pcb') },
+    {
+      id: 'schematic.annotate',
+      title: 'Annotate schematic…',
+      group: 'Schematic',
+      when: inSchematic,
+      keywords: ['reference', 'designator', 'renumber'],
+      run: () => useUiStore.getState().openDialog('annotate'),
+    },
+    {
+      id: 'schematic.fieldsTable',
+      title: 'Symbol fields table…',
+      group: 'Schematic',
+      when: inSchematic,
+      keywords: ['bom', 'fields', 'values'],
+      run: () => useUiStore.getState().openDialog('fields-table'),
+    },
+    {
+      id: 'schematic.assignFootprints',
+      title: 'Assign footprints…',
+      group: 'Schematic',
+      when: inSchematic,
+      keywords: ['cvpcb', 'footprint'],
+      run: () => useUiStore.getState().openDialog('fields-table'),
+    },
+    {
+      id: 'schematic.updatePcb',
+      title: 'Update PCB from schematic…',
+      group: 'Schematic',
+      shortcut: 'F8',
+      when: inSchematic,
+      keywords: ['netlist', 'sync'],
+      run: () => useUiStore.getState().openDialog('update-pcb'),
+    },
+    {
+      id: 'board.updateFromSchematic',
+      title: 'Update PCB from schematic…',
+      group: 'Board',
+      shortcut: 'F8',
+      when: inBoard,
+      keywords: ['netlist', 'import'],
+      run: () => useUiStore.getState().openDialog('update-pcb'),
+    },
     { id: 'schematic.ercSeverities', title: 'ERC severities…', group: 'Schematic', when: inSchematic, run: () => useUiStore.getState().openDialog('severities') },
   ];
   return registerCommands(list);

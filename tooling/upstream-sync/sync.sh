@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Daily upstream sync for the KiCad fork that FabPlane PCB depends on.
 #
-# Fetches upstream KiCad, merges it into the fork's `web-api` branch on a sync branch, rebuilds the
+# Fetches upstream KiCad, merges it into the fork's `main` branch on a sync branch, rebuilds the
 # headless server and the QA suite, regenerates this repo's bindings in a git worktree on a sync
 # branch, runs every suite, and on full success pushes both sync branches and opens a pull request
-# on each repo. It never pushes `web-api`, `master` or `main` and never creates tags: review and
+# on each repo. It never pushes `main` on either repo and never creates tags: review and
 # merge the PRs, then run land.sh to tag both repos. On any failure it stops at the first broken
 # stage with everything left in place for a person or an agent to fix (the daily scheduled task
 # runs this script and then repairs whatever stage failed, re-running with --resume).
@@ -42,7 +42,7 @@ DATE="$(date +%Y-%m-%d)"
 REPORT_DIR="${FP_PCB_SYNC_REPORT_DIR:-$WEB/.worktrees}"
 REPORT="$REPORT_DIR/$DATE.md"
 mkdir -p "$REPORT_DIR"
-SYNC_BRANCH="web-api-sync-$DATE"          # on the fork
+SYNC_BRANCH="upstream-sync-$DATE"          # on the fork
 WEB_BRANCH="sync/$DATE"                    # on this repo
 WT="$WEB/.worktrees/sync-$DATE"            # worktree for WEB_BRANCH
 export KICAD_CLI="$KICAD_SRC/build/dev/kicad/KiCad.app/Contents/MacOS/kicad-cli"
@@ -77,10 +77,10 @@ fi
 stage "fetch" "git fetch upstream"
 kg fetch upstream --tags --prune || fail fetch "could not fetch upstream" 3
 [ -z "$(kg status --porcelain)" ] || fail fetch "the fork's working tree is dirty; commit or stash first" 2
-BASE_BEFORE="$(kg merge-base web-api "$UPSTREAM_REF")"
+BASE_BEFORE="$(kg merge-base main "$UPSTREAM_REF")"
 UP_HEAD="$(kg rev-parse "$UPSTREAM_REF")"
 UP_SHORT="$(kg rev-parse --short "$UP_HEAD")"
-SERIES_COUNT="$(kg rev-list --count --no-merges "$UP_HEAD..web-api")"
+SERIES_COUNT="$(kg rev-list --count --no-merges "$UP_HEAD..main")"
 NEW_COUNT="$(kg rev-list --count "$BASE_BEFORE..$UP_HEAD")"
 echo "series: $SERIES_COUNT commits over $(kg rev-parse --short "$BASE_BEFORE"); upstream has $NEW_COUNT new commits up to $UP_SHORT" | tee -a "$REPORT"
 if [ "$NEW_COUNT" = "0" ] && [ "$FORCE" != "1" ]; then echo "already up to date" | tee -a "$REPORT"; exit 7; fi
@@ -92,14 +92,14 @@ kg log --oneline "$BASE_BEFORE..$UP_HEAD" -- api common/api pcbnew/api eeschema/
 [ "$DRY_RUN" = "1" ] && { echo "dry run: stopping before the merge"; exit 0; }
 
 # ---------------------------------------------------------------- 2. merge upstream on a sync branch
-stage "merge" "merge $UPSTREAM_REF into web-api as $SYNC_BRANCH"
+stage "merge" "merge $UPSTREAM_REF into main as $SYNC_BRANCH"
 if [ "$RESUME" = "1" ] && kg rev-parse -q --verify "$SYNC_BRANCH" >/dev/null && kg merge-base --is-ancestor "$UP_HEAD" "$SYNC_BRANCH"; then
   kg checkout -q "$SYNC_BRANCH"
   echo "resuming $SYNC_BRANCH at $(kg rev-parse --short HEAD)" | tee -a "$REPORT"
 else
   [ -f "$KICAD_SRC/.git/MERGE_HEAD" ] && fail merge "the fork is mid-merge; finish it (git merge --continue) and re-run with --resume" 2
-  kg checkout -q -B "$SYNC_BRANCH" web-api
-  if ! kg merge --no-ff --no-edit -m "Merge upstream KiCad $UP_SHORT into web-api ($DATE)" "$UPSTREAM_REF" >/tmp/fp-pcb-merge.log 2>&1; then
+  kg checkout -q -B "$SYNC_BRANCH" main
+  if ! kg merge --no-ff --no-edit -m "Merge upstream KiCad $UP_SHORT into main ($DATE)" "$UPSTREAM_REF" >/tmp/fp-pcb-merge.log 2>&1; then
     {
       echo; echo "Merge stopped with conflicts. The fork is left mid-merge on \`$SYNC_BRANCH\`:"; echo
       kg status --porcelain | sed 's/^/    /'
@@ -161,18 +161,18 @@ head -3 packages/client/dist/conformance-summary.txt 2>/dev/null | sed -n 2p | t
 bun run test:e2e >/tmp/fp-pcb-e2e.log 2>&1 || fail "web suites" "mock e2e failed:\n$(grep -E 'passed|failed|✘' /tmp/fp-pcb-e2e.log | head -10)" 6
 grep -E "passed|failed" /tmp/fp-pcb-e2e.log | tail -1 | tee -a "$REPORT"
 
-# ---------------------------------------------------------------- 7. publish: branches + pull requests, never main/web-api
+# ---------------------------------------------------------------- 7. publish: branches + pull requests, never main on either repo
 stage "publish" "push $SYNC_BRANCH and $WEB_BRANCH, open pull requests"
 echo | tee -a "$REPORT"; echo "All suites green $(date -u +%FT%TZ)." | tee -a "$REPORT"
 PR_BODY=/tmp/fp-pcb-pr-body.md
 FORK_PR=""; WEB_PR=""
 
-if [ "$(kg rev-parse "$SYNC_BRANCH")" = "$(kg rev-parse web-api)" ]; then
-  echo "fork: $SYNC_BRANCH is identical to web-api; nothing to publish" | tee -a "$REPORT"
+if [ "$(kg rev-parse "$SYNC_BRANCH")" = "$(kg rev-parse main)" ]; then
+  echo "fork: $SYNC_BRANCH is identical to main; nothing to publish" | tee -a "$REPORT"
 else
   kg push -q -u origin "$SYNC_BRANCH" --force-with-lease || fail publish "could not push $SYNC_BRANCH to $FORK_REPO" 8
   {
-    echo "Merges upstream KiCad \`$UP_SHORT\` ($NEW_COUNT commits) into \`web-api\`; the $SERIES_COUNT-commit API series, qa_api and every FabPlane PCB suite are green on the result."
+    echo "Merges upstream KiCad \`$UP_SHORT\` ($NEW_COUNT commits) into \`main\`; the $SERIES_COUNT-commit API series, qa_api and every FabPlane PCB suite are green on the result."
     echo
     echo "Merge with **Create a merge commit** (the branch is a merge, never rebase it). The bindings PR on \`$WEB_REPO\` pins \`$(kg rev-parse --short "$FORK_HEAD")\`; after merging both, run \`tooling/upstream-sync/land.sh $DATE\` to tag both repos \`$TAG\`."
     echo
@@ -180,11 +180,11 @@ else
     echo
     cat "$REPORT"
   } > "$PR_BODY"
-  FORK_PR="$(gh pr list -R "$FORK_REPO" --head "$SYNC_BRANCH" --base web-api --state open --json url -q '.[0].url')"
+  FORK_PR="$(gh pr list -R "$FORK_REPO" --head "$SYNC_BRANCH" --base main --state open --json url -q '.[0].url')"
   if [ -n "$FORK_PR" ]; then
     gh pr edit "$FORK_PR" -R "$FORK_REPO" --body-file "$PR_BODY" >/dev/null || fail publish "could not update $FORK_PR" 8
   else
-    FORK_PR="$(gh pr create -R "$FORK_REPO" --base web-api --head "$SYNC_BRANCH" --title "Sync web-api with upstream KiCad $UP_SHORT ($DATE)" --body-file "$PR_BODY")" \
+    FORK_PR="$(gh pr create -R "$FORK_REPO" --base main --head "$SYNC_BRANCH" --title "Sync main with upstream KiCad $UP_SHORT ($DATE)" --body-file "$PR_BODY")" \
       || fail publish "gh pr create failed on $FORK_REPO" 8
   fi
   echo "fork PR: $FORK_PR" | tee -a "$REPORT"
@@ -194,7 +194,7 @@ mkdir -p docs/sync && cp "$REPORT" "docs/sync/$DATE.md"
 wg add -A
 wg -c user.name="FabPlane PCB sync" -c user.email="sync@fabplane.invalid" commit -q -m "Sync bindings to upstream KiCad $UP_SHORT ($TAG)
 
-Upstream added $NEW_COUNT commits; the fork's sync branch merged them into web-api and every
+Upstream added $NEW_COUNT commits; the fork's sync branch merged them into main and every
 suite is green. Report: docs/sync/$DATE.md" || true
 if [ "$(wg rev-parse HEAD)" = "$(wg rev-parse main)" ]; then
   echo "web: no binding or report changes; nothing to publish" | tee -a "$REPORT"
@@ -219,6 +219,6 @@ else
   echo "web PR: $WEB_PR" | tee -a "$REPORT"
 fi
 
-kg checkout -q web-api
+kg checkout -q main
 echo | tee -a "$REPORT"; echo "Finished $(date -u +%FT%TZ): ${FORK_PR:-no fork PR}; ${WEB_PR:-no web PR}. Land with tooling/upstream-sync/land.sh $DATE after merging." | tee -a "$REPORT"
 exit 0

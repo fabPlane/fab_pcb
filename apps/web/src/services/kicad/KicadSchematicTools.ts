@@ -110,9 +110,7 @@ export class KicadSchematicTools implements SchematicToolsService {
   /** One `SetSymbolFields` call for every pending edit, so the grid commits in a single step. */
   async setFields(edits: FieldEditInput[]): Promise<{ updatedCount: number; errors: string[] }> {
     if (!edits.length) return { updatedCount: 0, errors: [] };
-    const r = await this.mutate('SetSymbolFields', () =>
-      this.sch.setFields(edits.map((e) => ({ id: e.id, field: e.field, value: e.value, sheetPath: this.sheetPaths.get(e.id) }))),
-    );
+    const r = await this.mutate('SetSymbolFields', () => this.sch.setFields(edits.map((e) => ({ id: e.id, field: e.field, value: e.value, sheetPath: this.sheetPaths.get(e.id) }))));
     return { updatedCount: r.updatedCount, errors: r.errors };
   }
 

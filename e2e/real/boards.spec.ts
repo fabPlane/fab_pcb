@@ -72,8 +72,11 @@ test.describe("real KiCad: practice boards", () => {
             // pick the centre of a pad on an unrouted net (a track ending in a pad wins the pick, as in KiCad),
             // with the pad's own copper side active (KiCad's rule: exact hits on the active layer first)
             const routed = new Set([...d.board().byType("KOT_PCB_TRACE")].map((t: any) => t.net));
-            const candidates = pads.filter((p: any) => p.net && !routed.has(p.net) && (p.proto.padStack?.layers ?? []).some((l: number) => l === 3 || l === 34));
-            const pad = candidates.find((p: any) => p.proto.padStack.layers.includes(3)) ?? candidates[0] ?? pads.find((p: any) => p.net) ?? pads[0];
+            const candidates = pads.filter(
+              (p: any) => p.net && !routed.has(p.net) && (p.proto.padStack?.layers ?? []).some((l: number) => l === 3 || l === 34),
+            );
+            const pad =
+              candidates.find((p: any) => p.proto.padStack.layers.includes(3)) ?? candidates[0] ?? pads.find((p: any) => p.net) ?? pads[0];
             const side = pad.proto.padStack?.layers?.includes(3) ? "BL_F_Cu" : "BL_B_Cu";
             (window as any).__fpPcb.stores.editor.getState().setActiveLayer("board", side);
             h.setActiveLayer(side);
@@ -81,7 +84,13 @@ test.describe("real KiCad: practice boards", () => {
             h.renderNow();
             const s = h.worldToScreen(Number(pad.proto.position.xNm), Number(pad.proto.position.yNm));
             const top = h.pick(s.x, s.y, 5)[0];
-            return { total: pads.length, drawn, missing: missing.slice(0, 3), top: top ? { ref: top.ref, owner: top.owner, net: top.net, layer: top.layer } : null, pad: { id: pad.id, net: pad.net, parent: pad.parent } };
+            return {
+              total: pads.length,
+              drawn,
+              missing: missing.slice(0, 3),
+              top: top ? { ref: top.ref, owner: top.owner, net: top.net, layer: top.layer } : null,
+              pad: { id: pad.id, net: pad.net, parent: pad.parent },
+            };
           });
           expect(probe.drawn, `pads without render items: ${probe.missing.join(", ")}`).toBe(probe.total);
           expect(probe.top?.ref).toBe(probe.pad.id);

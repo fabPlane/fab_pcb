@@ -10,23 +10,23 @@
       // theme. Mirrors readPersistedTheme / resolveThemeMode in src/theme/index.ts (which
       // takes over once the app mounts): dark is the default, 'system' follows the OS.
       (function () {
-        var mode = 'dark';
+        var mode = "dark";
         try {
-          var raw = localStorage.getItem('fp-pcb.ui');
+          var raw = localStorage.getItem("fp-pcb.ui");
           var t = raw && JSON.parse(raw).state.theme;
-          if (t === 'dark' || t === 'light' || t === 'system') mode = t;
+          if (t === "dark" || t === "light" || t === "system") mode = t;
         } catch (e) {}
         var resolved = mode;
-        if (mode === 'system') {
+        if (mode === "system") {
           try {
-            resolved = window.matchMedia && !window.matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'dark';
+            resolved = window.matchMedia && !window.matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "dark";
           } catch (e) {
-            resolved = 'dark';
+            resolved = "dark";
           }
         }
         var root = document.documentElement;
-        root.setAttribute('data-theme', resolved);
-        root.setAttribute('data-theme-mode', mode);
+        root.setAttribute("data-theme", resolved);
+        root.setAttribute("data-theme-mode", mode);
         root.style.colorScheme = resolved;
       })();
     </script>

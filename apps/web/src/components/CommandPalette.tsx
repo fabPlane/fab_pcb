@@ -86,9 +86,7 @@ export function CommandPalette() {
             return (
               <div key={h.command.id} role="option" aria-selected={i === active} className={`palette-item${i === active ? ' active' : ''}`} onMouseEnter={() => setActive(i)} onClick={() => run(i)}>
                 <span className="group">{h.command.group}</span>
-                <span className="title">
-                  {segs.slice(h.command.group.length + 2 > 0 ? 0 : 0).map((s, j) => (s.hit ? <mark key={j}>{s.text}</mark> : <span key={j}>{s.text}</span>))}
-                </span>
+                <span className="title">{segs.slice(h.command.group.length + 2 > 0 ? 0 : 0).map((s, j) => (s.hit ? <mark key={j}>{s.text}</mark> : <span key={j}>{s.text}</span>))}</span>
                 {h.command.description && <span className="desc">{h.command.description}</span>}
                 {binding && <span className="kbd">{formatBinding(binding)}</span>}
               </div>

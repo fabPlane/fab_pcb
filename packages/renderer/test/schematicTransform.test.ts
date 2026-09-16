@@ -1,5 +1,14 @@
 import { describe, expect, test } from 'bun:test';
-import { pinDrawOrientation, symbolTransform, transformCoordinate, transformDet, transformTextGlyphs, inverseTransform, composeTransform, IDENTITY_TRANSFORM } from '../src/schematic/symbolTransform.js';
+import {
+  pinDrawOrientation,
+  symbolTransform,
+  transformCoordinate,
+  transformDet,
+  transformTextGlyphs,
+  inverseTransform,
+  composeTransform,
+  IDENTITY_TRANSFORM,
+} from '../src/schematic/symbolTransform.js';
 import { textGlyphPrims } from '../src/schematic/textMetrics.js';
 import { schematicItemToRenderItems } from '../src/schematic/schematicAdapter.js';
 import { SCH_DEFAULTS, SCH_LAYERS } from '../src/schematic/schematicLayers.js';
@@ -62,7 +71,11 @@ describe('symbol transform (SCH_SYMBOL::SetOrientation / TRANSFORM)', () => {
   });
 
   test('text through a transform stays readable: mirrors and 180° become justification flips', () => {
-    const [g] = textGlyphPrims('R1', { x: 10, y: 0 }, { size: { x: 100, y: 100 }, thickness: 10, angle: 0, halign: 'left', valign: 'bottom' });
+    const [g] = textGlyphPrims(
+      'R1',
+      { x: 10, y: 0 },
+      { size: { x: 100, y: 100 }, thickness: 10, angle: 0, halign: 'left', valign: 'bottom' },
+    );
     const r180 = transformTextGlyphs(g!, symbolTransform(180), { x: 0, y: 0 });
     expect(r180.angle).toBe(0);
     expect(r180.halign).toBe('right');
@@ -92,7 +105,9 @@ describe('symbol transform (SCH_SYMBOL::SetOrientation / TRANSFORM)', () => {
 
   test('a rotated resistor (library-relative pins) lands where KiCad puts it', () => {
     // 90°: pin 1 (lib (0, -3.81), pointing down) -> (-3.81, 0) pointing right; root 1.27 further right
-    const items = schematicItemToRenderItems(resistor('R', 'R', 10, 10, { orientation: 2, pinsRelative: true }), { symbolPinsAbsolute: false });
+    const items = schematicItemToRenderItems(resistor('R', 'R', 10, 10, { orientation: 2, pinsRelative: true }), {
+      symbolPinsAbsolute: false,
+    });
     const p1 = items.find((i) => i.ref === 'R:1')!;
     const s = seg(p1.prims[0]!);
     expect(s.b).toEqual({ x: 10 * MM - 3.81 * MM, y: 10 * MM });

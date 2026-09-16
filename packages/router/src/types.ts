@@ -185,18 +185,18 @@ export interface RouteOptions {
   nets?: string[];
   /** Seed for routers that randomise; the same seed gives the same result. */
   seed?: number;
-  /** Router effort / passes (js_autorouter: `maxPasses`, Freerouting: `-mp` max passes). */
+  /** Router effort / passes (fab_router: `maxPasses`, Freerouting: `-mp` max passes). */
   effort?: number;
   /**
    * Solver preset. `laser-prefab` is reserved for routing through a blank's fixed free vias.
-   * js_autorouter currently rejects boards with free vias until safe via claiming is implemented.
+   * The capacity router currently rejects boards with free vias until safe via claiming is implemented.
    */
   preset?: RoutePreset;
   /** Anything router-specific; each adapter documents what it reads. */
   extra?: Record<string, unknown>;
   /**
-   * Cancels the run. Freerouting's process is killed; js_autorouter observes cancellation only at
-   * its batch-call boundaries until its solver API becomes interruptible. Nothing is applied.
+   * Cancels the run. Freerouting's process is killed; fab_router receives its cooperative signal.
+   * Nothing is applied after cancellation.
    */
   signal?: AbortSignal;
 }

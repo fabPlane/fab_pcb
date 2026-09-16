@@ -88,9 +88,7 @@ function positionedField(
   value: string,
   placement: NativeSymbolPlacement,
 ): SchematicField {
-  const field = source
-    ? clone(SchematicFieldSchema, source)
-    : create(SchematicFieldSchema, { name, visible: false, allowAutoPlace: true });
+  const field = source ? clone(SchematicFieldSchema, source) : create(SchematicFieldSchema, { name, visible: false, allowAutoPlace: true });
   field.name = name;
   field.text ??= create(TextSchema);
   field.text.text = value;
@@ -125,11 +123,7 @@ export function placeNativeSymbol(source: LibSymbol, placement: NativeSymbolPlac
     child.item = packAny(SchematicPinSchema, pin);
     const childUnit = child.unit?.unit ?? 0;
     const childStyle = child.bodyStyle?.style ?? 0;
-    if (
-      pin.number &&
-      (childUnit === 0 || childUnit === unit) &&
-      (childStyle === 0 || childStyle === bodyStyle)
-    )
+    if (pin.number && (childUnit === 0 || childUnit === unit) && (childStyle === 0 || childStyle === bodyStyle))
       pins.set(pin.number, absolute);
   }
 
@@ -147,12 +141,7 @@ export function placeNativeSymbol(source: LibSymbol, placement: NativeSymbolPlac
       referenceField: positionedField(definition.referenceField, "Reference", placement.reference, placement),
       valueField: positionedField(definition.valueField, "Value", placement.value, placement),
       footprintField: positionedField(definition.footprintField, "Footprint", placement.footprint, placement),
-      datasheetField: positionedField(
-        definition.datasheetField,
-        "Datasheet",
-        fields["Datasheet"] ?? fields["datasheet"] ?? "",
-        placement,
-      ),
+      datasheetField: positionedField(definition.datasheetField, "Datasheet", fields["Datasheet"] ?? fields["datasheet"] ?? "", placement),
       descriptionField: positionedField(
         definition.descriptionField,
         "Description",
@@ -161,8 +150,9 @@ export function placeNativeSymbol(source: LibSymbol, placement: NativeSymbolPlac
       ),
       unit: create(SchematicSymbolUnitSchema, { unit }),
       bodyStyle: create(SchematicSymbolBodyStyleSchema, { style: bodyStyle }),
-      showPinNames: true,
-      showPinNumbers: true,
+      showPinNames: definition.showPinNames,
+      showPinNumbers: definition.showPinNumbers,
+      pinNameOffset: definition.pinNameOffset,
       fieldsAutoplaced: false,
       userFields: Object.entries(fields)
         .filter(([name]) => !["Datasheet", "datasheet", "Description", "description"].includes(name))

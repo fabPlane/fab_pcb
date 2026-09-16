@@ -19,12 +19,17 @@ BUILD_TYPE="${2:-Release}"
 BUILD_DIR="$KICAD_SRC/build/$(echo "$BUILD_TYPE" | tr '[:upper:]' '[:lower:]')"
 BREW="$(brew --prefix)"
 JOBS="$(sysctl -n hw.ncpu)"
+CCACHE_ARGS=()
+if command -v ccache >/dev/null 2>&1; then
+  CCACHE_ARGS=(-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache)
+fi
 
 echo "KiCad source : $KICAD_SRC ($(git -C "$KICAD_SRC" describe --tags --always))"
 echo "Build dir    : $BUILD_DIR ($BUILD_TYPE, $JOBS jobs)"
 
 mkdir -p "$BUILD_DIR"
 cmake -S "$KICAD_SRC" -B "$BUILD_DIR" -G Ninja \
+  "${CCACHE_ARGS[@]}" \
   -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
   -DCMAKE_PREFIX_PATH="$BREW" \
   -DwxWidgets_CONFIG_EXECUTABLE="$BREW/bin/wx-config-3.2" \
@@ -34,6 +39,7 @@ cmake -S "$KICAD_SRC" -B "$BUILD_DIR" -G Ninja \
   -DOCC_LIBRARY_DIR="$BREW/opt/opencascade/lib" \
   -DKICAD_BUILD_QA_TESTS=OFF \
   -DKICAD_BUILD_I18N=OFF \
+  -DKICAD_SCRIPTING_WXPYTHON=OFF \
   -DKICAD_USE_SENTRY=OFF \
   -DKICAD_UPDATE_CHECK=OFF \
   -DKICAD_INSTALL_DEMOS=OFF \

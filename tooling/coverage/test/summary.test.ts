@@ -15,7 +15,9 @@ describe("coverage summary", () => {
   });
   test("markdown line and badge", () => {
     const s = summarize(rows);
-    expect(markdownLine(s, "3c7ce604bf97e13a")).toBe("IPC API coverage: **2/4** commands headless (50%) · 1 GUI-only · 1 unregistered — KiCad 3c7ce604bf");
+    expect(markdownLine(s, "3c7ce604bf97e13a")).toBe(
+      "IPC API coverage: **2/4** commands headless (50%) · 1 GUI-only · 1 unregistered — KiCad 3c7ce604bf",
+    );
     expect(badge(s)).toEqual({ schemaVersion: 1, label: "IPC API headless", message: "2/4 (50%)", color: "yellow", cacheSeconds: 3600 });
     expect(badgeColor(96)).toBe("brightgreen");
     expect(badgeColor(86.1)).toBe("green");

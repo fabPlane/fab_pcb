@@ -46,7 +46,10 @@ export class KiCadApiError extends Error {
 /** The client refused to send a command the connected server does not advertise. */
 export class CapabilityError extends Error {
   override readonly name = "CapabilityError";
-  constructor(readonly command: string, reason: string) {
+  constructor(
+    readonly command: string,
+    reason: string,
+  ) {
     super(`${command}: ${reason}`);
   }
 }

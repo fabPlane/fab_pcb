@@ -1,8 +1,8 @@
 # 07 — Staying current with upstream KiCad
 
-The fork carries an API patch series on branch `web-api` (see [upstream.md](upstream.md)).
-Upstream KiCad moves daily, so upstream is merged into `web-api` daily, rebuilt, retested, and
-proposed as two pull requests. Nothing lands on `web-api`, `master` or `main` without a merge
+The fork carries an API patch series on branch `main` (see [upstream.md](upstream.md)).
+Upstream KiCad moves daily, so upstream is merged into `main` daily, rebuilt, retested, and
+proposed as two pull requests. Nothing lands on `main` of either repo without a merge
 click; nothing here changes what the series does, it only keeps it building and passing.
 
 ## What runs
@@ -10,29 +10,29 @@ click; nothing here changes what the series does, it only keeps it building and 
 `tooling/upstream-sync/sync.sh`, in stages; it stops at the first broken one and leaves the
 state in place for repair:
 
-| Stage | Does | On failure |
-|---|---|---|
-| fetch | `git fetch upstream`; counts new upstream commits; lists those that touch `api/`, `common/api`, `pcbnew/api`, `eeschema/api`, `kicad/cli`, `qa/tests/api`, `libs/kinng` | exit 7 when nothing is new |
-| merge | merges `upstream/master` into `web-api` on a `web-api-sync-<date>` branch (a merge commit, never a rebase) | exit 2, merge left mid-way with the conflicted files listed in the report |
-| build | `build/dev` kicad-cli + kifaces, `build/qa` qa_api | exit 3 with the compiler's last lines |
-| qa_api | the fork's API QA suite (154+ cases) | exit 4 |
-| worktree | a git worktree of this repo at `.worktrees/sync-<date>` on branch `sync/<date>` from `main`, `bun install` | exit 5 |
-| bindings | `bun run gen` (proto), `bun run coverage`, client wrappers, typecheck; writes the planned tag to `packages/proto/KICAD_TAG` | exit 5: an unlisted command proto, a renamed handler, or a type break |
-| web suites | unit, integration against the live server (bridge, conformance, round trip, router), mock e2e | exit 6 |
-| publish | pushes `web-api-sync-<date>` and `sync/<date>`, opens (or updates) a PR on each repo with the report as the body; the report is committed as `docs/sync/<date>.md` on the sync branch | exit 8 |
+| Stage      | Does                                                                                                                                                                                   | On failure                                                                |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| fetch      | `git fetch upstream`; counts new upstream commits; lists those that touch `api/`, `common/api`, `pcbnew/api`, `eeschema/api`, `kicad/cli`, `qa/tests/api`, `libs/kinng`                | exit 7 when nothing is new                                                |
+| merge      | merges `upstream/master` into `main` on a `upstream-sync-<date>` branch (a merge commit, never a rebase)                                                                               | exit 2, merge left mid-way with the conflicted files listed in the report |
+| build      | `build/dev` kicad-cli + kifaces, `build/qa` qa_api                                                                                                                                     | exit 3 with the compiler's last lines                                     |
+| qa_api     | the fork's API QA suite (154+ cases)                                                                                                                                                   | exit 4                                                                    |
+| worktree   | a git worktree of this repo at `.worktrees/sync-<date>` on branch `sync/<date>` from `main`, `bun install`                                                                             | exit 5                                                                    |
+| bindings   | `bun run gen` (proto), `bun run coverage`, client wrappers, typecheck; writes the planned tag to `packages/proto/KICAD_TAG`                                                            | exit 5: an unlisted command proto, a renamed handler, or a type break     |
+| web suites | unit, integration against the live server (bridge, conformance, round trip, router), mock e2e                                                                                          | exit 6                                                                    |
+| publish    | pushes `upstream-sync-<date>` and `sync/<date>`, opens (or updates) a PR on each repo with the report as the body; the report is committed as `docs/sync/<date>.md` on the sync branch | exit 8                                                                    |
 
 The report is written to `.worktrees/<date>.md` while the run is in progress (the main checkout is
-never touched) and ends up in the bindings PR. The fork checkout is switched back to `web-api` at
+never touched) and ends up in the bindings PR. The fork checkout is switched back to `main` at
 the end of a green run; after a failure it stays on the sync branch.
 
 ## Landing a sync
 
-1. Review and merge the fork PR (`web-api-sync-<date>` → `web-api`, **Create a merge commit**).
+1. Review and merge the fork PR (`upstream-sync-<date>` → `main`, **Create a merge commit**).
 2. Review and merge the bindings PR (`sync/<date>` → `main`).
 3. Run `tooling/upstream-sync/land.sh <date>`. It checks both PRs are merged, tags the fork at
    the commit the bindings pin and this repo at the bindings commit with the
    `fp-pcb/<date>-upstream-<sha>` tag the PR recorded, pushes the tags, fast-forwards the local
-   branches, keeps the fork's `master` mirroring `web-api`, and removes the sync branches and the
+   branches, and removes the sync branches and the
    worktree. The tag follows the alignment rule in [01-architecture.md](01-architecture.md).
 
 ## The daily task
@@ -53,7 +53,7 @@ re-runs it with `--resume` (which keeps the sync branch, the worktree and any fi
 - **anything it cannot fix in one session**: leave the branches, the worktree and the report in
   place and say exactly which stage and why; the next run starts from the same point.
 
-The task never pushes `web-api`, `master` or `main`, never force-pushes anything but its own
+The task never pushes `main` on either repo, never force-pushes anything but its own
 sync branches, never creates or rewrites tags, and never edits `docs/upstream.md`'s history.
 
 ## Running it by hand
@@ -75,7 +75,7 @@ worktree.
 
 ## Publishing the fork by hand
 
-`web-api` only ever moves by merging a sync PR, so its history is append-only and a plain
-`git push origin web-api` always fast-forwards. The one exception was 2026-09-07, when the series
+`main` only ever moves by merging a sync PR, so its history is append-only and a plain
+`git push origin main` always fast-forwards. The one exception was 2026-09-07, when the series
 was still rebased daily and its first publish needed a leased force push; every published state
 stays reachable through its `fp-pcb/<date>-<name>` tag.

@@ -1,7 +1,7 @@
 // Autorouting for the board editor (Route -> Autoroute...). Two supported bridge routers, one
 // result shape:
 //
-//   js-server    TensorFleet js_autorouter inside the bridge
+//   fab-router   fabPlane/fab_router inside the bridge
 //                (`POST /sessions/:id/route {router:"js"}`).
 //   freerouting  Freerouting (Java) on the bridge, DSN from KiCad's own exporter, the session
 //                parsed by the router package and applied under our commit message.
@@ -98,21 +98,24 @@ export class KicadAutorouteService implements AutorouteService {
     const id = this.session.session?.id;
     if (this.session.bridgeless || !id) {
       const reason = 'no bridge: the tab talks to KiCad directly';
-      return { server: false, jsAutorouter: { ok: false, reason }, freerouting: { ok: false, reason } };
+      return { server: false, fabRouter: { ok: false, reason }, freerouting: { ok: false, reason } };
     }
     try {
       const r = await this.session.bridgeJson<{
-        jsAutorouter?: { ok: boolean; reason?: string };
+        capacityRouter?: { name: string; ok: boolean; reason?: string };
         freerouting?: { ok: boolean; reason?: string };
       }>(`/sessions/${encodeURIComponent(id)}/route`);
       return {
         server: true,
-        jsAutorouter: r.jsAutorouter ?? { ok: false, reason: 'the bridge does not report js_autorouter' },
+        fabRouter:
+          r.capacityRouter?.name === 'fab-router'
+            ? { ok: r.capacityRouter.ok, ...(r.capacityRouter.reason ? { reason: r.capacityRouter.reason } : {}) }
+            : { ok: false, reason: `the bridge does not report fab_router${r.capacityRouter?.name ? ` (reported ${r.capacityRouter.name})` : ''}` },
         freerouting: r.freerouting ?? { ok: false, reason: 'the bridge does not report Freerouting' },
       };
     } catch (e) {
       const reason = `the bridge has no /route (${e instanceof Error ? e.message : String(e)})`;
-      return { server: false, jsAutorouter: { ok: false, reason }, freerouting: { ok: false, reason } };
+      return { server: false, fabRouter: { ok: false, reason }, freerouting: { ok: false, reason } };
     }
   }
 

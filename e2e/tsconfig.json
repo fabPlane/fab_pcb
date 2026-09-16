@@ -4,14 +4,7 @@
     "composite": false,
     "declaration": false,
     "noEmit": true,
-    "types": [
-      "bun"
-    ]
+    "types": ["bun"]
   },
-  "include": [
-    "playwright.config.ts",
-    "playwright.real.config.ts",
-    "tests",
-    "real"
-  ]
+  "include": ["playwright.config.ts", "playwright.real.config.ts", "tests", "real"]
 }

@@ -715,7 +715,15 @@ export class MockCanvasHost implements CanvasHost {
           const horiz = pin.orientation === 'SPO_RIGHT' || pin.orientation === 'SPO_LEFT';
           const nx = horiz ? (pin.orientation === 'SPO_RIGHT' ? ex + inside : ex - inside) : ex;
           const ny = horiz ? ey : pin.orientation === 'SPO_DOWN' ? ey + inside + 400_000 : ey - inside - 400_000;
-          this.text(ctx, pin.name.replace(/~\{([^}]*)\}/g, '$1'), { xNm: nx, yNm: ny }, { size: { yNm: 1_000_000 } }, theme.ui.pinName, z, horiz ? (pin.orientation === 'SPO_RIGHT' ? 'HA_LEFT' : 'HA_RIGHT') : 'HA_CENTER');
+          this.text(
+            ctx,
+            pin.name.replace(/~\{([^}]*)\}/g, '$1'),
+            { xNm: nx, yNm: ny },
+            { size: { yNm: 1_000_000 } },
+            theme.ui.pinName,
+            z,
+            horiz ? (pin.orientation === 'SPO_RIGHT' ? 'HA_LEFT' : 'HA_RIGHT') : 'HA_CENTER',
+          );
         }
       }
     }
@@ -756,7 +764,12 @@ export class MockCanvasHost implements CanvasHost {
 
   private arcPath(ctx: CanvasRenderingContext2D, a: Vec, m: Vec, b: Vec): void {
     // circle through three points
-    const ax = a.xNm, ay = a.yNm, bx = m.xNm, by = m.yNm, cx = b.xNm, cy = b.yNm;
+    const ax = a.xNm,
+      ay = a.yNm,
+      bx = m.xNm,
+      by = m.yNm,
+      cx = b.xNm,
+      cy = b.yNm;
     const d = 2 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by));
     if (Math.abs(d) < 1e-9) {
       ctx.beginPath();
@@ -771,7 +784,7 @@ export class MockCanvasHost implements CanvasHost {
     const a1 = Math.atan2(cy - uy, cx - ux);
     const am = Math.atan2(by - uy, bx - ux);
     // choose direction that passes through the midpoint
-    const ccw = ((am - a0 + Math.PI * 2) % (Math.PI * 2)) > ((a1 - a0 + Math.PI * 2) % (Math.PI * 2));
+    const ccw = (am - a0 + Math.PI * 2) % (Math.PI * 2) > (a1 - a0 + Math.PI * 2) % (Math.PI * 2);
     ctx.beginPath();
     ctx.arc(ux, uy, r, a0, a1, ccw);
   }

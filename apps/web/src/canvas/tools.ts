@@ -187,7 +187,10 @@ export async function createItems(session: Pick<ToolSession, 'store' | 'storeKey
     await services.commands.run(session.store, message, (tx) => {
       for (const it of items) tx.create(it);
     });
-    useEditorStore.getState().setSelection(session.storeKey, items.map((i) => i.id));
+    useEditorStore.getState().setSelection(
+      session.storeKey,
+      items.map((i) => i.id),
+    );
     useAppStore.getState().notify(message);
     return true;
   } catch (e) {
@@ -287,7 +290,14 @@ export async function toolClick(storeKey: string, world: Pt, hit?: PickResult | 
     case 'via': {
       const d = routingDefaults();
       const copper = (services?.documents.layers() ?? []).filter((l) => l.kind === 'copper').map((l) => l.id);
-      await createItems(s, 'Place via', [makeVia(p, { diameterNm: Number(s.params.diameterNm ?? d.viaDiameterNm), drillNm: Number(s.params.drillNm ?? d.viaDrillNm), layers: copper.length ? [copper[0]!, copper[copper.length - 1]!] : undefined, net: hit?.net })]);
+      await createItems(s, 'Place via', [
+        makeVia(p, {
+          diameterNm: Number(s.params.diameterNm ?? d.viaDiameterNm),
+          drillNm: Number(s.params.drillNm ?? d.viaDrillNm),
+          layers: copper.length ? [copper[0]!, copper[copper.length - 1]!] : undefined,
+          net: hit?.net,
+        }),
+      ]);
       return;
     }
     case 'junction':
@@ -311,19 +321,25 @@ export async function toolClick(storeKey: string, world: Pt, hit?: PickResult | 
     case 'hierLabel': {
       const kind: LabelKind = s.id === 'label' ? 'local' : s.id === 'globalLabel' ? 'global' : 'hier';
       const title = kind === 'local' ? 'Place label' : kind === 'global' ? 'Place global label' : 'Place hierarchical label';
-      const ok = await createItems(s, title, [makeLabel(p, kind, String(s.params.text ?? 'NET'), { shape: (s.params.shape as LabelShape | undefined) ?? 'input', sizeNm: Number(s.params.sizeNm ?? 1_270_000) })]);
+      const ok = await createItems(s, title, [
+        makeLabel(p, kind, String(s.params.text ?? 'NET'), { shape: (s.params.shape as LabelShape | undefined) ?? 'input', sizeNm: Number(s.params.sizeNm ?? 1_270_000) }),
+      ]);
       if (ok && stillActive(s)) cancelTool();
       return;
     }
     case 'footprint': {
       const lib = s.params.library as LibraryFootprint;
-      const ok = await createItems(s, `Place footprint ${s.params.reference}`, [makeFootprintInstance(p, layer.endsWith('_Cu') ? layer : 'BL_F_Cu', lib, String(s.params.reference), s.params.value as string | undefined)]);
+      const ok = await createItems(s, `Place footprint ${s.params.reference}`, [
+        makeFootprintInstance(p, layer.endsWith('_Cu') ? layer : 'BL_F_Cu', lib, String(s.params.reference), s.params.value as string | undefined),
+      ]);
       if (ok && stillActive(s)) cancelTool();
       return;
     }
     case 'symbol': {
       const def = s.params.definition as SchematicSymbolDefinition;
-      const ok = await createItems(s, `Place symbol ${s.params.reference}`, [makeSymbolInstance(p, def, String(s.params.reference), String(s.params.value ?? ''), { unit: Number(s.params.unit ?? 1), footprint: s.params.footprint as string | undefined })]);
+      const ok = await createItems(s, `Place symbol ${s.params.reference}`, [
+        makeSymbolInstance(p, def, String(s.params.reference), String(s.params.value ?? ''), { unit: Number(s.params.unit ?? 1), footprint: s.params.footprint as string | undefined }),
+      ]);
       if (ok && stillActive(s)) cancelTool();
       return;
     }
@@ -411,7 +427,13 @@ export async function toolFinish(): Promise<void> {
         title: 'Zone properties',
         description: `${pts.length}-corner outline`,
         fields: [
-          { key: 'net', label: 'Net', type: 'select', default: s.params.net ?? nets[0]?.name ?? '', choices: [{ value: '', label: '<no net>' }, ...nets.map((n) => ({ value: n.name, label: n.name }))] },
+          {
+            key: 'net',
+            label: 'Net',
+            type: 'select',
+            default: s.params.net ?? nets[0]?.name ?? '',
+            choices: [{ value: '', label: '<no net>' }, ...nets.map((n) => ({ value: n.name, label: n.name }))],
+          },
           { key: 'layer', label: 'Layer', type: 'select', default: layer.endsWith('_Cu') ? layer : 'BL_F_Cu', choices: copper.map((l) => ({ value: l.id, label: l.name })) },
           { key: 'name', label: 'Name', type: 'string', default: '' },
           { key: 'clearance', label: 'Clearance', type: 'distance', default: 200_000 },
@@ -423,7 +445,15 @@ export async function toolFinish(): Promise<void> {
         if (stillActive(s)) cancelTool();
         return;
       }
-      const ok = await createItems(s, 'Add zone', [makeZone(pts, [String(answer.layer)], { net: String(answer.net) || undefined, name: String(answer.name), clearanceNm: Number(answer.clearance), minThicknessNm: Number(answer.minThickness), keepout: Boolean(answer.keepout) })]);
+      const ok = await createItems(s, 'Add zone', [
+        makeZone(pts, [String(answer.layer)], {
+          net: String(answer.net) || undefined,
+          name: String(answer.name),
+          clearanceNm: Number(answer.clearance),
+          minThicknessNm: Number(answer.minThickness),
+          keepout: Boolean(answer.keepout),
+        }),
+      ]);
       if (ok && !answer.keepout) {
         const refill = (services?.documents as { refillZones?: () => Promise<void> } | undefined)?.refillZones;
         if (refill) {
@@ -562,7 +592,11 @@ export function toolPreview(s: ToolSession, cursor: Pt | null): PreviewShape[] {
       return out;
     }
     case 'symbol':
-      if (c) out.push({ kind: 'rect', a: { x: c.x - 2_540_000, y: c.y - 3_810_000 }, b: { x: c.x + 2_540_000, y: c.y + 3_810_000 }, width: 0 }, { kind: 'marker', c, label: String(s.params.reference ?? '') });
+      if (c)
+        out.push(
+          { kind: 'rect', a: { x: c.x - 2_540_000, y: c.y - 3_810_000 }, b: { x: c.x + 2_540_000, y: c.y + 3_810_000 }, width: 0 },
+          { kind: 'marker', c, label: String(s.params.reference ?? '') },
+        );
       return out;
     default:
       if (c) out.push({ kind: 'marker', c, label: s.params.text ? String(s.params.text) : undefined });

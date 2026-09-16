@@ -50,7 +50,11 @@ function fakeDocs() {
         return new Map(ids.map((id) => [id, { outline: { nodes: [] }, holes: [] }]));
       },
     },
-    kicad: { async textAsShapes(reqs: unknown[]) { return reqs.map(() => ({ shapes: { shapes: [] } })); } },
+    kicad: {
+      async textAsShapes(reqs: unknown[]) {
+        return reqs.map(() => ({ shapes: { shapes: [] } }));
+      },
+    },
   } as unknown as KicadDocumentService;
   return { docs, calls, release: () => release() };
 }

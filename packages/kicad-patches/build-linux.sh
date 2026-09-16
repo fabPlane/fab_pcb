@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Build the Linux Docker image with kicad-cli + pcbnew/eeschema kifaces from the KiCad fork
-# (branch web-api), for CI and for running the headless API server on Linux hosts.
+# (branch main), for CI and for running the headless API server on Linux hosts.
 #
 # Usage: build-linux.sh [--smoke] [--push] [KICAD_REF]
 #   KICAD_SRC   path to the fork checkout (default ../../../kicad relative to this script);
 #               `git archive KICAD_REF` of it becomes the build context (uncommitted edits are NOT built,
 #               matching how packages/proto pins KICAD_COMMIT to a commit)
 #   KICAD_REPO  when set, the image clones this URL at KICAD_REF instead of using KICAD_SRC (CI)
-#   KICAD_REF   branch / tag / commit (default: HEAD of KICAD_SRC, or `web-api` with KICAD_REPO)
+#   KICAD_REF   branch / tag / commit (default: HEAD of KICAD_SRC, or `main` with KICAD_REPO)
 #   IMAGE       image name (default fp-pcb/kicad-cli); tagged :<short sha> and :latest
 #   JOBS        ninja -j (default: nproc inside the container; see the memory note in the Dockerfile)
 #   BUILD_TYPE  Release (default) | RelWithDebInfo | Debug
@@ -18,7 +18,7 @@
 #
 # Examples:
 #   packages/kicad-patches/build-linux.sh --smoke
-#   KICAD_REPO=https://gitlab.com/<fork>/kicad.git KICAD_REF=web-api packages/kicad-patches/build-linux.sh
+#   KICAD_REPO=https://gitlab.com/<fork>/kicad.git KICAD_REF=main packages/kicad-patches/build-linux.sh
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -47,7 +47,7 @@ cleanup() { [[ -n "${CTX:-}" && -d "${CTX:-}" ]] && rm -rf "$CTX"; }
 trap cleanup EXIT
 
 if [[ -n "${KICAD_REPO:-}" ]]; then
-  KICAD_REF="${REF_ARG:-${KICAD_REF:-web-api}}"
+  KICAD_REF="${REF_ARG:-${KICAD_REF:-main}}"
   SHORT="$(echo "$KICAD_REF" | tr '/' '-' | cut -c1-12)"
   echo "Source  : $KICAD_REPO @ $KICAD_REF (cloned inside the build)"
   CTX="$DOCKER_DIR"

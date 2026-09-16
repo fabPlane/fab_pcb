@@ -70,11 +70,7 @@ export function EditorScreen({ kind, id, store, layers, leftExtra }: EditorScree
 
   const left = (
     <div className="panel">
-      <PanelTabs
-        tabs={[...leftTabs, ...(leftExtra ? [{ id: 'layers' as const, label: leftExtra.label }] : [])]}
-        active={showHierarchy ? 'layers' : effectiveLeft}
-        onChange={(t) => setLeftTab(t)}
-      />
+      <PanelTabs tabs={[...leftTabs, ...(leftExtra ? [{ id: 'layers' as const, label: leftExtra.label }] : [])]} active={showHierarchy ? 'layers' : effectiveLeft} onChange={(t) => setLeftTab(t)} />
       {showHierarchy ? (
         leftExtra!.content
       ) : effectiveLeft === 'tree' ? (
@@ -100,7 +96,11 @@ export function EditorScreen({ kind, id, store, layers, leftExtra }: EditorScree
     <div className="panel">
       <PanelTabs
         tabs={[
-          { id: 'markers', label: kind === 'schematic' ? 'ERC' : 'DRC', badge: errors + warnings > 0 ? <span className={`badge ${errors ? 'error' : 'warning'}`}>{errors || warnings}</span> : undefined },
+          {
+            id: 'markers',
+            label: kind === 'schematic' ? 'ERC' : 'DRC',
+            badge: errors + warnings > 0 ? <span className={`badge ${errors ? 'error' : 'warning'}`}>{errors || warnings}</span> : undefined,
+          },
           { id: 'jobs', label: 'Jobs' },
           { id: 'history', label: 'History', badge: undoCount ? <span className="badge">{undoCount}</span> : undefined },
           { id: 'log', label: 'Output' },

@@ -117,7 +117,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
   <div class="fact"><div class="k">Commands</div><div class="v">165 defined</div><div class="s">150 headless · 15 GUI-only · 0 unregistered</div></div>
   <div class="fact"><div class="k">Render fidelity</div><div class="v">0.27% of pixels</div><div class="s">board vs KiCad's own SVG plot</div></div>
   <div class="fact"><div class="k">Units</div><div class="v">int64 nm · degrees</div><div class="s">bigint on the wire, number in the UI</div></div>
-  <div class="fact"><div class="k">Fork</div><div class="v">53 API commits</div><div class="s">branch web-api on KiCad 10.99</div></div>
+  <div class="fact"><div class="k">Fork</div><div class="v">53 API commits</div><div class="s">branch main on KiCad 10.99</div></div>
 </div>
 <p>Everything above was verified in the KiCad sources. Commits (<code>BeginCommit → Create/Update/Delete → EndCommit</code>) and zone filling already work headless; the headless board context creates a <code>BOARD_COMMIT</code> against a bare tool manager and registers tools on first use. That pattern is the template for most of the patch series.</p>
 
@@ -149,7 +149,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 
     <rect x="540" y="70" width="200" height="160" rx="6" fill="var(--surface-2)" stroke="var(--accent)"/>
     <text x="554" y="94" font-weight="600" font-family="Sora,system-ui">kicad-cli api-server</text>
-    <text x="554" y="118">our fork · branch web-api</text>
+    <text x="554" y="118">our fork · branch main</text>
     <text x="554" y="138">API_HANDLER_COMMON</text>
     <text x="554" y="158">API_HANDLER_PCB (headless)</text>
     <text x="554" y="178">API_HANDLER_SCH (headless)</text>
@@ -379,7 +379,7 @@ await board.commit('Move R1', async (tx) =&gt; {
 <p class="note">Handlers: <b>common</b> always loaded · <b>editor</b> commit/create/update/delete · <b>board</b> shared board base · <b>pcb</b> board document · <b>footprint</b> footprint document · <b>sch</b> schematic document.</p>
 
 <h2 id="gaps">Gaps and how each is fixed</h2>
-<p>Each gap becomes one commit on the fork's <code>web-api</code> branch: proto + handler + a test in <code>qa/tests/api</code> + a client conformance test. All written to be upstreamable.</p>
+<p>Each gap becomes one commit on the fork's <code>main</code> branch: proto + handler + a test in <code>qa/tests/api</code> + a client conformance test. All written to be upstreamable.</p>
 
 <div class="gap p0"><h3><span class="chip p0">P0</span>G1 · Events <span class="chip ok">done · PUB events socket + GetDocumentRevision</span></h3><p><span class="lbl">Today</span>REQ/REP only; nothing tells the UI a document changed.</p><p><span class="lbl">Fix</span>PUB0 socket <code>api-events.sock</code> via a new <code>KINNG_PUBLISHER</code>; publish <code>DocumentChanged</code> from <code>pushCurrentCommit</code>, plus save/open/close and job progress. Interim: <code>GetDocumentRevision</code> for cheap polling.</p></div>
 <div class="gap p0"><h3><span class="chip p0">P0</span>G3 · Headless <code>RunAction</code> <span class="chip ok">done · headless RunAction + GetActions</span></h3><p><span class="lbl">Today</span>Gated; the headless tool manager has no tools.</p><p><span class="lbl">Fix</span>Register non-interactive tools on demand, the way <code>RefillZones</code> registers <code>ZONE_FILLER_TOOL</code>. Add <code>GetActions</code> with a <code>headless_capable</code> flag.</p></div>
@@ -397,7 +397,7 @@ await board.commit('Move R1', async (tx) =&gt; {
 <div class="gap"><h3><span class="chip p1">P1</span>G12 · 3D</h3><p><span class="lbl">Decision</span>No KiCad change: browser-side three.js on the GLB from <code>RunBoardJobExport3D</code>. The raytrace job needs a GPU and stays optional.</p></div>
 <div class="gap"><h3><span class="chip p1">P1</span>G15 · Transport</h3><p><span class="lbl">Fix</span><code>--socket</code> accepts any nng URL, plus <code>--token</code>. Browser dials <code>ws://</code> directly.</p></div>
 <div class="gap"><h3><span class="chip p1">P1</span>G17 · Async jobs <span class="chip ok">done · async jobs, GetJobStatus, inline outputs</span></h3><p><span class="lbl">Fix</span><code>async</code> flag returning a job id, <code>GetJobStatus</code>, progress over G1, small outputs returned inline.</p></div>
-<p><b>Status:</b> every P0 gap and most P1 gaps have landed on the fork's <code>web-api</code> branch, 21 commits so far, each with a proto change, a handler, a QA test and a client conformance test. Colour themes and app settings (G11), the ws:// transport (G15) and the event follow-ups are the current batch. Push-and-shove routing headless stays a research spike.</p>
+<p><b>Status:</b> every P0 gap and most P1 gaps have landed on the fork's <code>main</code> branch, 21 commits so far, each with a proto change, a handler, a QA test and a client conformance test. Colour themes and app settings (G11), the ws:// transport (G15) and the event follow-ups are the current batch. Push-and-shove routing headless stays a research spike.</p>
 
 <h2 id="agents">Agents</h2>
 <p>Nine agents plus a coordinator, in three waves so no one waits on an unfinished interface. Each agent owns one package or concern and is judged by an objective exit test.</p>
@@ -442,7 +442,7 @@ await board.commit('Move R1', async (tx) =&gt; {
   <li><b>M6 ◐</b>P1 parity reached and the browser talks to KiCad directly over ws:// with no bridge in the request path. The patch series is grouped into ten merge requests in <code>docs/upstream.md</code>, ready to submit.</li>
   <li><b>M7 ✓</b>Five real KiCad demo boards (15 to 94 footprints) opened, edited, hand-routed, checked, exported and reopened through the web UI; six rendering bugs found and fixed. Freerouting and tscircuit's capacity autorouter integrated behind one interface and benchmarked: the JS router is instant on small boards, Freerouting is the one that routes dense and 4-layer boards.</li>
 </ol>
-<p class="note">Repo layout: <code>apps/web</code>, <code>packages/{proto,client,bridge,renderer,kicad-patches}</code>, <code>tooling/coverage</code>, <code>e2e</code>, <code>docs</code>. The KiCad fork lives in its own repo on branch <code>web-api</code>; this repo pins the fork commit its protos were generated from.</p>
+<p class="note">Repo layout: <code>apps/web</code>, <code>packages/{proto,client,bridge,renderer,kicad-patches}</code>, <code>tooling/coverage</code>, <code>e2e</code>, <code>docs</code>. The KiCad fork lives in its own repo on branch <code>main</code>; this repo pins the fork commit its protos were generated from.</p>
 </main>
 </div>
 

@@ -245,7 +245,10 @@ export class NngWsTransport implements Transport {
       // is the handshake. Verify what the server selected when the runtime exposes it.
       const negotiated = conn.ws.protocol;
       if (negotiated !== undefined && negotiated !== "" && negotiated !== this.subprotocol) {
-        this.onProtocolError(conn, new TransportError("protocol", `${this.url} negotiated subprotocol '${negotiated}', expected '${this.subprotocol}'`));
+        this.onProtocolError(
+          conn,
+          new TransportError("protocol", `${this.url} negotiated subprotocol '${negotiated}', expected '${this.subprotocol}'`),
+        );
         return;
       }
       this.everOpened = true;
@@ -275,7 +278,9 @@ export class NngWsTransport implements Transport {
   private onConnectFailure(conn: Connection | null, cause: unknown): void {
     if (conn && (this.conn !== conn || conn.closed)) return;
     const err =
-      cause instanceof TransportError ? cause : new TransportError("connect", `connect to ${this.url} failed: ${errorMessage(cause)}`, { cause });
+      cause instanceof TransportError
+        ? cause
+        : new TransportError("connect", `connect to ${this.url} failed: ${errorMessage(cause)}`, { cause });
     this.onDisconnected(conn, err);
   }
 
@@ -309,7 +314,10 @@ export class NngWsTransport implements Transport {
   private afterDisconnect(err: Error): void {
     if (this.closedByUser) return;
     if (this.reconnectOpts && this.attempt < this.reconnectOpts.maxAttempts) {
-      const delay = Math.min(this.reconnectOpts.maxDelayMs, this.reconnectOpts.initialDelayMs * Math.pow(this.reconnectOpts.factor, this.attempt));
+      const delay = Math.min(
+        this.reconnectOpts.maxDelayMs,
+        this.reconnectOpts.initialDelayMs * Math.pow(this.reconnectOpts.factor, this.attempt),
+      );
       this.attempt += 1;
       this.setState("connecting");
       this.log(`reconnect attempt ${this.attempt} in ${delay} ms`);
@@ -351,7 +359,10 @@ export class NngWsTransport implements Transport {
       return;
     }
     if (frame.length > this.maxFrameBytes) {
-      this.onProtocolError(conn, new TransportError("protocol", `reply frame of ${frame.length} bytes exceeds limit ${this.maxFrameBytes}`));
+      this.onProtocolError(
+        conn,
+        new TransportError("protocol", `reply frame of ${frame.length} bytes exceeds limit ${this.maxFrameBytes}`),
+      );
       return;
     }
     let id: number;

@@ -207,9 +207,9 @@ export interface ServerSettingsService {
 
 /**
  * Where the router runs. `js-tab` is retained only so an older caller receives the compatibility
- * error; the UI offers server-side js_autorouter or Freerouting through the bridge job.
+ * error; the UI offers server-side FabRouter or Freerouting through the bridge job.
  */
-export type AutorouterChoice = 'js-tab' | 'js-server' | 'freerouting';
+export type AutorouterChoice = 'js-tab' | 'fab-router' | 'freerouting';
 
 export interface AutorouteRequest {
   router: AutorouterChoice;
@@ -284,7 +284,7 @@ export interface AutorouteRun {
 export interface AutorouteAvailability {
   /** The bridge job route is reachable (false in direct-WebSocket mode without a bridge). */
   server: boolean;
-  jsAutorouter: { ok: boolean; reason?: string };
+  fabRouter: { ok: boolean; reason?: string };
   freerouting: { ok: boolean; reason?: string };
 }
 
@@ -295,7 +295,7 @@ export interface AutorouteService {
   available(): Promise<AutorouteAvailability>;
   /** Starts a run; resolves with the finished run (done, failed or cancelled). One run at a time. */
   start(request: AutorouteRequest): Promise<AutorouteRun>;
-  /** Cancels the running bridge job (at js_autorouter's batch boundary, or by killing Freerouting). */
+  /** Cancels the running bridge job (cooperatively for FabRouter, or by killing Freerouting). */
   cancel(): Promise<void>;
   /** True while a run is in flight. */
   running(): boolean;
