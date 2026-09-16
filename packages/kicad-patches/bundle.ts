@@ -61,6 +61,16 @@ const relativeCli = cli.slice(output.length + 1).replaceAll("\\", "/");
 const stockData = await findStockData(join(output, "kicad"));
 if (!stockData) throw new Error(`KiCad stock data is absent from ${runtime}`);
 const relativeStockData = stockData.slice(output.length + 1).replaceAll("\\", "/");
+const libraryPaths: string[] = [];
+if (target.startsWith("linux-")) {
+  // Nightly archives currently flatten their host runtime libraries into kicad/lib, while older
+  // locally-built runtimes kept them in kicad/lib/runtime. Advertise only directories that the
+  // assembled bundle actually contains; consumers intentionally reject stale manifest paths.
+  for (const relativePath of ["kicad/lib", "kicad/lib/runtime"]) {
+    if ((await stat(join(output, relativePath)).catch(() => null))?.isDirectory()) libraryPaths.push(relativePath);
+  }
+  if (libraryPaths.length === 0) throw new Error(`KiCad library directory is absent from ${runtime}`);
+}
 await Bun.write(
   join(output, "bundle.json"),
   JSON.stringify(
@@ -73,7 +83,7 @@ await Bun.write(
       footprints: "libraries/footprints",
       symbols: "libraries/symbols",
       ...(fabRouterSource ? { fabRouter: "private/fab_router/src/api.ts" } : {}),
-      ...(target.startsWith("linux-") ? { libraryPaths: ["kicad/lib", "kicad/lib/runtime"] } : {}),
+      ...(libraryPaths.length ? { libraryPaths } : {}),
       environment: { KICAD_SOCKET_TRANSPORT: spec.socketTransport },
     },
     null,

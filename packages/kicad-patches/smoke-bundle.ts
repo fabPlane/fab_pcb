@@ -43,6 +43,9 @@ for (const [label, path] of Object.entries(paths)) {
 }
 const workspace = await mkdtemp(join(tmpdir(), "fp-pcb-bundle-smoke-"));
 const libraryPaths = (manifest.libraryPaths ?? []).map((path) => resolve(root, path));
+for (const path of libraryPaths) {
+  if (!(await stat(path).catch(() => null))?.isDirectory()) throw new Error(`library path missing: ${path}`);
+}
 const env = {
   ...process.env,
   ...(manifest.environment ?? {}),
