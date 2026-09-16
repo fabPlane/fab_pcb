@@ -104,9 +104,15 @@ jobs:
   linux-x64:
     needs: select-linux-runner
     runs-on: ${{ fromJSON(needs.select-linux-runner.outputs.runner) }}
+    container: ubuntu:24.04
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
+      - name: Install runner prerequisites
+        run: apt-get update && apt-get install -y --no-install-recommends ca-certificates curl git jq unzip
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ env.BUN_VERSION }}
@@ -142,7 +148,7 @@ jobs:
           kicad="$(tr -d '[:space:]' < packages/proto/KICAD_COMMIT)"
           git init -q "$RUNNER_TEMP/kicad-source"
           git -C "$RUNNER_TEMP/kicad-source" remote add origin "https://github.com/fabPlane/kicad.git"
-          git -C "$RUNNER_TEMP/kicad-source" sparse-checkout set --no-cone qa/data
+          git -C "$RUNNER_TEMP/kicad-source" sparse-checkout set --no-cone qa/data tools/nightly/linux
           git -C "$RUNNER_TEMP/kicad-source" fetch --depth 1 --filter=blob:none origin "$kicad"
           git -C "$RUNNER_TEMP/kicad-source" checkout -q FETCH_HEAD
           for name in footprints symbols; do
@@ -156,6 +162,15 @@ jobs:
             git -C "$RUNNER_TEMP/kicad-$name" fetch --depth 1 origin "$commit"
             git -C "$RUNNER_TEMP/kicad-$name" checkout -q FETCH_HEAD
           done
+      - name: Install runtime libraries required by the KiCad archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          list="$RUNNER_TEMP/kicad-source/tools/nightly/linux/runtime-packages.txt"
+          test -s "$list"
+          apt-get update -qq
+          # shellcheck disable=SC2046
+          apt-get install -y -qq --no-install-recommends $(grep -v '^#' "$list" | tr '\n' ' ')
       - name: Assemble dependency-complete Linux backend
         shell: bash
         env:
