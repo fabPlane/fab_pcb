@@ -310,7 +310,18 @@ export abstract class BaseCanvasHost implements CanvasHost {
     for (const it of this.store.all()) upsert.push({ owner: it.id, items: this.safeConvert(it) });
     this.scene.apply({ upsert });
     this.picker.invalidate();
+    this.fitIfPending();
     this.requestRender();
+  }
+
+  /**
+   * The initial fit runs when the canvas is ready, but a canvas often mounts before the store
+   * has its items (a document tab opens as soon as KiCad has the file; GetItems lands a moment
+   * later). An empty scene then fits nothing and the camera sat at the origin — off the board
+   * for anything not drawn there. So fit again on the first store change that brings content.
+   */
+  private fitIfPending(): void {
+    if (this.fitPending && this.app) this.zoomToFit();
   }
 
   private safeConvert(it: StoredItemLike): RenderItem[] {
@@ -327,6 +338,7 @@ export abstract class BaseCanvasHost implements CanvasHost {
     this.scene.apply({ upsert, remove: diff.removed });
     this.picker.invalidate();
     this.refreshSelection();
+    this.fitIfPending();
     this.requestRender();
   }
 
