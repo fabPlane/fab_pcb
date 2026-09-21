@@ -3,7 +3,7 @@ import { describe, expect, test } from "bun:test";
 import { BoardLayer } from "@fp-pcb/proto";
 import { mm } from "@fp-pcb/client";
 import { parseSExpr, quote, child, children, head } from "../src/specctra/sexpr";
-import { writeDsn, viaPadstackName } from "../src/specctra/dsn";
+import { writeDsn, viaPadstackName, extraViasFromRouteOptions } from "../src/specctra/dsn";
 import { parseSes, sesToItems, resolutionToNm } from "../src/specctra/ses";
 import { twoNetBoard, F, B } from "./fixtures";
 
@@ -79,6 +79,61 @@ describe("writeDsn", () => {
     expect(children(round, "shape").length).toBe(2);
     expect(dsn).toContain("(circle F.Cu 1600)");
     expect(dsn).toContain("(rect F.Cu -1500 -1500 1500 1500)");
+  });
+
+  test("extraViasFromRouteOptions reads millimetre leftover-run rules", () => {
+    expect(extraViasFromRouteOptions({ viaDiameterMm: 0.36, viaDrillMm: 0.2 })).toEqual([
+      { diameter: mm(0.36), drill: mm(0.2) },
+    ]);
+    expect(extraViasFromRouteOptions({ viaDiameterNm: mm(0.5), viaDrillNm: mm(0.2) })).toEqual([
+      { diameter: mm(0.5), drill: mm(0.2) },
+    ]);
+    expect(extraViasFromRouteOptions({})).toEqual([]);
+  });
+
+  test("existing vias of a non-class size are in the library before wiring names them", () => {
+    const withVia = twoNetBoard();
+    withVia.vias.push({
+      id: "v-small",
+      net: "A",
+      netCode: 1,
+      position: { x: mm(2), y: mm(2) },
+      diameter: mm(0.36),
+      drill: mm(0.2),
+      layers: [F, B],
+    });
+    const text = writeDsn(withVia);
+    const name = viaPadstackName(mm(0.36), mm(0.2), 2);
+    expect(name).toBe("Via[0-1]_360:200_um");
+    const library = child(parseSExpr(text)[0] as never, "library")!;
+    const stacks = children(library, "padstack").map((p) => p[1] as string);
+    expect(stacks).toContain(name);
+    expect(text).toContain(`(via ${name} `);
+  });
+
+  test("extra via sizes and leftover nets round-trip through the DSN library", () => {
+    const leftover = twoNetBoard();
+    leftover.vias.push({
+      id: "v-class",
+      net: "A",
+      netCode: 1,
+      position: { x: mm(3), y: mm(3) },
+      diameter: mm(0.8),
+      drill: mm(0.4),
+      layers: [F, B],
+    });
+    const text = writeDsn(leftover, {
+      extraVias: [{ diameter: mm(0.5), drill: mm(0.2) }],
+      routableNets: ["A"],
+    });
+    const library = child(parseSExpr(text)[0] as never, "library")!;
+    const stacks = children(library, "padstack").map((p) => p[1] as string);
+    expect(stacks).toContain("Via[0-1]_800:400_um");
+    expect(stacks).toContain("Via[0-1]_500:200_um");
+    const network = child(parseSExpr(text)[0] as never, "network")!;
+    const nets = children(network, "net").map((n) => n[1]);
+    expect(nets).toEqual(["A"]);
+    expect(text).toContain("R3_1");
   });
 
   test("existing copper is exported as protected wiring; layer filter drops other layers", () => {
