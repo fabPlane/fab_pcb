@@ -70,13 +70,7 @@ describe.skipIf(!haveKicad)("coverage against the pinned KiCad checkout (git HEA
         .filter((c) => c.headless === "unregistered")
         .map((c) => c.command)
         .sort(),
-    ).toEqual([
-      "AddLibraryTableEntry",
-      "DeleteLibraryTableEntry",
-      "GetLibraryTable",
-      "SearchLibraries",
-      "UpdateLibraryTableEntry",
-    ]);
+    ).toEqual(["AddLibraryTableEntry", "DeleteLibraryTableEntry", "GetLibraryTable", "SearchLibraries", "UpdateLibraryTableEntry"]);
     expect(
       r.commands
         .filter((c) => c.headless === "gui-only")

@@ -87,6 +87,12 @@ imported footprints keep the import's spread positions) so a rebuild in the same
 compiles. Fix belongs in the fork's `SetNetClasses` handler (resynchronise nets and the effective
 net-class cache after replacing the classes).
 
+**Closed by upstream** (2026-09-21 sync, upstream `895541a847`): `SetNetClasses` and the new
+`SetNetClassAssignments` now flag the request and the API server calls `onNetSettingsChanged()` on
+every handler afterwards, so the board's net-class cache is rebuilt before the next command. The
+compile's ordering and the `autoplace_failed` diagnostic stay as belt and braces;
+`packages/compile/test/apply.kicad.test.ts` now expects the later autoplace to succeed.
+
 ### G30–G34 · Found by the PCBGolf board (fabdesk, 2026-09-14)
 
 commaai's PCBGolf board (238 parts, 196 nets, an LQFP-144 and four vertical USB-C ports; the

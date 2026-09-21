@@ -241,7 +241,10 @@ describe.skipIf(!haveKicad)("compile jobs + kicad-cli api-server", () => {
     const root = await (await kicad.currentSchematic())!.rootSheet();
     expect((await root.getSymbols()).map((symbol) => symbol.reference).sort()).toEqual(["R1", "R2"]);
     expect((await root.getAllItems()).some((item) => item.id === preservedWireId)).toBe(true);
-    expect((await (await kicad.currentSchematic())!.getWires(root.scope)).length).toBe(5);
+    // The rebuild draws the adopted wire's twin on top of it; since upstream KiCad 895541a847 the
+    // API commit runs eeschema's connectivity cleanup, which merges the overlapping segment into
+    // the manual one (older servers kept both, giving 5).
+    expect((await (await kicad.currentSchematic())!.getWires(root.scope)).length).toBe(4);
   }, 60_000);
 
   test("an ERC-invalid schematic fails before the board update", async () => {

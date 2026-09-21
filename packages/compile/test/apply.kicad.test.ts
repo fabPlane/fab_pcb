@@ -307,7 +307,8 @@ describe.skipIf(!haveKicad())("applyNetlist + kicad-cli api-server", () => {
     expect(toMm(Number(cls?.board?.clearance?.valueNm ?? 0))).toBeCloseTo(0.25, 6);
     expect(toMm(Number(cls?.board?.viaStack?.copperLayers[0]?.size?.xNm ?? 0))).toBeCloseTo(1, 6);
     expect(toMm(Number(cls?.board?.viaStack?.drill?.diameter?.xNm ?? 0))).toBeCloseTo(0.2, 6);
-    // G29: a footprint imported after SetNetClasses cannot be autoplaced; the compile warns and goes on.
+    // G29 (fixed by upstream 895541a847: SetNetClasses now notifies the board handler, so the
+    // footprint imported afterwards autoplaces like any other). The compile used to warn here.
     const later = await applyNetlist(
       board,
       {
@@ -317,7 +318,7 @@ describe.skipIf(!haveKicad())("applyNetlist + kicad-cli api-server", () => {
       { netlistPath: join(projectDir, ".fp-pcb", "compile.net"), autoplace: true },
     );
     expect(later.footprintsAdded).toBe(1);
-    expect(later.diagnostics.map((d) => d.code)).toEqual(["autoplace_failed"]);
+    expect(later.diagnostics).toEqual([]);
     expect((await board.getFootprints()).map((f) => f.reference).sort()).toEqual(["R1", "R2", "R3"]);
   }, 120_000);
 });

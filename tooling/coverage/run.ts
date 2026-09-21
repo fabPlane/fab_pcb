@@ -271,9 +271,7 @@ export async function analyze(src = kicadSrc()): Promise<CoverageResult> {
     for (const msg of file.messages) {
       const regs = byRequest.get(msg.typeName) ?? [];
       const isRequest =
-        regs.length > 0 ||
-        REQUEST_DESPITE_SUFFIX.has(msg.name) ||
-        (!NON_REQUEST_SUFFIX.test(msg.name) && REQUEST_VERB.test(msg.name));
+        regs.length > 0 || REQUEST_DESPITE_SUFFIX.has(msg.name) || (!NON_REQUEST_SUFFIX.test(msg.name) && REQUEST_VERB.test(msg.name));
       if (!isRequest) {
         skipped.push(msg.typeName);
         continue;

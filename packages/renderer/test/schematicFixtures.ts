@@ -2,8 +2,9 @@
  * Hand-written schematic items in protobuf-es message shape (camelCase, bigint nm, numeric
  * enums, `{ case, value }` oneofs), the way @fp-pcb/client hands them to the renderer.
  * Symbol definition children are decoded messages (`$typeName`), as the client's
- * `unpackAny` produces; pin positions follow the API convention (absolute sheet coordinates)
- * unless `pinsRelative` is set.
+ * `unpackAny` produces; pin positions follow the API convention (library coordinates, relative to
+ * the symbol origin and untransformed, since upstream KiCad 3cbac44524) unless `pinsAbsolute` is
+ * set, which pre-transforms them to sheet coordinates the way older servers sent them.
  */
 import type { StoredItemLike } from '../src/core/host.js';
 import { MemoryStore, a, d, id, v } from './fixtures.js';
@@ -102,8 +103,8 @@ export interface SymbolOpts {
   mirrorY?: boolean;
   dnp?: boolean;
   unit?: number;
-  /** keep pin positions in library coordinates (adapter option symbolPinsAbsolute: false) */
-  pinsRelative?: boolean;
+  /** pre-transform pin positions to sheet coordinates (adapter option symbolPinsAbsolute: true) */
+  pinsAbsolute?: boolean;
   showPinNames?: boolean;
   showPinNumbers?: boolean;
   pinNameOffsetMm?: number;
@@ -124,9 +125,9 @@ export function symbol(
 ): StoredItemLike {
   const orientation = opts.orientation ?? 1;
   const pinItems = pins.map((p, i) => {
-    const [tx, ty] = opts.pinsRelative ? [p.x, p.y] : kicadTransformPoint(p.x, p.y, orientation, !!opts.mirrorX, !!opts.mirrorY);
+    const [tx, ty] = opts.pinsAbsolute ? kicadTransformPoint(p.x, p.y, orientation, !!opts.mirrorX, !!opts.mirrorY) : [p.x, p.y];
     return {
-      item: pin(`${kiid}-pin${i + 1}`, p, opts.pinsRelative ? tx : xMm + tx, opts.pinsRelative ? ty : yMm + ty),
+      item: pin(`${kiid}-pin${i + 1}`, p, opts.pinsAbsolute ? xMm + tx : tx, opts.pinsAbsolute ? yMm + ty : ty),
       unit: { unit: 0 },
       bodyStyle: { style: 0 },
       isPrivate: false,

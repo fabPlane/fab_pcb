@@ -56,11 +56,12 @@ export async function applyBoardConstraints(board: Board, rules: BoardRules): Pr
 
 /**
  * The `Default` net class (`SetNetClasses`, merge mode; fields the spec leaves out keep their
- * values). **Run it after placing**: in the fork at `280274cc3d`, once `SetNetClasses` has run in a
- * session, `AutoplaceFootprints` fails with `basic_string` on every footprint imported afterwards
- * (existing footprints still place; save, refill, ratsnest and DRC are fine) — gap G29 in
- * `docs/04-ipc-gaps.md`. The job therefore sets the net class at the end of each compile and
- * `applyNetlist` turns a failed autoplace into the `autoplace_failed` warning.
+ * values). It runs after placing: in the fork at `280274cc3d`, once `SetNetClasses` had run in a
+ * session, `AutoplaceFootprints` failed with `basic_string` on every footprint imported afterwards
+ * — gap G29 in `docs/04-ipc-gaps.md`. Upstream `895541a847` (2026-09-21 sync) fixed that: the
+ * board handler is now told when the project's net settings change. The ordering is kept because
+ * it is harmless, and `applyNetlist` still turns a failed autoplace into the `autoplace_failed`
+ * warning.
  */
 export async function applyDefaultNetClass(kicad: KiCad, rules: BoardRules): Promise<string[]> {
   const lines: string[] = [];

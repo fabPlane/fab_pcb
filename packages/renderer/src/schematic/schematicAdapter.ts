@@ -172,9 +172,11 @@ export interface SchematicAdapterContext {
   /** bbox of another store item (groups) */
   itemBBox?: (id: string) => Box | undefined;
   /**
-   * Pin positions inside `definition.items` are already transformed to sheet coordinates
-   * (true for `GetItems` output: SCH_SYMBOL pins serialise `GetPosition()`). Set false for
-   * pins in library coordinates (symbols built from a library definition).
+   * Pin positions inside `definition.items` are library coordinates (relative to the symbol
+   * origin, untransformed) unless this is true. That is the API's frame since upstream KiCad
+   * `3cbac44524` ("instance things are in sheet space, definition things are in local space":
+   * `SCH_PIN::Serialize` packs `GetLocalPosition()`); older servers sent sheet coordinates, for
+   * which `symbolPinsAbsolute: true` keeps working.
    */
   symbolPinsAbsolute?: boolean;
   /** draw hidden pins / fields on `schematic.hidden` (eeschema "show hidden ..." options) */
@@ -1385,10 +1387,9 @@ export function pinLayout(pin: SchPinLike, index: number, s: SymbolInfo, c: Ctx)
   const libOrient = pinOrientationFromEnum(pin.orientation);
   const orient = pinDrawOrientation(libOrient, s.t);
   const rawPos = vec(pin.position);
-  const pos =
-    c.ctx.symbolPinsAbsolute === false
-      ? vAdd(s.pos, { x: s.t.x1 * rawPos.x + s.t.y1 * rawPos.y, y: s.t.x2 * rawPos.x + s.t.y2 * rawPos.y })
-      : rawPos;
+  const pos = c.ctx.symbolPinsAbsolute
+    ? rawPos
+    : vAdd(s.pos, { x: s.t.x1 * rawPos.x + s.t.y1 * rawPos.y, y: s.t.x2 * rawPos.x + s.t.y2 * rawPos.y });
   const length = dist(pin.length);
   const root = vAdd(pos, vScale(pinDirection(orient), length));
   const shown = pinShown(pin);
