@@ -57,13 +57,20 @@ describe.skipIf(!haveKicad)("coverage against the pinned KiCad checkout (git HEA
     expect(renderMarkdown(r)).toBe(await readFile(join(REPO_DIR, "docs", "api-coverage.md"), "utf8"));
     const s = summarize(r.commands);
     // The fork keeps adding commands, so pin the shape rather than the count: every command is
-    // either headless or one of the GUI-only ones below, and nothing is partial or unregistered.
-    // The GUI-only set is deliberate — it is editor state a web page owns itself — so a change to
-    // it should be a conscious edit here, not a silently drifting number.
+    // either headless, one of the GUI-only ones below, or one of the protos upstream defined
+    // without a handler; nothing is partial. Both sets are deliberate — GUI-only is editor state a
+    // web page owns itself, and the unregistered ones are upstream's library-table protos whose
+    // job the series' own GetLibraryTables / AddLibraryTableRow / RemoveLibraryTableRow do — so a
+    // change to either should be a conscious edit here, not a silently drifting number.
     expect(s.total).toBeGreaterThanOrEqual(115);
-    expect(s.ok + s["gui-only"]).toBe(s.total);
+    expect(s.ok + s["gui-only"] + s.unregistered).toBe(s.total);
     expect(s.partial).toBe(0);
-    expect(s.unregistered).toBe(0);
+    expect(
+      r.commands
+        .filter((c) => c.headless === "unregistered")
+        .map((c) => c.command)
+        .sort(),
+    ).toEqual(["AddLibraryTableEntry", "DeleteLibraryTableEntry", "GetLibraryTable", "SearchLibraries", "UpdateLibraryTableEntry"]);
     expect(
       r.commands
         .filter((c) => c.headless === "gui-only")
@@ -72,6 +79,7 @@ describe.skipIf(!haveKicad)("coverage against the pinned KiCad checkout (git HEA
     ).toEqual([
       "AddToSelection",
       "ClearSelection",
+      "FocusOnItems",
       "GetActiveLayer",
       "GetBoardEditorAppearanceSettings",
       "GetSelection",

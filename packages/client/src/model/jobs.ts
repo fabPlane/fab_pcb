@@ -19,6 +19,7 @@ import {
   RunBoardJobExportIpcD356Schema,
   RunBoardJobExportODBSchema,
   RunBoardJobExportPdfSchema,
+  RunBoardJobExportPngSchema,
   RunBoardJobExportPositionSchema,
   RunBoardJobExportPsSchema,
   RunBoardJobExportRenderSchema,
@@ -28,6 +29,7 @@ import {
   RunSchematicJobExportDxfSchema,
   RunSchematicJobExportNetlistSchema,
   RunSchematicJobExportPdfSchema,
+  RunSchematicJobExportPngSchema,
   RunSchematicJobExportPsSchema,
   RunSchematicJobExportSvgSchema,
   type GetJobStatusResponse,
@@ -246,6 +248,12 @@ export class BoardJobs extends Jobs {
       cmd.runBoardJobExportPdf(this.doc.client, { ...args, jobSettings }),
     );
   }
+  /** `RunBoardJobExportPng` (upstream, since 11.0): a raster plot; `dpi` and `antialiasing` in `args`. */
+  exportPng(outputPath: string, args: Args<typeof RunBoardJobExportPngSchema> = {}, opts?: JobOptions): Promise<JobResult> {
+    return this.run("RunBoardJobExportPng", outputPath, opts, (jobSettings) =>
+      cmd.runBoardJobExportPng(this.doc.client, { ...args, jobSettings }),
+    );
+  }
   exportPs(outputPath: string, args: Args<typeof RunBoardJobExportPsSchema> = {}, opts?: JobOptions): Promise<JobResult> {
     return this.run("RunBoardJobExportPs", outputPath, opts, (jobSettings) =>
       cmd.runBoardJobExportPs(this.doc.client, { ...args, jobSettings }),
@@ -307,6 +315,12 @@ export class SchematicJobs extends Jobs {
   exportPdf(outputPath: string, args: Args<typeof RunSchematicJobExportPdfSchema> = {}, opts?: JobOptions): Promise<JobResult> {
     return this.run("RunSchematicJobExportPdf", outputPath, opts, (jobSettings) =>
       cmd.runSchematicJobExportPdf(this.doc.client, { ...args, jobSettings }),
+    );
+  }
+  /** `RunSchematicJobExportPng` (upstream, since 11.0): a raster plot; `dpi` and `antialiasing` in `args`. */
+  exportPng(outputPath: string, args: Args<typeof RunSchematicJobExportPngSchema> = {}, opts?: JobOptions): Promise<JobResult> {
+    return this.run("RunSchematicJobExportPng", outputPath, opts, (jobSettings) =>
+      cmd.runSchematicJobExportPng(this.doc.client, { ...args, jobSettings }),
     );
   }
   exportPs(outputPath: string, args: Args<typeof RunSchematicJobExportPsSchema> = {}, opts?: JobOptions): Promise<JobResult> {

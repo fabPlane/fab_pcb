@@ -42,6 +42,10 @@ import {
   StatsOutputFormat,
   UnitSystem,
   WizardGenerationStatus,
+  LibraryCommandStatus_Code,
+  LibraryLoadStatus,
+  LibraryTableScope,
+  LibraryType,
   type DrcResultsResponse,
   type ErcResultsResponse,
   type JobProgress,
@@ -199,6 +203,28 @@ function guiOnlyTest(name: string, send: () => Promise<unknown>): void {
 }
 
 /**
+ * A command upstream defines in a .proto without registering a handler anywhere (its coverage row
+ * says `unregistered`): the server must answer AS_UNHANDLED, never crash or hang, and the row is
+ * recorded as skipped so it counts neither as headless coverage nor as a failure.
+ */
+function unregisteredTest(name: string, send: () => Promise<unknown>): void {
+  cmdTest(name, async () => {
+    const err = await send().then(
+      () => undefined,
+      (e: unknown) => e,
+    );
+    if (err === undefined) {
+      record(name, "pass", "unexpectedly handled: upstream registered a handler, update the coverage allow-list");
+      return;
+    }
+    expect(KiCadApiError.is(err)).toBe(true);
+    const e = err as KiCadApiError;
+    expect(e.code).toBe(ApiStatusCode.AS_UNHANDLED);
+    record(name, "skip", `unregistered upstream (no handler): ${e.codeName}`);
+  });
+}
+
+/**
  * KiCad keeps its API handlers in a pointer-ordered std::set, so a command registered by both the
  * board and the schematic handler reaches whichever comes first; that handler answers AS_BAD_REQUEST
  * ("the requested document ... is not open") for the other editor's document instead of
@@ -345,6 +371,7 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
   schJob("RunSchematicJobExportSvg", (out) => sch.jobs.exportSvg(`${out}/`), "");
   schJob("RunSchematicJobExportDxf", (out) => sch.jobs.exportDxf(`${out}/`), "");
   schJob("RunSchematicJobExportPdf", (out) => sch.jobs.exportPdf(out), ".pdf");
+  schJob("RunSchematicJobExportPng", (out) => sch.jobs.exportPng(`${out}/`, { dpi: 150 }), "");
   schJob("RunSchematicJobExportPs", (out) => sch.jobs.exportPs(`${out}/`), "");
   cmdTest(
     "RunSchematicJobExportNetlist",
@@ -595,6 +622,32 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     const nc = await project.netClasses();
     expect(nc.some((n) => n.name === "HV")).toBe(true);
   });
+  cmdTest("SetNetClassAssignments", async () => {
+    // Upstream (since 11.0): net -> netclass and pattern -> netclass assignments live in the
+    // project's net settings; the classes named must exist (HV was added by SetNetClasses above).
+    const projectSpec = project.specifier.project;
+    await cmd.setNetClassAssignments(c(), {
+      project: projectSpec,
+      mergeMode: MapMergeMode.MMM_MERGE,
+      assignments: [{ net: netNames[0]!, netclasses: ["HV"] }],
+      patternAssignments: [{ pattern: "/CLK*", netclass: "HV" }],
+    });
+    const unknown = await cmd
+      .setNetClassAssignments(c(), { project: projectSpec, assignments: [{ net: netNames[0]!, netclasses: ["NoSuchClass"] }] })
+      .then(
+        () => undefined,
+        (e: unknown) => e,
+      );
+    expect(KiCadApiError.is(unknown, ApiStatusCode.AS_BAD_REQUEST)).toBe(true);
+    return `${netNames[0]} -> HV, /CLK* -> HV; unknown netclass AS_BAD_REQUEST`;
+  });
+  cmdTest("GetNetClassAssignments", async () => {
+    const r = await cmd.getNetClassAssignments(c(), { project: project.specifier.project });
+    const net = r.assignments.find((a) => a.net === netNames[0]);
+    expect(net?.netclasses).toEqual(["HV"]);
+    expect(r.patternAssignments.some((p) => p.pattern === "/CLK*" && p.netclass === "HV")).toBe(true);
+    return `${r.assignments.length} net assignment(s), ${r.patternAssignments.length} pattern assignment(s)`;
+  });
   cmdTest("SetTextVariables", async () => {
     await project.setTextVariables({ KWEB: "bar" }, MapMergeMode.MMM_MERGE);
   });
@@ -689,6 +742,49 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
       );
       expect(KiCadApiError.is(again, ApiStatusCode.AS_BAD_REQUEST)).toBe(true);
       return "refuses to overwrite an existing board (AS_BAD_REQUEST); board + schematic created in a stub-less project, opened and editable";
+    },
+    120_000,
+  );
+  cmdTest(
+    "CreateDocument",
+    async () => {
+      // Upstream (since 11.0): an in-memory board or schematic, nothing on disk until SaveDocument;
+      // creating it implicitly opens (in memory) the project next to it. On the scratch server so
+      // the kitchen-sink project stays current here.
+      const s = await scratchServer();
+      // Earlier scratch cases leave their documents open and modified; a modified document of
+      // the same type is exactly what CreateDocument refuses to replace, so start clean.
+      await s.kicad.closeAllDocuments(true);
+      const dir = join(scratchDir, "created");
+      await mkdir(dir, { recursive: true });
+      const path = join(dir, "created");
+      const created = await cmd.createDocument(s.kicad.client, { type: DocumentType.DOCTYPE_PCB, path });
+      expect(created.document?.type).toBe(DocumentType.DOCTYPE_PCB);
+      expect(created.document?.project?.name).toBe("created");
+      expect(existsSync(`${path}.kicad_pcb`)).toBe(false);
+      const b = s.kicad.boardFrom(created.document!);
+      expect(await b.getAllItems()).toEqual([]);
+      const t = new Track();
+      t.start = { x: mm(1), y: mm(1) };
+      t.end = { x: mm(5), y: mm(1) };
+      t.width = mm(0.25);
+      t.layerId = BoardLayer.BL_F_Cu;
+      expect((await b.commit("first track", (tx) => tx.create([t]))).created.length).toBe(1);
+      // Replacing a modified document is refused until it is saved or reverted.
+      const refused = await cmd.createDocument(s.kicad.client, { type: DocumentType.DOCTYPE_PCB, path: join(dir, "other") }).then(
+        () => undefined,
+        (e: unknown) => e,
+      );
+      expect(KiCadApiError.is(refused, ApiStatusCode.AS_BAD_REQUEST)).toBe(true);
+      expect((refused as KiCadApiError).serverMessage).toMatch(/save or revert/);
+      await b.save();
+      expect(existsSync(`${path}.kicad_pcb`)).toBe(true);
+      expect(existsSync(`${path}.kicad_pro`)).toBe(true);
+      const sc = await cmd.createDocument(s.kicad.client, { type: DocumentType.DOCTYPE_SCHEMATIC, path });
+      expect(sc.document?.type).toBe(DocumentType.DOCTYPE_SCHEMATIC);
+      expect((await s.kicad.schematicFrom(sc.document!).sheets()).length).toBeGreaterThanOrEqual(1);
+      await s.kicad.closeAllDocuments();
+      return "board created in memory, editable, refused to replace while modified, saved with its project; schematic created next to it";
     },
     120_000,
   );
@@ -1294,9 +1390,10 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     // COLOR4D 0..1 -> 0..255: KiCad's default F.Cu is #C83434 and its wire colour #009600.
     expect(def.colors["board.copper.f"]).toEqual({ r: 200, g: 52, b: 52, a: 1 });
     expect(def.colors["schematic.wire"]).toEqual({ r: 0, g: 150, b: 0, a: 1 });
-    // Layer ids are the KiCad enums: F_Cu = 0, LAYER_WIRE = 1102.
+    // Layer ids are the KiCad enums: F_Cu = 0, LAYER_WIRE = SCH_LAYER_ID_START (1102 up to
+    // upstream 19174c2b8b, which added GAL layers for drill maps and charts; 1231 since).
     expect(def.layers["board.copper.f"]).toBe(0);
-    expect(def.layers["schematic.wire"]).toBe(1102);
+    expect(def.layers["schematic.wire"]).toBe(1231);
     // An empty name means the built-in default; the lookup is case-insensitive on the display name.
     const empty = await k().settings.colorTheme();
     expect(empty.name).toBe("KiCad Default");
@@ -1429,6 +1526,7 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     expect(r.status).toBe(CrossProbeStatus.CPS_OK);
     return "headless no-op CPS_OK";
   });
+  guiOnlyTest("FocusOnItems", () => cmd.focusOnItems(c(), { document: board.specifier, items: [{ value: firstFp.id }] }));
   guiOnlyTest("HighlightNets", () => cmd.highlightNets(c(), { netName: netNames.slice(0, 1) }));
   guiOnlyTest("SyncSelection", () =>
     cmd.syncSelection(c(), { items: [{ spec: { case: "footprint", value: { reference: firstFp.reference } } }] }),
@@ -1457,6 +1555,71 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     const bad = fp.filter((r) => !r.ok).map((r) => `${r.nickname}: ${r.error}`);
     return `footprint ${fp.length} rows (${fpProject.length} project), symbol ${sym.length} (${symProject.length} project), design block ${db.length}; ${bad.length} rows failed to resolve${bad.length ? `: ${bad.slice(0, 3).join("; ")}` : ""}`;
   });
+  // Upstream's library manager (since 11.0): one API_HANDLER_LIBRARIES per table type; the
+  // footprint and symbol ones are registered by their kifaces when a document opens, the design
+  // block one by the api-server host.
+  cmdTest("GetLibraryStatuses", async () => {
+    const fp = await cmd.getLibraryStatuses(c(), { types: [LibraryType.LT_FOOTPRINT], scope: LibraryTableScope.LTS_BOTH });
+    expect(fp.libraries.some((l) => l.entry?.nickname === "Resistor_SMD")).toBe(true);
+    const sym = await cmd.getLibraryStatuses(c(), { types: [LibraryType.LT_SYMBOL], scope: LibraryTableScope.LTS_PROJECT });
+    expect(sym.libraries.map((l) => l.entry?.nickname)).toContain("Device");
+    const byStatus = new Map<number, number>();
+    for (const l of [...fp.libraries, ...sym.libraries]) byStatus.set(l.status, (byStatus.get(l.status) ?? 0) + 1);
+    return `footprint ${fp.libraries.length}, symbol (project) ${sym.libraries.length}; ${[...byStatus].map(([k, v]) => `${LibraryLoadStatus[k]}=${v}`).join(" ")}`;
+  });
+  cmdTest("LoadAllLibraries", async () => {
+    const r = await cmd.loadAllLibraries(c(), { type: [LibraryType.LT_FOOTPRINT, LibraryType.LT_SYMBOL] });
+    expect(r.code).toBe(LibraryCommandStatus_Code.LCS_OK);
+    return LibraryCommandStatus_Code[r.code]!;
+  });
+  cmdTest("ReloadLibrary", async () => {
+    const r = await cmd.reloadLibrary(c(), {
+      type: LibraryType.LT_FOOTPRINT,
+      scope: LibraryTableScope.LTS_PROJECT,
+      nickname: ["Resistor_SMD"],
+    });
+    expect(r.code).toBe(LibraryCommandStatus_Code.LCS_OK);
+    const missing = await cmd.reloadLibrary(c(), {
+      type: LibraryType.LT_FOOTPRINT,
+      scope: LibraryTableScope.LTS_PROJECT,
+      nickname: ["NoSuchLibrary"],
+    });
+    expect(missing.code).not.toBe(LibraryCommandStatus_Code.LCS_OK);
+    return `Resistor_SMD ${LibraryCommandStatus_Code[r.code]}; unknown nickname ${LibraryCommandStatus_Code[missing.code]}`;
+  });
+  cmdTest("GetLibraryItems", async () => {
+    const r = await cmd.getLibraryItems(c(), { type: LibraryType.LT_FOOTPRINT, nickname: ["Resistor_SMD"] });
+    expect(r.items.some((i) => i.libraryNickname === "Resistor_SMD" && i.entryName === "R_0603_1608Metric")).toBe(true);
+    const syms = await cmd.getLibraryItems(c(), { type: LibraryType.LT_SYMBOL, nickname: ["Device"] });
+    expect(syms.items.length).toBeGreaterThan(0);
+    return `Resistor_SMD ${r.items.length} footprints, Device ${syms.items.length} symbols`;
+  });
+  cmdTest("GetItemsFromLibrary", async () => {
+    const r = await cmd.getItemsFromLibrary(c(), {
+      type: LibraryType.LT_FOOTPRINT,
+      document: board.specifier,
+      itemIds: [{ libraryNickname: "Resistor_SMD", entryName: "R_0603_1608Metric" }],
+    });
+    expect(r.items.length).toBe(1);
+    return `${r.items.length} item(s): ${r.items.map((i) => i.typeUrl.split(".").pop()).join(", ")}`;
+  });
+  unregisteredTest("GetLibraryTable", () =>
+    cmd.getLibraryTable(c(), { type: LibraryType.LT_FOOTPRINT, scope: LibraryTableScope.LTS_PROJECT }),
+  );
+  unregisteredTest("SearchLibraries", () => cmd.searchLibraries(c(), { type: LibraryType.LT_FOOTPRINT, query: "0603" }));
+  unregisteredTest("AddLibraryTableEntry", () =>
+    cmd.addLibraryTableEntry(c(), {
+      entry: { nickname: "Nope", uri: "/nowhere.pretty", type: LibraryType.LT_FOOTPRINT, scope: LibraryTableScope.LTS_PROJECT },
+    }),
+  );
+  unregisteredTest("UpdateLibraryTableEntry", () =>
+    cmd.updateLibraryTableEntry(c(), {
+      entry: { nickname: "Nope", uri: "/nowhere.pretty", type: LibraryType.LT_FOOTPRINT, scope: LibraryTableScope.LTS_PROJECT },
+    }),
+  );
+  unregisteredTest("DeleteLibraryTableEntry", () =>
+    cmd.deleteLibraryTableEntry(c(), { type: LibraryType.LT_FOOTPRINT, scope: LibraryTableScope.LTS_PROJECT, nickname: "Nope" }),
+  );
   cmdTest("ListLibraryEntries", async () => {
     const fps = await k().libraries.footprints.entries("Resistor_SMD", "0603");
     expect(fps.length).toBeGreaterThan(0);
@@ -1877,6 +2040,11 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
   );
   boardJob("RunBoardJobExportDxf", (out) => board.jobs.exportDxf(out, { plotSettings: { layers: [BoardLayer.BL_Edge_Cuts] } }), ".dxf");
   boardJob("RunBoardJobExportPdf", (out) => board.jobs.exportPdf(out, { plotSettings: { layers: [BoardLayer.BL_F_Cu] } }), ".pdf");
+  boardJob(
+    "RunBoardJobExportPng",
+    (out) => board.jobs.exportPng(out, { plotSettings: { layers: [BoardLayer.BL_F_Cu] }, dpi: 150 }),
+    ".png",
+  );
   boardJob("RunBoardJobExportPs", (out) => board.jobs.exportPs(out, { plotSettings: { layers: [BoardLayer.BL_F_Cu] } }), ".ps");
   boardJob(
     "RunBoardJobExportGerbers",
@@ -2091,6 +2259,38 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     // put the references back for the tests that follow
     await sch.annotate({ scope: "all", resetExisting: true, sortOrder: "x", numbering: "incremental" });
     return `${r.annotatedCount} of ${r.symbolCount} symbols cleared to "?" (${before.slice(0, 3).join(", ")} -> ${cleared.slice(0, 3).join(", ")}); "${r.messages[0]}"`;
+  });
+  cmdTest("PlaceSymbolFromLibrary", async () => {
+    // Upstream (since 11.0): loads the symbol from the project's tables and places it on the
+    // sheet the header names, annotating it unless a reference is given. Undone afterwards.
+    const symName = /^\s*\(symbol "([^"]+)"/m.exec(await readFile(QA_DEVICE_LIB, "utf8"))![1]!;
+    const before = (await sch.getSymbols()).length;
+    const r = await cmd.placeSymbolFromLibrary(c(), {
+      header: sch.header(),
+      libId: { libraryNickname: "Device", entryName: symName },
+      position: toVector2({ x: mm(200), y: mm(100) }),
+      reference: "U999",
+    });
+    expect(r.item).toBeDefined();
+    const symbols = await sch.getSymbols();
+    expect(symbols.length).toBe(before + 1);
+    const placed = symbols.find((sy) => sy.reference === "U999");
+    expect(placed).toBeDefined();
+    expect(placed!.libraryId).toBe(`Device:${symName}`);
+    const bad = await cmd
+      .placeSymbolFromLibrary(c(), {
+        header: sch.header(),
+        libId: { libraryNickname: "Device", entryName: "NoSuchSymbol" },
+        position: toVector2({ x: 0, y: 0 }),
+      })
+      .then(
+        () => undefined,
+        (e: unknown) => e,
+      );
+    expect(KiCadApiError.is(bad, ApiStatusCode.AS_BAD_REQUEST)).toBe(true);
+    await sch.undo();
+    expect((await sch.getSymbols()).length).toBe(before);
+    return `placed Device:${symName} as U999, undone; unknown symbol AS_BAD_REQUEST`;
   });
   cmdTest("Annotate", async () => {
     // a fully annotated schematic is a no-op
@@ -2348,6 +2548,37 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     expect(await countOf(KiCadObjectType.KOT_PCB_TRACE)).toBeGreaterThan(0);
     return `texts ${deletedTexts} deleted and restored by Undo; Edge.Cuts shape filter removed ${onEdgeCuts} of ${shapesBefore} shapes without board_edges and ${withEdges} with it; ${deletedBarcodes} barcode(s); an empty type list is AS_BAD_REQUEST; tracks/arcs/vias/zones ${tracks} deleted and restored`;
   });
+  cmdTest("PlaceFootprintFromLibrary", async () => {
+    // Upstream (since 11.0): loads the footprint from the project's tables and places it as one
+    // commit; the placed instance comes back with fresh UUIDs. Undone afterwards so the board's
+    // footprint set stays what the other checks expect.
+    const before = (await board.getFootprints()).length;
+    const r = await cmd.placeFootprintFromLibrary(c(), {
+      header: board.header(),
+      libId: { libraryNickname: "Resistor_SMD", entryName: "R_0603_1608Metric" },
+      position: toVector2({ x: mm(120), y: mm(120) }),
+      orientation: { valueDegrees: 90 },
+      layer: BoardLayer.BL_B_Cu,
+    });
+    expect(r.item).toBeDefined();
+    const placed = (await board.getFootprints()).find((f) => f.libraryId === "Resistor_SMD:R_0603_1608Metric" && f.position.x === mm(120));
+    expect(placed).toBeDefined();
+    expect((await board.getFootprints()).length).toBe(before + 1);
+    const bad = await cmd
+      .placeFootprintFromLibrary(c(), {
+        header: board.header(),
+        libId: { libraryNickname: "Resistor_SMD", entryName: "NoSuchFootprint" },
+        position: toVector2({ x: 0, y: 0 }),
+      })
+      .then(
+        () => undefined,
+        (e: unknown) => e,
+      );
+    expect(KiCadApiError.is(bad, ApiStatusCode.AS_BAD_REQUEST)).toBe(true);
+    await board.undo();
+    expect((await board.getFootprints()).length).toBe(before);
+    return `placed ${placed!.reference || "(unannotated)"} on B.Cu at 90deg, undone; unknown footprint AS_BAD_REQUEST`;
+  });
   cmdTest("UpdateFootprintsFromLibrary", async () => {
     const r = await board.updateFootprintsFromLibrary([], { onlyChanged: true });
     expect(r.updatedCount + r.unchangedCount).toBeGreaterThan(0);
@@ -2531,7 +2762,7 @@ async function printSummary(): Promise<void> {
   const lines = [
     "",
     `=== ${KICAD_TRANSPORT} conformance (KiCad ${KICAD_COMMIT.slice(0, 10)}) ===`,
-    `${rows.length} commands: ${count(rows, "pass")} pass, ${count(rows, "skip")} skip (gui-only), ${count(rows, "fail")} fail; headless ${headlessPass}/${headlessTotal} green; ${extras.length} extra checks: ${count(extras, "pass")} pass, ${count(extras, "skip")} skip, ${count(extras, "fail")} fail; ${bugNotes} with KICAD-BUG notes`,
+    `${rows.length} commands: ${count(rows, "pass")} pass, ${count(rows, "skip")} skip (gui-only or unregistered upstream), ${count(rows, "fail")} fail; headless ${headlessPass}/${headlessTotal} green; ${extras.length} extra checks: ${count(extras, "pass")} pass, ${count(extras, "skip")} skip, ${count(extras, "fail")} fail; ${bugNotes} with KICAD-BUG notes`,
     ...restarts.map((r) => `  server restarted ${r}`),
     ...rows.map((r) => `  ${r.status.padEnd(4)} ${r.command.padEnd(34)} ${r.group.padEnd(17)} ${r.note}`),
     ...extras.map((r) => `  ${r.status.padEnd(4)} ${r.name.padEnd(52)} extra             ${r.note}`),

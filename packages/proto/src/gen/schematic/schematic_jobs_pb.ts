@@ -22,7 +22,7 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
-import type { RunJobSettings, RunJobSettingsJson } from "../common/types/jobs_pb.js";
+import type { AntialiasingMode, AntialiasingModeJson, RunJobSettings, RunJobSettingsJson } from "../common/types/jobs_pb.js";
 import { file_common_types_jobs } from "../common/types/jobs_pb.js";
 import type { Message } from "@bufbuild/protobuf";
 
@@ -30,7 +30,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file schematic/schematic_jobs.proto.
  */
 export const file_schematic_schematic_jobs: GenFile = /*@__PURE__*/
-  fileDesc("Ch5zY2hlbWF0aWMvc2NoZW1hdGljX2pvYnMucHJvdG8SFGtpYXBpLnNjaGVtYXRpYy5qb2JzIsoCChVTY2hlbWF0aWNQbG90U2V0dGluZ3MSFQoNZHJhd2luZ19zaGVldBgBIAEoCRIUCgxkZWZhdWx0X2ZvbnQYAiABKAkSDwoHdmFyaWFudBgDIAEoCRIQCghwbG90X2FsbBgEIAEoCBIaChJwbG90X2RyYXdpbmdfc2hlZXQYBSABKAgSEgoKcGxvdF9wYWdlcxgGIAMoCRIVCg1zaG93X2hvcF9vdmVyGAcgASgIEhcKD2JsYWNrX2FuZF93aGl0ZRgIIAEoCBI9CglwYWdlX3NpemUYCSABKA4yKi5raWFwaS5zY2hlbWF0aWMuam9icy5TY2hlbWF0aWNKb2JQYWdlU2l6ZRIcChR1c2VfYmFja2dyb3VuZF9jb2xvchgKIAEoCBIVCg1taW5fcGVuX3dpZHRoGAsgASgFEg0KBXRoZW1lGAwgASgJIpgBChhSdW5TY2hlbWF0aWNKb2JFeHBvcnRTdmcSOAoMam9iX3NldHRpbmdzGAEgASgLMiIua2lhcGkuY29tbW9uLnR5cGVzLlJ1bkpvYlNldHRpbmdzEkIKDXBsb3Rfc2V0dGluZ3MYAiABKAsyKy5raWFwaS5zY2hlbWF0aWMuam9icy5TY2hlbWF0aWNQbG90U2V0dGluZ3MimAEKGFJ1blNjaGVtYXRpY0pvYkV4cG9ydER4ZhI4Cgxqb2Jfc2V0dGluZ3MYASABKAsyIi5raWFwaS5jb21tb24udHlwZXMuUnVuSm9iU2V0dGluZ3MSQgoNcGxvdF9zZXR0aW5ncxgCIAEoCzIrLmtpYXBpLnNjaGVtYXRpYy5qb2JzLlNjaGVtYXRpY1Bsb3RTZXR0aW5ncyLnAQoYUnVuU2NoZW1hdGljSm9iRXhwb3J0UGRmEjgKDGpvYl9zZXR0aW5ncxgBIAEoCzIiLmtpYXBpLmNvbW1vbi50eXBlcy5SdW5Kb2JTZXR0aW5ncxJCCg1wbG90X3NldHRpbmdzGAIgASgLMisua2lhcGkuc2NoZW1hdGljLmpvYnMuU2NoZW1hdGljUGxvdFNldHRpbmdzEhcKD3Byb3BlcnR5X3BvcHVwcxgDIAEoCBIaChJoaWVyYXJjaGljYWxfbGlua3MYBCABKAgSGAoQaW5jbHVkZV9tZXRhZGF0YRgFIAEoCCKXAQoXUnVuU2NoZW1hdGljSm9iRXhwb3J0UHMSOAoMam9iX3NldHRpbmdzGAEgASgLMiIua2lhcGkuY29tbW9uLnR5cGVzLlJ1bkpvYlNldHRpbmdzEkIKDXBsb3Rfc2V0dGluZ3MYAiABKAsyKy5raWFwaS5zY2hlbWF0aWMuam9icy5TY2hlbWF0aWNQbG90U2V0dGluZ3MirAEKHFJ1blNjaGVtYXRpY0pvYkV4cG9ydE5ldGxpc3QSOAoMam9iX3NldHRpbmdzGAEgASgLMiIua2lhcGkuY29tbW9uLnR5cGVzLlJ1bkpvYlNldHRpbmdzEjwKBmZvcm1hdBgCIAEoDjIsLmtpYXBpLnNjaGVtYXRpYy5qb2JzLlNjaGVtYXRpY05ldGxpc3RGb3JtYXQSFAoMdmFyaWFudF9uYW1lGAMgASgJIt0BChFCT01Gb3JtYXRTZXR0aW5ncxITCgtwcmVzZXRfbmFtZRgBIAEoCRIXCg9maWVsZF9kZWxpbWl0ZXIYAiABKAkSGAoQc3RyaW5nX2RlbGltaXRlchgDIAEoCRIVCg1yZWZfZGVsaW1pdGVyGAQgASgJEhsKE3JlZl9yYW5nZV9kZWxpbWl0ZXIYBSABKAkSEQoJa2VlcF90YWJzGAYgASgIEhgKEGtlZXBfbGluZV9icmVha3MYByABKAgSHwoXaW5jbHVkZV9ieXRlX29yZGVyX21hcmsYCCABKAgiOQoIQk9NRmllbGQSDAoEbmFtZRgBIAEoCRINCgVsYWJlbBgCIAEoCRIQCghncm91cF9ieRgDIAEoCCL3AQoQQk9NRmllbGRTZXR0aW5ncxITCgtwcmVzZXRfbmFtZRgBIAEoCRIuCgZmaWVsZHMYAiADKAsyHi5raWFwaS5zY2hlbWF0aWMuam9icy5CT01GaWVsZBISCgpzb3J0X2ZpZWxkGAMgASgJEj4KDnNvcnRfZGlyZWN0aW9uGAQgASgOMiYua2lhcGkuc2NoZW1hdGljLmpvYnMuQk9NU29ydERpcmVjdGlvbhIOCgZmaWx0ZXIYBSABKAkSOgoMZmlsdGVyX3Njb3BlGAYgASgOMiQua2lhcGkuc2NoZW1hdGljLmpvYnMuQk9NRmlsdGVyU2NvcGUihwIKGFJ1blNjaGVtYXRpY0pvYkV4cG9ydEJPTRI4Cgxqb2Jfc2V0dGluZ3MYASABKAsyIi5raWFwaS5jb21tb24udHlwZXMuUnVuSm9iU2V0dGluZ3MSNwoGZm9ybWF0GAIgASgLMicua2lhcGkuc2NoZW1hdGljLmpvYnMuQk9NRm9ybWF0U2V0dGluZ3MSNgoGZmllbGRzGAMgASgLMiYua2lhcGkuc2NoZW1hdGljLmpvYnMuQk9NRmllbGRTZXR0aW5ncxITCgtleGNsdWRlX2RucBgEIAEoCBIVCg1ncm91cF9zeW1ib2xzGAUgASgIEhQKDHZhcmlhbnRfbmFtZRgGIAEoCSpQChRTY2hlbWF0aWNKb2JQYWdlU2l6ZRIQCgxTSlBTX1VOS05PV04QABINCglTSlBTX0FVVE8QARILCgdTSlBTX0E0EAISCgoGU0pQU19BEAMquQEKFlNjaGVtYXRpY05ldGxpc3RGb3JtYXQSDwoLU05GX1VOS05PV04QABIRCg1TTkZfS0lDQURfWE1MEAESEwoPU05GX0tJQ0FEX1NFWFBSEAISEgoOU05GX09SQ0FEX1BDQjIQAxIPCgtTTkZfQ0FEU1RBUhAEEg0KCVNORl9TUElDRRAFEhMKD1NORl9TUElDRV9NT0RFTBAGEgwKCFNORl9QQURTEAcSDwoLU05GX0FMTEVHUk8QCCpKChBCT01Tb3J0RGlyZWN0aW9uEg8KC0JTRF9VTktOT1dOEAASEQoNQlNEX0FTQ0VORElORxABEhIKDkJTRF9ERVNDRU5ESU5HEAIqQQoOQk9NRmlsdGVyU2NvcGUSEQoNQkZTX1JFRkVSRU5DRRAAEg8KC0JGU19WSVNJQkxFEAESCwoHQkZTX0FMTBACYgZwcm90bzM", [file_common_types_jobs]);
+  fileDesc("Ch5zY2hlbWF0aWMvc2NoZW1hdGljX2pvYnMucHJvdG8SFGtpYXBpLnNjaGVtYXRpYy5qb2JzIosDChVTY2hlbWF0aWNQbG90U2V0dGluZ3MSFQoNZHJhd2luZ19zaGVldBgBIAEoCRIUCgxkZWZhdWx0X2ZvbnQYAiABKAkSDwoHdmFyaWFudBgDIAEoCRIQCghwbG90X2FsbBgEIAEoCBIaChJwbG90X2RyYXdpbmdfc2hlZXQYBSABKAgSEgoKcGxvdF9wYWdlcxgGIAMoCRIVCg1zaG93X2hvcF9vdmVyGAcgASgIEhcKD2JsYWNrX2FuZF93aGl0ZRgIIAEoCBI9CglwYWdlX3NpemUYCSABKA4yKi5raWFwaS5zY2hlbWF0aWMuam9icy5TY2hlbWF0aWNKb2JQYWdlU2l6ZRIcChR1c2VfYmFja2dyb3VuZF9jb2xvchgKIAEoCBIVCg1taW5fcGVuX3dpZHRoGAsgASgFEg0KBXRoZW1lGAwgASgJEj8KCnNoZWV0X21vZGUYDSABKA4yKy5raWFwaS5zY2hlbWF0aWMuam9icy5TY2hlbWF0aWNKb2JTaGVldE1vZGUimAEKGFJ1blNjaGVtYXRpY0pvYkV4cG9ydFN2ZxI4Cgxqb2Jfc2V0dGluZ3MYASABKAsyIi5raWFwaS5jb21tb24udHlwZXMuUnVuSm9iU2V0dGluZ3MSQgoNcGxvdF9zZXR0aW5ncxgCIAEoCzIrLmtpYXBpLnNjaGVtYXRpYy5qb2JzLlNjaGVtYXRpY1Bsb3RTZXR0aW5ncyKYAQoYUnVuU2NoZW1hdGljSm9iRXhwb3J0RHhmEjgKDGpvYl9zZXR0aW5ncxgBIAEoCzIiLmtpYXBpLmNvbW1vbi50eXBlcy5SdW5Kb2JTZXR0aW5ncxJCCg1wbG90X3NldHRpbmdzGAIgASgLMisua2lhcGkuc2NoZW1hdGljLmpvYnMuU2NoZW1hdGljUGxvdFNldHRpbmdzIucBChhSdW5TY2hlbWF0aWNKb2JFeHBvcnRQZGYSOAoMam9iX3NldHRpbmdzGAEgASgLMiIua2lhcGkuY29tbW9uLnR5cGVzLlJ1bkpvYlNldHRpbmdzEkIKDXBsb3Rfc2V0dGluZ3MYAiABKAsyKy5raWFwaS5zY2hlbWF0aWMuam9icy5TY2hlbWF0aWNQbG90U2V0dGluZ3MSFwoPcHJvcGVydHlfcG9wdXBzGAMgASgIEhoKEmhpZXJhcmNoaWNhbF9saW5rcxgEIAEoCBIYChBpbmNsdWRlX21ldGFkYXRhGAUgASgIIpcBChdSdW5TY2hlbWF0aWNKb2JFeHBvcnRQcxI4Cgxqb2Jfc2V0dGluZ3MYASABKAsyIi5raWFwaS5jb21tb24udHlwZXMuUnVuSm9iU2V0dGluZ3MSQgoNcGxvdF9zZXR0aW5ncxgCIAEoCzIrLmtpYXBpLnNjaGVtYXRpYy5qb2JzLlNjaGVtYXRpY1Bsb3RTZXR0aW5ncyLuAQoYUnVuU2NoZW1hdGljSm9iRXhwb3J0UG5nEjgKDGpvYl9zZXR0aW5ncxgBIAEoCzIiLmtpYXBpLmNvbW1vbi50eXBlcy5SdW5Kb2JTZXR0aW5ncxJCCg1wbG90X3NldHRpbmdzGAIgASgLMisua2lhcGkuc2NoZW1hdGljLmpvYnMuU2NoZW1hdGljUGxvdFNldHRpbmdzEhAKA2RwaRgDIAEoBUgAiAEBEjoKDGFudGlhbGlhc2luZxgEIAEoDjIkLmtpYXBpLmNvbW1vbi50eXBlcy5BbnRpYWxpYXNpbmdNb2RlQgYKBF9kcGkirAEKHFJ1blNjaGVtYXRpY0pvYkV4cG9ydE5ldGxpc3QSOAoMam9iX3NldHRpbmdzGAEgASgLMiIua2lhcGkuY29tbW9uLnR5cGVzLlJ1bkpvYlNldHRpbmdzEjwKBmZvcm1hdBgCIAEoDjIsLmtpYXBpLnNjaGVtYXRpYy5qb2JzLlNjaGVtYXRpY05ldGxpc3RGb3JtYXQSFAoMdmFyaWFudF9uYW1lGAMgASgJIt0BChFCT01Gb3JtYXRTZXR0aW5ncxITCgtwcmVzZXRfbmFtZRgBIAEoCRIXCg9maWVsZF9kZWxpbWl0ZXIYAiABKAkSGAoQc3RyaW5nX2RlbGltaXRlchgDIAEoCRIVCg1yZWZfZGVsaW1pdGVyGAQgASgJEhsKE3JlZl9yYW5nZV9kZWxpbWl0ZXIYBSABKAkSEQoJa2VlcF90YWJzGAYgASgIEhgKEGtlZXBfbGluZV9icmVha3MYByABKAgSHwoXaW5jbHVkZV9ieXRlX29yZGVyX21hcmsYCCABKAgiOQoIQk9NRmllbGQSDAoEbmFtZRgBIAEoCRINCgVsYWJlbBgCIAEoCRIQCghncm91cF9ieRgDIAEoCCL3AQoQQk9NRmllbGRTZXR0aW5ncxITCgtwcmVzZXRfbmFtZRgBIAEoCRIuCgZmaWVsZHMYAiADKAsyHi5raWFwaS5zY2hlbWF0aWMuam9icy5CT01GaWVsZBISCgpzb3J0X2ZpZWxkGAMgASgJEj4KDnNvcnRfZGlyZWN0aW9uGAQgASgOMiYua2lhcGkuc2NoZW1hdGljLmpvYnMuQk9NU29ydERpcmVjdGlvbhIOCgZmaWx0ZXIYBSABKAkSOgoMZmlsdGVyX3Njb3BlGAYgASgOMiQua2lhcGkuc2NoZW1hdGljLmpvYnMuQk9NRmlsdGVyU2NvcGUihwIKGFJ1blNjaGVtYXRpY0pvYkV4cG9ydEJPTRI4Cgxqb2Jfc2V0dGluZ3MYASABKAsyIi5raWFwaS5jb21tb24udHlwZXMuUnVuSm9iU2V0dGluZ3MSNwoGZm9ybWF0GAIgASgLMicua2lhcGkuc2NoZW1hdGljLmpvYnMuQk9NRm9ybWF0U2V0dGluZ3MSNgoGZmllbGRzGAMgASgLMiYua2lhcGkuc2NoZW1hdGljLmpvYnMuQk9NRmllbGRTZXR0aW5ncxITCgtleGNsdWRlX2RucBgEIAEoCBIVCg1ncm91cF9zeW1ib2xzGAUgASgIEhQKDHZhcmlhbnRfbmFtZRgGIAEoCSpQChRTY2hlbWF0aWNKb2JQYWdlU2l6ZRIQCgxTSlBTX1VOS05PV04QABINCglTSlBTX0FVVE8QARILCgdTSlBTX0E0EAISCgoGU0pQU19BEAMqVQoVU2NoZW1hdGljSm9iU2hlZXRNb2RlEhAKDFNKU01fVU5LTk9XThAAEhMKD1NKU01fQUxMX1NIRUVUUxABEhUKEVNKU01fU0lOR0xFX1NIRUVUEAIquQEKFlNjaGVtYXRpY05ldGxpc3RGb3JtYXQSDwoLU05GX1VOS05PV04QABIRCg1TTkZfS0lDQURfWE1MEAESEwoPU05GX0tJQ0FEX1NFWFBSEAISEgoOU05GX09SQ0FEX1BDQjIQAxIPCgtTTkZfQ0FEU1RBUhAEEg0KCVNORl9TUElDRRAFEhMKD1NORl9TUElDRV9NT0RFTBAGEgwKCFNORl9QQURTEAcSDwoLU05GX0FMTEVHUk8QCCpKChBCT01Tb3J0RGlyZWN0aW9uEg8KC0JTRF9VTktOT1dOEAASEQoNQlNEX0FTQ0VORElORxABEhIKDkJTRF9ERVNDRU5ESU5HEAIqQQoOQk9NRmlsdGVyU2NvcGUSEQoNQkZTX1JFRkVSRU5DRRAAEg8KC0JGU19WSVNJQkxFEAESCwoHQkZTX0FMTBACYgZwcm90bzM", [file_common_types_jobs]);
 
 /**
  * Shared plot options for schematic plot exports
@@ -97,6 +97,11 @@ export type SchematicPlotSettings = Message<"kiapi.schematic.jobs.SchematicPlotS
    * @generated from field: string theme = 12;
    */
   theme: string;
+
+  /**
+   * @generated from field: kiapi.schematic.jobs.SchematicJobSheetMode sheet_mode = 13;
+   */
+  sheetMode: SchematicJobSheetMode;
 };
 
 /**
@@ -164,6 +169,11 @@ export type SchematicPlotSettingsJson = {
    * @generated from field: string theme = 12;
    */
   theme?: string;
+
+  /**
+   * @generated from field: kiapi.schematic.jobs.SchematicJobSheetMode sheet_mode = 13;
+   */
+  sheetMode?: SchematicJobSheetModeJson;
 };
 
 /**
@@ -368,6 +378,75 @@ export const RunSchematicJobExportPsSchema: GenMessage<RunSchematicJobExportPs, 
   messageDesc(file_schematic_schematic_jobs, 4);
 
 /**
+ * Plots a schematic to PNG. Returns RunJobResponse.
+ *
+ * @generated from message kiapi.schematic.jobs.RunSchematicJobExportPng
+ */
+export type RunSchematicJobExportPng = Message<"kiapi.schematic.jobs.RunSchematicJobExportPng"> & {
+  /**
+   * @generated from field: kiapi.common.types.RunJobSettings job_settings = 1;
+   */
+  jobSettings?: RunJobSettings | undefined;
+
+  /**
+   * @generated from field: kiapi.schematic.jobs.SchematicPlotSettings plot_settings = 2;
+   */
+  plotSettings?: SchematicPlotSettings | undefined;
+
+  /**
+   * Range 72-2400.  If unspecified, will use the GUI default resolution (300 DPI).
+   *
+   * @generated from field: optional int32 dpi = 3;
+   */
+  dpi?: number | undefined;
+
+  /**
+   * If unspecified, anti-aliasing will follow the GUI default (enabled).
+   *
+   * @generated from field: kiapi.common.types.AntialiasingMode antialiasing = 4;
+   */
+  antialiasing: AntialiasingMode;
+};
+
+/**
+ * Plots a schematic to PNG. Returns RunJobResponse.
+ *
+ * @generated from message kiapi.schematic.jobs.RunSchematicJobExportPng
+ */
+export type RunSchematicJobExportPngJson = {
+  /**
+   * @generated from field: kiapi.common.types.RunJobSettings job_settings = 1;
+   */
+  jobSettings?: RunJobSettingsJson;
+
+  /**
+   * @generated from field: kiapi.schematic.jobs.SchematicPlotSettings plot_settings = 2;
+   */
+  plotSettings?: SchematicPlotSettingsJson;
+
+  /**
+   * Range 72-2400.  If unspecified, will use the GUI default resolution (300 DPI).
+   *
+   * @generated from field: optional int32 dpi = 3;
+   */
+  dpi?: number;
+
+  /**
+   * If unspecified, anti-aliasing will follow the GUI default (enabled).
+   *
+   * @generated from field: kiapi.common.types.AntialiasingMode antialiasing = 4;
+   */
+  antialiasing?: AntialiasingModeJson;
+};
+
+/**
+ * Describes the message kiapi.schematic.jobs.RunSchematicJobExportPng.
+ * Use `create(RunSchematicJobExportPngSchema)` to create a new message.
+ */
+export const RunSchematicJobExportPngSchema: GenMessage<RunSchematicJobExportPng, {jsonType: RunSchematicJobExportPngJson}> = /*@__PURE__*/
+  messageDesc(file_schematic_schematic_jobs, 5);
+
+/**
  * Exports a schematic netlist. Returns RunJobResponse.
  *
  * @generated from message kiapi.schematic.jobs.RunSchematicJobExportNetlist
@@ -422,7 +501,7 @@ export type RunSchematicJobExportNetlistJson = {
  * Use `create(RunSchematicJobExportNetlistSchema)` to create a new message.
  */
 export const RunSchematicJobExportNetlistSchema: GenMessage<RunSchematicJobExportNetlist, {jsonType: RunSchematicJobExportNetlistJson}> = /*@__PURE__*/
-  messageDesc(file_schematic_schematic_jobs, 5);
+  messageDesc(file_schematic_schematic_jobs, 6);
 
 /**
  * @generated from message kiapi.schematic.jobs.BOMFormatSettings
@@ -559,7 +638,7 @@ export type BOMFormatSettingsJson = {
  * Use `create(BOMFormatSettingsSchema)` to create a new message.
  */
 export const BOMFormatSettingsSchema: GenMessage<BOMFormatSettings, {jsonType: BOMFormatSettingsJson}> = /*@__PURE__*/
-  messageDesc(file_schematic_schematic_jobs, 6);
+  messageDesc(file_schematic_schematic_jobs, 7);
 
 /**
  * @generated from message kiapi.schematic.jobs.BOMField
@@ -618,7 +697,7 @@ export type BOMFieldJson = {
  * Use `create(BOMFieldSchema)` to create a new message.
  */
 export const BOMFieldSchema: GenMessage<BOMField, {jsonType: BOMFieldJson}> = /*@__PURE__*/
-  messageDesc(file_schematic_schematic_jobs, 7);
+  messageDesc(file_schematic_schematic_jobs, 8);
 
 /**
  * @generated from message kiapi.schematic.jobs.BOMFieldSettings
@@ -723,7 +802,7 @@ export type BOMFieldSettingsJson = {
  * Use `create(BOMFieldSettingsSchema)` to create a new message.
  */
 export const BOMFieldSettingsSchema: GenMessage<BOMFieldSettings, {jsonType: BOMFieldSettingsJson}> = /*@__PURE__*/
-  messageDesc(file_schematic_schematic_jobs, 8);
+  messageDesc(file_schematic_schematic_jobs, 9);
 
 /**
  * Exports a schematic bill of materials. Returns RunJobResponse.
@@ -820,7 +899,7 @@ export type RunSchematicJobExportBOMJson = {
  * Use `create(RunSchematicJobExportBOMSchema)` to create a new message.
  */
 export const RunSchematicJobExportBOMSchema: GenMessage<RunSchematicJobExportBOM, {jsonType: RunSchematicJobExportBOMJson}> = /*@__PURE__*/
-  messageDesc(file_schematic_schematic_jobs, 9);
+  messageDesc(file_schematic_schematic_jobs, 10);
 
 /**
  * Page size override used for schematic plotting jobs
@@ -867,6 +946,47 @@ export type SchematicJobPageSizeJson = "SJPS_UNKNOWN" | "SJPS_AUTO" | "SJPS_A4" 
  */
 export const SchematicJobPageSizeSchema: GenEnum<SchematicJobPageSize, SchematicJobPageSizeJson> = /*@__PURE__*/
   enumDesc(file_schematic_schematic_jobs, 0);
+
+/**
+ * Controls whether a schematic plot job exports all sheets to an output directory or a
+ * single sheet to an output file
+ *
+ * @generated from enum kiapi.schematic.jobs.SchematicJobSheetMode
+ */
+export enum SchematicJobSheetMode {
+  /**
+   * @generated from enum value: SJSM_UNKNOWN = 0;
+   */
+  SJSM_UNKNOWN = 0,
+
+  /**
+   * Export all sheets; the job settings output path is treated as a directory
+   *
+   * @generated from enum value: SJSM_ALL_SHEETS = 1;
+   */
+  SJSM_ALL_SHEETS = 1,
+
+  /**
+   * Export a single sheet; the job settings output path is treated as a file name
+   *
+   * @generated from enum value: SJSM_SINGLE_SHEET = 2;
+   */
+  SJSM_SINGLE_SHEET = 2,
+}
+
+/**
+ * Controls whether a schematic plot job exports all sheets to an output directory or a
+ * single sheet to an output file
+ *
+ * @generated from enum kiapi.schematic.jobs.SchematicJobSheetMode
+ */
+export type SchematicJobSheetModeJson = "SJSM_UNKNOWN" | "SJSM_ALL_SHEETS" | "SJSM_SINGLE_SHEET";
+
+/**
+ * Describes the enum kiapi.schematic.jobs.SchematicJobSheetMode.
+ */
+export const SchematicJobSheetModeSchema: GenEnum<SchematicJobSheetMode, SchematicJobSheetModeJson> = /*@__PURE__*/
+  enumDesc(file_schematic_schematic_jobs, 1);
 
 /**
  * Netlist format for schematic netlist export.
@@ -931,7 +1051,7 @@ export type SchematicNetlistFormatJson = "SNF_UNKNOWN" | "SNF_KICAD_XML" | "SNF_
  * Describes the enum kiapi.schematic.jobs.SchematicNetlistFormat.
  */
 export const SchematicNetlistFormatSchema: GenEnum<SchematicNetlistFormat, SchematicNetlistFormatJson> = /*@__PURE__*/
-  enumDesc(file_schematic_schematic_jobs, 1);
+  enumDesc(file_schematic_schematic_jobs, 2);
 
 /**
  * @generated from enum kiapi.schematic.jobs.BOMSortDirection
@@ -962,7 +1082,7 @@ export type BOMSortDirectionJson = "BSD_UNKNOWN" | "BSD_ASCENDING" | "BSD_DESCEN
  * Describes the enum kiapi.schematic.jobs.BOMSortDirection.
  */
 export const BOMSortDirectionSchema: GenEnum<BOMSortDirection, BOMSortDirectionJson> = /*@__PURE__*/
-  enumDesc(file_schematic_schematic_jobs, 2);
+  enumDesc(file_schematic_schematic_jobs, 3);
 
 /**
  * @generated from enum kiapi.schematic.jobs.BOMFilterScope
@@ -993,5 +1113,5 @@ export type BOMFilterScopeJson = "BFS_REFERENCE" | "BFS_VISIBLE" | "BFS_ALL";
  * Describes the enum kiapi.schematic.jobs.BOMFilterScope.
  */
 export const BOMFilterScopeSchema: GenEnum<BOMFilterScope, BOMFilterScopeJson> = /*@__PURE__*/
-  enumDesc(file_schematic_schematic_jobs, 3);
+  enumDesc(file_schematic_schematic_jobs, 4);
 

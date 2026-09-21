@@ -84,7 +84,7 @@ export class Project {
   }
 
   async netClasses(): Promise<NetClass[]> {
-    return (await cmd.getNetClasses(this.client, {})).netClasses;
+    return (await cmd.getNetClasses(this.client, { project: this.specifier.project })).netClasses;
   }
 
   /** Replace (default) or merge net classes. */
@@ -92,7 +92,11 @@ export class Project {
     netClasses: readonly MessageInitShape<typeof NetClassSchema>[],
     mergeMode: MapMergeMode = MapMergeMode.MMM_REPLACE,
   ): Promise<void> {
-    await cmd.setNetClasses(this.client, { netClasses: netClasses.map((n) => create(NetClassSchema, n)), mergeMode });
+    await cmd.setNetClasses(this.client, {
+      project: this.specifier.project,
+      netClasses: netClasses.map((n) => create(NetClassSchema, n)),
+      mergeMode,
+    });
   }
 
   async textVariables(): Promise<Record<string, string>> {

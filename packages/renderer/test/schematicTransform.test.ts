@@ -105,7 +105,7 @@ describe('symbol transform (SCH_SYMBOL::SetOrientation / TRANSFORM)', () => {
 
   test('a rotated resistor (library-relative pins) lands where KiCad puts it', () => {
     // 90°: pin 1 (lib (0, -3.81), pointing down) -> (-3.81, 0) pointing right; root 1.27 further right
-    const items = schematicItemToRenderItems(resistor('R', 'R', 10, 10, { orientation: 2, pinsRelative: true }), {
+    const items = schematicItemToRenderItems(resistor('R', 'R', 10, 10, { orientation: 2 }), {
       symbolPinsAbsolute: false,
     });
     const p1 = items.find((i) => i.ref === 'R:1')!;

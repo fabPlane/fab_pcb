@@ -94,9 +94,11 @@ function positionedField(source: SchematicFieldProto | undefined, name: string, 
 }
 
 /**
- * A symbol-library document exposes pin positions in library-local coordinates, while a placed
- * SchematicSymbolInstance carries its selected pins in absolute sheet coordinates. Convert the
- * cloned library definition before sending it to KiCad; shapes and fields remain library-local.
+ * Definition children of a SchematicSymbolInstance are in library-local coordinates (relative to
+ * the symbol origin, untransformed) — the frame a symbol-library document exposes too, since
+ * upstream KiCad `3cbac44524` ("instance things are in sheet space, definition things are in
+ * local space"). The cloned definition is sent as is; the generator only needs to know where
+ * each pin lands on the sheet, which for an unrotated placement is origin + local.
  */
 function placedDefinition(source: LibSymbol, origin: Vec2, pins: Map<string, Vec2>, reference: string) {
   const definition = clone(SchematicSymbolSchema, source.proto);
@@ -110,7 +112,6 @@ function placedDefinition(source: LibSymbol, origin: Vec2, pins: Map<string, Vec
     // Library pin KIIDs belong to the library definition. Each placed instance must receive
     // independent pin identities from KiCad rather than aliasing pins across repeated symbols.
     pin.id = undefined;
-    pin.position = toVector2(absolute);
     child.item = packAny(SchematicPinSchema, pin);
     if (pin.number) pins.set(`${reference}:${pin.number}`, absolute);
   }

@@ -24,7 +24,7 @@ import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2"
 import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import type { DocumentSpecifier, DocumentSpecifierJson, DocumentType, DocumentTypeJson, MapMergeMode, MapMergeModeJson, ProjectSpecifier, ProjectSpecifierJson } from "../types/base_types_pb.js";
 import { file_common_types_base_types } from "../types/base_types_pb.js";
-import type { NetClass, NetClassJson, TextVariables, TextVariablesJson } from "../types/project_settings_pb.js";
+import type { NetClass, NetClassAssignment, NetClassAssignmentJson, NetClassJson, NetClassPatternAssignment, NetClassPatternAssignmentJson, TextVariables, TextVariablesJson } from "../types/project_settings_pb.js";
 import { file_common_types_project_settings } from "../types/project_settings_pb.js";
 import type { Message } from "@bufbuild/protobuf";
 
@@ -32,18 +32,34 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file common/commands/project_commands.proto.
  */
 export const file_common_commands_project_commands: GenFile = /*@__PURE__*/
-  fileDesc("CiZjb21tb24vY29tbWFuZHMvcHJvamVjdF9jb21tYW5kcy5wcm90bxIVa2lhcGkuY29tbW9uLmNvbW1hbmRzIg8KDUdldE5ldENsYXNzZXMiSQoSTmV0Q2xhc3Nlc1Jlc3BvbnNlEjMKC25ldF9jbGFzc2VzGAEgAygLMh4ua2lhcGkuY29tbW9uLnByb2plY3QuTmV0Q2xhc3MiegoNU2V0TmV0Q2xhc3NlcxIzCgtuZXRfY2xhc3NlcxgBIAMoCzIeLmtpYXBpLmNvbW1vbi5wcm9qZWN0Lk5ldENsYXNzEjQKCm1lcmdlX21vZGUYAyABKA4yIC5raWFwaS5jb21tb24udHlwZXMuTWFwTWVyZ2VNb2RlInUKE0V4cGFuZFRleHRWYXJpYWJsZXMSNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISDAoEdGV4dBgCIAMoCRIXCg9leHBhbmRfZW52X3ZhcnMYAyABKAgiKwobRXhwYW5kVGV4dFZhcmlhYmxlc1Jlc3BvbnNlEgwKBHRleHQYASADKAkiSwoQR2V0VGV4dFZhcmlhYmxlcxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciK5AQoQU2V0VGV4dFZhcmlhYmxlcxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchI2Cgl2YXJpYWJsZXMYAiABKAsyIy5raWFwaS5jb21tb24ucHJvamVjdC5UZXh0VmFyaWFibGVzEjQKCm1lcmdlX21vZGUYAyABKA4yIC5raWFwaS5jb21tb24udHlwZXMuTWFwTWVyZ2VNb2RlIkwKDE9wZW5Eb2N1bWVudBIuCgR0eXBlGAEgASgOMiAua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50VHlwZRIMCgRwYXRoGAIgASgJIk8KFE9wZW5Eb2N1bWVudFJlc3BvbnNlEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIkgKDUNsb3NlRG9jdW1lbnQSNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIiIgoRQ2xvc2VBbGxEb2N1bWVudHMSDQoFZm9yY2UYASABKAgiRwoMU2F2ZURvY3VtZW50EjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyInMKCk5ld1Byb2plY3QSDAoEcGF0aBgBIAEoCRIaCg10ZW1wbGF0ZV9wYXRoGAIgASgJSACIAQESDAoEb3BlbhgDIAEoCBIbChNza2lwX3N0dWJfZG9jdW1lbnRzGAQgASgIQhAKDl90ZW1wbGF0ZV9wYXRoIksKC05ld0RvY3VtZW50Ei4KBHR5cGUYASABKA4yIC5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRUeXBlEgwKBHBhdGgYAiABKAkiowEKC1Byb2plY3RGaWxlEgwKBHBhdGgYASABKAkSNAoEa2luZBgCIAEoDjImLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5Qcm9qZWN0RmlsZVR5cGUSLgoEdHlwZRgDIAEoDjIgLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFR5cGUSDwoHaXNfb3BlbhgEIAEoCBIPCgdpc19yb290GAUgASgIIhAKDkdldFByb2plY3RJbmZvIpcBChNQcm9qZWN0SW5mb1Jlc3BvbnNlEjUKB3Byb2plY3QYASABKAsyJC5raWFwaS5jb21tb24udHlwZXMuUHJvamVjdFNwZWNpZmllchIWCg5raWNhZF9wcm9fcGF0aBgCIAEoCRIxCgVmaWxlcxgDIAMoCzIiLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5Qcm9qZWN0RmlsZSqSAgoPUHJvamVjdEZpbGVUeXBlEg8KC1BGVF9VTktOT1dOEAASDwoLUEZUX1BST0pFQ1QQARIRCg1QRlRfU0NIRU1BVElDEAISCwoHUEZUX1BDQhADEhQKEFBGVF9ERVNJR05fUlVMRVMQBBIWChJQRlRfTE9DQUxfU0VUVElOR1MQBRIWChJQRlRfU1lNQk9MX0xJQlJBUlkQBhIZChVQRlRfRk9PVFBSSU5UX0xJQlJBUlkQBxIYChRQRlRfU1lNQk9MX0xJQl9UQUJMRRAIEhsKF1BGVF9GT09UUFJJTlRfTElCX1RBQkxFEAkSFQoRUEZUX0RSQVdJTkdfU0hFRVQQChIOCgpQRlRfSk9CU0VUEAtiBnByb3RvMw", [file_common_types_base_types, file_common_types_project_settings]);
+  fileDesc("CiZjb21tb24vY29tbWFuZHMvcHJvamVjdF9jb21tYW5kcy5wcm90bxIVa2lhcGkuY29tbW9uLmNvbW1hbmRzIkYKDUdldE5ldENsYXNzZXMSNQoHcHJvamVjdBgBIAEoCzIkLmtpYXBpLmNvbW1vbi50eXBlcy5Qcm9qZWN0U3BlY2lmaWVyIkkKEk5ldENsYXNzZXNSZXNwb25zZRIzCgtuZXRfY2xhc3NlcxgBIAMoCzIeLmtpYXBpLmNvbW1vbi5wcm9qZWN0Lk5ldENsYXNzIrEBCg1TZXROZXRDbGFzc2VzEjMKC25ldF9jbGFzc2VzGAEgAygLMh4ua2lhcGkuY29tbW9uLnByb2plY3QuTmV0Q2xhc3MSNAoKbWVyZ2VfbW9kZRgDIAEoDjIgLmtpYXBpLmNvbW1vbi50eXBlcy5NYXBNZXJnZU1vZGUSNQoHcHJvamVjdBgEIAEoCzIkLmtpYXBpLmNvbW1vbi50eXBlcy5Qcm9qZWN0U3BlY2lmaWVyIk8KFkdldE5ldENsYXNzQXNzaWdubWVudHMSNQoHcHJvamVjdBgBIAEoCzIkLmtpYXBpLmNvbW1vbi50eXBlcy5Qcm9qZWN0U3BlY2lmaWVyIqoBChtOZXRDbGFzc0Fzc2lnbm1lbnRzUmVzcG9uc2USPQoLYXNzaWdubWVudHMYASADKAsyKC5raWFwaS5jb21tb24ucHJvamVjdC5OZXRDbGFzc0Fzc2lnbm1lbnQSTAoTcGF0dGVybl9hc3NpZ25tZW50cxgCIAMoCzIvLmtpYXBpLmNvbW1vbi5wcm9qZWN0Lk5ldENsYXNzUGF0dGVybkFzc2lnbm1lbnQikgIKFlNldE5ldENsYXNzQXNzaWdubWVudHMSNQoHcHJvamVjdBgBIAEoCzIkLmtpYXBpLmNvbW1vbi50eXBlcy5Qcm9qZWN0U3BlY2lmaWVyEjQKCm1lcmdlX21vZGUYAiABKA4yIC5raWFwaS5jb21tb24udHlwZXMuTWFwTWVyZ2VNb2RlEj0KC2Fzc2lnbm1lbnRzGAMgAygLMigua2lhcGkuY29tbW9uLnByb2plY3QuTmV0Q2xhc3NBc3NpZ25tZW50EkwKE3BhdHRlcm5fYXNzaWdubWVudHMYBCADKAsyLy5raWFwaS5jb21tb24ucHJvamVjdC5OZXRDbGFzc1BhdHRlcm5Bc3NpZ25tZW50InUKE0V4cGFuZFRleHRWYXJpYWJsZXMSNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISDAoEdGV4dBgCIAMoCRIXCg9leHBhbmRfZW52X3ZhcnMYAyABKAgiKwobRXhwYW5kVGV4dFZhcmlhYmxlc1Jlc3BvbnNlEgwKBHRleHQYASADKAkiSwoQR2V0VGV4dFZhcmlhYmxlcxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciK5AQoQU2V0VGV4dFZhcmlhYmxlcxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchI2Cgl2YXJpYWJsZXMYAiABKAsyIy5raWFwaS5jb21tb24ucHJvamVjdC5UZXh0VmFyaWFibGVzEjQKCm1lcmdlX21vZGUYAyABKA4yIC5raWFwaS5jb21tb24udHlwZXMuTWFwTWVyZ2VNb2RlIkwKDE9wZW5Eb2N1bWVudBIuCgR0eXBlGAEgASgOMiAua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50VHlwZRIMCgRwYXRoGAIgASgJIk8KFE9wZW5Eb2N1bWVudFJlc3BvbnNlEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIkgKDUNsb3NlRG9jdW1lbnQSNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIiIgoRQ2xvc2VBbGxEb2N1bWVudHMSDQoFZm9yY2UYASABKAgiRwoMU2F2ZURvY3VtZW50EjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyInMKCk5ld1Byb2plY3QSDAoEcGF0aBgBIAEoCRIaCg10ZW1wbGF0ZV9wYXRoGAIgASgJSACIAQESDAoEb3BlbhgDIAEoCBIbChNza2lwX3N0dWJfZG9jdW1lbnRzGAQgASgIQhAKDl90ZW1wbGF0ZV9wYXRoIksKC05ld0RvY3VtZW50Ei4KBHR5cGUYASABKA4yIC5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRUeXBlEgwKBHBhdGgYAiABKAkiowEKC1Byb2plY3RGaWxlEgwKBHBhdGgYASABKAkSNAoEa2luZBgCIAEoDjImLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5Qcm9qZWN0RmlsZVR5cGUSLgoEdHlwZRgDIAEoDjIgLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFR5cGUSDwoHaXNfb3BlbhgEIAEoCBIPCgdpc19yb290GAUgASgIIhAKDkdldFByb2plY3RJbmZvIpcBChNQcm9qZWN0SW5mb1Jlc3BvbnNlEjUKB3Byb2plY3QYASABKAsyJC5raWFwaS5jb21tb24udHlwZXMuUHJvamVjdFNwZWNpZmllchIWCg5raWNhZF9wcm9fcGF0aBgCIAEoCRIxCgVmaWxlcxgDIAMoCzIiLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5Qcm9qZWN0RmlsZSJOCg5DcmVhdGVEb2N1bWVudBIuCgR0eXBlGAEgASgOMiAua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50VHlwZRIMCgRwYXRoGAIgASgJKpICCg9Qcm9qZWN0RmlsZVR5cGUSDwoLUEZUX1VOS05PV04QABIPCgtQRlRfUFJPSkVDVBABEhEKDVBGVF9TQ0hFTUFUSUMQAhILCgdQRlRfUENCEAMSFAoQUEZUX0RFU0lHTl9SVUxFUxAEEhYKElBGVF9MT0NBTF9TRVRUSU5HUxAFEhYKElBGVF9TWU1CT0xfTElCUkFSWRAGEhkKFVBGVF9GT09UUFJJTlRfTElCUkFSWRAHEhgKFFBGVF9TWU1CT0xfTElCX1RBQkxFEAgSGwoXUEZUX0ZPT1RQUklOVF9MSUJfVEFCTEUQCRIVChFQRlRfRFJBV0lOR19TSEVFVBAKEg4KClBGVF9KT0JTRVQQC2IGcHJvdG8z", [file_common_types_base_types, file_common_types_project_settings]);
 
 /**
  * @generated from message kiapi.common.commands.GetNetClasses
  */
 export type GetNetClasses = Message<"kiapi.common.commands.GetNetClasses"> & {
+  /**
+   * Requests should include a project even though KiCad cannot have more than one project open at
+   * once yet.  Requests without a project will be deprecated in a future version.
+   * Since: 11.0
+   *
+   * @generated from field: kiapi.common.types.ProjectSpecifier project = 1;
+   */
+  project?: ProjectSpecifier | undefined;
 };
 
 /**
  * @generated from message kiapi.common.commands.GetNetClasses
  */
 export type GetNetClassesJson = {
+  /**
+   * Requests should include a project even though KiCad cannot have more than one project open at
+   * once yet.  Requests without a project will be deprecated in a future version.
+   * Since: 11.0
+   *
+   * @generated from field: kiapi.common.types.ProjectSpecifier project = 1;
+   */
+  project?: ProjectSpecifierJson;
 };
 
 /**
@@ -102,6 +118,15 @@ export type SetNetClasses = Message<"kiapi.common.commands.SetNetClasses"> & {
    * @generated from field: kiapi.common.types.MapMergeMode merge_mode = 3;
    */
   mergeMode: MapMergeMode;
+
+  /**
+   * Requests should include a project even though KiCad cannot have more than one project open at
+   * once yet.  Requests without a project will be deprecated in a future version.
+   * Since: 11.0
+   *
+   * @generated from field: kiapi.common.types.ProjectSpecifier project = 4;
+   */
+  project?: ProjectSpecifier | undefined;
 };
 
 /**
@@ -126,6 +151,15 @@ export type SetNetClassesJson = {
    * @generated from field: kiapi.common.types.MapMergeMode merge_mode = 3;
    */
   mergeMode?: MapMergeModeJson;
+
+  /**
+   * Requests should include a project even though KiCad cannot have more than one project open at
+   * once yet.  Requests without a project will be deprecated in a future version.
+   * Since: 11.0
+   *
+   * @generated from field: kiapi.common.types.ProjectSpecifier project = 4;
+   */
+  project?: ProjectSpecifierJson;
 };
 
 /**
@@ -134,6 +168,159 @@ export type SetNetClassesJson = {
  */
 export const SetNetClassesSchema: GenMessage<SetNetClasses, {jsonType: SetNetClassesJson}> = /*@__PURE__*/
   messageDesc(file_common_commands_project_commands, 2);
+
+/**
+ * Returns NetClassAssignmentsResponse
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.GetNetClassAssignments
+ */
+export type GetNetClassAssignments = Message<"kiapi.common.commands.GetNetClassAssignments"> & {
+  /**
+   * The project to query
+   *
+   * @generated from field: kiapi.common.types.ProjectSpecifier project = 1;
+   */
+  project?: ProjectSpecifier | undefined;
+};
+
+/**
+ * Returns NetClassAssignmentsResponse
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.GetNetClassAssignments
+ */
+export type GetNetClassAssignmentsJson = {
+  /**
+   * The project to query
+   *
+   * @generated from field: kiapi.common.types.ProjectSpecifier project = 1;
+   */
+  project?: ProjectSpecifierJson;
+};
+
+/**
+ * Describes the message kiapi.common.commands.GetNetClassAssignments.
+ * Use `create(GetNetClassAssignmentsSchema)` to create a new message.
+ */
+export const GetNetClassAssignmentsSchema: GenMessage<GetNetClassAssignments, {jsonType: GetNetClassAssignmentsJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_project_commands, 3);
+
+/**
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.NetClassAssignmentsResponse
+ */
+export type NetClassAssignmentsResponse = Message<"kiapi.common.commands.NetClassAssignmentsResponse"> & {
+  /**
+   * @generated from field: repeated kiapi.common.project.NetClassAssignment assignments = 1;
+   */
+  assignments: NetClassAssignment[];
+
+  /**
+   * @generated from field: repeated kiapi.common.project.NetClassPatternAssignment pattern_assignments = 2;
+   */
+  patternAssignments: NetClassPatternAssignment[];
+};
+
+/**
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.NetClassAssignmentsResponse
+ */
+export type NetClassAssignmentsResponseJson = {
+  /**
+   * @generated from field: repeated kiapi.common.project.NetClassAssignment assignments = 1;
+   */
+  assignments?: NetClassAssignmentJson[];
+
+  /**
+   * @generated from field: repeated kiapi.common.project.NetClassPatternAssignment pattern_assignments = 2;
+   */
+  patternAssignments?: NetClassPatternAssignmentJson[];
+};
+
+/**
+ * Describes the message kiapi.common.commands.NetClassAssignmentsResponse.
+ * Use `create(NetClassAssignmentsResponseSchema)` to create a new message.
+ */
+export const NetClassAssignmentsResponseSchema: GenMessage<NetClassAssignmentsResponse, {jsonType: NetClassAssignmentsResponseJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_project_commands, 4);
+
+/**
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.SetNetClassAssignments
+ */
+export type SetNetClassAssignments = Message<"kiapi.common.commands.SetNetClassAssignments"> & {
+  /**
+   * The project to query
+   *
+   * @generated from field: kiapi.common.types.ProjectSpecifier project = 1;
+   */
+  project?: ProjectSpecifier | undefined;
+
+  /**
+   * In MMM_MERGE mode, per-net assignments are replaced for each net present in the
+   * request (an empty netclasses list removes all assignments for that net), and pattern
+   * assignments are updated if they already exist.
+   * In MMM_REPLACE mode, any existing assignments or patterns not present in the request are erased.
+   *
+   * @generated from field: kiapi.common.types.MapMergeMode merge_mode = 2;
+   */
+  mergeMode: MapMergeMode;
+
+  /**
+   * @generated from field: repeated kiapi.common.project.NetClassAssignment assignments = 3;
+   */
+  assignments: NetClassAssignment[];
+
+  /**
+   * @generated from field: repeated kiapi.common.project.NetClassPatternAssignment pattern_assignments = 4;
+   */
+  patternAssignments: NetClassPatternAssignment[];
+};
+
+/**
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.SetNetClassAssignments
+ */
+export type SetNetClassAssignmentsJson = {
+  /**
+   * The project to query
+   *
+   * @generated from field: kiapi.common.types.ProjectSpecifier project = 1;
+   */
+  project?: ProjectSpecifierJson;
+
+  /**
+   * In MMM_MERGE mode, per-net assignments are replaced for each net present in the
+   * request (an empty netclasses list removes all assignments for that net), and pattern
+   * assignments are updated if they already exist.
+   * In MMM_REPLACE mode, any existing assignments or patterns not present in the request are erased.
+   *
+   * @generated from field: kiapi.common.types.MapMergeMode merge_mode = 2;
+   */
+  mergeMode?: MapMergeModeJson;
+
+  /**
+   * @generated from field: repeated kiapi.common.project.NetClassAssignment assignments = 3;
+   */
+  assignments?: NetClassAssignmentJson[];
+
+  /**
+   * @generated from field: repeated kiapi.common.project.NetClassPatternAssignment pattern_assignments = 4;
+   */
+  patternAssignments?: NetClassPatternAssignmentJson[];
+};
+
+/**
+ * Describes the message kiapi.common.commands.SetNetClassAssignments.
+ * Use `create(SetNetClassAssignmentsSchema)` to create a new message.
+ */
+export const SetNetClassAssignmentsSchema: GenMessage<SetNetClassAssignments, {jsonType: SetNetClassAssignmentsJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_project_commands, 5);
 
 /**
  * @generated from message kiapi.common.commands.ExpandTextVariables
@@ -188,7 +375,7 @@ export type ExpandTextVariablesJson = {
  * Use `create(ExpandTextVariablesSchema)` to create a new message.
  */
 export const ExpandTextVariablesSchema: GenMessage<ExpandTextVariables, {jsonType: ExpandTextVariablesJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_project_commands, 3);
+  messageDesc(file_common_commands_project_commands, 6);
 
 /**
  * @generated from message kiapi.common.commands.ExpandTextVariablesResponse
@@ -215,7 +402,7 @@ export type ExpandTextVariablesResponseJson = {
  * Use `create(ExpandTextVariablesResponseSchema)` to create a new message.
  */
 export const ExpandTextVariablesResponseSchema: GenMessage<ExpandTextVariablesResponse, {jsonType: ExpandTextVariablesResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_project_commands, 4);
+  messageDesc(file_common_commands_project_commands, 7);
 
 /**
  * returns kiapi.common.project.TextVariables
@@ -246,7 +433,7 @@ export type GetTextVariablesJson = {
  * Use `create(GetTextVariablesSchema)` to create a new message.
  */
 export const GetTextVariablesSchema: GenMessage<GetTextVariables, {jsonType: GetTextVariablesJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_project_commands, 5);
+  messageDesc(file_common_commands_project_commands, 8);
 
 /**
  * @generated from message kiapi.common.commands.SetTextVariables
@@ -297,7 +484,7 @@ export type SetTextVariablesJson = {
  * Use `create(SetTextVariablesSchema)` to create a new message.
  */
 export const SetTextVariablesSchema: GenMessage<SetTextVariables, {jsonType: SetTextVariablesJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_project_commands, 6);
+  messageDesc(file_common_commands_project_commands, 9);
 
 /**
  * Opens a document (currently only supported in CLI api-server mode)
@@ -344,7 +531,7 @@ export type OpenDocumentJson = {
  * Use `create(OpenDocumentSchema)` to create a new message.
  */
 export const OpenDocumentSchema: GenMessage<OpenDocument, {jsonType: OpenDocumentJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_project_commands, 7);
+  messageDesc(file_common_commands_project_commands, 10);
 
 /**
  * @generated from message kiapi.common.commands.OpenDocumentResponse
@@ -371,7 +558,7 @@ export type OpenDocumentResponseJson = {
  * Use `create(OpenDocumentResponseSchema)` to create a new message.
  */
 export const OpenDocumentResponseSchema: GenMessage<OpenDocumentResponse, {jsonType: OpenDocumentResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_project_commands, 8);
+  messageDesc(file_common_commands_project_commands, 11);
 
 /**
  * @generated from message kiapi.common.commands.CloseDocument
@@ -398,7 +585,7 @@ export type CloseDocumentJson = {
  * Use `create(CloseDocumentSchema)` to create a new message.
  */
 export const CloseDocumentSchema: GenMessage<CloseDocument, {jsonType: CloseDocumentJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_project_commands, 9);
+  messageDesc(file_common_commands_project_commands, 12);
 
 /**
  * Closes all open documents (currently only supported in CLI api-server mode)
@@ -433,7 +620,7 @@ export type CloseAllDocumentsJson = {
  * Use `create(CloseAllDocumentsSchema)` to create a new message.
  */
 export const CloseAllDocumentsSchema: GenMessage<CloseAllDocuments, {jsonType: CloseAllDocumentsJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_project_commands, 10);
+  messageDesc(file_common_commands_project_commands, 13);
 
 /**
  * @generated from message kiapi.common.commands.SaveDocument
@@ -460,7 +647,7 @@ export type SaveDocumentJson = {
  * Use `create(SaveDocumentSchema)` to create a new message.
  */
 export const SaveDocumentSchema: GenMessage<SaveDocument, {jsonType: SaveDocumentJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_project_commands, 11);
+  messageDesc(file_common_commands_project_commands, 14);
 
 /**
  * Creates a new project on disk and, optionally, opens it.  Currently only supported in CLI
@@ -553,7 +740,7 @@ export type NewProjectJson = {
  * Use `create(NewProjectSchema)` to create a new message.
  */
 export const NewProjectSchema: GenMessage<NewProject, {jsonType: NewProjectJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_project_commands, 12);
+  messageDesc(file_common_commands_project_commands, 15);
 
 /**
  * Creates a new, empty document in the currently open project and opens it.  Currently only
@@ -606,7 +793,7 @@ export type NewDocumentJson = {
  * Use `create(NewDocumentSchema)` to create a new message.
  */
 export const NewDocumentSchema: GenMessage<NewDocument, {jsonType: NewDocumentJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_project_commands, 13);
+  messageDesc(file_common_commands_project_commands, 16);
 
 /**
  * Since 11.0
@@ -695,7 +882,7 @@ export type ProjectFileJson = {
  * Use `create(ProjectFileSchema)` to create a new message.
  */
 export const ProjectFileSchema: GenMessage<ProjectFile, {jsonType: ProjectFileJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_project_commands, 14);
+  messageDesc(file_common_commands_project_commands, 17);
 
 /**
  * Describes the currently open project and the files in its directory.  Currently only
@@ -724,7 +911,7 @@ export type GetProjectInfoJson = {
  * Use `create(GetProjectInfoSchema)` to create a new message.
  */
 export const GetProjectInfoSchema: GenMessage<GetProjectInfo, {jsonType: GetProjectInfoJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_project_commands, 15);
+  messageDesc(file_common_commands_project_commands, 18);
 
 /**
  * Since 11.0
@@ -779,7 +966,58 @@ export type ProjectInfoResponseJson = {
  * Use `create(ProjectInfoResponseSchema)` to create a new message.
  */
 export const ProjectInfoResponseSchema: GenMessage<ProjectInfoResponse, {jsonType: ProjectInfoResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_project_commands, 16);
+  messageDesc(file_common_commands_project_commands, 19);
+
+/**
+ * Creates a new document (in memory; does not save to disk)
+ * Currently board and schematic files can be created.  A project will be created
+ * for the document if it doesn't already exist.
+ * Will return an error if the current document is unsaved: save or revert first
+ * Returns OpenDocumentResponse
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.CreateDocument
+ */
+export type CreateDocument = Message<"kiapi.common.commands.CreateDocument"> & {
+  /**
+   * @generated from field: kiapi.common.types.DocumentType type = 1;
+   */
+  type: DocumentType;
+
+  /**
+   * @generated from field: string path = 2;
+   */
+  path: string;
+};
+
+/**
+ * Creates a new document (in memory; does not save to disk)
+ * Currently board and schematic files can be created.  A project will be created
+ * for the document if it doesn't already exist.
+ * Will return an error if the current document is unsaved: save or revert first
+ * Returns OpenDocumentResponse
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.CreateDocument
+ */
+export type CreateDocumentJson = {
+  /**
+   * @generated from field: kiapi.common.types.DocumentType type = 1;
+   */
+  type?: DocumentTypeJson;
+
+  /**
+   * @generated from field: string path = 2;
+   */
+  path?: string;
+};
+
+/**
+ * Describes the message kiapi.common.commands.CreateDocument.
+ * Use `create(CreateDocumentSchema)` to create a new message.
+ */
+export const CreateDocumentSchema: GenMessage<CreateDocument, {jsonType: CreateDocumentJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_project_commands, 20);
 
 /**
  * Classifies the files that make up a project; see ProjectFile.

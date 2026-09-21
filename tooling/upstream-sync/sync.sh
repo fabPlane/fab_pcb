@@ -52,6 +52,8 @@ export KICAD10_3DMODEL_DIR="${KICAD10_3DMODEL_DIR:-/Applications/KiCad/KiCad.app
 # Freerouting lives untracked under the main checkout's vendor dir; point the worktree's suites at it.
 [ -f "$WEB/packages/router/vendor/freerouting-2.4.1.jar" ] && export FREEROUTING_JAR="${FREEROUTING_JAR:-$WEB/packages/router/vendor/freerouting-2.4.1.jar}"
 [ -x "$WEB/packages/router/vendor/jdk/Contents/Home/bin/java" ] && export FP_PCB_JAVA="${FP_PCB_JAVA:-$WEB/packages/router/vendor/jdk/Contents/Home/bin/java}"
+# The router corpus needs the private fab_router module; CI passes it the same way (FAB_ROUTER_MODULE).
+[ -f "$WEB/../fab_router/src/api.ts" ] && export FAB_ROUTER_MODULE="${FAB_ROUTER_MODULE:-$(cd "$WEB/../fab_router" && pwd)/src/api.ts}"
 
 repo_slug() { git -C "$1" remote get-url origin | sed -E 's#^(https://github.com/|git@github.com:)##; s#\.git$##'; }
 FORK_REPO="${FP_PCB_FORK_REPO:-$(repo_slug "$KICAD_SRC")}"

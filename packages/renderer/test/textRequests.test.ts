@@ -43,7 +43,7 @@ describe('schematic text requests: pins', () => {
       { orientation: 4, pos: [13.81, 10], root: [12.54, 10], anchor: [13.175 * MM, 10 * MM - PIN_OFF], angle: 0 },
     ];
     for (const c of cases) {
-      const reqs = schematicTextRequests(resistor('R', 'R1', 10, 10, { orientation: c.orientation }), { symbolPinsAbsolute: true });
+      const reqs = schematicTextRequests(resistor('R', 'R1', 10, 10, { orientation: c.orientation }));
       const num = at(byKey(reqs, 'R:pin:R-pin1:number'));
       expect(num.text).toBe('1');
       expect([num.x, num.y]).toEqual([Math.round(c.anchor[0]), Math.round(c.anchor[1])]);
@@ -58,7 +58,7 @@ describe('schematic text requests: pins', () => {
   });
 
   test('names inside the body (pin_name_offset > 0): left / right / vertical, numbers above the pin', () => {
-    const reqs = schematicTextRequests(ic('U', 'U1', 0, 0), { symbolPinsAbsolute: true });
+    const reqs = schematicTextRequests(ic('U', 'U1', 0, 0));
     // pin 1 IN: PIN_RIGHT at (-7.62, -2.54), root at (-5.08, -2.54)
     const inName = at(byKey(reqs, 'U:pin:U-pin1:name'));
     expect(inName).toMatchObject({ text: 'IN', x: -5.08 * MM + 0.508 * MM, y: -2.54 * MM, angle: 0, h: 1, v: 2 });
@@ -91,54 +91,44 @@ describe('schematic text requests: pins', () => {
         { number: '8', name: 'NC', x: 5.08, y: 0, orientation: 2, visible: false },
       ],
     );
-    const reqs = schematicTextRequests(item, { symbolPinsAbsolute: true });
+    const reqs = schematicTextRequests(item);
     // PIN_RIGHT at (-5.08, 0), root (-2.54, 0), mid x = -3.81
     expect(at(byKey(reqs, 'S:pin:S-pin1:name'))).toMatchObject({ text: 'CLK', x: -3.81 * MM, y: -PIN_OFF, angle: 0, h: 2, v: 3 });
     expect(at(byKey(reqs, 'S:pin:S-pin1:number'))).toMatchObject({ text: '7', x: -3.81 * MM, y: PIN_OFF, angle: 0, h: 2, v: 1 });
     expect(reqs.some((r) => r.key.includes('S-pin2'))).toBe(false);
-    expect(schematicTextRequests(item, { symbolPinsAbsolute: true, showHiddenPins: true }).some((r) => r.key === 'S:pin:S-pin2:name')).toBe(
-      true,
-    );
+    expect(schematicTextRequests(item, { showHiddenPins: true }).some((r) => r.key === 'S:pin:S-pin2:name')).toBe(true);
     // an active alternate replaces the shown name
     const p = item.proto as { definition: { items: Array<{ item: Record<string, unknown> }> } };
     const pin = p.definition.items[0]!.item;
     pin.alternates = [{ name: 'ALT_FN', shape: 2, electricalType: 1 }];
     pin.activeAlternate = 'ALT_FN';
-    expect(at(byKey(schematicTextRequests(item, { symbolPinsAbsolute: true }), 'S:pin:S-pin1:name')).text).toBe('ALT_FN');
+    expect(at(byKey(schematicTextRequests(item), 'S:pin:S-pin1:name')).text).toBe('ALT_FN');
   });
 });
 
 describe('schematic text requests: symbol fields', () => {
   test('a left-justified, vertically centred field is exact without measuring: anchor shifted by δ along the reading direction', () => {
     expect(DELTA).toBe(137862);
-    const reqs = schematicTextRequests(resistor('R', 'R1', 10, 10), { symbolPinsAbsolute: true });
+    const reqs = schematicTextRequests(resistor('R', 'R1', 10, 10));
     const ref = byKey(reqs, 'R:field:Reference');
     expect(ref.measure).toBeUndefined();
     // stored at (12.54, 8.73): the reading direction is +x, so the anchor moves right by δ
     expect(at(ref)).toMatchObject({ text: 'R1', x: 12.54 * MM + DELTA, y: 8.73 * MM, angle: 0, h: 1, v: 2 });
     // hidden footprint / datasheet fields make no request unless hidden fields are shown
     expect(reqs.some((r) => r.key === 'R:field:Footprint')).toBe(false);
-    expect(
-      schematicTextRequests(resistor('R', 'R1', 10, 10), { symbolPinsAbsolute: true, showHiddenFields: true }).some(
-        (r) => r.key === 'R:field:Footprint',
-      ),
-    ).toBe(true);
+    expect(schematicTextRequests(resistor('R', 'R1', 10, 10), { showHiddenFields: true }).some((r) => r.key === 'R:field:Footprint')).toBe(
+      true,
+    );
   });
 
   test('rotated symbol: the field turns vertical and δ points up; mirrored symbol: justification flips', () => {
-    const rot = at(
-      byKey(schematicTextRequests(resistor('R', 'R1', 10, 10, { orientation: 2 }), { symbolPinsAbsolute: true }), 'R:field:Reference'),
-    );
+    const rot = at(byKey(schematicTextRequests(resistor('R', 'R1', 10, 10, { orientation: 2 })), 'R:field:Reference'));
     expect(rot).toMatchObject({ x: 8.73 * MM, y: 7.46 * MM - DELTA, angle: 90, h: 1, v: 2 });
     // mirror Y (x -> -x): the reading direction is reversed, so a left-justified field is drawn right-justified, δ to the left
-    const my = at(
-      byKey(schematicTextRequests(resistor('R', 'R1', 0, 0, { mirrorY: true }), { symbolPinsAbsolute: true }), 'R:field:Reference'),
-    );
+    const my = at(byKey(schematicTextRequests(resistor('R', 'R1', 0, 0, { mirrorY: true })), 'R:field:Reference'));
     expect(my).toMatchObject({ x: -2.54 * MM - DELTA, y: -1.27 * MM, angle: 0, h: 3, v: 2 });
     // mirror X (y -> -y): reading direction kept, position mirrored
-    const mx = at(
-      byKey(schematicTextRequests(resistor('R', 'R1', 0, 0, { mirrorX: true }), { symbolPinsAbsolute: true }), 'R:field:Reference'),
-    );
+    const mx = at(byKey(schematicTextRequests(resistor('R', 'R1', 0, 0, { mirrorX: true })), 'R:field:Reference'));
     expect(mx).toMatchObject({ x: 2.54 * MM + DELTA, y: 1.27 * MM, angle: 0, h: 1, v: 2 });
   });
 
@@ -149,19 +139,15 @@ describe('schematic text requests: symbol fields', () => {
     const p = item.proto as { unit: { unit: number }; definition: { unitCount: number } };
     p.unit.unit = 2;
     p.definition.unitCount = 4;
-    expect(at(byKey(schematicTextRequests(item, { symbolPinsAbsolute: true }), 'R:field:Reference')).text).toBe('U2B');
-    expect(
-      at(
-        byKey(schematicTextRequests(item, { symbolPinsAbsolute: true, subpartFirstId: '1', subpartIdSeparator: '.' }), 'R:field:Reference'),
-      ).text,
-    ).toBe('U2.2');
+    expect(at(byKey(schematicTextRequests(item), 'R:field:Reference')).text).toBe('U2B');
+    expect(at(byKey(schematicTextRequests(item, { subpartFirstId: '1', subpartIdSeparator: '.' }), 'R:field:Reference')).text).toBe('U2.2');
   });
 
   test('a top-justified field is measured first: GetTextExtents box centre through the transform, drawn centred', async () => {
     const item = resistor('R', 'R1', 10, 10, { orientation: 2 });
     const p = item.proto as { referenceField: { text: { attributes: Record<string, unknown>; position: { xNm: bigint; yNm: bigint } } } };
     p.referenceField.text.attributes.verticalAlignment = 1;
-    const reqs = schematicTextRequests(item, { symbolPinsAbsolute: true });
+    const reqs = schematicTextRequests(item);
     const ref = byKey(reqs, 'R:field:Reference');
     expect(ref.text).toBeUndefined();
     expect(ref.measure).toBeDefined();
@@ -220,16 +206,16 @@ describe('schematic text requests: labels, sheets, text', () => {
   });
 
   test('hashes follow the content; every request key is a key the adapter looks up', () => {
-    const a = schematicTextRequests(resistor('R', 'R1', 10, 10), { symbolPinsAbsolute: true });
-    const b = schematicTextRequests(resistor('R', 'R1', 10, 10), { symbolPinsAbsolute: true });
-    const moved = schematicTextRequests(resistor('R', 'R1', 11, 10), { symbolPinsAbsolute: true });
+    const a = schematicTextRequests(resistor('R', 'R1', 10, 10));
+    const b = schematicTextRequests(resistor('R', 'R1', 10, 10));
+    const moved = schematicTextRequests(resistor('R', 'R1', 11, 10));
     expect(a.map((r) => r.hash)).toEqual(b.map((r) => r.hash));
     expect(a.map((r) => r.hash)).not.toEqual(moved.map((r) => r.hash));
     const items: StoredItemLike[] = syntheticSchematic();
     for (const item of items) {
       const seen = new Set<string>();
-      schematicItemToRenderItems(item, { symbolPinsAbsolute: true, textShapes: (k) => (seen.add(k), undefined) });
-      for (const r of schematicTextRequests(item, { symbolPinsAbsolute: true })) expect(seen.has(r.key)).toBe(true);
+      schematicItemToRenderItems(item, { textShapes: (k) => (seen.add(k), undefined) });
+      for (const r of schematicTextRequests(item)) expect(seen.has(r.key)).toBe(true);
     }
   });
 });

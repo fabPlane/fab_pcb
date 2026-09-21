@@ -110,7 +110,9 @@ function boardTexts(it: StoredItem): TextRef[] {
 }
 
 /** Adapter options of the schematic host; the text requests are built with the same ones so they are placed as drawn. */
-const SCH_ADAPTER: SchematicAdapterContext = { symbolPinsAbsolute: true, decodeAny: (any) => unpackAny(any as never) };
+// Pins in `definition.items` are library-local since upstream KiCad 3cbac44524 (the instance
+// transform is applied by the adapter); the previous servers sent sheet coordinates.
+const SCH_ADAPTER: SchematicAdapterContext = { symbolPinsAbsolute: false, decodeAny: (any) => unpackAny(any as never) };
 
 /**
  * Texts a schematic store item contributes, keyed for the schematic adapter: pin names and
