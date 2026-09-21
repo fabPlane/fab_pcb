@@ -15,7 +15,7 @@
     "./store": "./src/store/index.ts"
   },
   "scripts": {
-    "gen": "bun run gen-commands.ts",
+    "gen": "bun run gen-commands.ts && prettier --write src/commands.ts src/commands-data.ts",
     "test": "bun test",
     "test:conformance": "bun test test/conformance",
     "typecheck": "tsc -b"
