@@ -54,6 +54,11 @@ export const HANDLER_FILES: ReadonlyArray<{ path: string; handler: string; cls: 
     handler: "library",
     cls: "API_HANDLER_LIBRARY (base of the footprint and symbol library handlers)",
   },
+  {
+    path: "common/api/api_handler_libraries.cpp",
+    handler: "libraries",
+    cls: "API_HANDLER_LIBRARIES (upstream's library manager; one per table type, the design block one is registered by API_SERVER_HOST)",
+  },
   { path: "pcbnew/api/api_handler_board.cpp", handler: "board", cls: "API_HANDLER_BOARD" },
   { path: "pcbnew/api/api_handler_pcb.cpp", handler: "pcb", cls: "API_HANDLER_PCB" },
   { path: "pcbnew/api/api_handler_footprint.cpp", handler: "footprint", cls: "API_HANDLER_FOOTPRINT" },
@@ -70,8 +75,10 @@ export const HANDLER_FILES: ReadonlyArray<{ path: string; handler: string; cls: 
  * TextOrTextBox, BoardLayers, BOMField, ...) is a payload type.
  */
 const NON_REQUEST_SUFFIX = /(Response|Result|Status|Spec|Entry|Options|Settings)$/;
+/** Requests whose name carries a payload suffix anyway (upstream's library table mutations). */
+const REQUEST_DESPITE_SUFFIX = new Set(["AddLibraryTableEntry", "UpdateLibraryTableEntry", "DeleteLibraryTableEntry"]);
 const REQUEST_VERB =
-  /^(Get|Set|Add|Delete|Remove|Rename|Copy|Clear|Close|Open|Save|Revert|Run|Begin|End|Create|Update|Hit|Refresh|Expand|Ping|Flip|Interactive|Import|Refill|Inject|Parse|Check|CrossProbe|Sync|Highlight|Focus)[A-Z0-9]/;
+  /^(Get|Set|Add|Delete|Remove|Rename|Copy|Clear|Close|Open|Save|Revert|Run|Begin|End|Create|Update|Hit|Refresh|Expand|Ping|Flip|Interactive|Import|Refill|Inject|Parse|Check|CrossProbe|Sync|Highlight|Focus|Load|Reload|Search|Place)[A-Z0-9]/;
 
 export type Headless = "ok" | "gui-only" | "partial" | "unregistered";
 
@@ -263,7 +270,10 @@ export async function analyze(src = kicadSrc()): Promise<CoverageResult> {
     const rows: CommandInfo[] = [];
     for (const msg of file.messages) {
       const regs = byRequest.get(msg.typeName) ?? [];
-      const isRequest = regs.length > 0 || (!NON_REQUEST_SUFFIX.test(msg.name) && REQUEST_VERB.test(msg.name));
+      const isRequest =
+        regs.length > 0 ||
+        REQUEST_DESPITE_SUFFIX.has(msg.name) ||
+        (!NON_REQUEST_SUFFIX.test(msg.name) && REQUEST_VERB.test(msg.name));
       if (!isRequest) {
         skipped.push(msg.typeName);
         continue;

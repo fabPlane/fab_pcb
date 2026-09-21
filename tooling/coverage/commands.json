@@ -120,6 +120,16 @@
     "headless": "ok"
   },
   {
+    "command": "CreateDocument",
+    "group": "common/project",
+    "requestType": "kiapi.common.commands.CreateDocument",
+    "responseType": "kiapi.common.commands.OpenDocumentResponse",
+    "handlers": [
+      "common"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "ExpandTextVariables",
     "group": "common/project",
     "requestType": "kiapi.common.commands.ExpandTextVariables",
@@ -128,6 +138,16 @@
       "common",
       "board",
       "sch"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "GetNetClassAssignments",
+    "group": "common/project",
+    "requestType": "kiapi.common.commands.GetNetClassAssignments",
+    "responseType": "kiapi.common.commands.NetClassAssignmentsResponse",
+    "handlers": [
+      "common"
     ],
     "headless": "ok"
   },
@@ -200,6 +220,16 @@
       "pcb",
       "footprint",
       "sch"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "SetNetClassAssignments",
+    "group": "common/project",
+    "requestType": "kiapi.common.commands.SetNetClassAssignments",
+    "responseType": "google.protobuf.Empty",
+    "handlers": [
+      "common"
     ],
     "headless": "ok"
   },
@@ -284,6 +314,17 @@
       "editor"
     ],
     "headless": "ok"
+  },
+  {
+    "command": "FocusOnItems",
+    "group": "common/editor",
+    "requestType": "kiapi.common.commands.FocusOnItems",
+    "responseType": "google.protobuf.Empty",
+    "handlers": [
+      "board",
+      "sch"
+    ],
+    "headless": "gui-only"
   },
   {
     "command": "GetActions",
@@ -516,6 +557,7 @@
     "responseType": "kiapi.common.commands.SavedDocumentResponse",
     "handlers": [
       "board",
+      "sch",
       "sch"
     ],
     "headless": "ok"
@@ -537,7 +579,8 @@
     "requestType": "kiapi.common.commands.SaveSelectionToString",
     "responseType": "kiapi.common.commands.SavedSelectionResponse",
     "handlers": [
-      "board"
+      "board",
+      "sch"
     ],
     "headless": "gui-only"
   },
@@ -583,6 +626,14 @@
     "headless": "ok"
   },
   {
+    "command": "AddLibraryTableEntry",
+    "group": "common/library",
+    "requestType": "kiapi.common.commands.AddLibraryTableEntry",
+    "responseType": null,
+    "handlers": [],
+    "headless": "unregistered"
+  },
+  {
     "command": "AddLibraryTableRow",
     "group": "common/library",
     "requestType": "kiapi.common.commands.AddLibraryTableRow",
@@ -613,6 +664,24 @@
     "headless": "ok"
   },
   {
+    "command": "DeleteLibraryTableEntry",
+    "group": "common/library",
+    "requestType": "kiapi.common.commands.DeleteLibraryTableEntry",
+    "responseType": null,
+    "handlers": [],
+    "headless": "unregistered"
+  },
+  {
+    "command": "GetItemsFromLibrary",
+    "group": "common/library",
+    "requestType": "kiapi.common.commands.GetItemsFromLibrary",
+    "responseType": "kiapi.common.commands.GetItemsResponse",
+    "handlers": [
+      "libraries"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "GetLibraryItem",
     "group": "common/library",
     "requestType": "kiapi.common.commands.GetLibraryItem",
@@ -621,6 +690,34 @@
       "library"
     ],
     "headless": "ok"
+  },
+  {
+    "command": "GetLibraryItems",
+    "group": "common/library",
+    "requestType": "kiapi.common.commands.GetLibraryItems",
+    "responseType": "kiapi.common.commands.LibraryItemsResponse",
+    "handlers": [
+      "libraries"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "GetLibraryStatuses",
+    "group": "common/library",
+    "requestType": "kiapi.common.commands.GetLibraryStatuses",
+    "responseType": "kiapi.common.commands.LibraryStatusResponse",
+    "handlers": [
+      "libraries"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "GetLibraryTable",
+    "group": "common/library",
+    "requestType": "kiapi.common.commands.GetLibraryTable",
+    "responseType": null,
+    "handlers": [],
+    "headless": "unregistered"
   },
   {
     "command": "GetLibraryTables",
@@ -653,6 +750,26 @@
     "headless": "ok"
   },
   {
+    "command": "LoadAllLibraries",
+    "group": "common/library",
+    "requestType": "kiapi.common.commands.LoadAllLibraries",
+    "responseType": "kiapi.common.types.LibraryCommandStatus",
+    "handlers": [
+      "libraries"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "ReloadLibrary",
+    "group": "common/library",
+    "requestType": "kiapi.common.commands.ReloadLibrary",
+    "responseType": "kiapi.common.types.LibraryCommandStatus",
+    "handlers": [
+      "libraries"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "RemoveLibraryTableRow",
     "group": "common/library",
     "requestType": "kiapi.common.commands.RemoveLibraryTableRow",
@@ -681,6 +798,22 @@
       "library"
     ],
     "headless": "ok"
+  },
+  {
+    "command": "SearchLibraries",
+    "group": "common/library",
+    "requestType": "kiapi.common.commands.SearchLibraries",
+    "responseType": null,
+    "handlers": [],
+    "headless": "unregistered"
+  },
+  {
+    "command": "UpdateLibraryTableEntry",
+    "group": "common/library",
+    "requestType": "kiapi.common.commands.UpdateLibraryTableEntry",
+    "responseType": null,
+    "handlers": [],
+    "headless": "unregistered"
   },
   {
     "command": "GetAppSettings",
@@ -1174,6 +1307,16 @@
     "headless": "gui-only"
   },
   {
+    "command": "PlaceFootprintFromLibrary",
+    "group": "board/commands",
+    "requestType": "kiapi.board.commands.PlaceFootprintFromLibrary",
+    "responseType": "kiapi.common.commands.PlaceFromLibraryResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "RefillZones",
     "group": "board/commands",
     "requestType": "kiapi.board.commands.RefillZones",
@@ -1444,6 +1587,16 @@
     "headless": "ok"
   },
   {
+    "command": "RunBoardJobExportPng",
+    "group": "board/jobs",
+    "requestType": "kiapi.board.jobs.RunBoardJobExportPng",
+    "responseType": "kiapi.common.types.RunJobResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "RunBoardJobExportPosition",
     "group": "board/jobs",
     "requestType": "kiapi.board.jobs.RunBoardJobExportPosition",
@@ -1594,6 +1747,16 @@
     "headless": "ok"
   },
   {
+    "command": "PlaceSymbolFromLibrary",
+    "group": "sch/commands",
+    "requestType": "kiapi.schematic.commands.PlaceSymbolFromLibrary",
+    "responseType": "kiapi.common.commands.PlaceFromLibraryResponse",
+    "handlers": [
+      "sch"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "RunSchematicJobErc",
     "group": "sch/commands",
     "requestType": "kiapi.schematic.commands.RunSchematicJobErc",
@@ -1687,6 +1850,16 @@
     "command": "RunSchematicJobExportPdf",
     "group": "sch/jobs",
     "requestType": "kiapi.schematic.jobs.RunSchematicJobExportPdf",
+    "responseType": "kiapi.common.types.RunJobResponse",
+    "handlers": [
+      "sch"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "RunSchematicJobExportPng",
+    "group": "sch/jobs",
+    "requestType": "kiapi.schematic.jobs.RunSchematicJobExportPng",
     "responseType": "kiapi.common.types.RunJobResponse",
     "handlers": [
       "sch"
