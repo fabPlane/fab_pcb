@@ -19,6 +19,7 @@ import {
   RunBoardJobExportIpcD356Schema,
   RunBoardJobExportODBSchema,
   RunBoardJobExportPdfSchema,
+  RunBoardJobExportPngSchema,
   RunBoardJobExportPositionSchema,
   RunBoardJobExportPsSchema,
   RunBoardJobExportRenderSchema,
@@ -28,6 +29,7 @@ import {
   RunSchematicJobExportDxfSchema,
   RunSchematicJobExportNetlistSchema,
   RunSchematicJobExportPdfSchema,
+  RunSchematicJobExportPngSchema,
   RunSchematicJobExportPsSchema,
   RunSchematicJobExportSvgSchema,
   type GetJobStatusResponse,
@@ -226,6 +228,12 @@ export class BoardJobs extends Jobs {
       cmd.runBoardJobExportSvg(this.doc.client, { ...args, jobSettings }),
     );
   }
+  /** Raster export (upstream KiCad 11); `dpi` must be within 72..2400. */
+  exportPng(outputPath: string, args: Args<typeof RunBoardJobExportPngSchema> = {}, opts?: JobOptions): Promise<JobResult> {
+    return this.run("RunBoardJobExportPng", outputPath, opts, (jobSettings) =>
+      cmd.runBoardJobExportPng(this.doc.client, { ...args, jobSettings }),
+    );
+  }
   exportDxf(outputPath: string, args: Args<typeof RunBoardJobExportDxfSchema> = {}, opts?: JobOptions): Promise<JobResult> {
     return this.run("RunBoardJobExportDxf", outputPath, opts, (jobSettings) =>
       cmd.runBoardJobExportDxf(this.doc.client, { ...args, jobSettings }),
@@ -297,6 +305,12 @@ export class SchematicJobs extends Jobs {
   exportSvg(outputPath: string, args: Args<typeof RunSchematicJobExportSvgSchema> = {}, opts?: JobOptions): Promise<JobResult> {
     return this.run("RunSchematicJobExportSvg", outputPath, opts, (jobSettings) =>
       cmd.runSchematicJobExportSvg(this.doc.client, { ...args, jobSettings }),
+    );
+  }
+  /** Raster export (upstream KiCad 11); `dpi` must be within 72..2400. */
+  exportPng(outputPath: string, args: Args<typeof RunSchematicJobExportPngSchema> = {}, opts?: JobOptions): Promise<JobResult> {
+    return this.run("RunSchematicJobExportPng", outputPath, opts, (jobSettings) =>
+      cmd.runSchematicJobExportPng(this.doc.client, { ...args, jobSettings }),
     );
   }
   exportDxf(outputPath: string, args: Args<typeof RunSchematicJobExportDxfSchema> = {}, opts?: JobOptions): Promise<JobResult> {

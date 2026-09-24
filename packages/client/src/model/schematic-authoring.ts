@@ -45,9 +45,10 @@ function positionedField(source: SchematicField | undefined, name: string, value
 
 /**
  * Creates a native `SchematicSymbolInstance` suitable for a sheet commit. Library pin identities
- * are cleared and their positions are translated into the absolute sheet coordinates required by
- * KiCad's placed-symbol API. Rotation is deliberately left to a later transform-aware helper;
- * this constructor creates the conventional zero-degree placement without hiding that limitation.
+ * are cleared; pin positions stay in the symbol's local frame, which is what KiCad expects for a
+ * definition's children, and the returned pin map gives their absolute sheet positions. Rotation
+ * is deliberately left to a later transform-aware helper; this constructor creates the
+ * conventional zero-degree placement without hiding that limitation.
  */
 export function placeNativeSymbol(source: LibSymbol, placement: NativeSymbolPlacement): PlacedNativeSymbol {
   const definition = clone(SchematicSymbolSchema, source.proto);
@@ -62,7 +63,6 @@ export function placeNativeSymbol(source: LibSymbol, placement: NativeSymbolPlac
     const relative = vec2(pin.position);
     const absolute = { x: placement.position.x + relative.x, y: placement.position.y + relative.y };
     pin.id = undefined;
-    pin.position = toVector2(absolute);
     child.item = packAny(SchematicPinSchema, pin);
     const childUnit = child.unit?.unit ?? 0;
     const childStyle = child.bodyStyle?.style ?? 0;

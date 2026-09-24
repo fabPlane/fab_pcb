@@ -47,7 +47,7 @@ function deviceSymbol(): LibSymbol {
 }
 
 describe("generated schematic", () => {
-  test("draws library symbols and labelled wire stubs with absolute field and pin geometry", () => {
+  test("draws library symbols and labelled wire stubs with absolute field and wire geometry", () => {
     const result = buildGeneratedSchematic(
       {
         components: [{ ref: "R1", value: "10k", footprint: "Resistor_SMD:R_0402", libSource: { lib: "Device", part: "R" } }],
@@ -67,7 +67,8 @@ describe("generated schematic", () => {
     expect(symbol.proto.pinNameOffset).toEqual(toDistance(mm(0.254)));
     expect(symbol.position).toEqual({ x: mm(30.48), y: mm(25.4) });
     expect(symbol.field("Reference")?.position).toEqual({ x: mm(30.48), y: mm(23.4) });
-    expect(symbol.pins[0]?.position).toEqual({ x: mm(25.48), y: mm(25.4) });
+    // Definition pins stay in the symbol's local frame; the wire meets them in sheet coordinates
+    expect(symbol.pins[0]?.position).toEqual({ x: mm(-5), y: 0 });
     const wire = result.items.find((item): item is SchematicLine => item instanceof SchematicLine)!;
     expect(wire.start).toEqual({ x: mm(25.48), y: mm(25.4) });
     expect(wire.end).toEqual({ x: mm(20.4), y: mm(25.4) });
@@ -77,7 +78,7 @@ describe("generated schematic", () => {
     expect(result.items.every((item) => item.customProperties[GENERATED_SCHEMATIC_PROPERTY] === "circuit.netlist.json")).toBe(true);
   });
 
-  test("converts vertical library pins to placed-symbol sheet coordinates", () => {
+  test("routes wires to vertical library pins in placed-symbol sheet coordinates", () => {
     const vertical = deviceSymbol();
     const pin1 = vertical.proto.items[0]!.item!;
     const pin2 = vertical.proto.items[1]!.item!;
@@ -100,8 +101,8 @@ describe("generated schematic", () => {
 
     const symbol = result.items.find((item): item is SchematicSymbol => item instanceof SchematicSymbol)!;
     expect(symbol.pins.map((pin) => pin.position)).toEqual([
-      { x: mm(30.48), y: mm(29.21) },
-      { x: mm(30.48), y: mm(21.59) },
+      { x: 0, y: mm(3.81) },
+      { x: 0, y: mm(-3.81) },
     ]);
     expect(result.items.filter((item): item is SchematicLine => item instanceof SchematicLine).map((wire) => wire.start)).toEqual([
       { x: mm(30.48), y: mm(29.21) },
