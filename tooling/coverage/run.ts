@@ -54,6 +54,11 @@ export const HANDLER_FILES: ReadonlyArray<{ path: string; handler: string; cls: 
     handler: "library",
     cls: "API_HANDLER_LIBRARY (base of the footprint and symbol library handlers)",
   },
+  {
+    path: "common/api/api_handler_libraries.cpp",
+    handler: "libraries",
+    cls: "API_HANDLER_LIBRARIES (upstream library status and query commands)",
+  },
   { path: "pcbnew/api/api_handler_board.cpp", handler: "board", cls: "API_HANDLER_BOARD" },
   { path: "pcbnew/api/api_handler_pcb.cpp", handler: "pcb", cls: "API_HANDLER_PCB" },
   { path: "pcbnew/api/api_handler_footprint.cpp", handler: "footprint", cls: "API_HANDLER_FOOTPRINT" },
@@ -71,7 +76,7 @@ export const HANDLER_FILES: ReadonlyArray<{ path: string; handler: string; cls: 
  */
 const NON_REQUEST_SUFFIX = /(Response|Result|Status|Spec|Entry|Options|Settings)$/;
 const REQUEST_VERB =
-  /^(Get|Set|Add|Delete|Remove|Rename|Copy|Clear|Close|Open|Save|Revert|Run|Begin|End|Create|Update|Hit|Refresh|Expand|Ping|Flip|Interactive|Import|Refill|Inject|Parse|Check|CrossProbe|Sync|Highlight|Focus)[A-Z0-9]/;
+  /^(Get|Set|Add|Delete|Remove|Rename|Copy|Clear|Close|Open|Save|Revert|Run|Begin|End|Create|Update|Hit|Refresh|Expand|Ping|Flip|Interactive|Import|Refill|Inject|Parse|Check|CrossProbe|Sync|Highlight|Focus|Search)[A-Z0-9]/;
 
 export type Headless = "ok" | "gui-only" | "partial" | "unregistered";
 

@@ -2,19 +2,29 @@
 // This program source code file is part of KiCad, a free EDA CAD application.
 //
 // Copyright The KiCad Developers, see AUTHORS.txt for contributors.
+// @author Jon Evans <jon@craftyjon.com>
 //
-// This program is free software: you can redistribute it and/or modify it
-// under the terms of the GNU General Public License as published by the
-// Free Software Foundation, either version 3 of the License, or (at your
-// option) any later version.
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
 //
-// This program is distributed in the hope that it will be useful, but
-// WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// General Public License for more details.
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+//
+// library_commands.proto
+// Commands and responses related to library management
 
 //
 // Library access: library tables, entry listings, and reading/writing library items.
@@ -31,7 +41,7 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
-import type { LibraryIdentifier, LibraryIdentifierJson } from "../types/base_types_pb.js";
+import type { DocumentSpecifier, DocumentSpecifierJson, ItemHeader, ItemHeaderJson, LibraryIdentifier, LibraryIdentifierJson } from "../types/base_types_pb.js";
 import { file_common_types_base_types } from "../types/base_types_pb.js";
 import type { WizardInfo, WizardInfoJson, WizardParameterList, WizardParameterListJson } from "../types/wizards_pb.js";
 import { file_common_types_wizards } from "../types/wizards_pb.js";
@@ -39,13 +49,17 @@ import type { Footprint, FootprintJson, FootprintMountingStyle, FootprintMountin
 import { file_board_board_types } from "../../board/board_types_pb.js";
 import type { SchematicSymbol, SchematicSymbolJson } from "../../schematic/schematic_types_pb.js";
 import { file_schematic_schematic_types } from "../../schematic/schematic_types_pb.js";
+import type { LibraryStatusEntry, LibraryStatusEntryJson, LibraryTable, LibraryTableEntry, LibraryTableEntryJson, LibraryTableJson, LibraryTableScope as LibraryTableScope$1, LibraryTableScopeJson as LibraryTableScopeJson$1, LibraryType as LibraryType$1, LibraryTypeJson as LibraryTypeJson$1 } from "../types/library_types_pb.js";
+import { file_common_types_library_types } from "../types/library_types_pb.js";
+import type { Any, AnyJson } from "@bufbuild/protobuf/wkt";
+import { file_google_protobuf_any } from "@bufbuild/protobuf/wkt";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file common/commands/library_commands.proto.
  */
 export const file_common_commands_library_commands: GenFile = /*@__PURE__*/
-  fileDesc("CiZjb21tb24vY29tbWFuZHMvbGlicmFyeV9jb21tYW5kcy5wcm90bxIVa2lhcGkuY29tbW9uLmNvbW1hbmRzIu8BCg9MaWJyYXJ5VGFibGVSb3cSEAoIbmlja25hbWUYASABKAkSCwoDdXJpGAIgASgJEgwKBHR5cGUYAyABKAkSDwoHb3B0aW9ucxgEIAEoCRITCgtkZXNjcmlwdGlvbhgFIAEoCRI3CgVzY29wZRgGIAEoDjIoLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5MaWJyYXJ5VGFibGVTY29wZRIPCgdlbmFibGVkGAcgASgIEg4KBmhpZGRlbhgIIAEoCBIKCgJvaxgJIAEoCBINCgVlcnJvchgKIAEoCRIUCgxyZXNvbHZlZF91cmkYCyABKAkifQoQR2V0TGlicmFyeVRhYmxlcxIwCgR0eXBlGAEgASgOMiIua2lhcGkuY29tbW9uLmNvbW1hbmRzLkxpYnJhcnlUeXBlEjcKBXNjb3BlGAIgASgOMigua2lhcGkuY29tbW9uLmNvbW1hbmRzLkxpYnJhcnlUYWJsZVNjb3BlIlAKGEdldExpYnJhcnlUYWJsZXNSZXNwb25zZRI0CgRyb3dzGAEgAygLMiYua2lhcGkuY29tbW9uLmNvbW1hbmRzLkxpYnJhcnlUYWJsZVJvdyKUAQoSRm9vdHByaW50RW50cnlJbmZvEhEKCXBhZF9jb3VudBgBIAEoDRIYChB1bmlxdWVfcGFkX2NvdW50GAIgASgNEkEKDm1vdW50aW5nX3N0eWxlGAMgASgOMikua2lhcGkuYm9hcmQudHlwZXMuRm9vdHByaW50TW91bnRpbmdTdHlsZRIOCgZtb2RlbHMYBCADKAkiegoPU3ltYm9sRW50cnlJbmZvEhIKCnVuaXRfY291bnQYASABKA0SEAoIaXNfcG93ZXIYAiABKAgSGQoRZm9vdHByaW50X2ZpbHRlcnMYAyADKAkSEwoLcGFyZW50X25hbWUYBCABKAkSEQoJZm9vdHByaW50GAUgASgJIvgBCgxMaWJyYXJ5RW50cnkSMQoCaWQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeUlkZW50aWZpZXISDAoEbmFtZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCRIQCghrZXl3b3JkcxgEIAEoCRI+Cglmb290cHJpbnQYBSABKAsyKS5raWFwaS5jb21tb24uY29tbWFuZHMuRm9vdHByaW50RW50cnlJbmZvSAASOAoGc3ltYm9sGAYgASgLMiYua2lhcGkuY29tbW9uLmNvbW1hbmRzLlN5bWJvbEVudHJ5SW5mb0gAQgYKBGluZm8iaAoSTGlzdExpYnJhcnlFbnRyaWVzEjAKBHR5cGUYASABKA4yIi5raWFwaS5jb21tb24uY29tbWFuZHMuTGlicmFyeVR5cGUSEAoIbmlja25hbWUYAiABKAkSDgoGZmlsdGVyGAMgASgJIlIKGkxpc3RMaWJyYXJ5RW50cmllc1Jlc3BvbnNlEjQKB2VudHJpZXMYASADKAsyIy5raWFwaS5jb21tb24uY29tbWFuZHMuTGlicmFyeUVudHJ5InUKDkdldExpYnJhcnlJdGVtEjAKBHR5cGUYASABKA4yIi5raWFwaS5jb21tb24uY29tbWFuZHMuTGlicmFyeVR5cGUSMQoCaWQYAiABKAsyJS5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeUlkZW50aWZpZXIiggEKC0xpYnJhcnlJdGVtEjEKCWZvb3RwcmludBgBIAEoCzIcLmtpYXBpLmJvYXJkLnR5cGVzLkZvb3RwcmludEgAEjgKBnN5bWJvbBgCIAEoCzImLmtpYXBpLnNjaGVtYXRpYy50eXBlcy5TY2hlbWF0aWNTeW1ib2xIAEIGCgRpdGVtIn0KFkdldExpYnJhcnlJdGVtUmVzcG9uc2USMQoCaWQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeUlkZW50aWZpZXISMAoEaXRlbRgCIAEoCzIiLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5MaWJyYXJ5SXRlbSK7AQoPU2F2ZUxpYnJhcnlJdGVtEjAKBHR5cGUYASABKA4yIi5raWFwaS5jb21tb24uY29tbWFuZHMuTGlicmFyeVR5cGUSMQoCaWQYAiABKAsyJS5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeUlkZW50aWZpZXISMAoEaXRlbRgDIAEoCzIiLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5MaWJyYXJ5SXRlbRIRCglvdmVyd3JpdGUYBCABKAgiTAoXU2F2ZUxpYnJhcnlJdGVtUmVzcG9uc2USMQoCaWQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeUlkZW50aWZpZXIieAoRRGVsZXRlTGlicmFyeUl0ZW0SMAoEdHlwZRgBIAEoDjIiLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5MaWJyYXJ5VHlwZRIxCgJpZBgCIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5MaWJyYXJ5SWRlbnRpZmllciKuAQoNQ3JlYXRlTGlicmFyeRIwCgR0eXBlGAEgASgOMiIua2lhcGkuY29tbW9uLmNvbW1hbmRzLkxpYnJhcnlUeXBlEhAKCG5pY2tuYW1lGAIgASgJEgsKA3VyaRgDIAEoCRI3CgVzY29wZRgEIAEoDjIoLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5MaWJyYXJ5VGFibGVTY29wZRITCgtkZXNjcmlwdGlvbhgFIAEoCSLFAQoSQWRkTGlicmFyeVRhYmxlUm93EjAKBHR5cGUYASABKA4yIi5raWFwaS5jb21tb24uY29tbWFuZHMuTGlicmFyeVR5cGUSNwoFc2NvcGUYAiABKA4yKC5raWFwaS5jb21tb24uY29tbWFuZHMuTGlicmFyeVRhYmxlU2NvcGUSMwoDcm93GAMgASgLMiYua2lhcGkuY29tbW9uLmNvbW1hbmRzLkxpYnJhcnlUYWJsZVJvdxIPCgdyZXBsYWNlGAQgASgIIpQBChVSZW1vdmVMaWJyYXJ5VGFibGVSb3cSMAoEdHlwZRgBIAEoDjIiLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5MaWJyYXJ5VHlwZRI3CgVzY29wZRgCIAEoDjIoLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5MaWJyYXJ5VGFibGVTY29wZRIQCghuaWNrbmFtZRgDIAEoCSINCgtMaXN0V2l6YXJkcyJGChNMaXN0V2l6YXJkc1Jlc3BvbnNlEi8KB3dpemFyZHMYASADKAsyHi5raWFwaS5jb21tb24udHlwZXMuV2l6YXJkSW5mbyJcCglSdW5XaXphcmQSEgoKaWRlbnRpZmllchgBIAEoCRI7CgpwYXJhbWV0ZXJzGAIgASgLMicua2lhcGkuY29tbW9uLnR5cGVzLldpemFyZFBhcmFtZXRlckxpc3QqUwoLTGlicmFyeVR5cGUSDgoKTFRfVU5LTk9XThAAEg0KCUxUX1NZTUJPTBABEhAKDExUX0ZPT1RQUklOVBACEhMKD0xUX0RFU0lHTl9CTE9DSxADKkUKEUxpYnJhcnlUYWJsZVNjb3BlEg8KC0xUU19VTktOT1dOEAASDgoKTFRTX0dMT0JBTBABEg8KC0xUU19QUk9KRUNUEAJiBnByb3RvMw", [file_common_types_base_types, file_common_types_wizards, file_board_board_types, file_schematic_schematic_types]);
+  fileDesc("CiZjb21tb24vY29tbWFuZHMvbGlicmFyeV9jb21tYW5kcy5wcm90bxIVa2lhcGkuY29tbW9uLmNvbW1hbmRzIu8BCg9MaWJyYXJ5VGFibGVSb3cSEAoIbmlja25hbWUYASABKAkSCwoDdXJpGAIgASgJEgwKBHR5cGUYAyABKAkSDwoHb3B0aW9ucxgEIAEoCRITCgtkZXNjcmlwdGlvbhgFIAEoCRI3CgVzY29wZRgGIAEoDjIoLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5MaWJyYXJ5VGFibGVTY29wZRIPCgdlbmFibGVkGAcgASgIEg4KBmhpZGRlbhgIIAEoCBIKCgJvaxgJIAEoCBINCgVlcnJvchgKIAEoCRIUCgxyZXNvbHZlZF91cmkYCyABKAkifQoQR2V0TGlicmFyeVRhYmxlcxIwCgR0eXBlGAEgASgOMiIua2lhcGkuY29tbW9uLmNvbW1hbmRzLkxpYnJhcnlUeXBlEjcKBXNjb3BlGAIgASgOMigua2lhcGkuY29tbW9uLmNvbW1hbmRzLkxpYnJhcnlUYWJsZVNjb3BlIlAKGEdldExpYnJhcnlUYWJsZXNSZXNwb25zZRI0CgRyb3dzGAEgAygLMiYua2lhcGkuY29tbW9uLmNvbW1hbmRzLkxpYnJhcnlUYWJsZVJvdyKUAQoSRm9vdHByaW50RW50cnlJbmZvEhEKCXBhZF9jb3VudBgBIAEoDRIYChB1bmlxdWVfcGFkX2NvdW50GAIgASgNEkEKDm1vdW50aW5nX3N0eWxlGAMgASgOMikua2lhcGkuYm9hcmQudHlwZXMuRm9vdHByaW50TW91bnRpbmdTdHlsZRIOCgZtb2RlbHMYBCADKAkiegoPU3ltYm9sRW50cnlJbmZvEhIKCnVuaXRfY291bnQYASABKA0SEAoIaXNfcG93ZXIYAiABKAgSGQoRZm9vdHByaW50X2ZpbHRlcnMYAyADKAkSEwoLcGFyZW50X25hbWUYBCABKAkSEQoJZm9vdHByaW50GAUgASgJIvgBCgxMaWJyYXJ5RW50cnkSMQoCaWQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeUlkZW50aWZpZXISDAoEbmFtZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCRIQCghrZXl3b3JkcxgEIAEoCRI+Cglmb290cHJpbnQYBSABKAsyKS5raWFwaS5jb21tb24uY29tbWFuZHMuRm9vdHByaW50RW50cnlJbmZvSAASOAoGc3ltYm9sGAYgASgLMiYua2lhcGkuY29tbW9uLmNvbW1hbmRzLlN5bWJvbEVudHJ5SW5mb0gAQgYKBGluZm8iaAoSTGlzdExpYnJhcnlFbnRyaWVzEjAKBHR5cGUYASABKA4yIi5raWFwaS5jb21tb24uY29tbWFuZHMuTGlicmFyeVR5cGUSEAoIbmlja25hbWUYAiABKAkSDgoGZmlsdGVyGAMgASgJIlIKGkxpc3RMaWJyYXJ5RW50cmllc1Jlc3BvbnNlEjQKB2VudHJpZXMYASADKAsyIy5raWFwaS5jb21tb24uY29tbWFuZHMuTGlicmFyeUVudHJ5InUKDkdldExpYnJhcnlJdGVtEjAKBHR5cGUYASABKA4yIi5raWFwaS5jb21tb24uY29tbWFuZHMuTGlicmFyeVR5cGUSMQoCaWQYAiABKAsyJS5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeUlkZW50aWZpZXIiggEKC0xpYnJhcnlJdGVtEjEKCWZvb3RwcmludBgBIAEoCzIcLmtpYXBpLmJvYXJkLnR5cGVzLkZvb3RwcmludEgAEjgKBnN5bWJvbBgCIAEoCzImLmtpYXBpLnNjaGVtYXRpYy50eXBlcy5TY2hlbWF0aWNTeW1ib2xIAEIGCgRpdGVtIn0KFkdldExpYnJhcnlJdGVtUmVzcG9uc2USMQoCaWQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeUlkZW50aWZpZXISMAoEaXRlbRgCIAEoCzIiLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5MaWJyYXJ5SXRlbSK7AQoPU2F2ZUxpYnJhcnlJdGVtEjAKBHR5cGUYASABKA4yIi5raWFwaS5jb21tb24uY29tbWFuZHMuTGlicmFyeVR5cGUSMQoCaWQYAiABKAsyJS5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeUlkZW50aWZpZXISMAoEaXRlbRgDIAEoCzIiLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5MaWJyYXJ5SXRlbRIRCglvdmVyd3JpdGUYBCABKAgiTAoXU2F2ZUxpYnJhcnlJdGVtUmVzcG9uc2USMQoCaWQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeUlkZW50aWZpZXIieAoRRGVsZXRlTGlicmFyeUl0ZW0SMAoEdHlwZRgBIAEoDjIiLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5MaWJyYXJ5VHlwZRIxCgJpZBgCIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5MaWJyYXJ5SWRlbnRpZmllciKuAQoNQ3JlYXRlTGlicmFyeRIwCgR0eXBlGAEgASgOMiIua2lhcGkuY29tbW9uLmNvbW1hbmRzLkxpYnJhcnlUeXBlEhAKCG5pY2tuYW1lGAIgASgJEgsKA3VyaRgDIAEoCRI3CgVzY29wZRgEIAEoDjIoLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5MaWJyYXJ5VGFibGVTY29wZRITCgtkZXNjcmlwdGlvbhgFIAEoCSLFAQoSQWRkTGlicmFyeVRhYmxlUm93EjAKBHR5cGUYASABKA4yIi5raWFwaS5jb21tb24uY29tbWFuZHMuTGlicmFyeVR5cGUSNwoFc2NvcGUYAiABKA4yKC5raWFwaS5jb21tb24uY29tbWFuZHMuTGlicmFyeVRhYmxlU2NvcGUSMwoDcm93GAMgASgLMiYua2lhcGkuY29tbW9uLmNvbW1hbmRzLkxpYnJhcnlUYWJsZVJvdxIPCgdyZXBsYWNlGAQgASgIIpQBChVSZW1vdmVMaWJyYXJ5VGFibGVSb3cSMAoEdHlwZRgBIAEoDjIiLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5MaWJyYXJ5VHlwZRI3CgVzY29wZRgCIAEoDjIoLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5MaWJyYXJ5VGFibGVTY29wZRIQCghuaWNrbmFtZRgDIAEoCSINCgtMaXN0V2l6YXJkcyJGChNMaXN0V2l6YXJkc1Jlc3BvbnNlEi8KB3dpemFyZHMYASADKAsyHi5raWFwaS5jb21tb24udHlwZXMuV2l6YXJkSW5mbyJcCglSdW5XaXphcmQSEgoKaWRlbnRpZmllchgBIAEoCRI7CgpwYXJhbWV0ZXJzGAIgASgLMicua2lhcGkuY29tbW9uLnR5cGVzLldpemFyZFBhcmFtZXRlckxpc3QiiwEKD0dldExpYnJhcnlUYWJsZRItCgR0eXBlGAEgASgOMh8ua2lhcGkuY29tbW9uLnR5cGVzLkxpYnJhcnlUeXBlEjQKBXNjb3BlGAIgASgOMiUua2lhcGkuY29tbW9uLnR5cGVzLkxpYnJhcnlUYWJsZVNjb3BlEhMKC3N1YnN0aXR1dGVkGAMgASgIInwKFExpYnJhcnlUYWJsZVJlc3BvbnNlEi8KBXRhYmxlGAEgASgLMiAua2lhcGkuY29tbW9uLnR5cGVzLkxpYnJhcnlUYWJsZRIzCgRyb3dzGAIgAygLMiUua2lhcGkuY29tbW9uLnR5cGVzLkxpYnJhcnlUYWJsZUVudHJ5IoIBChRBZGRMaWJyYXJ5VGFibGVFbnRyeRI0CgVlbnRyeRgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5MaWJyYXJ5VGFibGVFbnRyeRI0CgVzY29wZRgCIAEoDjIlLmtpYXBpLmNvbW1vbi50eXBlcy5MaWJyYXJ5VGFibGVTY29wZSKFAQoXVXBkYXRlTGlicmFyeVRhYmxlRW50cnkSNAoFZW50cnkYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeVRhYmxlRW50cnkSNAoFc2NvcGUYAiABKA4yJS5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeVRhYmxlU2NvcGUikAEKF0RlbGV0ZUxpYnJhcnlUYWJsZUVudHJ5Ei0KBHR5cGUYASABKA4yHy5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeVR5cGUSEAoIbmlja25hbWUYAiABKAkSNAoFc2NvcGUYAyABKA4yJS5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeVRhYmxlU2NvcGUiegoSR2V0TGlicmFyeVN0YXR1c2VzEi4KBXR5cGVzGAEgAygOMh8ua2lhcGkuY29tbW9uLnR5cGVzLkxpYnJhcnlUeXBlEjQKBXNjb3BlGAIgASgOMiUua2lhcGkuY29tbW9uLnR5cGVzLkxpYnJhcnlUYWJsZVNjb3BlIlIKFUxpYnJhcnlTdGF0dXNSZXNwb25zZRI5CglsaWJyYXJpZXMYASADKAsyJi5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeVN0YXR1c0VudHJ5IoYBCg1SZWxvYWRMaWJyYXJ5Ei0KBHR5cGUYASABKA4yHy5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeVR5cGUSNAoFc2NvcGUYAiABKA4yJS5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeVRhYmxlU2NvcGUSEAoIbmlja25hbWUYAyADKAkiQQoQTG9hZEFsbExpYnJhcmllcxItCgR0eXBlGAEgAygOMh8ua2lhcGkuY29tbW9uLnR5cGVzLkxpYnJhcnlUeXBlIlIKD0dldExpYnJhcnlJdGVtcxItCgR0eXBlGAEgASgOMh8ua2lhcGkuY29tbW9uLnR5cGVzLkxpYnJhcnlUeXBlEhAKCG5pY2tuYW1lGAIgAygJIkwKFExpYnJhcnlJdGVtc1Jlc3BvbnNlEjQKBWl0ZW1zGAEgAygLMiUua2lhcGkuY29tbW9uLnR5cGVzLkxpYnJhcnlJZGVudGlmaWVyIrYBChNHZXRJdGVtc0Zyb21MaWJyYXJ5Ei0KBHR5cGUYASABKA4yHy5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeVR5cGUSNwoIZG9jdW1lbnQYAiABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISNwoIaXRlbV9pZHMYAyADKAsyJS5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeUlkZW50aWZpZXIiTwoPU2VhcmNoTGlicmFyaWVzEi0KBHR5cGUYASABKA4yHy5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeVR5cGUSDQoFcXVlcnkYAiABKAkiTwoXU2VhcmNoTGlicmFyaWVzUmVzcG9uc2USNAoFaXRlbXMYASADKAsyJS5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeUlkZW50aWZpZXIibgoYUGxhY2VGcm9tTGlicmFyeVJlc3BvbnNlEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEiIKBGl0ZW0YAiABKAsyFC5nb29nbGUucHJvdG9idWYuQW55KlMKC0xpYnJhcnlUeXBlEg4KCkxUX1VOS05PV04QABINCglMVF9TWU1CT0wQARIQCgxMVF9GT09UUFJJTlQQAhITCg9MVF9ERVNJR05fQkxPQ0sQAypFChFMaWJyYXJ5VGFibGVTY29wZRIPCgtMVFNfVU5LTk9XThAAEg4KCkxUU19HTE9CQUwQARIPCgtMVFNfUFJPSkVDVBACYgZwcm90bzM", [file_common_types_base_types, file_common_types_wizards, file_board_board_types, file_schematic_schematic_types, file_common_types_library_types, file_google_protobuf_any]);
 
 /**
  * One row of a library table (sym-lib-table, fp-lib-table, design-block-lib-table)
@@ -1226,6 +1240,761 @@ export type RunWizardJson = {
  */
 export const RunWizardSchema: GenMessage<RunWizard, {jsonType: RunWizardJson}> = /*@__PURE__*/
   messageDesc(file_common_commands_library_commands, 19);
+
+/**
+ * Returns LibraryTableResponse
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.GetLibraryTable
+ */
+export type GetLibraryTable = Message<"kiapi.common.commands.GetLibraryTable"> & {
+  /**
+   * Which type of table (symbol, footprint, design block) to query
+   *
+   * @generated from field: kiapi.common.types.LibraryType type = 1;
+   */
+  type: LibraryType$1;
+
+  /**
+   * Which table scope (global, project, or both)
+   *
+   * @generated from field: kiapi.common.types.LibraryTableScope scope = 2;
+   */
+  scope: LibraryTableScope$1;
+
+  /**
+   * If true, return URIs with environment variables expanded
+   *
+   * @generated from field: bool substituted = 3;
+   */
+  substituted: boolean;
+};
+
+/**
+ * Returns LibraryTableResponse
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.GetLibraryTable
+ */
+export type GetLibraryTableJson = {
+  /**
+   * Which type of table (symbol, footprint, design block) to query
+   *
+   * @generated from field: kiapi.common.types.LibraryType type = 1;
+   */
+  type?: LibraryTypeJson$1;
+
+  /**
+   * Which table scope (global, project, or both)
+   *
+   * @generated from field: kiapi.common.types.LibraryTableScope scope = 2;
+   */
+  scope?: LibraryTableScopeJson$1;
+
+  /**
+   * If true, return URIs with environment variables expanded
+   *
+   * @generated from field: bool substituted = 3;
+   */
+  substituted?: boolean;
+};
+
+/**
+ * Describes the message kiapi.common.commands.GetLibraryTable.
+ * Use `create(GetLibraryTableSchema)` to create a new message.
+ */
+export const GetLibraryTableSchema: GenMessage<GetLibraryTable, {jsonType: GetLibraryTableJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_library_commands, 20);
+
+/**
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.LibraryTableResponse
+ */
+export type LibraryTableResponse = Message<"kiapi.common.commands.LibraryTableResponse"> & {
+  /**
+   * The table that was queried
+   *
+   * @generated from field: kiapi.common.types.LibraryTable table = 1;
+   */
+  table?: LibraryTable | undefined;
+
+  /**
+   * @generated from field: repeated kiapi.common.types.LibraryTableEntry rows = 2;
+   */
+  rows: LibraryTableEntry[];
+};
+
+/**
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.LibraryTableResponse
+ */
+export type LibraryTableResponseJson = {
+  /**
+   * The table that was queried
+   *
+   * @generated from field: kiapi.common.types.LibraryTable table = 1;
+   */
+  table?: LibraryTableJson;
+
+  /**
+   * @generated from field: repeated kiapi.common.types.LibraryTableEntry rows = 2;
+   */
+  rows?: LibraryTableEntryJson[];
+};
+
+/**
+ * Describes the message kiapi.common.commands.LibraryTableResponse.
+ * Use `create(LibraryTableResponseSchema)` to create a new message.
+ */
+export const LibraryTableResponseSchema: GenMessage<LibraryTableResponse, {jsonType: LibraryTableResponseJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_library_commands, 21);
+
+/**
+ * Inserts a new row into the given library table.
+ * Returns LibraryCommandStatus
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.AddLibraryTableEntry
+ */
+export type AddLibraryTableEntry = Message<"kiapi.common.commands.AddLibraryTableEntry"> & {
+  /**
+   * @generated from field: kiapi.common.types.LibraryTableEntry entry = 1;
+   */
+  entry?: LibraryTableEntry | undefined;
+
+  /**
+   * Which table to modify.  LTS_BOTH is invalid here.
+   *
+   * @generated from field: kiapi.common.types.LibraryTableScope scope = 2;
+   */
+  scope: LibraryTableScope$1;
+};
+
+/**
+ * Inserts a new row into the given library table.
+ * Returns LibraryCommandStatus
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.AddLibraryTableEntry
+ */
+export type AddLibraryTableEntryJson = {
+  /**
+   * @generated from field: kiapi.common.types.LibraryTableEntry entry = 1;
+   */
+  entry?: LibraryTableEntryJson;
+
+  /**
+   * Which table to modify.  LTS_BOTH is invalid here.
+   *
+   * @generated from field: kiapi.common.types.LibraryTableScope scope = 2;
+   */
+  scope?: LibraryTableScopeJson$1;
+};
+
+/**
+ * Describes the message kiapi.common.commands.AddLibraryTableEntry.
+ * Use `create(AddLibraryTableEntrySchema)` to create a new message.
+ */
+export const AddLibraryTableEntrySchema: GenMessage<AddLibraryTableEntry, {jsonType: AddLibraryTableEntryJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_library_commands, 22);
+
+/**
+ * Modifies an existing row, matched by entry.nickname (and scope).
+ * Returns LibraryCommandStatus
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.UpdateLibraryTableEntry
+ */
+export type UpdateLibraryTableEntry = Message<"kiapi.common.commands.UpdateLibraryTableEntry"> & {
+  /**
+   * @generated from field: kiapi.common.types.LibraryTableEntry entry = 1;
+   */
+  entry?: LibraryTableEntry | undefined;
+
+  /**
+   * Which table to modify.  LTS_BOTH is invalid here.
+   *
+   * @generated from field: kiapi.common.types.LibraryTableScope scope = 2;
+   */
+  scope: LibraryTableScope$1;
+};
+
+/**
+ * Modifies an existing row, matched by entry.nickname (and scope).
+ * Returns LibraryCommandStatus
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.UpdateLibraryTableEntry
+ */
+export type UpdateLibraryTableEntryJson = {
+  /**
+   * @generated from field: kiapi.common.types.LibraryTableEntry entry = 1;
+   */
+  entry?: LibraryTableEntryJson;
+
+  /**
+   * Which table to modify.  LTS_BOTH is invalid here.
+   *
+   * @generated from field: kiapi.common.types.LibraryTableScope scope = 2;
+   */
+  scope?: LibraryTableScopeJson$1;
+};
+
+/**
+ * Describes the message kiapi.common.commands.UpdateLibraryTableEntry.
+ * Use `create(UpdateLibraryTableEntrySchema)` to create a new message.
+ */
+export const UpdateLibraryTableEntrySchema: GenMessage<UpdateLibraryTableEntry, {jsonType: UpdateLibraryTableEntryJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_library_commands, 23);
+
+/**
+ * Deletes a row from the given library table by nickname.
+ * Returns LibraryCommandStatus
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.DeleteLibraryTableEntry
+ */
+export type DeleteLibraryTableEntry = Message<"kiapi.common.commands.DeleteLibraryTableEntry"> & {
+  /**
+   * Which table type (symbol, footprint, design block) contains the row
+   *
+   * @generated from field: kiapi.common.types.LibraryType type = 1;
+   */
+  type: LibraryType$1;
+
+  /**
+   * @generated from field: string nickname = 2;
+   */
+  nickname: string;
+
+  /**
+   * Which table to modify.  LTS_BOTH is invalid here.
+   *
+   * @generated from field: kiapi.common.types.LibraryTableScope scope = 3;
+   */
+  scope: LibraryTableScope$1;
+};
+
+/**
+ * Deletes a row from the given library table by nickname.
+ * Returns LibraryCommandStatus
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.DeleteLibraryTableEntry
+ */
+export type DeleteLibraryTableEntryJson = {
+  /**
+   * Which table type (symbol, footprint, design block) contains the row
+   *
+   * @generated from field: kiapi.common.types.LibraryType type = 1;
+   */
+  type?: LibraryTypeJson$1;
+
+  /**
+   * @generated from field: string nickname = 2;
+   */
+  nickname?: string;
+
+  /**
+   * Which table to modify.  LTS_BOTH is invalid here.
+   *
+   * @generated from field: kiapi.common.types.LibraryTableScope scope = 3;
+   */
+  scope?: LibraryTableScopeJson$1;
+};
+
+/**
+ * Describes the message kiapi.common.commands.DeleteLibraryTableEntry.
+ * Use `create(DeleteLibraryTableEntrySchema)` to create a new message.
+ */
+export const DeleteLibraryTableEntrySchema: GenMessage<DeleteLibraryTableEntry, {jsonType: DeleteLibraryTableEntryJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_library_commands, 24);
+
+/**
+ * Queries the load status of each library of the given type(s)
+ * Returns LibraryStatusResponse
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.GetLibraryStatuses
+ */
+export type GetLibraryStatuses = Message<"kiapi.common.commands.GetLibraryStatuses"> & {
+  /**
+   * Types to query; empty means all types
+   *
+   * @generated from field: repeated kiapi.common.types.LibraryType types = 1;
+   */
+  types: LibraryType$1[];
+
+  /**
+   * Which table scope(s) to query
+   *
+   * @generated from field: kiapi.common.types.LibraryTableScope scope = 2;
+   */
+  scope: LibraryTableScope$1;
+};
+
+/**
+ * Queries the load status of each library of the given type(s)
+ * Returns LibraryStatusResponse
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.GetLibraryStatuses
+ */
+export type GetLibraryStatusesJson = {
+  /**
+   * Types to query; empty means all types
+   *
+   * @generated from field: repeated kiapi.common.types.LibraryType types = 1;
+   */
+  types?: LibraryTypeJson$1[];
+
+  /**
+   * Which table scope(s) to query
+   *
+   * @generated from field: kiapi.common.types.LibraryTableScope scope = 2;
+   */
+  scope?: LibraryTableScopeJson$1;
+};
+
+/**
+ * Describes the message kiapi.common.commands.GetLibraryStatuses.
+ * Use `create(GetLibraryStatusesSchema)` to create a new message.
+ */
+export const GetLibraryStatusesSchema: GenMessage<GetLibraryStatuses, {jsonType: GetLibraryStatusesJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_library_commands, 25);
+
+/**
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.LibraryStatusResponse
+ */
+export type LibraryStatusResponse = Message<"kiapi.common.commands.LibraryStatusResponse"> & {
+  /**
+   * @generated from field: repeated kiapi.common.types.LibraryStatusEntry libraries = 1;
+   */
+  libraries: LibraryStatusEntry[];
+};
+
+/**
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.LibraryStatusResponse
+ */
+export type LibraryStatusResponseJson = {
+  /**
+   * @generated from field: repeated kiapi.common.types.LibraryStatusEntry libraries = 1;
+   */
+  libraries?: LibraryStatusEntryJson[];
+};
+
+/**
+ * Describes the message kiapi.common.commands.LibraryStatusResponse.
+ * Use `create(LibraryStatusResponseSchema)` to create a new message.
+ */
+export const LibraryStatusResponseSchema: GenMessage<LibraryStatusResponse, {jsonType: LibraryStatusResponseJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_library_commands, 26);
+
+/**
+ * Reloads library table row(s) from disk.  This starts a reload process that operates
+ * asynchronously.  The API command will return immediately but updated library content
+ * will not be available until the load has completed.
+ * Returns LibraryCommandStatus
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.ReloadLibrary
+ */
+export type ReloadLibrary = Message<"kiapi.common.commands.ReloadLibrary"> & {
+  /**
+   * Type of library to reload
+   *
+   * @generated from field: kiapi.common.types.LibraryType type = 1;
+   */
+  type: LibraryType$1;
+
+  /**
+   * Which table to look up the library in.  LTS_BOTH is invalid here.
+   *
+   * @generated from field: kiapi.common.types.LibraryTableScope scope = 2;
+   */
+  scope: LibraryTableScope$1;
+
+  /**
+   * List of libraries to reload. If absent, all libraries matching type and scope will be reloaded.
+   *
+   * @generated from field: repeated string nickname = 3;
+   */
+  nickname: string[];
+};
+
+/**
+ * Reloads library table row(s) from disk.  This starts a reload process that operates
+ * asynchronously.  The API command will return immediately but updated library content
+ * will not be available until the load has completed.
+ * Returns LibraryCommandStatus
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.ReloadLibrary
+ */
+export type ReloadLibraryJson = {
+  /**
+   * Type of library to reload
+   *
+   * @generated from field: kiapi.common.types.LibraryType type = 1;
+   */
+  type?: LibraryTypeJson$1;
+
+  /**
+   * Which table to look up the library in.  LTS_BOTH is invalid here.
+   *
+   * @generated from field: kiapi.common.types.LibraryTableScope scope = 2;
+   */
+  scope?: LibraryTableScopeJson$1;
+
+  /**
+   * List of libraries to reload. If absent, all libraries matching type and scope will be reloaded.
+   *
+   * @generated from field: repeated string nickname = 3;
+   */
+  nickname?: string[];
+};
+
+/**
+ * Describes the message kiapi.common.commands.ReloadLibrary.
+ * Use `create(ReloadLibrarySchema)` to create a new message.
+ */
+export const ReloadLibrarySchema: GenMessage<ReloadLibrary, {jsonType: ReloadLibraryJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_library_commands, 27);
+
+/**
+ * Starts a background load of all libraries of the given types that are listed in the
+ * library tables.  If no types are given, all library types are loaded.  The command
+ * returns immediately and the load proceeds asynchronously; progress can be monitored
+ * with GetLibraryStatuses.
+ * In GUI mode this command is a no-op, because the GUI preloads libraries on its own.
+ * Returns LibraryCommandStatus
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.LoadAllLibraries
+ */
+export type LoadAllLibraries = Message<"kiapi.common.commands.LoadAllLibraries"> & {
+  /**
+   * Types of libraries to load; empty means all types
+   *
+   * @generated from field: repeated kiapi.common.types.LibraryType type = 1;
+   */
+  type: LibraryType$1[];
+};
+
+/**
+ * Starts a background load of all libraries of the given types that are listed in the
+ * library tables.  If no types are given, all library types are loaded.  The command
+ * returns immediately and the load proceeds asynchronously; progress can be monitored
+ * with GetLibraryStatuses.
+ * In GUI mode this command is a no-op, because the GUI preloads libraries on its own.
+ * Returns LibraryCommandStatus
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.LoadAllLibraries
+ */
+export type LoadAllLibrariesJson = {
+  /**
+   * Types of libraries to load; empty means all types
+   *
+   * @generated from field: repeated kiapi.common.types.LibraryType type = 1;
+   */
+  type?: LibraryTypeJson$1[];
+};
+
+/**
+ * Describes the message kiapi.common.commands.LoadAllLibraries.
+ * Use `create(LoadAllLibrariesSchema)` to create a new message.
+ */
+export const LoadAllLibrariesSchema: GenMessage<LoadAllLibraries, {jsonType: LoadAllLibrariesJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_library_commands, 28);
+
+/**
+ * Requests items contained in a library or set of libraries
+ * Returns LibraryItemsResponse
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.GetLibraryItems
+ */
+export type GetLibraryItems = Message<"kiapi.common.commands.GetLibraryItems"> & {
+  /**
+   * @generated from field: kiapi.common.types.LibraryType type = 1;
+   */
+  type: LibraryType$1;
+
+  /**
+   * The library or libraries to query.
+   *
+   * @generated from field: repeated string nickname = 2;
+   */
+  nickname: string[];
+};
+
+/**
+ * Requests items contained in a library or set of libraries
+ * Returns LibraryItemsResponse
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.GetLibraryItems
+ */
+export type GetLibraryItemsJson = {
+  /**
+   * @generated from field: kiapi.common.types.LibraryType type = 1;
+   */
+  type?: LibraryTypeJson$1;
+
+  /**
+   * The library or libraries to query.
+   *
+   * @generated from field: repeated string nickname = 2;
+   */
+  nickname?: string[];
+};
+
+/**
+ * Describes the message kiapi.common.commands.GetLibraryItems.
+ * Use `create(GetLibraryItemsSchema)` to create a new message.
+ */
+export const GetLibraryItemsSchema: GenMessage<GetLibraryItems, {jsonType: GetLibraryItemsJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_library_commands, 29);
+
+/**
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.LibraryItemsResponse
+ */
+export type LibraryItemsResponse = Message<"kiapi.common.commands.LibraryItemsResponse"> & {
+  /**
+   * The identifiers of all content in the library
+   *
+   * @generated from field: repeated kiapi.common.types.LibraryIdentifier items = 1;
+   */
+  items: LibraryIdentifier[];
+};
+
+/**
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.LibraryItemsResponse
+ */
+export type LibraryItemsResponseJson = {
+  /**
+   * The identifiers of all content in the library
+   *
+   * @generated from field: repeated kiapi.common.types.LibraryIdentifier items = 1;
+   */
+  items?: LibraryIdentifierJson[];
+};
+
+/**
+ * Describes the message kiapi.common.commands.LibraryItemsResponse.
+ * Use `create(LibraryItemsResponseSchema)` to create a new message.
+ */
+export const LibraryItemsResponseSchema: GenMessage<LibraryItemsResponse, {jsonType: LibraryItemsResponseJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_library_commands, 30);
+
+/**
+ * Requests the full content of items contained in a library or set of libraries
+ * Returns GetItemsResponse
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.GetItemsFromLibrary
+ */
+export type GetItemsFromLibrary = Message<"kiapi.common.commands.GetItemsFromLibrary"> & {
+  /**
+   * The type of library to query (symbol, footprint, design block).
+   *
+   * @generated from field: kiapi.common.types.LibraryType type = 1;
+   */
+  type: LibraryType$1;
+
+  /**
+   * Which document context to use (to enable querying project-specific libraries)
+   *
+   * @generated from field: kiapi.common.types.DocumentSpecifier document = 2;
+   */
+  document?: DocumentSpecifier | undefined;
+
+  /**
+   * The items to retrieve.
+   *
+   * @generated from field: repeated kiapi.common.types.LibraryIdentifier item_ids = 3;
+   */
+  itemIds: LibraryIdentifier[];
+};
+
+/**
+ * Requests the full content of items contained in a library or set of libraries
+ * Returns GetItemsResponse
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.GetItemsFromLibrary
+ */
+export type GetItemsFromLibraryJson = {
+  /**
+   * The type of library to query (symbol, footprint, design block).
+   *
+   * @generated from field: kiapi.common.types.LibraryType type = 1;
+   */
+  type?: LibraryTypeJson$1;
+
+  /**
+   * Which document context to use (to enable querying project-specific libraries)
+   *
+   * @generated from field: kiapi.common.types.DocumentSpecifier document = 2;
+   */
+  document?: DocumentSpecifierJson;
+
+  /**
+   * The items to retrieve.
+   *
+   * @generated from field: repeated kiapi.common.types.LibraryIdentifier item_ids = 3;
+   */
+  itemIds?: LibraryIdentifierJson[];
+};
+
+/**
+ * Describes the message kiapi.common.commands.GetItemsFromLibrary.
+ * Use `create(GetItemsFromLibrarySchema)` to create a new message.
+ */
+export const GetItemsFromLibrarySchema: GenMessage<GetItemsFromLibrary, {jsonType: GetItemsFromLibraryJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_library_commands, 31);
+
+/**
+ * Requests items matching a search query in the given library scopes
+ * Returns SearchLibrariesResponse
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.SearchLibraries
+ */
+export type SearchLibraries = Message<"kiapi.common.commands.SearchLibraries"> & {
+  /**
+   * @generated from field: kiapi.common.types.LibraryType type = 1;
+   */
+  type: LibraryType$1;
+
+  /**
+   * Glob pattern or substring to match against item names.  Follows the same logic
+   * of KiCad's library chooser filter
+   *
+   * @generated from field: string query = 2;
+   */
+  query: string;
+};
+
+/**
+ * Requests items matching a search query in the given library scopes
+ * Returns SearchLibrariesResponse
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.SearchLibraries
+ */
+export type SearchLibrariesJson = {
+  /**
+   * @generated from field: kiapi.common.types.LibraryType type = 1;
+   */
+  type?: LibraryTypeJson$1;
+
+  /**
+   * Glob pattern or substring to match against item names.  Follows the same logic
+   * of KiCad's library chooser filter
+   *
+   * @generated from field: string query = 2;
+   */
+  query?: string;
+};
+
+/**
+ * Describes the message kiapi.common.commands.SearchLibraries.
+ * Use `create(SearchLibrariesSchema)` to create a new message.
+ */
+export const SearchLibrariesSchema: GenMessage<SearchLibraries, {jsonType: SearchLibrariesJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_library_commands, 32);
+
+/**
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.SearchLibrariesResponse
+ */
+export type SearchLibrariesResponse = Message<"kiapi.common.commands.SearchLibrariesResponse"> & {
+  /**
+   * The identifiers of matching content
+   *
+   * @generated from field: repeated kiapi.common.types.LibraryIdentifier items = 1;
+   */
+  items: LibraryIdentifier[];
+};
+
+/**
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.SearchLibrariesResponse
+ */
+export type SearchLibrariesResponseJson = {
+  /**
+   * The identifiers of matching content
+   *
+   * @generated from field: repeated kiapi.common.types.LibraryIdentifier items = 1;
+   */
+  items?: LibraryIdentifierJson[];
+};
+
+/**
+ * Describes the message kiapi.common.commands.SearchLibrariesResponse.
+ * Use `create(SearchLibrariesResponseSchema)` to create a new message.
+ */
+export const SearchLibrariesResponseSchema: GenMessage<SearchLibrariesResponse, {jsonType: SearchLibrariesResponseJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_library_commands, 33);
+
+/**
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.PlaceFromLibraryResponse
+ */
+export type PlaceFromLibraryResponse = Message<"kiapi.common.commands.PlaceFromLibraryResponse"> & {
+  /**
+   * @generated from field: kiapi.common.types.ItemHeader header = 1;
+   */
+  header?: ItemHeader | undefined;
+
+  /**
+   * The newly-created item
+   *
+   * @generated from field: google.protobuf.Any item = 2;
+   */
+  item?: Any | undefined;
+};
+
+/**
+ * Since: 11.0
+ *
+ * @generated from message kiapi.common.commands.PlaceFromLibraryResponse
+ */
+export type PlaceFromLibraryResponseJson = {
+  /**
+   * @generated from field: kiapi.common.types.ItemHeader header = 1;
+   */
+  header?: ItemHeaderJson;
+
+  /**
+   * The newly-created item
+   *
+   * @generated from field: google.protobuf.Any item = 2;
+   */
+  item?: AnyJson;
+};
+
+/**
+ * Describes the message kiapi.common.commands.PlaceFromLibraryResponse.
+ * Use `create(PlaceFromLibraryResponseSchema)` to create a new message.
+ */
+export const PlaceFromLibraryResponseSchema: GenMessage<PlaceFromLibraryResponse, {jsonType: PlaceFromLibraryResponseJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_library_commands, 34);
 
 /**
  * Since 11.0
