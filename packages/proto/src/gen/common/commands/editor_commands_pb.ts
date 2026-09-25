@@ -27,7 +27,7 @@ import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2"
 import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Any, AnyJson } from "@bufbuild/protobuf/wkt";
 import { file_google_protobuf_any } from "@bufbuild/protobuf/wkt";
-import type { Box2, Box2Json, DocumentSpecifier, DocumentSpecifierJson, DocumentType, DocumentTypeJson, FrameType, FrameTypeJson, ItemHeader, ItemHeaderJson, ItemRequestStatus, ItemRequestStatusJson, KIID, KIIDJson, LibraryIdentifier, LibraryIdentifierJson, PageSettings, PageSettingsJson, TitleBlockInfo, TitleBlockInfoJson, Vector2, Vector2Json } from "../types/base_types_pb.js";
+import type { Box2, Box2Json, Distance, DistanceJson, DocumentSpecifier, DocumentSpecifierJson, DocumentType, DocumentTypeJson, FrameType, FrameTypeJson, ItemHeader, ItemHeaderJson, ItemRequestStatus, ItemRequestStatusJson, KIID, KIIDJson, LibraryIdentifier, LibraryIdentifierJson, PageSettings, PageSettingsJson, TitleBlockInfo, TitleBlockInfoJson, Vector2, Vector2Json } from "../types/base_types_pb.js";
 import { file_common_types_base_types } from "../types/base_types_pb.js";
 import type { KiCadObjectType, KiCadObjectTypeJson } from "../types/enums_pb.js";
 import { file_common_types_enums } from "../types/enums_pb.js";
@@ -37,7 +37,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file common/commands/editor_commands.proto.
  */
 export const file_common_commands_editor_commands: GenFile = /*@__PURE__*/
-  fileDesc("CiVjb21tb24vY29tbWFuZHMvZWRpdG9yX2NvbW1hbmRzLnByb3RvEhVraWFwaS5jb21tb24uY29tbWFuZHMiPQoNUmVmcmVzaEVkaXRvchIsCgVmcmFtZRgBIAEoDjIdLmtpYXBpLmNvbW1vbi50eXBlcy5GcmFtZVR5cGUifAoPT3BlbkxpYnJhcnlJdGVtEi4KBHR5cGUYASABKA4yIC5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRUeXBlEjkKCmlkZW50aWZpZXIYAiABKAsyJS5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeUlkZW50aWZpZXIiQgoQR2V0T3BlbkRvY3VtZW50cxIuCgR0eXBlGAEgASgOMiAua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50VHlwZSJUChhHZXRPcGVuRG9jdW1lbnRzUmVzcG9uc2USOAoJZG9jdW1lbnRzGAEgAygLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIlMKGEdldERvY3VtZW50TW9kaWZpZWRTdGF0ZRI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciJfCiBHZXREb2N1bWVudE1vZGlmaWVkU3RhdGVSZXNwb25zZRI7CgVzdGF0ZRgBIAEoDjIsLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5Eb2N1bWVudE1vZGlmaWVkU3RhdGUiOQoLU2F2ZU9wdGlvbnMSEQoJb3ZlcndyaXRlGAEgASgIEhcKD2luY2x1ZGVfcHJvamVjdBgCIAEoCCKQAQoSU2F2ZUNvcHlPZkRvY3VtZW50EjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEgwKBHBhdGgYAiABKAkSMwoHb3B0aW9ucxgDIAEoCzIiLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5TYXZlT3B0aW9ucyJJCg5SZXZlcnREb2N1bWVudBI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciIbCglSdW5BY3Rpb24SDgoGYWN0aW9uGAEgASgJIksKEVJ1bkFjdGlvblJlc3BvbnNlEjYKBnN0YXR1cxgBIAEoDjImLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5SdW5BY3Rpb25TdGF0dXMiRQoKR2V0QWN0aW9ucxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciJYCgpBY3Rpb25JbmZvEgwKBG5hbWUYASABKAkSDQoFbGFiZWwYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSGAoQaGVhZGxlc3NfY2FwYWJsZRgEIAEoCCJIChJHZXRBY3Rpb25zUmVzcG9uc2USMgoHYWN0aW9ucxgBIAMoCzIhLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5BY3Rpb25JbmZvIj0KC0JlZ2luQ29tbWl0Ei4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyIjsKE0JlZ2luQ29tbWl0UmVzcG9uc2USJAoCaWQYASABKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRCKnAQoJRW5kQ29tbWl0EiQKAmlkGAEgASgLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSMwoGYWN0aW9uGAIgASgOMiMua2lhcGkuY29tbW9uLmNvbW1hbmRzLkNvbW1pdEFjdGlvbhIPCgdtZXNzYWdlGAMgASgJEi4KBmhlYWRlchgEIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyIhMKEUVuZENvbW1pdFJlc3BvbnNlIo8BCgtDcmVhdGVJdGVtcxIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchIjCgVpdGVtcxgCIAMoCzIULmdvb2dsZS5wcm90b2J1Zi5BbnkSKwoJY29udGFpbmVyGAMgASgLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQiWAoKSXRlbVN0YXR1cxIzCgRjb2RlGAEgASgOMiUua2lhcGkuY29tbW9uLmNvbW1hbmRzLkl0ZW1TdGF0dXNDb2RlEhUKDWVycm9yX21lc3NhZ2UYAiABKAkiawoSSXRlbUNyZWF0aW9uUmVzdWx0EjEKBnN0YXR1cxgBIAEoCzIhLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5JdGVtU3RhdHVzEiIKBGl0ZW0YAiABKAsyFC5nb29nbGUucHJvdG9idWYuQW55Ir4BChNDcmVhdGVJdGVtc1Jlc3BvbnNlEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEjUKBnN0YXR1cxgCIAEoDjIlLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtUmVxdWVzdFN0YXR1cxJACg1jcmVhdGVkX2l0ZW1zGAMgAygLMikua2lhcGkuY29tbW9uLmNvbW1hbmRzLkl0ZW1DcmVhdGlvblJlc3VsdCIpCghJdGVtUGFnZRIOCgZvZmZzZXQYASABKA0SDQoFbGltaXQYAiABKA0izQEKCEdldEl0ZW1zEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEjIKBXR5cGVzGAIgAygOMiMua2lhcGkuY29tbW9uLnR5cGVzLktpQ2FkT2JqZWN0VHlwZRItCgRwYWdlGAMgASgLMh8ua2lhcGkuY29tbW9uLmNvbW1hbmRzLkl0ZW1QYWdlEhsKDnNpbmNlX3JldmlzaW9uGAQgASgESACIAQFCEQoPX3NpbmNlX3JldmlzaW9uIkgKDUdldEl0ZW1Db3VudHMSNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIiTQoJSXRlbUNvdW50EjEKBHR5cGUYASABKA4yIy5raWFwaS5jb21tb24udHlwZXMuS2lDYWRPYmplY3RUeXBlEg0KBWNvdW50GAIgASgNIlsKFUdldEl0ZW1Db3VudHNSZXNwb25zZRIwCgZjb3VudHMYASADKAsyIC5raWFwaS5jb21tb24uY29tbWFuZHMuSXRlbUNvdW50EhAKCHJldmlzaW9uGAIgASgEImcKDEdldEl0ZW1zQnlJZBIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchInCgVpdGVtcxgCIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEIu4BChBHZXRJdGVtc1Jlc3BvbnNlEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEjUKBnN0YXR1cxgCIAEoDjIlLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtUmVxdWVzdFN0YXR1cxIjCgVpdGVtcxgDIAMoCzIULmdvb2dsZS5wcm90b2J1Zi5BbnkSDQoFdG90YWwYBCABKA0SEAoIcmV2aXNpb24YBSABKAQSLQoLZGVsZXRlZF9pZHMYBiADKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRCJiCgtVcGRhdGVJdGVtcxIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchIjCgVpdGVtcxgCIAMoCzIULmdvb2dsZS5wcm90b2J1Zi5BbnkiaQoQSXRlbVVwZGF0ZVJlc3VsdBIxCgZzdGF0dXMYASABKAsyIS5raWFwaS5jb21tb24uY29tbWFuZHMuSXRlbVN0YXR1cxIiCgRpdGVtGAIgASgLMhQuZ29vZ2xlLnByb3RvYnVmLkFueSK8AQoTVXBkYXRlSXRlbXNSZXNwb25zZRIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchI1CgZzdGF0dXMYAiABKA4yJS5raWFwaS5jb21tb24udHlwZXMuSXRlbVJlcXVlc3RTdGF0dXMSPgoNdXBkYXRlZF9pdGVtcxgDIAMoCzInLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5JdGVtVXBkYXRlUmVzdWx0ImkKC0RlbGV0ZUl0ZW1zEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEioKCGl0ZW1faWRzGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQidQoSSXRlbURlbGV0aW9uUmVzdWx0EiQKAmlkGAEgASgLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSOQoGc3RhdHVzGAIgASgOMikua2lhcGkuY29tbW9uLmNvbW1hbmRzLkl0ZW1EZWxldGlvblN0YXR1cyK+AQoTRGVsZXRlSXRlbXNSZXNwb25zZRIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchI1CgZzdGF0dXMYAiABKA4yJS5raWFwaS5jb21tb24udHlwZXMuSXRlbVJlcXVlc3RTdGF0dXMSQAoNZGVsZXRlZF9pdGVtcxgDIAMoCzIpLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5JdGVtRGVsZXRpb25SZXN1bHQinwEKDkdldEJvdW5kaW5nQm94Ei4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEicKBWl0ZW1zGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSNAoEbW9kZRgDIAEoDjImLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5Cb3VuZGluZ0JveE1vZGUiagoWR2V0Qm91bmRpbmdCb3hSZXNwb25zZRInCgVpdGVtcxgBIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEicKBWJveGVzGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLkJveDIicgoMR2V0U2VsZWN0aW9uEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEjIKBXR5cGVzGAIgAygOMiMua2lhcGkuY29tbW9uLnR5cGVzLktpQ2FkT2JqZWN0VHlwZSI4ChFTZWxlY3Rpb25SZXNwb25zZRIjCgVpdGVtcxgBIAMoCzIULmdvb2dsZS5wcm90b2J1Zi5BbnkiaQoOQWRkVG9TZWxlY3Rpb24SLgoGaGVhZGVyGAEgASgLMh4ua2lhcGkuY29tbW9uLnR5cGVzLkl0ZW1IZWFkZXISJwoFaXRlbXMYAiADKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRCJuChNSZW1vdmVGcm9tU2VsZWN0aW9uEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEicKBWl0ZW1zGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQiQAoOQ2xlYXJTZWxlY3Rpb24SLgoGaGVhZGVyGAEgASgLMh4ua2lhcGkuY29tbW9uLnR5cGVzLkl0ZW1IZWFkZXIioQEKB0hpdFRlc3QSLgoGaGVhZGVyGAEgASgLMh4ua2lhcGkuY29tbW9uLnR5cGVzLkl0ZW1IZWFkZXISJAoCaWQYAiABKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRBItCghwb3NpdGlvbhgDIAEoCzIbLmtpYXBpLmNvbW1vbi50eXBlcy5WZWN0b3IyEhEKCXRvbGVyYW5jZRgEIAEoBSJHCg9IaXRUZXN0UmVzcG9uc2USNAoGcmVzdWx0GAEgASgOMiQua2lhcGkuY29tbW9uLmNvbW1hbmRzLkhpdFRlc3RSZXN1bHQiTAoRR2V0VGl0bGVCbG9ja0luZm8SNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIihQEKEVNldFRpdGxlQmxvY2tJbmZvEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEjcKC3RpdGxlX2Jsb2NrGAIgASgLMiIua2lhcGkuY29tbW9uLnR5cGVzLlRpdGxlQmxvY2tJbmZvIkoKD0dldFBhZ2VTZXR0aW5ncxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciKDAQoPU2V0UGFnZVNldHRpbmdzEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEjcKDXBhZ2Vfc2V0dGluZ3MYAiABKAsyIC5raWFwaS5jb21tb24udHlwZXMuUGFnZVNldHRpbmdzIk4KE0dldERvY3VtZW50UmV2aXNpb24SNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIiLAoYRG9jdW1lbnRSZXZpc2lvblJlc3BvbnNlEhAKCHJldmlzaW9uGAEgASgEIk8KFFNhdmVEb2N1bWVudFRvU3RyaW5nEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyImIKFVNhdmVkRG9jdW1lbnRSZXNwb25zZRI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchIQCghjb250ZW50cxgCIAEoCSIXChVTYXZlU2VsZWN0aW9uVG9TdHJpbmciUQoWU2F2ZWRTZWxlY3Rpb25SZXNwb25zZRIlCgNpZHMYASADKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRBIQCghjb250ZW50cxgCIAEoCSJsChFTYXZlSXRlbXNUb1N0cmluZxIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchInCgVpdGVtcxgCIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEImoKHVBhcnNlQW5kQ3JlYXRlSXRlbXNGcm9tU3RyaW5nEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEhAKCGNvbnRlbnRzGAIgASgJIk4KBFVuZG8SNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISDQoFY291bnQYAiABKA0iTgoEUmVkbxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchINCgVjb3VudBgCIAEoDSJLChBVbmRvUmVkb1Jlc3BvbnNlEg8KB2FwcGxpZWQYASABKA0SEgoKdW5kb19jb3VudBgCIAEoDRISCgpyZWRvX2NvdW50GAMgASgNInsKDlVuZG9TdGFja0VudHJ5EhMKC2Rlc2NyaXB0aW9uGAEgASgJEhMKC2NsaWVudF9uYW1lGAIgASgJEisKCWNvbW1pdF9pZBgDIAEoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEhIKCml0ZW1fY291bnQYBCABKA0iRwoMR2V0VW5kb1N0YWNrEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIn0KEVVuZG9TdGFja1Jlc3BvbnNlEjMKBHVuZG8YASADKAsyJS5raWFwaS5jb21tb24uY29tbWFuZHMuVW5kb1N0YWNrRW50cnkSMwoEcmVkbxgCIAMoCzIlLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5VbmRvU3RhY2tFbnRyeSpOChVEb2N1bWVudE1vZGlmaWVkU3RhdGUSDwoLRE1TX1VOS05PV04QABISCg5ETVNfVU5NT0RJRklFRBABEhAKDERNU19NT0RJRklFRBACKlcKD1J1bkFjdGlvblN0YXR1cxIPCgtSQVNfVU5LTk9XThAAEgoKBlJBU19PSxABEg8KC1JBU19JTlZBTElEEAISFgoSUkFTX0ZSQU1FX05PVF9PUEVOEAMqPQoMQ29tbWl0QWN0aW9uEg8KC0NNQV9VTktOT1dOEAASDgoKQ01BX0NPTU1JVBABEgwKCENNQV9EUk9QEAIqkwEKDkl0ZW1TdGF0dXNDb2RlEg8KC0lTQ19VTktOT1dOEAASCgoGSVNDX09LEAESFAoQSVNDX0lOVkFMSURfVFlQRRACEhAKDElTQ19FWElTVElORxADEhMKD0lTQ19OT05FWElTVEVOVBAEEhEKDUlTQ19JTU1VVEFCTEUQBRIUChBJU0NfSU5WQUxJRF9EQVRBEAcqWQoSSXRlbURlbGV0aW9uU3RhdHVzEg8KC0lEU19VTktOT1dOEAASCgoGSURTX09LEAESEwoPSURTX05PTkVYSVNURU5UEAISEQoNSURTX0lNTVVUQUJMRRADKlIKD0JvdW5kaW5nQm94TW9kZRIPCgtCQk1fVU5LTk9XThAAEhEKDUJCTV9JVEVNX09OTFkQARIbChdCQk1fSVRFTV9BTkRfQ0hJTERfVEVYVBACKj0KDUhpdFRlc3RSZXN1bHQSDwoLSFRSX1VOS05PV04QABIOCgpIVFJfTk9fSElUEAESCwoHSFRSX0hJVBACYgZwcm90bzM", [file_google_protobuf_any, file_common_types_base_types, file_common_types_enums]);
+  fileDesc("CiVjb21tb24vY29tbWFuZHMvZWRpdG9yX2NvbW1hbmRzLnByb3RvEhVraWFwaS5jb21tb24uY29tbWFuZHMiPQoNUmVmcmVzaEVkaXRvchIsCgVmcmFtZRgBIAEoDjIdLmtpYXBpLmNvbW1vbi50eXBlcy5GcmFtZVR5cGUifAoPT3BlbkxpYnJhcnlJdGVtEi4KBHR5cGUYASABKA4yIC5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRUeXBlEjkKCmlkZW50aWZpZXIYAiABKAsyJS5raWFwaS5jb21tb24udHlwZXMuTGlicmFyeUlkZW50aWZpZXIiQgoQR2V0T3BlbkRvY3VtZW50cxIuCgR0eXBlGAEgASgOMiAua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50VHlwZSJUChhHZXRPcGVuRG9jdW1lbnRzUmVzcG9uc2USOAoJZG9jdW1lbnRzGAEgAygLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIlMKGEdldERvY3VtZW50TW9kaWZpZWRTdGF0ZRI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciJfCiBHZXREb2N1bWVudE1vZGlmaWVkU3RhdGVSZXNwb25zZRI7CgVzdGF0ZRgBIAEoDjIsLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5Eb2N1bWVudE1vZGlmaWVkU3RhdGUiOQoLU2F2ZU9wdGlvbnMSEQoJb3ZlcndyaXRlGAEgASgIEhcKD2luY2x1ZGVfcHJvamVjdBgCIAEoCCKQAQoSU2F2ZUNvcHlPZkRvY3VtZW50EjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEgwKBHBhdGgYAiABKAkSMwoHb3B0aW9ucxgDIAEoCzIiLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5TYXZlT3B0aW9ucyJJCg5SZXZlcnREb2N1bWVudBI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciIbCglSdW5BY3Rpb24SDgoGYWN0aW9uGAEgASgJIksKEVJ1bkFjdGlvblJlc3BvbnNlEjYKBnN0YXR1cxgBIAEoDjImLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5SdW5BY3Rpb25TdGF0dXMiRQoKR2V0QWN0aW9ucxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciJYCgpBY3Rpb25JbmZvEgwKBG5hbWUYASABKAkSDQoFbGFiZWwYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSGAoQaGVhZGxlc3NfY2FwYWJsZRgEIAEoCCJIChJHZXRBY3Rpb25zUmVzcG9uc2USMgoHYWN0aW9ucxgBIAMoCzIhLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5BY3Rpb25JbmZvIj0KC0JlZ2luQ29tbWl0Ei4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyIjsKE0JlZ2luQ29tbWl0UmVzcG9uc2USJAoCaWQYASABKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRCKnAQoJRW5kQ29tbWl0EiQKAmlkGAEgASgLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSMwoGYWN0aW9uGAIgASgOMiMua2lhcGkuY29tbW9uLmNvbW1hbmRzLkNvbW1pdEFjdGlvbhIPCgdtZXNzYWdlGAMgASgJEi4KBmhlYWRlchgEIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyIhMKEUVuZENvbW1pdFJlc3BvbnNlIo8BCgtDcmVhdGVJdGVtcxIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchIjCgVpdGVtcxgCIAMoCzIULmdvb2dsZS5wcm90b2J1Zi5BbnkSKwoJY29udGFpbmVyGAMgASgLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQiWAoKSXRlbVN0YXR1cxIzCgRjb2RlGAEgASgOMiUua2lhcGkuY29tbW9uLmNvbW1hbmRzLkl0ZW1TdGF0dXNDb2RlEhUKDWVycm9yX21lc3NhZ2UYAiABKAkiawoSSXRlbUNyZWF0aW9uUmVzdWx0EjEKBnN0YXR1cxgBIAEoCzIhLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5JdGVtU3RhdHVzEiIKBGl0ZW0YAiABKAsyFC5nb29nbGUucHJvdG9idWYuQW55Ir4BChNDcmVhdGVJdGVtc1Jlc3BvbnNlEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEjUKBnN0YXR1cxgCIAEoDjIlLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtUmVxdWVzdFN0YXR1cxJACg1jcmVhdGVkX2l0ZW1zGAMgAygLMikua2lhcGkuY29tbW9uLmNvbW1hbmRzLkl0ZW1DcmVhdGlvblJlc3VsdCIpCghJdGVtUGFnZRIOCgZvZmZzZXQYASABKA0SDQoFbGltaXQYAiABKA0izQEKCEdldEl0ZW1zEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEjIKBXR5cGVzGAIgAygOMiMua2lhcGkuY29tbW9uLnR5cGVzLktpQ2FkT2JqZWN0VHlwZRItCgRwYWdlGAMgASgLMh8ua2lhcGkuY29tbW9uLmNvbW1hbmRzLkl0ZW1QYWdlEhsKDnNpbmNlX3JldmlzaW9uGAQgASgESACIAQFCEQoPX3NpbmNlX3JldmlzaW9uIkgKDUdldEl0ZW1Db3VudHMSNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIiTQoJSXRlbUNvdW50EjEKBHR5cGUYASABKA4yIy5raWFwaS5jb21tb24udHlwZXMuS2lDYWRPYmplY3RUeXBlEg0KBWNvdW50GAIgASgNIlsKFUdldEl0ZW1Db3VudHNSZXNwb25zZRIwCgZjb3VudHMYASADKAsyIC5raWFwaS5jb21tb24uY29tbWFuZHMuSXRlbUNvdW50EhAKCHJldmlzaW9uGAIgASgEImcKDEdldEl0ZW1zQnlJZBIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchInCgVpdGVtcxgCIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEIu4BChBHZXRJdGVtc1Jlc3BvbnNlEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEjUKBnN0YXR1cxgCIAEoDjIlLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtUmVxdWVzdFN0YXR1cxIjCgVpdGVtcxgDIAMoCzIULmdvb2dsZS5wcm90b2J1Zi5BbnkSDQoFdG90YWwYBCABKA0SEAoIcmV2aXNpb24YBSABKAQSLQoLZGVsZXRlZF9pZHMYBiADKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRCJiCgtVcGRhdGVJdGVtcxIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchIjCgVpdGVtcxgCIAMoCzIULmdvb2dsZS5wcm90b2J1Zi5BbnkiaQoQSXRlbVVwZGF0ZVJlc3VsdBIxCgZzdGF0dXMYASABKAsyIS5raWFwaS5jb21tb24uY29tbWFuZHMuSXRlbVN0YXR1cxIiCgRpdGVtGAIgASgLMhQuZ29vZ2xlLnByb3RvYnVmLkFueSK8AQoTVXBkYXRlSXRlbXNSZXNwb25zZRIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchI1CgZzdGF0dXMYAiABKA4yJS5raWFwaS5jb21tb24udHlwZXMuSXRlbVJlcXVlc3RTdGF0dXMSPgoNdXBkYXRlZF9pdGVtcxgDIAMoCzInLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5JdGVtVXBkYXRlUmVzdWx0ImkKC0RlbGV0ZUl0ZW1zEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEioKCGl0ZW1faWRzGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQidQoSSXRlbURlbGV0aW9uUmVzdWx0EiQKAmlkGAEgASgLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSOQoGc3RhdHVzGAIgASgOMikua2lhcGkuY29tbW9uLmNvbW1hbmRzLkl0ZW1EZWxldGlvblN0YXR1cyK+AQoTRGVsZXRlSXRlbXNSZXNwb25zZRIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchI1CgZzdGF0dXMYAiABKA4yJS5raWFwaS5jb21tb24udHlwZXMuSXRlbVJlcXVlc3RTdGF0dXMSQAoNZGVsZXRlZF9pdGVtcxgDIAMoCzIpLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5JdGVtRGVsZXRpb25SZXN1bHQinwEKDkdldEJvdW5kaW5nQm94Ei4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEicKBWl0ZW1zGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQSNAoEbW9kZRgDIAEoDjImLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5Cb3VuZGluZ0JveE1vZGUiagoWR2V0Qm91bmRpbmdCb3hSZXNwb25zZRInCgVpdGVtcxgBIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEicKBWJveGVzGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLkJveDIicgoMR2V0U2VsZWN0aW9uEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEjIKBXR5cGVzGAIgAygOMiMua2lhcGkuY29tbW9uLnR5cGVzLktpQ2FkT2JqZWN0VHlwZSI4ChFTZWxlY3Rpb25SZXNwb25zZRIjCgVpdGVtcxgBIAMoCzIULmdvb2dsZS5wcm90b2J1Zi5BbnkiaQoOQWRkVG9TZWxlY3Rpb24SLgoGaGVhZGVyGAEgASgLMh4ua2lhcGkuY29tbW9uLnR5cGVzLkl0ZW1IZWFkZXISJwoFaXRlbXMYAiADKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRCJuChNSZW1vdmVGcm9tU2VsZWN0aW9uEi4KBmhlYWRlchgBIAEoCzIeLmtpYXBpLmNvbW1vbi50eXBlcy5JdGVtSGVhZGVyEicKBWl0ZW1zGAIgAygLMhgua2lhcGkuY29tbW9uLnR5cGVzLktJSUQiQAoOQ2xlYXJTZWxlY3Rpb24SLgoGaGVhZGVyGAEgASgLMh4ua2lhcGkuY29tbW9uLnR5cGVzLkl0ZW1IZWFkZXIirgEKDEZvY3VzT25JdGVtcxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchInCgVpdGVtcxgCIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEjEKBm1hcmdpbhgDIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZUgAiAEBQgkKB19tYXJnaW4ioQEKB0hpdFRlc3QSLgoGaGVhZGVyGAEgASgLMh4ua2lhcGkuY29tbW9uLnR5cGVzLkl0ZW1IZWFkZXISJAoCaWQYAiABKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRBItCghwb3NpdGlvbhgDIAEoCzIbLmtpYXBpLmNvbW1vbi50eXBlcy5WZWN0b3IyEhEKCXRvbGVyYW5jZRgEIAEoBSJHCg9IaXRUZXN0UmVzcG9uc2USNAoGcmVzdWx0GAEgASgOMiQua2lhcGkuY29tbW9uLmNvbW1hbmRzLkhpdFRlc3RSZXN1bHQiTAoRR2V0VGl0bGVCbG9ja0luZm8SNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIihQEKEVNldFRpdGxlQmxvY2tJbmZvEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEjcKC3RpdGxlX2Jsb2NrGAIgASgLMiIua2lhcGkuY29tbW9uLnR5cGVzLlRpdGxlQmxvY2tJbmZvIkoKD0dldFBhZ2VTZXR0aW5ncxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllciKDAQoPU2V0UGFnZVNldHRpbmdzEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEjcKDXBhZ2Vfc2V0dGluZ3MYAiABKAsyIC5raWFwaS5jb21tb24udHlwZXMuUGFnZVNldHRpbmdzIk4KE0dldERvY3VtZW50UmV2aXNpb24SNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXIiLAoYRG9jdW1lbnRSZXZpc2lvblJlc3BvbnNlEhAKCHJldmlzaW9uGAEgASgEIk8KFFNhdmVEb2N1bWVudFRvU3RyaW5nEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyImIKFVNhdmVkRG9jdW1lbnRSZXNwb25zZRI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchIQCghjb250ZW50cxgCIAEoCSIXChVTYXZlU2VsZWN0aW9uVG9TdHJpbmciUQoWU2F2ZWRTZWxlY3Rpb25SZXNwb25zZRIlCgNpZHMYASADKAsyGC5raWFwaS5jb21tb24udHlwZXMuS0lJRBIQCghjb250ZW50cxgCIAEoCSJsChFTYXZlSXRlbXNUb1N0cmluZxIuCgZoZWFkZXIYASABKAsyHi5raWFwaS5jb21tb24udHlwZXMuSXRlbUhlYWRlchInCgVpdGVtcxgCIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEImoKHVBhcnNlQW5kQ3JlYXRlSXRlbXNGcm9tU3RyaW5nEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEhAKCGNvbnRlbnRzGAIgASgJIk4KBFVuZG8SNwoIZG9jdW1lbnQYASABKAsyJS5raWFwaS5jb21tb24udHlwZXMuRG9jdW1lbnRTcGVjaWZpZXISDQoFY291bnQYAiABKA0iTgoEUmVkbxI3Cghkb2N1bWVudBgBIAEoCzIlLmtpYXBpLmNvbW1vbi50eXBlcy5Eb2N1bWVudFNwZWNpZmllchINCgVjb3VudBgCIAEoDSJLChBVbmRvUmVkb1Jlc3BvbnNlEg8KB2FwcGxpZWQYASABKA0SEgoKdW5kb19jb3VudBgCIAEoDRISCgpyZWRvX2NvdW50GAMgASgNInsKDlVuZG9TdGFja0VudHJ5EhMKC2Rlc2NyaXB0aW9uGAEgASgJEhMKC2NsaWVudF9uYW1lGAIgASgJEisKCWNvbW1pdF9pZBgDIAEoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEhIKCml0ZW1fY291bnQYBCABKA0iRwoMR2V0VW5kb1N0YWNrEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyIn0KEVVuZG9TdGFja1Jlc3BvbnNlEjMKBHVuZG8YASADKAsyJS5raWFwaS5jb21tb24uY29tbWFuZHMuVW5kb1N0YWNrRW50cnkSMwoEcmVkbxgCIAMoCzIlLmtpYXBpLmNvbW1vbi5jb21tYW5kcy5VbmRvU3RhY2tFbnRyeSpOChVEb2N1bWVudE1vZGlmaWVkU3RhdGUSDwoLRE1TX1VOS05PV04QABISCg5ETVNfVU5NT0RJRklFRBABEhAKDERNU19NT0RJRklFRBACKlcKD1J1bkFjdGlvblN0YXR1cxIPCgtSQVNfVU5LTk9XThAAEgoKBlJBU19PSxABEg8KC1JBU19JTlZBTElEEAISFgoSUkFTX0ZSQU1FX05PVF9PUEVOEAMqPQoMQ29tbWl0QWN0aW9uEg8KC0NNQV9VTktOT1dOEAASDgoKQ01BX0NPTU1JVBABEgwKCENNQV9EUk9QEAIqkwEKDkl0ZW1TdGF0dXNDb2RlEg8KC0lTQ19VTktOT1dOEAASCgoGSVNDX09LEAESFAoQSVNDX0lOVkFMSURfVFlQRRACEhAKDElTQ19FWElTVElORxADEhMKD0lTQ19OT05FWElTVEVOVBAEEhEKDUlTQ19JTU1VVEFCTEUQBRIUChBJU0NfSU5WQUxJRF9EQVRBEAcqWQoSSXRlbURlbGV0aW9uU3RhdHVzEg8KC0lEU19VTktOT1dOEAASCgoGSURTX09LEAESEwoPSURTX05PTkVYSVNURU5UEAISEQoNSURTX0lNTVVUQUJMRRADKlIKD0JvdW5kaW5nQm94TW9kZRIPCgtCQk1fVU5LTk9XThAAEhEKDUJCTV9JVEVNX09OTFkQARIbChdCQk1fSVRFTV9BTkRfQ0hJTERfVEVYVBACKj0KDUhpdFRlc3RSZXN1bHQSDwoLSFRSX1VOS05PV04QABIOCgpIVFJfTk9fSElUEAESCwoHSFRSX0hJVBACYgZwcm90bzM", [file_google_protobuf_any, file_common_types_base_types, file_common_types_enums]);
 
 /**
  * Refreshes the given frame, if that frame is open.  Returns google.protobuf.Empty.
@@ -1014,7 +1014,8 @@ export type GetItems = Message<"kiapi.common.commands.GetItems"> & {
   header?: ItemHeader | undefined;
 
   /**
-   * List of one or more types of items to retreive
+   * List of types of items to retrieve; if omitted, all types valid for the
+   * target document will be returned
    *
    * @generated from field: repeated kiapi.common.types.KiCadObjectType types = 2;
    */
@@ -1053,7 +1054,8 @@ export type GetItemsJson = {
   header?: ItemHeaderJson;
 
   /**
-   * List of one or more types of items to retreive
+   * List of types of items to retrieve; if omitted, all types valid for the
+   * target document will be returned
    *
    * @generated from field: repeated kiapi.common.types.KiCadObjectType types = 2;
    */
@@ -1940,6 +1942,73 @@ export const ClearSelectionSchema: GenMessage<ClearSelection, {jsonType: ClearSe
   messageDesc(file_common_commands_editor_commands, 41);
 
 /**
+ * Ensures the given items are visible and zooms to fit them.
+ * The bounding box of all given items will be expanded by `margin` if present.
+ * Returns an error if any of the given `items` are not in `document`.
+ * Available only in interactive mode and when the editor in question is idle.
+ * Returns Empty
+ *
+ * @generated from message kiapi.common.commands.FocusOnItems
+ */
+export type FocusOnItems = Message<"kiapi.common.commands.FocusOnItems"> & {
+  /**
+   * For schematics, a document with a sheet path focuses that sheet's placement of the items
+   *
+   * @generated from field: kiapi.common.types.DocumentSpecifier document = 1;
+   */
+  document?: DocumentSpecifier | undefined;
+
+  /**
+   * The items to fit in the view.  Schematic items must all be on one sheet.
+   *
+   * @generated from field: repeated kiapi.common.types.KIID items = 2;
+   */
+  items: KIID[];
+
+  /**
+   * @generated from field: optional kiapi.common.types.Distance margin = 3;
+   */
+  margin?: Distance | undefined;
+};
+
+/**
+ * Ensures the given items are visible and zooms to fit them.
+ * The bounding box of all given items will be expanded by `margin` if present.
+ * Returns an error if any of the given `items` are not in `document`.
+ * Available only in interactive mode and when the editor in question is idle.
+ * Returns Empty
+ *
+ * @generated from message kiapi.common.commands.FocusOnItems
+ */
+export type FocusOnItemsJson = {
+  /**
+   * For schematics, a document with a sheet path focuses that sheet's placement of the items
+   *
+   * @generated from field: kiapi.common.types.DocumentSpecifier document = 1;
+   */
+  document?: DocumentSpecifierJson;
+
+  /**
+   * The items to fit in the view.  Schematic items must all be on one sheet.
+   *
+   * @generated from field: repeated kiapi.common.types.KIID items = 2;
+   */
+  items?: KIIDJson[];
+
+  /**
+   * @generated from field: optional kiapi.common.types.Distance margin = 3;
+   */
+  margin?: DistanceJson;
+};
+
+/**
+ * Describes the message kiapi.common.commands.FocusOnItems.
+ * Use `create(FocusOnItemsSchema)` to create a new message.
+ */
+export const FocusOnItemsSchema: GenMessage<FocusOnItems, {jsonType: FocusOnItemsJson}> = /*@__PURE__*/
+  messageDesc(file_common_commands_editor_commands, 42);
+
+/**
  * Tests if a certain point falls within tolerance of an item's geometry
  *
  * @generated from message kiapi.common.commands.HitTest
@@ -1998,7 +2067,7 @@ export type HitTestJson = {
  * Use `create(HitTestSchema)` to create a new message.
  */
 export const HitTestSchema: GenMessage<HitTest, {jsonType: HitTestJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 42);
+  messageDesc(file_common_commands_editor_commands, 43);
 
 /**
  * @generated from message kiapi.common.commands.HitTestResponse
@@ -2025,7 +2094,7 @@ export type HitTestResponseJson = {
  * Use `create(HitTestResponseSchema)` to create a new message.
  */
 export const HitTestResponseSchema: GenMessage<HitTestResponse, {jsonType: HitTestResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 43);
+  messageDesc(file_common_commands_editor_commands, 44);
 
 /**
  * returns common.types.TitleBlockInfo
@@ -2056,7 +2125,7 @@ export type GetTitleBlockInfoJson = {
  * Use `create(GetTitleBlockInfoSchema)` to create a new message.
  */
 export const GetTitleBlockInfoSchema: GenMessage<GetTitleBlockInfo, {jsonType: GetTitleBlockInfoJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 44);
+  messageDesc(file_common_commands_editor_commands, 45);
 
 /**
  * @generated from message kiapi.common.commands.SetTitleBlockInfo
@@ -2093,7 +2162,7 @@ export type SetTitleBlockInfoJson = {
  * Use `create(SetTitleBlockInfoSchema)` to create a new message.
  */
 export const SetTitleBlockInfoSchema: GenMessage<SetTitleBlockInfo, {jsonType: SetTitleBlockInfoJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 45);
+  messageDesc(file_common_commands_editor_commands, 46);
 
 /**
  * returns common.types.PageSettings
@@ -2124,7 +2193,7 @@ export type GetPageSettingsJson = {
  * Use `create(GetPageSettingsSchema)` to create a new message.
  */
 export const GetPageSettingsSchema: GenMessage<GetPageSettings, {jsonType: GetPageSettingsJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 46);
+  messageDesc(file_common_commands_editor_commands, 47);
 
 /**
  * @generated from message kiapi.common.commands.SetPageSettings
@@ -2161,7 +2230,7 @@ export type SetPageSettingsJson = {
  * Use `create(SetPageSettingsSchema)` to create a new message.
  */
 export const SetPageSettingsSchema: GenMessage<SetPageSettings, {jsonType: SetPageSettingsJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 47);
+  messageDesc(file_common_commands_editor_commands, 48);
 
 /**
  * Returns the document's revision counter.  The counter starts at 0 when the document is opened
@@ -2206,7 +2275,7 @@ export type GetDocumentRevisionJson = {
  * Use `create(GetDocumentRevisionSchema)` to create a new message.
  */
 export const GetDocumentRevisionSchema: GenMessage<GetDocumentRevision, {jsonType: GetDocumentRevisionJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 48);
+  messageDesc(file_common_commands_editor_commands, 49);
 
 /**
  * Since 11.0
@@ -2241,7 +2310,7 @@ export type DocumentRevisionResponseJson = {
  * Use `create(DocumentRevisionResponseSchema)` to create a new message.
  */
 export const DocumentRevisionResponseSchema: GenMessage<DocumentRevisionResponse, {jsonType: DocumentRevisionResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 49);
+  messageDesc(file_common_commands_editor_commands, 50);
 
 /**
  * @generated from message kiapi.common.commands.SaveDocumentToString
@@ -2268,7 +2337,7 @@ export type SaveDocumentToStringJson = {
  * Use `create(SaveDocumentToStringSchema)` to create a new message.
  */
 export const SaveDocumentToStringSchema: GenMessage<SaveDocumentToString, {jsonType: SaveDocumentToStringJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 50);
+  messageDesc(file_common_commands_editor_commands, 51);
 
 /**
  * @generated from message kiapi.common.commands.SavedDocumentResponse
@@ -2305,7 +2374,7 @@ export type SavedDocumentResponseJson = {
  * Use `create(SavedDocumentResponseSchema)` to create a new message.
  */
 export const SavedDocumentResponseSchema: GenMessage<SavedDocumentResponse, {jsonType: SavedDocumentResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 51);
+  messageDesc(file_common_commands_editor_commands, 52);
 
 /**
  * @generated from message kiapi.common.commands.SaveSelectionToString
@@ -2324,7 +2393,7 @@ export type SaveSelectionToStringJson = {
  * Use `create(SaveSelectionToStringSchema)` to create a new message.
  */
 export const SaveSelectionToStringSchema: GenMessage<SaveSelectionToString, {jsonType: SaveSelectionToStringJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 52);
+  messageDesc(file_common_commands_editor_commands, 53);
 
 /**
  * @generated from message kiapi.common.commands.SavedSelectionResponse
@@ -2361,7 +2430,7 @@ export type SavedSelectionResponseJson = {
  * Use `create(SavedSelectionResponseSchema)` to create a new message.
  */
 export const SavedSelectionResponseSchema: GenMessage<SavedSelectionResponse, {jsonType: SavedSelectionResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 53);
+  messageDesc(file_common_commands_editor_commands, 54);
 
 /**
  * Serializes the given items in the same clipboard format as SaveSelectionToString, without
@@ -2416,7 +2485,7 @@ export type SaveItemsToStringJson = {
  * Use `create(SaveItemsToStringSchema)` to create a new message.
  */
 export const SaveItemsToStringSchema: GenMessage<SaveItemsToString, {jsonType: SaveItemsToStringJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 54);
+  messageDesc(file_common_commands_editor_commands, 55);
 
 /**
  * Attempts to parse the given string as a s-expression formatted container with items,
@@ -2463,7 +2532,7 @@ export type ParseAndCreateItemsFromStringJson = {
  * Use `create(ParseAndCreateItemsFromStringSchema)` to create a new message.
  */
 export const ParseAndCreateItemsFromStringSchema: GenMessage<ParseAndCreateItemsFromString, {jsonType: ParseAndCreateItemsFromStringJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 55);
+  messageDesc(file_common_commands_editor_commands, 56);
 
 /**
  * Undoes the most recent commands of the document (API commits, actions, and in the editor the
@@ -2514,7 +2583,7 @@ export type UndoJson = {
  * Use `create(UndoSchema)` to create a new message.
  */
 export const UndoSchema: GenMessage<Undo, {jsonType: UndoJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 56);
+  messageDesc(file_common_commands_editor_commands, 57);
 
 /**
  * Redoes commands undone by Undo.  Returns UndoRedoResponse
@@ -2557,7 +2626,7 @@ export type RedoJson = {
  * Use `create(RedoSchema)` to create a new message.
  */
 export const RedoSchema: GenMessage<Redo, {jsonType: RedoJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 57);
+  messageDesc(file_common_commands_editor_commands, 58);
 
 /**
  * Since 11.0
@@ -2612,7 +2681,7 @@ export type UndoRedoResponseJson = {
  * Use `create(UndoRedoResponseSchema)` to create a new message.
  */
 export const UndoRedoResponseSchema: GenMessage<UndoRedoResponse, {jsonType: UndoRedoResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 58);
+  messageDesc(file_common_commands_editor_commands, 59);
 
 /**
  * Since 11.0
@@ -2685,7 +2754,7 @@ export type UndoStackEntryJson = {
  * Use `create(UndoStackEntrySchema)` to create a new message.
  */
 export const UndoStackEntrySchema: GenMessage<UndoStackEntry, {jsonType: UndoStackEntryJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 59);
+  messageDesc(file_common_commands_editor_commands, 60);
 
 /**
  * Lists the undo and redo stacks of a document.  Returns UndoStackResponse
@@ -2718,7 +2787,7 @@ export type GetUndoStackJson = {
  * Use `create(GetUndoStackSchema)` to create a new message.
  */
 export const GetUndoStackSchema: GenMessage<GetUndoStack, {jsonType: GetUndoStackJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 60);
+  messageDesc(file_common_commands_editor_commands, 61);
 
 /**
  * Since 11.0
@@ -2767,7 +2836,7 @@ export type UndoStackResponseJson = {
  * Use `create(UndoStackResponseSchema)` to create a new message.
  */
 export const UndoStackResponseSchema: GenMessage<UndoStackResponse, {jsonType: UndoStackResponseJson}> = /*@__PURE__*/
-  messageDesc(file_common_commands_editor_commands, 61);
+  messageDesc(file_common_commands_editor_commands, 62);
 
 /**
  * @generated from enum kiapi.common.commands.DocumentModifiedState

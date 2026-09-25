@@ -38,7 +38,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file common/types/project_settings.proto.
  */
 export const file_common_types_project_settings: GenFile = /*@__PURE__*/
-  fileDesc("CiNjb21tb24vdHlwZXMvcHJvamVjdF9zZXR0aW5ncy5wcm90bxIUa2lhcGkuY29tbW9uLnByb2plY3QimAUKFU5ldENsYXNzQm9hcmRTZXR0aW5ncxI0CgljbGVhcmFuY2UYASABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2VIAIgBARI2Cgt0cmFja193aWR0aBgCIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZUgBiAEBEkAKFWRpZmZfcGFpcl90cmFja193aWR0aBgDIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZUgCiAEBEjgKDWRpZmZfcGFpcl9nYXAYBCABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2VIA4gBARI8ChFkaWZmX3BhaXJfdmlhX2dhcBgFIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZUgEiAEBEjMKCXZpYV9zdGFjaxgGIAEoCzIbLmtpYXBpLmJvYXJkLnR5cGVzLlBhZFN0YWNrSAWIAQESOAoObWljcm92aWFfc3RhY2sYByABKAsyGy5raWFwaS5ib2FyZC50eXBlcy5QYWRTdGFja0gGiAEBEi0KBWNvbG9yGAggASgLMhkua2lhcGkuY29tbW9uLnR5cGVzLkNvbG9ySAeIAQESGwoOdHVuaW5nX3Byb2ZpbGUYCSABKAlICIgBAUIMCgpfY2xlYXJhbmNlQg4KDF90cmFja193aWR0aEIYChZfZGlmZl9wYWlyX3RyYWNrX3dpZHRoQhAKDl9kaWZmX3BhaXJfZ2FwQhQKEl9kaWZmX3BhaXJfdmlhX2dhcEIMCgpfdmlhX3N0YWNrQhEKD19taWNyb3ZpYV9zdGFja0IICgZfY29sb3JCEQoPX3R1bmluZ19wcm9maWxlIqsCChlOZXRDbGFzc1NjaGVtYXRpY1NldHRpbmdzEjUKCndpcmVfd2lkdGgYASABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2VIAIgBARI0CglidXNfd2lkdGgYAiABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2VIAYgBARItCgVjb2xvchgDIAEoCzIZLmtpYXBpLmNvbW1vbi50eXBlcy5Db2xvckgCiAEBEjwKCmxpbmVfc3R5bGUYBCABKA4yIy5raWFwaS5jb21tb24udHlwZXMuU3Ryb2tlTGluZVN0eWxlSAOIAQFCDQoLX3dpcmVfd2lkdGhCDAoKX2J1c193aWR0aEIICgZfY29sb3JCDQoLX2xpbmVfc3R5bGUipgIKCE5ldENsYXNzEgwKBG5hbWUYASABKAkSFQoIcHJpb3JpdHkYAiABKAVIAIgBARI/CgVib2FyZBgDIAEoCzIrLmtpYXBpLmNvbW1vbi5wcm9qZWN0Lk5ldENsYXNzQm9hcmRTZXR0aW5nc0gBiAEBEkcKCXNjaGVtYXRpYxgEIAEoCzIvLmtpYXBpLmNvbW1vbi5wcm9qZWN0Lk5ldENsYXNzU2NoZW1hdGljU2V0dGluZ3NIAogBARIwCgR0eXBlGAUgASgOMiIua2lhcGkuY29tbW9uLnByb2plY3QuTmV0Q2xhc3NUeXBlEhQKDGNvbnN0aXR1ZW50cxgGIAMoCUILCglfcHJpb3JpdHlCCAoGX2JvYXJkQgwKCl9zY2hlbWF0aWMiiAEKDVRleHRWYXJpYWJsZXMSRQoJdmFyaWFibGVzGAEgAygLMjIua2lhcGkuY29tbW9uLnByb2plY3QuVGV4dFZhcmlhYmxlcy5WYXJpYWJsZXNFbnRyeRowCg5WYXJpYWJsZXNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBKkMKDE5ldENsYXNzVHlwZRIPCgtOQ1RfVU5LTk9XThAAEhAKDE5DVF9FWFBMSUNJVBABEhAKDE5DVF9JTVBMSUNJVBACYgZwcm90bzM", [file_common_types_base_types, file_common_types_enums, file_board_board_types]);
+  fileDesc("CiNjb21tb24vdHlwZXMvcHJvamVjdF9zZXR0aW5ncy5wcm90bxIUa2lhcGkuY29tbW9uLnByb2plY3QimAUKFU5ldENsYXNzQm9hcmRTZXR0aW5ncxI0CgljbGVhcmFuY2UYASABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2VIAIgBARI2Cgt0cmFja193aWR0aBgCIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZUgBiAEBEkAKFWRpZmZfcGFpcl90cmFja193aWR0aBgDIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZUgCiAEBEjgKDWRpZmZfcGFpcl9nYXAYBCABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2VIA4gBARI8ChFkaWZmX3BhaXJfdmlhX2dhcBgFIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZUgEiAEBEjMKCXZpYV9zdGFjaxgGIAEoCzIbLmtpYXBpLmJvYXJkLnR5cGVzLlBhZFN0YWNrSAWIAQESOAoObWljcm92aWFfc3RhY2sYByABKAsyGy5raWFwaS5ib2FyZC50eXBlcy5QYWRTdGFja0gGiAEBEi0KBWNvbG9yGAggASgLMhkua2lhcGkuY29tbW9uLnR5cGVzLkNvbG9ySAeIAQESGwoOdHVuaW5nX3Byb2ZpbGUYCSABKAlICIgBAUIMCgpfY2xlYXJhbmNlQg4KDF90cmFja193aWR0aEIYChZfZGlmZl9wYWlyX3RyYWNrX3dpZHRoQhAKDl9kaWZmX3BhaXJfZ2FwQhQKEl9kaWZmX3BhaXJfdmlhX2dhcEIMCgpfdmlhX3N0YWNrQhEKD19taWNyb3ZpYV9zdGFja0IICgZfY29sb3JCEQoPX3R1bmluZ19wcm9maWxlIqsCChlOZXRDbGFzc1NjaGVtYXRpY1NldHRpbmdzEjUKCndpcmVfd2lkdGgYASABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2VIAIgBARI0CglidXNfd2lkdGgYAiABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2VIAYgBARItCgVjb2xvchgDIAEoCzIZLmtpYXBpLmNvbW1vbi50eXBlcy5Db2xvckgCiAEBEjwKCmxpbmVfc3R5bGUYBCABKA4yIy5raWFwaS5jb21tb24udHlwZXMuU3Ryb2tlTGluZVN0eWxlSAOIAQFCDQoLX3dpcmVfd2lkdGhCDAoKX2J1c193aWR0aEIICgZfY29sb3JCDQoLX2xpbmVfc3R5bGUipgIKCE5ldENsYXNzEgwKBG5hbWUYASABKAkSFQoIcHJpb3JpdHkYAiABKAVIAIgBARI/CgVib2FyZBgDIAEoCzIrLmtpYXBpLmNvbW1vbi5wcm9qZWN0Lk5ldENsYXNzQm9hcmRTZXR0aW5nc0gBiAEBEkcKCXNjaGVtYXRpYxgEIAEoCzIvLmtpYXBpLmNvbW1vbi5wcm9qZWN0Lk5ldENsYXNzU2NoZW1hdGljU2V0dGluZ3NIAogBARIwCgR0eXBlGAUgASgOMiIua2lhcGkuY29tbW9uLnByb2plY3QuTmV0Q2xhc3NUeXBlEhQKDGNvbnN0aXR1ZW50cxgGIAMoCUILCglfcHJpb3JpdHlCCAoGX2JvYXJkQgwKCl9zY2hlbWF0aWMiNQoSTmV0Q2xhc3NBc3NpZ25tZW50EgsKA25ldBgBIAEoCRISCgpuZXRjbGFzc2VzGAIgAygJIj4KGU5ldENsYXNzUGF0dGVybkFzc2lnbm1lbnQSDwoHcGF0dGVybhgBIAEoCRIQCghuZXRjbGFzcxgCIAEoCSKIAQoNVGV4dFZhcmlhYmxlcxJFCgl2YXJpYWJsZXMYASADKAsyMi5raWFwaS5jb21tb24ucHJvamVjdC5UZXh0VmFyaWFibGVzLlZhcmlhYmxlc0VudHJ5GjAKDlZhcmlhYmxlc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEqQwoMTmV0Q2xhc3NUeXBlEg8KC05DVF9VTktOT1dOEAASEAoMTkNUX0VYUExJQ0lUEAESEAoMTkNUX0lNUExJQ0lUEAJiBnByb3RvMw", [file_common_types_base_types, file_common_types_enums, file_board_board_types]);
 
 /**
  * @generated from message kiapi.common.project.NetClassBoardSettings
@@ -312,6 +312,110 @@ export const NetClassSchema: GenMessage<NetClass, {jsonType: NetClassJson}> = /*
   messageDesc(file_common_types_project_settings, 2);
 
 /**
+ * A direct assignment of netclasses to a net, equivalent to the assignments
+ * created by netclass labels in a schematic.
+ *
+ * @generated from message kiapi.common.project.NetClassAssignment
+ */
+export type NetClassAssignment = Message<"kiapi.common.project.NetClassAssignment"> & {
+  /**
+   * Full net path (e.g. "/sheet1/net1"). May refer to a net that does not exist yet.
+   *
+   * @generated from field: string net = 1;
+   */
+  net: string;
+
+  /**
+   * Names of netclasses assigned to the net.
+   * In MMM_MERGE mode, an empty list removes all assignments for this net.
+   *
+   * @generated from field: repeated string netclasses = 2;
+   */
+  netclasses: string[];
+};
+
+/**
+ * A direct assignment of netclasses to a net, equivalent to the assignments
+ * created by netclass labels in a schematic.
+ *
+ * @generated from message kiapi.common.project.NetClassAssignment
+ */
+export type NetClassAssignmentJson = {
+  /**
+   * Full net path (e.g. "/sheet1/net1"). May refer to a net that does not exist yet.
+   *
+   * @generated from field: string net = 1;
+   */
+  net?: string;
+
+  /**
+   * Names of netclasses assigned to the net.
+   * In MMM_MERGE mode, an empty list removes all assignments for this net.
+   *
+   * @generated from field: repeated string netclasses = 2;
+   */
+  netclasses?: string[];
+};
+
+/**
+ * Describes the message kiapi.common.project.NetClassAssignment.
+ * Use `create(NetClassAssignmentSchema)` to create a new message.
+ */
+export const NetClassAssignmentSchema: GenMessage<NetClassAssignment, {jsonType: NetClassAssignmentJson}> = /*@__PURE__*/
+  messageDesc(file_common_types_project_settings, 3);
+
+/**
+ * A pattern-based netclass assignment, matching net names by wildcard.
+ *
+ * @generated from message kiapi.common.project.NetClassPatternAssignment
+ */
+export type NetClassPatternAssignment = Message<"kiapi.common.project.NetClassPatternAssignment"> & {
+  /**
+   * Wildcard pattern matched against full net paths (e.g. "/power/*").
+   *
+   * @generated from field: string pattern = 1;
+   */
+  pattern: string;
+
+  /**
+   * Name of the netclass assigned to matching nets.
+   * In MMM_MERGE mode, an empty string removes the pattern.
+   *
+   * @generated from field: string netclass = 2;
+   */
+  netclass: string;
+};
+
+/**
+ * A pattern-based netclass assignment, matching net names by wildcard.
+ *
+ * @generated from message kiapi.common.project.NetClassPatternAssignment
+ */
+export type NetClassPatternAssignmentJson = {
+  /**
+   * Wildcard pattern matched against full net paths (e.g. "/power/*").
+   *
+   * @generated from field: string pattern = 1;
+   */
+  pattern?: string;
+
+  /**
+   * Name of the netclass assigned to matching nets.
+   * In MMM_MERGE mode, an empty string removes the pattern.
+   *
+   * @generated from field: string netclass = 2;
+   */
+  netclass?: string;
+};
+
+/**
+ * Describes the message kiapi.common.project.NetClassPatternAssignment.
+ * Use `create(NetClassPatternAssignmentSchema)` to create a new message.
+ */
+export const NetClassPatternAssignmentSchema: GenMessage<NetClassPatternAssignment, {jsonType: NetClassPatternAssignmentJson}> = /*@__PURE__*/
+  messageDesc(file_common_types_project_settings, 4);
+
+/**
  * @generated from message kiapi.common.project.TextVariables
  */
 export type TextVariables = Message<"kiapi.common.project.TextVariables"> & {
@@ -336,7 +440,7 @@ export type TextVariablesJson = {
  * Use `create(TextVariablesSchema)` to create a new message.
  */
 export const TextVariablesSchema: GenMessage<TextVariables, {jsonType: TextVariablesJson}> = /*@__PURE__*/
-  messageDesc(file_common_types_project_settings, 3);
+  messageDesc(file_common_types_project_settings, 5);
 
 /**
  * @generated from enum kiapi.common.project.NetClassType

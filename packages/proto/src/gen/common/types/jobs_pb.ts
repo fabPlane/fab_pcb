@@ -30,7 +30,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file common/types/jobs.proto.
  */
 export const file_common_types_jobs: GenFile = /*@__PURE__*/
-  fileDesc("Chdjb21tb24vdHlwZXMvam9icy5wcm90bxISa2lhcGkuY29tbW9uLnR5cGVzIisKDUpvYk91dHB1dERhdGESDAoEcGF0aBgBIAEoCRIMCgRkYXRhGAIgASgMIrABCg5SdW5Kb2JSZXNwb25zZRItCgZzdGF0dXMYASABKA4yHS5raWFwaS5jb21tb24udHlwZXMuSm9iU3RhdHVzEhMKC291dHB1dF9wYXRoGAIgAygJEg8KB21lc3NhZ2UYAyABKAkSDgoGam9iX2lkGAQgASgJEjkKDmlubGluZV9vdXRwdXRzGAUgAygLMiEua2lhcGkuY29tbW9uLnR5cGVzLkpvYk91dHB1dERhdGEihAEKDlJ1bkpvYlNldHRpbmdzEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEhMKC291dHB1dF9wYXRoGAIgASgJEg0KBWFzeW5jGAMgASgIEhUKDXJldHVybl9pbmxpbmUYBCABKAgqXQoJSm9iU3RhdHVzEhIKDkpTX1VOU1BFQ0lGSUVEEAASDgoKSlNfU1VDQ0VTUxABEg4KCkpTX1dBUk5JTkcQAhIMCghKU19FUlJPUhADEg4KCkpTX1JVTk5JTkcQBGIGcHJvdG8z", [file_common_types_base_types]);
+  fileDesc("Chdjb21tb24vdHlwZXMvam9icy5wcm90bxISa2lhcGkuY29tbW9uLnR5cGVzIisKDUpvYk91dHB1dERhdGESDAoEcGF0aBgBIAEoCRIMCgRkYXRhGAIgASgMIrABCg5SdW5Kb2JSZXNwb25zZRItCgZzdGF0dXMYASABKA4yHS5raWFwaS5jb21tb24udHlwZXMuSm9iU3RhdHVzEhMKC291dHB1dF9wYXRoGAIgAygJEg8KB21lc3NhZ2UYAyABKAkSDgoGam9iX2lkGAQgASgJEjkKDmlubGluZV9vdXRwdXRzGAUgAygLMiEua2lhcGkuY29tbW9uLnR5cGVzLkpvYk91dHB1dERhdGEihAEKDlJ1bkpvYlNldHRpbmdzEjcKCGRvY3VtZW50GAEgASgLMiUua2lhcGkuY29tbW9uLnR5cGVzLkRvY3VtZW50U3BlY2lmaWVyEhMKC291dHB1dF9wYXRoGAIgASgJEg0KBWFzeW5jGAMgASgIEhUKDXJldHVybl9pbmxpbmUYBCABKAgqXQoJSm9iU3RhdHVzEhIKDkpTX1VOU1BFQ0lGSUVEEAASDgoKSlNfU1VDQ0VTUxABEg4KCkpTX1dBUk5JTkcQAhIMCghKU19FUlJPUhADEg4KCkpTX1JVTk5JTkcQBCpDChBBbnRpYWxpYXNpbmdNb2RlEg8KC0FBTV9VTktOT1dOEAASDAoIQUFNX05PTkUQARIQCgxBQU1fU1RBTkRBUkQQAmIGcHJvdG8z", [file_common_types_base_types]);
 
 /**
  * A job output returned inline; see RunJobSettings.return_inline
@@ -296,4 +296,43 @@ export type JobStatusJson = "JS_UNSPECIFIED" | "JS_SUCCESS" | "JS_WARNING" | "JS
  */
 export const JobStatusSchema: GenEnum<JobStatus, JobStatusJson> = /*@__PURE__*/
   enumDesc(file_common_types_jobs, 0);
+
+/**
+ * Anti-aliasing mode for raster plot outputs
+ *
+ * @generated from enum kiapi.common.types.AntialiasingMode
+ */
+export enum AntialiasingMode {
+  /**
+   * @generated from enum value: AAM_UNKNOWN = 0;
+   */
+  AAM_UNKNOWN = 0,
+
+  /**
+   * No anti-aliasing
+   *
+   * @generated from enum value: AAM_NONE = 1;
+   */
+  AAM_NONE = 1,
+
+  /**
+   * Anti-aliasing (KiCad currently has only one AA mode)
+   *
+   * @generated from enum value: AAM_STANDARD = 2;
+   */
+  AAM_STANDARD = 2,
+}
+
+/**
+ * Anti-aliasing mode for raster plot outputs
+ *
+ * @generated from enum kiapi.common.types.AntialiasingMode
+ */
+export type AntialiasingModeJson = "AAM_UNKNOWN" | "AAM_NONE" | "AAM_STANDARD";
+
+/**
+ * Describes the enum kiapi.common.types.AntialiasingMode.
+ */
+export const AntialiasingModeSchema: GenEnum<AntialiasingMode, AntialiasingModeJson> = /*@__PURE__*/
+  enumDesc(file_common_types_jobs, 1);
 

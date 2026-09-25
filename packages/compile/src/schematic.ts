@@ -94,9 +94,10 @@ function positionedField(source: SchematicFieldProto | undefined, name: string, 
 }
 
 /**
- * A symbol-library document exposes pin positions in library-local coordinates, while a placed
- * SchematicSymbolInstance carries its selected pins in absolute sheet coordinates. Convert the
- * cloned library definition before sending it to KiCad; shapes and fields remain library-local.
+ * A symbol definition's children, pins included, are in the symbol's local frame both in a
+ * symbol-library document and in a placed SchematicSymbolInstance, so the cloned library
+ * definition is sent as it is; only the pin map records absolute sheet positions (for wires,
+ * labels and no-connects).
  */
 function placedDefinition(source: LibSymbol, origin: Vec2, pins: Map<string, Vec2>, reference: string) {
   const definition = clone(SchematicSymbolSchema, source.proto);
@@ -110,7 +111,6 @@ function placedDefinition(source: LibSymbol, origin: Vec2, pins: Map<string, Vec
     // Library pin KIIDs belong to the library definition. Each placed instance must receive
     // independent pin identities from KiCad rather than aliasing pins across repeated symbols.
     pin.id = undefined;
-    pin.position = toVector2(absolute);
     child.item = packAny(SchematicPinSchema, pin);
     if (pin.number) pins.set(`${reference}:${pin.number}`, absolute);
   }

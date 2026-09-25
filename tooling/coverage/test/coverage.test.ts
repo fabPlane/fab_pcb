@@ -61,9 +61,21 @@ describe.skipIf(!haveKicad)("coverage against the pinned KiCad checkout (git HEA
     // The GUI-only set is deliberate — it is editor state a web page owns itself — so a change to
     // it should be a conscious edit here, not a silently drifting number.
     expect(s.total).toBeGreaterThanOrEqual(115);
-    expect(s.ok + s["gui-only"]).toBe(s.total);
-    expect(s.partial).toBe(0);
-    expect(s.unregistered).toBe(0);
+    expect(s.ok + s["gui-only"] + s.partial + s.unregistered).toBe(s.total);
+    // RevertDocument is headless for boards and schematics but still needs the footprint editor
+    expect(
+      r.commands
+        .filter((c) => c.headless === "partial")
+        .map((c) => c.command)
+        .sort(),
+    ).toEqual(["RevertDocument"]);
+    // Upstream KiCad defines these library protos but no handler serves them yet
+    expect(
+      r.commands
+        .filter((c) => c.headless === "unregistered")
+        .map((c) => c.command)
+        .sort(),
+    ).toEqual(["GetLibraryTable", "SearchLibraries"]);
     expect(
       r.commands
         .filter((c) => c.headless === "gui-only")
@@ -72,6 +84,7 @@ describe.skipIf(!haveKicad)("coverage against the pinned KiCad checkout (git HEA
     ).toEqual([
       "AddToSelection",
       "ClearSelection",
+      "FocusOnItems",
       "GetActiveLayer",
       "GetBoardEditorAppearanceSettings",
       "GetSelection",
@@ -79,7 +92,6 @@ describe.skipIf(!haveKicad)("coverage against the pinned KiCad checkout (git HEA
       "HighlightNets",
       "InteractiveMoveItems",
       "RemoveFromSelection",
-      "RevertDocument",
       "SaveSelectionToString",
       "SetActiveLayer",
       "SetBoardEditorAppearanceSettings",

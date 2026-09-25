@@ -241,7 +241,10 @@ describe.skipIf(!haveKicad)("compile jobs + kicad-cli api-server", () => {
     const root = await (await kicad.currentSchematic())!.rootSheet();
     expect((await root.getSymbols()).map((symbol) => symbol.reference).sort()).toEqual(["R1", "R2"]);
     expect((await root.getAllItems()).some((item) => item.id === preservedWireId)).toBe(true);
-    expect((await (await kicad.currentSchematic())!.getWires(root.scope)).length).toBe(5);
+    // The regenerated stub that lies exactly on the adopted wire is merged away by KiCad's commit
+    // cleanup (headless commits run it since upstream f47543c257), as the editor would; the
+    // adopted wire itself is kept (checked above).
+    expect((await (await kicad.currentSchematic())!.getWires(root.scope)).length).toBe(4);
   }, 60_000);
 
   test("an ERC-invalid schematic fails before the board update", async () => {
