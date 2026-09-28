@@ -127,7 +127,18 @@ describe("bridge HTTP without KiCad", () => {
     await mkdir(join(staticDir, "assets"));
     await writeFile(join(staticDir, "assets", "a.js"), "console.log(1)");
     bridge = await startBridge(
-      configFromEnv({}, { port: 0, kicadCli: "/nonexistent/kicad-cli", staticDir, workspaceRoot: staticDir, log: () => {} }),
+      configFromEnv(
+        {},
+        {
+          port: 0,
+          kicadCli: "/nonexistent/kicad-cli",
+          staticDir,
+          workspaceRoot: staticDir,
+          runtimeId: "test-runtime",
+          ownerPid: 1234,
+          log: () => {},
+        },
+      ),
     );
   });
   afterAll(async () => {
@@ -136,9 +147,16 @@ describe("bridge HTTP without KiCad", () => {
   });
 
   test("health reports the missing binary", async () => {
-    const h = (await (await fetch(`${bridge.url}/health`)).json()) as { ok: boolean; kicadCliExists: boolean };
+    const h = (await (await fetch(`${bridge.url}/health`)).json()) as {
+      ok: boolean;
+      kicadCliExists: boolean;
+      runtimeId: string;
+      ownerPid: number;
+    };
     expect(h.ok).toBe(true);
     expect(h.kicadCliExists).toBe(false);
+    expect(h.runtimeId).toBe("test-runtime");
+    expect(h.ownerPid).toBe(1234);
   });
   test("POST /sessions fails with 502 when kicad-cli cannot be spawned", async () => {
     const res = await fetch(`${bridge.url}/sessions`, { method: "POST", body: "{}" });

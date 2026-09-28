@@ -1,5 +1,5 @@
 /** Native server-side adapter for fabPlane/fab_router's text DSN/SES API. */
-import { dsnLayers, writeDsn } from "./specctra/dsn";
+import { dsnLayers, extraViasFromRouteOptions, writeDsn } from "./specctra/dsn";
 import { parseSes, sesToItems } from "./specctra/ses";
 import {
   RouteCancelled,
@@ -73,6 +73,26 @@ function failureText(result: Extract<FabRouterTextResult, { ok: false }>): strin
   return error ?? result.diagnostics.map(diagnosticText).filter(Boolean).join("; ") ?? "unknown failure";
 }
 
+/** Leftover endpoints in millimetres, for a fail-fast "boxed pad" report when nothing routes. */
+export function blockedConnectionPads(input: RouteInput): Array<{ net: string; x: number; y: number; itemId: string }> {
+  const seen = new Set<string>();
+  const out: Array<{ net: string; x: number; y: number; itemId: string }> = [];
+  for (const connection of input.connections) {
+    for (const end of [connection.from, connection.to]) {
+      const key = `${connection.net}\0${end.itemId}\0${end.position.x}\0${end.position.y}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({
+        net: connection.net,
+        x: end.position.x / 1e6,
+        y: end.position.y / 1e6,
+        itemId: end.itemId,
+      });
+    }
+  }
+  return out;
+}
+
 export class FabRouter implements Autorouter {
   readonly name = "fab-router";
   private routeDsnPromise?: Promise<FabRouteDsn>;
@@ -118,8 +138,16 @@ export class FabRouter implements Autorouter {
     if (opts.signal?.aborted) throw new RouteCancelled();
 
     const layers = dsnLayers(input, opts);
-    const dsn = writeDsn(input, { layers });
-    log.push(`fab_router: ${dsn.length} byte DSN, ${layers.length} layer(s), ${input.connections.length} connection(s)`);
+    const extraVias = extraViasFromRouteOptions(opts);
+    const dsn = writeDsn(input, {
+      layers,
+      extraVias,
+      ...(opts.nets ? { routableNets: opts.nets } : {}),
+    });
+    log.push(
+      `fab_router: ${dsn.length} byte DSN, ${layers.length} layer(s), ${input.connections.length} connection(s)` +
+        (opts.nets?.length ? `, leftover nets ${opts.nets.join(",")}` : ""),
+    );
     progress?.({ phase: "export", percent: 0, total: input.connections.length });
     const routeDsn = await this.solver();
     if (opts.signal?.aborted) throw new RouteCancelled();
@@ -162,7 +190,16 @@ export class FabRouter implements Autorouter {
       },
     );
 
-    if (!result.ok) throw new Error(`fab_router failed: ${failureText(result)}`);
+    if (!result.ok) {
+      const blocked = blockedConnectionPads(input);
+      const detail = blocked.length
+        ? `; blockedPads ${blocked
+            .slice(0, 24)
+            .map((pad) => `${pad.net}@${pad.x.toFixed(2)},${pad.y.toFixed(2)}`)
+            .join("; ")}`
+        : "";
+      throw new Error(`fab_router failed: ${failureText(result)}${detail}`);
+    }
     log.push(
       ...result.diagnostics
         .map(diagnosticText)
@@ -191,6 +228,15 @@ export class FabRouter implements Autorouter {
       );
     }
     const unrouted: RouteConnection[] = input.connections.filter((connection) => incompleteNets.has(connection.net));
+    if (unrouted.length === input.connections.length && input.connections.length) {
+      const blocked = blockedConnectionPads(input);
+      log.push(
+        `no leftover connections routed; blockedPads: ${blocked
+          .slice(0, 24)
+          .map((pad) => `${pad.net} ${pad.itemId} (${pad.x.toFixed(3)},${pad.y.toFixed(3)})`)
+          .join("; ")}`,
+      );
+    }
     const elapsedMs = Math.round(performance.now() - started);
     log.push(
       `${tracks.length} tracks, ${vias.length} vias; ${input.connections.length - unrouted.length}/${input.connections.length} connections in ${elapsedMs} ms (${result.report.stoppedBy})`,

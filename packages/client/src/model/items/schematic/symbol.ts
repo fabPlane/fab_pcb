@@ -150,6 +150,9 @@ export class SchematicSymbol extends Item<SchematicSymbolInstance> {
   get footprint(): string {
     return this.proto.footprintField?.text?.text ?? "";
   }
+  set footprint(v: string) {
+    if (this.proto.footprintField?.text) this.proto.footprintField.text.text = v;
+  }
   get datasheet(): string {
     return this.proto.datasheetField?.text?.text ?? "";
   }

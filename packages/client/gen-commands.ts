@@ -9,6 +9,7 @@
  * than producing a wrapper that does not compile.
  */
 import { readFile, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { DescMessage } from "@bufbuild/protobuf";
@@ -49,7 +50,107 @@ function lowerFirst(s: string): string {
   return s.charAt(0).toLowerCase() + s.slice(1);
 }
 
-export async function generate(): Promise<{ data: string; commands: string; rows: CommandRow[] }> {
+function words(value: string): string[] {
+  return value
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[^A-Za-z0-9]+/g, " ")
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+function referencedTypes(schema: DescMessage): string[] {
+  const out = new Set<string>();
+  const visit = (message: DescMessage) => {
+    if (out.has(message.typeName)) return;
+    out.add(message.typeName);
+    for (const field of message.fields) {
+      if (field.fieldKind === "message") visit(field.message);
+      else if (field.fieldKind === "list" && field.listKind === "message") visit(field.message);
+      else if (field.fieldKind === "map" && field.mapKind === "message") visit(field.message);
+    }
+  };
+  visit(schema);
+  return [...out].sort();
+}
+
+function descriptorShape(schema: DescMessage): unknown {
+  return {
+    type: schema.typeName,
+    fields: schema.fields.map((field) => ({
+      name: field.name,
+      jsonName: field.jsonName,
+      number: field.number,
+      kind: field.fieldKind,
+      value:
+        field.fieldKind === "scalar"
+          ? field.scalar
+          : field.fieldKind === "enum"
+            ? { type: field.enum.typeName, values: field.enum.values.map((v) => [v.name, v.number]) }
+            : field.fieldKind === "message"
+              ? field.message.typeName
+              : field.fieldKind === "list"
+                ? field.listKind === "scalar"
+                  ? field.scalar
+                  : field.listKind === "enum"
+                    ? { type: field.enum.typeName, values: field.enum.values.map((v) => [v.name, v.number]) }
+                    : field.message.typeName
+                : field.mapKind === "scalar"
+                  ? field.scalar
+                  : field.mapKind === "enum"
+                    ? { type: field.enum.typeName, values: field.enum.values.map((v) => [v.name, v.number]) }
+                    : field.message.typeName,
+      presence: field.presence,
+      oneof: field.oneof?.name ?? null,
+      deprecated: field.deprecated,
+    })),
+  };
+}
+
+function documentTypes(row: CommandRow): string[] {
+  const values = new Set<string>();
+  if (row.group.startsWith("board/")) values.add("pcb");
+  if (row.group.startsWith("sch/")) values.add("schematic");
+  if (row.handlers.some((h) => h === "pcb" || h === "board")) values.add("pcb");
+  if (row.handlers.includes("sch")) values.add("schematic");
+  if (row.handlers.some((h) => h === "footprint" || h === "fplib")) values.add("footprint");
+  if (row.handlers.includes("symlib")) values.add("symbol");
+  if (row.group === "common/project" || row.command.includes("Document")) {
+    for (const value of ["project", "pcb", "schematic", "footprint", "symbol"]) values.add(value);
+  }
+  if (values.size === 0) values.add("global");
+  return [...values].sort();
+}
+
+function catalogEntry(row: CommandRow) {
+  const request = proto.kiapiRegistry.getMessage(row.requestType);
+  const response = proto.kiapiRegistry.getMessage(row.responseType ?? EMPTY);
+  if (!request || !response) throw new Error(`missing descriptor for ${row.command}`);
+  const refs = [...new Set([...referencedTypes(request), ...referencedTypes(response)])];
+  const objectTypes = refs
+    .filter((type) => /kiapi\.(board|schematic)\.types\./.test(type))
+    .map((type) => type.slice(type.lastIndexOf(".") + 1))
+    .filter((type) => !/^(Document|Board|Schematic)$/.test(type))
+    .sort();
+  const capabilities = [...new Set([...words(row.command), ...words(row.group), ...row.handlers])].sort();
+  const schemaShape = { request: descriptorShape(request), response: descriptorShape(response) };
+  return {
+    operation: row.command,
+    group: row.group,
+    requestType: row.requestType,
+    responseType: row.responseType ?? EMPTY,
+    handlers: row.handlers,
+    headless: row.headless,
+    documentTypes: documentTypes(row),
+    objectTypes,
+    capabilities,
+    summary: `${row.command} via ${row.handlers.length ? row.handlers.join(", ") : "no registered"} handler${row.handlers.length === 1 ? "" : "s"}.`,
+    schemaHash: createHash("sha256").update(JSON.stringify(schemaShape)).digest("hex"),
+  };
+}
+
+export async function generate(): Promise<{ data: string; commands: string; catalog: string; rows: CommandRow[] }> {
   const rows = JSON.parse(await readFile(COMMANDS_JSON, "utf8")) as CommandRow[];
   const commit = (await readFile(KICAD_COMMIT_FILE, "utf8")).trim();
   const header = `// @generated by packages/client/gen-commands.ts from tooling/coverage/commands.json (KiCad ${commit.slice(0, 10)}) -- do not edit; run \`bun run gen\`.`;
@@ -164,13 +265,44 @@ export async function generate(): Promise<{ data: string; commands: string; rows
     ...fns,
   ].join("\n");
 
-  return { data, commands, rows };
+  const entries = rows.map(catalogEntry);
+  const schemaShapes = [...proto.kiapiRegistry]
+    .filter(
+      (desc): desc is DescMessage =>
+        desc.kind === "message" && (desc.typeName.startsWith("kiapi.") || desc.typeName.startsWith("google.protobuf.")),
+    )
+    .map(descriptorShape)
+    .sort((a, b) => String((a as { type: string }).type).localeCompare(String((b as { type: string }).type)));
+  const catalogHash = createHash("sha256").update(JSON.stringify(entries)).digest("hex");
+  const schemaHash = createHash("sha256").update(JSON.stringify(schemaShapes)).digest("hex");
+  const catalog = [
+    header,
+    "",
+    'import type { HeadlessStatus } from "./commands-data";',
+    "",
+    "export interface IpcCatalogEntry {",
+    "  operation: string; group: string; requestType: string; responseType: string; handlers: string[];",
+    "  headless: HeadlessStatus; documentTypes: string[]; objectTypes: string[]; capabilities: string[];",
+    "  summary: string; schemaHash: string;",
+    "}",
+    "",
+    'export const IPC_CATALOG_VERSION = "direct-kicad-ipc/1.0.0";',
+    `export const IPC_CATALOG_SHA256 = ${JSON.stringify(catalogHash)};`,
+    `export const IPC_SCHEMA_SHA256 = ${JSON.stringify(schemaHash)};`,
+    "export const IPC_CATALOG: readonly IpcCatalogEntry[] = [",
+    ...entries.map((entry) => `  ${JSON.stringify(entry)},`),
+    "];",
+    "",
+  ].join("\n");
+
+  return { data, commands, catalog, rows };
 }
 
 if (import.meta.main) {
-  const { data, commands, rows } = await generate();
+  const { data, commands, catalog, rows } = await generate();
   await writeFile(join(PKG_DIR, "src", "commands-data.ts"), data);
   await writeFile(join(PKG_DIR, "src", "commands.ts"), commands);
+  await writeFile(join(PKG_DIR, "src", "ipc-catalog-data.ts"), catalog);
   const ok = rows.filter((r) => r.headless === "ok").length;
-  console.log(`wrote src/commands-data.ts and src/commands.ts: ${rows.length} commands (${ok} headless)`);
+  console.log(`wrote commands and IPC catalog: ${rows.length} commands (${ok} headless)`);
 }

@@ -231,7 +231,9 @@ export function emptyResultReason(
   r: Pick<RouteResult, "totalConnections" | "tracks" | "vias" | "unrouted" | "timedOut" | "log">,
 ): string | null {
   if (r.totalConnections === 0 || r.tracks.length || r.vias.length || r.unrouted.length < r.totalConnections) return null;
-  const why = [...r.log].reverse().find((l) => /solver failed|precheck|timed out|exited with|no session|ran out of/i.test(l));
+  const why = [...r.log]
+    .reverse()
+    .find((l) => /solver failed|precheck|timed out|exited with|no session|ran out of|blockedPads|padstack-unknown/i.test(l));
   if (r.timedOut) return `timed out with nothing routed${why ? ` (${why})` : ""}`;
   return why ? `the router routed nothing: ${why}` : "the router returned no tracks or vias";
 }
@@ -313,6 +315,9 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         const input = await extractRouteInput(board, { nets: request.options?.nets, warn: pushLog });
         pushLog(`extract: ${input.pads.length} pads, ${input.connections.length} connections, ${input.copperLayers.length} copper layers`);
         checkCancelled();
+        if (request.options?.nets?.length && input.connections.length === 0) {
+          pushLog(`onlyConnections ${request.options.nets.join(",")} has no remaining ratsnest; skipping the router`);
+        }
         const router: Autorouter =
           deps.routers?.(request, kicad, board) ??
           (request.router === "freerouting"

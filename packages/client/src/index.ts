@@ -19,6 +19,7 @@ export {
 } from "./commands-data";
 export * from "./errors";
 export * from "./units";
+export * from "./ipc-catalog";
 export {
   KiCadEvents,
   TransportEventSubscriber,
