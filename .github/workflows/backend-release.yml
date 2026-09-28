@@ -3,6 +3,10 @@ name: Backend release
 on:
   workflow_dispatch:
     inputs:
+      source_ref:
+        description: "fab_pcb commit to package (default: workflow ref)"
+        type: string
+        default: ""
       runner:
         description: Linux runner selection (auto uses the NAS)
         type: choice
@@ -42,8 +46,15 @@ jobs:
       runner: ${{ steps.select.outputs.runner }}
       choice: ${{ steps.select.outputs.choice }}
       kicad_tag: ${{ steps.kicad.outputs.tag }}
+      source_sha: ${{ steps.source.outputs.sha }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_ref || github.sha }}
+      - name: Resolve the source commit
+        id: source
+        shell: bash
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - name: Resolve the prebuilt KiCad runtime
         id: kicad
         shell: bash
@@ -111,6 +122,8 @@ jobs:
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.select-linux-runner.outputs.source_sha }}
       - name: Install runner prerequisites
         run: apt-get update && apt-get install -y --no-install-recommends ca-certificates curl git jq unzip
       - uses: oven-sh/setup-bun@v2
@@ -206,12 +219,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: [self-hosted, macOS, ARM64, macos-arm64, ios-builds, mac-mini], target: darwin-arm64, kicad-platform: macos-arm64 }
-          - { os: [self-hosted, macOS, ARM64, macos-arm64, ios-builds, mac-mini], target: darwin-x64, kicad-platform: macos-x86_64 }
+          - { os: macos-15, target: darwin-arm64, kicad-platform: macos-arm64 }
+          - { os: macos-15-intel, target: darwin-x64, kicad-platform: macos-x86_64 }
     runs-on: ${{ matrix.os }}
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.select-linux-runner.outputs.source_sha }}
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ env.BUN_VERSION }}
@@ -288,6 +303,8 @@ jobs:
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.select-linux-runner.outputs.source_sha }}
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ env.BUN_VERSION }}
@@ -371,12 +388,13 @@ jobs:
         run: |
           set -euo pipefail
           test "$(find artifacts -name 'fp-pcb-backend-*.tar.gz' | wc -l | tr -d ' ')" = 4
-          echo "tag=backend-${GITHUB_SHA:0:10}" >> "$GITHUB_OUTPUT"
+          source_sha='${{ needs.select-linux-runner.outputs.source_sha }}'
+          echo "tag=backend-${source_sha:0:10}" >> "$GITHUB_OUTPUT"
       - name: Publish immutable FabRouter-enabled backend release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.release.outputs.tag }}
           name: ${{ steps.release.outputs.tag }}
-          body: FabRouter-enabled FabPlane PCB native backends for ${{ github.sha }}.
+          body: FabRouter-enabled FabPlane PCB native backends for ${{ needs.select-linux-runner.outputs.source_sha }}.
           files: artifacts/fp-pcb-backend-*.tar.gz
           fail_on_unmatched_files: true
