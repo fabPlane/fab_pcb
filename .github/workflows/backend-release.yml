@@ -3,6 +3,10 @@ name: Backend release
 on:
   workflow_dispatch:
     inputs:
+      source_ref:
+        description: "fab_pcb commit to package (default: workflow ref)"
+        type: string
+        default: ""
       runner:
         description: Linux runner selection (auto uses the NAS)
         type: choice
@@ -42,8 +46,19 @@ jobs:
       runner: ${{ steps.select.outputs.runner }}
       choice: ${{ steps.select.outputs.choice }}
       kicad_tag: ${{ steps.kicad.outputs.tag }}
+      source_sha: ${{ steps.source.outputs.sha }}
+      release_tag: ${{ steps.source.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_ref || github.sha }}
+      - name: Resolve the source commit
+        id: source
+        shell: bash
+        run: |
+          sha="$(git rev-parse HEAD)"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "tag=backend-${sha:0:10}" >> "$GITHUB_OUTPUT"
       - name: Resolve the prebuilt KiCad runtime
         id: kicad
         shell: bash
@@ -56,10 +71,25 @@ jobs:
           releases="$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/$KICAD_RELEASE_REPO/releases?per_page=100")"
-          tag="$(printf '%s' "$releases" | jq -r --arg suffix "-$sha10" \
-            '.[] | .tag_name | select(startswith("nightly-") and endswith($suffix))' | head -1)"
+          tag=""
+          while IFS= read -r candidate; do
+            assets="$(printf '%s' "$releases" | jq -r --arg tag "$candidate" \
+              '.[] | select(.tag_name == $tag) | .assets[].name')"
+            complete=true
+            for platform_archive in linux-x86_64.tar.gz macos-arm64.tar.gz macos-x86_64.tar.gz windows-x86_64.zip; do
+              if ! grep -Fxq "kicad-cli-$candidate-$platform_archive" <<< "$assets"; then
+                complete=false
+                break
+              fi
+            done
+            if "$complete"; then
+              tag="$candidate"
+              break
+            fi
+          done < <(printf '%s' "$releases" | jq -r --arg suffix "-$sha10" \
+            '.[] | .tag_name | select(startswith("nightly-") and endswith($suffix))')
           if [ -z "$tag" ]; then
-            echo "::error title=no prebuilt KiCad runtime::No $KICAD_RELEASE_REPO nightly release matches KICAD_COMMIT $commit"
+            echo "::error title=no complete KiCad runtime::No $KICAD_RELEASE_REPO nightly release has all four platforms for KICAD_COMMIT $commit"
             exit 1
           fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
@@ -101,6 +131,16 @@ jobs:
 
           select_runner local
 
+      - name: Prepare draft backend release
+        if: github.event_name == 'push' || inputs.publish_release == true
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ steps.source.outputs.tag }}
+          target_commitish: ${{ steps.source.outputs.sha }}
+          name: ${{ steps.source.outputs.tag }}
+          body: FabRouter-enabled FabPlane PCB native backends for ${{ steps.source.outputs.sha }}.
+          draft: true
+
   linux-x64:
     needs: select-linux-runner
     runs-on: ${{ fromJSON(needs.select-linux-runner.outputs.runner) }}
@@ -111,6 +151,8 @@ jobs:
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.select-linux-runner.outputs.source_sha }}
       - name: Install runner prerequisites
         run: apt-get update && apt-get install -y --no-install-recommends ca-certificates curl git jq unzip
       - uses: oven-sh/setup-bun@v2
@@ -193,12 +235,14 @@ jobs:
             --test-name-pattern "server killed mid-request"
       - name: Archive backend
         run: tar -C dist/pcb/linux-x64 -czf fp-pcb-backend-linux-x64.tar.gz .
-      - uses: actions/upload-artifact@v4
+      - name: Upload Linux backend to draft release
+        if: github.event_name == 'push' || inputs.publish_release == true
+        uses: softprops/action-gh-release@v3
         with:
-          name: fp-pcb-backend-linux-x64
-          path: fp-pcb-backend-linux-x64.tar.gz
-          if-no-files-found: error
-          retention-days: 1
+          tag_name: ${{ needs.select-linux-runner.outputs.release_tag }}
+          draft: true
+          files: fp-pcb-backend-linux-x64.tar.gz
+          fail_on_unmatched_files: true
 
   macos:
     needs: select-linux-runner
@@ -206,12 +250,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: [self-hosted, macOS, ARM64, macos-arm64, ios-builds, mac-mini], target: darwin-arm64, kicad-platform: macos-arm64 }
-          - { os: [self-hosted, macOS, ARM64, macos-arm64, ios-builds, mac-mini], target: darwin-x64, kicad-platform: macos-x86_64 }
+          - { os: macos-15, target: darwin-arm64, kicad-platform: macos-arm64 }
+          - { os: macos-15-intel, target: darwin-x64, kicad-platform: macos-x86_64 }
     runs-on: ${{ matrix.os }}
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.select-linux-runner.outputs.source_sha }}
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ env.BUN_VERSION }}
@@ -275,12 +321,14 @@ jobs:
           fi
       - name: Archive backend
         run: tar -C "dist/pcb/${{ matrix.target }}" -czf "fp-pcb-backend-${{ matrix.target }}.tar.gz" .
-      - uses: actions/upload-artifact@v4
+      - name: Upload macOS backend to draft release
+        if: github.event_name == 'push' || inputs.publish_release == true
+        uses: softprops/action-gh-release@v3
         with:
-          name: fp-pcb-backend-${{ matrix.target }}
-          path: fp-pcb-backend-${{ matrix.target }}.tar.gz
-          if-no-files-found: error
-          retention-days: 1
+          tag_name: ${{ needs.select-linux-runner.outputs.release_tag }}
+          draft: true
+          files: fp-pcb-backend-${{ matrix.target }}.tar.gz
+          fail_on_unmatched_files: true
 
   windows-x64:
     needs: select-linux-runner
@@ -288,6 +336,8 @@ jobs:
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.select-linux-runner.outputs.source_sha }}
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ env.BUN_VERSION }}
@@ -347,12 +397,14 @@ jobs:
       - name: Archive backend
         shell: pwsh
         run: tar -C dist/pcb/windows-x64 -czf fp-pcb-backend-windows-x64.tar.gz .
-      - uses: actions/upload-artifact@v4
+      - name: Upload Windows backend to draft release
+        if: github.event_name == 'push' || inputs.publish_release == true
+        uses: softprops/action-gh-release@v3
         with:
-          name: fp-pcb-backend-windows-x64
-          path: fp-pcb-backend-windows-x64.tar.gz
-          if-no-files-found: error
-          retention-days: 1
+          tag_name: ${{ needs.select-linux-runner.outputs.release_tag }}
+          draft: true
+          files: fp-pcb-backend-windows-x64.tar.gz
+          fail_on_unmatched_files: true
 
   publish:
     needs: [select-linux-runner, linux-x64, macos, windows-x64]
@@ -360,23 +412,26 @@ jobs:
     runs-on: ${{ fromJSON(needs.select-linux-runner.outputs.runner) }}
     container: ubuntu:24.04
     steps:
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: fp-pcb-backend-*
-          path: artifacts
-          merge-multiple: true
-      - name: Resolve immutable release tag
-        id: release
+      - name: Install release verification tools
+        run: apt-get update && apt-get install -y --no-install-recommends ca-certificates curl jq
+      - name: Verify all four backend archives
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.select-linux-runner.outputs.release_tag }}
         run: |
           set -euo pipefail
-          test "$(find artifacts -name 'fp-pcb-backend-*.tar.gz' | wc -l | tr -d ' ')" = 4
-          echo "tag=backend-${GITHUB_SHA:0:10}" >> "$GITHUB_OUTPUT"
+          assets="$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/releases?per_page=100" | \
+            jq -r --arg tag "$RELEASE_TAG" '.[] | select(.tag_name == $tag) | .assets[].name')"
+          for target in linux-x64 darwin-arm64 darwin-x64 windows-x64; do
+            grep -Fxq "fp-pcb-backend-$target.tar.gz" <<< "$assets"
+          done
       - name: Publish immutable FabRouter-enabled backend release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
-          tag_name: ${{ steps.release.outputs.tag }}
-          name: ${{ steps.release.outputs.tag }}
-          body: FabRouter-enabled FabPlane PCB native backends for ${{ github.sha }}.
-          files: artifacts/fp-pcb-backend-*.tar.gz
-          fail_on_unmatched_files: true
+          tag_name: ${{ needs.select-linux-runner.outputs.release_tag }}
+          name: ${{ needs.select-linux-runner.outputs.release_tag }}
+          body: FabRouter-enabled FabPlane PCB native backends for ${{ needs.select-linux-runner.outputs.source_sha }}.
+          draft: false
