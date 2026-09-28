@@ -183,6 +183,10 @@ export interface RouteOptions {
   maxTimeMs?: number;
   /** Only route these nets (names); others stay as they are and act as obstacles. */
   nets?: string[];
+  /** Via copper diameter, nm. Published in the DSN library so leftover sessions round-trip. */
+  viaDiameterNm?: number;
+  /** Via drill diameter, nm. */
+  viaDrillNm?: number;
   /** Seed for routers that randomise; the same seed gives the same result. */
   seed?: number;
   /** Router effort / passes (fab_router: `maxPasses`, Freerouting: `-mp` max passes). */

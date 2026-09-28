@@ -1,5 +1,17 @@
 # @fp-pcb/client
 
+## Searchable direct IPC
+
+The generated IPC catalog covers every command in the pinned KiCad command metadata and protobuf
+descriptor set. `searchIpcCatalog()` filters by operation, document type, object type, capability,
+and headless support; `describeIpcOperation()` returns bounded request/response schemas, units,
+constraints, and a small protobuf-JSON example. `callIpcOperation()` validates protobuf JSON through
+the same `kiapiRegistry` used by `KiCadClient` and invokes the existing transport.
+
+The catalog identifies itself with `IPC_CATALOG_VERSION`, `IPC_CATALOG_SHA256`,
+`IPC_SCHEMA_SHA256`, and the pinned `KICAD_COMMIT`. Regenerate it together with typed command
+wrappers using `bun run gen` in this package.
+
 The KiCad IPC API client: transport-agnostic, isomorphic (Bun and browser), and generated from
 the fork's protos so it never drifts from the server. It talks to a `kicad-cli api-server`
 process — directly over its nng IPC socket in Bun, or through `@fp-pcb/bridge` from a page.

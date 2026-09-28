@@ -11,6 +11,10 @@ export const DEFAULT_WORKSPACE_ROOT = `${KICAD_CHECKOUT}/qa/data`;
 export const DEFAULT_WASM_MODULE = resolve(import.meta.dir, "../../kicad-wasm/dist/kicad_api.js");
 
 export interface BridgeConfig {
+  /** Opaque identity supplied by the owning desktop runtime. */
+  runtimeId: string | null;
+  /** PID of the desktop process that owns this bridge. */
+  ownerPid: number | null;
   /** TCP port for HTTP + WebSocket. `0` picks a free port. Env `PORT`, default 4020. */
   port: number;
   /** Env `HOST`, default `127.0.0.1`. */
@@ -26,6 +30,8 @@ export interface BridgeConfig {
   /** Bundled standard KiCad libraries registered into every compiled project. */
   footprintDir: string | null;
   symbolDir: string | null;
+  /** Resolved private JavaScript router module, when configured. */
+  jsAutorouterModule: string | null;
   /** Root the `/files` API is confined to. Env `WORKSPACE_ROOT`, default the KiCad `qa/data` dir. */
   workspaceRoot: string;
   /** Directory served for unmatched GET requests (SPA). Env `STATIC_DIR`; unset disables. */
@@ -100,6 +106,8 @@ export function configFromEnv(env: Record<string, string | undefined> = process.
   if (socketTransport !== "ipc" && socketTransport !== "ws")
     throw new Error(`KICAD_SOCKET_TRANSPORT must be "ipc" or "ws", got ${JSON.stringify(socketTransport)}`);
   const base: BridgeConfig = {
+    runtimeId: env.FABDESK_RUNTIME_ID?.trim() || null,
+    ownerPid: env.FABDESK_DESKTOP_PID ? int(env.FABDESK_DESKTOP_PID, 0) : null,
     port: int(env.PORT, 4020),
     hostname: env.HOST ?? "127.0.0.1",
     kicadCli: env.KICAD_CLI ?? DEFAULT_KICAD_CLI,
@@ -108,6 +116,7 @@ export function configFromEnv(env: Record<string, string | undefined> = process.
     wsHostname: env.KICAD_WS_HOST ?? "127.0.0.1",
     footprintDir: env.KICAD_FOOTPRINT_DIR ? resolve(env.KICAD_FOOTPRINT_DIR) : null,
     symbolDir: env.KICAD_SYMBOL_DIR ? resolve(env.KICAD_SYMBOL_DIR) : null,
+    jsAutorouterModule: env.JS_AUTOROUTER_MODULE ? resolve(env.JS_AUTOROUTER_MODULE) : null,
     workspaceRoot: resolve(env.WORKSPACE_ROOT ?? DEFAULT_WORKSPACE_ROOT),
     staticDir: env.STATIC_DIR ? resolve(env.STATIC_DIR) : null,
     requestTimeoutMs: int(env.KICAD_REQUEST_TIMEOUT_MS, 120_000),

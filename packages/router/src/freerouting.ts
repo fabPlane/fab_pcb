@@ -31,7 +31,8 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Board } from "@fp-pcb/client";
 import { commands as generatedCommands, KiCadApiError } from "@fp-pcb/client";
-import { writeDsn, dsnLayers } from "./specctra/dsn";
+import { writeDsn, dsnLayers, extraViasFromRouteOptions } from "./specctra/dsn";
+import { blockedConnectionPads } from "./fab-router";
 import { parseSes, sesToItems } from "./specctra/ses";
 import {
   RouteCancelled,
@@ -432,6 +433,19 @@ export class FreeroutingRouter implements Autorouter {
     const mode = await this.resolveMode();
     const name = `freerouting-${mode}`;
     log.push(`mode: ${mode}; jar: ${this.jar}; java: ${this.java}`);
+    if (input.connections.length === 0) {
+      log.push("no remaining connections in the extract; skipping Freerouting");
+      return {
+        router: name,
+        tracks: [],
+        vias: [],
+        unrouted: [],
+        totalConnections: 0,
+        timedOut: false,
+        elapsedMs: Math.round(performance.now() - t0),
+        log,
+      };
+    }
     const workDir = this.fr.workDir ?? (await mkdtemp(join(tmpdir(), "fp-pcb-freerouting-")));
     const dsnPath = join(workDir, "board.dsn");
     const sesPath = join(workDir, "board.ses");
@@ -440,20 +454,27 @@ export class FreeroutingRouter implements Autorouter {
       log.push("note: kicad mode exports every enabled copper layer; the `layers` option is ignored");
     if (opts.viaCost !== undefined) log.push("note: Freerouting's via costs are set in its GUI/profile, not on the CLI; `viaCost` ignored");
     if (opts.seed !== undefined) log.push("note: Freerouting is not seedable from the CLI; `seed` ignored");
-    if (opts.nets?.length)
-      log.push("note: Freerouting routes every unrouted net in the DSN; `nets` only filters which connections count as ours");
+    const leftover = Boolean(opts.nets?.length);
+    if (leftover)
+      log.push(
+        `leftover DSN: onlyConnections=${opts.nets!.join(",")} via builtin writeDsn (KiCad Specctra export is full-board and ignores the net filter)`,
+      );
 
     progress?.({ phase: "export", percent: 0 });
     let dsn: string;
     if (opts.signal?.aborted) throw new RouteCancelled();
-    if (mode !== "builtin") {
+    if (!leftover && mode !== "builtin") {
       dsn = await exportDsnViaKicad(
         this.ctx.board!,
         dsnPath,
         this.fr.kicadCli ? { kicadCli: this.fr.kicadCli, log: (l) => log.push(l) } : undefined,
       );
     } else {
-      dsn = writeDsn(input, { layers });
+      dsn = writeDsn(input, {
+        layers,
+        extraVias: extraViasFromRouteOptions(opts),
+        ...(opts.nets ? { routableNets: opts.nets } : {}),
+      });
     }
     await writeFile(dsnPath, dsn);
     log.push(`dsn: ${dsn.length} bytes, ${layers.length} layers`);
@@ -547,6 +568,15 @@ export class FreeroutingRouter implements Autorouter {
     log.push(
       `${result.tracks.length} tracks, ${result.vias.length} vias to create; ${input.connections.length - result.unrouted.length}/${input.connections.length} connections in ${result.elapsedMs} ms`,
     );
+    if (result.unrouted.length === input.connections.length && input.connections.length) {
+      const blocked = blockedConnectionPads(input);
+      log.push(
+        `no leftover connections routed; blockedPads: ${blocked
+          .slice(0, 24)
+          .map((pad) => `${pad.net} ${pad.itemId} (${pad.x.toFixed(3)},${pad.y.toFixed(3)})`)
+          .join("; ")}`,
+      );
+    }
     if (this.fr.keepFiles || this.fr.workDir) log.push(`files kept in ${workDir}`);
     else await rm(workDir, { recursive: true, force: true }).catch(() => {});
     progress?.({ phase: "done", percent: 100, routed: input.connections.length - result.unrouted.length, total: input.connections.length });

@@ -12,7 +12,7 @@ import {
   packAny,
   unpackAnyAs,
 } from "@fp-pcb/proto";
-import { LibSymbol, mm, placeNativeSymbol, toDistance, toVector2 } from "../src";
+import { LibSymbol, mm, moveNativeSymbol, placeNativeSymbol, toDistance, toVector2 } from "../src";
 
 function librarySymbol(): LibSymbol {
   const pin = (number: string, x: number, y: number, unit = 1) =>
@@ -68,5 +68,43 @@ describe("native schematic authoring", () => {
       .definition!.items.map((child) => child.item && unpackAnyAs(child.item, SchematicPinSchema))
       .filter(Boolean);
     expect(pins.map((pin) => pin!.id)).toEqual([undefined, undefined, undefined]);
+  });
+
+  test("rotates and mirrors pins and fields with the symbol transform", () => {
+    const placed = placeNativeSymbol(librarySymbol(), {
+      reference: "R8",
+      value: "1k",
+      footprint: "Resistor_SMD:R_0603_1608Metric",
+      position: { x: mm(30), y: mm(40) },
+      rotation: 90,
+      mirrorX: true,
+    });
+
+    expect(placed.symbol.rotation).toBe(90);
+    expect(placed.symbol.mirrorX).toBe(true);
+    expect(placed.pins).toEqual(
+      new Map([
+        ["1", { x: mm(30), y: mm(45) }],
+        ["2", { x: mm(30), y: mm(35) }],
+      ]),
+    );
+    expect(placed.symbol.field("Reference")?.position).toEqual({ x: mm(32), y: mm(40) });
+  });
+
+  test("moves a placed symbol and its fields while preserving local pin coordinates", () => {
+    const placed = placeNativeSymbol(librarySymbol(), {
+      reference: "R9",
+      value: "22k",
+      footprint: "Resistor_SMD:R_0603_1608Metric",
+      position: { x: mm(30), y: mm(40) },
+    });
+    moveNativeSymbol(placed.symbol, { x: mm(50), y: mm(60) });
+
+    expect(placed.symbol.position).toEqual({ x: mm(50), y: mm(60) });
+    expect(placed.symbol.pins.map((pin) => pin.position)).toEqual([
+      { x: mm(-5), y: mm(0) },
+      { x: mm(5), y: mm(0) },
+    ]);
+    expect(placed.symbol.field("Reference")?.position).toEqual({ x: mm(50), y: mm(58) });
   });
 });

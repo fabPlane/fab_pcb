@@ -71,6 +71,40 @@ export interface DsnOptions {
   name?: string;
   /** Copper layers to publish (default: every layer of the input). */
   layers?: BoardLayer[];
+  /**
+   * Extra via sizes (nm) to publish in the library, in addition to net-class and existing-board
+   * vias. `route_run` rules.viaDiameterMm/viaDrillMm land here so leftover routing can mint a
+   * padstack the session can round-trip.
+   */
+  extraVias?: Array<{ diameter: number; drill: number }>;
+  /**
+   * When set, only these nets receive `(net …)` pin lists. Other pads stay in placement as
+   * obstacles. Existing copper of every net is still exported as protected wiring.
+   * `undefined` keeps every named pad in the network (full-board export).
+   */
+  routableNets?: string[];
+}
+
+/** Via sizes (nm) requested by `RouteOptions` / leftover `route_run` rules. */
+export function extraViasFromRouteOptions(opts: {
+  viaDiameterNm?: number;
+  viaDrillNm?: number;
+  extra?: Record<string, unknown>;
+  viaDiameterMm?: number;
+  viaDrillMm?: number;
+}): Array<{ diameter: number; drill: number }> {
+  const mm = (value: unknown): number | undefined =>
+    typeof value === "number" && Number.isFinite(value) && value > 0 ? Math.round(value * 1e6) : undefined;
+  const diameter =
+    (typeof opts.viaDiameterNm === "number" && opts.viaDiameterNm > 0 ? opts.viaDiameterNm : undefined) ??
+    mm(opts.viaDiameterMm) ??
+    mm(opts.extra?.["viaDiameterMm"]);
+  const drill =
+    (typeof opts.viaDrillNm === "number" && opts.viaDrillNm > 0 ? opts.viaDrillNm : undefined) ??
+    mm(opts.viaDrillMm) ??
+    mm(opts.extra?.["viaDrillMm"]);
+  if (diameter === undefined || drill === undefined) return [];
+  return [{ diameter, drill }];
 }
 
 /** Writes the DSN. Pure; unit-tested on hand-written inputs. */
@@ -138,7 +172,9 @@ export function writeDsn(input: RouteInput, opts: DsnOptions = {}): string {
       );
     }
   }
-  // Via padstacks: one per distinct (diameter, drill) among the net classes.
+  // Via padstacks must cover every name wiring will emit. Net-class sizes alone are not enough:
+  // existing board vias of another size used to be named in (wiring) after the library was
+  // written, and the importer dropped them (`padstack-unknown: Via[0-3]_360:200_um`).
   const viaNames = new Map<string, { diameter: number; drill: number }>();
   const viaFor = (d: number, drill: number) => {
     const n = viaPadstackName(d, drill, layers.length);
@@ -147,6 +183,8 @@ export function writeDsn(input: RouteInput, opts: DsnOptions = {}): string {
   };
   const defaultVia = viaFor(rules.viaDiameter, rules.viaDrill);
   for (const r of input.rules.perNet.values()) viaFor(r.viaDiameter, r.viaDrill);
+  for (const existing of input.vias) viaFor(existing.diameter, existing.drill);
+  for (const extra of opts.extraVias ?? []) viaFor(extra.diameter, extra.drill);
   out.push(`    (via ${[...viaNames.keys()].map(quote).join(" ")})`);
   out.push(
     `    (rule (width ${um(rules.trackWidth)}) (clearance ${um(rules.clearance)}) (clearance ${um(rules.clearance)} (type default_smd)) (clearance ${um(Math.min(rules.clearance, 100_000))} (type smd_smd)))`,
@@ -205,9 +243,11 @@ export function writeDsn(input: RouteInput, opts: DsnOptions = {}): string {
   out.push(`  )`);
 
   // --- network -----------------------------------------------------------------------------------
+  const routable = opts.routableNets ? new Set(opts.routableNets) : null;
   const pinsByNet = new Map<string, string[]>();
   for (const p of pads) {
     if (!p.net) continue;
+    if (routable && !routable.has(p.net)) continue;
     let list = pinsByNet.get(p.net);
     if (!list) pinsByNet.set(p.net, (list = []));
     list.push(`${compOf.get(p.id)!}-1`);

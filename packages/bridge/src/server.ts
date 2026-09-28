@@ -93,6 +93,9 @@ export async function startBridge(cfg: BridgeConfig): Promise<BridgeServer> {
         return json({
           ok: true,
           name: "@fp-pcb/bridge",
+          pid: process.pid,
+          runtimeId: cfg.runtimeId,
+          ownerPid: cfg.ownerPid,
           protocolVersion: WS_BRIDGE_PROTOCOL_VERSION,
           uptimeSec: Math.round((Date.now() - startedAt) / 1000),
           kicadCli: cfg.kicadCli,

@@ -24,7 +24,36 @@ export interface NativeSymbolPlacement {
   position: Vec2;
   unit?: number;
   bodyStyle?: number;
+  /** Clockwise rotation in KiCad sheet coordinates. */
+  rotation?: 0 | 90 | 180 | 270;
+  mirrorX?: boolean;
+  mirrorY?: boolean;
   fields?: Readonly<Record<string, string>>;
+}
+
+const ORIENTATION_BY_DEGREES = {
+  0: SchematicSymbolOrientation.SSO_0,
+  90: SchematicSymbolOrientation.SSO_90,
+  180: SchematicSymbolOrientation.SSO_180,
+  270: SchematicSymbolOrientation.SSO_270,
+} as const;
+
+function transformRelative(point: Vec2, placement: NativeSymbolPlacement): Vec2 {
+  let x = placement.mirrorX ? -point.x : point.x;
+  let y = placement.mirrorY ? -point.y : point.y;
+  switch (placement.rotation ?? 0) {
+    case 90:
+      [x, y] = [-y, x];
+      break;
+    case 180:
+      x = -x;
+      y = -y;
+      break;
+    case 270:
+      [x, y] = [y, -x];
+      break;
+  }
+  return { x, y };
 }
 
 export interface PlacedNativeSymbol {
@@ -33,22 +62,41 @@ export interface PlacedNativeSymbol {
   pins: ReadonlyMap<string, Vec2>;
 }
 
-function positionedField(source: SchematicField | undefined, name: string, value: string, origin: Vec2): SchematicField {
+/** Move an already-placed native symbol while keeping its absolute fields aligned. */
+export function moveNativeSymbol(symbol: SchematicSymbol, position: Vec2): SchematicSymbol {
+  const delta = { x: position.x - symbol.position.x, y: position.y - symbol.position.y };
+  if (!delta.x && !delta.y) return symbol;
+  symbol.position = position;
+  for (const field of symbol.fields) {
+    const current = field.position;
+    field.position = { x: current.x + delta.x, y: current.y + delta.y };
+  }
+  return symbol;
+}
+
+function positionedField(
+  source: SchematicField | undefined,
+  name: string,
+  value: string,
+  placement: NativeSymbolPlacement,
+): SchematicField {
   const field = source ? clone(SchematicFieldSchema, source) : create(SchematicFieldSchema, { name, visible: false, allowAutoPlace: true });
   field.name = name;
   field.text ??= create(TextSchema);
   field.text.text = value;
-  const relative = vec2(field.text.position);
-  field.text.position = toVector2({ x: origin.x + relative.x, y: origin.y + relative.y });
+  const relative = transformRelative(vec2(field.text.position), placement);
+  field.text.position = toVector2({
+    x: placement.position.x + relative.x,
+    y: placement.position.y + relative.y,
+  });
   return field;
 }
 
 /**
  * Creates a native `SchematicSymbolInstance` suitable for a sheet commit. Library pin identities
- * are cleared; pin positions stay in the symbol's local frame, which is what KiCad expects for a
- * definition's children, and the returned pin map gives their absolute sheet positions. Rotation
- * is deliberately left to a later transform-aware helper; this constructor creates the
- * conventional zero-degree placement without hiding that limitation.
+ * are cleared; pin positions stay in the symbol's local frame, which KiCad expects for definition
+ * children. The returned pin map and absolute fields receive the rotation/mirror transform recorded
+ * on the symbol instance, so callers can wire immediately without corrupting the embedded symbol.
  */
 export function placeNativeSymbol(source: LibSymbol, placement: NativeSymbolPlacement): PlacedNativeSymbol {
   const definition = clone(SchematicSymbolSchema, source.proto);
@@ -60,7 +108,7 @@ export function placeNativeSymbol(source: LibSymbol, placement: NativeSymbolPlac
     if (!child.item) continue;
     const pin = unpackAnyAs(child.item, SchematicPinSchema);
     if (!pin) continue;
-    const relative = vec2(pin.position);
+    const relative = transformRelative(vec2(pin.position), placement);
     const absolute = { x: placement.position.x + relative.x, y: placement.position.y + relative.y };
     pin.id = undefined;
     child.item = packAny(SchematicPinSchema, pin);
@@ -74,23 +122,22 @@ export function placeNativeSymbol(source: LibSymbol, placement: NativeSymbolPlac
   const symbol = new SchematicSymbol(
     create(SchematicSymbolInstanceSchema, {
       position: toVector2(placement.position),
-      transform: create(SchematicSymbolTransformSchema, { orientation: SchematicSymbolOrientation.SSO_0 }),
+      transform: create(SchematicSymbolTransformSchema, {
+        orientation: ORIENTATION_BY_DEGREES[placement.rotation ?? 0],
+        mirrorX: placement.mirrorX ?? false,
+        mirrorY: placement.mirrorY ?? false,
+      }),
       definition,
       libId: definition.id,
-      referenceField: positionedField(definition.referenceField, "Reference", placement.reference, placement.position),
-      valueField: positionedField(definition.valueField, "Value", placement.value, placement.position),
-      footprintField: positionedField(definition.footprintField, "Footprint", placement.footprint, placement.position),
-      datasheetField: positionedField(
-        definition.datasheetField,
-        "Datasheet",
-        fields["Datasheet"] ?? fields["datasheet"] ?? "",
-        placement.position,
-      ),
+      referenceField: positionedField(definition.referenceField, "Reference", placement.reference, placement),
+      valueField: positionedField(definition.valueField, "Value", placement.value, placement),
+      footprintField: positionedField(definition.footprintField, "Footprint", placement.footprint, placement),
+      datasheetField: positionedField(definition.datasheetField, "Datasheet", fields["Datasheet"] ?? fields["datasheet"] ?? "", placement),
       descriptionField: positionedField(
         definition.descriptionField,
         "Description",
         fields["Description"] ?? fields["description"] ?? "",
-        placement.position,
+        placement,
       ),
       unit: create(SchematicSymbolUnitSchema, { unit }),
       bodyStyle: create(SchematicSymbolBodyStyleSchema, { style: bodyStyle }),
@@ -100,7 +147,7 @@ export function placeNativeSymbol(source: LibSymbol, placement: NativeSymbolPlac
       fieldsAutoplaced: false,
       userFields: Object.entries(fields)
         .filter(([name]) => !["Datasheet", "datasheet", "Description", "description"].includes(name))
-        .map(([name, value]) => positionedField(undefined, name, value, placement.position)),
+        .map(([name, value]) => positionedField(undefined, name, value, placement)),
     }),
   );
   return { symbol, pins };
