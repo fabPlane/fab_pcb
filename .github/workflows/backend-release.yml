@@ -133,7 +133,7 @@ jobs:
 
       - name: Prepare draft backend release
         if: github.event_name == 'push' || inputs.publish_release == true
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.source.outputs.tag }}
           target_commitish: ${{ steps.source.outputs.sha }}
@@ -237,7 +237,7 @@ jobs:
         run: tar -C dist/pcb/linux-x64 -czf fp-pcb-backend-linux-x64.tar.gz .
       - name: Upload Linux backend to draft release
         if: github.event_name == 'push' || inputs.publish_release == true
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.select-linux-runner.outputs.release_tag }}
           draft: true
@@ -323,7 +323,7 @@ jobs:
         run: tar -C "dist/pcb/${{ matrix.target }}" -czf "fp-pcb-backend-${{ matrix.target }}.tar.gz" .
       - name: Upload macOS backend to draft release
         if: github.event_name == 'push' || inputs.publish_release == true
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.select-linux-runner.outputs.release_tag }}
           draft: true
@@ -399,7 +399,7 @@ jobs:
         run: tar -C dist/pcb/windows-x64 -czf fp-pcb-backend-windows-x64.tar.gz .
       - name: Upload Windows backend to draft release
         if: github.event_name == 'push' || inputs.publish_release == true
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.select-linux-runner.outputs.release_tag }}
           draft: true
@@ -429,7 +429,7 @@ jobs:
             grep -Fxq "fp-pcb-backend-$target.tar.gz" <<< "$assets"
           done
       - name: Publish immutable FabRouter-enabled backend release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.select-linux-runner.outputs.release_tag }}
           name: ${{ needs.select-linux-runner.outputs.release_tag }}
