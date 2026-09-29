@@ -2,7 +2,9 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { create } from "@bufbuild/protobuf";
 import {
+  ErcErrorType,
   GlobalLabelSchema,
+  RuleSeverity,
   SchematicFieldSchema,
   SchematicLabelSpinStyle,
   SchematicLineSchema,
@@ -14,13 +16,68 @@ import { existsSync } from "node:fs";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { generateSchematic, GENERATED_SCHEMATIC_PROPERTY } from "../src/schematic";
+import { generatedNetMerges, generateSchematic, GENERATED_SCHEMATIC_PROPERTY } from "../src/schematic";
 import { registerLibraries } from "../src/libraries";
 import type { Netlist } from "../src/types";
 import { haveKicad, KICAD_CLI, newProjectWithLibraries, QA_LIBRARIES, startBareServer, type RunningServer } from "./kicad-server";
 
 const STANDARD_SYMBOLS = process.env.KICAD11_SYMBOL_DIR ?? process.env.KICAD_SYMBOL_DIR ?? "";
 const haveUsbSymbols = existsSync(join(STANDARD_SYMBOLS, "Connector.kicad_sym")) && existsSync(join(STANDARD_SYMBOLS, "Device.kicad_sym"));
+const haveTimerSymbols = haveUsbSymbols && ["Timer", "power"].every((lib) => existsSync(join(STANDARD_SYMBOLS, `${lib}.kicad_sym`)));
+
+/** The USB-C 555 blinker from a Fabdesk circuit_build run whose leftward stubs merged +5V with CTRL. */
+function usb555BlinkerNetlist(powerFlags = true): Netlist {
+  const part = (ref: string, value: string, lib: string, symbol: string) => ({
+    ref,
+    value,
+    footprint: "x",
+    libSource: { lib, part: symbol },
+  });
+  const nodes = (...keys: string[]) =>
+    keys.map((key) => {
+      const [ref, pin] = key.split(":") as [string, string];
+      return { ref, pin };
+    });
+  const netlist: Netlist = {
+    components: [
+      part("J1", "USB_C_POWER", "Connector", "USB_C_Receptacle_PowerOnly_6P"),
+      part("R1", "10k", "Device", "R"),
+      part("R2", "68k", "Device", "R"),
+      part("R5", "1k", "Device", "R"),
+      part("#FLG02", "PWR_FLAG", "power", "PWR_FLAG"),
+      part("R3", "5.1k", "Device", "R"),
+      part("R4", "5.1k", "Device", "R"),
+      part("D1", "RED", "Device", "LED"),
+      part("C2", "10nF", "Device", "C"),
+      part("C3", "100nF", "Device", "C"),
+      part("C1", "10uF", "Device", "C"),
+      part("#FLG01", "PWR_FLAG", "power", "PWR_FLAG"),
+      part("U1", "NE555D", "Timer", "NE555D"),
+    ],
+    nets: [
+      // NE555D pins 8 (+5V) and 5 (CTRL) are adjacent on the symbol's top edge.
+      { name: "+5V", nodes: nodes("J1:A9", "J1:B9", "U1:8", "U1:4", "R1:1", "C3:1", "#FLG01:1") },
+      { name: "DISCH", nodes: nodes("R1:2", "R2:1", "U1:7") },
+      { name: "TIMING", nodes: nodes("R2:2", "U1:2", "U1:6", "C1:1") },
+      { name: "CTRL", nodes: nodes("U1:5", "C2:1") },
+      { name: "OUT", nodes: nodes("U1:3", "R5:1") },
+      { name: "LED_A", nodes: nodes("R5:2", "D1:2") },
+      { name: "CC1", nodes: nodes("J1:A5", "R3:1") },
+      { name: "CC2", nodes: nodes("J1:B5", "R4:1") },
+      { name: "GND", nodes: nodes("J1:A12", "J1:B12", "U1:1", "R3:2", "R4:2", "C1:2", "C2:2", "C3:2", "D1:1", "#FLG02:1") },
+    ],
+    noConnects: nodes("J1:S1"),
+  };
+  if (powerFlags) return netlist;
+  // Without the flags every later symbol shifts one grid slot, which put J1's downward GND stub in
+  // the column above R3's upward CC1 stub.
+  const flag = (ref: string) => ref.startsWith("#FLG");
+  return {
+    ...netlist,
+    components: netlist.components.filter((component) => !flag(component.ref)),
+    nets: netlist.nets.map((net) => ({ ...net, nodes: net.nodes.filter((node) => !flag(node.ref)) })),
+  };
+}
 
 function usbPowerNetlist(part: "USB_C_Receptacle_USB2.0_16P" | "USB_C_Receptacle_PowerOnly_6P"): Netlist {
   const full = part === "USB_C_Receptacle_USB2.0_16P";
@@ -72,6 +129,15 @@ if (!haveKicad()) console.log(`[skip] pinned kicad-cli or qa libraries not found
 describe.skipIf(!haveKicad())("generated schematic + kicad-cli api-server", () => {
   let server: RunningServer;
   let root: string;
+  const registerTimerLibraries = () =>
+    registerLibraries(
+      server.kicad,
+      ["Connector", "Device", "Timer", "power"].map((lib) => ({
+        kind: "symbol" as const,
+        nickname: lib,
+        uri: join(STANDARD_SYMBOLS, `${lib}.kicad_sym`),
+      })),
+    );
 
   beforeAll(async () => {
     root = await mkdtemp(join(tmpdir(), "fp-pcb-schematic-"));
@@ -160,6 +226,57 @@ describe.skipIf(!haveKicad())("generated schematic + kicad-cli api-server", () =
     expect(remaining.filter((item) => item instanceof SchematicLine || item instanceof GlobalLabel)).toHaveLength(0);
   }, 60_000);
 
+  test("a short between generated labels is reported although KiCad rates it a warning", async () => {
+    const { board } = await newProjectWithLibraries(server.kicad, root, "generated-net-merge");
+    const project = server.kicad.projectFrom(board.specifier);
+    let schematic = (await server.kicad.currentSchematic()) ?? (await project.openSchematic());
+    const labelledWire = (y: number, names: [string, string], owned: boolean) => {
+      const [start, end] = [
+        { x: mm(25.4), y: mm(y) },
+        { x: mm(50.8), y: mm(y) },
+      ];
+      const wire = new SchematicLine(
+        create(SchematicLineSchema, { start: toVector2(start), end: toVector2(end), type: SchematicLineType.SLT_WIRE }),
+      );
+      const labels = ([start, end] as const).map(
+        (position, index) =>
+          new GlobalLabel(
+            create(GlobalLabelSchema, {
+              position: toVector2(position),
+              text: create(TextSchema, { text: names[index], position: toVector2(position) }),
+              spinStyle: index ? SchematicLabelSpinStyle.SLSS_RIGHT : SchematicLabelSpinStyle.SLSS_LEFT,
+              fields: owned
+                ? [
+                    create(SchematicFieldSchema, {
+                      name: GENERATED_SCHEMATIC_PROPERTY,
+                      visible: false,
+                      text: create(TextSchema, { text: "circuit.netlist.json", position: toVector2(position) }),
+                    }),
+                  ]
+                : [],
+            }),
+          ),
+      );
+      return [wire, ...labels];
+    };
+    await (
+      await schematic.rootSheet()
+    ).commit("test: generated and manual shorts", (tx) =>
+      tx.create([...labelledWire(25.4, ["+5V", "CTRL"], true), ...labelledWire(50.8, ["MANUAL_A", "MANUAL_B"], false)]),
+    );
+    await schematic.save();
+    await schematic.close();
+
+    schematic = await project.openSchematic();
+    const erc = await schematic.erc.run();
+    // The pre-existing gate only rejects ERC errors; both shorts arrive as warnings.
+    const conflicts = erc.markers.filter((marker) => marker.errorType === ErcErrorType.ERCET_DRIVER_CONFLICT);
+    expect(conflicts.map((marker) => marker.severity)).toEqual([RuleSeverity.RS_WARNING, RuleSeverity.RS_WARNING]);
+    const merges = await generatedNetMerges(schematic, erc.markers);
+    expect(merges).toHaveLength(1);
+    expect(merges[0]).toContain("CTRL");
+  }, 60_000);
+
   test("explicit no-connects survive save/reopen and satisfy ERC", async () => {
     const { board } = await newProjectWithLibraries(server.kicad, root, "explicit-no-connect");
     await registerLibraries(server.kicad, [
@@ -222,6 +339,49 @@ describe.skipIf(!haveKicad())("generated schematic + kicad-cli api-server", () =
       erc = await schematic.erc.run();
       expect(erc.errorCount).toBe(0);
       expect(erc.markers.filter((marker) => /doesn't match copy in library/i.test(marker.description))).toEqual([]);
+    },
+    60_000,
+  );
+
+  test.skipIf(!haveTimerSymbols)(
+    "stubs on adjacent top-edge NE555 pins keep their nets separate and satisfy ERC",
+    async () => {
+      const { board } = await newProjectWithLibraries(server.kicad, root, "ne555-top-edge");
+      await registerTimerLibraries();
+
+      const generated = await generateSchematic(server.kicad, usb555BlinkerNetlist());
+      expect(generated.diagnostics).toEqual([]);
+      await generated.schematic.save();
+      await generated.schematic.close();
+
+      const schematic = await server.kicad.projectFrom(board.specifier).openSchematic();
+      const erc = await schematic.erc.run();
+      // Placeholder footprints are irrelevant here; every connectivity marker is a regression.
+      const markers = erc.markers.map((marker) => marker.description).filter((description) => !/footprint library/i.test(description));
+      expect(markers).toEqual([]);
+      expect(erc.errorCount).toBe(0);
+      expect(await generatedNetMerges(schematic, erc.markers)).toEqual([]);
+    },
+    60_000,
+  );
+
+  test.skipIf(!haveTimerSymbols)(
+    "a tall connector's bottom stubs stay clear of the next row's top stubs",
+    async () => {
+      const { board } = await newProjectWithLibraries(server.kicad, root, "ne555-no-flags");
+      await registerTimerLibraries();
+
+      const generated = await generateSchematic(server.kicad, usb555BlinkerNetlist(false));
+      expect(generated.diagnostics).toEqual([]);
+      await generated.schematic.save();
+      await generated.schematic.close();
+
+      // Unflagged power pins are ERC errors by design here; only net merges matter.
+      const schematic = await server.kicad.projectFrom(board.specifier).openSchematic();
+      const erc = await schematic.erc.run();
+      expect(
+        erc.markers.filter((marker) => marker.errorType === ErcErrorType.ERCET_DRIVER_CONFLICT).map((marker) => marker.description),
+      ).toEqual([]);
     },
     60_000,
   );
