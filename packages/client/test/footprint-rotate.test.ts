@@ -1,6 +1,14 @@
 import { describe, expect, test } from "bun:test";
 import { create } from "@bufbuild/protobuf";
-import { BoardGraphicShapeSchema, BoardLayer, FieldSchema, FootprintInstanceSchema, PadSchema, packAny } from "@fp-pcb/proto";
+import {
+  BoardGraphicShapeSchema,
+  BoardLayer,
+  FieldSchema,
+  FootprintInstanceSchema,
+  Footprint3DModelSchema,
+  PadSchema,
+  packAny,
+} from "@fp-pcb/proto";
 import { Footprint, BoardShape } from "../src/model";
 const point = (x: number, y: number) => ({ xNm: BigInt(x), yNm: BigInt(y) });
 function fixture() {
@@ -70,6 +78,21 @@ describe("Footprint.rotate", () => {
     const original = f.clone();
     f.rotate(360);
     expect(f.equals(original)).toBe(true);
+  });
+  test("3D model transforms stay local to the footprint", () => {
+    const f = fixture();
+    const model = packAny(
+      Footprint3DModelSchema,
+      create(Footprint3DModelSchema, {
+        filename: "missing.step",
+        offset: { xNm: 1, yNm: 2, zNm: 3 },
+        rotation: { xNm: 0, yNm: 0, zNm: 37 },
+        scale: { xNm: 1, yNm: 1, zNm: 1 },
+      }),
+    );
+    f.proto.definition!.items.push(model);
+    f.rotate(180);
+    expect(f.proto.definition!.items.at(-1)).toEqual(model);
   });
   test("unknown embedded items fail without a partial rotation", () => {
     const f = fixture();

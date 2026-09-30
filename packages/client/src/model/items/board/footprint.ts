@@ -514,6 +514,9 @@ function rotateFootprintChild(
   degrees: number,
 ): void {
   switch (item.$typeName) {
+    // 3D offsets and rotations are local to the footprint, unlike IPC pad/text positions.
+    case "kiapi.board.types.Footprint3DModel":
+      break;
     case "kiapi.board.types.Pad": {
       const pad = item as unknown as PadProto;
       pad.position = point(pad.position);
