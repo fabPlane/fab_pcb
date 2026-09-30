@@ -162,6 +162,9 @@ export class Footprint extends Item<FootprintInstance> {
    * Move the footprint and every child coordinate KiCad serializes in the board frame. Merely
    * changing `position` is insufficient: footprint deserialization restores pads, fields, text,
    * and graphics from their absolute child coordinates after setting the anchor.
+   * Legacy translation leaves unknown embedded item kinds unchanged; callers that need strict
+   * validation should inspect them first. Unlike rotate(), this preserves the existing API's
+   * permissive behavior. Footprint-local 3D model transforms also remain unchanged.
    */
   translate(delta: Vec2): this {
     if (!delta.x && !delta.y) return this;
@@ -218,6 +221,7 @@ export class Footprint extends Item<FootprintInstance> {
   get orientation(): number {
     return deg(this.proto.orientation);
   }
+  /** Metadata only: does not transform pads or graphics. Use rotate() for a physical rotation. */
   set orientation(d: number) {
     this.proto.orientation = toAngle(d);
   }
