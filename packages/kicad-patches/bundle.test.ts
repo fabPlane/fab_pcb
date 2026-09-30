@@ -3,7 +3,13 @@ import { readFileSync } from "node:fs";
 import { mkdtemp, mkdir, symlink } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { findStockData, targetSpec, validateFabRouterSource, validateRelocatableSymlinks } from "./bundle-lib";
+import {
+  findStockData,
+  targetSpec,
+  validateFabRouterSource,
+  validateRelocatableSymlinks,
+  validateUsbCShieldCompatibility,
+} from "./bundle-lib";
 
 describe("backend bundle targets", () => {
   test("uses IPC on Unix and KiCad WebSockets on Windows", () => {
@@ -60,6 +66,31 @@ describe("KiCad stock data", () => {
     const mac = await mkdtemp(join(tmpdir(), "fp-pcb-stock-mac-"));
     await mkdir(join(mac, "KiCad.app", "Contents", "SharedSupport"), { recursive: true });
     expect(await findStockData(mac)).toBe(join(mac, "KiCad.app", "Contents", "SharedSupport"));
+  });
+});
+
+describe("KiCad library compatibility", () => {
+  test("requires the power-only USB-C shield pin to match its footprint pads", async () => {
+    const root = await mkdtemp(join(tmpdir(), "fp-pcb-kicad-libraries-"));
+    const footprints = join(root, "footprints");
+    const symbols = join(root, "symbols");
+    const connectorFootprints = join(footprints, "Connector_USB.pretty");
+    await mkdir(connectorFootprints, { recursive: true });
+    await mkdir(symbols, { recursive: true });
+    await Bun.write(
+      join(symbols, "Connector.kicad_sym"),
+      '(symbol "USB_C_Receptacle_PowerOnly_6P_1_1" (pin passive line (name "SHIELD") (number "S1")))\n',
+    );
+    const footprintPath = join(connectorFootprints, "USB_C_Receptacle_GCT_USB4125-xx-x_6P_TopMnt_Horizontal.kicad_mod");
+    const footprint = (shield: string) =>
+      `(footprint "USB-C"\n${Array.from({ length: 4 }, () => `  (pad "${shield}" thru_hole oval)`).join("\n")}\n)\n`;
+    await Bun.write(footprintPath, footprint("S1"));
+    await expect(validateUsbCShieldCompatibility(footprints, symbols)).resolves.toBeUndefined();
+
+    await Bun.write(footprintPath, footprint("SH"));
+    await expect(validateUsbCShieldCompatibility(footprints, symbols)).rejects.toThrow(
+      "USB-C shield pin/pad mismatch: symbol uses S1, footprint uses SH",
+    );
   });
 });
 
