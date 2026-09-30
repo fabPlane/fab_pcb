@@ -2,7 +2,14 @@
 /** Assemble a relocatable FabPlane PCB backend: fork runtime, bridge executable, and libraries. */
 import { cp, mkdir, readdir, rm, stat } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
-import { findStockData, targetSpec, validateFabRouterSource, validateLibraryDirectory, validateRelocatableSymlinks } from "./bundle-lib";
+import {
+  findStockData,
+  targetSpec,
+  validateFabRouterSource,
+  validateLibraryDirectory,
+  validateRelocatableSymlinks,
+  validateUsbCShieldCompatibility,
+} from "./bundle-lib";
 
 const [target, runtimeArg, footprintsArg, symbolsArg, outputArg] = process.argv.slice(2);
 if (!target || !runtimeArg || !footprintsArg || !symbolsArg || !outputArg) {
@@ -19,6 +26,7 @@ const output = resolve(outputArg);
 const fabRouterSource = process.env.FP_PCB_FAB_ROUTER_SOURCE ? resolve(process.env.FP_PCB_FAB_ROUTER_SOURCE) : null;
 await validateLibraryDirectory("footprint", footprints);
 await validateLibraryDirectory("symbol", symbols);
+await validateUsbCShieldCompatibility(footprints, symbols);
 if (fabRouterSource) await validateFabRouterSource(fabRouterSource);
 if (!(await stat(runtime).catch(() => null))?.isDirectory()) throw new Error(`KiCad runtime directory not found: ${runtime}`);
 
