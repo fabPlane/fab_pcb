@@ -66,6 +66,34 @@ export function schematicPinSheetPosition(symbol: SchematicSymbol, pin: Schemati
   return { x: symbol.position.x + relative.x, y: symbol.position.y + relative.y };
 }
 
+/** Keep an equivalent transform in KiCad's canonical orientation/mirror representation.
+ * KiCad applies the orientation and mirror setters in sequence when unpacking an instance;
+ * noncanonical mirror flags can otherwise be lost when an earlier setter normalizes it.
+ * Definition pins and absolute fields are unchanged.
+ */
+export function normalizeNativeSymbolTransform(symbol: SchematicSymbol): SchematicSymbol {
+  let rotation = symbol.rotation;
+  let mirrorX = symbol.mirrorX;
+  let mirrorY = symbol.mirrorY;
+  if (mirrorX && mirrorY) {
+    rotation = (rotation + 180) % 360;
+    mirrorX = mirrorY = false;
+  } else if (mirrorX && rotation === 180) {
+    rotation = 0;
+    mirrorX = false;
+    mirrorY = true;
+  } else if (mirrorY && rotation !== 0) {
+    rotation = (rotation + 180) % 360;
+    mirrorX = true;
+    mirrorY = false;
+  }
+  const transform = (symbol.proto.transform ??= create(SchematicSymbolTransformSchema));
+  transform.orientation = ORIENTATION_BY_DEGREES[rotation as 0 | 90 | 180 | 270];
+  transform.mirrorX = mirrorX;
+  transform.mirrorY = mirrorY;
+  return symbol;
+}
+
 export interface PlacedNativeSymbol {
   symbol: SchematicSymbol;
   /** Absolute sheet coordinates, keyed by pin number, for the selected unit and body style. */
@@ -154,6 +182,7 @@ export function placeNativeSymbol(source: LibSymbol, placement: NativeSymbolPlac
         .map(([name, value]) => positionedField(undefined, name, value, placement)),
     }),
   );
+  normalizeNativeSymbolTransform(symbol);
   for (const pin of symbol.pins) if (pin.number) pins.set(pin.number, schematicPinSheetPosition(symbol, pin));
   return { symbol, pins };
 }

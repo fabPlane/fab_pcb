@@ -9,7 +9,6 @@ import {
   SchematicSymbolSchema,
   SchematicSymbolUnitSchema,
   SchematicSymbolInstanceSchema,
-  SchematicSymbolOrientation,
   TextSchema,
   packAny,
   unpackAnyAs,
@@ -124,12 +123,6 @@ describe("native schematic authoring", () => {
     const pin = unpackAnyAs(source.proto.items[0]!.item!, SchematicPinSchema)!;
     pin.position = toVector2({ x: mm(-2), y: mm(3) });
     source.proto.items[0]!.item = packAny(SchematicPinSchema, pin);
-    const orientations = [
-      SchematicSymbolOrientation.SSO_0,
-      SchematicSymbolOrientation.SSO_90,
-      SchematicSymbolOrientation.SSO_180,
-      SchematicSymbolOrientation.SSO_270,
-    ];
     // Counterclockwise rotation in sheet coordinates, independently specified for an asymmetric pin.
     const oriented = [
       [-2, 3],
@@ -155,7 +148,6 @@ describe("native schematic authoring", () => {
             fromBinary(SchematicSymbolInstanceSchema, toBinary(SchematicSymbolInstanceSchema, placed.symbol.proto)),
           );
           moveNativeSymbol(symbol, { x: mm(100), y: mm(60) });
-          symbol.proto.transform!.orientation = orientations[index]!;
           expect(schematicPinSheetPosition(symbol, symbol.pins.find((p) => p.number === "1")!)).toEqual({
             x: mm(100 + (mirrorY ? -x : x)),
             y: mm(60 + (mirrorX ? -y : y)),

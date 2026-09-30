@@ -81,6 +81,7 @@ export {
   moveNativeSymbol,
   placeNativeSymbol,
   schematicPinSheetPosition,
+  normalizeNativeSymbolTransform,
   type NativeSymbolPlacement,
   type PlacedNativeSymbol,
 } from "./schematic-authoring";
