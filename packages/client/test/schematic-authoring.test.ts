@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { create } from "@bufbuild/protobuf";
+import { create, fromBinary, toBinary } from "@bufbuild/protobuf";
 import {
   LibraryIdentifierSchema,
   SchematicFieldSchema,
@@ -8,11 +8,22 @@ import {
   SchematicSymbolChildSchema,
   SchematicSymbolSchema,
   SchematicSymbolUnitSchema,
+  SchematicSymbolInstanceSchema,
+  SchematicSymbolOrientation,
   TextSchema,
   packAny,
   unpackAnyAs,
 } from "@fp-pcb/proto";
-import { LibSymbol, mm, moveNativeSymbol, placeNativeSymbol, toDistance, toVector2 } from "../src";
+import {
+  LibSymbol,
+  SchematicSymbol,
+  mm,
+  moveNativeSymbol,
+  placeNativeSymbol,
+  schematicPinSheetPosition,
+  toDistance,
+  toVector2,
+} from "../src";
 
 function librarySymbol(): LibSymbol {
   const pin = (number: string, x: number, y: number, unit = 1) =>
@@ -84,11 +95,11 @@ describe("native schematic authoring", () => {
     expect(placed.symbol.mirrorX).toBe(true);
     expect(placed.pins).toEqual(
       new Map([
-        ["1", { x: mm(30), y: mm(45) }],
-        ["2", { x: mm(30), y: mm(35) }],
+        ["1", { x: mm(30), y: mm(35) }],
+        ["2", { x: mm(30), y: mm(45) }],
       ]),
     );
-    expect(placed.symbol.field("Reference")?.position).toEqual({ x: mm(32), y: mm(40) });
+    expect(placed.symbol.field("Reference")?.position).toEqual({ x: mm(28), y: mm(40) });
   });
 
   test("moves a placed symbol and its fields while preserving local pin coordinates", () => {
@@ -106,5 +117,78 @@ describe("native schematic authoring", () => {
       { x: mm(5), y: mm(0) },
     ]);
     expect(placed.symbol.field("Reference")?.position).toEqual({ x: mm(50), y: mm(58) });
+  });
+
+  test("sheet endpoints use the current instance transform without changing local pins", () => {
+    const source = librarySymbol();
+    const pin = unpackAnyAs(source.proto.items[0]!.item!, SchematicPinSchema)!;
+    pin.position = toVector2({ x: mm(-2), y: mm(3) });
+    source.proto.items[0]!.item = packAny(SchematicPinSchema, pin);
+    const orientations = [
+      SchematicSymbolOrientation.SSO_0,
+      SchematicSymbolOrientation.SSO_90,
+      SchematicSymbolOrientation.SSO_180,
+      SchematicSymbolOrientation.SSO_270,
+    ];
+    // Counterclockwise rotation in sheet coordinates, independently specified for an asymmetric pin.
+    const oriented = [
+      [-2, 3],
+      [3, 2],
+      [2, -3],
+      [-3, -2],
+    ] as const;
+    for (const [index, rotation] of ([0, 90, 180, 270] as const).entries())
+      for (const mirrorX of [false, true])
+        for (const mirrorY of [false, true]) {
+          const placed = placeNativeSymbol(source, {
+            reference: "R1",
+            value: "1k",
+            footprint: "",
+            position: { x: mm(30), y: mm(40) },
+            rotation,
+            mirrorX,
+            mirrorY,
+          });
+          const [x, y] = oriented[index]!;
+          expect(placed.pins.get("1")).toEqual({ x: mm(30 + (mirrorY ? -x : x)), y: mm(40 + (mirrorX ? -y : y)) });
+          const symbol = new SchematicSymbol(
+            fromBinary(SchematicSymbolInstanceSchema, toBinary(SchematicSymbolInstanceSchema, placed.symbol.proto)),
+          );
+          moveNativeSymbol(symbol, { x: mm(100), y: mm(60) });
+          symbol.proto.transform!.orientation = orientations[index]!;
+          expect(schematicPinSheetPosition(symbol, symbol.pins.find((p) => p.number === "1")!)).toEqual({
+            x: mm(100 + (mirrorY ? -x : x)),
+            y: mm(60 + (mirrorX ? -y : y)),
+          });
+          expect(symbol.pins.find((p) => p.number === "1")!.position).toEqual({ x: mm(-2), y: mm(3) });
+        }
+  });
+
+  test("new and existing endpoints select common pins and the current unit/body style", () => {
+    const source = librarySymbol();
+    for (const [number, unit, style] of [
+      ["99", 0, 0],
+      ["4", 2, 2],
+    ] as const)
+      source.proto.items.push(
+        create(SchematicSymbolChildSchema, {
+          unit: create(SchematicSymbolUnitSchema, { unit }),
+          bodyStyle: create(SchematicSymbolBodyStyleSchema, { style }),
+          item: packAny(SchematicPinSchema, create(SchematicPinSchema, { number, position: toVector2({ x: mm(2), y: mm(3) }) })),
+        }),
+      );
+    const placed = placeNativeSymbol(source, {
+      reference: "U1",
+      value: "fixture",
+      footprint: "",
+      position: { x: mm(100), y: mm(60) },
+      unit: 2,
+      bodyStyle: 2,
+      rotation: 90,
+      mirrorY: true,
+    });
+    expect([...placed.pins.keys()].sort()).toEqual(["4", "99"]);
+    expect(placed.symbol.pins.map((p) => p.number).sort()).toEqual(["4", "99"]);
+    for (const pin of placed.symbol.pins) expect(schematicPinSheetPosition(placed.symbol, pin)).toEqual(placed.pins.get(pin.number)!);
   });
 });

@@ -14,7 +14,7 @@ import {
   unpackAnyAs,
   type SchematicField,
 } from "@fp-pcb/proto";
-import { SchematicSymbol, type LibSymbol } from "./items";
+import { SchematicSymbol, type LibSymbol, type SchematicPin } from "./items";
 import { toVector2, vec2, type Vec2 } from "../units";
 
 export interface NativeSymbolPlacement {
@@ -24,7 +24,7 @@ export interface NativeSymbolPlacement {
   position: Vec2;
   unit?: number;
   bodyStyle?: number;
-  /** Clockwise rotation in KiCad sheet coordinates. */
+  /** KiCad symbol orientation: 90 degrees rotates counterclockwise on the sheet. */
   rotation?: 0 | 90 | 180 | 270;
   mirrorX?: boolean;
   mirrorY?: boolean;
@@ -38,22 +38,32 @@ const ORIENTATION_BY_DEGREES = {
   270: SchematicSymbolOrientation.SSO_270,
 } as const;
 
-function transformRelative(point: Vec2, placement: NativeSymbolPlacement): Vec2 {
-  let x = placement.mirrorX ? -point.x : point.x;
-  let y = placement.mirrorY ? -point.y : point.y;
+function transformRelative(point: Vec2, placement: { rotation?: number; mirrorX?: boolean; mirrorY?: boolean }): Vec2 {
+  let { x, y } = point;
   switch (placement.rotation ?? 0) {
     case 90:
-      [x, y] = [-y, x];
+      [x, y] = [y, -x];
       break;
     case 180:
       x = -x;
       y = -y;
       break;
     case 270:
-      [x, y] = [y, -x];
+      [x, y] = [-y, x];
       break;
   }
+  // KiCad mirrors the oriented symbol about the sheet axes: X flips Y, Y flips X.
+  if (placement.mirrorX) y = -y;
+  if (placement.mirrorY) x = -x;
   return { x, y };
+}
+
+/** Resolve a definition pin into sheet coordinates using the instance's current transform.
+ * `SchematicPin.position` remains local; callers should select pins through `symbol.pins`.
+ */
+export function schematicPinSheetPosition(symbol: SchematicSymbol, pin: SchematicPin): Vec2 {
+  const relative = transformRelative(pin.position, symbol);
+  return { x: symbol.position.x + relative.x, y: symbol.position.y + relative.y };
 }
 
 export interface PlacedNativeSymbol {
@@ -108,14 +118,8 @@ export function placeNativeSymbol(source: LibSymbol, placement: NativeSymbolPlac
     if (!child.item) continue;
     const pin = unpackAnyAs(child.item, SchematicPinSchema);
     if (!pin) continue;
-    const relative = transformRelative(vec2(pin.position), placement);
-    const absolute = { x: placement.position.x + relative.x, y: placement.position.y + relative.y };
     pin.id = undefined;
     child.item = packAny(SchematicPinSchema, pin);
-    const childUnit = child.unit?.unit ?? 0;
-    const childStyle = child.bodyStyle?.style ?? 0;
-    if (pin.number && (childUnit === 0 || childUnit === unit) && (childStyle === 0 || childStyle === bodyStyle))
-      pins.set(pin.number, absolute);
   }
 
   const fields = placement.fields ?? {};
@@ -150,5 +154,6 @@ export function placeNativeSymbol(source: LibSymbol, placement: NativeSymbolPlac
         .map(([name, value]) => positionedField(undefined, name, value, placement)),
     }),
   );
+  for (const pin of symbol.pins) if (pin.number) pins.set(pin.number, schematicPinSheetPosition(symbol, pin));
   return { symbol, pins };
 }

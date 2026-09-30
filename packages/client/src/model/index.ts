@@ -77,7 +77,13 @@ export {
 } from "./settings";
 export { FootprintDocument } from "./footprint-doc";
 export { SymbolDocument } from "./symbol-doc";
-export { moveNativeSymbol, placeNativeSymbol, type NativeSymbolPlacement, type PlacedNativeSymbol } from "./schematic-authoring";
+export {
+  moveNativeSymbol,
+  placeNativeSymbol,
+  schematicPinSheetPosition,
+  type NativeSymbolPlacement,
+  type PlacedNativeSymbol,
+} from "./schematic-authoring";
 export {
   createBoardGraphic,
   createBoardText,

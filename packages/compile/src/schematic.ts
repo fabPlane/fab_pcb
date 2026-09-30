@@ -35,7 +35,7 @@ import {
   toVector2,
   vec2,
   type Item,
-  type LibSymbol,
+  LibSymbol,
   type Schematic,
   type Vec2,
 } from "@fp-pcb/client";
@@ -409,11 +409,10 @@ export async function generateSchematic(kicad: KiCad, netlist: Netlist): Promise
     if (!component.libSource) continue;
     const libId = `${component.libSource.lib}:${component.libSource.part}`;
     if (definitions.has(libId)) continue;
-    const definition = await kicad
-      .openSymbol(libId)
-      .then((document) => document.libSymbol())
-      .catch(() => undefined);
-    if (definition) definitions.set(libId, definition);
+    // GetLibraryItem returns the effective definition, including inherited pins and graphics.
+    // The symbol-editor document contains only its editable children.
+    const definition = await kicad.libraries.symbols.get(libId).catch(() => undefined);
+    if (definition instanceof LibSymbol) definitions.set(libId, definition);
   }
   const generatedItems = buildGeneratedSchematic(netlist, definitions);
   const existingItems = await root.getAllItems();
