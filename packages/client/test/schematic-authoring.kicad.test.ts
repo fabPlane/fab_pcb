@@ -1,26 +1,35 @@
 /** Compare model endpoints with KiCad's own saved-file pin locations, including normalized mirrors. */
 import { describe, expect, test } from "bun:test";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { LibSymbol, mm, placeNativeSymbol, schematicPinSheetPosition, type PlacedNativeSymbol } from "../src";
 import { haveKicad, KICAD_CLI, startKiCad } from "./kicad-server";
 
-const symbols = process.env.KICAD_SYMBOL_DIR;
-
-describe.skipIf(!haveKicad() || !symbols)("native schematic pin transforms against saved KiCad", () => {
+describe.skipIf(!haveKicad())("native schematic pin transforms against saved KiCad", () => {
   test("new and reopened asymmetric pins match ERC positions for every rotation and mirror", async () => {
     const dir = await mkdtemp(join(tmpdir(), "fp-pcb-sheet-pins-"));
     const server = await startKiCad(null, "sheet-pins");
     try {
+      const library = join(dir, "Probe.kicad_sym");
+      await writeFile(
+        library,
+        `(kicad_symbol_lib (version 20250114) (generator "kicad_symbol_editor")
+        (symbol "Asymmetric" (in_bom yes) (on_board yes)
+          (property "Reference" "J" (at 0 2.54 0) (effects (font (size 1.27 1.27))))
+          (property "Value" "Asymmetric" (at 0 -5.08 0) (effects (font (size 1.27 1.27))))
+          (symbol "Asymmetric_1_1"
+            (pin passive line (at -5.08 0 0) (length 2.54) (name "Pin1" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
+            (pin passive line (at -5.08 -2.54 0) (length 2.54) (name "Pin2" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27))))))))`,
+      );
       await server.kicad.newProject(join(dir, "board.kicad_pro"));
       await server.kicad.libraries.addTableRow("symbol", "project", {
-        nickname: "Connector_Generic",
+        nickname: "Probe",
         type: "KiCad",
         enabled: true,
-        uri: join(symbols!, "Connector_Generic.kicad_sym"),
+        uri: library,
       });
-      const source = await server.kicad.libraries.symbols.get("Connector_Generic:Conn_01x02");
+      const source = await server.kicad.libraries.symbols.get("Probe:Asymmetric");
       expect(source).toBeInstanceOf(LibSymbol);
       if (!(source instanceof LibSymbol)) throw new Error("connector definition unavailable");
       let schematic = await server.kicad.openSchematic(join(dir, "board.kicad_sch"));

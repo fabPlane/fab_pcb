@@ -383,6 +383,16 @@ describe.skipIf(!haveKicad())("generated schematic + kicad-cli api-server", () =
           nets[attribute(match[1]!, "name")] = [...match[2]!.matchAll(/<node\b([^>]*)\/?\s*>/g)]
             .map((node) => `${attribute(node[1]!, "ref")}:${attribute(node[1]!, "pin")}`)
             .sort();
+        // KiCad exports explicit no-connect markers as singleton nets too. They must remain
+        // isolated; they are not part of the nine intended connected nets.
+        for (const node of source.noConnects ?? []) {
+          const endpoint = `${node.ref}:${node.pin}`;
+          const isolated = Object.entries(nets).find(
+            ([name, pins]) => name.startsWith("unconnected-") && pins.length === 1 && pins[0] === endpoint,
+          );
+          expect(isolated).toBeDefined();
+          delete nets[isolated![0]];
+        }
         expect(nets).toEqual(
           Object.fromEntries(
             source.nets.map((net) => [
