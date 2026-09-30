@@ -1,7 +1,8 @@
 /** `Footprint` (a placed `FootprintInstance`), `Pad`, and `BoardField`. */
-import { create } from "@bufbuild/protobuf";
+import { clone, create } from "@bufbuild/protobuf";
 import {
   BoardLayer,
+  PolySetSchema,
   FieldSchema,
   FootprintInstanceSchema,
   FootprintSchema,
@@ -12,6 +13,7 @@ import {
   kiapiRegistry,
   packAny,
   unpackAny,
+  type Angle,
   type BoardGraphicShape,
   type BoardText,
   type BoardTextBox,
@@ -160,6 +162,9 @@ export class Footprint extends Item<FootprintInstance> {
    * Move the footprint and every child coordinate KiCad serializes in the board frame. Merely
    * changing `position` is insufficient: footprint deserialization restores pads, fields, text,
    * and graphics from their absolute child coordinates after setting the anchor.
+   * Legacy translation leaves unknown embedded item kinds unchanged; callers that need strict
+   * validation should inspect them first. Unlike rotate(), this preserves the existing API's
+   * permissive behavior. Footprint-local 3D model transforms also remain unchanged.
    */
   translate(delta: Vec2): this {
     if (!delta.x && !delta.y) return this;
@@ -176,10 +181,47 @@ export class Footprint extends Item<FootprintInstance> {
     }
     return this;
   }
+  /**
+   * Rotate around the footprint anchor, including the absolute child coordinates exchanged by
+   * KiCad. Setting `orientation` alone only changes metadata; use this for a physical rotation.
+   * Unsupported embedded geometry throws before changing this snapshot.
+   */
+  rotate(degrees: number): this {
+    if (!Number.isFinite(degrees)) throw new Error("footprint rotation must be finite");
+    degrees %= 360;
+    if (!degrees) return this;
+    const next = clone(FootprintInstanceSchema, this.proto);
+    const origin = vec2(next.position);
+    const radians = (degrees * Math.PI) / 180;
+    const cos = Math.cos(radians);
+    const sin = Math.sin(radians);
+    const point = (value: Vector2 | undefined): Vector2 => {
+      const p = vec2(value);
+      const x = p.x - origin.x;
+      const y = p.y - origin.y;
+      // KiCad angles are counterclockwise, while board Y increases downwards.
+      return toVector2({ x: Math.round(origin.x + x * cos + y * sin), y: Math.round(origin.y - x * sin + y * cos) });
+    };
+    const angle = (value: Angle | undefined) => toAngle(deg(value) + degrees);
+    for (const field of mandatoryFields(next)) rotateField(field, point, angle);
+    if (next.definition) {
+      for (const field of mandatoryFields(next.definition)) rotateField(field, point, angle);
+      next.definition.items = next.definition.items.map((any) => {
+        const item = unpackAny(any);
+        if (!item) throw new Error(`cannot rotate unknown footprint child ${any.typeUrl}`);
+        rotateFootprintChild(item, point, angle, degrees);
+        return packAny(itemSchema(item.$typeName), item);
+      });
+    }
+    next.orientation = angle(next.orientation);
+    Object.assign(this.proto, next);
+    return this;
+  }
   /** Rotation in degrees. */
   get orientation(): number {
     return deg(this.proto.orientation);
   }
+  /** Metadata only: does not transform pads or graphics. Use rotate() for a physical rotation. */
   set orientation(d: number) {
     this.proto.orientation = toAngle(d);
   }
@@ -382,6 +424,152 @@ function translateFootprintChild(item: { $typeName: string } & Record<string, un
     }
     default:
       return false;
+  }
+}
+
+type RotatePoint = (value: Vector2 | undefined) => Vector2;
+type RotateAngle = (value: Angle | undefined) => Angle;
+
+function rotateText(text: BoardText["text"], point: RotatePoint, angle: RotateAngle): void {
+  if (!text) return;
+  text.position = point(text.position);
+  if (text.attributes) text.attributes.angle = angle(text.attributes.angle);
+}
+
+function rotateField(field: FieldProto, point: RotatePoint, angle: RotateAngle): void {
+  rotateText(field.text?.text, point, angle);
+}
+
+function rotatePolySet(polySet: PolySet | undefined, point: RotatePoint): void {
+  for (const polygon of polySet?.polygons ?? []) {
+    for (const line of [polygon.outline, ...polygon.holes]) {
+      for (const node of line?.nodes ?? []) {
+        if (node.geometry.case === "point") node.geometry.value = point(node.geometry.value);
+        if (node.geometry.case === "arc") {
+          node.geometry.value.start = point(node.geometry.value.start);
+          node.geometry.value.mid = point(node.geometry.value.mid);
+          node.geometry.value.end = point(node.geometry.value.end);
+        }
+      }
+    }
+  }
+}
+
+function rotateShape(shape: BoardGraphicShape["shape"], point: RotatePoint, angle: RotateAngle, degrees: number): void {
+  const geometry = shape?.geometry;
+  if (!geometry?.case) return;
+  const value = geometry.value as unknown as Record<string, unknown>;
+  const move = (...keys: string[]) => {
+    for (const key of keys) value[key] = point(value[key] as Vector2 | undefined);
+  };
+  switch (geometry.case) {
+    case "segment":
+      move("start", "end");
+      break;
+    case "arc":
+      move("start", "mid", "end");
+      break;
+    case "circle":
+      move("center", "radiusPoint");
+      break;
+    case "bezier":
+      move("start", "control1", "control2", "end");
+      break;
+    case "ellipse":
+    case "ellipseArc":
+      move("center");
+      geometry.value.rotation = angle(geometry.value.rotation);
+      break;
+    case "polygon":
+      rotatePolySet(geometry.value, point);
+      break;
+    case "rectangle": {
+      if (degrees % 90 === 0) {
+        move("topLeft", "bottomRight");
+        break;
+      }
+      if (nm(geometry.value.cornerRadius)) throw new Error("cannot rotate a rounded footprint rectangle by a non-right angle");
+      const a = vec2(geometry.value.topLeft);
+      const b = vec2(geometry.value.bottomRight);
+      shape!.geometry = {
+        case: "polygon",
+        value: create(PolySetSchema, {
+          polygons: [
+            {
+              outline: {
+                closed: true,
+                nodes: [a, { x: b.x, y: a.y }, b, { x: a.x, y: b.y }].map((p) => ({
+                  geometry: { case: "point" as const, value: point(toVector2(p)) },
+                })),
+              },
+            },
+          ],
+        }),
+      };
+      break;
+    }
+  }
+}
+
+function rotateFootprintChild(
+  item: { $typeName: string } & Record<string, unknown>,
+  point: RotatePoint,
+  angle: RotateAngle,
+  degrees: number,
+): void {
+  switch (item.$typeName) {
+    // 3D offsets and rotations are local to the footprint, unlike IPC pad/text positions.
+    case "kiapi.board.types.Footprint3DModel":
+      break;
+    case "kiapi.board.types.Pad": {
+      const pad = item as unknown as PadProto;
+      pad.position = point(pad.position);
+      if (pad.padStack) pad.padStack.angle = angle(pad.padStack.angle);
+      break;
+    }
+    case "kiapi.board.types.ReferencePoint":
+      item.position = point(item.position as Vector2 | undefined);
+      break;
+    case "kiapi.board.types.Barcode":
+      item.position = point(item.position as Vector2 | undefined);
+      item.orientation = angle(item.orientation as Angle | undefined);
+      break;
+    case "kiapi.board.types.Field":
+      rotateField(item as unknown as FieldProto, point, angle);
+      break;
+    case "kiapi.board.types.BoardText":
+      rotateText((item as unknown as BoardText).text, point, angle);
+      break;
+    case "kiapi.board.types.BoardTextBox": {
+      const box = (item as unknown as BoardTextBox).textbox;
+      if (box) {
+        box.topLeft = point(box.topLeft);
+        box.bottomRight = point(box.bottomRight);
+        if (box.attributes) box.attributes.angle = angle(box.attributes.angle);
+      }
+      break;
+    }
+    case "kiapi.board.types.BoardGraphicShape":
+      rotateShape((item as unknown as BoardGraphicShape).shape, point, angle, degrees);
+      break;
+    case "kiapi.board.types.Dimension": {
+      const dimension = item as unknown as Dimension;
+      rotateText(dimension.text, point, angle);
+      const style = dimension.dimensionStyle;
+      if (style.case) {
+        const geometry = style.value as unknown as Record<string, unknown>;
+        for (const key of ["start", "end", "center", "radiusPoint"]) if (geometry[key]) geometry[key] = point(geometry[key] as Vector2);
+      }
+      break;
+    }
+    case "kiapi.board.types.Zone": {
+      const zone = item as unknown as Zone;
+      rotatePolySet(zone.outline, point);
+      for (const filled of zone.filledPolygons) rotatePolySet(filled.shapes, point);
+      break;
+    }
+    default:
+      throw new Error(`cannot rotate footprint child ${item.$typeName}`);
   }
 }
 
