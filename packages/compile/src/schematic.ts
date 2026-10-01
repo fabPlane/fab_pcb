@@ -1,6 +1,7 @@
 /** Rebuild the generated part of a project's root schematic from the compile netlist. */
 import { clone, create } from "@bufbuild/protobuf";
 import {
+  ErcErrorType,
   GlobalLabelSchema,
   NoConnectMarkerSchema,
   packAny,
@@ -8,6 +9,7 @@ import {
   SchematicFieldSchema,
   SchematicLabelSpinStyle,
   SchematicLineSchema,
+  SchematicPinOrientation,
   SchematicPinSchema,
   SchematicLineType,
   SchematicSymbolBodyStyleSchema,
@@ -17,6 +19,7 @@ import {
   SchematicSymbolUnitSchema,
   TextSchema,
   unpackAnyAs,
+  type ErcMarker,
   type SchematicField as SchematicFieldProto,
 } from "@fp-pcb/proto";
 import {
@@ -24,6 +27,7 @@ import {
   GlobalLabel,
   mm,
   mil,
+  nm,
   NoConnect,
   SchematicLine,
   SchematicSymbol,
@@ -31,7 +35,7 @@ import {
   toVector2,
   vec2,
   type Item,
-  type LibSymbol,
+  LibSymbol,
   type Schematic,
   type Vec2,
 } from "@fp-pcb/client";
@@ -83,6 +87,114 @@ function referenceClass(reference: string): string {
   return reference.match(/^[^0-9?]+/)?.[0] ?? reference.replace(/\?+$/, "");
 }
 
+interface PlacedPin {
+  position: Vec2;
+  orientation: SchematicPinOrientation;
+}
+
+const STUB_LENGTH = mm(4 * SCHEMATIC_GRID_MM);
+
+/** Where a pin's labelled stub points: away from the symbol body. Unknown orientations keep the leftward fallback. */
+function outward(orientation: SchematicPinOrientation): { direction: Vec2; spinStyle: SchematicLabelSpinStyle } {
+  switch (orientation) {
+    // Pin orientation is the direction the symbol body extends from the connection point,
+    // so the labelled stub must extend in the opposite direction.
+    case SchematicPinOrientation.SPO_LEFT:
+      return { direction: { x: 1, y: 0 }, spinStyle: SchematicLabelSpinStyle.SLSS_RIGHT };
+    case SchematicPinOrientation.SPO_UP:
+      return { direction: { x: 0, y: 1 }, spinStyle: SchematicLabelSpinStyle.SLSS_BOTTOM };
+    case SchematicPinOrientation.SPO_DOWN:
+      return { direction: { x: 0, y: -1 }, spinStyle: SchematicLabelSpinStyle.SLSS_UP };
+    case SchematicPinOrientation.SPO_RIGHT:
+    case SchematicPinOrientation.SPO_UNKNOWN:
+    default:
+      return { direction: { x: -1, y: 0 }, spinStyle: SchematicLabelSpinStyle.SLSS_LEFT };
+  }
+}
+
+function along(from: Vec2, direction: Vec2, distance: number): Vec2 {
+  return { x: from.x + direction.x * distance, y: from.y + direction.y * distance };
+}
+
+function labelledStub(pin: PlacedPin): { end: Vec2; spinStyle: SchematicLabelSpinStyle } {
+  const { direction, spinStyle } = outward(pin.orientation);
+  return { end: along(pin.position, direction, STUB_LENGTH), spinStyle };
+}
+
+/** How far a symbol reaches from its origin in each direction (all values positive). */
+interface Extent {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
+
+/** A generous global-label length: KiCad's default 1.27 mm text plus the label outline. */
+function labelLength(text: string): number {
+  return mm(SCHEMATIC_GRID_MM * (text.length + 2));
+}
+
+/**
+ * The reach of a symbol's pins, body (approximated by the pin roots), labelled stubs and labels.
+ * Outward stubs on the top and bottom edges point at the neighbouring grid rows, so spacing must
+ * come from this reach or a stub can run into another symbol's stub and join two nets.
+ */
+function symbolExtent(definition: LibSymbol, reference: string, pinNets: ReadonlyMap<string, string>): Extent {
+  const minimum = mm(2 * SCHEMATIC_GRID_MM);
+  const extent: Extent = { left: minimum, right: minimum, top: minimum, bottom: minimum };
+  const include = (point: Vec2) => {
+    extent.left = Math.max(extent.left, -point.x);
+    extent.right = Math.max(extent.right, point.x);
+    extent.top = Math.max(extent.top, -point.y);
+    extent.bottom = Math.max(extent.bottom, point.y);
+  };
+  for (const child of definition.proto.items) {
+    const pin = child.item ? unpackAnyAs(child.item, SchematicPinSchema) : undefined;
+    if (!pin) continue;
+    const position = vec2(pin.position);
+    const { direction } = outward(pin.orientation);
+    include(position);
+    include(along(position, direction, -nm(pin.length)));
+    const net = pinNets.get(`${reference}:${pin.number}`);
+    if (net !== undefined) include(along(position, direction, STUB_LENGTH + labelLength(net)));
+  }
+  return extent;
+}
+
+function snapUp(value: number): number {
+  const grid = mm(SCHEMATIC_GRID_MM);
+  return Math.ceil(value / grid) * grid;
+}
+
+const LAYOUT_COLUMNS = 4;
+
+/**
+ * Symbol origins on a four-column grid. Small symbols keep the historical 28 x 24 grid-unit pitch;
+ * columns and rows grow when symbols with their stubs and labels would otherwise meet. Every
+ * origin stays on the 50 mil grid so library pins do too.
+ */
+function layoutSymbols(extents: readonly (Extent | undefined)[]): Vec2[] {
+  const gap = mm(2 * SCHEMATIC_GRID_MM);
+  const margin = mm(8 * SCHEMATIC_GRID_MM);
+  const max = (values: number[]) => values.reduce((a, b) => Math.max(a, b), 0);
+  const known = extents.filter((extent): extent is Extent => extent !== undefined);
+  const pitchX = snapUp(Math.max(mm(28 * SCHEMATIC_GRID_MM), max(known.map((e) => e.right)) + max(known.map((e) => e.left)) + gap));
+  const x0 = snapUp(Math.max(mm(24 * SCHEMATIC_GRID_MM), max(known.map((e) => e.left)) + margin));
+
+  const rows = Math.ceil(extents.length / LAYOUT_COLUMNS);
+  const row = (r: number) => extents.slice(r * LAYOUT_COLUMNS, (r + 1) * LAYOUT_COLUMNS).filter((e): e is Extent => e !== undefined);
+  const rowY: number[] = [];
+  for (let r = 0; r < rows; r++) {
+    rowY.push(
+      r === 0
+        ? snapUp(Math.max(mm(20 * SCHEMATIC_GRID_MM), max(row(0).map((e) => e.top)) + margin))
+        : rowY[r - 1]! +
+            snapUp(Math.max(mm(24 * SCHEMATIC_GRID_MM), max(row(r - 1).map((e) => e.bottom)) + max(row(r).map((e) => e.top)) + gap)),
+    );
+  }
+  return extents.map((_, index) => ({ x: x0 + (index % LAYOUT_COLUMNS) * pitchX, y: rowY[Math.floor(index / LAYOUT_COLUMNS)]! }));
+}
+
 function positionedField(source: SchematicFieldProto | undefined, name: string, value: string, origin: Vec2): SchematicFieldProto {
   const field = source ? clone(SchematicFieldSchema, source) : create(SchematicFieldSchema, { name, visible: false, allowAutoPlace: true });
   field.name = name;
@@ -99,7 +211,7 @@ function positionedField(source: SchematicFieldProto | undefined, name: string, 
  * definition is sent as it is; only the pin map records absolute sheet positions (for wires,
  * labels and no-connects).
  */
-function placedDefinition(source: LibSymbol, origin: Vec2, pins: Map<string, Vec2>, reference: string) {
+function placedDefinition(source: LibSymbol, origin: Vec2, pins: Map<string, PlacedPin>, reference: string) {
   const definition = clone(SchematicSymbolSchema, source.proto);
 
   for (const child of definition.items) {
@@ -112,7 +224,7 @@ function placedDefinition(source: LibSymbol, origin: Vec2, pins: Map<string, Vec
     // independent pin identities from KiCad rather than aliasing pins across repeated symbols.
     pin.id = undefined;
     child.item = packAny(SchematicPinSchema, pin);
-    if (pin.number) pins.set(`${reference}:${pin.number}`, absolute);
+    if (pin.number) pins.set(`${reference}:${pin.number}`, { position: absolute, orientation: pin.orientation });
   }
 
   return definition;
@@ -122,11 +234,19 @@ function placedDefinition(source: LibSymbol, origin: Vec2, pins: Map<string, Vec
 export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyMap<string, LibSymbol>): GeneratedSchematic {
   const items: Item[] = [];
   const diagnostics: Diagnostic[] = [];
-  const pins = new Map<string, Vec2>();
+  const pins = new Map<string, PlacedPin>();
   let symbolsCreated = 0;
   let wiresCreated = 0;
   let labelsCreated = 0;
   let noConnectsCreated = 0;
+
+  const pinNets = new Map(netlist.nets.flatMap((net) => net.nodes.map((node) => [`${node.ref}:${node.pin}`, net.name] as const)));
+  const positions = layoutSymbols(
+    netlist.components.map((component) => {
+      const definition = component.libSource && definitions.get(`${component.libSource.lib}:${component.libSource.part}`);
+      return definition ? symbolExtent(definition, component.ref, pinNets) : undefined;
+    }),
+  );
 
   for (const [index, component] of netlist.components.entries()) {
     if (!component.libSource) {
@@ -161,11 +281,7 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
       });
     }
 
-    // Keep generated symbols and their labelled stubs on KiCad's default 50 mil grid.
-    const position = {
-      x: mm(24 * SCHEMATIC_GRID_MM + (index % 4) * 28 * SCHEMATIC_GRID_MM),
-      y: mm(20 * SCHEMATIC_GRID_MM + Math.floor(index / 4) * 24 * SCHEMATIC_GRID_MM),
-    };
+    const position = positions[index]!;
     const proto = create(SchematicSymbolInstanceSchema, {
       position: toVector2(position),
       transform: create(SchematicSymbolTransformSchema, { orientation: SchematicSymbolOrientation.SSO_0 }),
@@ -207,8 +323,8 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
   const connectedPositions = new Set<string>();
   for (const net of netlist.nets) {
     for (const node of net.nodes) {
-      const start = pins.get(`${node.ref}:${node.pin}`);
-      if (!start) {
+      const pin = pins.get(`${node.ref}:${node.pin}`);
+      if (!pin) {
         diagnostics.push({
           severity: "error",
           stage: "schematic",
@@ -217,8 +333,9 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
         });
         continue;
       }
+      const start = pin.position;
       connectedPositions.add(positionKey(start));
-      const end = { x: start.x - mm(5.08), y: start.y };
+      const { end, spinStyle } = labelledStub(pin);
       const wire = generated(
         new SchematicLine(create(SchematicLineSchema, { start: toVector2(start), end: toVector2(end), type: SchematicLineType.SLT_WIRE })),
       );
@@ -227,7 +344,7 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
           create(GlobalLabelSchema, {
             position: toVector2(end),
             text: create(TextSchema, { text: net.name, position: toVector2(end) }),
-            spinStyle: SchematicLabelSpinStyle.SLSS_LEFT,
+            spinStyle,
             // KiCad currently serialises custom properties on global labels but does not return
             // them through GetItems after reopen. A hidden field is the durable ownership marker.
             fields: [generatedLabelField(end)],
@@ -242,7 +359,7 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
 
   const noConnectPositions = new Set<string>();
   for (const declaration of netlist.noConnects ?? []) {
-    const position = pins.get(`${declaration.ref}:${declaration.pin}`);
+    const position = pins.get(`${declaration.ref}:${declaration.pin}`)?.position;
     if (!position) {
       diagnostics.push({
         severity: "error",
@@ -292,11 +409,10 @@ export async function generateSchematic(kicad: KiCad, netlist: Netlist): Promise
     if (!component.libSource) continue;
     const libId = `${component.libSource.lib}:${component.libSource.part}`;
     if (definitions.has(libId)) continue;
-    const definition = await kicad
-      .openSymbol(libId)
-      .then((document) => document.libSymbol())
-      .catch(() => undefined);
-    if (definition) definitions.set(libId, definition);
+    // GetLibraryItem returns the effective definition, including inherited pins and graphics.
+    // The symbol-editor document contains only its editable children.
+    const definition = await kicad.libraries.symbols.get(libId).catch(() => undefined);
+    if (definition instanceof LibSymbol) definitions.set(libId, definition);
   }
   const generatedItems = buildGeneratedSchematic(netlist, definitions);
   const existingItems = await root.getAllItems();
@@ -326,4 +442,18 @@ export async function generateSchematic(kicad: KiCad, netlist: Netlist): Promise
     });
   }
   return { schematic, ...generatedItems };
+}
+
+/**
+ * KiCad reports two net names on one connected item set as a driver-conflict warning, not an error.
+ * Every generated label names a distinct netlist net, so a conflict between two of them is a short
+ * drawn by the generator, whatever geometry caused it. Returns those markers' descriptions.
+ */
+export async function generatedNetMerges(schematic: Schematic, markers: readonly ErcMarker[]): Promise<string[]> {
+  const conflicts = markers.filter((marker) => !marker.excluded && marker.errorType === ErcErrorType.ERCET_DRIVER_CONFLICT);
+  if (!conflicts.length) return [];
+  const labels = new Set((await (await schematic.rootSheet()).getAllItems()).filter(isGeneratedLabel).map((label) => label.id));
+  return conflicts
+    .filter((marker) => marker.items.length === 2 && marker.items.every((item) => labels.has(item.value)))
+    .map((marker) => marker.description);
 }

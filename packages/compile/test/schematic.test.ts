@@ -5,6 +5,8 @@ import {
   LibraryIdentifierSchema,
   packAny,
   SchematicFieldSchema,
+  SchematicLabelSpinStyle,
+  SchematicPinOrientation,
   SchematicPinSchema,
   SchematicSymbolChildSchema,
   SchematicSymbolSchema,
@@ -108,6 +110,148 @@ describe("generated schematic", () => {
       { x: mm(30.48), y: mm(29.21) },
       { x: mm(30.48), y: mm(21.59) },
     ]);
+  });
+
+  test("points labelled stubs away from every symbol edge", () => {
+    const symbol = deviceSymbol();
+    const pin = (number: string, x: number, y: number, orientation: SchematicPinOrientation) =>
+      create(SchematicSymbolChildSchema, {
+        unit: { unit: 1 },
+        bodyStyle: { style: 1 },
+        item: packAny(SchematicPinSchema, create(SchematicPinSchema, { number, orientation, position: toVector2({ x: mm(x), y: mm(y) }) })),
+      });
+    // Pins 1 and 2 model adjacent pins on the top edge of an NE555. Leftward stubs would
+    // cross pin 1 while connecting pin 2 and incorrectly join the two nets.
+    symbol.proto.items = [
+      pin("1", 0, -10.16, SchematicPinOrientation.SPO_DOWN),
+      pin("2", 2.54, -10.16, SchematicPinOrientation.SPO_DOWN),
+      pin("3", 0, 10.16, SchematicPinOrientation.SPO_UP),
+      pin("4", 10.16, 0, SchematicPinOrientation.SPO_LEFT),
+      pin("5", -10.16, 0, SchematicPinOrientation.SPO_RIGHT),
+    ];
+
+    const result = buildGeneratedSchematic(
+      {
+        components: [{ ref: "R1", value: "NE555D", footprint: "x", libSource: { lib: "Device", part: "R" } }],
+        nets: ["1", "2", "3", "4", "5"].map((number) => ({ name: `N${number}`, nodes: [{ ref: "R1", pin: number }] })),
+      },
+      new Map([["Device:R", symbol]]),
+    );
+
+    expect(result.diagnostics).toEqual([]);
+    const { x, y } = result.items.find((item): item is SchematicSymbol => item instanceof SchematicSymbol)!.position;
+    const at = (dx: number, dy: number) => ({ x: x + mm(dx), y: y + mm(dy) });
+    const wires = result.items.filter((item): item is SchematicLine => item instanceof SchematicLine);
+    expect(wires.map((wire) => [wire.start, wire.end])).toEqual([
+      [at(0, -10.16), at(0, -15.24)],
+      [at(2.54, -10.16), at(2.54, -15.24)],
+      [at(0, 10.16), at(0, 15.24)],
+      [at(10.16, 0), at(15.24, 0)],
+      [at(-10.16, 0), at(-15.24, 0)],
+    ]);
+    const labels = result.items.filter((item): item is GlobalLabel => item instanceof GlobalLabel);
+    expect(labels.map((label) => label.spinStyle)).toEqual([
+      SchematicLabelSpinStyle.SLSS_UP,
+      SchematicLabelSpinStyle.SLSS_UP,
+      SchematicLabelSpinStyle.SLSS_BOTTOM,
+      SchematicLabelSpinStyle.SLSS_RIGHT,
+      SchematicLabelSpinStyle.SLSS_LEFT,
+    ]);
+  });
+
+  test("keeps the historical grid for symbols that fit it", () => {
+    const result = buildGeneratedSchematic(
+      {
+        components: [1, 2, 3, 4, 5, 6].map((n) => ({
+          ref: `R${n}`,
+          value: "10k",
+          footprint: "x",
+          libSource: { lib: "Device", part: "R" },
+        })),
+        nets: [{ name: "VCC", nodes: [1, 2, 3, 4, 5, 6].map((n) => ({ ref: `R${n}`, pin: "1" })) }],
+      },
+      new Map([["Device:R", deviceSymbol()]]),
+    );
+    const symbols = result.items.filter((item): item is SchematicSymbol => item instanceof SchematicSymbol);
+    // Origins are whole 50 mil grid steps: 24 and 20 units in, 28 x 24 units apart.
+    const grid = (x: number, y: number) => ({ x: x * mm(1.27), y: y * mm(1.27) });
+    expect(symbols.map((symbol) => symbol.position)).toEqual([
+      grid(24, 20),
+      grid(52, 20),
+      grid(80, 20),
+      grid(108, 20),
+      grid(24, 44),
+      grid(52, 44),
+    ]);
+  });
+
+  test("spaces rows so a tall symbol's bottom stubs cannot reach the next row's top stubs", () => {
+    const pin = (number: string, x: number, y: number, orientation: SchematicPinOrientation) =>
+      create(SchematicSymbolChildSchema, {
+        unit: { unit: 1 },
+        bodyStyle: { style: 1 },
+        item: packAny(
+          SchematicPinSchema,
+          create(SchematicPinSchema, { number, orientation, length: toDistance(mm(2.54)), position: toVector2({ x: mm(x), y: mm(y) }) }),
+        ),
+      });
+    // A USB-C power receptacle reaches 17.78 mm below its origin; a vertical resistor 3.81 mm above.
+    // On the historical 30.48 mm row pitch their outward stubs overlapped in the same column.
+    const tall = deviceSymbol();
+    tall.proto.items = [pin("1", 0, 17.78, SchematicPinOrientation.SPO_UP), pin("2", 15.24, 0, SchematicPinOrientation.SPO_LEFT)];
+    const vertical = deviceSymbol();
+    vertical.proto.items = [pin("1", 0, -3.81, SchematicPinOrientation.SPO_DOWN), pin("2", 0, 3.81, SchematicPinOrientation.SPO_UP)];
+    const part = (ref: string, symbol: string) => ({ ref, value: "x", footprint: "x", libSource: { lib: "Device", part: symbol } });
+
+    const result = buildGeneratedSchematic(
+      {
+        components: [part("R1", "TALL"), part("R2", "R"), part("R3", "R"), part("R4", "R"), part("R5", "R")],
+        nets: [
+          {
+            name: "GND",
+            nodes: [
+              { ref: "R1", pin: "1" },
+              { ref: "R5", pin: "2" },
+            ],
+          },
+          {
+            name: "CC1",
+            nodes: [
+              { ref: "R1", pin: "2" },
+              { ref: "R5", pin: "1" },
+            ],
+          },
+        ],
+      },
+      new Map([
+        ["Device:TALL", tall],
+        ["Device:R", vertical],
+      ]),
+    );
+
+    expect(result.diagnostics).toEqual([]);
+    const stubs = result.items.flatMap((item, index) => {
+      const label = result.items[index + 1];
+      return item instanceof SchematicLine && label instanceof GlobalLabel ? [{ net: label.text, start: item.start, end: item.end }] : [];
+    });
+    const touches = (a: (typeof stubs)[number], b: (typeof stubs)[number]) => {
+      const span = (p: number, q: number) => [Math.min(p, q), Math.max(p, q)] as const;
+      const [ax0, ax1] = span(a.start.x, a.end.x);
+      const [ay0, ay1] = span(a.start.y, a.end.y);
+      const [bx0, bx1] = span(b.start.x, b.end.x);
+      const [by0, by1] = span(b.start.y, b.end.y);
+      return ax0 <= bx1 && bx0 <= ax1 && ay0 <= by1 && by0 <= ay1;
+    };
+    const shorts = stubs.flatMap((a, i) =>
+      stubs
+        .slice(i + 1)
+        .filter((b) => b.net !== a.net && touches(a, b))
+        .map((b) => `${a.net}/${b.net}`),
+    );
+    expect(shorts).toEqual([]);
+    const [r1, r5] = [result.items[0], result.items[4]] as SchematicSymbol[];
+    expect(r5!.position.x).toBe(r1!.position.x);
+    expect(r5!.position.y - r1!.position.y).toBeGreaterThan(mm(30.48));
   });
 
   test("does not reuse library pin identities for placed symbols", () => {

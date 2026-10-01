@@ -34,7 +34,7 @@ import { compile, CompileCancelled } from "./compile";
 import { netlistJsonFrontend } from "./frontends/netlist-json";
 import { registerLibraries } from "./libraries";
 import { applyBoardConstraints, applyDefaultNetClass, hasRules, persistNetClassFile } from "./rules";
-import { generateSchematic } from "./schematic";
+import { generatedNetMerges, generateSchematic } from "./schematic";
 import type { BoardRules, BoardSpec, CompileResult, CompileSource, Frontend, LibrarySpec, MatchMode } from "./types";
 
 export type CompileJobState =
@@ -288,6 +288,15 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
                 stage: "schematic",
                 code: "erc_errors",
                 message: `Generated schematic has ${erc.errorCount} ERC error(s) after save/reload${detail ? `: ${detail}` : "."}`,
+              });
+            }
+            const merges = await generatedNetMerges(schematic, erc.markers);
+            if (merges.length) {
+              diagnostics.push({
+                severity: "error",
+                stage: "schematic",
+                code: "generated_net_merge",
+                message: `Generated schematic joins ${merges.length} pair(s) of distinct netlist nets: ${merges.slice(0, 10).join("; ")}`,
               });
             }
             if (diagnostics.some((diagnostic) => diagnostic.severity === "error")) {

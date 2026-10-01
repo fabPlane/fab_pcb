@@ -17,12 +17,14 @@
  *
  * The job refills the zones (unless `refillZones: false`), saves the board (`SaveDocument`, so
  * KiCad's exporter reads the current state), runs `extractRouteInput` -> router.route ->
- * `applyRouteResult` (one commit, message "Autoroute (<router>): <n> connections"), then saves
- * again so the routed board is durable on disk. The browser only has to pick up the
- * `DocumentChanged` event as usual. Cancelling before the apply leaves the board untouched; a
- * failed router run (a fab_router error, a Freerouting crash) applies nothing and reports the
- * error. A failure of the final save reports the job as failed but leaves the applied route in
- * KiCad memory, where the caller can retry saving it.
+ * `applyRouteResult` (one commit, message "Autoroute (<router>): <n> connections"), refills again,
+ * then saves and re-measures the routed board. The post-apply refill is best-effort: its outcome
+ * is reported in `zoneRefill`, but a failure does not discard the applied route or prevent the
+ * final save. The browser only has to pick up the `DocumentChanged` event as usual. Cancelling
+ * before the apply leaves the board untouched; a failed router run (a fab_router error, a
+ * Freerouting crash) applies nothing and reports the error. A failure of the final save reports
+ * the job as failed but leaves the applied route in KiCad memory, where the caller can retry
+ * saving it.
  */
 import { Arc, KiCad, KiCadClient, Track, Via, type Transport } from "@fp-pcb/client";
 import { DrcErrorType } from "@fp-pcb/proto";
@@ -43,11 +45,20 @@ export interface RouteJobRequest {
   /** Commit message; default `Autoroute (<router>): <routed> connections`. */
   message?: string;
   /**
-   * `RefillZones` before extracting (default true), so pads a copper pour already connects are not
-   * in the ratsnest the router gets. Not repeated after the apply: that would be a second undo
-   * entry, and DRC wants the fill anyway (the app's "Refill + DRC" button does both).
+   * `RefillZones` before extracting and after applying (default true). The first refill keeps
+   * pour-connected pads out of the router's ratsnest; the second makes the saved fill match the
+   * new tracks and vias.
    */
   refillZones?: boolean;
+}
+
+export interface RouteJobZoneRefill {
+  /** The pre-route refill completed successfully. */
+  before: boolean;
+  /** The post-apply refill completed successfully. */
+  after: boolean;
+  /** A non-fatal post-apply refill failure. */
+  error?: string;
 }
 
 /** An unrouted connection as reported to the browser (positions in nm). */
@@ -111,6 +122,8 @@ export interface RouteJobInfo {
   progress?: RouteProgress;
   /** Tail of the router's output (last `LOG_TAIL` lines) while it runs. */
   log: string[];
+  /** Whether the pre-route and post-apply zone refills completed. */
+  zoneRefill: RouteJobZoneRefill;
   /** Set when `state` is `done`. */
   summary?: RouteJobSummary;
   error?: string;
@@ -165,6 +178,12 @@ export interface RouteJobDeps {
   freerouting?: FreeroutingPaths;
   /** Replaces the selected capacity router (tests and embedded hosts). */
   capacityRouter?: Autorouter;
+  /** Replaces opening the session's current board (tests and embedded hosts). */
+  openBoard?: (session: RouteJobSession, jobId: string) => Promise<Awaited<ReturnType<KiCad["currentBoard"]>>>;
+  /** Replaces route-input extraction (tests). */
+  extract?: typeof extractRouteInput;
+  /** Replaces applying the route result (tests). */
+  apply?: typeof applyRouteResult;
   log?: (message: string) => void;
 }
 
@@ -275,6 +294,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
       state: "queued",
       startedAt: new Date().toISOString(),
       log: [],
+      zoneRefill: { before: false, after: false },
     };
     const abort = new AbortController();
     const job: Job = { info, listeners: new Set(), abort };
@@ -295,16 +315,19 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
 
     void (async () => {
       try {
-        if (!session.transport) throw new Error("session has no KiCad transport");
+        if (!session.transport && !deps.openBoard) throw new Error("session has no KiCad transport");
         if (request.router === "freerouting" && !freerouting.ok) throw new Error(`Freerouting unavailable: ${freerouting.reason}`);
-        const client = new KiCadClient(session.transport, { clientName: session.clientName ?? `fp-pcb/router-job-${id}` });
-        const kicad = new KiCad(client);
-        const board = await kicad.currentBoard();
+        const client = session.transport
+          ? new KiCadClient(session.transport, { clientName: session.clientName ?? `fp-pcb/router-job-${id}` })
+          : undefined;
+        const kicad = client ? new KiCad(client) : undefined;
+        const board = deps.openBoard ? await deps.openBoard(session, id) : await kicad!.currentBoard();
         if (!board) throw new Error("no board open in this session");
         checkCancelled();
         if (request.refillZones ?? true) {
           setState("filling");
           await board.refillZones();
+          info.zoneRefill.before = true;
           checkCancelled();
         }
         setState("saving");
@@ -312,14 +335,14 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         checkCancelled();
         setState("extracting");
         const copperBefore = new Set((await board.getTracks()).map((item) => item.id));
-        const input = await extractRouteInput(board, { nets: request.options?.nets, warn: pushLog });
+        const input = await (deps.extract ?? extractRouteInput)(board, { nets: request.options?.nets, warn: pushLog });
         pushLog(`extract: ${input.pads.length} pads, ${input.connections.length} connections, ${input.copperLayers.length} copper layers`);
         checkCancelled();
         if (request.options?.nets?.length && input.connections.length === 0) {
           pushLog(`onlyConnections ${request.options.nets.join(",")} has no remaining ratsnest; skipping the router`);
         }
         const router: Autorouter =
-          deps.routers?.(request, kicad, board) ??
+          deps.routers?.(request, kicad!, board) ??
           (request.router === "freerouting"
             ? new FreeroutingRouter(
                 { board },
@@ -353,7 +376,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         if (!alreadyApplied(result) && (result.tracks.length || result.vias.length || result.claimedVias?.length)) {
           const maxCleanupPasses = Math.min(20, result.tracks.length + result.vias.length + 1);
           for (let cleanupPass = 0; cleanupPass < maxCleanupPasses; cleanupPass++) {
-            const committed = await applyRouteResult(board, result, { message });
+            const committed = await (deps.apply ?? applyRouteResult)(board, result, { message });
             if (result.router !== "fab-router") {
               applied = true;
               break;
@@ -377,7 +400,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
                   const undone = await board.undo(1);
                   if (undone.applied !== 1) throw new Error("could not relabel fab_router's tentative route commit");
                   message = nativeMessage;
-                  await applyRouteResult(board, result, { message });
+                  await (deps.apply ?? applyRouteResult)(board, result, { message });
                 }
               }
               applied = true;
@@ -399,6 +422,17 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         }
         const appliedByKicad = (result as RouteResult & { applied?: { tracksAdded: number; viasAdded: number } }).applied;
         if (applied || appliedByKicad) {
+          if (request.refillZones ?? true) {
+            setState("filling");
+            try {
+              await board.refillZones();
+              info.zoneRefill.after = true;
+            } catch (e) {
+              const detail = e instanceof Error ? e.message : String(e);
+              info.zoneRefill.error = detail;
+              result.log.push(`RefillZones after the apply failed: ${detail}; saving the applied route without a fresh fill`);
+            }
+          }
           setState("saving");
           await persistAppliedRoute(board);
         }
