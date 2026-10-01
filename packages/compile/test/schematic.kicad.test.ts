@@ -13,7 +13,7 @@ import {
 } from "@fp-pcb/proto";
 import { GlobalLabel, mm, NoConnect, SchematicLine, toVector2 } from "@fp-pcb/client";
 import { existsSync } from "node:fs";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { generatedNetMerges, generateSchematic, GENERATED_SCHEMATIC_PROPERTY } from "../src/schematic";
@@ -343,27 +343,70 @@ describe.skipIf(!haveKicad())("generated schematic + kicad-cli api-server", () =
     60_000,
   );
 
-  test.skipIf(!haveTimerSymbols)(
-    "stubs on adjacent top-edge NE555 pins keep their nets separate and satisfy ERC",
-    async () => {
-      const { board } = await newProjectWithLibraries(server.kicad, root, "ne555-top-edge");
-      await registerTimerLibraries();
+  for (const timer of ["NE555D", "TLC555xD"])
+    test.skipIf(!haveTimerSymbols)(
+      `stubs on ${timer} pins keep exact saved endpoints separate and satisfy ERC`,
+      async () => {
+        const { board } = await newProjectWithLibraries(server.kicad, root, `${timer}-top-edge`);
+        await registerTimerLibraries();
 
-      const generated = await generateSchematic(server.kicad, usb555BlinkerNetlist());
-      expect(generated.diagnostics).toEqual([]);
-      await generated.schematic.save();
-      await generated.schematic.close();
+        const source = usb555BlinkerNetlist();
+        source.components.find((component) => component.ref === "U1")!.libSource!.part = timer;
+        const generated = await generateSchematic(server.kicad, source);
+        expect(generated.diagnostics).toEqual([]);
+        await generated.schematic.save();
+        await generated.schematic.close();
 
-      const schematic = await server.kicad.projectFrom(board.specifier).openSchematic();
-      const erc = await schematic.erc.run();
-      // Placeholder footprints are irrelevant here; every connectivity marker is a regression.
-      const markers = erc.markers.map((marker) => marker.description).filter((description) => !/footprint library/i.test(description));
-      expect(markers).toEqual([]);
-      expect(erc.errorCount).toBe(0);
-      expect(await generatedNetMerges(schematic, erc.markers)).toEqual([]);
-    },
-    60_000,
-  );
+        const schematic = await server.kicad.projectFrom(board.specifier).openSchematic();
+        const erc = await schematic.erc.run();
+        // Placeholder footprints are irrelevant here; every connectivity marker is a regression.
+        const markers = erc.markers.map((marker) => marker.description).filter((description) => !/footprint library/i.test(description));
+        expect(markers).toEqual([]);
+        expect(erc.errorCount).toBe(0);
+        expect(await generatedNetMerges(schematic, erc.markers)).toEqual([]);
+        const pinNumbers = (await (await schematic.rootSheet()).getSymbols())
+          .find((symbol) => symbol.reference === "U1")!
+          .pins.map((pin) => pin.number)
+          .sort();
+        expect(pinNumbers).toEqual(["1", "2", "3", "4", "5", "6", "7", "8"]);
+        const projectDir = join(root, `${timer}-top-edge`);
+        const xmlPath = join(projectDir, "saved.xml");
+        const proc = Bun.spawn(
+          [KICAD_CLI, "sch", "export", "netlist", "--format", "kicadxml", "-o", xmlPath, join(projectDir, `${timer}-top-edge.kicad_sch`)],
+          { stdout: "ignore", stderr: "pipe" },
+        );
+        const stderr = new Response(proc.stderr).text();
+        expect(await proc.exited, await stderr).toBe(0);
+        const nets: Record<string, string[]> = {};
+        const attribute = (text: string, name: string) => new RegExp(`\\b${name}="([^"]*)"`).exec(text)![1]!;
+        for (const match of (await readFile(xmlPath, "utf8")).matchAll(/<net\b([^>]*)>([\s\S]*?)<\/net>/g))
+          nets[attribute(match[1]!, "name")] = [...match[2]!.matchAll(/<node\b([^>]*)\/?\s*>/g)]
+            .map((node) => `${attribute(node[1]!, "ref")}:${attribute(node[1]!, "pin")}`)
+            .sort();
+        // KiCad exports explicit no-connect markers as singleton nets too. They must remain
+        // isolated; they are not part of the nine intended connected nets.
+        for (const node of source.noConnects ?? []) {
+          const endpoint = `${node.ref}:${node.pin}`;
+          const isolated = Object.entries(nets).find(
+            ([name, pins]) => name.startsWith("unconnected-") && pins.length === 1 && pins[0] === endpoint,
+          );
+          expect(isolated).toBeDefined();
+          delete nets[isolated![0]];
+        }
+        expect(nets).toEqual(
+          Object.fromEntries(
+            source.nets.map((net) => [
+              net.name,
+              net.nodes
+                .filter((node) => !node.ref.startsWith("#"))
+                .map((node) => `${node.ref}:${node.pin}`)
+                .sort(),
+            ]),
+          ),
+        );
+      },
+      60_000,
+    );
 
   test.skipIf(!haveTimerSymbols)(
     "a tall connector's bottom stubs stay clear of the next row's top stubs",
