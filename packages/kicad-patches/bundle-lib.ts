@@ -29,6 +29,34 @@ export async function validateLibraryDirectory(kind: "footprint" | "symbol", roo
   if (!found) throw new Error(`${kind} library directory ${root} contains no ${suffix} libraries`);
 }
 
+/** Guard the known USB-C shield mapping that KiCad DRC cannot detect after a mismatched import. */
+export async function validateUsbCShieldCompatibility(footprints: string, symbols: string): Promise<void> {
+  const symbolPath = join(symbols, "Connector.kicad_sym");
+  const footprintPath = join(footprints, "Connector_USB.pretty", "USB_C_Receptacle_GCT_USB4125-xx-x_6P_TopMnt_Horizontal.kicad_mod");
+  const [symbol, footprint] = await Promise.all([
+    readFile(symbolPath, "utf8").catch(() => {
+      throw new Error(`USB-C symbol library not found: ${symbolPath}`);
+    }),
+    readFile(footprintPath, "utf8").catch(() => {
+      throw new Error(`USB-C footprint not found: ${footprintPath}`);
+    }),
+  ]);
+  const symbolShield = symbol.match(/\(symbol "USB_C_Receptacle_PowerOnly_6P_1_1"[\s\S]*?\(name "SHIELD"[\s\S]*?\(number "([^"]+)"/)?.[1];
+  if (!symbolShield) throw new Error(`USB-C shield pin not found in ${symbolPath}`);
+
+  const shieldPads = [...footprint.matchAll(/^\s*\(pad "(S1|SH)"\s/gm)]
+    .map((match) => match[1])
+    .filter((number): number is string => Boolean(number));
+  const footprintShields = new Set(shieldPads);
+  if (shieldPads.length !== 4 || footprintShields.size !== 1) {
+    throw new Error(`expected four consistently numbered USB-C shield pads in ${footprintPath}`);
+  }
+  const footprintShield = [...footprintShields][0];
+  if (symbolShield !== footprintShield) {
+    throw new Error(`USB-C shield pin/pad mismatch: symbol uses ${symbolShield}, footprint uses ${footprintShield}`);
+  }
+}
+
 export async function validateFabRouterSource(root: string): Promise<void> {
   if (!(await stat(root).catch(() => null))?.isDirectory()) {
     throw new Error(`fab_router source directory not found: ${root}`);
