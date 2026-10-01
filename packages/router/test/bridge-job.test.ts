@@ -1,8 +1,104 @@
 import { describe, expect, test } from "bun:test";
 import { create } from "@bufbuild/protobuf";
 import { ArcSchema, BoardLayer, TrackSchema, ViaSchema } from "@fp-pcb/proto";
-import { Arc, Track, Via, toDistance, toVector2 } from "@fp-pcb/client";
+import { Arc, Track, Via, toDistance, toVector2, type Board } from "@fp-pcb/client";
+import type { RouteInput, RouteResult } from "../src/types";
 import { createRouteJobs, persistAppliedRoute, routeGeometry, withoutRejectedCreatedCopper } from "../src/bridge-job";
+
+function routeJobFixture(options: { refillZones?: boolean; failSecondRefill?: boolean; appliesCopper?: boolean } = {}) {
+  const calls: string[] = [];
+  let refills = 0;
+  const board = {
+    async refillZones() {
+      calls.push("refill");
+      refills++;
+      if (options.failSecondRefill && refills === 2) throw new Error("zone filler unavailable");
+    },
+    async save() {
+      calls.push("save");
+    },
+    async getTracks() {
+      calls.push("getTracks");
+      return [];
+    },
+    async ratsnest() {
+      calls.push("ratsnest");
+      return { unroutedCount: 0, edges: [] };
+    },
+  } as unknown as Board;
+  const appliesCopper = options.appliesCopper ?? true;
+  const result: RouteResult = {
+    router: "test-router",
+    tracks: appliesCopper
+      ? [{ net: "N", netCode: 1, start: { x: 0, y: 0 }, end: { x: 1, y: 0 }, width: 1, layer: BoardLayer.BL_F_Cu }]
+      : [],
+    vias: [],
+    unrouted: [],
+    totalConnections: appliesCopper ? 1 : 0,
+    timedOut: false,
+    elapsedMs: 1,
+    log: [],
+  };
+  const jobs = createRouteJobs({
+    openBoard: async () => board,
+    extract: async () => {
+      calls.push("extract");
+      return { pads: [], connections: [], copperLayers: [] } as unknown as RouteInput;
+    },
+    capacityRouter: {
+      name: "test-router",
+      async route() {
+        calls.push("route");
+        return result;
+      },
+    },
+    apply: async () => {
+      calls.push("apply");
+      return { commitId: "commit-1", created: [], updated: [], deleted: [], value: [] };
+    },
+  });
+  const info = jobs.start(
+    { id: "test-session", transport: null },
+    { router: "js", ...(options.refillZones === undefined ? {} : { refillZones: options.refillZones }) },
+  );
+  return { calls, done: jobs.wait(info.id) };
+}
+
+describe("route job zone refills", () => {
+  test("refills before routing and after the apply, before the final save and re-measure", async () => {
+    const { calls, done } = routeJobFixture();
+    const info = await done;
+    expect(info.state).toBe("done");
+    expect(info.zoneRefill).toEqual({ before: true, after: true });
+    expect(calls).toEqual(["refill", "save", "getTracks", "extract", "route", "apply", "refill", "save", "ratsnest", "getTracks"]);
+  });
+
+  test("refillZones false skips both zone refills", async () => {
+    const { calls, done } = routeJobFixture({ refillZones: false });
+    const info = await done;
+    expect(info.state).toBe("done");
+    expect(info.zoneRefill).toEqual({ before: false, after: false });
+    expect(calls).not.toContain("refill");
+  });
+
+  test("a post-apply refill failure is reported without failing or losing the saved route", async () => {
+    const { calls, done } = routeJobFixture({ failSecondRefill: true });
+    const info = await done;
+    expect(info.state).toBe("done");
+    expect(info.zoneRefill).toEqual({ before: true, after: false, error: "zone filler unavailable" });
+    expect(info.summary?.log.at(-1)).toContain("saving the applied route without a fresh fill");
+    expect(calls.slice(calls.indexOf("apply"))).toEqual(["apply", "refill", "save", "ratsnest", "getTracks"]);
+  });
+
+  test("a route that applies no copper does not run the post-apply refill", async () => {
+    const { calls, done } = routeJobFixture({ appliesCopper: false });
+    const info = await done;
+    expect(info.state).toBe("done");
+    expect(info.zoneRefill).toEqual({ before: true, after: false });
+    expect(calls.filter((call) => call === "refill")).toHaveLength(1);
+    expect(calls).not.toContain("apply");
+  });
+});
 
 test("the stable capacity slot uses fab_router", async () => {
   const freerouting = { jar: "/missing/router.jar", java: "/missing/java", ok: false as const, reason: "test" };

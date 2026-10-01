@@ -81,6 +81,7 @@ describe.skipIf(!haveKicad)("route jobs + kicad-cli api-server", () => {
     const states: string[] = [];
     const done = await follow(job.id, (ev, d) => states.push(`${ev}:${d.state}`));
     expect(done.state).toBe("done");
+    expect(done.zoneRefill).toEqual({ before: true, after: true });
     expect(done.summary).toMatchObject({ routed: 14, total: 14, timedOut: false, unrouted: [] });
     expect(done.summary!.tracks).toBeGreaterThan(0);
     expect(done.summary!.trackLengthNm).toBeGreaterThan(0);
@@ -95,10 +96,14 @@ describe.skipIf(!haveKicad)("route jobs + kicad-cli api-server", () => {
     // Job completion means the route is durable, not merely present in KiCad's in-memory board.
     const saved = await readFile(join(workspace, "ecc83", "ecc83-pp.unrouted.kicad_pcb"), "utf8");
     expect(saved.match(/\n\s*\(segment\b/g)?.length ?? 0).toBeGreaterThan(0);
-    // one undo entry for the whole pass
+    const drc = await board.drc.run({ refillZones: false });
+    // DRCET_CLEARANCE is 5; bridge intentionally has no direct dependency on @fp-pcb/proto.
+    expect(drc.markers.filter((marker) => marker.errorType === 5)).toEqual([]);
+    // The route itself is one commit; the post-apply refill can add a later undo entry.
     const stack = await board.undoStack();
-    expect(stack.undo[stack.undo.length - 1]?.description).toBe("Autoroute (js): 14 connections");
-    await board.undo();
+    const routeIndex = stack.undo.map((entry) => entry.description).lastIndexOf("Autoroute (js): 14 connections");
+    expect(routeIndex).toBeGreaterThanOrEqual(0);
+    await board.undo(stack.undo.length - routeIndex);
     expect((await board.unroutedCount()).unroutedCount).toBe(14);
   }, 180_000);
 
