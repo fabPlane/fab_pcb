@@ -5,7 +5,9 @@ import { join } from "node:path";
 import { VENDOR_DIR } from "../src/freerouting";
 import { fetchFreerouting } from "../src/freerouting-runtime";
 
-const target = process.argv.find((arg) => arg.startsWith("--target="))?.slice(9) ?? `${process.platform === "win32" ? "windows" : process.platform}-${process.arch}`;
+const target =
+  process.argv.find((arg) => arg.startsWith("--target="))?.slice(9) ??
+  `${process.platform === "win32" ? "windows" : process.platform}-${process.arch}`;
 const withJdk = process.argv.includes("--jdk");
 const runtime = await fetchFreerouting(VENDOR_DIR, target, withJdk);
 if (withJdk) {

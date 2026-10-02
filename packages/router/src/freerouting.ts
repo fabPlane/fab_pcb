@@ -509,7 +509,9 @@ export class FreeroutingRouter implements Autorouter {
     if (run.timedOut) log.push(`timed out after ${opts.maxTimeMs} ms; Freerouting writes no session when killed`);
     if (run.exitCode !== 0) log.push(`freerouting exited with ${run.exitCode}`);
     if (!run.timedOut && (run.exitCode !== 0 || !run.ses)) {
-      throw new Error(`Freerouting failed: exit ${run.exitCode}; ${run.ses ? "session written" : "no session written"}. ${log.slice(-8).join("; ")}`);
+      throw new Error(
+        `Freerouting failed: exit ${run.exitCode}; ${run.ses ? "session written" : "no session written"}. ${log.slice(-8).join("; ")}`,
+      );
     }
 
     let result: RouteResult;

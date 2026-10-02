@@ -82,7 +82,8 @@ try {
     await Bun.sleep(200);
   }
   if (!health) throw new Error("bridge did not become healthy within 60 seconds");
-  if ((health.freerouting as { ok?: boolean } | undefined)?.ok !== true) throw new Error(`Freerouting unavailable: ${JSON.stringify(health.freerouting)}`);
+  if ((health.freerouting as { ok?: boolean } | undefined)?.ok !== true)
+    throw new Error(`Freerouting unavailable: ${JSON.stringify(health.freerouting)}`);
   if (health.ok !== true || health.kicadCliExists !== true) throw new Error(`unhealthy bridge: ${JSON.stringify(health)}`);
   if (manifest.fabRouter) {
     const router = health.capacityRouter as { name?: string; ok?: boolean } | undefined;

@@ -22,7 +22,9 @@ test("pinned downloads cover every bundle target and reject a corrupted cache", 
     const file = join(dir, "cached.jar");
     await Bun.write(file, "corrupt");
     await expect(checkedDownload("https://invalid.invalid/download", file, "0".repeat(64))).rejects.toThrow("checksum mismatch");
-  } finally { await rm(dir, { recursive: true, force: true }); }
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });
 
 test.skipIf(process.platform === "win32")("a successful process without a session is a failed job; timeout remains a result", async () => {
@@ -39,7 +41,9 @@ test.skipIf(process.platform === "win32")("a successful process without a sessio
     const result = await router.route(twoNetBoard(), { maxTimeMs: 50 });
     expect(result.timedOut).toBe(true);
     expect(result.tracks).toHaveLength(0);
-  } finally { await rm(dir, { recursive: true, force: true }); }
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });
 
 describe("parseFreeroutingLine", () => {
