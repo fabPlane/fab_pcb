@@ -5,3 +5,7 @@ bench/results/*.dsn
 bench/results/*.ses
 bench/results/*.log
 vendor/jdk/
+vendor/cache/
+vendor/jdk-*/
+vendor/OpenJDK*.tar.gz
+vendor/OpenJDK*.zip

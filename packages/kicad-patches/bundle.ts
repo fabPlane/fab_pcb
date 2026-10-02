@@ -2,6 +2,8 @@
 /** Assemble a relocatable FabPlane PCB backend: fork runtime, bridge executable, and libraries. */
 import { cp, mkdir, readdir, rm, stat } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
+import { fetchFreerouting, trimFreeroutingRuntime, JDK_VERSION, JAR_SHA256 } from "../router/src/freerouting-runtime";
+import { FREEROUTING_VERSION, VENDOR_DIR } from "../router/src/freerouting";
 import {
   findStockData,
   targetSpec,
@@ -47,6 +49,15 @@ if (fabRouterSource) {
     preserveTimestamps: true,
   });
 }
+const runtimeCache = process.env.FP_PCB_FREEROUTING_CACHE ?? VENDOR_DIR;
+const freerouting = await fetchFreerouting(runtimeCache, target);
+const freeroutingRoot = join(output, "freerouting");
+await mkdir(freeroutingRoot, { recursive: true });
+const jarName = `freerouting-${FREEROUTING_VERSION}.jar`;
+await cp(freerouting.jar, join(freeroutingRoot, jarName));
+const modules = await trimFreeroutingRuntime(freerouting.jar, freerouting.jdkHome, join(freeroutingRoot, "jre"), target);
+await cp(join(import.meta.dir, "licenses"), join(freeroutingRoot, "licenses"), { recursive: true });
+// jlink includes each selected OpenJDK module's legal notices under jre/legal.
 await validateRelocatableSymlinks(output);
 
 const bridge = join(output, "bin", spec.bridgeName);
@@ -90,6 +101,15 @@ await Bun.write(
       bridge: `bin/${spec.bridgeName}`,
       footprints: "libraries/footprints",
       symbols: "libraries/symbols",
+      freerouting: {
+        jar: `freerouting/${jarName}`,
+        java: `freerouting/jre/bin/${target.startsWith("windows") ? "java.exe" : "java"}`,
+        version: FREEROUTING_VERSION,
+        jarSha256: JAR_SHA256,
+        javaVersion: JDK_VERSION,
+        modules,
+        notices: "freerouting/licenses/NOTICE.txt",
+      },
       ...(fabRouterSource ? { fabRouter: "private/fab_router/src/api.ts" } : {}),
       ...(libraryPaths.length ? { libraryPaths } : {}),
       environment: { KICAD_SOCKET_TRANSPORT: spec.socketTransport },

@@ -224,6 +224,8 @@ export interface RouteProgress {
   /** Connections routed so far / total, when the router reports it. */
   routed?: number;
   total?: number;
+  pass?: number;
+  violations?: number;
   message?: string;
 }
 

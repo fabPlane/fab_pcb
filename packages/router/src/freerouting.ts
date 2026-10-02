@@ -348,6 +348,8 @@ export async function runFreerouting(
           const routed = total.unrouted - (ev.unrouted ?? 0);
           progress?.({
             phase: ev.kind === "pass" ? `pass ${ev.pass}` : `optimizer pass ${ev.pass}`,
+            pass: ev.pass,
+            violations: ev.violations,
             percent: ev.kind === "optimizer" ? 90 : total.unrouted ? Math.min(89, Math.round((routed / total.unrouted) * 89)) : undefined,
             routed,
             total: total.unrouted,
@@ -506,6 +508,9 @@ export class FreeroutingRouter implements Autorouter {
     );
     if (run.timedOut) log.push(`timed out after ${opts.maxTimeMs} ms; Freerouting writes no session when killed`);
     if (run.exitCode !== 0) log.push(`freerouting exited with ${run.exitCode}`);
+    if (!run.timedOut && (run.exitCode !== 0 || !run.ses)) {
+      throw new Error(`Freerouting failed: exit ${run.exitCode}; ${run.ses ? "session written" : "no session written"}. ${log.slice(-8).join("; ")}`);
+    }
 
     let result: RouteResult;
     if (!run.ses) {
