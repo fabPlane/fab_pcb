@@ -30,6 +30,7 @@ import { Arc, KiCad, KiCadClient, Track, Via, type Transport } from "@fp-pcb/cli
 import { DrcErrorType } from "@fp-pcb/proto";
 import { applyRouteResult } from "./apply";
 import { extractRouteInput } from "./extract";
+import { applyRequestRules } from "./request-rules";
 import { FreeroutingRouter, alreadyApplied, resolveFreerouting, type FreeroutingOptions, type FreeroutingPaths } from "./freerouting";
 import { FabRouter } from "./fab-router";
 import { RouteCancelled, type Autorouter, type RouteConnection, type RouteOptions, type RouteProgress, type RouteResult } from "./types";
@@ -69,6 +70,7 @@ export interface RouteJobUnrouted {
 }
 
 export interface RouteJobSummary {
+  pairRouting?: import("./types").PairRouting;
   tracks: number;
   /** Vias the router added. */
   vias: number;
@@ -336,6 +338,8 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         setState("extracting");
         const copperBefore = new Set((await board.getTracks()).map((item) => item.id));
         const input = await (deps.extract ?? extractRouteInput)(board, { nets: request.options?.nets, warn: pushLog });
+        const ruleLog = applyRequestRules(input, request.options ?? {});
+        ruleLog.forEach(pushLog);
         pushLog(`extract: ${input.pads.length} pads, ${input.connections.length} connections, ${input.copperLayers.length} copper layers`);
         checkCancelled();
         if (request.options?.nets?.length && input.connections.length === 0) {
@@ -458,12 +462,14 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
             `GetRatsnest after the apply failed: ${e instanceof Error ? e.message : String(e)}; using the router's own count`,
           );
         }
+        result.log.push(...ruleLog);
         info.state = "done";
         info.finishedAt = new Date().toISOString();
         info.log = result.log.slice(-LOG_TAIL);
         const claimedIds = new Set(result.claimedVias?.map((via) => via.id) ?? []);
         const geometry = routeGeometry((await board.getTracks()).filter((item) => !copperBefore.has(item.id) || claimedIds.has(item.id)));
         info.summary = {
+          ...(result.pairRouting ? { pairRouting: result.pairRouting } : {}),
           tracks: appliedByKicad?.tracksAdded ?? result.tracks.length,
           vias: appliedByKicad?.viasAdded ?? result.vias.length,
           claimedVias: result.claimedVias?.length ?? 0,

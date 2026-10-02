@@ -32,6 +32,8 @@ export interface FabRouterReport {
   stoppedBy: string;
   wallClockMs: number;
   perNet: Array<{ net: string; incomplete: number }>;
+  pairCapability?: "coupled";
+  pairs?: import("./types").PairRouting["pairs"];
 }
 
 export interface FabRouterHooks {
@@ -55,7 +57,12 @@ export type FabRouterTextResult =
       diagnostics: Array<{ level?: string; code?: string; message?: string }>;
     };
 
-export type FabRouteDsn = (dsnText: string, settings?: FabRouterSettings, hooks?: FabRouterHooks) => FabRouterTextResult;
+export type FabRouteDsn = (
+  dsnText: string,
+  settings?: FabRouterSettings,
+  hooks?: FabRouterHooks,
+  request?: { differentialPairs: import("./types").DifferentialPair[]; minimumClearanceMm?: number },
+) => FabRouterTextResult;
 
 export interface FabRouterOptions {
   /** Test/host injection. When absent, the adapter imports `moduleSpecifier`. */
@@ -188,6 +195,7 @@ export class FabRouter implements Autorouter {
         },
         onLog: (level, message) => log.push(`${level}: ${message}`),
       },
+      { differentialPairs: input.differentialPairs ?? [], minimumClearanceMm: input.rules.minClearance / 1e6 },
     );
 
     if (!result.ok) {
@@ -200,6 +208,7 @@ export class FabRouter implements Autorouter {
         : "";
       throw new Error(`fab_router failed: ${failureText(result)}${detail}`);
     }
+
     log.push(
       ...result.diagnostics
         .map(diagnosticText)
@@ -247,7 +256,22 @@ export class FabRouter implements Autorouter {
       routed: input.connections.length - unrouted.length,
       total: input.connections.length,
     });
+    const pairRouting: import("./types").PairRouting | undefined = input.differentialPairs?.length
+      ? {
+          capability: result.report.pairCapability ?? "measurement-only",
+          pairs:
+            result.report.pairs ??
+            input.differentialPairs.map((p) => ({
+              p: p.p,
+              n: p.n,
+              status: incompleteNets.has(p.p) || incompleteNets.has(p.n) ? "unrouted" : "independent-fallback",
+              reason: "solver supports measurement only; members routed independently",
+            })),
+        }
+      : undefined;
+    if (pairRouting) log.push(`pairRouting ${JSON.stringify(pairRouting)}`);
     return {
+      ...(pairRouting ? { pairRouting } : {}),
       router: this.name,
       tracks,
       vias,

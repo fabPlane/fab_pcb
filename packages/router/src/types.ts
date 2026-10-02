@@ -172,9 +172,23 @@ export interface RouteInput {
   obstacles: RouteObstacle[];
   connections: RouteConnection[];
   rules: RouteRules;
+  differentialPairs?: DifferentialPair[];
 }
 
+export interface DifferentialPair {
+  p: string;
+  n: string;
+  widthMm?: number | undefined;
+  gapMm?: number | undefined;
+  skewToleranceMm?: number | undefined;
+}
 export interface RouteOptions {
+  trackWidthMm?: number;
+  clearanceMm?: number;
+  viaDiameterMm?: number;
+  viaDrillMm?: number;
+  perNet?: Array<{ net: string; widthMm?: number | undefined; viaDiameterMm?: number | undefined; viaDrillMm?: number | undefined }>;
+  differentialPairs?: DifferentialPair[];
   /** Copper layers the router may route on; default: every enabled copper layer. */
   layers?: BoardLayer[];
   /** Relative cost of a via versus 1 mm of track (router-specific scale; 1 = neutral). */
@@ -260,7 +274,20 @@ export interface NewVia {
   layers: BoardLayer[];
 }
 
+/** Router capability and per-declaration outcome; saved-board measurements remain authoritative. */
+export interface PairRouting {
+  capability: "measurement-only" | "coupled";
+  pairs: Array<{
+    p: string;
+    n: string;
+    status: "coupled" | "independent-fallback" | "unrouted" | "unsupported";
+    reason: string | null;
+    [key: string]: unknown;
+  }>;
+}
+
 export interface RouteResult {
+  pairRouting?: PairRouting;
   router: string;
   tracks: NewTrack[];
   vias: NewVia[];
