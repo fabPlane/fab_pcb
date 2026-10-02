@@ -10,7 +10,41 @@ import { join } from "node:path";
 import type { Board } from "@fp-pcb/client";
 import { DEFAULT_JAR, FreeroutingRouter, exportDsnViaKicad, findJava, parseFreeroutingLine, resolveFreerouting } from "../src/freerouting";
 import type { RouteProgress } from "../src/types";
+import { checkedDownload, freeroutingDownloadSpec } from "../src/freerouting-runtime";
 import { twoNetBoard, F, B } from "./fixtures";
+
+test("pinned downloads cover every bundle target and reject a corrupted cache", async () => {
+  for (const target of ["linux-x64", "darwin-x64", "darwin-arm64", "windows-x64"]) {
+    expect(freeroutingDownloadSpec(target).sha256).toMatch(/^[a-f0-9]{64}$/);
+  }
+  const dir = await mkdtemp(join(tmpdir(), "freerouting-checksum-"));
+  try {
+    const file = join(dir, "cached.jar");
+    await Bun.write(file, "corrupt");
+    await expect(checkedDownload("https://invalid.invalid/download", file, "0".repeat(64))).rejects.toThrow("checksum mismatch");
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test.skipIf(process.platform === "win32")("a successful process without a session is a failed job; timeout remains a result", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "freerouting-failure-"));
+  try {
+    const fakeJava = join(dir, "java");
+    const fakeJar = join(dir, "freerouting.jar");
+    await Bun.write(fakeJar, "fake jar");
+    await Bun.write(fakeJava, "#!/bin/sh\nexit 0\n");
+    await chmod(fakeJava, 0o755);
+    const router = new FreeroutingRouter({}, { mode: "builtin", jar: fakeJar, java: fakeJava });
+    await expect(router.route(twoNetBoard(), {})).rejects.toThrow("no session written");
+    await Bun.write(fakeJava, "#!/bin/sh\nexec sleep 10\n");
+    const result = await router.route(twoNetBoard(), { maxTimeMs: 50 });
+    expect(result.timedOut).toBe(true);
+    expect(result.tracks).toHaveLength(0);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
 
 describe("parseFreeroutingLine", () => {
   test("auto-routing and optimizer passes", () => {

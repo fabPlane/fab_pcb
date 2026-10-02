@@ -1,0 +1,18 @@
+Freerouting 2.4.1 is distributed as a separate Java process under GPL-3.0.
+Its license is included in GPL-3.0.txt. Corresponding source for this unmodified
+release: https://github.com/freerouting/freerouting/tree/v2.4.1
+Source archive: https://github.com/freerouting/freerouting/archive/refs/tags/v2.4.1.tar.gz
+
+Eclipse Temurin OpenJDK 25.0.4.1+1 is distributed under GPLv2 with the Classpath
+Exception. The selected runtime modules include their license and third-party
+notices under ../jre/legal. The Classpath Exception is included in
+GPL-2.0-with-classpath-exception.txt.
+Corresponding source: https://github.com/adoptium/jdk25u/tree/jdk-25.0.4.1%2B1
+Temurin build scripts: https://github.com/adoptium/temurin-build
+Release: https://github.com/adoptium/temurin25-binaries/releases/tag/jdk-25.0.4.1%2B1
+
+Distribution source notice: installers are distributed electronically. These
+corresponding-source locations must be made available alongside each binary
+download. Distributors must retain and provide corresponding source as required
+by the licenses if the upstream source locations cease to be available. This
+notice does not change either upstream license or impose additional conditions.

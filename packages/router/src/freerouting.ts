@@ -31,6 +31,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Board } from "@fp-pcb/client";
 import { commands as generatedCommands, KiCadApiError } from "@fp-pcb/client";
+import { overlayDsnRules } from "./specctra/rule-overlay";
 import { writeDsn, dsnLayers, extraViasFromRouteOptions } from "./specctra/dsn";
 import { blockedConnectionPads } from "./fab-router";
 import { parseSes, sesToItems } from "./specctra/ses";
@@ -348,6 +349,8 @@ export async function runFreerouting(
           const routed = total.unrouted - (ev.unrouted ?? 0);
           progress?.({
             phase: ev.kind === "pass" ? `pass ${ev.pass}` : `optimizer pass ${ev.pass}`,
+            pass: ev.pass,
+            violations: ev.violations,
             percent: ev.kind === "optimizer" ? 90 : total.unrouted ? Math.min(89, Math.round((routed / total.unrouted) * 89)) : undefined,
             routed,
             total: total.unrouted,
@@ -476,9 +479,29 @@ export class FreeroutingRouter implements Autorouter {
         ...(opts.nets ? { routableNets: opts.nets } : {}),
       });
     }
+    if (
+      !leftover &&
+      mode !== "builtin" &&
+      (opts.perNet?.length ||
+        opts.trackWidthMm !== undefined ||
+        opts.clearanceMm !== undefined ||
+        opts.viaDiameterMm !== undefined ||
+        opts.viaDrillMm !== undefined ||
+        opts.differentialPairs?.some((p) => p.widthMm !== undefined))
+    ) {
+      dsn = overlayDsnRules(dsn, input);
+      log.push("exported DSN: explicit per-net rule overlay applied");
+    }
     await writeFile(dsnPath, dsn);
     log.push(`dsn: ${dsn.length} bytes, ${layers.length} layers`);
 
+    const fixedWidths =
+      opts.trackWidthMm !== undefined ||
+      opts.perNet?.some((r) => r.widthMm !== undefined) ||
+      opts.differentialPairs?.some((p) => p.widthMm !== undefined);
+    // The pinned 2.4.1 fan-out inserter has a micro-neckdown fallback independent of automatic_neckdown.
+    // Explicit widths disable both reduction paths; no-rule requests retain the default strategy.
+    if (fixedWidths) log.push("explicit widths: automatic neckdown disabled; fan-out pre-pass disabled (pinned micro-neckdown fallback)");
     const passes = opts.effort ?? this.fr.passes ?? 100;
     progress?.({ phase: "freerouting", percent: 1 });
     const run = await runFreerouting(
@@ -489,7 +512,10 @@ export class FreeroutingRouter implements Autorouter {
         java: this.java!,
         passes,
         jvmArgs: this.fr.jvmArgs,
-        extraArgs: this.fr.extraArgs,
+        extraArgs: [
+          ...(this.fr.extraArgs ?? []),
+          ...(fixedWidths ? ["--router.automatic_neckdown=false", "--router.fanout.enabled=false"] : []),
+        ],
         maxTimeMs: opts.maxTimeMs,
         signal: opts.signal,
       },
@@ -506,6 +532,11 @@ export class FreeroutingRouter implements Autorouter {
     );
     if (run.timedOut) log.push(`timed out after ${opts.maxTimeMs} ms; Freerouting writes no session when killed`);
     if (run.exitCode !== 0) log.push(`freerouting exited with ${run.exitCode}`);
+    if (!run.timedOut && (run.exitCode !== 0 || !run.ses)) {
+      throw new Error(
+        `Freerouting failed: exit ${run.exitCode}; ${run.ses ? "session written" : "no session written"}. ${log.slice(-8).join("; ")}`,
+      );
+    }
 
     let result: RouteResult;
     if (!run.ses) {
@@ -563,6 +594,19 @@ export class FreeroutingRouter implements Autorouter {
         elapsedMs: 0,
         log,
       };
+    }
+    if (input.differentialPairs?.length) {
+      const open = new Set(result.unrouted.map((c) => c.net));
+      result.pairRouting = {
+        capability: "measurement-only",
+        pairs: input.differentialPairs.map((p) => ({
+          p: p.p,
+          n: p.n,
+          status: open.has(p.p) || open.has(p.n) ? "unrouted" : "independent-fallback",
+          reason: "Freerouting routes pair members independently",
+        })),
+      };
+      log.push(`pairRouting ${JSON.stringify(result.pairRouting)}`);
     }
     result.elapsedMs = Math.round(performance.now() - t0);
     log.push(

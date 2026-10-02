@@ -14,6 +14,7 @@ interface Manifest {
   footprints: string;
   symbols: string;
   fabRouter?: string;
+  freerouting: { jar: string; java: string };
   libraryPaths?: string[];
   environment?: Record<string, string>;
 }
@@ -37,6 +38,8 @@ const paths = {
   bridge: resolve(root, manifest.bridge),
   footprints: resolve(root, manifest.footprints),
   symbols: resolve(root, manifest.symbols),
+  jar: resolve(root, manifest.freerouting.jar),
+  java: resolve(root, manifest.freerouting.java),
 };
 for (const [label, path] of Object.entries(paths)) {
   if (!(await stat(path).catch(() => null))) throw new Error(`${label} missing: ${path}`);
@@ -50,13 +53,15 @@ const env = {
   ...process.env,
   ...(manifest.environment ?? {}),
   ...(libraryPaths.length ? { LD_LIBRARY_PATH: [...libraryPaths, process.env.LD_LIBRARY_PATH].filter(Boolean).join(delimiter) } : {}),
-  PORT: "4020",
+  PORT: "4027",
   HOST: "127.0.0.1",
   KICAD_CLI: paths.cli,
   KICAD_STOCK_DATA_HOME: paths.stockData,
   KICAD_FOOTPRINT_DIR: paths.footprints,
   KICAD_SYMBOL_DIR: paths.symbols,
   WORKSPACE_ROOT: workspace,
+  FREEROUTING_JAR: paths.jar,
+  FP_PCB_JAVA: paths.java,
   ...(manifest.fabRouter ? { FAB_ROUTER_MODULE: resolve(root, manifest.fabRouter) } : {}),
 };
 const version = Bun.spawnSync([paths.cli, "version"], { env, stdout: "pipe", stderr: "pipe" });
@@ -68,7 +73,7 @@ try {
   for (let attempt = 0; attempt < 300; attempt++) {
     if (bridge.exitCode !== null) throw new Error(`bridge exited with code ${bridge.exitCode}`);
     try {
-      const response = await fetch("http://127.0.0.1:4020/health");
+      const response = await fetch("http://127.0.0.1:4027/health");
       if (response.ok) {
         health = (await response.json()) as Record<string, unknown>;
         break;
@@ -77,6 +82,8 @@ try {
     await Bun.sleep(200);
   }
   if (!health) throw new Error("bridge did not become healthy within 60 seconds");
+  if ((health.freerouting as { ok?: boolean } | undefined)?.ok !== true)
+    throw new Error(`Freerouting unavailable: ${JSON.stringify(health.freerouting)}`);
   if (health.ok !== true || health.kicadCliExists !== true) throw new Error(`unhealthy bridge: ${JSON.stringify(health)}`);
   if (manifest.fabRouter) {
     const router = health.capacityRouter as { name?: string; ok?: boolean } | undefined;

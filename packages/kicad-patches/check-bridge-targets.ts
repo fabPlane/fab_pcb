@@ -4,12 +4,14 @@ import { mkdtemp, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { targetSpec } from "./bundle-lib";
+import { freeroutingDownloadSpec } from "../router/src/freerouting-runtime";
 
 const targets = ["linux-x64", "darwin-x64", "darwin-arm64", "windows-x64"] as const;
 const output = await mkdtemp(join(tmpdir(), "fp-pcb-bridge-targets-"));
 try {
   for (const target of targets) {
     const spec = targetSpec(target);
+    freeroutingDownloadSpec(target);
     const outfile = join(output, `${target}${target.startsWith("windows") ? ".exe" : ""}`);
     const proc = Bun.spawn(
       [
