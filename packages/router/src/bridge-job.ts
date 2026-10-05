@@ -70,6 +70,7 @@ export interface RouteJobUnrouted {
 }
 
 export interface RouteJobSummary {
+  diagnostics?: import("./types").RoutingDiagnostics;
   pairRouting?: import("./types").PairRouting;
   tracks: number;
   /** Vias the router added. */
@@ -263,9 +264,10 @@ export function routeGeometry(
  * Freerouting writes no session. Null when something was routed or there was nothing to route.
  */
 export function emptyResultReason(
-  r: Pick<RouteResult, "totalConnections" | "tracks" | "vias" | "unrouted" | "timedOut" | "log">,
+  r: Pick<RouteResult, "totalConnections" | "tracks" | "vias" | "unrouted" | "timedOut" | "log" | "diagnostics">,
 ): string | null {
   if (r.totalConnections === 0 || r.tracks.length || r.vias.length || r.unrouted.length < r.totalConnections) return null;
+  if (r.diagnostics) return r.diagnostics.text;
   const why = [...r.log]
     .reverse()
     .find((l) => /solver failed|precheck|timed out|exited with|no session|ran out of|blockedPads|padstack-unknown/i.test(l));
@@ -383,7 +385,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         });
         checkCancelled();
         const empty = emptyResultReason(result);
-        if (empty) {
+        if (empty && !result.diagnostics) {
           info.log = result.log.slice(-LOG_TAIL);
           throw new Error(empty);
         }
@@ -486,6 +488,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           new Map((input.nets ?? []).map((net) => [net.name, net.code])),
         );
         info.summary = {
+          ...(result.diagnostics ? { diagnostics: result.diagnostics } : {}),
           ...(result.pairRouting ? { pairRouting: result.pairRouting } : {}),
           tracks: appliedByKicad?.tracksAdded ?? result.tracks.length,
           vias: appliedByKicad?.viasAdded ?? result.vias.length,
@@ -498,7 +501,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           elapsedMs: result.elapsedMs,
           wallMs: Math.round(performance.now() - t0),
           timedOut: result.timedOut,
-          message: applied || appliedByKicad ? message : "",
+          message: result.diagnostics?.text ?? (applied || appliedByKicad ? message : ""),
           unrouted,
           geometry,
           log: result.log,

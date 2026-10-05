@@ -286,7 +286,23 @@ export interface PairRouting {
   }>;
 }
 
+export interface RoutingDiagnostics {
+  text: string;
+  passes: number;
+  stoppedBy: string;
+  solverOpens: { before: number; after: number };
+  generated: { tracks: number; vias: number };
+  discarded: { tracks: number; vias: number };
+  remaining: { nets: number; opens: number; detail: Array<{net:string;incomplete:number}> };
+  leftoverEndpoints: Array<{net:string;x:number;y:number;itemId:string}>;
+  leftoverEndpointTotal: number;
+  physicalBlockerEstablished: boolean;
+  collisions: Array<{endpoint:{uuid:string;ref:string;pin:string;layer:string};blocker:{uuid:string;type:string;net:string};requiredClearanceMm:number;measuredClearanceMm:number;test:string}>;
+  search?: {searches:number;popsUsed:number;popLimit:number;maxPopsUsed:number;maxSearchLimit:number;stoppedBy:Record<string,number>};
+}
+
 export interface RouteResult {
+  diagnostics?: RoutingDiagnostics;
   pairRouting?: PairRouting;
   router: string;
   tracks: NewTrack[];
