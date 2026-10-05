@@ -239,14 +239,26 @@ export class FabRouter implements Autorouter {
     const remaining = result.report.perNet.filter(net => net.incomplete > 0);
     const endpoints = leftoverConnectionEndpoints(input).filter(end => incompleteNets.has(end.net));
     const discardedWires = generatedWires.filter(wire => incompleteNets.has(wire.net)).length;
+    const padByDsnRef = new Map<string, typeof input.pads[number]>();
+    const refCounts = new Map<string, number>();
+    for (const pad of input.pads.filter(pad => pad.layers.some(layer => layers.includes(layer)) && pad.size.x > 0 && pad.size.y > 0)) {
+      const base = `${pad.footprint || "PAD"}_${pad.number || pad.id.slice(0, 8)}`.replace(/-/g, "_");
+      const count = refCounts.get(base) ?? 0;
+      refCounts.set(base, count + 1);
+      padByDsnRef.set(count ? `${base}_${count}` : base, pad);
+    }
     const sourceItem = (x: number, y: number, type: string, excludeId?: string, net?: string | null) => {
-      if (type === "track") return input.tracks.find(item => [item.start,item.end].some(pt => Math.abs(pt.x / 1e6 - x) < 0.00001 && Math.abs(pt.y / 1e6 - y) < 0.00001));
+      if (type === "track") {
+        const matching = input.tracks.filter(item => item.id !== excludeId && [item.start,item.end].some(pt => Math.abs(pt.x / 1e6 - x) < 0.00001 && Math.abs(pt.y / 1e6 - y) < 0.00001));
+        return matching.length === 1 ? matching[0] : undefined;
+      }
       const items = type === "barrel" ? input.vias : input.pads;
       const matching = items.filter(item => item.id !== excludeId && Math.abs(item.position.x / 1e6 - x) < 0.00001 && Math.abs(item.position.y / 1e6 - y) < 0.00001);
-      return matching.find(item => net !== null && net !== undefined && item.net === net) ?? matching[0];
+      const sameNet = net !== null && net !== undefined ? matching.filter(item => item.net === net) : [];
+      return sameNet.length === 1 ? sameNet[0] : matching.length === 1 ? matching[0] : undefined;
     };
     const collisions = (result.report.endpointCollisions ?? []).flatMap(c => {
-      const endpoint = sourceItem(c.endpoint.xMm, c.endpoint.yMm, "pad");
+      const endpoint = padByDsnRef.get(c.endpoint.ref) ?? sourceItem(c.endpoint.xMm, c.endpoint.yMm, "pad");
       const blocker = sourceItem(c.blocker.xMm, c.blocker.yMm, c.blocker.type, endpoint?.id, c.blocker.net);
       // A DSN-local id is not a native UUID. Only publish collisions with native identities.
       if (!endpoint || !blocker) return [];

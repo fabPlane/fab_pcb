@@ -193,3 +193,13 @@ test("generated and discarded counts exclude protected copper echoed in SES", as
   expect(result.diagnostics).toMatchObject({generated:{tracks:1,vias:1},discarded:{tracks:1,vias:1}});
   expect(input.tracks).toHaveLength(1);
 });
+
+test("coincident pad positions use the DSN reference to retain the endpoint UUID", async () => {
+  const input=twoNetBoard(),endpoint=input.pads[2]!,blocker=input.pads[0]!;
+  endpoint.position={...blocker.position};
+  const native=success([{net:"A",incomplete:1},{net:"B",incomplete:1}]);
+  if(!native.ok)throw new Error("fixture");
+  native.report.endpointCollisions=[{endpoint:{modelId:1,ref:`${endpoint.footprint}_${endpoint.number}`.replace(/-/g,"_"),pin:"1",xMm:endpoint.position.x/1e6,yMm:endpoint.position.y/1e6},layer:"F.Cu",blocker:{modelId:2,type:"pad",net:"A",xMm:blocker.position.x/1e6,yMm:blocker.position.y/1e6},requiredClearanceMm:0.2,measuredClearanceMm:0,test:"endpoint-track-width"}];
+  const result=await new FabRouter({routeDsn:()=>native}).route(input);
+  expect(result.diagnostics!.collisions[0]).toMatchObject({endpoint:{uuid:endpoint.id},blocker:{uuid:blocker.id}});
+});
