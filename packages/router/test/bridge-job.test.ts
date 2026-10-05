@@ -163,9 +163,9 @@ describe("routeGeometry", () => {
     );
 
     expect(routeGeometry([track, arc, via])).toEqual([
-      { kind: "trace", id: "track-1", layer: BoardLayer.BL_F_Cu, net: 7, points: [1, 2, 3, 4], width: 5 },
-      { kind: "trace", id: "arc-1", layer: BoardLayer.BL_B_Cu, net: 8, points: [10, 20, 15, 25, 20, 20], width: 6 },
-      { kind: "via", id: "via-1", layer: -1, net: 7, points: [90, 190, 110, 210] },
+      { kind: "trace", id: "track-1", layer: BoardLayer.BL_F_Cu, net: 7, netName: "N", points: [1, 2, 3, 4], width: 5 },
+      { kind: "trace", id: "arc-1", layer: BoardLayer.BL_B_Cu, net: 8, netName: "M", points: [10, 20, 15, 25, 20, 20], width: 6 },
+      { kind: "via", id: "via-1", layer: -1, net: 7, netName: "N", points: [90, 190, 110, 210] },
     ]);
   });
 });
@@ -192,4 +192,26 @@ test("withoutRejectedCreatedCopper maps rejected KiCad ids back to generated cop
   const clean = withoutRejectedCreatedCopper(result, created, new Set(["reject-track", "reject-via"]));
   expect(clean.tracks.map((track) => track.net)).toEqual(["A"]);
   expect(clean.vias).toEqual([]);
+});
+
+test("route geometry resolves native name-only net records through the extracted net table", () => {
+  const track = new Track(create(TrackSchema, { id: { value: "native-track" }, net: { name: "SIGNAL" }, layer: BoardLayer.BL_F_Cu }));
+  const via = new Via(
+    create(ViaSchema, {
+      id: { value: "native-via" },
+      net: { name: "GND" },
+      padStack: { copperLayers: [{ size: toVector2({ x: 600000, y: 600000 }) }] },
+    }),
+  );
+  const geometry = routeGeometry(
+    [track, via],
+    new Map([
+      ["SIGNAL", 13],
+      ["GND", 2],
+    ]),
+  );
+  expect(geometry.map(({ net, netName }) => ({ net, netName }))).toEqual([
+    { net: 13, netName: "SIGNAL" },
+    { net: 2, netName: "GND" },
+  ]);
 });

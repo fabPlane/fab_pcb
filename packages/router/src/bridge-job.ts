@@ -108,6 +108,8 @@ export interface RouteJobGeometry {
   /** KiCad BoardLayer enum. Through vias use -1. */
   layer: number;
   net: number;
+  /** Native net name, including when GetItems omits the net code. */
+  netName?: string;
   /** Trace centreline points, or a via bounding box. */
   points: number[];
   /** Trace width in nm. */
@@ -223,7 +225,10 @@ export function withoutRejectedCreatedCopper(
 }
 
 /** Compact, renderer-neutral copper geometry for a completed routing run. */
-export function routeGeometry(items: readonly (Track | Arc | Via)[]): RouteJobGeometry[] {
+export function routeGeometry(
+  items: readonly (Track | Arc | Via)[],
+  codeByNet: ReadonlyMap<string, number> = new Map(),
+): RouteJobGeometry[] {
   return items.map((item) => {
     if (item instanceof Via) {
       const r = item.diameter / 2;
@@ -231,7 +236,8 @@ export function routeGeometry(items: readonly (Track | Arc | Via)[]): RouteJobGe
         kind: "via",
         id: item.id,
         layer: -1,
-        net: item.netCode ?? 0,
+        net: item.netCode || codeByNet.get(item.net ?? "") || 0,
+        netName: item.net ?? "",
         points: [item.position.x - r, item.position.y - r, item.position.x + r, item.position.y + r],
       };
     }
@@ -239,7 +245,15 @@ export function routeGeometry(items: readonly (Track | Arc | Via)[]): RouteJobGe
       item instanceof Arc
         ? [item.start.x, item.start.y, item.mid.x, item.mid.y, item.end.x, item.end.y]
         : [item.start.x, item.start.y, item.end.x, item.end.y];
-    return { kind: "trace", id: item.id, layer: item.layerId, net: item.netCode ?? 0, points, width: item.width };
+    return {
+      kind: "trace",
+      id: item.id,
+      layer: item.layerId,
+      net: item.netCode || codeByNet.get(item.net ?? "") || 0,
+      netName: item.net ?? "",
+      points,
+      width: item.width,
+    };
   });
 }
 
@@ -467,7 +481,10 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         info.finishedAt = new Date().toISOString();
         info.log = result.log.slice(-LOG_TAIL);
         const claimedIds = new Set(result.claimedVias?.map((via) => via.id) ?? []);
-        const geometry = routeGeometry((await board.getTracks()).filter((item) => !copperBefore.has(item.id) || claimedIds.has(item.id)));
+        const geometry = routeGeometry(
+          (await board.getTracks()).filter((item) => !copperBefore.has(item.id) || claimedIds.has(item.id)),
+          new Map((input.nets ?? []).map((net) => [net.name, net.code])),
+        );
         info.summary = {
           ...(result.pairRouting ? { pairRouting: result.pairRouting } : {}),
           tracks: appliedByKicad?.tracksAdded ?? result.tracks.length,
