@@ -184,3 +184,12 @@ test("collision evidence names native UUIDs and clearance, without inferring enc
   expect(result.diagnostics!.text).toContain("blocked pad under endpoint-track-width test");
   expect(result.diagnostics!.text).toContain("does not establish that every escape is blocked");
 });
+
+test("generated and discarded counts exclude protected copper echoed in SES", async () => {
+  const input=twoNetBoard();
+  input.tracks.push({id:"protected",net:"A",netCode:1,layer:F,width:mm(0.25),start:{x:mm(5),y:mm(5)},end:{x:mm(25),y:mm(25)}});
+  const native=success([{net:"A",incomplete:1},{net:"B",incomplete:1}]);
+  const result=await new FabRouter({routeDsn:()=>native}).route(input);
+  expect(result.diagnostics).toMatchObject({generated:{tracks:1,vias:1},discarded:{tracks:1,vias:1}});
+  expect(input.tracks).toHaveLength(1);
+});

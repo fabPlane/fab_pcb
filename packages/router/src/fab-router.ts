@@ -217,6 +217,9 @@ export class FabRouter implements Autorouter {
     progress?.({ phase: "import", percent: 99, total: input.connections.length });
     const session = parseSes(result.ses);
     const parsed = sesToItems(session, input);
+    // SES also echoes protected input wires. Count only polylines that contribute new segments,
+    // using the same exact echoed-geometry filter as the native import.
+    const generatedWires = session.wires.filter(wire => sesToItems({ ...session, wires: [wire], vias: [] }, input).tracks.length > 0);
     log.push(...parsed.warnings.map((warning) => `ses: ${warning}`));
 
     // A best-so-far SES can contain useful-looking stubs on nets the solver did not complete.
@@ -235,7 +238,7 @@ export class FabRouter implements Autorouter {
     const unrouted: RouteConnection[] = input.connections.filter((connection) => incompleteNets.has(connection.net));
     const remaining = result.report.perNet.filter(net => net.incomplete > 0);
     const endpoints = leftoverConnectionEndpoints(input).filter(end => incompleteNets.has(end.net));
-    const discardedWires = session.wires.filter(wire => incompleteNets.has(wire.net)).length;
+    const discardedWires = generatedWires.filter(wire => incompleteNets.has(wire.net)).length;
     const sourceItem = (x: number, y: number, type: string, excludeId?: string, net?: string | null) => {
       if (type === "track") return input.tracks.find(item => [item.start,item.end].some(pt => Math.abs(pt.x / 1e6 - x) < 0.00001 && Math.abs(pt.y / 1e6 - y) < 0.00001));
       const items = type === "barrel" ? input.vias : input.pads;
@@ -254,13 +257,13 @@ export class FabRouter implements Autorouter {
     const collisionText = collisions.length
       ? `Endpoint collision found (blocked pad under endpoint-track-width test): ${collisions.slice(0, 3).map(c => `${c.endpoint.ref}.${c.endpoint.pin} ${c.endpoint.uuid} on ${c.endpoint.layer}; blocker ${c.blocker.uuid} ${c.blocker.type} net ${c.blocker.net || "unassigned"}; clearance required ${c.requiredClearanceMm.toFixed(3)} mm, measured ${c.measuredClearanceMm.toFixed(3)} mm`).join("; ")}. This does not establish that every escape is blocked.`
       : "No physical blocker was established.";
-    const text = `fab_router stopped after ${result.report.passes} passes (${result.report.stoppedBy}): solver opens ${result.report.incompleteBefore} → ${result.report.incompleteAfter}; generated ${session.wires.length} tracks and ${parsed.vias.length} vias; discarded ${discardedWires} tracks and ${discardedVias} vias because their nets were incomplete. Remaining (${remaining.length} nets, ${result.report.incompleteAfter} opens): ${remainingText || "none"}. ${collisionText} Next: ${remaining.length ? "try Freerouting for these nets and check the remaining native opens" : "check native connectivity and DRC"}.`;
+    const text = `fab_router stopped after ${result.report.passes} passes (${result.report.stoppedBy}): solver opens ${result.report.incompleteBefore} → ${result.report.incompleteAfter}; generated ${generatedWires.length} tracks and ${parsed.vias.length} vias; discarded ${discardedWires} tracks and ${discardedVias} vias because their nets were incomplete. Remaining (${remaining.length} nets, ${result.report.incompleteAfter} opens): ${remainingText || "none"}. ${collisionText} Next: ${remaining.length ? "try Freerouting for these nets and check the remaining native opens" : "check native connectivity and DRC"}.`;
     const diagnostics: import("./types").RoutingDiagnostics = {
       text,
       passes: result.report.passes,
       stoppedBy: result.report.stoppedBy,
       solverOpens: { before: result.report.incompleteBefore, after: result.report.incompleteAfter },
-      generated: { tracks: session.wires.length, vias: parsed.vias.length },
+      generated: { tracks: generatedWires.length, vias: parsed.vias.length },
       discarded: { tracks: discardedWires, vias: discardedVias },
       remaining: { nets: remaining.length, opens: result.report.incompleteAfter, detail: remaining.slice(0, 24) },
       leftoverEndpoints: endpoints.slice(0, 24),
