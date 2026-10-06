@@ -10,6 +10,7 @@ import {
   validateRelocatableSymlinks,
   validateUsbCShieldCompatibility,
 } from "./bundle-lib";
+import { bridgeCompileCommand } from "./compile-bridge";
 
 const [target, runtimeArg, footprintsArg, symbolsArg, outputArg] = process.argv.slice(2);
 if (!target || !runtimeArg || !footprintsArg || !symbolsArg || !outputArg) {
@@ -50,17 +51,11 @@ if (fabRouterSource) {
 await validateRelocatableSymlinks(output);
 
 const bridge = join(output, "bin", spec.bridgeName);
-const build = Bun.spawn(
-  [
-    "bun",
-    "build",
-    join(import.meta.dir, "..", "bridge", "src", "main.ts"),
-    "--compile",
-    `--target=${spec.bunTarget}`,
-    `--outfile=${bridge}`,
-  ],
-  { cwd: resolve(import.meta.dir, "../.."), stdout: "inherit", stderr: "inherit" },
-);
+const build = Bun.spawn(bridgeCompileCommand(join(import.meta.dir, "..", "bridge", "src", "main.ts"), bridge, spec.bunTarget), {
+  cwd: resolve(import.meta.dir, "../.."),
+  stdout: "inherit",
+  stderr: "inherit",
+});
 if (await build.exited) throw new Error(`bridge compilation failed for ${spec.bunTarget}`);
 
 const cli = await findFile(join(output, "kicad"), spec.kicadCliName);

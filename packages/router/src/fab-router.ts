@@ -1,6 +1,7 @@
 /** Native server-side adapter for fabPlane/fab_router's text DSN/SES API. */
 import { dsnLayers, extraViasFromRouteOptions, writeDsn } from "./specctra/dsn";
 import { parseSes, sesToItems } from "./specctra/ses";
+import { runFabRouterInWorker } from "./fab-router-worker-client";
 import {
   RouteCancelled,
   type Autorouter,
@@ -58,7 +59,7 @@ export type FabRouterTextResult =
 export type FabRouteDsn = (dsnText: string, settings?: FabRouterSettings, hooks?: FabRouterHooks) => FabRouterTextResult;
 
 export interface FabRouterOptions {
-  /** Test/host injection. When absent, the adapter imports `moduleSpecifier`. */
+  /** Inline test/host injection. Native module solvers otherwise run in an owned worker. */
   routeDsn?: FabRouteDsn;
   /** Defaults to `FAB_ROUTER_MODULE`, then `@fabplane/fab-router`. */
   moduleSpecifier?: string;
@@ -149,46 +150,52 @@ export class FabRouter implements Autorouter {
         (opts.nets?.length ? `, leftover nets ${opts.nets.join(",")}` : ""),
     );
     progress?.({ phase: "export", percent: 0, total: input.connections.length });
-    const routeDsn = await this.solver();
     if (opts.signal?.aborted) throw new RouteCancelled();
 
-    const result = routeDsn(
-      dsn,
-      {
-        ...(opts.effort !== undefined ? { maxPasses: Math.max(1, Math.round(opts.effort)) } : {}),
-        ...(opts.maxTimeMs !== undefined ? { timeBudgetMs: opts.maxTimeMs } : {}),
-        ...(opts.viaCost !== undefined ? { viaCost: opts.viaCost } : {}),
-        ...(opts.seed !== undefined ? { seed: opts.seed } : {}),
+    const settings: FabRouterSettings = {
+      ...(opts.effort !== undefined ? { maxPasses: Math.max(1, Math.round(opts.effort)) } : {}),
+      ...(opts.maxTimeMs !== undefined ? { timeBudgetMs: opts.maxTimeMs } : {}),
+      ...(opts.viaCost !== undefined ? { viaCost: opts.viaCost } : {}),
+      ...(opts.seed !== undefined ? { seed: opts.seed } : {}),
+    };
+    const hooks: FabRouterHooks = {
+      signal: opts.signal,
+      onPass: (event) => {
+        progress?.({
+          phase: `pass ${event.pass}`,
+          ...(opts.effort ? { percent: Math.min(95, (event.pass / opts.effort) * 95) } : {}),
+          routed: Math.max(0, input.connections.length - event.incomplete),
+          total: input.connections.length,
+        });
       },
-      {
-        signal: opts.signal,
-        onPass: (event) => {
-          progress?.({
-            phase: `pass ${event.pass}`,
-            ...(opts.effort ? { percent: Math.min(95, (event.pass / opts.effort) * 95) } : {}),
-            routed: Math.max(0, input.connections.length - event.incomplete),
-            total: input.connections.length,
-          });
-        },
-        onConnection: (event) => {
-          progress?.({
-            phase: "connection",
-            routed: undefined,
-            total: input.connections.length,
-            message: `${event.net}: ${event.ok ? "routed" : "open"}`,
-          });
-        },
-        onProgress: (event) => {
-          progress?.({
-            phase: "routing",
-            percent: event.total ? Math.min(95, (event.done / event.total) * 95) : undefined,
-            routed: event.done,
-            total: event.total,
-          });
-        },
-        onLog: (level, message) => log.push(`${level}: ${message}`),
+      onConnection: (event) => {
+        progress?.({
+          phase: "connection",
+          routed: undefined,
+          total: input.connections.length,
+          message: `${event.net}: ${event.ok ? "routed" : "open"}`,
+        });
       },
-    );
+      onProgress: (event) => {
+        progress?.({
+          phase: "routing",
+          percent: event.total ? Math.min(95, (event.done / event.total) * 95) : undefined,
+          routed: event.done,
+          total: event.total,
+        });
+      },
+      onLog: (level, message) => log.push(`${level}: ${message}`),
+    };
+    const result = this.config.routeDsn
+      ? this.config.routeDsn(dsn, settings, hooks)
+      : await runFabRouterInWorker(
+          {
+            moduleSpecifier: this.config.moduleSpecifier ?? process.env.FAB_ROUTER_MODULE ?? "@fabplane/fab-router",
+            dsn,
+            settings,
+          },
+          hooks,
+        );
 
     if (!result.ok) {
       const blocked = blockedConnectionPads(input);
