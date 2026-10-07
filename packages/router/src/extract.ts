@@ -124,6 +124,16 @@ function toRoutePad(pad: Pad, footprintRef: string, copper: readonly BoardLayer[
     size: vec2(first?.size),
     shape: padShape(first?.shape),
     rotation: pad.orientation,
+    cornerRadius: first ? first.cornerRoundingRatio * Math.min(nm(first.size?.xNm), nm(first.size?.yNm)) : undefined,
+    collisionGeometryUnsupported: stack?.copperLayers.some(
+      (l) =>
+        nm(l.offset?.xNm) !== 0 ||
+        nm(l.offset?.yNm) !== 0 ||
+        l.shape !== first?.shape ||
+        nm(l.size?.xNm) !== nm(first?.size?.xNm) ||
+        nm(l.size?.yNm) !== nm(first?.size?.yNm) ||
+        l.cornerRoundingRatio !== first?.cornerRoundingRatio,
+    ),
     layers,
     through,
     drill: through ? nm(stack?.drill?.diameter?.xNm) : 0,
@@ -260,6 +270,7 @@ export async function extractRouteInput(board: Board, opts: ExtractOptions = {})
           net: t.net ?? "",
           netCode: t.netCode ?? 0,
           start: pts[i - 1]!,
+          collisionGeometryUnsupported: true,
           end: pts[i]!,
           width: t.width,
           layer: t.layerId,

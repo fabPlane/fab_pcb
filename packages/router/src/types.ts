@@ -53,9 +53,15 @@ export interface RoutePad {
    * anchor); routers should prefer it over `size`/`rotation` when present.
    */
   bounds?: Box;
+  /** Exact rounded corner radius, nm; absent means the probe cannot measure a roundrect. */
+  cornerRadius?: number;
+  /** Extraction cannot represent this pad's offset or differing layer geometry exactly. */
+  collisionGeometryUnsupported?: boolean;
 }
 
 export interface RouteTrack {
+  /** Chords used by the routers are not exact copper geometry for collision evidence. */
+  collisionGeometryUnsupported?: boolean;
   id: string;
   net: string;
   netCode: number;
@@ -293,12 +299,46 @@ export interface RoutingDiagnostics {
   solverOpens: { before: number; after: number };
   generated: { tracks: number; vias: number };
   discarded: { tracks: number; vias: number };
-  remaining: { nets: number; opens: number; detail: Array<{net:string;incomplete:number}> };
-  leftoverEndpoints: Array<{net:string;x:number;y:number;itemId:string}>;
+  remaining: { nets: number; opens: number; detail: Array<{ net: string; incomplete: number }> };
+  leftoverEndpoints: Array<{ net: string; x: number; y: number; itemId: string }>;
   leftoverEndpointTotal: number;
   physicalBlockerEstablished: boolean;
-  collisions: Array<{endpoint:{uuid:string;ref:string;pin:string;layer:string};blocker:{uuid:string;type:string;net:string};requiredClearanceMm:number;measuredClearanceMm:number;test:string}>;
-  search?: {searches:number;popsUsed:number;popLimit:number;maxPopsUsed:number;maxSearchLimit:number;stoppedBy:Record<string,number>};
+  collisions: Array<{
+    endpoint: { uuid: string; ref: string; pin: string; layer: string };
+    blocker: { uuid: string; type: string; net: string };
+    requiredClearanceMm: number;
+    measuredClearanceMm: number;
+    test: string;
+  }>;
+  search?: {
+    searches: number;
+    popsUsed: number;
+    popLimit: number;
+    maxPopsUsed: number;
+    maxSearchLimit: number;
+    stoppedBy: Record<string, number>;
+  };
+}
+
+export interface EndpointCollision {
+  endpoint: { uuid: string; ref: string; pin: string; layer: string };
+  blocker: { uuid: string; type: "pad" | "via" | "track"; net: string };
+  requiredClearanceMm: number;
+  measuredClearanceMm: number;
+  test: "endpoint-track-width";
+}
+
+export interface EndpointCollisions {
+  text: string;
+  obstacleSet: "pre-route";
+  /** Unique pad/layer probes; non-pad ratsnest endpoints are not tested. */
+  testedEndpoints: number;
+  /** Unique endpoint/layer/obstacle comparisons skipped for inexact geometry. */
+  unsupported: number;
+  total: number;
+  truncated: boolean;
+  physicalBlockerEstablished: boolean;
+  collisions: EndpointCollision[];
 }
 
 export interface RouteResult {

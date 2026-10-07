@@ -30,6 +30,7 @@ import { Arc, KiCad, KiCadClient, Track, Via, type Transport } from "@fp-pcb/cli
 import { DrcErrorType } from "@fp-pcb/proto";
 import { applyRouteResult } from "./apply";
 import { extractRouteInput } from "./extract";
+import { endpointCollisions } from "./endpoint-collisions";
 import { applyRequestRules } from "./request-rules";
 import { FreeroutingRouter, alreadyApplied, resolveFreerouting, type FreeroutingOptions, type FreeroutingPaths } from "./freerouting";
 import { FabRouter } from "./fab-router";
@@ -70,6 +71,7 @@ export interface RouteJobUnrouted {
 }
 
 export interface RouteJobSummary {
+  endpointCollisions?: import("./types").EndpointCollisions;
   diagnostics?: import("./types").RoutingDiagnostics;
   pairRouting?: import("./types").PairRouting;
   tracks: number;
@@ -459,10 +461,18 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         // Re-measure with KiCad's connectivity: what is still an airline after the apply.
         let unrouted = unroutedOf(result);
         let measured = routed;
+        let nativeOpen: RouteConnection[] | undefined;
         try {
           const nets = new Set(request.options?.nets ?? []);
           const rats = await board.ratsnest(request.options?.nets ?? []);
           const edges = rats.edges.filter((e) => !nets.size || nets.has(e.net));
+          nativeOpen = edges.map((e) => ({
+            net: e.net,
+            netCode: e.netCode,
+            length: e.length,
+            from: { itemId: e.source, position: e.sourcePosition, layers: [] },
+            to: { itemId: e.target, position: e.targetPosition, layers: [] },
+          }));
           unrouted = edges.slice(0, MAX_UNROUTED).map((e) => ({
             net: e.net,
             from: { x: e.sourcePosition.x, y: e.sourcePosition.y },
@@ -479,6 +489,16 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           );
         }
         result.log.push(...ruleLog);
+        // Only native leftover endpoints, against input copper captured before either router ran.
+        // On GetRatsnest failure omit the probe rather than label solver guesses as native opens.
+        const collisions = nativeOpen ? endpointCollisions(input, nativeOpen) : undefined;
+        if (collisions) {
+          result.log.push(collisions.text);
+          if (result.diagnostics) {
+            result.diagnostics.physicalBlockerEstablished = collisions.physicalBlockerEstablished;
+            result.diagnostics.collisions = collisions.collisions;
+          }
+        }
         info.state = "done";
         info.finishedAt = new Date().toISOString();
         info.log = result.log.slice(-LOG_TAIL);
@@ -488,6 +508,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           new Map((input.nets ?? []).map((net) => [net.name, net.code])),
         );
         info.summary = {
+          ...(collisions ? { endpointCollisions: collisions } : {}),
           ...(result.diagnostics ? { diagnostics: result.diagnostics } : {}),
           ...(result.pairRouting ? { pairRouting: result.pairRouting } : {}),
           tracks: appliedByKicad?.tracksAdded ?? result.tracks.length,

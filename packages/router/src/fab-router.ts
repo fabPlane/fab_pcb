@@ -31,8 +31,6 @@ export interface FabRouterReport {
   aborted: boolean;
   stoppedBy: string;
   wallClockMs: number;
-  search?: { searches: number; popsUsed: number; popLimit: number; maxPopsUsed: number; maxSearchLimit: number; stoppedBy: Record<string, number> };
-  endpointCollisions?: Array<{ endpoint: { modelId: number; ref: string; pin: string; xMm: number; yMm: number }; layer: string; blocker: { modelId: number; type: string; net: string | null; xMm: number; yMm: number }; requiredClearanceMm: number; measuredClearanceMm: number; test: string }>;
   perNet: Array<{ net: string; incomplete: number }>;
   pairCapability?: "coupled";
   pairs?: import("./types").PairRouting["pairs"];
@@ -201,7 +199,9 @@ export class FabRouter implements Autorouter {
     );
 
     if (!result.ok) {
-      throw new Error(`fab_router failed: ${failureText(result)}. No physical blocker was established. Next: check the solver diagnostics.`);
+      throw new Error(
+        `fab_router failed: ${failureText(result)}. No physical blocker was established. Next: check the solver diagnostics.`,
+      );
     }
 
     log.push(
@@ -219,7 +219,7 @@ export class FabRouter implements Autorouter {
     const parsed = sesToItems(session, input);
     // SES also echoes protected input wires. Count only polylines that contribute new segments,
     // using the same exact echoed-geometry filter as the native import.
-    const generatedWires = session.wires.filter(wire => sesToItems({ ...session, wires: [wire], vias: [] }, input).tracks.length > 0);
+    const generatedWires = session.wires.filter((wire) => sesToItems({ ...session, wires: [wire], vias: [] }, input).tracks.length > 0);
     log.push(...parsed.warnings.map((warning) => `ses: ${warning}`));
 
     // A best-so-far SES can contain useful-looking stubs on nets the solver did not complete.
@@ -236,40 +236,15 @@ export class FabRouter implements Autorouter {
       );
     }
     const unrouted: RouteConnection[] = input.connections.filter((connection) => incompleteNets.has(connection.net));
-    const remaining = result.report.perNet.filter(net => net.incomplete > 0);
-    const endpoints = leftoverConnectionEndpoints(input).filter(end => incompleteNets.has(end.net));
-    const discardedWires = generatedWires.filter(wire => incompleteNets.has(wire.net)).length;
-    const padByDsnRef = new Map<string, typeof input.pads[number]>();
-    const refCounts = new Map<string, number>();
-    for (const pad of input.pads.filter(pad => pad.layers.some(layer => layers.includes(layer)) && pad.size.x > 0 && pad.size.y > 0)) {
-      const base = `${pad.footprint || "PAD"}_${pad.number || pad.id.slice(0, 8)}`.replace(/-/g, "_");
-      const count = refCounts.get(base) ?? 0;
-      refCounts.set(base, count + 1);
-      padByDsnRef.set(count ? `${base}_${count}` : base, pad);
-    }
-    const sourceItem = (x: number, y: number, type: string, excludeId?: string, net?: string | null) => {
-      if (type === "track") {
-        const matching = input.tracks.filter(item => item.id !== excludeId && [item.start,item.end].some(pt => Math.abs(pt.x / 1e6 - x) < 0.00001 && Math.abs(pt.y / 1e6 - y) < 0.00001));
-        return matching.length === 1 ? matching[0] : undefined;
-      }
-      const items = type === "barrel" ? input.vias : input.pads;
-      const matching = items.filter(item => item.id !== excludeId && Math.abs(item.position.x / 1e6 - x) < 0.00001 && Math.abs(item.position.y / 1e6 - y) < 0.00001);
-      const sameNet = net !== null && net !== undefined ? matching.filter(item => item.net === net) : [];
-      return sameNet.length === 1 ? sameNet[0] : matching.length === 1 ? matching[0] : undefined;
-    };
-    const collisions = (result.report.endpointCollisions ?? []).flatMap(c => {
-      const endpoint = padByDsnRef.get(c.endpoint.ref) ?? sourceItem(c.endpoint.xMm, c.endpoint.yMm, "pad");
-      const blocker = sourceItem(c.blocker.xMm, c.blocker.yMm, c.blocker.type, endpoint?.id, c.blocker.net);
-      // A DSN-local id is not a native UUID. Only publish collisions with native identities.
-      if (!endpoint || !blocker) return [];
-      const pad = input.pads.find(p => p.id === endpoint.id)!;
-      return [{ endpoint: { uuid: endpoint.id, ref: pad.footprint, pin: pad.number, layer: c.layer }, blocker: { uuid: blocker.id, type: c.blocker.type, net: blocker.net }, requiredClearanceMm: c.requiredClearanceMm, measuredClearanceMm: c.measuredClearanceMm, test: c.test }];
-    }).slice(0, 24);
-    const remainingText = remaining.slice(0, 8).map(net => `${net.net} ${net.incomplete}`).join("; ") + (remaining.length > 8 ? `; ${remaining.length - 8} more nets` : "");
-    const collisionText = collisions.length
-      ? `Endpoint collision found (blocked pad under endpoint-track-width test): ${collisions.slice(0, 3).map(c => `${c.endpoint.ref}.${c.endpoint.pin} ${c.endpoint.uuid} on ${c.endpoint.layer}; blocker ${c.blocker.uuid} ${c.blocker.type} net ${c.blocker.net || "unassigned"}; clearance required ${c.requiredClearanceMm.toFixed(3)} mm, measured ${c.measuredClearanceMm.toFixed(3)} mm`).join("; ")}. This does not establish that every escape is blocked.`
-      : "No physical blocker was established.";
-    const text = `fab_router stopped after ${result.report.passes} passes (${result.report.stoppedBy}): solver opens ${result.report.incompleteBefore} → ${result.report.incompleteAfter}; generated ${generatedWires.length} tracks and ${parsed.vias.length} vias; discarded ${discardedWires} tracks and ${discardedVias} vias because their nets were incomplete. Remaining (${remaining.length} nets, ${result.report.incompleteAfter} opens): ${remainingText || "none"}. ${collisionText} Next: ${remaining.length ? "try Freerouting for these nets and check the remaining native opens" : "check native connectivity and DRC"}.`;
+    const remaining = result.report.perNet.filter((net) => net.incomplete > 0);
+    const endpoints = leftoverConnectionEndpoints(input).filter((end) => incompleteNets.has(end.net));
+    const discardedWires = generatedWires.filter((wire) => incompleteNets.has(wire.net)).length;
+    const remainingText =
+      remaining
+        .slice(0, 8)
+        .map((net) => `${net.net} ${net.incomplete}`)
+        .join("; ") + (remaining.length > 8 ? `; ${remaining.length - 8} more nets` : "");
+    const text = `fab_router stopped after ${result.report.passes} passes (${result.report.stoppedBy}): solver opens ${result.report.incompleteBefore} → ${result.report.incompleteAfter}; generated ${generatedWires.length} tracks and ${parsed.vias.length} vias; discarded ${discardedWires} tracks and ${discardedVias} vias because their nets were incomplete. Remaining (${remaining.length} nets, ${result.report.incompleteAfter} opens): ${remainingText || "none"}. Physical endpoint evidence is measured by the bridge after native connectivity is rechecked. Next: ${remaining.length ? "try Freerouting for these nets and check the remaining native opens" : "check native connectivity and DRC"}.`;
     const diagnostics: import("./types").RoutingDiagnostics = {
       text,
       passes: result.report.passes,
@@ -280,9 +255,8 @@ export class FabRouter implements Autorouter {
       remaining: { nets: remaining.length, opens: result.report.incompleteAfter, detail: remaining.slice(0, 24) },
       leftoverEndpoints: endpoints.slice(0, 24),
       leftoverEndpointTotal: endpoints.length,
-      physicalBlockerEstablished: collisions.length > 0,
-      collisions,
-      ...(result.report.search ? { search: result.report.search } : {}),
+      physicalBlockerEstablished: false,
+      collisions: [],
     };
     log.push(text);
     const elapsedMs = Math.round(performance.now() - started);

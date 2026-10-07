@@ -4,6 +4,54 @@ import { ArcSchema, BoardLayer, TrackSchema, ViaSchema } from "@fp-pcb/proto";
 import { Arc, Track, Via, toDistance, toVector2, type Board } from "@fp-pcb/client";
 import type { RouteInput, RouteResult } from "../src/types";
 import { createRouteJobs, persistAppliedRoute, routeGeometry, withoutRejectedCreatedCopper } from "../src/bridge-job";
+import { collisionBoard } from "./collision-fixture";
+
+for (const router of ["js", "freerouting"] as const)
+  test(`${router} probes native leftover opens after application using pre-route obstacles`, async () => {
+    const input = collisionBoard();
+    const board = {
+      drc: { run: async () => ({ markers: [] }) },
+      save: async () => {},
+      getTracks: async () => [],
+      ratsnest: async () => ({
+        edges: input.connections.map((c) => ({
+          net: c.net,
+          netCode: c.netCode,
+          source: c.from.itemId,
+          target: c.to.itemId,
+          sourcePosition: c.from.position,
+          targetPosition: c.to.position,
+          length: c.length,
+        })),
+      }),
+    } as unknown as Board;
+    const jobs = createRouteJobs({
+      openBoard: async () => board,
+      extract: async () => input,
+      freerouting: { jar: "/test/router.jar", java: "/test/java", ok: true },
+      routers: () => ({
+        name: router === "js" ? "fab-router" : "freerouting",
+        route: async () => ({
+          router: router === "js" ? "fab-router" : "freerouting",
+          tracks: [{ net: "A", netCode: 1, start: { x: 0, y: 0 }, end: { x: 1, y: 0 }, width: 1, layer: BoardLayer.BL_F_Cu }],
+          vias: [],
+          totalConnections: 1,
+          unrouted: [],
+          timedOut: false,
+          elapsedMs: 1,
+          log: [],
+        }),
+      }),
+      apply: async () => ({ commitId: "commit", created: [], updated: [], deleted: [], value: [] }),
+    });
+    const info = await jobs.wait(
+      jobs.start({ id: "collision-session", transport: null }, { router, refillZones: false, message: "test route" }).id,
+    );
+    expect(info.state).toBe("done");
+    expect(info.summary?.routed).toBe(0); // Native open, despite the solver claiming success.
+    expect(info.summary?.endpointCollisions).toMatchObject({ total: 1, physicalBlockerEstablished: true, obstacleSet: "pre-route" });
+    expect(info.summary?.endpointCollisions?.collisions[0]?.blocker.uuid).toBe("blocker");
+  });
 
 function routeJobFixture(options: { refillZones?: boolean; failSecondRefill?: boolean; appliesCopper?: boolean } = {}) {
   const calls: string[] = [];
@@ -86,7 +134,7 @@ describe("route job zone refills", () => {
     const info = await done;
     expect(info.state).toBe("done");
     expect(info.zoneRefill).toEqual({ before: true, after: false, error: "zone filler unavailable" });
-    expect(info.summary?.log.at(-1)).toContain("saving the applied route without a fresh fill");
+    expect(info.summary?.log.some((line) => line.includes("saving the applied route without a fresh fill"))).toBe(true);
     expect(calls.slice(calls.indexOf("apply"))).toEqual(["apply", "refill", "save", "ratsnest", "getTracks"]);
   });
 
