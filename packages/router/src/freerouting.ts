@@ -33,7 +33,7 @@ import type { Board } from "@fp-pcb/client";
 import { commands as generatedCommands, KiCadApiError } from "@fp-pcb/client";
 import { overlayDsnRules } from "./specctra/rule-overlay";
 import { writeDsn, dsnLayers, extraViasFromRouteOptions } from "./specctra/dsn";
-import { blockedConnectionPads } from "./fab-router";
+import { leftoverConnectionEndpoints } from "./fab-router";
 import { parseSes, sesToItems } from "./specctra/ses";
 import {
   RouteCancelled,
@@ -613,9 +613,9 @@ export class FreeroutingRouter implements Autorouter {
       `${result.tracks.length} tracks, ${result.vias.length} vias to create; ${input.connections.length - result.unrouted.length}/${input.connections.length} connections in ${result.elapsedMs} ms`,
     );
     if (result.unrouted.length === input.connections.length && input.connections.length) {
-      const blocked = blockedConnectionPads(input);
+      const blocked = leftoverConnectionEndpoints(input);
       log.push(
-        `no leftover connections routed; blockedPads: ${blocked
+        `no leftover connections routed; leftoverEndpoints (no physical blocker established): ${blocked
           .slice(0, 24)
           .map((pad) => `${pad.net} ${pad.itemId} (${pad.x.toFixed(3)},${pad.y.toFixed(3)})`)
           .join("; ")}`,
