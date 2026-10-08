@@ -132,3 +132,27 @@ describe("FabRouter", () => {
     await expect(new FabRouter({ routeDsn: () => success() }).route(input)).rejects.toThrow("assignable prefab via");
   });
 });
+
+test("declarations reach the DSN request and measurement-only outcomes stay visible", async () => {
+  const input = twoNetBoard();
+  input.differentialPairs = [{ p: "A", n: "B", widthMm: 0.25, gapMm: 0.2, skewToleranceMm: 0.1 }];
+  let received: Parameters<import("../src/fab-router").FabRouteDsn>[3];
+  const result = await new FabRouter({
+    routeDsn: (_text, _settings, _hooks, request) => {
+      received = request;
+      return success();
+    },
+  }).route(input);
+  expect(received).toEqual({ differentialPairs: input.differentialPairs, minimumClearanceMm: input.rules.minClearance / 1e6 });
+  expect(result.pairRouting).toMatchObject({ capability: "measurement-only", pairs: [{ p: "A", n: "B", status: "independent-fallback" }] });
+});
+test("coupled-capable solver outcomes are preserved without inventing measurements", async () => {
+  const input = twoNetBoard();
+  input.differentialPairs = [{ p: "A", n: "B" }];
+  const native = success();
+  if (!native.ok) throw new Error("fixture");
+  native.report.pairCapability = "coupled";
+  native.report.pairs = [{ p: "A", n: "B", status: "coupled", reason: null, coupledLengthMm: 12, tuningAddedLengthMm: 0.2 }];
+  const result = await new FabRouter({ routeDsn: () => native }).route(input);
+  expect(result.pairRouting).toEqual({ capability: "coupled", pairs: native.report.pairs });
+});

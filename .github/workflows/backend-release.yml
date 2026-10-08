@@ -138,7 +138,11 @@ jobs:
           tag_name: ${{ steps.source.outputs.tag }}
           target_commitish: ${{ steps.source.outputs.sha }}
           name: ${{ steps.source.outputs.tag }}
-          body: FabRouter-enabled FabPlane PCB native backends for ${{ steps.source.outputs.sha }}.
+          body: |
+            FabRouter-enabled FabPlane PCB native backends for ${{ steps.source.outputs.sha }}, including Freerouting 2.4.1 and Eclipse Temurin 25.0.4.1+1.
+            Licenses and source notice are included in freerouting/licenses and freerouting/jre/legal.
+            Corresponding source: https://github.com/freerouting/freerouting/archive/refs/tags/v2.4.1.tar.gz
+            Temurin source: https://github.com/adoptium/jdk25u/tree/jdk-25.0.4.1%2B1
           draft: true
 
   linux-x64:
@@ -217,6 +221,7 @@ jobs:
         shell: bash
         env:
           FP_PCB_FAB_ROUTER_SOURCE: ${{ github.workspace }}/.release-private/fab_router
+          # bundle.ts fetches checksummed Freerouting/Temurin pins and runs jdeps + jlink natively.
         run: |
           set -euo pipefail
           bun packages/kicad-patches/bundle.ts linux-x64 \
@@ -304,6 +309,7 @@ jobs:
         shell: bash
         env:
           FP_PCB_FAB_ROUTER_SOURCE: ${{ github.workspace }}/.release-private/fab_router
+          # Native target JDK is used for jdeps + jlink, including both macOS architectures.
         run: |
           set -euo pipefail
           bun packages/kicad-patches/bundle.ts "${{ matrix.target }}" \
