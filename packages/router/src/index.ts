@@ -1,4 +1,5 @@
 export * from "./types";
+export { endpointCollisions } from "./endpoint-collisions";
 export { extractRouteInput, rulesForNet, copperLayersInOrder, isCopperLayer, type ExtractOptions } from "./extract";
 export { applyRouteResult, claimedViaItems, itemsFor, trackProto, viaProto, type ApplyOptions } from "./apply";
 export { JsRouter, type JsRouterOptions } from "./js-router";

@@ -30,6 +30,7 @@ import { Arc, KiCad, KiCadClient, Track, Via, type Transport } from "@fp-pcb/cli
 import { DrcErrorType } from "@fp-pcb/proto";
 import { applyRouteResult } from "./apply";
 import { extractRouteInput } from "./extract";
+import { endpointCollisions } from "./endpoint-collisions";
 import { applyRequestRules } from "./request-rules";
 import { FreeroutingRouter, alreadyApplied, resolveFreerouting, type FreeroutingOptions, type FreeroutingPaths } from "./freerouting";
 import { FabRouter } from "./fab-router";
@@ -70,6 +71,8 @@ export interface RouteJobUnrouted {
 }
 
 export interface RouteJobSummary {
+  endpointCollisions?: import("./types").EndpointCollisions;
+  diagnostics?: import("./types").RoutingDiagnostics;
   pairRouting?: import("./types").PairRouting;
   tracks: number;
   /** Vias the router added. */
@@ -108,6 +111,8 @@ export interface RouteJobGeometry {
   /** KiCad BoardLayer enum. Through vias use -1. */
   layer: number;
   net: number;
+  /** Native net name, including when GetItems omits the net code. */
+  netName?: string;
   /** Trace centreline points, or a via bounding box. */
   points: number[];
   /** Trace width in nm. */
@@ -223,7 +228,10 @@ export function withoutRejectedCreatedCopper(
 }
 
 /** Compact, renderer-neutral copper geometry for a completed routing run. */
-export function routeGeometry(items: readonly (Track | Arc | Via)[]): RouteJobGeometry[] {
+export function routeGeometry(
+  items: readonly (Track | Arc | Via)[],
+  codeByNet: ReadonlyMap<string, number> = new Map(),
+): RouteJobGeometry[] {
   return items.map((item) => {
     if (item instanceof Via) {
       const r = item.diameter / 2;
@@ -231,7 +239,8 @@ export function routeGeometry(items: readonly (Track | Arc | Via)[]): RouteJobGe
         kind: "via",
         id: item.id,
         layer: -1,
-        net: item.netCode ?? 0,
+        net: item.netCode || codeByNet.get(item.net ?? "") || 0,
+        netName: item.net ?? "",
         points: [item.position.x - r, item.position.y - r, item.position.x + r, item.position.y + r],
       };
     }
@@ -239,7 +248,15 @@ export function routeGeometry(items: readonly (Track | Arc | Via)[]): RouteJobGe
       item instanceof Arc
         ? [item.start.x, item.start.y, item.mid.x, item.mid.y, item.end.x, item.end.y]
         : [item.start.x, item.start.y, item.end.x, item.end.y];
-    return { kind: "trace", id: item.id, layer: item.layerId, net: item.netCode ?? 0, points, width: item.width };
+    return {
+      kind: "trace",
+      id: item.id,
+      layer: item.layerId,
+      net: item.netCode || codeByNet.get(item.net ?? "") || 0,
+      netName: item.net ?? "",
+      points,
+      width: item.width,
+    };
   });
 }
 
@@ -249,9 +266,10 @@ export function routeGeometry(items: readonly (Track | Arc | Via)[]): RouteJobGe
  * Freerouting writes no session. Null when something was routed or there was nothing to route.
  */
 export function emptyResultReason(
-  r: Pick<RouteResult, "totalConnections" | "tracks" | "vias" | "unrouted" | "timedOut" | "log">,
+  r: Pick<RouteResult, "totalConnections" | "tracks" | "vias" | "unrouted" | "timedOut" | "log" | "diagnostics">,
 ): string | null {
   if (r.totalConnections === 0 || r.tracks.length || r.vias.length || r.unrouted.length < r.totalConnections) return null;
+  if (r.diagnostics) return r.diagnostics.text;
   const why = [...r.log]
     .reverse()
     .find((l) => /solver failed|precheck|timed out|exited with|no session|ran out of|blockedPads|padstack-unknown/i.test(l));
@@ -369,7 +387,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         });
         checkCancelled();
         const empty = emptyResultReason(result);
-        if (empty) {
+        if (empty && !result.diagnostics) {
           info.log = result.log.slice(-LOG_TAIL);
           throw new Error(empty);
         }
@@ -443,10 +461,18 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         // Re-measure with KiCad's connectivity: what is still an airline after the apply.
         let unrouted = unroutedOf(result);
         let measured = routed;
+        let nativeOpen: RouteConnection[] | undefined;
         try {
           const nets = new Set(request.options?.nets ?? []);
           const rats = await board.ratsnest(request.options?.nets ?? []);
           const edges = rats.edges.filter((e) => !nets.size || nets.has(e.net));
+          nativeOpen = edges.map((e) => ({
+            net: e.net,
+            netCode: e.netCode,
+            length: e.length,
+            from: { itemId: e.source, position: e.sourcePosition, layers: [] },
+            to: { itemId: e.target, position: e.targetPosition, layers: [] },
+          }));
           unrouted = edges.slice(0, MAX_UNROUTED).map((e) => ({
             net: e.net,
             from: { x: e.sourcePosition.x, y: e.sourcePosition.y },
@@ -463,12 +489,27 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           );
         }
         result.log.push(...ruleLog);
+        // Only native leftover endpoints, against input copper captured before either router ran.
+        // On GetRatsnest failure omit the probe rather than label solver guesses as native opens.
+        const collisions = nativeOpen ? endpointCollisions(input, nativeOpen) : undefined;
+        if (collisions) {
+          result.log.push(collisions.text);
+          if (result.diagnostics) {
+            result.diagnostics.physicalBlockerEstablished = collisions.physicalBlockerEstablished;
+            result.diagnostics.collisions = collisions.collisions;
+          }
+        }
         info.state = "done";
         info.finishedAt = new Date().toISOString();
         info.log = result.log.slice(-LOG_TAIL);
         const claimedIds = new Set(result.claimedVias?.map((via) => via.id) ?? []);
-        const geometry = routeGeometry((await board.getTracks()).filter((item) => !copperBefore.has(item.id) || claimedIds.has(item.id)));
+        const geometry = routeGeometry(
+          (await board.getTracks()).filter((item) => !copperBefore.has(item.id) || claimedIds.has(item.id)),
+          new Map((input.nets ?? []).map((net) => [net.name, net.code])),
+        );
         info.summary = {
+          ...(collisions ? { endpointCollisions: collisions } : {}),
+          ...(result.diagnostics ? { diagnostics: result.diagnostics } : {}),
           ...(result.pairRouting ? { pairRouting: result.pairRouting } : {}),
           tracks: appliedByKicad?.tracksAdded ?? result.tracks.length,
           vias: appliedByKicad?.viasAdded ?? result.vias.length,
@@ -481,7 +522,12 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           elapsedMs: result.elapsedMs,
           wallMs: Math.round(performance.now() - t0),
           timedOut: result.timedOut,
-          message: applied || appliedByKicad ? message : "",
+          message:
+            result.diagnostics && (!(applied || appliedByKicad) || unrouted.length > 0)
+              ? result.diagnostics.text
+              : applied || appliedByKicad
+                ? message
+                : "",
           unrouted,
           geometry,
           log: result.log,

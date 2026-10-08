@@ -4,6 +4,54 @@ import { ArcSchema, BoardLayer, TrackSchema, ViaSchema } from "@fp-pcb/proto";
 import { Arc, Track, Via, toDistance, toVector2, type Board } from "@fp-pcb/client";
 import type { RouteInput, RouteResult } from "../src/types";
 import { createRouteJobs, persistAppliedRoute, routeGeometry, withoutRejectedCreatedCopper } from "../src/bridge-job";
+import { collisionBoard } from "./collision-fixture";
+
+for (const router of ["js", "freerouting"] as const)
+  test(`${router} probes native leftover opens after application using pre-route obstacles`, async () => {
+    const input = collisionBoard();
+    const board = {
+      drc: { run: async () => ({ markers: [] }) },
+      save: async () => {},
+      getTracks: async () => [],
+      ratsnest: async () => ({
+        edges: input.connections.map((c) => ({
+          net: c.net,
+          netCode: c.netCode,
+          source: c.from.itemId,
+          target: c.to.itemId,
+          sourcePosition: c.from.position,
+          targetPosition: c.to.position,
+          length: c.length,
+        })),
+      }),
+    } as unknown as Board;
+    const jobs = createRouteJobs({
+      openBoard: async () => board,
+      extract: async () => input,
+      freerouting: { jar: "/test/router.jar", java: "/test/java", ok: true },
+      routers: () => ({
+        name: router === "js" ? "fab-router" : "freerouting",
+        route: async () => ({
+          router: router === "js" ? "fab-router" : "freerouting",
+          tracks: [{ net: "A", netCode: 1, start: { x: 0, y: 0 }, end: { x: 1, y: 0 }, width: 1, layer: BoardLayer.BL_F_Cu }],
+          vias: [],
+          totalConnections: 1,
+          unrouted: [],
+          timedOut: false,
+          elapsedMs: 1,
+          log: [],
+        }),
+      }),
+      apply: async () => ({ commitId: "commit", created: [], updated: [], deleted: [], value: [] }),
+    });
+    const info = await jobs.wait(
+      jobs.start({ id: "collision-session", transport: null }, { router, refillZones: false, message: "test route" }).id,
+    );
+    expect(info.state).toBe("done");
+    expect(info.summary?.routed).toBe(0); // Native open, despite the solver claiming success.
+    expect(info.summary?.endpointCollisions).toMatchObject({ total: 1, physicalBlockerEstablished: true, obstacleSet: "pre-route" });
+    expect(info.summary?.endpointCollisions?.collisions[0]?.blocker.uuid).toBe("blocker");
+  });
 
 function routeJobFixture(options: { refillZones?: boolean; failSecondRefill?: boolean; appliesCopper?: boolean } = {}) {
   const calls: string[] = [];
@@ -86,7 +134,7 @@ describe("route job zone refills", () => {
     const info = await done;
     expect(info.state).toBe("done");
     expect(info.zoneRefill).toEqual({ before: true, after: false, error: "zone filler unavailable" });
-    expect(info.summary?.log.at(-1)).toContain("saving the applied route without a fresh fill");
+    expect(info.summary?.log.some((line) => line.includes("saving the applied route without a fresh fill"))).toBe(true);
     expect(calls.slice(calls.indexOf("apply"))).toEqual(["apply", "refill", "save", "ratsnest", "getTracks"]);
   });
 
@@ -163,9 +211,9 @@ describe("routeGeometry", () => {
     );
 
     expect(routeGeometry([track, arc, via])).toEqual([
-      { kind: "trace", id: "track-1", layer: BoardLayer.BL_F_Cu, net: 7, points: [1, 2, 3, 4], width: 5 },
-      { kind: "trace", id: "arc-1", layer: BoardLayer.BL_B_Cu, net: 8, points: [10, 20, 15, 25, 20, 20], width: 6 },
-      { kind: "via", id: "via-1", layer: -1, net: 7, points: [90, 190, 110, 210] },
+      { kind: "trace", id: "track-1", layer: BoardLayer.BL_F_Cu, net: 7, netName: "N", points: [1, 2, 3, 4], width: 5 },
+      { kind: "trace", id: "arc-1", layer: BoardLayer.BL_B_Cu, net: 8, netName: "M", points: [10, 20, 15, 25, 20, 20], width: 6 },
+      { kind: "via", id: "via-1", layer: -1, net: 7, netName: "N", points: [90, 190, 110, 210] },
     ]);
   });
 });
@@ -192,4 +240,107 @@ test("withoutRejectedCreatedCopper maps rejected KiCad ids back to generated cop
   const clean = withoutRejectedCreatedCopper(result, created, new Set(["reject-track", "reject-via"]));
   expect(clean.tracks.map((track) => track.net)).toEqual(["A"]);
   expect(clean.vias).toEqual([]);
+});
+
+test("route geometry resolves native name-only net records through the extracted net table", () => {
+  const track = new Track(create(TrackSchema, { id: { value: "native-track" }, net: { name: "SIGNAL" }, layer: BoardLayer.BL_F_Cu }));
+  const via = new Via(
+    create(ViaSchema, {
+      id: { value: "native-via" },
+      net: { name: "GND" },
+      padStack: { copperLayers: [{ size: toVector2({ x: 600000, y: 600000 }) }] },
+    }),
+  );
+  const geometry = routeGeometry(
+    [track, via],
+    new Map([
+      ["SIGNAL", 13],
+      ["GND", 2],
+    ]),
+  );
+  expect(geometry.map(({ net, netName }) => ({ net, netName }))).toEqual([
+    { net: 13, netName: "SIGNAL" },
+    { net: 2, netName: "GND" },
+  ]);
+});
+
+describe("route summary messages with fab_router diagnostics", () => {
+  for (const scenario of ["complete", "no-progress", "native-opens"] as const) {
+    test(`${scenario}: keeps diagnostics separate from the successful autoroute message`, async () => {
+      const input = collisionBoard();
+      const usable = scenario !== "no-progress";
+      const edges =
+        scenario === "native-opens"
+          ? input.connections.map((c) => ({
+              net: c.net,
+              netCode: c.netCode,
+              source: c.from.itemId,
+              target: c.to.itemId,
+              sourcePosition: c.from.position,
+              targetPosition: c.to.position,
+              length: c.length,
+            }))
+          : [];
+      const diagnostics: NonNullable<RouteResult["diagnostics"]> = {
+        text: `fab_router diagnostic paragraph: ${scenario}`,
+        passes: 1,
+        stoppedBy: scenario === "complete" ? "complete" : "stagnant",
+        solverOpens: { before: 1, after: usable ? 0 : 1 },
+        generated: { tracks: usable ? 1 : 0, vias: 0 },
+        discarded: { tracks: 0, vias: 0 },
+        remaining: { nets: usable ? 0 : 1, opens: usable ? 0 : 1, detail: [] },
+        leftoverEndpoints: [],
+        leftoverEndpointTotal: 0,
+        physicalBlockerEstablished: false,
+        collisions: [],
+      };
+      const result: RouteResult = {
+        router: "fab-router",
+        tracks: usable
+          ? [
+              {
+                net: "A",
+                netCode: 1,
+                start: { x: 0, y: 0 },
+                end: { x: 1, y: 0 },
+                width: 1,
+                layer: BoardLayer.BL_F_Cu,
+              },
+            ]
+          : [],
+        vias: [],
+        unrouted: [],
+        totalConnections: 1,
+        timedOut: false,
+        elapsedMs: 1,
+        diagnostics,
+        log: [diagnostics.text],
+      };
+      const commitMessages: string[] = [];
+      const board = {
+        drc: { run: async () => ({ markers: [] }) },
+        save: async () => {},
+        getTracks: async () => [],
+        undo: async () => ({ applied: 1 }),
+        ratsnest: async () => ({ edges }),
+      } as unknown as Board;
+      const jobs = createRouteJobs({
+        openBoard: async () => board,
+        extract: async () => input,
+        capacityRouter: { name: "fab-router", route: async () => result },
+        apply: async (_board, _result, options) => {
+          commitMessages.push(options?.message ?? "");
+          return { commitId: "commit", created: [], updated: [], deleted: [], value: [] };
+        },
+      });
+      const info = await jobs.wait(jobs.start({ id: "message-session", transport: null }, { router: "js", refillZones: false }).id);
+      expect(info.state).toBe("done");
+      expect(info.summary?.message).toBe(scenario === "complete" ? "Autoroute (js): 1 connection" : diagnostics.text);
+      expect(info.summary?.diagnostics?.text).toBe(diagnostics.text);
+      expect(info.summary?.endpointCollisions).toBeDefined();
+      expect(info.summary?.log).toContain(diagnostics.text);
+      if (scenario === "complete") expect(commitMessages).toEqual(["Autoroute (js): 1 connection"]);
+      if (!usable) expect(commitMessages).toEqual([]);
+    });
+  }
 });

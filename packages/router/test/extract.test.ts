@@ -223,6 +223,45 @@ function boardServer(): FakeTransport {
 }
 
 describe("extractRouteInput", () => {
+  test("keeps exact roundrect radius and marks offset or differing-layer geometry unsupported", async () => {
+    const t = boardServer();
+    t.on(GetItemsSchema, (req) =>
+      reply(GetItemsResponseSchema, {
+        status: ItemRequestStatus.IRS_OK,
+        items: req.types.includes(KiCadObjectType.KOT_PCB_PAD)
+          ? ["rounded", "offset", "layered"].map((id) =>
+              packAny(
+                PadSchema,
+                create(PadSchema, {
+                  id: { value: id },
+                  position: v(5, 5),
+                  type: PadType.PT_PTH,
+                  padStack: {
+                    type: PadStackType.PST_NORMAL,
+                    layers: [BoardLayer.BL_F_Cu, BoardLayer.BL_B_Cu],
+                    copperLayers: [
+                      {
+                        layer: BoardLayer.BL_F_Cu,
+                        shape: PadStackShape.PSS_ROUNDRECT,
+                        size: v(2, 1),
+                        cornerRoundingRatio: 0.25,
+                        ...(id === "offset" ? { offset: v(0.1, 0) } : {}),
+                      },
+                      ...(id === "layered" ? [{ layer: BoardLayer.BL_B_Cu, shape: PadStackShape.PSS_RECTANGLE, size: v(1, 1) }] : []),
+                    ],
+                  },
+                }),
+              ),
+            )
+          : [],
+      }),
+    );
+    const kicad = new KiCad(await KiCadClient.connect(t, { clientName: "extract-radius" }));
+    const input = await extractRouteInput(kicad.boardFrom(DOC));
+    expect(input.pads[0]).toMatchObject({ shape: "roundrect", cornerRadius: mm(0.25), collisionGeometryUnsupported: false });
+    expect(input.pads[1]?.collisionGeometryUnsupported).toBe(true);
+    expect(input.pads[2]?.collisionGeometryUnsupported).toBe(true);
+  });
   test("builds the full RouteInput from the fake board", async () => {
     const t = boardServer();
     const kicad = new KiCad(await KiCadClient.connect(t, { clientName: "extract-test" }));

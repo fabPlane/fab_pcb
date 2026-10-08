@@ -80,8 +80,8 @@ function failureText(result: Extract<FabRouterTextResult, { ok: false }>): strin
   return error ?? result.diagnostics.map(diagnosticText).filter(Boolean).join("; ") ?? "unknown failure";
 }
 
-/** Leftover endpoints in millimetres, for a fail-fast "boxed pad" report when nothing routes. */
-export function blockedConnectionPads(input: RouteInput): Array<{ net: string; x: number; y: number; itemId: string }> {
+/** Untested input endpoints in millimetres; this list is not collision evidence. */
+export function leftoverConnectionEndpoints(input: RouteInput): Array<{ net: string; x: number; y: number; itemId: string }> {
   const seen = new Set<string>();
   const out: Array<{ net: string; x: number; y: number; itemId: string }> = [];
   for (const connection of input.connections) {
@@ -199,14 +199,9 @@ export class FabRouter implements Autorouter {
     );
 
     if (!result.ok) {
-      const blocked = blockedConnectionPads(input);
-      const detail = blocked.length
-        ? `; blockedPads ${blocked
-            .slice(0, 24)
-            .map((pad) => `${pad.net}@${pad.x.toFixed(2)},${pad.y.toFixed(2)}`)
-            .join("; ")}`
-        : "";
-      throw new Error(`fab_router failed: ${failureText(result)}${detail}`);
+      throw new Error(
+        `fab_router failed: ${failureText(result)}. No physical blocker was established. Next: check the solver diagnostics.`,
+      );
     }
 
     log.push(
@@ -220,7 +215,11 @@ export class FabRouter implements Autorouter {
     }
 
     progress?.({ phase: "import", percent: 99, total: input.connections.length });
-    const parsed = sesToItems(parseSes(result.ses), input);
+    const session = parseSes(result.ses);
+    const parsed = sesToItems(session, input);
+    // SES also echoes protected input wires. Count only polylines that contribute new segments,
+    // using the same exact echoed-geometry filter as the native import.
+    const generatedWires = session.wires.filter((wire) => sesToItems({ ...session, wires: [wire], vias: [] }, input).tracks.length > 0);
     log.push(...parsed.warnings.map((warning) => `ses: ${warning}`));
 
     // A best-so-far SES can contain useful-looking stubs on nets the solver did not complete.
@@ -237,15 +236,29 @@ export class FabRouter implements Autorouter {
       );
     }
     const unrouted: RouteConnection[] = input.connections.filter((connection) => incompleteNets.has(connection.net));
-    if (unrouted.length === input.connections.length && input.connections.length) {
-      const blocked = blockedConnectionPads(input);
-      log.push(
-        `no leftover connections routed; blockedPads: ${blocked
-          .slice(0, 24)
-          .map((pad) => `${pad.net} ${pad.itemId} (${pad.x.toFixed(3)},${pad.y.toFixed(3)})`)
-          .join("; ")}`,
-      );
-    }
+    const remaining = result.report.perNet.filter((net) => net.incomplete > 0);
+    const endpoints = leftoverConnectionEndpoints(input).filter((end) => incompleteNets.has(end.net));
+    const discardedWires = generatedWires.filter((wire) => incompleteNets.has(wire.net)).length;
+    const remainingText =
+      remaining
+        .slice(0, 8)
+        .map((net) => `${net.net} ${net.incomplete}`)
+        .join("; ") + (remaining.length > 8 ? `; ${remaining.length - 8} more nets` : "");
+    const text = `fab_router stopped after ${result.report.passes} passes (${result.report.stoppedBy}): solver opens ${result.report.incompleteBefore} → ${result.report.incompleteAfter}; generated ${generatedWires.length} tracks and ${parsed.vias.length} vias; discarded ${discardedWires} tracks and ${discardedVias} vias because their nets were incomplete. Remaining (${remaining.length} nets, ${result.report.incompleteAfter} opens): ${remainingText || "none"}. Physical endpoint evidence is measured by the bridge after native connectivity is rechecked. Next: ${remaining.length ? "try Freerouting for these nets and check the remaining native opens" : "check native connectivity and DRC"}.`;
+    const diagnostics: import("./types").RoutingDiagnostics = {
+      text,
+      passes: result.report.passes,
+      stoppedBy: result.report.stoppedBy,
+      solverOpens: { before: result.report.incompleteBefore, after: result.report.incompleteAfter },
+      generated: { tracks: generatedWires.length, vias: parsed.vias.length },
+      discarded: { tracks: discardedWires, vias: discardedVias },
+      remaining: { nets: remaining.length, opens: result.report.incompleteAfter, detail: remaining.slice(0, 24) },
+      leftoverEndpoints: endpoints.slice(0, 24),
+      leftoverEndpointTotal: endpoints.length,
+      physicalBlockerEstablished: false,
+      collisions: [],
+    };
+    log.push(text);
     const elapsedMs = Math.round(performance.now() - started);
     log.push(
       `${tracks.length} tracks, ${vias.length} vias; ${input.connections.length - unrouted.length}/${input.connections.length} connections in ${elapsedMs} ms (${result.report.stoppedBy})`,
@@ -272,6 +285,7 @@ export class FabRouter implements Autorouter {
     if (pairRouting) log.push(`pairRouting ${JSON.stringify(pairRouting)}`);
     return {
       ...(pairRouting ? { pairRouting } : {}),
+      diagnostics,
       router: this.name,
       tracks,
       vias,

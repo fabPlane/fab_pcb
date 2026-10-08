@@ -92,6 +92,23 @@ is dense boards: on interf_u and stickhub the precheck/retry sequence ends with 
 
 ## The common layer
 
+Bridge jobs run the report-only `endpointCollisions(input, nativeOpenConnections)` probe after
+application and native `GetRatsnest`, for both routers. The obstacle set is the board before routing;
+new router copper is not tested. Each unique open pad endpoint is tested on every pad copper layer
+using a disk of its effective net track width centered at the pad position. Clearance uses the
+effective net-class rules supplied to the routers (including request overlays), replacing an item's
+net-class clearance with its pad override when present, then taking the larger of both item rules
+and the board minimum. Same-net copper is excluded. This establishes a collision under that test,
+not that every escape is blocked. Native UUIDs, mm clearances, unsupported comparison counts and
+at most 24 collisions appear in `summary.endpointCollisions` with text for either router.
+
+Circles, rotated rectangles, ovals and rounded rectangles with a known radius are measured exactly.
+Custom-pad bounding boxes can exclude distant copper but cannot establish a collision; nearby custom
+pads, trapezoids, chamfered rectangles, missing roundrect radii, offset/differing-layer pad stacks
+and approximated arc chords are counted as unsupported, never approximated as positive evidence.
+Unsupported counts are unique endpoint/layer/obstacle comparisons, not a count of board items.
+Non-pad endpoints are outside the probe's scope. If native remeasurement fails, the field is omitted.
+
 `extractRouteInput(board, { nets?, warn? })` reads, through the model layer:
 
 - `GetBoardEnabledLayers` + `GetBoardLayerName` -> `copperLayers` (F.Cu, In1..InN, B.Cu, with user names);
