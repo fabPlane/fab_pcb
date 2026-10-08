@@ -184,8 +184,10 @@ describe.skipIf(!haveKicad || !cfg.freerouting.ok)("Freerouting job (kicad-dsn m
     expect(done.summary!.message).toBe(`Autoroute (freerouting): ${done.summary!.routed} connections`);
     expect((await board.unroutedCount()).unroutedCount).toBe(14 - done.summary!.routed);
     const stack = await board.undoStack();
-    expect(stack.undo[stack.undo.length - 1]?.description).toBe(done.summary!.message);
-    await board.undo();
+    // The post-apply refill can add a later undo entry, as it does for the JS route above.
+    const routeIndex = stack.undo.map((entry) => entry.description).lastIndexOf(done.summary!.message);
+    expect(routeIndex).toBeGreaterThanOrEqual(0);
+    await board.undo(stack.undo.length - routeIndex);
     expect((await board.unroutedCount()).unroutedCount).toBe(14);
   }, 180_000);
 });
