@@ -264,55 +264,78 @@ test("route geometry resolves native name-only net records through the extracted
   ]);
 });
 
-
 describe("route summary messages with fab_router diagnostics", () => {
   for (const scenario of ["complete", "no-progress", "native-opens"] as const) {
     test(`${scenario}: keeps diagnostics separate from the successful autoroute message`, async () => {
       const input = collisionBoard();
       const usable = scenario !== "no-progress";
-      const edges = scenario === "native-opens" ? input.connections.map((c) => ({
-        net: c.net, netCode: c.netCode, source: c.from.itemId, target: c.to.itemId,
-        sourcePosition: c.from.position, targetPosition: c.to.position, length: c.length,
-      })) : [];
+      const edges =
+        scenario === "native-opens"
+          ? input.connections.map((c) => ({
+              net: c.net,
+              netCode: c.netCode,
+              source: c.from.itemId,
+              target: c.to.itemId,
+              sourcePosition: c.from.position,
+              targetPosition: c.to.position,
+              length: c.length,
+            }))
+          : [];
       const diagnostics: NonNullable<RouteResult["diagnostics"]> = {
         text: `fab_router diagnostic paragraph: ${scenario}`,
-        passes: 1, stoppedBy: scenario === "complete" ? "complete" : "stagnant",
+        passes: 1,
+        stoppedBy: scenario === "complete" ? "complete" : "stagnant",
         solverOpens: { before: 1, after: usable ? 0 : 1 },
         generated: { tracks: usable ? 1 : 0, vias: 0 },
         discarded: { tracks: 0, vias: 0 },
         remaining: { nets: usable ? 0 : 1, opens: usable ? 0 : 1, detail: [] },
-        leftoverEndpoints: [], leftoverEndpointTotal: 0,
-        physicalBlockerEstablished: false, collisions: [],
+        leftoverEndpoints: [],
+        leftoverEndpointTotal: 0,
+        physicalBlockerEstablished: false,
+        collisions: [],
       };
       const result: RouteResult = {
-        router: "fab-router", tracks: usable ? [{
-          net: "A", netCode: 1, start: { x: 0, y: 0 }, end: { x: 1, y: 0 },
-          width: 1, layer: BoardLayer.BL_F_Cu,
-        }] : [],
-        vias: [], unrouted: [], totalConnections: 1, timedOut: false,
-        elapsedMs: 1, diagnostics, log: [diagnostics.text],
+        router: "fab-router",
+        tracks: usable
+          ? [
+              {
+                net: "A",
+                netCode: 1,
+                start: { x: 0, y: 0 },
+                end: { x: 1, y: 0 },
+                width: 1,
+                layer: BoardLayer.BL_F_Cu,
+              },
+            ]
+          : [],
+        vias: [],
+        unrouted: [],
+        totalConnections: 1,
+        timedOut: false,
+        elapsedMs: 1,
+        diagnostics,
+        log: [diagnostics.text],
       };
       const commitMessages: string[] = [];
       const board = {
         drc: { run: async () => ({ markers: [] }) },
-        save: async () => {}, getTracks: async () => [],
+        save: async () => {},
+        getTracks: async () => [],
         undo: async () => ({ applied: 1 }),
         ratsnest: async () => ({ edges }),
       } as unknown as Board;
       const jobs = createRouteJobs({
-        openBoard: async () => board, extract: async () => input,
+        openBoard: async () => board,
+        extract: async () => input,
         capacityRouter: { name: "fab-router", route: async () => result },
         apply: async (_board, _result, options) => {
           commitMessages.push(options?.message ?? "");
           return { commitId: "commit", created: [], updated: [], deleted: [], value: [] };
         },
       });
-      const info = await jobs.wait(jobs.start(
-        { id: "message-session", transport: null }, { router: "js", refillZones: false },
-      ).id);
+      const info = await jobs.wait(jobs.start({ id: "message-session", transport: null }, { router: "js", refillZones: false }).id);
       expect(info.state).toBe("done");
-      expect(info.summary?.message).toBe(scenario === "complete"
-        ? "Autoroute (js): 1 connection" : diagnostics.text);
+      expect(info.summary?.message).toBe(scenario === "complete" ? "Autoroute (js): 1 connection" : diagnostics.text);
       expect(info.summary?.diagnostics?.text).toBe(diagnostics.text);
       expect(info.summary?.endpointCollisions).toBeDefined();
       expect(info.summary?.log).toContain(diagnostics.text);

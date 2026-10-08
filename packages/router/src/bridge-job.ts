@@ -522,9 +522,12 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           elapsedMs: result.elapsedMs,
           wallMs: Math.round(performance.now() - t0),
           timedOut: result.timedOut,
-          message: result.diagnostics && (!(applied || appliedByKicad) || unrouted.length > 0)
-            ? result.diagnostics.text
-            : applied || appliedByKicad ? message : "",
+          message:
+            result.diagnostics && (!(applied || appliedByKicad) || unrouted.length > 0)
+              ? result.diagnostics.text
+              : applied || appliedByKicad
+                ? message
+                : "",
           unrouted,
           geometry,
           log: result.log,
