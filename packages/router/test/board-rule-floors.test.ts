@@ -26,7 +26,7 @@ test("minimum width and via floors preserve copper spacing; drill spacing uses t
     expect(child(rule, "width")![1]).toBe("300");
     expect(child(rule, "clearance")![1]).toBe("200");
     const typed = new Map(children(rule, "clearance").filter(c => child(c, "type")).map(c => [child(c, "type")![1], c[1]]));
-    expect(typed.get("wire_pin")).toBe("200");
+    expect(typed.has("wire_pin")).toBe(false);
     expect(typed.get("wire_via")).toBe("400");
     expect(typed.get("smd_smd")).toBe("200");
     const cross = children(child(pcb, "network"), "class_class");
@@ -83,8 +83,8 @@ test("NPTH drill geometry protects holes without raising plated-pad spacing", ()
     const obstacle = children(structure, "keepout").find(k => k[1] === "fabdesk-drill-npth");
     expect(child(obstacle, "circle")![2]).toBe("1600");
     const rule = child(structure, "rule");
-    expect(children(rule, "clearance").find(c => child(c, "type")?.[1] === "wire_pin")![1]).toBe("200");
-    expect(children(rule, "clearance").find(c => child(c, "type")?.[1] === "wire_via")![1]).toBe("200");
+    expect(children(rule, "clearance").some(c => child(c, "type")?.[1] === "wire_pin")).toBe(false);
+    expect(children(rule, "clearance").some(c => child(c, "type")?.[1] === "wire_via")).toBe(false);
   }
 });
 
@@ -95,5 +95,5 @@ test("plated oval drills receive annular credit on corresponding axes", () => {
   input.pads.push({ ...input.pads[0]!, id: "slot", shape: "oval", drill: 600_000,
     drillSize: { x: 600_000, y: 1_700_000 }, size: { x: 1_000_000, y: 2_100_000 } });
   const structure = child(parseSExpr(writeDsn(input))[0] as SExpr[], "structure");
-  expect(children(child(structure, "rule"), "clearance").find(c => child(c, "type")?.[1] === "wire_pin")![1]).toBe("200");
+  expect(children(child(structure, "rule"), "clearance").some(c => child(c, "type")?.[1] === "wire_pin")).toBe(false);
 });

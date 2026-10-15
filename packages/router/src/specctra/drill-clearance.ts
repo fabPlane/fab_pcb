@@ -36,7 +36,7 @@ export function drillClearanceDsn(text: string, input: RouteInput): string {
     const [a, b] = pair.split("_") as [string, string];
     const drilledA = a === "pin" || a === "via", drilledB = b === "pin" || b === "via";
     return ["clearance", String(Math.max(copper, hole - Math.min(...[...(drilledA ? [ring[a]!] : []), ...(drilledB ? [ring[b]!] : [])]), drilledA && drilledB ? holes - ring[a]! - ring[b]! : 0) / scale), ["type", pair]];
-  });
+  }).filter(rule => Number(rule[1]) > copper / scale);
   child(structure, "rule")!.push(...rules(input.rules.default.clearance));
   const classes = children(network, "class");
   for (const cls of classes) {
@@ -50,7 +50,10 @@ export function drillClearanceDsn(text: string, input: RouteInput): string {
   const classCopper = new Map(classes.map(c => [String(c[1]), Number(child(child(c, "rule"), "clearance")?.[1] ?? copper / scale) * scale]));
   const names = [...new Set(["kicad_default", ...classes.map(c => String(c[1]))])];
   for (let i = 0; i < names.length; i++) for (let j = i + 1; j < names.length; j++)
-    network.push(["class_class", ["classes", names[i]!, names[j]!], ["rule", ...rules(Math.max(copper, classCopper.get(names[i]!) ?? copper, classCopper.get(names[j]!) ?? copper))]]);
+  {
+    const mixed = rules(Math.max(copper, classCopper.get(names[i]!) ?? copper, classCopper.get(names[j]!) ?? copper));
+    if (mixed.length) network.push(["class_class", ["classes", names[i]!, names[j]!], ["rule", ...mixed]]);
+  }
   const emit = (n: SExpr): string => typeof n === "string" ? quote(n) : n[0] === "string_quote" ? '(string_quote ")' : `(${n.map(emit).join(" ")})`;
   return tree.map(emit).join("\n") + "\n";
 }
