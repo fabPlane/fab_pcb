@@ -6,7 +6,15 @@
  */
 import { equals, type Message } from "@bufbuild/protobuf";
 import type { Any } from "@bufbuild/protobuf/wkt";
-import { CommitAction, ItemDeletionStatus, ItemRequestStatus, ItemStatusCode, KiCadObjectType, SchematicSymbolSchema, type ItemStatus } from "@fp-pcb/proto";
+import {
+  CommitAction,
+  ItemDeletionStatus,
+  ItemRequestStatus,
+  ItemStatusCode,
+  KiCadObjectType,
+  SchematicSymbolSchema,
+  type ItemStatus,
+} from "@fp-pcb/proto";
 import * as cmd from "../commands";
 import { CommitDroppedError, CommitRecoveryError, KiCadItemError, type ItemFailure } from "../errors";
 import type { Document, ItemScope, UndoRedoResult } from "./document";
@@ -207,7 +215,11 @@ export class Commit {
       let recovery: "dropped" | "undone" = "dropped";
       try {
         // A rejected finalization may still leave the transaction pending.
-        await cmd.endCommit(this.doc.client, { id: { value: this.id }, action: CommitAction.CMA_DROP, header: this.doc.header(this.scope) });
+        await cmd.endCommit(this.doc.client, {
+          id: { value: this.id },
+          action: CommitAction.CMA_DROP,
+          header: this.doc.header(this.scope),
+        });
       } catch {
         // Headless KiCad can transfer the undo record before finalization throws. Undo only
         // our exact newest entry; never undo another client's edit or reload saved files.
@@ -229,7 +241,8 @@ export class Commit {
   }
 
   private enqueue(kind: OpKind, wrappers: Item[], scope: ItemScope | undefined, ids?: string[]): Promise<unknown> {
-    if (this.ended || this.finalizing) return Promise.reject(new Error(`commit ${this.id || "(one-shot)"} has already ended or is finalizing`));
+    if (this.ended || this.finalizing)
+      return Promise.reject(new Error(`commit ${this.id || "(one-shot)"} has already ended or is finalizing`));
     const groups = new Map<string, Op>();
     const promises: Promise<unknown>[] = [];
     const list = wrappers.length ? wrappers : (ids ?? []).map(() => undefined);
@@ -369,7 +382,14 @@ export class Commit {
     const incoming = op.anys.map((any) => wrapAny(any));
     const symbols = incoming.filter((item): item is SchematicSymbol => item instanceof SchematicSymbol);
     if (!symbols.length) return op.anys;
-    const current = new Map((await this.doc.getItemsById(symbols.map((symbol) => symbol.id), op.scope)).map((item) => [item.id, item]));
+    const current = new Map(
+      (
+        await this.doc.getItemsById(
+          symbols.map((symbol) => symbol.id),
+          op.scope,
+        )
+      ).map((item) => [item.id, item]),
+    );
     return incoming.map((item, index) => {
       if (!(item instanceof SchematicSymbol)) return op.anys[index]!;
       const before = current.get(item.id);
@@ -377,9 +397,12 @@ export class Commit {
       if (!(before instanceof SchematicSymbol)) return op.anys[index]!;
       if (
         (item.libraryId && item.libraryId !== before.libraryId) ||
-        (item.proto.definition && (!before.proto.definition || !equals(SchematicSymbolSchema, item.proto.definition, before.proto.definition)))
+        (item.proto.definition &&
+          (!before.proto.definition || !equals(SchematicSymbolSchema, item.proto.definition, before.proto.definition)))
       )
-        throw new Error(`cannot update the library definition of placed symbol ${item.reference || item.id}; replace the inspected symbol instead. Instance updates support position, rotation, mirror, fields and value.`);
+        throw new Error(
+          `cannot update the library definition of placed symbol ${item.reference || item.id}; replace the inspected symbol instead. Instance updates support position, rotation, mirror, fields and value.`,
+        );
       // Work on decoded request copies, retaining the caller's definition for pin geometry/inspection.
       delete item.proto.definition;
       return item.toAny();
