@@ -22,6 +22,7 @@ import {
   type Box,
   type Vec2,
 } from "@fp-pcb/client";
+import { detectDifferentialPairs } from "./pairs";
 import { arcPoints, chainOutline, circlePoints, type OutlinePiece } from "./geometry";
 import type {
   RouteConnection,
@@ -451,6 +452,7 @@ export async function extractRouteInput(board: Board, opts: ExtractOptions = {})
     zones: routeZones,
     obstacles,
     connections,
+    differentialPairs: detectDifferentialPairs(nets.map(n => n.name),classes),
     rules,
   };
 }
