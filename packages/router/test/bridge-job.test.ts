@@ -476,12 +476,67 @@ test("native route application deletes reported stubs and creates replacement co
   expect(calls).toEqual(["begin", "delete", "create", "end"]);
 });
 
-test("native cleanup keeps a useful connection behind a dangling chain longer than twenty items",async()=>{
- const input=collisionBoard();
- const result:RouteResult={router:"fab-router",tracks:Array.from({length:27},(_,i)=>({net:"A",netCode:1,start:{x:i*1e6,y:0},end:{x:(i+1)*1e6,y:0},width:200000,layer:BoardLayer.BL_F_Cu})),vias:[],unrouted:input.connections,totalConnections:input.connections.length,timedOut:false,elapsedMs:1,log:[]};
- let created:Track[]=[];let checks=0;
- const board={save:async()=>{},getTracks:async()=>created,undo:async()=>({applied:1}),ratsnest:async()=>({edges:[]}),drc:{run:async()=>{checks++;return{markers:created.length>1?[{errorType:DrcErrorType.DRCET_DANGLING_TRACK,items:[{value:created.at(-1)!.id}]}]:[]};}}} as unknown as Board;
- const jobs=createRouteJobs({openBoard:async()=>board,extract:async()=>input,capacityRouter:{name:"fab-router",route:async()=>result},apply:async(_b,route)=>{created=route.tracks.map((t,i)=>new Track(create(TrackSchema,{id:{value:`created-${i}`},net:{name:t.net},start:toVector2(t.start),end:toVector2(t.end),layer:t.layer,width:toDistance(t.width)})));return{commitId:"cleanup",created,updated:[],deleted:[],value:created};}});
- const info=await jobs.wait(jobs.start({id:"long-chain",transport:null},{router:"js",refillZones:false,message:"keep useful connection"}).id);
- expect(info.state).toBe("done");expect(info.summary!.tracks).toBe(1);expect(checks).toBe(27);expect(info.summary!.routed).toBe(1);
+test("native cleanup keeps a useful connection behind a dangling chain longer than twenty items", async () => {
+  const input = collisionBoard();
+  const result: RouteResult = {
+    router: "fab-router",
+    tracks: Array.from({ length: 27 }, (_, i) => ({
+      net: "A",
+      netCode: 1,
+      start: { x: i * 1e6, y: 0 },
+      end: { x: (i + 1) * 1e6, y: 0 },
+      width: 200000,
+      layer: BoardLayer.BL_F_Cu,
+    })),
+    vias: [],
+    unrouted: input.connections,
+    totalConnections: input.connections.length,
+    timedOut: false,
+    elapsedMs: 1,
+    log: [],
+  };
+  let created: Track[] = [];
+  let checks = 0;
+  const board = {
+    save: async () => {},
+    getTracks: async () => created,
+    undo: async () => ({ applied: 1 }),
+    ratsnest: async () => ({ edges: [] }),
+    drc: {
+      run: async () => {
+        checks++;
+        return {
+          markers: created.length > 1 ? [{ errorType: DrcErrorType.DRCET_DANGLING_TRACK, items: [{ value: created.at(-1)!.id }] }] : [],
+        };
+      },
+    },
+  } as unknown as Board;
+  const jobs = createRouteJobs({
+    openBoard: async () => board,
+    extract: async () => input,
+    capacityRouter: { name: "fab-router", route: async () => result },
+    apply: async (_b, route) => {
+      created = route.tracks.map(
+        (t, i) =>
+          new Track(
+            create(TrackSchema, {
+              id: { value: `created-${i}` },
+              net: { name: t.net },
+              start: toVector2(t.start),
+              end: toVector2(t.end),
+              layer: t.layer,
+              width: toDistance(t.width),
+            }),
+          ),
+      );
+      return { commitId: "cleanup", created, updated: [], deleted: [], value: created };
+    },
+  });
+  const info = await jobs.wait(
+    jobs.start({ id: "long-chain", transport: null }, { router: "js", refillZones: false, message: "keep useful connection" }).id,
+  );
+  expect(info.state).toBe("done");
+  expect(info.summary!.tracks).toBe(1);
+  expect(checks).toBe(27);
+  expect(info.summary!.routed).toBe(1);
 });

@@ -15,8 +15,8 @@ export function applyRequestRules(input: RouteInput, opts: RouteOptions): string
   const known = new Set(input.nets.map((n) => n.name));
   const perNet = opts.perNet ?? [];
   const explicit = opts.differentialPairs ?? [];
-  const used = new Set(explicit.flatMap(p => [p.p,p.n]));
-  const pairs = [...explicit,...(input.differentialPairs ?? []).filter(p => !used.has(p.p) && !used.has(p.n))];
+  const used = new Set(explicit.flatMap((p) => [p.p, p.n]));
+  const pairs = [...explicit, ...(input.differentialPairs ?? []).filter((p) => !used.has(p.p) && !used.has(p.n))];
   const bad = [...perNet.map((r) => r.net), ...pairs.flatMap((p) => [p.p, p.n])].filter((n) => !known.has(n));
   if (bad.length) throw new Error(`unknown routing rule nets: ${[...new Set(bad)].join(", ")}`);
   if (new Set(perNet.map((r) => r.net)).size !== perNet.length) throw new Error("duplicate per-net routing rules");
@@ -27,7 +27,8 @@ export function applyRequestRules(input: RouteInput, opts: RouteOptions): string
     members.add(p.n);
     for (const n of [p.p, p.n]) {
       const w = perNet.find((r) => r.net === n)?.widthMm;
-      if (explicit.includes(p) && w !== undefined && p.widthMm !== undefined && w !== p.widthMm) throw new Error(`conflicting pair width for ${n}`);
+      if (explicit.includes(p) && w !== undefined && p.widthMm !== undefined && w !== p.widthMm)
+        throw new Error(`conflicting pair width for ${n}`);
     }
     for (const v of [p.gapMm, p.skewToleranceMm])
       if (v !== undefined && (!Number.isFinite(v) || v < 0)) throw new Error(`invalid pair dimensions ${p.p}/${p.n}`);
@@ -37,7 +38,8 @@ export function applyRequestRules(input: RouteInput, opts: RouteOptions): string
   for (const n of input.nets) {
     const own = perNet.find((r) => r.net === n.name);
     const pair = pairs.find((p) => p.p === n.name || p.n === n.name);
-    const width = own?.widthMm ?? (pair && explicit.includes(pair) ? pair.widthMm ?? opts.trackWidthMm : opts.trackWidthMm ?? pair?.widthMm);
+    const width =
+      own?.widthMm ?? (pair && explicit.includes(pair) ? (pair.widthMm ?? opts.trackWidthMm) : (opts.trackWidthMm ?? pair?.widthMm));
     const diameter = own?.viaDiameterMm ?? opts.viaDiameterMm ?? (opts.viaDiameterNm === undefined ? undefined : opts.viaDiameterNm / 1e6);
     const drill = own?.viaDrillMm ?? opts.viaDrillMm ?? (opts.viaDrillNm === undefined ? undefined : opts.viaDrillNm / 1e6);
     if (![width, diameter, drill].every(positive)) throw new Error(`invalid routing dimensions for ${n.name}`);
@@ -61,6 +63,7 @@ export function applyRequestRules(input: RouteInput, opts: RouteOptions): string
     logs.push(`effective rule ${n.name}: ${JSON.stringify(r)} (nm)`);
   }
   input.differentialPairs = pairs;
-  for (const p of pairs) logs.push(`pair ${JSON.stringify(p)}: ${explicit.includes(p) ? "declared request metadata" : "native netclass/name metadata"}`);
+  for (const p of pairs)
+    logs.push(`pair ${JSON.stringify(p)}: ${explicit.includes(p) ? "declared request metadata" : "native netclass/name metadata"}`);
   return logs;
 }

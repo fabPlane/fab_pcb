@@ -452,7 +452,10 @@ export async function extractRouteInput(board: Board, opts: ExtractOptions = {})
     zones: routeZones,
     obstacles,
     connections,
-    differentialPairs: detectDifferentialPairs(nets.map(n => n.name),classes),
+    differentialPairs: detectDifferentialPairs(
+      nets.map((n) => n.name),
+      classes,
+    ),
     rules,
   };
 }
