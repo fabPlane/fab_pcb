@@ -158,7 +158,8 @@ jobs:
         with:
           ref: ${{ needs.select-linux-runner.outputs.source_sha }}
       - name: Install runner prerequisites
-        run: apt-get update && apt-get install -y --no-install-recommends ca-certificates curl git jq unzip
+        # binutils: jlink --strip-debug strips native libraries with objcopy on Linux.
+        run: apt-get update && apt-get install -y --no-install-recommends binutils ca-certificates curl git jq unzip
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ env.BUN_VERSION }}
