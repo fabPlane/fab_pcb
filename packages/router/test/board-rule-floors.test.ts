@@ -87,3 +87,13 @@ test("NPTH drill geometry protects holes without raising plated-pad spacing", ()
     expect(children(rule, "clearance").find(c => child(c, "type")?.[1] === "wire_via")![1]).toBe("200");
   }
 });
+
+
+test("plated oval drills receive annular credit on corresponding axes", () => {
+  const input = twoNetBoard();
+  input.rules.holeClearance = 250_000;
+  input.pads.push({ ...input.pads[0]!, id: "slot", shape: "oval", drill: 600_000,
+    drillSize: { x: 600_000, y: 1_700_000 }, size: { x: 1_000_000, y: 2_100_000 } });
+  const structure = child(parseSExpr(writeDsn(input))[0] as SExpr[], "structure");
+  expect(children(child(structure, "rule"), "clearance").find(c => child(c, "type")?.[1] === "wire_pin")![1]).toBe("200");
+});

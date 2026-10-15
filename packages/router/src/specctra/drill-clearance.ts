@@ -20,7 +20,7 @@ export function drillClearanceDsn(text: string, input: RouteInput): string {
   // geometry gets zero credit. Minima span all padstacks, including protected vias.
   const pinRings = input.pads.filter(p => p.through && !p.nonPlated).map(p =>
     p.collisionGeometryUnsupported || p.shape === "custom" ? 0 : Math.max(0,
-      (Math.min(p.size.x, p.size.y) - Math.max(p.drillSize?.x ?? p.drill, p.drillSize?.y ?? p.drill)) / 2));
+      Math.min(p.size.x - (p.drillSize?.x ?? p.drill), p.size.y - (p.drillSize?.y ?? p.drill)) / 2));
   const viaRings = [...input.rules.perNet.values(), input.rules.default, ...input.vias].map(v =>
     Math.max(0, (("viaDiameter" in v ? v.viaDiameter : v.diameter) - ("viaDrill" in v ? v.viaDrill : v.drill)) / 2));
   const ring: Record<string, number> = { wire: 0, smd: 0, area: 0, pin: pinRings.length ? Math.min(...pinRings) : 0, via: Math.min(...viaRings) };
