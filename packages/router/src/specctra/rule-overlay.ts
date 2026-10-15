@@ -1,5 +1,6 @@
 /** Overlay explicit rules on KiCad-exported DSN, preserving network pins and geometry. */
 import type { RouteInput } from "../types";
+import { drillClearanceDsn } from "./drill-clearance";
 import { viaPadstackName } from "./dsn";
 import { parseSExpr, child, children, atoms, quote, type SExpr } from "./sexpr";
 
@@ -60,5 +61,5 @@ export function overlayDsnRules(text: string, input: RouteInput): string {
   }
   const emit = (n: SExpr): string =>
     typeof n === "string" ? quote(n) : n[0] === "string_quote" ? '(string_quote ")' : `(${n.map(emit).join(" ")})`;
-  return tree.map(emit).join("\n");
+  return drillClearanceDsn(tree.map(emit).join("\n"), input);
 }

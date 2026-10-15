@@ -17,6 +17,7 @@ import { BoardLayer } from "@fp-pcb/proto";
 import type { Vec2 } from "@fp-pcb/client";
 import { copperLayersInOrder, rulesForNet } from "../extract";
 import type { RouteInput, RouteLayer, RouteOptions, RoutePad } from "../types";
+import { drillClearanceDsn } from "./drill-clearance";
 import { num, quote } from "./sexpr";
 
 /** nm -> µm, the DSN unit. */
@@ -289,7 +290,7 @@ export function writeDsn(input: RouteInput, opts: DsnOptions = {}): string {
   }
   out.push(`  )`);
   out.push(`)`);
-  return out.join("\n") + "\n";
+  return drillClearanceDsn(out.join("\n") + "\n", input);
 }
 
 /** Layers a `RouteOptions` restricts routing to, resolved against the input. */

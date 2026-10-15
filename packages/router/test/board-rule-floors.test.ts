@@ -9,25 +9,33 @@ import { child, children, parseSExpr, type SExpr } from "../src/specctra/sexpr";
 import { FreeroutingRouter } from "../src/freerouting";
 import { twoNetBoard } from "./fixtures";
 
-test("minimum width, independent hole clearance and via constraints floor every class without mutating input", () => {
+test("minimum width and via floors preserve copper spacing; drill spacing uses typed classes", () => {
   const input = twoNetBoard();
+  input.rules.perNet.set("B", { ...input.rules.default, netClass: "Other" });
   input.rules.minTrackWidth = 300_000;
   input.rules.holeClearance = 400_000;
   input.rules.minViaDrill = 500_000;
   input.rules.minViaAnnularWidth = 200_000;
   const effective = freeroutingRuleInput(input);
-  expect(effective.rules.default).toMatchObject({ trackWidth: 300_000, clearance: 400_000, viaDrill: 500_000, viaDiameter: 900_000 });
+  expect(effective.rules.default).toMatchObject({ trackWidth: 300_000, clearance: 200_000, viaDrill: 500_000, viaDiameter: 900_000 });
   expect(effective.rules.perNet.get("A")).toEqual(effective.rules.default);
   expect(input.rules.default.trackWidth).toBe(250_000);
   for (const dsn of [writeDsn(effective), overlayDsnRules(writeDsn(input), effective)]) {
     const pcb = parseSExpr(dsn)[0] as SExpr[];
     const rule = child(child(pcb, "structure"), "rule");
     expect(child(rule, "width")![1]).toBe("300");
-    for (const clearance of children(rule, "clearance")) expect(Number(clearance[1])).toBeGreaterThanOrEqual(400);
+    expect(child(rule, "clearance")![1]).toBe("200");
+    const typed = new Map(children(rule, "clearance").filter(c => child(c, "type")).map(c => [child(c, "type")![1], c[1]]));
+    expect(typed.get("wire_pin")).toBe("400");
+    expect(typed.get("wire_via")).toBe("400");
+    expect(typed.get("smd_smd")).toBe("200");
+    const cross = children(child(pcb, "network"), "class_class");
+    expect(cross.length).toBeGreaterThan(0);
+    expect(children(child(cross[0], "rule"), "clearance").some(c => child(c, "type")?.[1] === "smd_via")).toBe(true);
     for (const cls of children(child(pcb, "network"), "class")) {
       if (cls[1]?.toString().startsWith("fabdesk_rule_")) {
         expect(child(child(cls, "rule"), "width")![1]).toBe("300");
-        expect(child(child(cls, "rule"), "clearance")![1]).toBe("400");
+        expect(child(child(cls, "rule"), "clearance")![1]).toBe("200");
       }
     }
   }
