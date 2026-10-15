@@ -93,15 +93,25 @@ export class CommitDroppedError extends Error {
     cause: unknown,
     readonly recovery: "dropped" | "undone" = "dropped",
   ) {
-    super(`commit ${commitId} ${recovery}: ${cause instanceof Error ? cause.message : String(cause)}. Prior live state restored; pre-existing unsaved work retained.`, { cause });
+    super(
+      `commit ${commitId} ${recovery}: ${cause instanceof Error ? cause.message : String(cause)}. Prior live state restored; pre-existing unsaved work retained.`,
+      { cause },
+    );
   }
 }
 
 /** Recovery could not be confirmed. Keep the live document; never silently reload saved files. */
 export class CommitRecoveryError extends Error {
   override readonly name = "CommitRecoveryError";
-  constructor(readonly commitId: string, cause: unknown, readonly recoveryError: unknown) {
-    super(`commit ${commitId} failed: ${cause instanceof Error ? cause.message : String(cause)}. Rollback could not be confirmed: ${recoveryError instanceof Error ? recoveryError.message : String(recoveryError)}. Live document retained; do not save, reload or overwrite it until unsaved work has been preserved.`, { cause });
+  constructor(
+    readonly commitId: string,
+    cause: unknown,
+    readonly recoveryError: unknown,
+  ) {
+    super(
+      `commit ${commitId} failed: ${cause instanceof Error ? cause.message : String(cause)}. Rollback could not be confirmed: ${recoveryError instanceof Error ? recoveryError.message : String(recoveryError)}. Live document retained; do not save, reload or overwrite it until unsaved work has been preserved.`,
+      { cause },
+    );
   }
 }
 
