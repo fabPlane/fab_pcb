@@ -116,7 +116,12 @@ export async function trimFreeroutingRuntime(jar: string, jdkHome: string, outpu
     // directory, which cannot coexist on the case-insensitive macOS and Windows file systems.
     // The entry list goes through an @-file: ~30k names overflow the Windows command line.
     const entries = join(work, "entries.txt");
-    await Bun.write(entries, jdepsClassEntries(await command([jarTool, "--list", "--file", jar])).map((entry) => `"${entry}"`).join("\n"));
+    await Bun.write(
+      entries,
+      jdepsClassEntries(await command([jarTool, "--list", "--file", jar]))
+        .map((entry) => `"${entry}"`)
+        .join("\n"),
+    );
     await command([jarTool, "--extract", "--file", jar, `@${entries}`], scratch);
     const dependencies = await command([
       join(jdkHome, "bin", `jdeps${suffix}`),
