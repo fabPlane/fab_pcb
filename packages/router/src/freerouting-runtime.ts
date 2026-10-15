@@ -88,7 +88,8 @@ export async function fetchFreerouting(cache: string, target: string, withJdk = 
 async function command(args: string[], cwd?: string): Promise<string> {
   const result = Bun.spawn(args, { ...(cwd ? { cwd } : {}), stdout: "pipe", stderr: "pipe" });
   const [stdout, stderr, code] = await Promise.all([new Response(result.stdout).text(), new Response(result.stderr).text(), result.exited]);
-  if (code) throw new Error(`${args[0]} exited ${code}: ${stderr}`);
+  // jlink and jdeps report errors on stdout, so include both streams.
+  if (code) throw new Error(`${args[0]} exited ${code}: ${[stderr.trim(), stdout.trim()].filter(Boolean).join("\n")}`);
   return stdout.trim();
 }
 
