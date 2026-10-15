@@ -187,7 +187,7 @@ export function writeDsn(input: RouteInput, opts: DsnOptions = {}): string {
   for (const extra of opts.extraVias ?? []) viaFor(extra.diameter, extra.drill);
   out.push(`    (via ${[...viaNames.keys()].map(quote).join(" ")})`);
   out.push(
-    `    (rule (width ${um(rules.trackWidth)}) (clearance ${um(rules.clearance)}) (clearance ${um(rules.clearance)} (type default_smd)) (clearance ${um(Math.min(rules.clearance, 100_000))} (type smd_smd)))`,
+    `    (rule (width ${um(rules.trackWidth)}) (clearance ${um(rules.clearance)}) (clearance ${um(rules.clearance)} (type default_smd)) (clearance ${um(rules.clearance)} (type smd_smd)))`,
   );
   out.push(`  )`);
 

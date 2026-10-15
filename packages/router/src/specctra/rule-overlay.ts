@@ -25,6 +25,12 @@ export function overlayDsnRules(text: string, input: RouteInput): string {
   const layers = children(structure, "layer").map((n) => String(n[1]));
   const viaList = child(structure, "via");
   if (!viaList) throw new Error("DSN has no via declaration for rule overlay");
+  const defaultRule = child(structure, "rule");
+  if (!defaultRule) throw new Error("DSN has no default rule");
+  for (const width of children(defaultRule, "width")) width[1] = value(input.rules.default.trackWidth);
+  // Floor every exported typed clearance, including KiCad's smd_smd relaxation.
+  for (const clearance of children(defaultRule, "clearance"))
+    clearance[1] = value(Math.max(Number(clearance[1]) * scale, input.rules.default.clearance));
   let i = 0;
   const existingClasses = new Set(children(network, "class").map((n) => String(n[1])));
   const existingStacks = new Set(children(library, "padstack").map((n) => String(n[1])));

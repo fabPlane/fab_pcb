@@ -153,6 +153,9 @@ export interface RouteRules {
   /** Copper-to-board-edge clearance, nm. */
   edgeClearance: number;
   holeToHole: number;
+  /** Hole-to-copper clearance, nm (optional for older extracted inputs). */
+  holeClearance?: number;
+  minViaAnnularWidth?: number;
   /** The default net class: what nets without a class of their own get. */
   default: RouteNetRules;
   /** Rules per net name (only nets whose class differs from `default` need an entry, but every net may have one). */

@@ -364,6 +364,8 @@ export async function extractRouteInput(board: Board, opts: ExtractOptions = {})
     minViaDrill: nm(c?.minThroughDrill),
     edgeClearance: nm(c?.copperEdgeClearance),
     holeToHole: nm(c?.holeToHoleMin),
+    holeClearance: nm(c?.holeClearance),
+    minViaAnnularWidth: nm(c?.minViaAnnularWidth),
   };
   const hardFallback: RouteNetRules = {
     netClass: "Default",
