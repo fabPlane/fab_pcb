@@ -65,7 +65,7 @@ describe("FabRouter", () => {
       phases.push(event.phase),
     );
 
-    expect(settings).toEqual({ maxPasses: 3, timeBudgetMs: 12_345, viaCost: 9, seed: 7 });
+    expect(settings).toEqual({ maxPasses: 3, timeBudgetMs: 12_345, viaCost: 9, seed: 7, copperToEdgeClearanceUm: 200, holeClearanceUm: 0 });
     expect(hooks?.signal).toBeUndefined();
     expect(phases).toEqual(["export", "pass 1", "routing", "import", "done"]);
     expect(result.router).toBe("fab-router");
@@ -212,4 +212,22 @@ test("generated and discarded counts exclude protected copper echoed in SES", as
   const result = await new FabRouter({ routeDsn: () => native }).route(input);
   expect(result.diagnostics).toMatchObject({ generated: { tracks: 1, vias: 1 }, discarded: { tracks: 1, vias: 1 } });
   expect(input.tracks).toHaveLength(1);
+});
+
+test("forwards native clearance floors in micrometres and honors explicit solver overrides", async () => {
+  const input = twoNetBoard();
+  input.rules.edgeClearance = mm(0.5);
+  input.rules.holeClearance = mm(0.25);
+  let settings: FabRouterSettings | undefined;
+  const router = new FabRouter({
+    routeDsn: (_dsn, received) => {
+      settings = received;
+      return success();
+    },
+  });
+  await router.route(input);
+  expect(settings).toMatchObject({ copperToEdgeClearanceUm: 500, holeClearanceUm: 250 });
+  await router.route(input, { extra: { copperToEdgeClearanceUm: 600, holeClearanceUm: 300 } });
+  expect(settings).toMatchObject({ copperToEdgeClearanceUm: 600, holeClearanceUm: 300 });
+  await expect(router.route(input, { extra: { holeClearanceUm: -1 } })).rejects.toThrow("invalid fab_router holeClearanceUm");
 });
