@@ -142,7 +142,7 @@ export interface SesItems {
 }
 
 /** Existing copper is matched to the session's echo of it within this distance, nm. */
-const ECHO_TOLERANCE = 10_000;
+const ECHO_TOLERANCE = 100; // One KiCad/Freerouting DSN coordinate quantum, not a geometric proximity test.
 
 /**
  * Turns a parsed session into board items for `input`'s layers and nets. Layer names are matched
@@ -174,19 +174,29 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
   const echoed = { tracks: 0, vias: 0 };
   const near = (a: { x: number; y: number }, b: { x: number; y: number }) =>
     Math.abs(a.x - b.x) <= ECHO_TOLERANCE && Math.abs(a.y - b.y) <= ECHO_TOLERANCE;
-  const existingTracks = new Map<string, { start: { x: number; y: number }; end: { x: number; y: number } }[]>();
+  const existingTracks = new Map<string, RouteInput["tracks"]>();
   for (const t of input.tracks) {
     const key = `${t.layer}\u0000${t.net}`;
     let list = existingTracks.get(key);
     if (!list) existingTracks.set(key, (list = []));
-    list.push({ start: t.start, end: t.end });
+    if (!t.collisionGeometryUnsupported) list.push(t);
   }
-  const isEchoedTrack = (layer: BoardLayer, net: string, start: { x: number; y: number }, end: { x: number; y: number }) =>
+  const isEchoedTrack = (layer: BoardLayer, net: string, start: { x: number; y: number }, end: { x: number; y: number }, width: number) =>
     (existingTracks.get(`${layer}\u0000${net}`) ?? []).some(
-      (t) => (near(t.start, start) && near(t.end, end)) || (near(t.start, end) && near(t.end, start)),
+      (t) =>
+        Math.abs(t.width - width) <= ECHO_TOLERANCE &&
+        ((near(t.start, start) && near(t.end, end)) || (near(t.start, end) && near(t.end, start))),
     );
-  const isEchoedVia = (net: string, position: { x: number; y: number }) =>
-    input.vias.some((v) => v.net === net && near(v.position, position));
+  const isEchoedVia = (net: string, position: { x: number; y: number }, diameter: number, drill: number, layers: BoardLayer[]) =>
+    input.vias.some(
+      (v) =>
+        v.net === net &&
+        near(v.position, position) &&
+        Math.abs(v.diameter - diameter) <= ECHO_TOLERANCE &&
+        Math.abs(v.drill - drill) <= ECHO_TOLERANCE &&
+        v.layers.length === layers.length &&
+        v.layers.every((l) => layers.includes(l)),
+    );
 
   for (const w of session.wires) {
     const layer = layerByName.get(w.layer);
@@ -200,7 +210,7 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
       const start = w.points[i - 1]!;
       const end = w.points[i]!;
       if (start.x === end.x && start.y === end.y) continue;
-      if (isEchoedTrack(layer, w.net, start, end)) {
+      if (isEchoedTrack(layer, w.net, start, end, width)) {
         echoed.tracks++;
         continue;
       }
@@ -210,10 +220,6 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
   }
   const allLayers = input.copperLayers.map((l) => l.id);
   for (const v of session.vias) {
-    if (isEchoedVia(v.net, { x: v.x, y: v.y })) {
-      echoed.vias++;
-      continue;
-    }
     const ps = session.padstacks.get(v.padstack);
     const rules = rulesFor(v.net);
     const m = /_(\d+):(\d+)_um$/.exec(v.padstack);
@@ -221,6 +227,10 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
     const drill = m ? Number(m[2]) * 1000 : rules.viaDrill;
     let layers = (ps?.layers ?? []).map((n) => layerByName.get(n)).filter((l): l is BoardLayer => l !== undefined);
     if (layers.length < 2) layers = allLayers;
+    if (isEchoedVia(v.net, { x: v.x, y: v.y }, diameter, drill, layers)) {
+      echoed.vias++;
+      continue;
+    }
     if (!ps) warnOnce(`via padstack "${v.padstack}" is not in library_out; using its name and the net class`);
     vias.push({ net: v.net, netCode: codes.get(v.net) ?? 0, position: { x: v.x, y: v.y }, diameter, drill, layers });
     routedNets.add(v.net);

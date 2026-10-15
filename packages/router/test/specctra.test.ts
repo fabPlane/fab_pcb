@@ -247,12 +247,12 @@ describe("parseSes / sesToItems", () => {
 
   test("sesToItems: the session's echo of the board's existing tracks and vias is not created again", () => {
     const input = twoNetBoard();
-    // net A's first segment already exists on the board (10 µm off, as KiCad's export/import rounding leaves it)
+    // The DSN coordinate quantum is 100 nm; nearby distinct copper is not an echo.
     input.tracks.push({
       id: "t-a",
       net: "A",
       netCode: 1,
-      start: { x: 5_000_000, y: 5_005_000 },
+      start: { x: 5_000_000, y: 5_000_050 },
       end: { x: 10_000_000, y: 5_000_000 },
       width: 250_000,
       layer: BoardLayer.BL_F_Cu,

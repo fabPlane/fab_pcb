@@ -252,6 +252,12 @@ export function writeDsn(input: RouteInput, opts: DsnOptions = {}): string {
     if (!list) pinsByNet.set(p.net, (list = []));
     list.push(`${compOf.get(p.id)!}-1`);
   }
+  // Protected wiring still needs a network identity. Otherwise Freerouting can put copper
+  // whose net has no declaration into another net's session bucket (observed on scoped DSNs).
+  // Empty pin lists preserve the names without giving those nets routing targets.
+  for (const item of [...input.tracks, ...input.vias]) {
+    if (item.net && !pinsByNet.has(item.net)) pinsByNet.set(item.net, []);
+  }
   out.push(`  (network`);
   for (const [net, pins] of pinsByNet) out.push(`    (net ${quote(net)} (pins ${pins.map(quote).join(" ")}))`);
   const byClass = new Map<string, { nets: string[]; rules: ReturnType<typeof rulesForNet> }>();

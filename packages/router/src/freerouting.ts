@@ -34,6 +34,7 @@ import { commands as generatedCommands, KiCadApiError } from "@fp-pcb/client";
 import { overlayDsnRules } from "./specctra/rule-overlay";
 import { writeDsn, dsnLayers, extraViasFromRouteOptions } from "./specctra/dsn";
 import { leftoverConnectionEndpoints } from "./fab-router";
+import { filterSessionCopper } from "./specctra/session-filter";
 import { parseSes, sesToItems } from "./specctra/ses";
 import {
   RouteCancelled,
@@ -536,6 +537,12 @@ export class FreeroutingRouter implements Autorouter {
       throw new Error(
         `Freerouting failed: exit ${run.exitCode}; ${run.ses ? "session written" : "no session written"}. ${log.slice(-8).join("; ")}`,
       );
+    }
+
+    if (run.ses) {
+      run.ses = filterSessionCopper(run.ses, input, opts.nets);
+      log.push("session filtered: protected copper echoes and outside-scope nets excluded from additive import");
+      if (this.fr.keepFiles || this.fr.workDir) await writeFile(join(workDir, "import.ses"), run.ses);
     }
 
     let result: RouteResult;
