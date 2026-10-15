@@ -4,13 +4,13 @@
  * merged into one `CreateItems` / `UpdateItems` / `DeleteItems` request, in order. Results are the
  * canonical items KiCad echoes back (with server-assigned ids and normalised fields).
  */
-import type { Message } from "@bufbuild/protobuf";
+import { equals, type Message } from "@bufbuild/protobuf";
 import type { Any } from "@bufbuild/protobuf/wkt";
-import { CommitAction, ItemDeletionStatus, ItemRequestStatus, ItemStatusCode, KiCadObjectType, type ItemStatus } from "@fp-pcb/proto";
+import { CommitAction, ItemDeletionStatus, ItemRequestStatus, ItemStatusCode, KiCadObjectType, SchematicSymbolSchema, type ItemStatus } from "@fp-pcb/proto";
 import * as cmd from "../commands";
 import { CommitDroppedError, KiCadItemError, type ItemFailure } from "../errors";
 import type { Document, ItemScope, UndoRedoResult } from "./document";
-import { Item, toAnyItem, wrapAny } from "./items";
+import { Item, SchematicSymbol, toAnyItem, wrapAny } from "./items";
 
 export type ItemInput = Item | Message | Any;
 
@@ -295,7 +295,7 @@ export class Commit {
         op.kind === "create"
           ? await cmd.createItems(doc.client, { header, items: op.anys }).then((r) => (this.checkStatus(r.status, command), r.createdItems))
           : await cmd
-              .updateItems(doc.client, { header, items: op.anys })
+              .updateItems(doc.client, { header, items: await this.instanceUpdates(op) })
               .then((r) => (this.checkStatus(r.status, command), r.updatedItems));
       const canonical: (Item | undefined)[] = [];
       const failures: ItemFailure[] = [];
@@ -327,6 +327,28 @@ export class Commit {
       emit("failed", op.wrappers, op.ids);
       throw e;
     }
+  }
+
+  /** Placed-symbol edits must not round-trip inactive-unit library pin identities into instances. */
+  private async instanceUpdates(op: Op): Promise<Any[]> {
+    const incoming = op.anys.map((any) => wrapAny(any));
+    const symbols = incoming.filter((item): item is SchematicSymbol => item instanceof SchematicSymbol);
+    if (!symbols.length) return op.anys;
+    const current = new Map((await this.doc.getItemsById(symbols.map((symbol) => symbol.id), op.scope)).map((item) => [item.id, item]));
+    return incoming.map((item, index) => {
+      if (!(item instanceof SchematicSymbol)) return op.anys[index]!;
+      const before = current.get(item.id);
+      // Let KiCad report nonexistent/wrong-type items through the ordinary strict item checks.
+      if (!(before instanceof SchematicSymbol)) return op.anys[index]!;
+      if (
+        (item.libraryId && item.libraryId !== before.libraryId) ||
+        (item.proto.definition && (!before.proto.definition || !equals(SchematicSymbolSchema, item.proto.definition, before.proto.definition)))
+      )
+        throw new Error(`cannot update the library definition of placed symbol ${item.reference || item.id}; replace the inspected symbol instead. Instance updates support position, rotation, mirror, fields and value.`);
+      // Work on decoded request copies, retaining the caller's definition for pin geometry/inspection.
+      delete item.proto.definition;
+      return item.toAny();
+    });
   }
 
   private checkStatus(status: ItemRequestStatus, command: string): void {
