@@ -92,20 +92,31 @@ async function command(args: string[], cwd?: string): Promise<string> {
   return stdout.trim();
 }
 
+/**
+ * The class entries jdeps should see: every `.class` except the dependencies' `module-info.class`
+ * descriptors, which make jdeps treat the fat jar as broken modules.
+ */
+export function jdepsClassEntries(listing: string): string[] {
+  return listing
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((entry) => entry.endsWith(".class") && !entry.endsWith("module-info.class"));
+}
+
 /** Fat jars contain dependency module-info classes; analyze extracted class files as a classpath. */
 export async function trimFreeroutingRuntime(jar: string, jdkHome: string, output: string, target: string) {
   const suffix = target.startsWith("windows") ? ".exe" : "";
-  const scratch = await mkdtemp(join(tmpdir(), "freerouting-jdeps-"));
+  const jarTool = join(jdkHome, "bin", `jar${suffix}`);
+  const work = await mkdtemp(join(tmpdir(), "freerouting-jdeps-"));
+  const scratch = join(work, "classes");
   try {
-    await command([join(jdkHome, "bin", `jar${suffix}`), "--extract", "--file", jar], scratch);
-    const removeDescriptors = async (dir: string): Promise<void> => {
-      for (const entry of await readdir(dir, { withFileTypes: true })) {
-        const path = join(dir, entry.name);
-        if (entry.isDirectory()) await removeDescriptors(path);
-        else if (entry.name === "module-info.class") await rm(path);
-      }
-    };
-    await removeDescriptors(scratch);
+    await mkdir(scratch);
+    // Extract class files only. The fat jar also holds META-INF/LICENSE next to a META-INF/license/
+    // directory, which cannot coexist on the case-insensitive macOS and Windows file systems.
+    // The entry list goes through an @-file: ~30k names overflow the Windows command line.
+    const entries = join(work, "entries.txt");
+    await Bun.write(entries, jdepsClassEntries(await command([jarTool, "--list", "--file", jar])).map((entry) => `"${entry}"`).join("\n"));
+    await command([jarTool, "--extract", "--file", jar, `@${entries}`], scratch);
     const dependencies = await command([
       join(jdkHome, "bin", `jdeps${suffix}`),
       "--ignore-missing-deps",
@@ -129,6 +140,6 @@ export async function trimFreeroutingRuntime(jar: string, jdkHome: string, outpu
     ]);
     return modules;
   } finally {
-    await rm(scratch, { recursive: true, force: true });
+    await rm(work, { recursive: true, force: true });
   }
 }
