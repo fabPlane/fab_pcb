@@ -173,7 +173,7 @@ function labelLength(text: string): number {
  * Outward stubs on the top and bottom edges point at the neighbouring grid rows, so spacing must
  * come from this reach or a stub can run into another symbol's stub and join two nets.
  */
-function symbolExtent(definition: LibSymbol, reference: string, pinNets: ReadonlyMap<string, string>): Extent {
+function symbolExtent(definition: LibSymbol, reference: string, pinNets: ReadonlyMap<string, string>, unit: number): Extent {
   const minimum = mm(2 * SCHEMATIC_GRID_MM);
   const extent: Extent = { left: minimum, right: minimum, top: minimum, bottom: minimum };
   const include = (point: Vec2) => {
@@ -183,6 +183,8 @@ function symbolExtent(definition: LibSymbol, reference: string, pinNets: Readonl
     extent.bottom = Math.max(extent.bottom, point.y);
   };
   for (const child of definition.proto.items) {
+    if (child.unit?.unit && child.unit.unit !== unit) continue;
+    if (child.bodyStyle?.style && child.bodyStyle.style !== 1) continue;
     const pin = child.item ? unpackAnyAs(child.item, SchematicPinSchema) : undefined;
     if (!pin) continue;
     const position = vec2(pin.position);
@@ -245,7 +247,7 @@ function positionedField(source: SchematicFieldProto | undefined, name: string, 
  * definition is sent as it is; only the pin map records absolute sheet positions (for wires,
  * labels and no-connects).
  */
-function placedDefinition(source: LibSymbol, origin: Vec2, pins: Map<string, PlacedPin>, reference: string) {
+function placedDefinition(source: LibSymbol, origin: Vec2, pins: Map<string, PlacedPin[]>, reference: string, unit: number) {
   const definition = clone(SchematicSymbolSchema, source.proto);
 
   for (const child of definition.items) {
@@ -258,7 +260,12 @@ function placedDefinition(source: LibSymbol, origin: Vec2, pins: Map<string, Pla
     // independent pin identities from KiCad rather than aliasing pins across repeated symbols.
     pin.id = undefined;
     child.item = packAny(SchematicPinSchema, pin);
-    if (pin.number) pins.set(`${reference}:${pin.number}`, { position: absolute, orientation: pin.orientation });
+    if (pin.number && (!child.unit?.unit || child.unit.unit === unit) && (!child.bodyStyle?.style || child.bodyStyle.style === 1)) {
+      const key = `${reference}:${pin.number}`;
+      const selected = pins.get(key) ?? [];
+      selected.push({ position: absolute, orientation: pin.orientation });
+      pins.set(key, selected);
+    }
   }
 
   return definition;
@@ -268,21 +275,27 @@ function placedDefinition(source: LibSymbol, origin: Vec2, pins: Map<string, Pla
 export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyMap<string, LibSymbol>): GeneratedSchematic {
   const items: Item[] = [];
   const diagnostics = normalizeVirtualReferences(netlist, definitions);
-  const pins = new Map<string, PlacedPin>();
+  const pins = new Map<string, PlacedPin[]>();
   let symbolsCreated = 0;
   let wiresCreated = 0;
   let labelsCreated = 0;
   let noConnectsCreated = 0;
 
   const pinNets = new Map(netlist.nets.flatMap((net) => net.nodes.map((node) => [`${node.ref}:${node.pin}`, net.name] as const)));
+  // Each unit has its own local frame, including separate power units. Never flatten their pins
+  // onto one instance: distinct units commonly reuse the same local pin positions.
+  const instances = netlist.components.flatMap((component) => {
+    const definition = component.libSource && definitions.get(`${component.libSource.lib}:${component.libSource.part}`);
+    return Array.from({ length: Math.max(1, definition?.proto.unitCount ?? 1) }, (_, index) => ({ component, unit: index + 1 }));
+  });
   const positions = layoutSymbols(
-    netlist.components.map((component) => {
+    instances.map(({ component, unit }) => {
       const definition = component.libSource && definitions.get(`${component.libSource.lib}:${component.libSource.part}`);
-      return definition ? symbolExtent(definition, component.ref, pinNets) : undefined;
+      return definition ? symbolExtent(definition, component.ref, pinNets, unit) : undefined;
     }),
   );
 
-  for (const [index, component] of netlist.components.entries()) {
+  for (const [index, { component, unit }] of instances.entries()) {
     if (!component.libSource) {
       diagnostics.push({
         severity: "error",
@@ -319,7 +332,7 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
     const proto = create(SchematicSymbolInstanceSchema, {
       position: toVector2(position),
       transform: create(SchematicSymbolTransformSchema, { orientation: SchematicSymbolOrientation.SSO_0 }),
-      definition: placedDefinition(definition, position, pins, component.ref),
+      definition: placedDefinition(definition, position, pins, component.ref, unit),
       libId: definition.proto.id,
       referenceField: positionedField(definition.proto.referenceField, "Reference", component.ref, position),
       valueField: positionedField(definition.proto.valueField, "Value", component.value, position),
@@ -336,7 +349,7 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
         component.fields?.Description ?? component.fields?.description ?? "",
         position,
       ),
-      unit: create(SchematicSymbolUnitSchema, { unit: 1 }),
+      unit: create(SchematicSymbolUnitSchema, { unit }),
       bodyStyle: create(SchematicSymbolBodyStyleSchema, { style: 1 }),
       showPinNames: definition.proto.showPinNames,
       showPinNumbers: definition.proto.showPinNumbers,
@@ -357,8 +370,8 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
   const connectedPositions = new Set<string>();
   for (const net of netlist.nets) {
     for (const node of net.nodes) {
-      const pin = pins.get(`${node.ref}:${node.pin}`);
-      if (!pin) {
+      const selectedPins = pins.get(`${node.ref}:${node.pin}`);
+      if (!selectedPins?.length) {
         diagnostics.push({
           severity: "error",
           stage: "schematic",
@@ -367,34 +380,38 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
         });
         continue;
       }
-      const start = pin.position;
-      connectedPositions.add(positionKey(start));
-      const { end, spinStyle } = labelledStub(pin);
-      const wire = generated(
-        new SchematicLine(create(SchematicLineSchema, { start: toVector2(start), end: toVector2(end), type: SchematicLineType.SLT_WIRE })),
-      );
-      const label = generated(
-        new GlobalLabel(
-          create(GlobalLabelSchema, {
-            position: toVector2(end),
-            text: create(TextSchema, { text: net.name, position: toVector2(end) }),
-            spinStyle,
-            // KiCad currently serialises custom properties on global labels but does not return
-            // them through GetItems after reopen. A hidden field is the durable ownership marker.
-            fields: [generatedLabelField(end)],
-          }),
-        ),
-      );
-      items.push(wire, label);
-      wiresCreated++;
-      labelsCreated++;
+      for (const pin of selectedPins) {
+        const start = pin.position;
+        connectedPositions.add(positionKey(start));
+        const { end, spinStyle } = labelledStub(pin);
+        const wire = generated(
+          new SchematicLine(
+            create(SchematicLineSchema, { start: toVector2(start), end: toVector2(end), type: SchematicLineType.SLT_WIRE }),
+          ),
+        );
+        const label = generated(
+          new GlobalLabel(
+            create(GlobalLabelSchema, {
+              position: toVector2(end),
+              text: create(TextSchema, { text: net.name, position: toVector2(end) }),
+              spinStyle,
+              // KiCad currently serialises custom properties on global labels but does not return
+              // them through GetItems after reopen. A hidden field is the durable ownership marker.
+              fields: [generatedLabelField(end)],
+            }),
+          ),
+        );
+        items.push(wire, label);
+        wiresCreated++;
+        labelsCreated++;
+      }
     }
   }
 
   const noConnectPositions = new Set<string>();
   for (const declaration of netlist.noConnects ?? []) {
-    const position = pins.get(`${declaration.ref}:${declaration.pin}`)?.position;
-    if (!position) {
+    const selectedPins = pins.get(`${declaration.ref}:${declaration.pin}`);
+    if (!selectedPins?.length) {
       diagnostics.push({
         severity: "error",
         stage: "schematic",
@@ -403,30 +420,32 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
       });
       continue;
     }
-    const key = positionKey(position);
-    if (connectedPositions.has(key)) {
-      diagnostics.push({
-        severity: "error",
-        stage: "schematic",
-        code: "no_connect_on_connected_position",
-        message: `${declaration.ref} pin ${declaration.pin} shares a symbol position with a connected pin and cannot be marked no-connect.`,
-      });
-      continue;
-    }
-    // Stacked symbol pins (common on USB connectors) share one electrical position and need one X.
-    if (noConnectPositions.has(key)) continue;
-    noConnectPositions.add(key);
-    items.push(
-      generated(
-        new NoConnect(
-          create(NoConnectMarkerSchema, {
-            position: toVector2(position),
-            size: toDistance(mil(48)),
-          }),
+    for (const { position } of selectedPins) {
+      const key = positionKey(position);
+      if (connectedPositions.has(key)) {
+        diagnostics.push({
+          severity: "error",
+          stage: "schematic",
+          code: "no_connect_on_connected_position",
+          message: `${declaration.ref} pin ${declaration.pin} shares a symbol position with a connected pin and cannot be marked no-connect.`,
+        });
+        continue;
+      }
+      // Stacked symbol pins (common on USB connectors) share one electrical position and need one X.
+      if (noConnectPositions.has(key)) continue;
+      noConnectPositions.add(key);
+      items.push(
+        generated(
+          new NoConnect(
+            create(NoConnectMarkerSchema, {
+              position: toVector2(position),
+              size: toDistance(mil(48)),
+            }),
+          ),
         ),
-      ),
-    );
-    noConnectsCreated++;
+      );
+      noConnectsCreated++;
+    }
   }
 
   return { items, diagnostics, symbolsCreated, wiresCreated, labelsCreated, noConnectsCreated };
