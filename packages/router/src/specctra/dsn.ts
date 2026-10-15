@@ -68,6 +68,8 @@ function padShapes(pad: RoutePad, layer: string): string {
 }
 
 export interface DsnOptions {
+  /** Typed drill rules target Freerouting's copper-envelope model. fab_router uses native hole settings. */
+  freeroutingDrillRules?: boolean;
   /** Design name written into the file. Default: the board file name. */
   name?: string;
   /** Copper layers to publish (default: every layer of the input). */
@@ -290,7 +292,7 @@ export function writeDsn(input: RouteInput, opts: DsnOptions = {}): string {
   }
   out.push(`  )`);
   out.push(`)`);
-  return drillClearanceDsn(out.join("\n") + "\n", input);
+  return drillClearanceDsn(out.join("\n") + "\n", input, opts.freeroutingDrillRules ?? true);
 }
 
 /** Layers a `RouteOptions` restricts routing to, resolved against the input. */

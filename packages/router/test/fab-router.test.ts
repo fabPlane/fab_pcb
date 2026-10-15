@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { mm } from "@fp-pcb/client";
 import { FabRouter, type FabRouterHooks, type FabRouterSettings, type FabRouterTextResult } from "../src/fab-router";
 import { B, F, twoNetBoard } from "./fixtures";
+import { writeDsn } from "../src/specctra/dsn";
 
 const SES = `(session "board.ses"
   (base_design "board.dsn")
@@ -47,6 +48,26 @@ function success(
 }
 
 describe("FabRouter", () => {
+  test("uses native hole settings without Freerouting pin classes, retaining NPTH obstacles", async () => {
+    const input = twoNetBoard();
+    input.rules.holeClearance = mm(0.25);
+    input.pads[0]!.size = { x: mm(0.8), y: mm(0.8) };
+    input.pads.push({ ...input.pads[0]!, id: "npth", net: "", netCode: 0, nonPlated: true });
+    let dsn = "";
+    let settings: FabRouterSettings | undefined;
+    await new FabRouter({ routeDsn: (text, received) => {
+      dsn = text;
+      settings = received;
+      return success();
+    } }).route(input);
+    expect(dsn).not.toContain("wire_pin");
+    expect(dsn).not.toContain("pin_pin");
+    expect(dsn).toContain("fabdesk-drill-npth");
+    expect(settings?.holeClearanceUm).toBe(250);
+    expect(writeDsn(input)).toContain("wire_pin");
+    expect(writeDsn(input)).toContain("fabdesk-drill-npth");
+  });
+
   test("maps controls and native progress hooks, then converts the SES", async () => {
     let settings: FabRouterSettings | undefined;
     let hooks: FabRouterHooks | undefined;

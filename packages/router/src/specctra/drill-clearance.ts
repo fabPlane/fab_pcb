@@ -5,7 +5,7 @@ import { child, children, parseSExpr, quote, type SExpr } from "./sexpr";
  * from copper envelopes; subtract conservative annular copper from drill floors.
  * Class-class rules are necessary: per-net classes otherwise lose global item typing.
  */
-export function drillClearanceDsn(text: string, input: RouteInput): string {
+export function drillClearanceDsn(text: string, input: RouteInput, freeroutingRules = true): string {
   const hole = input.rules.holeClearance ?? 0;
   const holes = input.rules.holeToHole;
   if (!hole && !holes) return text;
@@ -31,6 +31,9 @@ export function drillClearanceDsn(text: string, input: RouteInput): string {
     const diameter = Math.max(pad.drillSize?.x ?? pad.drill, pad.drillSize?.y ?? pad.drill) + 2 * Math.max(0, Math.max(hole, holes) - copper);
     for (const layer of children(structure, "layer")) structure.push(["keepout", `fabdesk-drill-${pad.id}`, ["circle", String(layer[1]), String(diameter / scale), String(pad.position.x / scale), String(-pad.position.y / scale)]]);
   }
+  const emit = (n: SExpr): string => typeof n === "string" ? quote(n) : n[0] === "string_quote" ? '(string_quote ")' : `(${n.map(emit).join(" ")})`;
+  // NPTH geometry is shared; pin-class translation belongs only to Freerouting.
+  if (!freeroutingRules) return tree.map(emit).join("\n") + "\n";
   const pairs = ["wire_pin", "wire_via", "smd_pin", "smd_via", "area_pin", "area_via", "pin_pin", "pin_via", "via_via"];
   const rules = (copper: number): SExpr[][] => pairs.map(pair => {
     const [a, b] = pair.split("_") as [string, string];
@@ -54,6 +57,5 @@ export function drillClearanceDsn(text: string, input: RouteInput): string {
     const mixed = rules(Math.max(copper, classCopper.get(names[i]!) ?? copper, classCopper.get(names[j]!) ?? copper));
     if (mixed.length) network.push(["class_class", ["classes", names[i]!, names[j]!], ["rule", ...mixed]]);
   }
-  const emit = (n: SExpr): string => typeof n === "string" ? quote(n) : n[0] === "string_quote" ? '(string_quote ")' : `(${n.map(emit).join(" ")})`;
   return tree.map(emit).join("\n") + "\n";
 }

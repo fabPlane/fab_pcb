@@ -152,6 +152,7 @@ export class FabRouter implements Autorouter {
     const dsn = writeDsn(input, {
       layers,
       extraVias,
+      freeroutingDrillRules: false,
       ...(opts.nets ? { routableNets: opts.nets } : {}),
     });
     log.push(
