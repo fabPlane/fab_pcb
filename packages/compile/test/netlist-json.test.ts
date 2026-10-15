@@ -97,3 +97,9 @@ describe("netlistJsonFrontend", () => {
     );
   });
 });
+
+test("misplaced placement coordinates name the required shape", () => {
+  const result = checkNetlistJson({ ...GOOD, board: { placements: [{ ref: "R1", x: 1, y: 2 }] } }, "circuit.netlist.json");
+  expect(result.file).toBeNull();
+  expect(result.diagnostics.some((d) => d.message.includes("use position: {x, y} in mm"))).toBe(true);
+});
