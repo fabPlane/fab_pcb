@@ -136,6 +136,8 @@ function toRoutePad(pad: Pad, footprintRef: string, copper: readonly BoardLayer[
     ),
     layers,
     through,
+    nonPlated: pad.padType === PadType.PT_NPTH,
+    ...(through && stack?.drill?.diameter ? { drillSize: vec2(stack.drill.diameter) } : {}),
     drill: through ? nm(stack?.drill?.diameter?.xNm) : 0,
     clearance: pad.proto.copperClearanceOverride ? nm(pad.proto.copperClearanceOverride) : undefined,
   };

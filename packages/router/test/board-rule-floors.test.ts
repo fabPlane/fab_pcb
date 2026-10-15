@@ -13,7 +13,7 @@ test("minimum width and via floors preserve copper spacing; drill spacing uses t
   const input = twoNetBoard();
   input.rules.perNet.set("B", { ...input.rules.default, netClass: "Other" });
   input.rules.minTrackWidth = 300_000;
-  input.rules.holeClearance = 400_000;
+  input.rules.holeClearance = 600_000;
   input.rules.minViaDrill = 500_000;
   input.rules.minViaAnnularWidth = 200_000;
   const effective = freeroutingRuleInput(input);
@@ -26,7 +26,7 @@ test("minimum width and via floors preserve copper spacing; drill spacing uses t
     expect(child(rule, "width")![1]).toBe("300");
     expect(child(rule, "clearance")![1]).toBe("200");
     const typed = new Map(children(rule, "clearance").filter(c => child(c, "type")).map(c => [child(c, "type")![1], c[1]]));
-    expect(typed.get("wire_pin")).toBe("400");
+    expect(typed.get("wire_pin")).toBe("200");
     expect(typed.get("wire_via")).toBe("400");
     expect(typed.get("smd_smd")).toBe("200");
     const cross = children(child(pcb, "network"), "class_class");
@@ -68,5 +68,22 @@ printf '%s' '(session board (routes (resolution um 10) (network_out)))' > "$out"
     expect(args).toContain("--router.fanout.enabled=false");
   } finally {
     await rm(dir, { recursive: true, force: true });
+  }
+});
+
+
+test("NPTH drill geometry protects holes without raising plated-pad spacing", () => {
+  const input = twoNetBoard();
+  input.rules.holeClearance = 250_000;
+  input.pads.push({ ...input.pads[0]!, id: "npth", net: "", nonPlated: true, drill: 1_000_000,
+    drillSize: { x: 1_000_000, y: 1_500_000 }, size: { x: 1_000_000, y: 1_500_000 } });
+  for (const dsn of [writeDsn(input), overlayDsnRules(writeDsn(input), input)]) {
+    const pcb = parseSExpr(dsn)[0] as SExpr[];
+    const structure = child(pcb, "structure");
+    const obstacle = children(structure, "keepout").find(k => k[1] === "fabdesk-drill-npth");
+    expect(child(obstacle, "circle")![2]).toBe("1600");
+    const rule = child(structure, "rule");
+    expect(children(rule, "clearance").find(c => child(c, "type")?.[1] === "wire_pin")![1]).toBe("200");
+    expect(children(rule, "clearance").find(c => child(c, "type")?.[1] === "wire_via")![1]).toBe("200");
   }
 });

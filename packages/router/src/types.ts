@@ -44,6 +44,10 @@ export interface RoutePad {
   layers: BoardLayer[];
   /** Plated through hole: connects on every copper layer. */
   through: boolean;
+  /** Non-plated drill: export an independent obstacle, without blocking plated endpoints. */
+  nonPlated?: boolean;
+  /** Both drill dimensions, nm; oval holes need their long axis too. */
+  drillSize?: Vec2;
   /** Drill diameter in nm (0 for SMD). */
   drill: number;
   /** Pad-level clearance override in nm, when set. */
