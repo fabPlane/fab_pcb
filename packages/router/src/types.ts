@@ -300,6 +300,11 @@ export interface PairRouting {
 }
 
 export interface RoutingDiagnostics {
+  /** Native cleanup facts; kept inside diagnostics so existing clients preserve them. */
+  danglingCopper?: {
+    removedExisting: Array<{ id: string; net: string }>;
+    retained: Array<{ id: string; net: string; reason: "locked" }>;
+  };
   text: string;
   passes: number;
   stoppedBy: string;

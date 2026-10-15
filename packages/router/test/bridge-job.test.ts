@@ -1,9 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { create } from "@bufbuild/protobuf";
-import { ArcSchema, BoardLayer, TrackSchema, ViaSchema } from "@fp-pcb/proto";
+import { ArcSchema, BoardLayer, DrcErrorType, LockedState, TrackSchema, ViaSchema } from "@fp-pcb/proto";
 import { Arc, Track, Via, toDistance, toVector2, type Board } from "@fp-pcb/client";
 import type { RouteInput, RouteResult } from "../src/types";
 import { createRouteJobs, persistAppliedRoute, routeGeometry, withoutRejectedCreatedCopper } from "../src/bridge-job";
+import { applyRouteResult } from "../src/apply";
 import { collisionBoard } from "./collision-fixture";
 
 for (const router of ["js", "freerouting"] as const)
@@ -343,4 +344,101 @@ describe("route summary messages with fab_router diagnostics", () => {
       if (!usable) expect(commitMessages).toEqual([]);
     });
   }
+});
+
+test("fab_router prunes and reports pre-existing scoped stubs in the same route commit", async () => {
+  const input = collisionBoard();
+  const stub = new Track(create(TrackSchema, { id: { value: "old-stub" }, net: { name: "A" } }));
+  const outside = new Track(create(TrackSchema, { id: { value: "outside-stub" }, net: { name: "OTHER" } }));
+  const locked = new Track(create(TrackSchema, { id: { value: "locked-stub" }, net: { name: "A" }, locked: LockedState.LS_LOCKED }));
+  const result: RouteResult = {
+    router: "fab-router",
+    tracks: [{ net: "A", netCode: 1, start: { x: 0, y: 0 }, end: { x: 1, y: 0 }, width: 1, layer: BoardLayer.BL_F_Cu }],
+    vias: [],
+    unrouted: [],
+    totalConnections: 1,
+    timedOut: false,
+    elapsedMs: 1,
+    log: [],
+  };
+  let removed: string[] = [];
+  let undos = 0;
+  const appliedRemovals: string[][] = [];
+  const board = {
+    save: async () => {},
+    getTracks: async () => [stub, outside, locked].filter((t) => !removed.includes(t.id)),
+    undo: async () => {
+      undos++;
+      removed = [];
+      return { applied: 1 };
+    },
+    ratsnest: async () => ({ edges: [] }),
+    drc: {
+      run: async () => ({
+        markers: [stub, outside, locked]
+          .filter((t) => !removed.includes(t.id))
+          .map((t) => ({ errorType: DrcErrorType.DRCET_DANGLING_TRACK, items: [{ value: t.id }] })),
+      }),
+    },
+  } as unknown as Board;
+  const jobs = createRouteJobs({
+    openBoard: async () => board,
+    extract: async () => input,
+    capacityRouter: { name: "fab-router", route: async () => result },
+    apply: async (_b, _r, opts) => {
+      removed = [...(opts?.removeCopperIds ?? [])];
+      appliedRemovals.push([...removed]);
+      return { commitId: "commit", created: [], updated: [], deleted: [], value: [] };
+    },
+  });
+  const info = await jobs.wait(
+    jobs.start({ id: "stub-session", transport: null }, { router: "js", options: { nets: ["A"] }, refillZones: false, message: "repair" })
+      .id,
+  );
+  expect(info.state).toBe("done");
+  expect(appliedRemovals).toEqual([[], ["old-stub"]]);
+  expect(undos).toBe(1);
+  expect(info.summary?.retainedDanglingCopper).toEqual([{ id: "locked-stub", net: "A", reason: "locked" }]);
+  expect(info.summary?.message).toContain("route is not native-clean");
+  expect(info.summary?.removedExistingCopper).toEqual([{ id: "old-stub", net: "A" }]);
+  expect(info.summary?.log.join("\n")).toContain("old-stub");
+  expect((await board.getTracks()).map((t) => t.id)).toEqual(["outside-stub", "locked-stub"]);
+});
+
+test("native route application deletes reported stubs and creates replacement copper in one strict commit", async () => {
+  const calls: string[] = [];
+  const board = {
+    commit: async (_message: string, action: (tx: any) => Promise<any>, _scope: unknown, opts: any) => {
+      calls.push("begin");
+      expect(opts.strict).toBe(true);
+      const value = await action({
+        delete: async (ids: string[]) => {
+          expect(ids).toEqual(["old-stub"]);
+          calls.push("delete");
+        },
+        create: async (items: any[]) => {
+          expect(items).toHaveLength(1);
+          calls.push("create");
+          return items;
+        },
+      });
+      calls.push("end");
+      return { created: value };
+    },
+  } as unknown as Board;
+  await applyRouteResult(
+    board,
+    {
+      router: "fab-router",
+      tracks: [{ net: "A", netCode: 1, start: { x: 0, y: 0 }, end: { x: 1, y: 0 }, width: 1, layer: BoardLayer.BL_F_Cu }],
+      vias: [],
+      unrouted: [],
+      totalConnections: 1,
+      timedOut: false,
+      elapsedMs: 1,
+      log: [],
+    },
+    { removeCopperIds: ["old-stub"] },
+  );
+  expect(calls).toEqual(["begin", "delete", "create", "end"]);
 });

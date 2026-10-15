@@ -88,6 +88,10 @@ export interface RouteJobSummary {
    */
   routed: number;
   routerRouted: number;
+  /** Pre-existing, unlocked dangling copper removed on requested repair nets. */
+  removedExistingCopper?: Array<{ id: string; net: string }>;
+  /** Locked existing stubs retained rather than silently deleting protected user copper. */
+  retainedDanglingCopper?: Array<{ id: string; net: string; reason: "locked" }>;
   total: number;
   /** Sum of the created tracks' lengths, nm (0 when KiCad's importer created them). */
   trackLengthNm: number;
@@ -354,7 +358,8 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         await board.save();
         checkCancelled();
         setState("extracting");
-        const copperBefore = new Set((await board.getTracks()).map((item) => item.id));
+        const originalCopper = await board.getTracks();
+        const copperBefore = new Set(originalCopper.map((item) => item.id));
         const input = await (deps.extract ?? extractRouteInput)(board, { nets: request.options?.nets, warn: pushLog });
         const ruleLog = applyRequestRules(input, request.options ?? {});
         ruleLog.forEach(pushLog);
@@ -395,26 +400,45 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         let message = request.message ?? autorouteMessage(request.router, routed);
         setState("applying");
         let applied = false;
+        const removedExistingCopper = new Map<string, string>();
+        const retainedDanglingCopper: Array<{ id: string; net: string; reason: "locked" }> = [];
+        // Without an explicit scope, repair only nets with input connections.
+        const repairNets = new Set(request.options?.nets ?? input.connections.map((connection) => connection.net));
+        const removableExisting = new Map(
+          originalCopper.filter((item) => !item.locked && item.net && repairNets.has(item.net)).map((item) => [item.id, item.net!]),
+        );
         if (!alreadyApplied(result) && (result.tracks.length || result.vias.length || result.claimedVias?.length)) {
-          const maxCleanupPasses = Math.min(20, result.tracks.length + result.vias.length + 1);
+          const maxCleanupPasses = Math.min(20, result.tracks.length + result.vias.length + removableExisting.size + 1);
           for (let cleanupPass = 0; cleanupPass < maxCleanupPasses; cleanupPass++) {
-            const committed = await (deps.apply ?? applyRouteResult)(board, result, { message });
+            const committed = await (deps.apply ?? applyRouteResult)(board, result, {
+              message,
+              removeCopperIds: [...removedExistingCopper.keys()],
+            });
             if (result.router !== "fab-router") {
               applied = true;
               break;
             }
             const createdIds = new Set(committed.created.map((item) => item.id));
             const drc = await board.drc.run({ refillZones: false });
-            const rejectedIds = new Set(
+            const danglingIds = new Set(
               drc.markers
                 .filter(
                   (marker) =>
                     marker.errorType === DrcErrorType.DRCET_DANGLING_TRACK || marker.errorType === DrcErrorType.DRCET_DANGLING_VIA,
                 )
-                .flatMap((marker) => marker.items.map((item) => item.value))
-                .filter((id) => createdIds.has(id)),
+                .flatMap((marker) => marker.items.map((item) => item.value)),
             );
-            if (!rejectedIds.size) {
+            const rejectedIds = new Set([...danglingIds].filter((id) => createdIds.has(id)));
+            const existingIds = [...danglingIds].filter((id) => removableExisting.has(id) && !removedExistingCopper.has(id));
+            if (!rejectedIds.size && !existingIds.length) {
+              for (const item of originalCopper.filter(
+                (item) => item.locked && item.net && repairNets.has(item.net) && danglingIds.has(item.id),
+              )) {
+                retainedDanglingCopper.push({ id: item.id, net: item.net!, reason: "locked" });
+                result.log.push(
+                  `Retained locked dangling copper on requested net ${item.net}: ${item.id}; native DRC still requires attention`,
+                );
+              }
               if (!request.message) {
                 const nativeOpen = (await board.ratsnest(request.options?.nets ?? [])).edges.length;
                 const nativeMessage = autorouteMessage(request.router, Math.max(0, result.totalConnections - nativeOpen));
@@ -422,7 +446,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
                   const undone = await board.undo(1);
                   if (undone.applied !== 1) throw new Error("could not relabel fab_router's tentative route commit");
                   message = nativeMessage;
-                  await (deps.apply ?? applyRouteResult)(board, result, { message });
+                  await (deps.apply ?? applyRouteResult)(board, result, { message, removeCopperIds: [...removedExistingCopper.keys()] });
                 }
               }
               applied = true;
@@ -430,15 +454,19 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
             }
             const undone = await board.undo(1);
             if (undone.applied !== 1) throw new Error("could not undo fab_router's tentative dangling-copper commit");
+            for (const id of existingIds) {
+              removedExistingCopper.set(id, removableExisting.get(id)!);
+              result.log.push(`Removed pre-existing dangling copper on requested net ${removableExisting.get(id)}: ${id}`);
+            }
             const before = result.tracks.length + result.vias.length;
             result = withoutRejectedCreatedCopper(result, committed.created as (Track | Arc | Via)[], rejectedIds);
             const removed = before - result.tracks.length - result.vias.length;
             result.log.push(
-              `KiCad rejected ${removed} dangling fab_router item(s) before the durable commit (cleanup pass ${cleanupPass + 1})`,
+              `KiCad rejected ${removed} generated and ${existingIds.length} pre-existing dangling item(s) before the durable commit (cleanup pass ${cleanupPass + 1})`,
             );
-            if (!removed)
+            if (!removed && !existingIds.length)
               throw new Error("KiCad identified dangling fab_router copper but it could not be mapped back to the route result");
-            if (!result.tracks.length && !result.vias.length && !result.claimedVias?.length) break;
+            if (!result.tracks.length && !result.vias.length && !result.claimedVias?.length && !removedExistingCopper.size) break;
             if (cleanupPass + 1 === maxCleanupPasses) throw new Error("fab_router dangling-copper cleanup did not converge");
           }
         }
@@ -508,6 +536,8 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           new Map((input.nets ?? []).map((net) => [net.name, net.code])),
         );
         info.summary = {
+          ...(retainedDanglingCopper.length ? { retainedDanglingCopper } : {}),
+          ...(removedExistingCopper.size ? { removedExistingCopper: [...removedExistingCopper].map(([id, net]) => ({ id, net })) } : {}),
           ...(collisions ? { endpointCollisions: collisions } : {}),
           ...(result.diagnostics ? { diagnostics: result.diagnostics } : {}),
           ...(result.pairRouting ? { pairRouting: result.pairRouting } : {}),
@@ -532,6 +562,17 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           geometry,
           log: result.log,
         };
+        if (info.summary.diagnostics && (retainedDanglingCopper.length || removedExistingCopper.size)) {
+          info.summary.diagnostics.danglingCopper = {
+            removedExisting: [...removedExistingCopper].map(([id, net]) => ({ id, net })),
+            retained: retainedDanglingCopper,
+          };
+        }
+        if (retainedDanglingCopper.length) {
+          const warning = `${retainedDanglingCopper.length} locked dangling copper item(s) remain on requested nets; route is not native-clean. Retained: ${retainedDanglingCopper.map((item) => `${item.net}/${item.id}`).join(", ")}.`;
+          info.summary.message += `; ${warning}`;
+          if (info.summary.diagnostics) info.summary.diagnostics.text += ` ${warning}`;
+        }
         log(`route job ${id}: done, ${measured}/${result.totalConnections} in ${info.summary.wallMs} ms`);
         emit(job, "done", info);
       } catch (e) {
