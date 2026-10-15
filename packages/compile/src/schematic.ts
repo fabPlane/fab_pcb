@@ -87,6 +87,40 @@ function referenceClass(reference: string): string {
   return reference.match(/^[^0-9?]+/)?.[0] ?? reference.replace(/\?+$/, "");
 }
 
+/** Normalize the in-memory compile IR, never the author's source file. Reserve all given
+ * references first so a valid virtual reference survives regardless of component order.
+ * Connectivity follows the rename; the same IR then drives schematic and board import.
+ */
+export function normalizeVirtualReferences(netlist: Netlist, definitions: ReadonlyMap<string, LibSymbol>): Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
+  const used = new Set(netlist.components.map((component) => component.ref));
+  const renames = new Map<string, string>();
+  for (const component of netlist.components) {
+    if (component.libSource?.lib !== "power") continue;
+    const libId = `${component.libSource.lib}:${component.libSource.part}`;
+    const declared = definitions.get(libId)?.proto.referenceField?.text?.text ?? "";
+    const expected = referenceClass(declared);
+    if (!expected.startsWith("#")) continue;
+    if (referenceClass(component.ref) === expected && /^#[^0-9?]+[0-9]+$/.test(component.ref)) continue;
+    let index = 1;
+    while (used.has(`${expected}${index}`)) index++;
+    const reference = `${expected}${index}`;
+    const previous = component.ref;
+    used.add(reference);
+    component.ref = reference;
+    renames.set(previous, reference);
+    diagnostics.push({
+      severity: "warning",
+      stage: "schematic",
+      code: "virtual_reference_normalized",
+      message: `${previous} -> ${reference}: normalized virtual power reference for ${libId} (declared class ${expected}).`,
+    });
+  }
+  for (const net of netlist.nets) for (const node of net.nodes) node.ref = renames.get(node.ref) ?? node.ref;
+  for (const node of netlist.noConnects ?? []) node.ref = renames.get(node.ref) ?? node.ref;
+  return diagnostics;
+}
+
 interface PlacedPin {
   position: Vec2;
   orientation: SchematicPinOrientation;
@@ -230,10 +264,10 @@ function placedDefinition(source: LibSymbol, origin: Vec2, pins: Map<string, Pla
   return definition;
 }
 
-/** Pure geometry builder, separated from KiCad I/O for focused regression tests. */
+/** Geometry builder without KiCad I/O. Normalizes virtual references in the working compile IR. */
 export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyMap<string, LibSymbol>): GeneratedSchematic {
   const items: Item[] = [];
-  const diagnostics: Diagnostic[] = [];
+  const diagnostics = normalizeVirtualReferences(netlist, definitions);
   const pins = new Map<string, PlacedPin>();
   let symbolsCreated = 0;
   let wiresCreated = 0;
@@ -277,7 +311,7 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
         severity: "error",
         stage: "schematic",
         code: "symbol_reference_mismatch",
-        message: `${component.ref}: symbol ${libId} declares reference class ${expectedReferenceClass}, not ${actualReferenceClass}; choose a symbol whose electrical function matches the component.`,
+        message: `${component.ref}: symbol ${libId} declares reference class ${expectedReferenceClass}, not ${actualReferenceClass}; if ${libId} is the intended symbol, change the reference to ${expectedReferenceClass} followed by a number; otherwise choose a symbol matching the intended electrical function.`,
       });
     }
 

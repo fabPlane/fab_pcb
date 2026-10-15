@@ -333,3 +333,64 @@ describe("generated schematic", () => {
     expect(result.diagnostics.every((diagnostic) => diagnostic.severity === "error")).toBe(true);
   });
 });
+
+function powerSymbol(reference = "#FLG"): LibSymbol {
+  const symbol = deviceSymbol();
+  symbol.proto.referenceField!.text!.text = reference;
+  return symbol;
+}
+
+test("normalizes virtual power references and rewrites connected and unconnected nodes", () => {
+  for (const ref of ["F1", "FLG1"]) {
+    const netlist = {
+      components: [{ ref, value: "PWR_FLAG", footprint: "", libSource: { lib: "power", part: "PWR_FLAG" } }],
+      nets: [{ name: "VCC", nodes: [{ ref, pin: "1" }] }],
+      noConnects: [{ ref, pin: "2" }],
+    };
+    const result = buildGeneratedSchematic(netlist, new Map([["power:PWR_FLAG", powerSymbol()]]));
+    expect(netlist.components[0]!.ref).toBe("#FLG1");
+    expect(netlist.nets[0]!.nodes[0]!.ref).toBe("#FLG1");
+    expect(netlist.noConnects[0]!.ref).toBe("#FLG1");
+    expect(result.diagnostics).toContainEqual(
+      expect.objectContaining({
+        severity: "warning",
+        code: "virtual_reference_normalized",
+        message: expect.stringContaining(`${ref} -> #FLG1`),
+      }),
+    );
+    expect(result.diagnostics.some((d) => d.code === "symbol_reference_mismatch")).toBe(false);
+  }
+});
+
+test("preserves valid virtual references and avoids collisions deterministically", () => {
+  const components = ["F1", "#FLG1", "FLG2"].map((ref) => ({
+    ref,
+    value: "PWR_FLAG",
+    footprint: "",
+    libSource: { lib: "power", part: "PWR_FLAG" },
+  }));
+  const netlist = { components, nets: [] };
+  const definitions = new Map([["power:PWR_FLAG", powerSymbol()]]);
+  buildGeneratedSchematic(netlist, definitions);
+  expect(components.map((c) => c.ref)).toEqual(["#FLG2", "#FLG1", "#FLG3"]);
+  expect(buildGeneratedSchematic(netlist, definitions).diagnostics).toEqual([]);
+});
+
+test("normalizes declared #PWR class but keeps real mismatches failing", () => {
+  const definitions = new Map([
+    ["power:VCC", powerSymbol("#PWR")],
+    ["Device:C", powerSymbol("C")],
+  ]);
+  const netlist = {
+    components: [
+      { ref: "V1", value: "VCC", footprint: "", libSource: { lib: "power", part: "VCC" } },
+      { ref: "R1", value: "100n", footprint: "Capacitor_SMD:C_0603", libSource: { lib: "Device", part: "C" } },
+    ],
+    nets: [],
+  };
+  const result = buildGeneratedSchematic(netlist, definitions);
+  expect(netlist.components[0]!.ref).toBe("#PWR1");
+  expect(result.diagnostics).toContainEqual(
+    expect.objectContaining({ severity: "error", code: "symbol_reference_mismatch", message: expect.stringContaining("reference") }),
+  );
+});
