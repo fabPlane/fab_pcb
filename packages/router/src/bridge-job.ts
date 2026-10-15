@@ -420,7 +420,8 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           originalCopper.filter((item) => !item.locked && item.net && repairNets.has(item.net)).map((item) => [item.id, item.net!]),
         );
         if (!alreadyApplied(result) && (result.tracks.length || result.vias.length || result.claimedVias?.length)) {
-          const maxCleanupPasses = Math.min(20, result.tracks.length + result.vias.length + removableExisting.size + 1);
+          // Each pass must remove at least one item; this finite bound handles long dangling chains.
+          const maxCleanupPasses = result.tracks.length + result.vias.length + removableExisting.size + 1;
           for (let cleanupPass = 0; cleanupPass < maxCleanupPasses; cleanupPass++) {
             const committed = await (deps.apply ?? applyRouteResult)(board, result, {
               message,
