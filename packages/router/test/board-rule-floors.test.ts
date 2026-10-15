@@ -25,13 +25,17 @@ test("minimum width and via floors preserve copper spacing; drill spacing uses t
     const rule = child(child(pcb, "structure"), "rule");
     expect(child(rule, "width")![1]).toBe("300");
     expect(child(rule, "clearance")![1]).toBe("200");
-    const typed = new Map(children(rule, "clearance").filter(c => child(c, "type")).map(c => [child(c, "type")![1], c[1]]));
+    const typed = new Map(
+      children(rule, "clearance")
+        .filter((c) => child(c, "type"))
+        .map((c) => [child(c, "type")![1], c[1]]),
+    );
     expect(typed.has("wire_pin")).toBe(false);
     expect(typed.get("wire_via")).toBe("400");
     expect(typed.get("smd_smd")).toBe("200");
     const cross = children(child(pcb, "network"), "class_class");
     expect(cross.length).toBeGreaterThan(0);
-    expect(children(child(cross[0], "rule"), "clearance").some(c => child(c, "type")?.[1] === "smd_via")).toBe(true);
+    expect(children(child(cross[0], "rule"), "clearance").some((c) => child(c, "type")?.[1] === "smd_via")).toBe(true);
     for (const cls of children(child(pcb, "network"), "class")) {
       if (cls[1]?.toString().startsWith("fabdesk_rule_")) {
         expect(child(child(cls, "rule"), "width")![1]).toBe("300");
@@ -71,29 +75,40 @@ printf '%s' '(session board (routes (resolution um 10) (network_out)))' > "$out"
   }
 });
 
-
 test("NPTH drill geometry protects holes without raising plated-pad spacing", () => {
   const input = twoNetBoard();
   input.rules.holeClearance = 250_000;
-  input.pads.push({ ...input.pads[0]!, id: "npth", net: "", nonPlated: true, drill: 1_000_000,
-    drillSize: { x: 1_000_000, y: 1_500_000 }, size: { x: 1_000_000, y: 1_500_000 } });
+  input.pads.push({
+    ...input.pads[0]!,
+    id: "npth",
+    net: "",
+    nonPlated: true,
+    drill: 1_000_000,
+    drillSize: { x: 1_000_000, y: 1_500_000 },
+    size: { x: 1_000_000, y: 1_500_000 },
+  });
   for (const dsn of [writeDsn(input), overlayDsnRules(writeDsn(input), input)]) {
     const pcb = parseSExpr(dsn)[0] as SExpr[];
     const structure = child(pcb, "structure");
-    const obstacle = children(structure, "keepout").find(k => k[1] === "fabdesk-drill-npth");
+    const obstacle = children(structure, "keepout").find((k) => k[1] === "fabdesk-drill-npth");
     expect(child(obstacle, "circle")![2]).toBe("1600");
     const rule = child(structure, "rule");
-    expect(children(rule, "clearance").some(c => child(c, "type")?.[1] === "wire_pin")).toBe(false);
-    expect(children(rule, "clearance").some(c => child(c, "type")?.[1] === "wire_via")).toBe(false);
+    expect(children(rule, "clearance").some((c) => child(c, "type")?.[1] === "wire_pin")).toBe(false);
+    expect(children(rule, "clearance").some((c) => child(c, "type")?.[1] === "wire_via")).toBe(false);
   }
 });
-
 
 test("plated oval drills receive annular credit on corresponding axes", () => {
   const input = twoNetBoard();
   input.rules.holeClearance = 250_000;
-  input.pads.push({ ...input.pads[0]!, id: "slot", shape: "oval", drill: 600_000,
-    drillSize: { x: 600_000, y: 1_700_000 }, size: { x: 1_000_000, y: 2_100_000 } });
+  input.pads.push({
+    ...input.pads[0]!,
+    id: "slot",
+    shape: "oval",
+    drill: 600_000,
+    drillSize: { x: 600_000, y: 1_700_000 },
+    size: { x: 1_000_000, y: 2_100_000 },
+  });
   const structure = child(parseSExpr(writeDsn(input))[0] as SExpr[], "structure");
-  expect(children(child(structure, "rule"), "clearance").some(c => child(c, "type")?.[1] === "wire_pin")).toBe(false);
+  expect(children(child(structure, "rule"), "clearance").some((c) => child(c, "type")?.[1] === "wire_pin")).toBe(false);
 });

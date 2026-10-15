@@ -55,11 +55,13 @@ describe("FabRouter", () => {
     input.pads.push({ ...input.pads[0]!, id: "npth", net: "", netCode: 0, nonPlated: true });
     let dsn = "";
     let settings: FabRouterSettings | undefined;
-    await new FabRouter({ routeDsn: (text, received) => {
-      dsn = text;
-      settings = received;
-      return success();
-    } }).route(input);
+    await new FabRouter({
+      routeDsn: (text, received) => {
+        dsn = text;
+        settings = received;
+        return success();
+      },
+    }).route(input);
     expect(dsn).not.toContain("wire_pin");
     expect(dsn).not.toContain("pin_pin");
     expect(dsn).toContain("fabdesk-drill-npth");

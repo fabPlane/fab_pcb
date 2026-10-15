@@ -82,6 +82,16 @@ test("an all-echo or empty session adds nothing; metadata remains usable", () =>
 test("scoped DSN retains protected net identities without routing their pads", () => {
   const pcb = parseSExpr(writeDsn(fixture(), { routableNets: ["A"] }))[0] as SExpr[];
   const nets = children(child(pcb, "network"), "net");
-  expect(child(nets.find((n) => n[1] === "A"), "pins")!.length).toBeGreaterThan(1);
-  expect(child(nets.find((n) => n[1] === "B"), "pins")).toEqual(["pins"]);
+  expect(
+    child(
+      nets.find((n) => n[1] === "A"),
+      "pins",
+    )!.length,
+  ).toBeGreaterThan(1);
+  expect(
+    child(
+      nets.find((n) => n[1] === "B"),
+      "pins",
+    ),
+  ).toEqual(["pins"]);
 });
