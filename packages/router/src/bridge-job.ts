@@ -33,7 +33,7 @@ import { extractRouteInput } from "./extract";
 import { endpointCollisions } from "./endpoint-collisions";
 import { applyRequestRules } from "./request-rules";
 import { FreeroutingRouter, alreadyApplied, resolveFreerouting, type FreeroutingOptions, type FreeroutingPaths } from "./freerouting";
-import { FabRouter } from "./fab-router";
+import { FabRouter, leftoverConnectionEndpoints } from "./fab-router";
 import { RouteCancelled, type Autorouter, type RouteConnection, type RouteOptions, type RouteProgress, type RouteResult } from "./types";
 
 export type RouteJobState = "queued" | "saving" | "filling" | "extracting" | "routing" | "applying" | "done" | "failed" | "cancelled";
@@ -393,8 +393,20 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         checkCancelled();
         const empty = emptyResultReason(result);
         if (empty && !result.diagnostics) {
+          const collisions = endpointCollisions(input, result.unrouted);
+          const endpoints = leftoverConnectionEndpoints({ ...input, connections: result.unrouted });
+          const solverStatus = [...result.log].reverse().find((line) => /stage completed|pass #.*unrouted/.test(line));
+          const detail = endpoints
+            .slice(0, 8)
+            .map((end) => {
+              const rules = input.rules.perNet.get(end.net) ?? input.rules.default;
+              return `${end.net} ${end.itemId} (${end.x.toFixed(3)},${end.y.toFixed(3)}) mm; width ${rules.trackWidth / 1e6}, clearance ${rules.clearance / 1e6}, via ${rules.viaDiameter / 1e6}/${rules.viaDrill / 1e6} mm`;
+            })
+            .join("; ");
+          const reason = `${empty}. ${solverStatus ?? "No solver search termination detail was exposed."} Remaining input connections: ${result.unrouted.length}; endpoints: ${detail}${endpoints.length > 8 ? `; ${endpoints.length - 8} more endpoints` : ""}. ${collisions.text} Next: inspect these connections and retained copper/keepouts; a failed search does not prove the board is unroutable.`;
+          result.log.push(reason);
           info.log = result.log.slice(-LOG_TAIL);
-          throw new Error(empty);
+          throw new Error(reason);
         }
         const routed = result.totalConnections - result.unrouted.length;
         let message = request.message ?? autorouteMessage(request.router, routed);

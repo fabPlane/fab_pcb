@@ -12,6 +12,7 @@ import {
   Pad,
   Track,
   Via,
+  Zone,
   boxFromPoints,
   boxUnion,
   mm,
@@ -295,7 +296,12 @@ export async function extractRouteInput(board: Board, opts: ExtractOptions = {})
   // --- zones -----------------------------------------------------------------------------------
   const keepouts: RouteKeepout[] = [];
   const routeZones: RouteZone[] = [];
-  for (const z of zones) {
+  // KiCad embeds footprint rule areas in the footprint definition. GetItems(ZONE)
+  // can return only board-level zones; embedded coordinates are already absolute.
+  const allZones = new Map(zones.map((z) => [z.id, z]));
+  for (const footprint of footprints)
+    for (const item of footprint.items) if (item instanceof Zone && !allZones.has(item.id)) allZones.set(item.id, item);
+  for (const z of allZones.values()) {
     const layers = copperLayersInOrder(z.layers);
     const polys = polygonsOf(z.outline);
     if (!polys.length) continue;

@@ -7,6 +7,39 @@ import { createRouteJobs, persistAppliedRoute, routeGeometry, withoutRejectedCre
 import { applyRouteResult } from "../src/apply";
 import { collisionBoard } from "./collision-fixture";
 
+test("empty routing reports affected endpoints, effective rules and measured blockers before failing", async () => {
+  const input = collisionBoard();
+  const board = { save: async () => {}, getTracks: async () => [] } as unknown as Board;
+  const jobs = createRouteJobs({
+    openBoard: async () => board,
+    extract: async () => input,
+    routers: () => ({
+      name: "freerouting",
+      route: async () => ({
+        router: "freerouting",
+        tracks: [],
+        vias: [],
+        totalConnections: input.connections.length,
+        unrouted: input.connections,
+        timedOut: false,
+        elapsedMs: 1,
+        log: ["Auto-routing stage completed: 1 unrouted"],
+      }),
+    }),
+    freerouting: { jar: "/test/router.jar", java: "/test/java", ok: true },
+    apply: async () => {
+      throw new Error("empty copper must never apply");
+    },
+  });
+  const result = await jobs.wait(jobs.start({ id: "empty-detail", transport: null }, { router: "freerouting", refillZones: false }).id);
+  expect(result.state).toBe("failed");
+  expect(result.error).toContain("Auto-routing stage completed: 1 unrouted");
+  expect(result.error).toContain("Remaining input connections: 1");
+  expect(result.error).toContain("clearance");
+  expect(result.error).toContain("blocker");
+  expect(result.error).toContain("does not prove the board is unroutable");
+});
+
 for (const router of ["js", "freerouting"] as const)
   test(`${router} probes native leftover opens after application using pre-route obstacles`, async () => {
     const input = collisionBoard();
