@@ -8,7 +8,7 @@ import { equals, type Message } from "@bufbuild/protobuf";
 import type { Any } from "@bufbuild/protobuf/wkt";
 import { CommitAction, ItemDeletionStatus, ItemRequestStatus, ItemStatusCode, KiCadObjectType, SchematicSymbolSchema, type ItemStatus } from "@fp-pcb/proto";
 import * as cmd from "../commands";
-import { CommitDroppedError, KiCadItemError, type ItemFailure } from "../errors";
+import { CommitDroppedError, CommitRecoveryError, KiCadItemError, type ItemFailure } from "../errors";
 import type { Document, ItemScope, UndoRedoResult } from "./document";
 import { Item, SchematicSymbol, toAnyItem, wrapAny } from "./items";
 
@@ -77,6 +77,7 @@ export class Commit {
   private scheduled = false;
   private flushing: Promise<void> | null = null;
   private ended = false;
+  private finalizing = false;
   private readonly strict: boolean;
 
   constructor(
@@ -129,14 +130,22 @@ export class Commit {
   async push(message = ""): Promise<void> {
     await this.drain();
     if (this.ended) return;
-    this.ended = true;
-    if (!this.id) return;
-    await cmd.endCommit(this.doc.client, {
-      id: { value: this.id },
-      action: CommitAction.CMA_COMMIT,
-      message,
-      header: this.doc.header(this.scope),
-    });
+    if (this.finalizing) throw new Error(`commit ${this.id} is already finalizing`);
+    this.finalizing = true;
+    try {
+      if (this.id)
+        await cmd.endCommit(this.doc.client, {
+          id: { value: this.id },
+          action: CommitAction.CMA_COMMIT,
+          message,
+          header: this.doc.header(this.scope),
+        });
+      this.ended = true;
+    } catch (error) {
+      await this.failAndRecover(error);
+    } finally {
+      this.finalizing = false;
+    }
   }
 
   /** `EndCommit(CMA_DROP)`: reverts everything done in this commit. Never throws. */
@@ -147,10 +156,10 @@ export class Commit {
       /* the failed op is what we are dropping */
     }
     if (this.ended) return;
-    this.ended = true;
     if (!this.id) return;
     try {
       await cmd.endCommit(this.doc.client, { id: { value: this.id }, action: CommitAction.CMA_DROP, header: this.doc.header(this.scope) });
+      this.ended = true;
     } catch {
       /* best effort */
     }
@@ -184,8 +193,7 @@ export class Commit {
       value = await fn(this);
       await this.drain();
     } catch (e) {
-      await this.drop();
-      throw new CommitDroppedError(this.id, e);
+      return this.failAndRecover(e);
     }
     await this.push(message);
     return { value, commitId: this.id, created: this.created, updated: this.updated, deleted: this.deleted };
@@ -193,8 +201,35 @@ export class Commit {
 
   // --- internals ---------------------------------------------------------------------------------
 
+  private async failAndRecover(cause: unknown): Promise<never> {
+    try {
+      if (!this.id) throw new Error("one-shot operation has no native transaction to revert");
+      let recovery: "dropped" | "undone" = "dropped";
+      try {
+        // A rejected finalization may still leave the transaction pending.
+        await cmd.endCommit(this.doc.client, { id: { value: this.id }, action: CommitAction.CMA_DROP, header: this.doc.header(this.scope) });
+      } catch {
+        // Headless KiCad can transfer the undo record before finalization throws. Undo only
+        // our exact newest entry; never undo another client's edit or reload saved files.
+        const top = (await this.doc.undoStack()).undo.at(-1);
+        if (top?.commitId?.value !== this.id)
+          throw new Error("failed transaction is not the newest native undo entry; refusing to undo other work");
+        const result = await this.doc.undo(1);
+        if (result.applied !== 1) throw new Error("native undo did not confirm reverting the failed transaction");
+        recovery = "undone";
+      }
+      this.ended = true;
+      throw new CommitDroppedError(this.id, cause, recovery);
+    } catch (error) {
+      if (error instanceof CommitDroppedError) throw error;
+      // State is unknown; stop this handle and preserve the server's live document for recovery.
+      this.ended = true;
+      throw new CommitRecoveryError(this.id, cause, error);
+    }
+  }
+
   private enqueue(kind: OpKind, wrappers: Item[], scope: ItemScope | undefined, ids?: string[]): Promise<unknown> {
-    if (this.ended) return Promise.reject(new Error(`commit ${this.id || "(one-shot)"} has already ended`));
+    if (this.ended || this.finalizing) return Promise.reject(new Error(`commit ${this.id || "(one-shot)"} has already ended or is finalizing`));
     const groups = new Map<string, Op>();
     const promises: Promise<unknown>[] = [];
     const list = wrappers.length ? wrappers : (ids ?? []).map(() => undefined);
