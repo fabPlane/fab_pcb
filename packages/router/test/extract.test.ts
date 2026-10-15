@@ -96,6 +96,8 @@ function footprint(id: string, reference: string, embeddedZone = false) {
       referenceField: { text: { text: { text: reference } } },
       ...(embeddedZone
         ? {
+            position: v(40, 30),
+            orientation: { valueDegrees: 90 },
             definition: {
               items: [
                 packAny(
@@ -257,7 +259,7 @@ function boardServer(embeddedZone = false): FakeTransport {
 }
 
 describe("extractRouteInput", () => {
-  test("exports footprint rule areas alongside board zones without transforming absolute child coordinates", async () => {
+  test("exports footprint rule areas with translation and rotation alongside absolute board zones", async () => {
     const board = new KiCad(await KiCadClient.connect(boardServer(true), { clientName: "embedded-zone" })).boardFrom(DOC);
     const input = await extractRouteInput(board!);
     expect(input.keepouts).toHaveLength(2);
@@ -266,9 +268,9 @@ describe("extractRouteInput", () => {
       tracks: true,
       vias: true,
       polygon: [
-        { x: mm(7), y: mm(11) },
-        { x: mm(9), y: mm(11) },
-        { x: mm(9), y: mm(13) },
+        { x: mm(51), y: mm(23) },
+        { x: mm(51), y: mm(21) },
+        { x: mm(53), y: mm(21) },
       ],
     });
   });
