@@ -3,7 +3,8 @@ import { fromBinary } from "@bufbuild/protobuf";
 import { SchematicSymbolSchema } from "@fp-pcb/proto";
 import { LibSymbol, SchematicSymbol, SchematicLine, NoConnect, schematicPinSheetPosition } from "@fp-pcb/client";
 import { buildGeneratedSchematic } from "../src/schematic";
-import stock from "./fixtures/stock-multiunit-symbols.json";
+import { readFileSync } from "node:fs";
+const stock = JSON.parse(readFileSync(new URL("./fixtures/stock-multiunit-symbols.json", import.meta.url), "utf8")) as Array<{ id: string; protoBase64: string }>;
 
 // Effective stock definitions captured from packaged KiCad 10.99.0-4517-g329aba9ff.
 // Native integration separately uses the actual stock libraries, not these captured bytes.
