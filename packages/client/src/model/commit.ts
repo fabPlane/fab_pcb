@@ -164,12 +164,18 @@ export class Commit {
       /* the failed op is what we are dropping */
     }
     if (this.ended) return;
-    if (!this.id) return;
     try {
-      await cmd.endCommit(this.doc.client, { id: { value: this.id }, action: CommitAction.CMA_DROP, header: this.doc.header(this.scope) });
-      this.ended = true;
+      if (this.id)
+        await cmd.endCommit(this.doc.client, {
+          id: { value: this.id },
+          action: CommitAction.CMA_DROP,
+          header: this.doc.header(this.scope),
+        });
     } catch {
       /* best effort */
+    } finally {
+      // The caller discarded this work; a later push() must never commit it.
+      this.ended = true;
     }
   }
 
@@ -210,6 +216,9 @@ export class Commit {
   // --- internals ---------------------------------------------------------------------------------
 
   private async failAndRecover(cause: unknown): Promise<never> {
+    // Requests queued before the failure must land inside the transaction the drop reverts, not
+    // after it. drain() never throws: flush settles each op's own promise.
+    await this.drain();
     try {
       if (!this.id) throw new Error("one-shot operation has no native transaction to revert");
       let recovery: "dropped" | "undone" = "dropped";

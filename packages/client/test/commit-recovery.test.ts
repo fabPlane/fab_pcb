@@ -113,6 +113,26 @@ describe("commit finalization containment", () => {
         expect(f.counts()).toEqual({ drops: 1, undoCalls: mode === "pending" ? 0 : 1 });
       });
 
+  test("a callback that throws with an item request still queued drains it before dropping", async () => {
+    const f = server("pending"),
+      doc = await f.doc();
+    let queued: Promise<unknown> | undefined;
+    const error = await doc
+      .commit("edit", async (tx) => {
+        queued = tx.update([edit()]);
+        throw new Error("callback failed");
+      })
+      .catch((e: unknown) => e);
+    await queued?.catch(() => undefined);
+    expect(error).toBeInstanceOf(CommitDroppedError);
+    expect((error as Error).message).toContain("callback failed");
+    const order = f.t.calls.map((c) => c.typeName).filter((n) => /UpdateItems$|EndCommit$/.test(n));
+    expect(order.map((n) => n.split(".").at(-1))).toEqual(["UpdateItems", "EndCommit"]);
+    // The update ran inside the transaction, so the drop reverted it.
+    expect(f.live()).toEqual({ moved: 10, unsaved: 42 });
+    expect(f.counts().drops).toBe(1);
+  });
+
   for (const mode of ["newer", "no-undo"] as const)
     test(`${mode}: refuse unsafe recovery without claiming rollback`, async () => {
       const f = server(mode),
