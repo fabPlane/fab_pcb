@@ -17,6 +17,7 @@ import { BoardLayer } from "@fp-pcb/proto";
 import type { Vec2 } from "@fp-pcb/client";
 import { copperLayersInOrder, rulesForNet } from "../extract";
 import type { RouteInput, RouteLayer, RouteOptions, RoutePad } from "../types";
+import { drillClearanceDsn } from "./drill-clearance";
 import { num, quote } from "./sexpr";
 
 /** nm -> µm, the DSN unit. */
@@ -67,6 +68,8 @@ function padShapes(pad: RoutePad, layer: string): string {
 }
 
 export interface DsnOptions {
+  /** Typed drill rules target Freerouting's copper-envelope model. fab_router uses native hole settings. */
+  freeroutingDrillRules?: boolean;
   /** Design name written into the file. Default: the board file name. */
   name?: string;
   /** Copper layers to publish (default: every layer of the input). */
@@ -187,7 +190,7 @@ export function writeDsn(input: RouteInput, opts: DsnOptions = {}): string {
   for (const extra of opts.extraVias ?? []) viaFor(extra.diameter, extra.drill);
   out.push(`    (via ${[...viaNames.keys()].map(quote).join(" ")})`);
   out.push(
-    `    (rule (width ${um(rules.trackWidth)}) (clearance ${um(rules.clearance)}) (clearance ${um(rules.clearance)} (type default_smd)) (clearance ${um(Math.min(rules.clearance, 100_000))} (type smd_smd)))`,
+    `    (rule (width ${um(rules.trackWidth)}) (clearance ${um(rules.clearance)}) (clearance ${um(rules.clearance)} (type default_smd)) (clearance ${um(rules.clearance)} (type smd_smd)))`,
   );
   out.push(`  )`);
 
@@ -252,6 +255,12 @@ export function writeDsn(input: RouteInput, opts: DsnOptions = {}): string {
     if (!list) pinsByNet.set(p.net, (list = []));
     list.push(`${compOf.get(p.id)!}-1`);
   }
+  // Protected wiring still needs a network identity. Otherwise Freerouting can put copper
+  // whose net has no declaration into another net's session bucket (observed on scoped DSNs).
+  // Empty pin lists preserve the names without giving those nets routing targets.
+  for (const item of [...input.tracks, ...input.vias]) {
+    if (item.net && !pinsByNet.has(item.net)) pinsByNet.set(item.net, []);
+  }
   out.push(`  (network`);
   for (const [net, pins] of pinsByNet) out.push(`    (net ${quote(net)} (pins ${pins.map(quote).join(" ")}))`);
   const byClass = new Map<string, { nets: string[]; rules: ReturnType<typeof rulesForNet> }>();
@@ -283,7 +292,7 @@ export function writeDsn(input: RouteInput, opts: DsnOptions = {}): string {
   }
   out.push(`  )`);
   out.push(`)`);
-  return out.join("\n") + "\n";
+  return drillClearanceDsn(out.join("\n") + "\n", input, opts.freeroutingDrillRules ?? true);
 }
 
 /** Layers a `RouteOptions` restricts routing to, resolved against the input. */

@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { mm } from "@fp-pcb/client";
 import { FabRouter, type FabRouterHooks, type FabRouterSettings, type FabRouterTextResult } from "../src/fab-router";
 import { B, F, twoNetBoard } from "./fixtures";
+import { writeDsn } from "../src/specctra/dsn";
 
 const SES = `(session "board.ses"
   (base_design "board.dsn")
@@ -47,6 +48,28 @@ function success(
 }
 
 describe("FabRouter", () => {
+  test("uses native hole settings without Freerouting pin classes, retaining NPTH obstacles", async () => {
+    const input = twoNetBoard();
+    input.rules.holeClearance = mm(0.25);
+    input.pads[0]!.size = { x: mm(0.8), y: mm(0.8) };
+    input.pads.push({ ...input.pads[0]!, id: "npth", net: "", netCode: 0, nonPlated: true });
+    let dsn = "";
+    let settings: FabRouterSettings | undefined;
+    await new FabRouter({
+      routeDsn: (text, received) => {
+        dsn = text;
+        settings = received;
+        return success();
+      },
+    }).route(input);
+    expect(dsn).not.toContain("wire_pin");
+    expect(dsn).not.toContain("pin_pin");
+    expect(dsn).toContain("fabdesk-drill-npth");
+    expect(settings?.holeClearanceUm).toBe(250);
+    expect(writeDsn(input)).toContain("wire_pin");
+    expect(writeDsn(input)).toContain("fabdesk-drill-npth");
+  });
+
   test("maps controls and native progress hooks, then converts the SES", async () => {
     let settings: FabRouterSettings | undefined;
     let hooks: FabRouterHooks | undefined;
@@ -65,7 +88,7 @@ describe("FabRouter", () => {
       phases.push(event.phase),
     );
 
-    expect(settings).toEqual({ maxPasses: 3, timeBudgetMs: 12_345, viaCost: 9, seed: 7 });
+    expect(settings).toEqual({ maxPasses: 3, timeBudgetMs: 12_345, viaCost: 9, seed: 7, copperToEdgeClearanceUm: 200, holeClearanceUm: 0 });
     expect(hooks?.signal).toBeUndefined();
     expect(phases).toEqual(["export", "pass 1", "routing", "import", "done"]);
     expect(result.router).toBe("fab-router");
@@ -212,4 +235,22 @@ test("generated and discarded counts exclude protected copper echoed in SES", as
   const result = await new FabRouter({ routeDsn: () => native }).route(input);
   expect(result.diagnostics).toMatchObject({ generated: { tracks: 1, vias: 1 }, discarded: { tracks: 1, vias: 1 } });
   expect(input.tracks).toHaveLength(1);
+});
+
+test("forwards native clearance floors in micrometres and honors explicit solver overrides", async () => {
+  const input = twoNetBoard();
+  input.rules.edgeClearance = mm(0.5);
+  input.rules.holeClearance = mm(0.25);
+  let settings: FabRouterSettings | undefined;
+  const router = new FabRouter({
+    routeDsn: (_dsn, received) => {
+      settings = received;
+      return success();
+    },
+  });
+  await router.route(input);
+  expect(settings).toMatchObject({ copperToEdgeClearanceUm: 500, holeClearanceUm: 250 });
+  await router.route(input, { extra: { copperToEdgeClearanceUm: 600, holeClearanceUm: 300 } });
+  expect(settings).toMatchObject({ copperToEdgeClearanceUm: 600, holeClearanceUm: 300 });
+  await expect(router.route(input, { extra: { holeClearanceUm: -1 } })).rejects.toThrow("invalid fab_router holeClearanceUm");
 });

@@ -84,7 +84,7 @@ export function validatePlacements(netlist: Netlist, board: BoardSpec | undefine
         severity: "error",
         stage: "netlist",
         code: "bad_placement_position",
-        message: `${prefix}/position: x and y must be finite numbers in millimetres.`,
+        message: `${prefix}/position: use position: {x, y} in mm; x and y must be finite numbers.`,
       });
     }
     if (!refs.has(placement.ref)) {

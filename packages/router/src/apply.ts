@@ -72,6 +72,8 @@ export interface ApplyOptions {
   message?: string;
   /** Skip items KiCad rejects instead of dropping the commit (default: strict, i.e. throw). */
   strict?: boolean;
+  /** Native dangling cleanup only: existing scoped copper deleted in the same undoable commit. */
+  removeCopperIds?: string[];
 }
 
 /** The board's vias named by `result.claimedVias`, with the claiming net set on each (nothing sent yet). */
@@ -99,6 +101,7 @@ export async function applyRouteResult(board: Board, result: RouteResult, opts: 
   return board.commit(
     message,
     async (tx) => {
+      if (opts.removeCopperIds?.length) await tx.delete(opts.removeCopperIds);
       const created = items.length ? await tx.create(items) : [];
       if (claimed.length) await tx.update(claimed);
       return created;

@@ -81,13 +81,19 @@ export function checkNetlistJson(value: unknown, file: string): { file: NetlistJ
   const net = obj({ name: str(true), code: num(), nodes: arr(node) });
   const point = obj({ x: num(), y: num() });
   const position = (v: unknown, path: string) => {
-    if (!isRecord(v)) return errs.error(path, "must be an object", "bad_placement_position");
+    if (!isRecord(v)) return errs.error(path, "use position: {x, y} in mm; x and y must be finite numbers", "bad_placement_position");
     for (const axis of ["x", "y"] as const) {
       if (typeof v[axis] !== "number" || !Number.isFinite(v[axis]))
         errs.error(`${path}/${axis}`, "must be a finite number", "bad_placement_position");
     }
   };
-  const placement = obj({ ref: str(true), position });
+  const placement: Check = (v, path) => {
+    obj({ ref: str(true), position })(v, path);
+    if (isRecord(v)) {
+      for (const key of ["x", "y"])
+        if (key in v) errs.error(`${path}/${key}`, "unknown placement field; use position: {x, y} in mm", "bad_placement_position");
+    }
+  };
   const library = obj({
     kind: (v, path) => {
       if (v !== "footprint" && v !== "symbol") errs.error(path, 'must be "footprint" or "symbol"');

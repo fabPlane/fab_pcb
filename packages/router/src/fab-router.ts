@@ -12,6 +12,9 @@ import {
 } from "./types";
 
 export interface FabRouterSettings {
+  /** Native floors, in micrometres; RouteOptions.extra can override these explicitly. */
+  copperToEdgeClearanceUm?: number;
+  holeClearanceUm?: number;
   maxPasses?: number;
   timeBudgetMs?: number;
   viaCost?: number;
@@ -149,6 +152,7 @@ export class FabRouter implements Autorouter {
     const dsn = writeDsn(input, {
       layers,
       extraVias,
+      freeroutingDrillRules: false,
       ...(opts.nets ? { routableNets: opts.nets } : {}),
     });
     log.push(
@@ -159,9 +163,16 @@ export class FabRouter implements Autorouter {
     const routeDsn = await this.solver();
     if (opts.signal?.aborted) throw new RouteCancelled();
 
+    const clearanceSetting = (key: "copperToEdgeClearanceUm" | "holeClearanceUm", nativeNm: number) => {
+      const value = opts.extra?.[key] ?? nativeNm / 1000;
+      if (typeof value !== "number" || !Number.isFinite(value) || value < 0) throw new Error(`invalid fab_router ${key}`);
+      return value;
+    };
     const result = routeDsn(
       dsn,
       {
+        copperToEdgeClearanceUm: clearanceSetting("copperToEdgeClearanceUm", input.rules.edgeClearance),
+        holeClearanceUm: clearanceSetting("holeClearanceUm", input.rules.holeClearance ?? 0),
         ...(opts.effort !== undefined ? { maxPasses: Math.max(1, Math.round(opts.effort)) } : {}),
         ...(opts.maxTimeMs !== undefined ? { timeBudgetMs: opts.maxTimeMs } : {}),
         ...(opts.viaCost !== undefined ? { viaCost: opts.viaCost } : {}),

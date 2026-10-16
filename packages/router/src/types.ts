@@ -44,6 +44,10 @@ export interface RoutePad {
   layers: BoardLayer[];
   /** Plated through hole: connects on every copper layer. */
   through: boolean;
+  /** Non-plated drill: export an independent obstacle, without blocking plated endpoints. */
+  nonPlated?: boolean;
+  /** Both drill dimensions, nm; oval holes need their long axis too. */
+  drillSize?: Vec2;
   /** Drill diameter in nm (0 for SMD). */
   drill: number;
   /** Pad-level clearance override in nm, when set. */
@@ -153,6 +157,9 @@ export interface RouteRules {
   /** Copper-to-board-edge clearance, nm. */
   edgeClearance: number;
   holeToHole: number;
+  /** Hole-to-copper clearance, nm (optional for older extracted inputs). */
+  holeClearance?: number;
+  minViaAnnularWidth?: number;
   /** The default net class: what nets without a class of their own get. */
   default: RouteNetRules;
   /** Rules per net name (only nets whose class differs from `default` need an entry, but every net may have one). */
@@ -293,6 +300,11 @@ export interface PairRouting {
 }
 
 export interface RoutingDiagnostics {
+  /** Native cleanup facts; kept inside diagnostics so existing clients preserve them. */
+  danglingCopper?: {
+    removedExisting: Array<{ id: string; net: string }>;
+    retained: Array<{ id: string; net: string; reason: "locked" }>;
+  };
   text: string;
   passes: number;
   stoppedBy: string;

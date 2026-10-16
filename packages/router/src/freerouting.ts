@@ -32,8 +32,10 @@ import { fileURLToPath } from "node:url";
 import type { Board } from "@fp-pcb/client";
 import { commands as generatedCommands, KiCadApiError } from "@fp-pcb/client";
 import { overlayDsnRules } from "./specctra/rule-overlay";
+import { freeroutingRuleInput } from "./specctra/board-rule-floors";
 import { writeDsn, dsnLayers, extraViasFromRouteOptions } from "./specctra/dsn";
 import { leftoverConnectionEndpoints } from "./fab-router";
+import { filterSessionCopper } from "./specctra/session-filter";
 import { parseSes, sesToItems } from "./specctra/ses";
 import {
   RouteCancelled,
@@ -464,6 +466,7 @@ export class FreeroutingRouter implements Autorouter {
       );
 
     progress?.({ phase: "export", percent: 0 });
+    const ruleInput = freeroutingRuleInput(input);
     let dsn: string;
     if (opts.signal?.aborted) throw new RouteCancelled();
     if (!leftover && mode !== "builtin") {
@@ -473,35 +476,28 @@ export class FreeroutingRouter implements Autorouter {
         this.fr.kicadCli ? { kicadCli: this.fr.kicadCli, log: (l) => log.push(l) } : undefined,
       );
     } else {
-      dsn = writeDsn(input, {
+      dsn = writeDsn(ruleInput, {
         layers,
         extraVias: extraViasFromRouteOptions(opts),
         ...(opts.nets ? { routableNets: opts.nets } : {}),
       });
     }
-    if (
-      !leftover &&
-      mode !== "builtin" &&
-      (opts.perNet?.length ||
-        opts.trackWidthMm !== undefined ||
-        opts.clearanceMm !== undefined ||
-        opts.viaDiameterMm !== undefined ||
-        opts.viaDrillMm !== undefined ||
-        opts.differentialPairs?.some((p) => p.widthMm !== undefined))
-    ) {
-      dsn = overlayDsnRules(dsn, input);
-      log.push("exported DSN: explicit per-net rule overlay applied");
+    if (!leftover && mode !== "builtin") {
+      dsn = overlayDsnRules(dsn, ruleInput);
+      log.push("exported DSN: board minimums and effective per-net rule overlay applied");
     }
     await writeFile(dsnPath, dsn);
     log.push(`dsn: ${dsn.length} bytes, ${layers.length} layers`);
 
     const fixedWidths =
+      input.rules.minTrackWidth > 0 ||
       opts.trackWidthMm !== undefined ||
       opts.perNet?.some((r) => r.widthMm !== undefined) ||
       opts.differentialPairs?.some((p) => p.widthMm !== undefined);
     // The pinned 2.4.1 fan-out inserter has a micro-neckdown fallback independent of automatic_neckdown.
-    // Explicit widths disable both reduction paths; no-rule requests retain the default strategy.
-    if (fixedWidths) log.push("explicit widths: automatic neckdown disabled; fan-out pre-pass disabled (pinned micro-neckdown fallback)");
+    // A board minimum also forbids reduction below the exported width: 2.4.1 has no neckdown floor.
+    if (fixedWidths)
+      log.push("board minimum or explicit widths: automatic neckdown disabled; fan-out pre-pass disabled (pinned micro-neckdown fallback)");
     const passes = opts.effort ?? this.fr.passes ?? 100;
     progress?.({ phase: "freerouting", percent: 1 });
     const run = await runFreerouting(
@@ -536,6 +532,12 @@ export class FreeroutingRouter implements Autorouter {
       throw new Error(
         `Freerouting failed: exit ${run.exitCode}; ${run.ses ? "session written" : "no session written"}. ${log.slice(-8).join("; ")}`,
       );
+    }
+
+    if (run.ses) {
+      run.ses = filterSessionCopper(run.ses, input, opts.nets);
+      log.push("session filtered: protected copper echoes and outside-scope nets excluded from additive import");
+      if (this.fr.keepFiles || this.fr.workDir) await writeFile(join(workDir, "import.ses"), run.ses);
     }
 
     let result: RouteResult;

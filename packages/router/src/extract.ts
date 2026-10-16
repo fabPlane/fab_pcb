@@ -136,6 +136,8 @@ function toRoutePad(pad: Pad, footprintRef: string, copper: readonly BoardLayer[
     ),
     layers,
     through,
+    nonPlated: pad.padType === PadType.PT_NPTH,
+    ...(through && stack?.drill?.diameter ? { drillSize: vec2(stack.drill.diameter) } : {}),
     drill: through ? nm(stack?.drill?.diameter?.xNm) : 0,
     clearance: pad.proto.copperClearanceOverride ? nm(pad.proto.copperClearanceOverride) : undefined,
   };
@@ -364,6 +366,8 @@ export async function extractRouteInput(board: Board, opts: ExtractOptions = {})
     minViaDrill: nm(c?.minThroughDrill),
     edgeClearance: nm(c?.copperEdgeClearance),
     holeToHole: nm(c?.holeToHoleMin),
+    holeClearance: nm(c?.holeClearance),
+    minViaAnnularWidth: nm(c?.minViaAnnularWidth),
   };
   const hardFallback: RouteNetRules = {
     netClass: "Default",
