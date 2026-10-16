@@ -34,3 +34,19 @@ test("native netclass dimensions are retained and explicit requests take precede
   applyRequestRules(input, { differentialPairs: [{ p: "A", n: "B", widthMm: 0.3 }] });
   expect(input.differentialPairs).toEqual([{ p: "A", n: "B", widthMm: 0.3 }]);
 });
+
+test("#2 a Power class's automatically saved differential fields do not constrain rails", () => {
+  const cls = create(NetClassSchema, {
+    name: "Power",
+    board: { diffPairTrackWidth: toDistance(mm(0.2)), diffPairGap: toDistance(mm(0.15)) },
+  });
+  expect(
+    detectDifferentialPairs(
+      ["VBAT+", "VBAT-"],
+      new Map([
+        ["VBAT+", cls],
+        ["VBAT-", cls],
+      ]),
+    ),
+  ).toEqual([{ p: "VBAT+", n: "VBAT-" }]);
+});

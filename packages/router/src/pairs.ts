@@ -16,8 +16,20 @@ export function detectDifferentialPairs(names: readonly string[], classes: Reado
       if (!p.endsWith(positive!)) continue;
       const n = p.slice(0, -positive!.length) + negative!;
       if (!known.has(n) || used.has(n)) continue;
-      const pc = classes.get(p)?.board,
-        nc = classes.get(n)?.board;
+      // KiCad serializes these fields on every class. Only a name targeting this pair
+      // or explicitly describing differential/pair signals supplies native pair dimensions.
+      const pairClass = (net: string) => {
+        const c = classes.get(net);
+        if (!c) return undefined;
+        const key = c.name.toLowerCase().replace(/[^a-z0-9]/g, "");
+        const stem = p
+          .replace(/(?:_P|\+|P)$/, "")
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, "");
+        return /(?:diff(?:erential)?|pair)/i.test(c.name) || (key.length >= 2 && stem.includes(key)) ? c.board : undefined;
+      };
+      const pc = pairClass(p),
+        nc = pairClass(n);
       const width = pc?.diffPairTrackWidth ?? nc?.diffPairTrackWidth;
       const gap = pc?.diffPairGap ?? nc?.diffPairGap;
       pairs.push({ p, n, ...(width && nm(width) > 0 ? { widthMm: nm(width) / 1e6 } : {}), ...(gap ? { gapMm: nm(gap) / 1e6 } : {}) });
