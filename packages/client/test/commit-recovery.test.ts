@@ -133,6 +133,61 @@ describe("commit finalization containment", () => {
     expect(f.counts().drops).toBe(1);
   });
 
+  test("an in-flight UpdateItems finishes before recovery drops the transaction", async () => {
+    const f = server("pending"),
+      doc = await f.doc();
+    let entered!: () => void, finish!: () => void;
+    const started = new Promise<void>((resolve) => {
+      entered = resolve;
+    });
+    const blocked = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    let landedAfterDrop = false;
+    f.t.on(UpdateItemsSchema, async (req) => {
+      entered();
+      await blocked;
+      landedAfterDrop = f.counts().drops > 0;
+      f.live().moved = 25;
+      return reply(UpdateItemsResponseSchema, {
+        status: ItemRequestStatus.IRS_OK,
+        updatedItems: req.items.map((item) => ({ status: { code: ItemStatusCode.ISC_OK }, item })),
+      });
+    });
+    let update: Promise<unknown> | undefined;
+    const outcome = doc
+      .commit("edit", async (tx) => {
+        update = tx.update([edit()]);
+        await started;
+        throw Error("callback failed with request in flight");
+      })
+      .catch((error: unknown) => error);
+    await started;
+    // Let the callback rejection reach failAndRecover while the update response is held.
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    const dropsWhileBlocked = f.counts().drops;
+    finish();
+    const error = await outcome;
+    await update;
+    expect(dropsWhileBlocked).toBe(0);
+    expect(landedAfterDrop).toBe(false);
+    expect(error).toBeInstanceOf(CommitDroppedError);
+    expect(f.live()).toEqual({ moved: 10, unsaved: 42 });
+    expect(f.counts().drops).toBe(1);
+  });
+
+  test("a failed drop still ends the handle and prevents a later push", async () => {
+    const f = server("pending"),
+      doc = await f.doc();
+    f.t.on(EndCommitSchema, () => fail(ApiStatusCode.AS_BAD_REQUEST, "drop failed"));
+    const tx = await doc.beginCommit();
+    await tx.drop();
+    expect(tx.isOpen).toBe(false);
+    await tx.push("must not commit discarded work");
+    expect(f.t.requestsOf(EndCommitSchema).map((r) => r.action)).toEqual([CommitAction.CMA_DROP]);
+    await expect(tx.update([edit()])).rejects.toThrow("ended");
+  });
+
   for (const mode of ["newer", "no-undo"] as const)
     test(`${mode}: refuse unsafe recovery without claiming rollback`, async () => {
       const f = server(mode),

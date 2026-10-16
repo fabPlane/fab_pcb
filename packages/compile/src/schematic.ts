@@ -319,7 +319,7 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
     const symbolReference = definition.proto.referenceField?.text?.text ?? "";
     const expectedReferenceClass = referenceClass(symbolReference);
     const actualReferenceClass = referenceClass(component.ref);
-    if (expectedReferenceClass && actualReferenceClass !== expectedReferenceClass) {
+    if (unit === 1 && expectedReferenceClass && actualReferenceClass !== expectedReferenceClass) {
       diagnostics.push({
         severity: "error",
         stage: "schematic",
@@ -409,6 +409,7 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
   }
 
   const noConnectPositions = new Set<string>();
+  const reportedNoConnectConflicts = new Set<string>();
   for (const declaration of netlist.noConnects ?? []) {
     const selectedPins = pins.get(`${declaration.ref}:${declaration.pin}`);
     if (!selectedPins?.length) {
@@ -423,12 +424,14 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
     for (const { position } of selectedPins) {
       const key = positionKey(position);
       if (connectedPositions.has(key)) {
-        diagnostics.push({
-          severity: "error",
-          stage: "schematic",
-          code: "no_connect_on_connected_position",
-          message: `${declaration.ref} pin ${declaration.pin} shares a symbol position with a connected pin and cannot be marked no-connect.`,
-        });
+        if (!reportedNoConnectConflicts.has(declaration.ref))
+          diagnostics.push({
+            severity: "error",
+            stage: "schematic",
+            code: "no_connect_on_connected_position",
+            message: `${declaration.ref} pin ${declaration.pin} shares a symbol position with a connected pin and cannot be marked no-connect.`,
+          });
+        reportedNoConnectConflicts.add(declaration.ref);
         continue;
       }
       // Stacked symbol pins (common on USB connectors) share one electrical position and need one X.

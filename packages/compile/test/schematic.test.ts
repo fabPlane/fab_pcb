@@ -10,6 +10,7 @@ import {
   SchematicPinSchema,
   SchematicSymbolChildSchema,
   SchematicSymbolSchema,
+  SchematicSymbolUnitSchema,
   TextSchema,
 } from "@fp-pcb/proto";
 import { GlobalLabel, LibSymbol, mm, NoConnect, SchematicLine, SchematicSymbol, toDistance, toVector2 } from "@fp-pcb/client";
@@ -49,6 +50,28 @@ function deviceSymbol(): LibSymbol {
 }
 
 describe("generated schematic", () => {
+  test("part-level reference and connected no-connect errors are not repeated for each unit", () => {
+    const definition = deviceSymbol();
+    definition.proto.unitCount = 3;
+    for (const child of definition.proto.items) child.unit = create(SchematicSymbolUnitSchema, { unit: 0 });
+    const components = ["U1", "U2"].map((ref) => ({ ref, value: "multi", footprint: "x", libSource: { lib: "Device", part: "R" } }));
+    const result = buildGeneratedSchematic(
+      {
+        components,
+        nets: [{ name: "CONNECTED", nodes: components.flatMap((c) => ["1", "2"].map((pin) => ({ ref: c.ref, pin }))) }],
+        noConnects: components.flatMap((c) => ["1", "2"].map((pin) => ({ ref: c.ref, pin }))),
+      },
+      new Map([["Device:R", definition]]),
+    );
+    expect(result.symbolsCreated).toBe(6);
+    for (const code of ["symbol_reference_mismatch", "no_connect_on_connected_position"]) {
+      const errors = result.diagnostics.filter((d) => d.code === code);
+      expect(errors).toHaveLength(2);
+      for (const component of components) expect(errors.filter((d) => d.message.startsWith(component.ref))).toHaveLength(1);
+    }
+    expect(result.noConnectsCreated).toBe(0);
+  });
+
   test("draws library symbols and labelled wire stubs with absolute field and wire geometry", () => {
     const result = buildGeneratedSchematic(
       {
