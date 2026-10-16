@@ -1,0 +1,113 @@
+{
+  "job": "J1",
+  "tier": "easy",
+  "role": "scored",
+  "scope": null,
+  "target_nets": [],
+  "target_footprint": null,
+  "power_nets": [],
+  "pairs": [],
+  "kept_zones": [],
+  "rules": {
+    "classes": [
+      {
+        "name": "Default",
+        "clearance": 0.2,
+        "track_width": 0.25,
+        "via_diameter": 0.6,
+        "via_drill": 0.4,
+        "diff_pair_width": 0.25,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "nets": [
+          "+3V3",
+          "+5V",
+          "GND",
+          "Net-(I2c1-Pad2)",
+          "Net-(I2c1-Pad3)",
+          "Net-(JP1-Pad1)",
+          "Net-(R1-Pad1)",
+          "Net-(R1-Pad2)",
+          "Net-(R10-Pad1)",
+          "Net-(R10-Pad2)",
+          "Net-(R2-Pad1)",
+          "Net-(R2-Pad2)",
+          "Net-(R3-Pad1)",
+          "Net-(R3-Pad2)",
+          "Net-(R4-Pad1)",
+          "Net-(R4-Pad2)",
+          "Net-(Relays1-Pad2)",
+          "Net-(Relays1-Pad3)",
+          "Net-(Relays1-Pad4)",
+          "Net-(Relays1-Pad5)",
+          "Net-(U1-Pad15)",
+          "Net-(U1-Pad16)",
+          "Net-(U1-Pad17)",
+          "Net-(U1-Pad19)",
+          "Net-(U1-Pad20)",
+          "Net-(U1-Pad23)",
+          "Net-(U1-Pad3)",
+          "Net-(U1-Pad4)"
+        ]
+      }
+    ],
+    "clearance_mm": 0.0,
+    "copper_to_edge_mm": 0.5,
+    "copper_to_hole_mm": 0.25,
+    "hole_to_hole_mm": 0.25,
+    "minimum_track_mm": 0.2,
+    "minimum_via_mm": 0.4,
+    "minimum_annular_mm": 0.1,
+    "provenance": "legacy board net_class and stock pcbnew design settings; no human-routing fit"
+  },
+  "baseline": {
+    "errors": 0,
+    "warnings": 19,
+    "opens": 39,
+    "error_types": {},
+    "warning_types": {
+      "silk_overlap": 2,
+      "lib_footprint_issues": 17
+    }
+  },
+  "source": {
+    "board_id": "photon_Sprinkler_sprinkler",
+    "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+    "raw_blob": "412e13d94a1d102c7c4672c9a0b5333daeb01a85",
+    "raw_sha256": "cc8ce7d288cc558e7aeac2e9f82b9ba4b0478460407c89d35ac536afd2d643b4",
+    "repository": "https://github.com/broncosis/photon_Sprinkler",
+    "verified_license_url": "https://github.com/broncosis/photon_Sprinkler/blob/a47b8e13ef795252f40fb399dc991114fde74d22/LICENSE",
+    "license_revision": "a47b8e13ef795252f40fb399dc991114fde74d22",
+    "license_file": "LICENSE"
+  },
+  "fidelity": {
+    "footprints": true,
+    "pads": true,
+    "outline": true,
+    "layers": true,
+    "nets": true
+  },
+  "gates": {
+    "fidelity": true,
+    "baseline_errors_zero": true
+  },
+  "gate_pass": true,
+  "selection": {
+    "job": "J1",
+    "tier": "easy",
+    "board_id": "photon_Sprinkler_sprinkler",
+    "why": "39 connections, 1.51 pads/cm\u00b2, 1.9mm pitch, 2 reference vias. Whole-board routing with clean human reference under original rules."
+  },
+  "sha256": {
+    "board.kicad_pcb": "cc337702072c157e73401b4f8c18f8f82d17868874e064de54e54430c54ad966",
+    "board.kicad_pro": "57d27367e67625af30477ea50655d9d5b88a6189b5e6e23e937b150deb292166",
+    "baseline-drc.json": "9af9e01c19a68d986982809ef513c65a96ac5b171fc751bd2389ee1992e6b359",
+    "board.kicad_dru": "bbef6e119424cbf626d6fec0697069e203a9bde1d54f30517b179a0375f28b6b"
+  },
+  "utc": "2026-10-09T10:32:52.466080+00:00",
+  "correction": {
+    "source_fixture": "evidence/open-router-suite-2026-10-09/fixtures-v2/photon-sprinkler-sprinkler/j1",
+    "record": "evidence/open-router-comparison-2026-10-09/correction-2026-10-12/fixture-proofs.json",
+    "changes": "zone UUIDs and study class-width rules only; baseline and hash metadata recomputed"
+  }
+}

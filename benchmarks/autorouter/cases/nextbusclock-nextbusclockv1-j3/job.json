@@ -1,0 +1,180 @@
+{
+  "job": "J3",
+  "tier": "medium",
+  "role": "scored",
+  "scope": null,
+  "target_nets": [],
+  "target_footprint": null,
+  "power_nets": [
+    {
+      "name": "VCC",
+      "minimum_width_mm": 0.5,
+      "min_width_mm": 0.5
+    }
+  ],
+  "pairs": [],
+  "kept_zones": [],
+  "rules": {
+    "classes": [
+      {
+        "name": "Default",
+        "clearance": 0.25,
+        "track_width": 0.25,
+        "via_diameter": 0.6,
+        "via_drill": 0.4,
+        "diff_pair_width": 0.25,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "nets": [
+          "/33V_PWR",
+          "/5V_PWR",
+          "/ESP_RX",
+          "/ESP_TX",
+          "/SR_CLOCK",
+          "/SR_DATA",
+          "/SR_LATCH",
+          "GND",
+          "Net-(C5-Pad2)",
+          "Net-(C6-Pad2)",
+          "Net-(D1-Pad2)",
+          "Net-(DIG1-Pad1)",
+          "Net-(DIG1-Pad10)",
+          "Net-(DIG1-Pad2)",
+          "Net-(DIG1-Pad3)",
+          "Net-(DIG1-Pad4)",
+          "Net-(DIG1-Pad5)",
+          "Net-(DIG1-Pad6)",
+          "Net-(DIG1-Pad7)",
+          "Net-(DIG1-Pad8)",
+          "Net-(DIG1-Pad9)",
+          "Net-(DIG2-Pad1)",
+          "Net-(DIG2-Pad10)",
+          "Net-(DIG2-Pad2)",
+          "Net-(DIG2-Pad3)",
+          "Net-(DIG2-Pad4)",
+          "Net-(DIG2-Pad5)",
+          "Net-(DIG2-Pad6)",
+          "Net-(DIG2-Pad7)",
+          "Net-(DIG2-Pad8)",
+          "Net-(DIG2-Pad9)",
+          "Net-(ESP1-Pad4)",
+          "Net-(ESP1-Pad5)",
+          "Net-(ESP1-Pad6)",
+          "Net-(IC1-Pad1)",
+          "Net-(IC1-Pad11)",
+          "Net-(IC1-Pad12)",
+          "Net-(IC1-Pad13)",
+          "Net-(IC1-Pad15)",
+          "Net-(IC1-Pad16)",
+          "Net-(IC1-Pad19)",
+          "Net-(IC1-Pad23)",
+          "Net-(IC1-Pad24)",
+          "Net-(IC1-Pad25)",
+          "Net-(IC1-Pad26)",
+          "Net-(IC1-Pad27)",
+          "Net-(IC1-Pad28)",
+          "Net-(IC1-Pad4)",
+          "Net-(IC1-Pad5)",
+          "Net-(IC1-Pad6)",
+          "Net-(SR1-Pad7)",
+          "Net-(SR2-Pad7)",
+          "Net-(SR2-Pad9)",
+          "VCC"
+        ]
+      }
+    ],
+    "clearance_mm": 0.0,
+    "copper_to_edge_mm": 0.5,
+    "copper_to_hole_mm": 0.25,
+    "hole_to_hole_mm": 0.25,
+    "minimum_track_mm": 0.25,
+    "minimum_via_mm": 0.4,
+    "minimum_annular_mm": 0.1,
+    "provenance": "legacy board net_class and stock pcbnew design settings; no human-routing fit",
+    "j3_only_power_minima": {
+      "VCC": 0.5
+    }
+  },
+  "baseline": {
+    "errors": 0,
+    "warnings": 63,
+    "opens": 77,
+    "error_types": {},
+    "warning_types": {
+      "silk_overlap": 37,
+      "lib_footprint_issues": 26
+    }
+  },
+  "source": {
+    "board_id": "nextbusclock_NextBusClockV1",
+    "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+    "raw_blob": "40516805f48f7c9561c1811862b0d957ea0bc733",
+    "raw_sha256": "54d875cf26031b32087857a06c846717734eb3c8235a7d1e45fb2fe06efc4e56",
+    "repository": "https://github.com/chrisgillis/nextbusclock",
+    "verified_license_url": "https://github.com/chrisgillis/nextbusclock/blob/9c7722846e11bf405ecefba4e91cd991bbea5dd7/LICENSE",
+    "license_revision": "9c7722846e11bf405ecefba4e91cd991bbea5dd7",
+    "license_file": "LICENSE"
+  },
+  "fidelity": {
+    "footprints": true,
+    "pads": true,
+    "outline": true,
+    "layers": true,
+    "nets": true
+  },
+  "gates": {
+    "fidelity": true,
+    "baseline_errors_zero": true
+  },
+  "gate_pass": true,
+  "selection": {
+    "job": "J3",
+    "tier": "medium",
+    "board_id": "nextbusclock_NextBusClockV1",
+    "power_nets": [
+      {
+        "name": "VCC",
+        "length_mm": 119.325,
+        "pads": 5,
+        "endpoints": [
+          {
+            "reference": "5V_REG1",
+            "value": "LM7805"
+          },
+          {
+            "reference": "BJ1",
+            "value": "BARREL_JACK"
+          },
+          {
+            "reference": "C1",
+            "value": "10uF"
+          },
+          {
+            "reference": "SR1",
+            "value": "74HC595"
+          },
+          {
+            "reference": "SR2",
+            "value": "74HC595"
+          }
+        ],
+        "qualified": true,
+        "minimum_width_mm": 0.5
+      }
+    ],
+    "pairs": [],
+    "why": "119.325mm on declared supply rails to 5 supply/load footprint incidences; every declared rail >=40mm, width >=2x signal."
+  },
+  "sha256": {
+    "board.kicad_pcb": "9491fc0200c5f820dc798f909c17382a5dee07604b03ca3e602549ee8f2385c6",
+    "board.kicad_pro": "de4b2949148f7b9b3bcf3f9913ff3f1cb25b2a736c1f4bbf204d7187d59d62be",
+    "baseline-drc.json": "4bb7edbc1121a02ba469f7782035be49d109caf7e2e6adb14d35e69a8062eba9",
+    "board.kicad_dru": "8810a7bf196b592e969c4822ec7847d34ea39b0ac9bc6be46d2a5ab71a1e3407"
+  },
+  "utc": "2026-10-09T10:33:33.127223+00:00",
+  "correction": {
+    "source_fixture": "evidence/open-router-suite-2026-10-09/fixtures-v2/nextbusclock-nextbusclockv1/j3",
+    "record": "evidence/open-router-comparison-2026-10-09/correction-2026-10-12/fixture-proofs.json",
+    "changes": "zone UUIDs and study class-width rules only; baseline and hash metadata recomputed"
+  }
+}

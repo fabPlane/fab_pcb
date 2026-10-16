@@ -1,0 +1,14 @@
+{
+  "study": "Corrected open-source autorouter comparison, final 2026-10-12",
+  "cases": 26,
+  "excluded": "Aquarius J3; no valid witness under the frozen rules",
+  "checker": "native-check-v4.3.py, byte-identical original",
+  "harness_changes": "Paths relocated to this folder; fab_router supports an explicit source module override. No algorithm or scoring-gate changes.",
+  "source_commits": {
+    "fab-router": "69cf598db98c136bff16bbe02bccdded95674b18",
+    "freerouting": "b647a2f824cfbc54bc4dcaee71b03b7cd945eb76",
+    "fastroute": "6e14035e966ff058fac79da0600eaf76f3f45c4f",
+    "tracemaker": "24c847772e57ea8888e2cfe4bbf1aa00666390a4",
+    "kicad-routing-tools": "9399bfb29e072bfe60b10d9cdae20c274fc2a17a"
+  }
+}

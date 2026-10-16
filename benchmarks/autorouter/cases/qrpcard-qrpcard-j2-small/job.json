@@ -1,0 +1,158 @@
+{
+  "job": "J2",
+  "role": "scored",
+  "tier": "medium",
+  "scope": "small",
+  "target_nets": [
+    "Net-(LO(Q)1-Pad1)"
+  ],
+  "target_footprint": "U1",
+  "target_connections": 2,
+  "power_nets": [],
+  "pairs": [],
+  "kept_zones": [],
+  "rules": {
+    "classes": [
+      {
+        "name": "Default",
+        "clearance": 0.2,
+        "track_width": 0.25,
+        "via_diameter": 0.6,
+        "via_drill": 0.4,
+        "diff_pair_width": 0.25,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "nets": [
+          "+5V",
+          "GND",
+          "Net-(C1-Pad1)",
+          "Net-(C1-Pad2)",
+          "Net-(C10-Pad2)",
+          "Net-(C11-Pad2)",
+          "Net-(C12-Pad2)",
+          "Net-(C4-Pad2)",
+          "Net-(C5-Pad1)",
+          "Net-(C7-Pad2)",
+          "Net-(C8-Pad2)",
+          "Net-(C9-Pad2)",
+          "Net-(I1-Pad1)",
+          "Net-(J1-Pad3)",
+          "Net-(J1-Pad4)",
+          "Net-(J1-Pad5)",
+          "Net-(LO(I)1-Pad1)",
+          "Net-(LO(Q)1-Pad1)",
+          "Net-(R3-Pad2)",
+          "Net-(U1-Pad12)",
+          "Net-(U1-Pad8)"
+        ]
+      }
+    ],
+    "clearance_mm": 0.0,
+    "copper_to_edge_mm": 0.5,
+    "copper_to_hole_mm": 0.25,
+    "hole_to_hole_mm": 0.25,
+    "minimum_track_mm": 0.2,
+    "minimum_via_mm": 0.4,
+    "minimum_annular_mm": 0.1,
+    "provenance": "legacy board net_class and stock pcbnew design settings; no human-routing fit"
+  },
+  "baseline": {
+    "errors": 0,
+    "warnings": 52,
+    "opens": 2,
+    "error_types": {},
+    "warning_types": {
+      "silk_overlap": 1,
+      "silk_over_copper": 2,
+      "lib_footprint_issues": 33,
+      "silk_edge_clearance": 14,
+      "track_dangling": 2
+    }
+  },
+  "selection": {
+    "job": "J2",
+    "tier": "medium",
+    "scope": "small",
+    "board_id": "QRPCard_QRPCard",
+    "target_nets": [
+      "Net-(LO(Q)1-Pad1)"
+    ],
+    "target_footprint": "U1",
+    "connections": 2,
+    "congestion": {
+      "scope": "small",
+      "footprint": "U1",
+      "value": "SN74HC74",
+      "library_id": "SMD_Packages:SOIC-14_N",
+      "target_nets": [
+        "Net-(LO(Q)1-Pad1)"
+      ],
+      "connections": 2,
+      "per_net_connections": {
+        "Net-(LO(Q)1-Pad1)": 2
+      },
+      "excluded_ground_supply_incident": [
+        "GND"
+      ],
+      "bbox_mm": [
+        76.073,
+        109.855,
+        111.76,
+        156.79674
+      ],
+      "kept_copper_in_bbox": 81,
+      "kept_segments_in_bbox": 72,
+      "kept_vias_in_bbox": 9,
+      "nearby_kept_copper_2mm": 44,
+      "arc_chord_proxy_items": 0,
+      "seed_order": "1ca6b3a8a694a147ba06c0a76ec53439b1bf60dd56648f2a9185503268869937"
+    },
+    "why": "U1 (SN74HC74): one incident signal net reconnected after a pin/component edit; other nets retained"
+  },
+  "source": {
+    "board_id": "QRPCard_QRPCard",
+    "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+    "raw_blob": "ac9a8be6c366dd1fa3ed19acfdef2f2cb74362b7",
+    "raw_sha256": "90426237749a60b9bf6b71940dc5f1ae9cff804b8ea118aeb84b153e5382a4db",
+    "repository": "https://github.com/devttys0/QRPCard",
+    "verified_license_url": "https://github.com/devttys0/QRPCard/blob/b474df243eb6b7e60f512eb54c89913802a4fa8e/LICENSE",
+    "license_revision": "b474df243eb6b7e60f512eb54c89913802a4fa8e",
+    "license_file": "LICENSE"
+  },
+  "fidelity": {
+    "footprints": true,
+    "pads": true,
+    "outline": true,
+    "layers": true,
+    "nets": true
+  },
+  "gates": {
+    "native_fidelity": true,
+    "baseline_errors_zero": true,
+    "kept_copper_exact": true,
+    "target_copper_absent": true,
+    "opens_in_scope": true,
+    "source_zones_preserved": true
+  },
+  "gate_checks": {
+    "native_fidelity": true,
+    "baseline_errors_zero": true,
+    "kept_copper_exact": true,
+    "target_copper_absent": true,
+    "opens_in_scope": true,
+    "source_zones_preserved": true
+  },
+  "gate_pass": true,
+  "sha256": {
+    "board.kicad_pcb": "fdc33cc77473daa9b1f801337a163fce9472de8daa23066d5de1bbaf3aece977",
+    "board.kicad_pro": "df297ef7d2b48897904264eed3b13cd6b3d9739ba3d3baa70e861ee449117e2f",
+    "baseline-drc.json": "37ca814405c3fec7fd09d44c4027eda54d962790f2840f2afcba5f2a7055aa52",
+    "board.kicad_dru": "bbef6e119424cbf626d6fec0697069e203a9bde1d54f30517b179a0375f28b6b"
+  },
+  "utc": "2026-10-09T10:52:24.957280+00:00",
+  "correction": {
+    "source_fixture": "evidence/open-router-suite-2026-10-09/fixtures-j2-v3/qrpcard-qrpcard/j2-small",
+    "record": "evidence/open-router-comparison-2026-10-09/correction-2026-10-12/fixture-proofs.json",
+    "changes": "zone UUIDs and study class-width rules only; baseline and hash metadata recomputed"
+  }
+}

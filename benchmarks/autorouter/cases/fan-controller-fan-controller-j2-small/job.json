@@ -1,0 +1,179 @@
+{
+  "job": "J2",
+  "role": "scored",
+  "tier": "hard",
+  "scope": "small",
+  "target_nets": [
+    "/ENC_A(CN2)"
+  ],
+  "target_footprint": "U1",
+  "target_connections": 1,
+  "power_nets": [],
+  "pairs": [],
+  "kept_zones": [],
+  "rules": {
+    "classes": [
+      {
+        "name": "Default",
+        "clearance": 0.2,
+        "track_width": 0.25,
+        "via_diameter": 0.6,
+        "via_drill": 0.4,
+        "diff_pair_width": 0.25,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "nets": [
+          "+12V",
+          "+5V",
+          "/ENC_A(CN2)",
+          "/ENC_B(CN6)",
+          "/SW(CN7)",
+          "/pwm0(OC2B)",
+          "/pwm1(OC5)",
+          "/pwm2(OC4)",
+          "/pwm3(OC1E)",
+          "/pwm_in",
+          "/sense0(CN13)",
+          "/sense1",
+          "/sense2",
+          "/sense3",
+          "/sense_out",
+          "GND",
+          "Net-(C10-Pad1)",
+          "Net-(C12-Pad1)",
+          "Net-(D1-Pad1)",
+          "Net-(D2-Pad1)",
+          "Net-(D3-Pad1)",
+          "Net-(D4-Pad1)",
+          "Net-(P3-Pad4)",
+          "Net-(P4-Pad4)",
+          "Net-(P5-Pad4)",
+          "Net-(P6-Pad4)",
+          "Net-(Q1-Pad1)",
+          "Net-(Q2-Pad1)",
+          "Net-(Q3-Pad1)",
+          "Net-(Q4-Pad1)",
+          "Net-(Q5-Pad1)",
+          "Net-(R14-Pad1)",
+          "Net-(R5-Pad2)",
+          "Net-(U1-Pad11)",
+          "Net-(U1-Pad12)",
+          "Net-(U1-Pad16)",
+          "Net-(U1-Pad22)",
+          "Net-(U1-Pad26)",
+          "Net-(U1-Pad9)",
+          "PGEC",
+          "PGED",
+          "analog_cmd",
+          "~MCLR"
+        ]
+      }
+    ],
+    "clearance_mm": 0.0,
+    "copper_to_edge_mm": 0.5,
+    "copper_to_hole_mm": 0.25,
+    "hole_to_hole_mm": 0.25,
+    "minimum_track_mm": 0.2,
+    "minimum_via_mm": 0.4,
+    "minimum_annular_mm": 0.1,
+    "provenance": "legacy board net_class and stock pcbnew design settings; no human-routing fit"
+  },
+  "baseline": {
+    "errors": 0,
+    "warnings": 108,
+    "opens": 1,
+    "error_types": {},
+    "warning_types": {
+      "silk_overlap": 9,
+      "silk_over_copper": 33,
+      "lib_footprint_issues": 66
+    }
+  },
+  "selection": {
+    "job": "J2",
+    "tier": "hard",
+    "scope": "small",
+    "board_id": "fan_controller_fan_controller",
+    "target_nets": [
+      "/ENC_A(CN2)"
+    ],
+    "target_footprint": "U1",
+    "connections": 1,
+    "congestion": {
+      "scope": "small",
+      "footprint": "U1",
+      "value": "pic24fv08km202",
+      "library_id": "kicad_pcb:SSOP-28",
+      "target_nets": [
+        "/ENC_A(CN2)"
+      ],
+      "connections": 1,
+      "per_net_connections": {
+        "/ENC_A(CN2)": 1
+      },
+      "excluded_ground_supply_incident": [
+        "+5V",
+        "GND"
+      ],
+      "bbox_mm": [
+        119.466,
+        64.932,
+        142.541,
+        84.532
+      ],
+      "kept_copper_in_bbox": 126,
+      "kept_segments_in_bbox": 118,
+      "kept_vias_in_bbox": 8,
+      "nearby_kept_copper_2mm": 62,
+      "arc_chord_proxy_items": 0,
+      "seed_order": "ae656cdbcd1173b22e1c6382476ae000df37fcd88fe11c2fefbfbd4ebbba5b8e"
+    },
+    "why": "U1 (pic24fv08km202): one incident signal net reconnected after a pin/component edit; other nets retained"
+  },
+  "source": {
+    "board_id": "fan_controller_fan_controller",
+    "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+    "raw_blob": "072fc9ab13ad4d39b19f3ee4acdad8c82223c302",
+    "raw_sha256": "39450c48bdfa861692edffd064018b825d80cd34e1ce052d28cfe064bd38734d",
+    "repository": "https://github.com/slightlynybbled/fan_controller",
+    "verified_license_url": "https://github.com/slightlynybbled/fan_controller/blob/27579e00bceebd0c3d04cc5c79289e0239c98e26/license.txt",
+    "license_revision": "27579e00bceebd0c3d04cc5c79289e0239c98e26",
+    "license_file": "license.txt"
+  },
+  "fidelity": {
+    "footprints": true,
+    "pads": true,
+    "outline": true,
+    "layers": true,
+    "nets": true
+  },
+  "gates": {
+    "native_fidelity": true,
+    "baseline_errors_zero": true,
+    "kept_copper_exact": true,
+    "target_copper_absent": true,
+    "opens_in_scope": true,
+    "source_zones_preserved": true
+  },
+  "gate_checks": {
+    "native_fidelity": true,
+    "baseline_errors_zero": true,
+    "kept_copper_exact": true,
+    "target_copper_absent": true,
+    "opens_in_scope": true,
+    "source_zones_preserved": true
+  },
+  "gate_pass": true,
+  "sha256": {
+    "board.kicad_pcb": "c3ac7ba10c9fa0690c3048bc9b580a8ee63e689271b6b639bc82676a2ae4486e",
+    "board.kicad_pro": "b65a504ebcd06ba0068d044e224e0a8af23a9a4be128f4a5622369efc441652b",
+    "baseline-drc.json": "624aa8f6d643ea41825b0a84124c8355f374f620dace1143037225136a5ef3a8",
+    "board.kicad_dru": "bbef6e119424cbf626d6fec0697069e203a9bde1d54f30517b179a0375f28b6b"
+  },
+  "utc": "2026-10-09T10:52:27.866549+00:00",
+  "correction": {
+    "source_fixture": "evidence/open-router-suite-2026-10-09/fixtures-j2-v3/fan-controller-fan-controller/j2-small",
+    "record": "evidence/open-router-comparison-2026-10-09/correction-2026-10-12/fixture-proofs.json",
+    "changes": "zone UUIDs and study class-width rules only; baseline and hash metadata recomputed"
+  }
+}

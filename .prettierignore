@@ -16,3 +16,6 @@ e2e/playwright-report
 # @fp-pcb/router: downloaded jar + JDK, bench renders
 packages/router/vendor/
 packages/router/bench/results/*.svg
+
+# Frozen comparison captures and checksum-controlled harness/configuration.
+benchmarks/autorouter/

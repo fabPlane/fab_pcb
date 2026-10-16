@@ -1,0 +1,3 @@
+(version 1)
+
+(rule "power-VCC" (condition "A.Type == 'Track' && A.NetName == 'VCC'") (constraint track_width (min 0.5mm)))

@@ -1,0 +1,183 @@
+{
+  "job": "J3",
+  "tier": "medium",
+  "role": "scored",
+  "scope": null,
+  "target_nets": [],
+  "target_footprint": null,
+  "power_nets": [
+    {
+      "name": "+12V",
+      "minimum_width_mm": 0.5,
+      "min_width_mm": 0.5
+    },
+    {
+      "name": "+5V",
+      "minimum_width_mm": 0.5,
+      "min_width_mm": 0.5
+    }
+  ],
+  "pairs": [],
+  "kept_zones": [],
+  "rules": {
+    "classes": [
+      {
+        "name": "Default",
+        "clearance": 0.2,
+        "track_width": 0.25,
+        "via_diameter": 0.8,
+        "via_drill": 0.4,
+        "diff_pair_width": 0.25,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "nets": [
+          "+12V",
+          "+5V",
+          "GND",
+          "Net-(D1-Pad1)",
+          "Net-(J4-Pad1)",
+          "Net-(J5-Pad1)",
+          "Net-(J6-Pad1)",
+          "Net-(J7-Pad1)",
+          "Net-(R1-Pad2)",
+          "Net-(U1-Pad3)",
+          "Net-(U1-Pad6)",
+          "Net-(U1-Pad8)",
+          "Net-(U3-Pad4)",
+          "blue_sig1",
+          "blue_sig2",
+          "green_sig1",
+          "green_sig2",
+          "inv_blank-or-5V-input",
+          "inverted_blank",
+          "red_sig1",
+          "red_sig2"
+        ]
+      }
+    ],
+    "clearance_mm": 0.0,
+    "copper_to_edge_mm": 0.5,
+    "copper_to_hole_mm": 0.25,
+    "hole_to_hole_mm": 0.25,
+    "minimum_track_mm": 0.2,
+    "minimum_via_mm": 0.4,
+    "minimum_annular_mm": 0.1,
+    "provenance": "legacy board net_class and stock pcbnew design settings; no human-routing fit",
+    "j3_only_power_minima": {
+      "+12V": 0.5,
+      "+5V": 0.5
+    }
+  },
+  "baseline": {
+    "errors": 0,
+    "warnings": 15,
+    "opens": 50,
+    "error_types": {},
+    "warning_types": {
+      "silk_overlap": 1,
+      "lib_footprint_mismatch": 10,
+      "lib_footprint_issues": 4
+    }
+  },
+  "source": {
+    "board_id": "kitspace_Lcr_addon",
+    "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+    "raw_blob": "4dc07720401a4f5be102d28a8b49eb6fc6d94706",
+    "raw_sha256": "22a9b0a1485d39053639a9297e9cf3d9313827f3339baed1304df3eda5fde20b",
+    "repository": "https://github.com/eulerlab/open-visual-stimulator",
+    "verified_license_url": "https://github.com/eulerlab/open-visual-stimulator/blob/c628fb573bcde3dd4c0369f16222ea2575973ced/LICENSE",
+    "license_revision": "c628fb573bcde3dd4c0369f16222ea2575973ced",
+    "license_file": "LICENSE"
+  },
+  "fidelity": {
+    "footprints": true,
+    "pads": true,
+    "outline": true,
+    "layers": true,
+    "nets": true
+  },
+  "gates": {
+    "fidelity": true,
+    "baseline_errors_zero": true
+  },
+  "gate_pass": true,
+  "selection": {
+    "job": "J3",
+    "tier": "medium",
+    "board_id": "kitspace_Lcr_addon",
+    "power_nets": [
+      {
+        "name": "+12V",
+        "length_mm": 70.768,
+        "pads": 3,
+        "endpoints": [
+          {
+            "reference": "C1",
+            "value": "680uF"
+          },
+          {
+            "reference": "J2",
+            "value": "LCr_ conector"
+          },
+          {
+            "reference": "U4",
+            "value": "LM2596T-5"
+          }
+        ],
+        "qualified": true,
+        "minimum_width_mm": 0.5
+      },
+      {
+        "name": "+5V",
+        "length_mm": 134.5,
+        "pads": 7,
+        "endpoints": [
+          {
+            "reference": "U4",
+            "value": "LM2596T-5"
+          },
+          {
+            "reference": "C2",
+            "value": "220uF"
+          },
+          {
+            "reference": "L1",
+            "value": "33uH"
+          },
+          {
+            "reference": "J8",
+            "value": "blank_jumper"
+          },
+          {
+            "reference": "U1",
+            "value": "SN74LS08N"
+          },
+          {
+            "reference": "U2",
+            "value": "SN74LS08N"
+          },
+          {
+            "reference": "U3",
+            "value": "SN74HC14N"
+          }
+        ],
+        "qualified": true,
+        "minimum_width_mm": 0.5
+      }
+    ],
+    "pairs": [],
+    "why": "205.268mm on declared supply rails to 10 supply/load footprint incidences; every declared rail >=40mm, width >=2x signal."
+  },
+  "sha256": {
+    "board.kicad_pcb": "1052faf7718555f02af42c42bcdb8ce717c55575aeafc37a560781d9028bbdfb",
+    "board.kicad_pro": "7dc00deaf73bacaecf7f755031f0045157c7d8cf8ef2de8c44669aebb4adc336",
+    "baseline-drc.json": "76e890adc1bc4a17a0dc3d164faaa353a0911aebc755faa31b9e1f759b95c22c",
+    "board.kicad_dru": "982b1d8be000c6c4e4a42ce81f4ee88b4ab0206670fef764a1c95a348179c113"
+  },
+  "utc": "2026-10-09T10:33:31.939093+00:00",
+  "correction": {
+    "source_fixture": "evidence/open-router-suite-2026-10-09/fixtures-v2/kitspace-lcr-addon/j3",
+    "record": "evidence/open-router-comparison-2026-10-09/correction-2026-10-12/fixture-proofs.json",
+    "changes": "zone UUIDs and study class-width rules only; baseline and hash metadata recomputed"
+  }
+}

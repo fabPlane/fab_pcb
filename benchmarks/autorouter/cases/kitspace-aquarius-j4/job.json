@@ -1,0 +1,925 @@
+{
+  "job": "J4",
+  "tier": "hard",
+  "role": "scored",
+  "scope": null,
+  "target_nets": [],
+  "target_footprint": null,
+  "power_nets": [],
+  "pairs": [],
+  "kept_zones": [
+    {
+      "net": "GNDD",
+      "layer": "F.Cu",
+      "outline_hash": "c4f7236a6b8b5bd9584c666e04ce23ccbd216014bbe6b56a06f902c262625799"
+    },
+    {
+      "net": "GNDD",
+      "layer": "B.Cu",
+      "outline_hash": "00240266035a34d30b36067d8fa9ad51360663aacd7abecf97d0ab91e7e39457"
+    }
+  ],
+  "rules": {
+    "classes": [
+      {
+        "name": "Default",
+        "clearance": 0.127,
+        "track_width": 0.2032,
+        "via_diameter": 0.762,
+        "via_drill": 0.381,
+        "diff_pair_width": 0.25,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "nets": [
+          "+3V3",
+          "/Inputs/D+",
+          "/Inputs/D-",
+          "/Inputs/LED_PWR",
+          "/Inputs/PB0",
+          "/Inputs/POT00",
+          "/Inputs/RST",
+          "/Inputs/TCK",
+          "/Inputs/TDI",
+          "/Inputs/TDO",
+          "/Inputs/TMS",
+          "/Inputs/USB_PWR",
+          "/Leds/Stars/LED0",
+          "/Leds/Stars/LED1",
+          "/Leds/Stars/LED10",
+          "/Leds/Stars/LED11",
+          "/Leds/Stars/LED12",
+          "/Leds/Stars/LED2",
+          "/Leds/Stars/LED3",
+          "/Leds/Stars/LED4",
+          "/Leds/Stars/LED5",
+          "/Leds/Stars/LED6",
+          "/Leds/Stars/LED7",
+          "/Leds/Stars/LED8",
+          "/Leds/Stars/LED9",
+          "GNDA",
+          "GNDD",
+          "GNDPWR",
+          "Net-(C1-Pad1)",
+          "Net-(C2-Pad1)",
+          "Net-(C3-Pad1)",
+          "Net-(C8-Pad1)",
+          "Net-(D1-Pad1)",
+          "Net-(D10-Pad1)",
+          "Net-(D11-Pad1)",
+          "Net-(D12-Pad1)",
+          "Net-(D13-Pad1)",
+          "Net-(D2-Pad1)",
+          "Net-(D3-Pad1)",
+          "Net-(D4-Pad1)",
+          "Net-(D5-Pad1)",
+          "Net-(D6-Pad1)",
+          "Net-(D7-Pad1)",
+          "Net-(D8-Pad1)",
+          "Net-(D9-Pad1)",
+          "Net-(J2-Pad4)",
+          "Net-(J2-Pad5)",
+          "Net-(J3-Pad1)",
+          "Net-(Q1-Pad3)",
+          "Net-(Q10-Pad3)",
+          "Net-(Q11-Pad3)",
+          "Net-(Q12-Pad3)",
+          "Net-(Q13-Pad3)",
+          "Net-(Q2-Pad3)",
+          "Net-(Q3-Pad3)",
+          "Net-(Q4-Pad3)",
+          "Net-(Q5-Pad3)",
+          "Net-(Q6-Pad3)",
+          "Net-(Q7-Pad3)",
+          "Net-(Q8-Pad3)",
+          "Net-(Q9-Pad3)",
+          "Net-(R1-Pad1)",
+          "VBUS"
+        ]
+      }
+    ],
+    "clearance_mm": 0.0,
+    "copper_to_edge_mm": 0.5,
+    "copper_to_hole_mm": 0.25,
+    "hole_to_hole_mm": 0.25,
+    "minimum_track_mm": 0.127,
+    "minimum_via_mm": 0.45,
+    "minimum_annular_mm": 0.1,
+    "provenance": "legacy board net_class and stock pcbnew design settings; no human-routing fit"
+  },
+  "baseline": {
+    "errors": 0,
+    "warnings": 109,
+    "opens": 110,
+    "error_types": {},
+    "warning_types": {
+      "nonmirrored_text_on_back_layer": 2,
+      "silk_over_copper": 25,
+      "silk_overlap": 2,
+      "lib_footprint_issues": 23,
+      "lib_footprint_mismatch": 53,
+      "silk_edge_clearance": 3,
+      "isolated_copper": 1
+    }
+  },
+  "source": {
+    "board_id": "kitspace_aquarius",
+    "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+    "raw_blob": "ea6133191e75f89c404b8e0ee3d5c7bc6daabd70",
+    "raw_sha256": "eb8b8b0b79c63e9780b0856ef68049b06c9f7b759b742bee120dd9270dc626a8",
+    "repository": "https://github.com/LincolnUehara/Aquarius",
+    "verified_license_url": "https://github.com/LincolnUehara/Aquarius/blob/0cf1a5438f00b51e099b0173a9eedeaed0154f46/LICENSE",
+    "license_revision": "0cf1a5438f00b51e099b0173a9eedeaed0154f46",
+    "license_file": "LICENSE"
+  },
+  "fidelity": {
+    "footprints": true,
+    "pads": true,
+    "outline": true,
+    "layers": true,
+    "nets": true
+  },
+  "gates": {
+    "fidelity": true,
+    "baseline_errors_zero": true,
+    "source_zone_definitions": true,
+    "real_pour_contact": true
+  },
+  "gate_pass": true,
+  "selection": {
+    "job": "J4",
+    "tier": "hard",
+    "board_id": "kitspace_aquarius",
+    "pour": {
+      "errors": 0,
+      "opens": 110,
+      "error_types": {},
+      "ground_pads": 70,
+      "ground_pads_in_filled_zone": 62,
+      "ground_pad_contacts": [
+        [
+          "C1",
+          "2",
+          "GNDD"
+        ],
+        [
+          "C2",
+          "2",
+          "GNDD"
+        ],
+        [
+          "C5",
+          "2",
+          "GNDD"
+        ],
+        [
+          "C8",
+          "2",
+          "GNDD"
+        ],
+        [
+          "C9",
+          "2",
+          "GNDD"
+        ],
+        [
+          "C10",
+          "2",
+          "GNDD"
+        ],
+        [
+          "C11",
+          "2",
+          "GNDD"
+        ],
+        [
+          "C12",
+          "2",
+          "GNDD"
+        ],
+        [
+          "C13",
+          "2",
+          "GNDD"
+        ],
+        [
+          "C14",
+          "2",
+          "GNDD"
+        ],
+        [
+          "Q1",
+          "2",
+          "GNDD"
+        ],
+        [
+          "Q2",
+          "2",
+          "GNDD"
+        ],
+        [
+          "Q4",
+          "2",
+          "GNDD"
+        ],
+        [
+          "Q5",
+          "2",
+          "GNDD"
+        ],
+        [
+          "Q6",
+          "2",
+          "GNDD"
+        ],
+        [
+          "Q8",
+          "2",
+          "GNDD"
+        ],
+        [
+          "Q9",
+          "2",
+          "GNDD"
+        ],
+        [
+          "Q10",
+          "2",
+          "GNDD"
+        ],
+        [
+          "Q11",
+          "2",
+          "GNDD"
+        ],
+        [
+          "Q12",
+          "2",
+          "GNDD"
+        ],
+        [
+          "Q13",
+          "2",
+          "GNDD"
+        ],
+        [
+          "R20",
+          "1",
+          "GNDD"
+        ],
+        [
+          "SW2",
+          "1",
+          "GNDD"
+        ],
+        [
+          "SW2",
+          "1",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "5",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "7",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "8",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "9",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "10",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "12",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "13",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "14",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "19",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "20",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "21",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "22",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "27",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "28",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "30",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "31",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "32",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "34",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "35",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "39",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "43",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "44",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "46",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "47",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "48",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "53",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "55",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "63",
+          "GNDD"
+        ],
+        [
+          "U1",
+          "64",
+          "GNDD"
+        ],
+        [
+          "Q3",
+          "2",
+          "GNDD"
+        ],
+        [
+          "R19",
+          "2",
+          "GNDD"
+        ],
+        [
+          "R24",
+          "2",
+          "GNDD"
+        ],
+        [
+          "C6",
+          "2",
+          "GNDD"
+        ],
+        [
+          "C15",
+          "2",
+          "GNDD"
+        ],
+        [
+          "Q7",
+          "2",
+          "GNDD"
+        ],
+        [
+          "C3",
+          "2",
+          "GNDD"
+        ],
+        [
+          "C4",
+          "2",
+          "GNDD"
+        ],
+        [
+          "RV2",
+          "3",
+          "GNDD"
+        ]
+      ],
+      "remaining_ground_opens": 6,
+      "ground_zone_count": 2,
+      "ground_pads_connected_by_pour": 62,
+      "ground_pads_contact_list": [
+        [
+          "C1",
+          "2",
+          "GNDD",
+          178.659694,
+          49.297494
+        ],
+        [
+          "C10",
+          "2",
+          "GNDD",
+          174.33624,
+          53.841688
+        ],
+        [
+          "C11",
+          "2",
+          "GNDD",
+          173.168806,
+          52.674255
+        ],
+        [
+          "C12",
+          "2",
+          "GNDD",
+          184.2895,
+          69.1515
+        ],
+        [
+          "C13",
+          "2",
+          "GNDD",
+          184.2895,
+          70.8025
+        ],
+        [
+          "C14",
+          "2",
+          "GNDD",
+          184.2895,
+          72.517
+        ],
+        [
+          "C15",
+          "2",
+          "GNDD",
+          184.2895,
+          54.0385
+        ],
+        [
+          "C2",
+          "2",
+          "GNDD",
+          178.685094,
+          51.558094
+        ],
+        [
+          "C3",
+          "2",
+          "GNDD",
+          174.824294,
+          36.313206
+        ],
+        [
+          "C4",
+          "2",
+          "GNDD",
+          178.253294,
+          39.767606
+        ],
+        [
+          "C5",
+          "2",
+          "GNDD",
+          177.135694,
+          38.637306
+        ],
+        [
+          "C6",
+          "2",
+          "GNDD",
+          175.992694,
+          37.494306
+        ],
+        [
+          "C8",
+          "2",
+          "GNDD",
+          181.9275,
+          79.8705
+        ],
+        [
+          "C9",
+          "2",
+          "GNDD",
+          175.503673,
+          55.009121
+        ],
+        [
+          "Q1",
+          "2",
+          "GNDD",
+          154.239,
+          69.009
+        ],
+        [
+          "Q10",
+          "2",
+          "GNDD",
+          126.68,
+          62.786
+        ],
+        [
+          "Q11",
+          "2",
+          "GNDD",
+          131.633,
+          54.15
+        ],
+        [
+          "Q12",
+          "2",
+          "GNDD",
+          126.553,
+          54.15
+        ],
+        [
+          "Q13",
+          "2",
+          "GNDD",
+          121.6,
+          54.15
+        ],
+        [
+          "Q2",
+          "2",
+          "GNDD",
+          140.396,
+          79.169
+        ],
+        [
+          "Q3",
+          "2",
+          "GNDD",
+          132.522,
+          79.169
+        ],
+        [
+          "Q4",
+          "2",
+          "GNDD",
+          145.494,
+          86.675
+        ],
+        [
+          "Q5",
+          "2",
+          "GNDD",
+          148.397,
+          90.853
+        ],
+        [
+          "Q6",
+          "2",
+          "GNDD",
+          127.061,
+          79.169
+        ],
+        [
+          "Q7",
+          "2",
+          "GNDD",
+          122.616,
+          86.408
+        ],
+        [
+          "Q8",
+          "2",
+          "GNDD",
+          131.76,
+          62.786
+        ],
+        [
+          "Q9",
+          "2",
+          "GNDD",
+          121.6,
+          62.786
+        ],
+        [
+          "R19",
+          "2",
+          "GNDD",
+          181.9275,
+          81.4705
+        ],
+        [
+          "R20",
+          "1",
+          "GNDD",
+          175.082,
+          58.3565
+        ],
+        [
+          "R24",
+          "2",
+          "GNDD",
+          181.9275,
+          75.133
+        ],
+        [
+          "RV2",
+          "3",
+          "GNDD",
+          164.1405,
+          94.7166
+        ],
+        [
+          "SW2",
+          "1",
+          "GNDD",
+          181.3645,
+          55.9945
+        ],
+        [
+          "SW2",
+          "1",
+          "GNDD",
+          181.3645,
+          63.9445
+        ],
+        [
+          "U1",
+          "10",
+          "GNDD",
+          165.174891,
+          40.388785
+        ],
+        [
+          "U1",
+          "12",
+          "GNDD",
+          165.881998,
+          39.681678
+        ],
+        [
+          "U1",
+          "13",
+          "GNDD",
+          166.235551,
+          39.328125
+        ],
+        [
+          "U1",
+          "14",
+          "GNDD",
+          166.589105,
+          38.974571
+        ],
+        [
+          "U1",
+          "19",
+          "GNDD",
+          170.725679,
+          38.974571
+        ],
+        [
+          "U1",
+          "20",
+          "GNDD",
+          171.079233,
+          39.328125
+        ],
+        [
+          "U1",
+          "21",
+          "GNDD",
+          171.432786,
+          39.681678
+        ],
+        [
+          "U1",
+          "22",
+          "GNDD",
+          171.78634,
+          40.035232
+        ],
+        [
+          "U1",
+          "27",
+          "GNDD",
+          173.554106,
+          41.802998
+        ],
+        [
+          "U1",
+          "28",
+          "GNDD",
+          173.90766,
+          42.156552
+        ],
+        [
+          "U1",
+          "30",
+          "GNDD",
+          174.614767,
+          42.863659
+        ],
+        [
+          "U1",
+          "31",
+          "GNDD",
+          174.96832,
+          43.217212
+        ],
+        [
+          "U1",
+          "32",
+          "GNDD",
+          175.321873,
+          43.570765
+        ],
+        [
+          "U1",
+          "34",
+          "GNDD",
+          174.96832,
+          46.64668
+        ],
+        [
+          "U1",
+          "35",
+          "GNDD",
+          174.614767,
+          47.000233
+        ],
+        [
+          "U1",
+          "39",
+          "GNDD",
+          173.200553,
+          48.414447
+        ],
+        [
+          "U1",
+          "43",
+          "GNDD",
+          171.78634,
+          49.82866
+        ],
+        [
+          "U1",
+          "44",
+          "GNDD",
+          171.432786,
+          50.182214
+        ],
+        [
+          "U1",
+          "46",
+          "GNDD",
+          170.725679,
+          50.889321
+        ],
+        [
+          "U1",
+          "47",
+          "GNDD",
+          170.372126,
+          51.242874
+        ],
+        [
+          "U1",
+          "48",
+          "GNDD",
+          170.018573,
+          51.596427
+        ],
+        [
+          "U1",
+          "5",
+          "GNDD",
+          163.407124,
+          42.156552
+        ],
+        [
+          "U1",
+          "53",
+          "GNDD",
+          165.881998,
+          50.182214
+        ],
+        [
+          "U1",
+          "55",
+          "GNDD",
+          165.174891,
+          49.475107
+        ],
+        [
+          "U1",
+          "63",
+          "GNDD",
+          162.346464,
+          46.64668
+        ],
+        [
+          "U1",
+          "64",
+          "GNDD",
+          161.992911,
+          46.293127
+        ],
+        [
+          "U1",
+          "7",
+          "GNDD",
+          164.114231,
+          41.449445
+        ],
+        [
+          "U1",
+          "8",
+          "GNDD",
+          164.467784,
+          41.095892
+        ],
+        [
+          "U1",
+          "9",
+          "GNDD",
+          164.821338,
+          40.742338
+        ]
+      ],
+      "ground_measure_method": "Native BuildConnectivity/GetConnectedPads(zone) on refilled zero-track board; center-in-fill count is earlier conservative geometric diagnostic only."
+    },
+    "why": "Pour directly connects 62/70 ground pads; 6 ground opens remain as routing work; 0 pour-input errors."
+  },
+  "sha256": {
+    "board.kicad_pcb": "18aa9f053078d6e1ed6d955c07597f790474d82ca6f22e2d2d80d02b6b2daadc",
+    "board.kicad_pro": "58729c9ab3ed262b908bb02eb8689ab76c5d128b44d32f63ff891e609e97a6a8",
+    "baseline-drc.json": "17aa8a69a65380ea307ef86913b828321b8bcdbfc63a3263e586c761674dcfb8",
+    "board.kicad_dru": "bbef6e119424cbf626d6fec0697069e203a9bde1d54f30517b179a0375f28b6b"
+  },
+  "utc": "2026-10-09T10:33:53.997174+00:00",
+  "correction": {
+    "source_fixture": "evidence/open-router-suite-2026-10-09/fixtures-v2/kitspace-aquarius/j4",
+    "record": "evidence/open-router-comparison-2026-10-09/correction-2026-10-12/fixture-proofs.json",
+    "changes": "zone UUIDs and study class-width rules only; baseline and hash metadata recomputed"
+  }
+}

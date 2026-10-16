@@ -1,0 +1,492 @@
+{
+  "version": "standalone-autorouter-v1",
+  "cases": [
+    {
+      "id": "fan-controller-fan-controller-j2-large",
+      "path": "cases/fan-controller-fan-controller-j2-large",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-j2-v4/fan-controller-fan-controller/j2-large",
+      "board_id": "fan_controller_fan_controller",
+      "job": "J2",
+      "tier": "hard",
+      "source": {
+        "board_id": "fan_controller_fan_controller",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "072fc9ab13ad4d39b19f3ee4acdad8c82223c302",
+        "raw_sha256": "39450c48bdfa861692edffd064018b825d80cd34e1ce052d28cfe064bd38734d",
+        "repository": "https://github.com/slightlynybbled/fan_controller",
+        "verified_license_url": "https://github.com/slightlynybbled/fan_controller/blob/27579e00bceebd0c3d04cc5c79289e0239c98e26/license.txt",
+        "license_revision": "27579e00bceebd0c3d04cc5c79289e0239c98e26",
+        "license_file": "license.txt"
+      }
+    },
+    {
+      "id": "fan-controller-fan-controller-j2-medium",
+      "path": "cases/fan-controller-fan-controller-j2-medium",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-j2-v4/fan-controller-fan-controller/j2-medium",
+      "board_id": "fan_controller_fan_controller",
+      "job": "J2",
+      "tier": "hard",
+      "source": {
+        "board_id": "fan_controller_fan_controller",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "072fc9ab13ad4d39b19f3ee4acdad8c82223c302",
+        "raw_sha256": "39450c48bdfa861692edffd064018b825d80cd34e1ce052d28cfe064bd38734d",
+        "repository": "https://github.com/slightlynybbled/fan_controller",
+        "verified_license_url": "https://github.com/slightlynybbled/fan_controller/blob/27579e00bceebd0c3d04cc5c79289e0239c98e26/license.txt",
+        "license_revision": "27579e00bceebd0c3d04cc5c79289e0239c98e26",
+        "license_file": "license.txt"
+      }
+    },
+    {
+      "id": "fan-controller-fan-controller-j2-small",
+      "path": "cases/fan-controller-fan-controller-j2-small",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-j2-v4/fan-controller-fan-controller/j2-small",
+      "board_id": "fan_controller_fan_controller",
+      "job": "J2",
+      "tier": "hard",
+      "source": {
+        "board_id": "fan_controller_fan_controller",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "072fc9ab13ad4d39b19f3ee4acdad8c82223c302",
+        "raw_sha256": "39450c48bdfa861692edffd064018b825d80cd34e1ce052d28cfe064bd38734d",
+        "repository": "https://github.com/slightlynybbled/fan_controller",
+        "verified_license_url": "https://github.com/slightlynybbled/fan_controller/blob/27579e00bceebd0c3d04cc5c79289e0239c98e26/license.txt",
+        "license_revision": "27579e00bceebd0c3d04cc5c79289e0239c98e26",
+        "license_file": "license.txt"
+      }
+    },
+    {
+      "id": "hellscribe-hellscribe-j2-large",
+      "path": "cases/hellscribe-hellscribe-j2-large",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-j2-v4/hellscribe-hellscribe/j2-large",
+      "board_id": "HellScribe_HellScribe",
+      "job": "J2",
+      "tier": "medium",
+      "source": {
+        "board_id": "HellScribe_HellScribe",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "9b5de803ced7158936d7a86a276a186acb83696c",
+        "raw_sha256": "7b6d205fd5c304c74bf716e71aff95fbb7b0f196ab2e1ad5efec9726a03a74f2",
+        "repository": "https://github.com/devttys0/HellScribe",
+        "verified_license_url": "https://github.com/devttys0/HellScribe/blob/c9f7c3c3433a882272c53421727428b486a25bdf/LICENSE",
+        "license_revision": "c9f7c3c3433a882272c53421727428b486a25bdf",
+        "license_file": "LICENSE"
+      }
+    },
+    {
+      "id": "nextbusclock-nextbusclockv1-j2-large",
+      "path": "cases/nextbusclock-nextbusclockv1-j2-large",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-j2-v4/nextbusclock-nextbusclockv1/j2-large",
+      "board_id": "nextbusclock_NextBusClockV1",
+      "job": "J2",
+      "tier": "easy",
+      "source": {
+        "board_id": "nextbusclock_NextBusClockV1",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "40516805f48f7c9561c1811862b0d957ea0bc733",
+        "raw_sha256": "54d875cf26031b32087857a06c846717734eb3c8235a7d1e45fb2fe06efc4e56",
+        "repository": "https://github.com/chrisgillis/nextbusclock",
+        "verified_license_url": "https://github.com/chrisgillis/nextbusclock/blob/9c7722846e11bf405ecefba4e91cd991bbea5dd7/LICENSE",
+        "license_revision": "9c7722846e11bf405ecefba4e91cd991bbea5dd7",
+        "license_file": "LICENSE"
+      }
+    },
+    {
+      "id": "nextbusclock-nextbusclockv1-j2-medium",
+      "path": "cases/nextbusclock-nextbusclockv1-j2-medium",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-j2-v4/nextbusclock-nextbusclockv1/j2-medium",
+      "board_id": "nextbusclock_NextBusClockV1",
+      "job": "J2",
+      "tier": "easy",
+      "source": {
+        "board_id": "nextbusclock_NextBusClockV1",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "40516805f48f7c9561c1811862b0d957ea0bc733",
+        "raw_sha256": "54d875cf26031b32087857a06c846717734eb3c8235a7d1e45fb2fe06efc4e56",
+        "repository": "https://github.com/chrisgillis/nextbusclock",
+        "verified_license_url": "https://github.com/chrisgillis/nextbusclock/blob/9c7722846e11bf405ecefba4e91cd991bbea5dd7/LICENSE",
+        "license_revision": "9c7722846e11bf405ecefba4e91cd991bbea5dd7",
+        "license_file": "LICENSE"
+      }
+    },
+    {
+      "id": "nextbusclock-nextbusclockv1-j2-small",
+      "path": "cases/nextbusclock-nextbusclockv1-j2-small",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-j2-v4/nextbusclock-nextbusclockv1/j2-small",
+      "board_id": "nextbusclock_NextBusClockV1",
+      "job": "J2",
+      "tier": "easy",
+      "source": {
+        "board_id": "nextbusclock_NextBusClockV1",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "40516805f48f7c9561c1811862b0d957ea0bc733",
+        "raw_sha256": "54d875cf26031b32087857a06c846717734eb3c8235a7d1e45fb2fe06efc4e56",
+        "repository": "https://github.com/chrisgillis/nextbusclock",
+        "verified_license_url": "https://github.com/chrisgillis/nextbusclock/blob/9c7722846e11bf405ecefba4e91cd991bbea5dd7/LICENSE",
+        "license_revision": "9c7722846e11bf405ecefba4e91cd991bbea5dd7",
+        "license_file": "LICENSE"
+      }
+    },
+    {
+      "id": "qrpcard-qrpcard-j2-medium",
+      "path": "cases/qrpcard-qrpcard-j2-medium",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-j2-v4/qrpcard-qrpcard/j2-medium",
+      "board_id": "QRPCard_QRPCard",
+      "job": "J2",
+      "tier": "medium",
+      "source": {
+        "board_id": "QRPCard_QRPCard",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "ac9a8be6c366dd1fa3ed19acfdef2f2cb74362b7",
+        "raw_sha256": "90426237749a60b9bf6b71940dc5f1ae9cff804b8ea118aeb84b153e5382a4db",
+        "repository": "https://github.com/devttys0/QRPCard",
+        "verified_license_url": "https://github.com/devttys0/QRPCard/blob/b474df243eb6b7e60f512eb54c89913802a4fa8e/LICENSE",
+        "license_revision": "b474df243eb6b7e60f512eb54c89913802a4fa8e",
+        "license_file": "LICENSE"
+      }
+    },
+    {
+      "id": "qrpcard-qrpcard-j2-small",
+      "path": "cases/qrpcard-qrpcard-j2-small",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-j2-v4/qrpcard-qrpcard/j2-small",
+      "board_id": "QRPCard_QRPCard",
+      "job": "J2",
+      "tier": "medium",
+      "source": {
+        "board_id": "QRPCard_QRPCard",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "ac9a8be6c366dd1fa3ed19acfdef2f2cb74362b7",
+        "raw_sha256": "90426237749a60b9bf6b71940dc5f1ae9cff804b8ea118aeb84b153e5382a4db",
+        "repository": "https://github.com/devttys0/QRPCard",
+        "verified_license_url": "https://github.com/devttys0/QRPCard/blob/b474df243eb6b7e60f512eb54c89913802a4fa8e/LICENSE",
+        "license_revision": "b474df243eb6b7e60f512eb54c89913802a4fa8e",
+        "license_file": "LICENSE"
+      }
+    },
+    {
+      "id": "fan-controller-fan-controller-j1",
+      "path": "cases/fan-controller-fan-controller-j1",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-v3/fan-controller-fan-controller/j1",
+      "board_id": "fan_controller_fan_controller",
+      "job": "J1",
+      "tier": "hard",
+      "source": {
+        "board_id": "fan_controller_fan_controller",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "072fc9ab13ad4d39b19f3ee4acdad8c82223c302",
+        "raw_sha256": "39450c48bdfa861692edffd064018b825d80cd34e1ce052d28cfe064bd38734d",
+        "repository": "https://github.com/slightlynybbled/fan_controller",
+        "verified_license_url": "https://github.com/slightlynybbled/fan_controller/blob/27579e00bceebd0c3d04cc5c79289e0239c98e26/license.txt",
+        "license_revision": "27579e00bceebd0c3d04cc5c79289e0239c98e26",
+        "license_file": "license.txt"
+      }
+    },
+    {
+      "id": "hellscribe-hellscribe-j1",
+      "path": "cases/hellscribe-hellscribe-j1",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-v3/hellscribe-hellscribe/j1",
+      "board_id": "HellScribe_HellScribe",
+      "job": "J1",
+      "tier": "medium",
+      "source": {
+        "board_id": "HellScribe_HellScribe",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "9b5de803ced7158936d7a86a276a186acb83696c",
+        "raw_sha256": "7b6d205fd5c304c74bf716e71aff95fbb7b0f196ab2e1ad5efec9726a03a74f2",
+        "repository": "https://github.com/devttys0/HellScribe",
+        "verified_license_url": "https://github.com/devttys0/HellScribe/blob/c9f7c3c3433a882272c53421727428b486a25bdf/LICENSE",
+        "license_revision": "c9f7c3c3433a882272c53421727428b486a25bdf",
+        "license_file": "LICENSE"
+      }
+    },
+    {
+      "id": "kitspace-aquarius-j4",
+      "path": "cases/kitspace-aquarius-j4",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-v3/kitspace-aquarius/j4",
+      "board_id": "kitspace_aquarius",
+      "job": "J4",
+      "tier": "hard",
+      "source": {
+        "board_id": "kitspace_aquarius",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "ea6133191e75f89c404b8e0ee3d5c7bc6daabd70",
+        "raw_sha256": "eb8b8b0b79c63e9780b0856ef68049b06c9f7b759b742bee120dd9270dc626a8",
+        "repository": "https://github.com/LincolnUehara/Aquarius",
+        "verified_license_url": "https://github.com/LincolnUehara/Aquarius/blob/0cf1a5438f00b51e099b0173a9eedeaed0154f46/LICENSE",
+        "license_revision": "0cf1a5438f00b51e099b0173a9eedeaed0154f46",
+        "license_file": "LICENSE"
+      }
+    },
+    {
+      "id": "kitspace-lcr-addon-j3",
+      "path": "cases/kitspace-lcr-addon-j3",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-v3/kitspace-lcr-addon/j3",
+      "board_id": "kitspace_Lcr_addon",
+      "job": "J3",
+      "tier": "medium",
+      "source": {
+        "board_id": "kitspace_Lcr_addon",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "4dc07720401a4f5be102d28a8b49eb6fc6d94706",
+        "raw_sha256": "22a9b0a1485d39053639a9297e9cf3d9313827f3339baed1304df3eda5fde20b",
+        "repository": "https://github.com/eulerlab/open-visual-stimulator",
+        "verified_license_url": "https://github.com/eulerlab/open-visual-stimulator/blob/c628fb573bcde3dd4c0369f16222ea2575973ced/LICENSE",
+        "license_revision": "c628fb573bcde3dd4c0369f16222ea2575973ced",
+        "license_file": "LICENSE"
+      }
+    },
+    {
+      "id": "kitspace-solenoid-driver-j1",
+      "path": "cases/kitspace-solenoid-driver-j1",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-v3/kitspace-solenoid-driver/j1",
+      "board_id": "kitspace_solenoid_driver",
+      "job": "J1",
+      "tier": "easy",
+      "source": {
+        "board_id": "kitspace_solenoid_driver",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "dcae4ef2207e24c6c5853eb17f4a07299e01ca68",
+        "raw_sha256": "974893bfb394e83b2f609408eecd9c54a5e6db1759524e961ac47f7356d0d0cc",
+        "repository": "https://github.com/BeeHive-org/BeeHive",
+        "verified_license_url": "https://github.com/BeeHive-org/BeeHive/blob/a7bbd36c15c2fb293a4699d9088aaf81921192e2/LICENSE",
+        "license_revision": "a7bbd36c15c2fb293a4699d9088aaf81921192e2",
+        "license_file": "LICENSE"
+      }
+    },
+    {
+      "id": "kitspace-solenoid-driver-j3",
+      "path": "cases/kitspace-solenoid-driver-j3",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-v3/kitspace-solenoid-driver/j3",
+      "board_id": "kitspace_solenoid_driver",
+      "job": "J3",
+      "tier": "easy",
+      "source": {
+        "board_id": "kitspace_solenoid_driver",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "dcae4ef2207e24c6c5853eb17f4a07299e01ca68",
+        "raw_sha256": "974893bfb394e83b2f609408eecd9c54a5e6db1759524e961ac47f7356d0d0cc",
+        "repository": "https://github.com/BeeHive-org/BeeHive",
+        "verified_license_url": "https://github.com/BeeHive-org/BeeHive/blob/a7bbd36c15c2fb293a4699d9088aaf81921192e2/LICENSE",
+        "license_revision": "a7bbd36c15c2fb293a4699d9088aaf81921192e2",
+        "license_file": "LICENSE"
+      }
+    },
+    {
+      "id": "kitspace-solenoid-driver-j4",
+      "path": "cases/kitspace-solenoid-driver-j4",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-v3/kitspace-solenoid-driver/j4",
+      "board_id": "kitspace_solenoid_driver",
+      "job": "J4",
+      "tier": "easy",
+      "source": {
+        "board_id": "kitspace_solenoid_driver",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "dcae4ef2207e24c6c5853eb17f4a07299e01ca68",
+        "raw_sha256": "974893bfb394e83b2f609408eecd9c54a5e6db1759524e961ac47f7356d0d0cc",
+        "repository": "https://github.com/BeeHive-org/BeeHive",
+        "verified_license_url": "https://github.com/BeeHive-org/BeeHive/blob/a7bbd36c15c2fb293a4699d9088aaf81921192e2/LICENSE",
+        "license_revision": "a7bbd36c15c2fb293a4699d9088aaf81921192e2",
+        "license_file": "LICENSE"
+      }
+    },
+    {
+      "id": "nextbusclock-nextbusclockv1-j3",
+      "path": "cases/nextbusclock-nextbusclockv1-j3",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-v3/nextbusclock-nextbusclockv1/j3",
+      "board_id": "nextbusclock_NextBusClockV1",
+      "job": "J3",
+      "tier": "medium",
+      "source": {
+        "board_id": "nextbusclock_NextBusClockV1",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "40516805f48f7c9561c1811862b0d957ea0bc733",
+        "raw_sha256": "54d875cf26031b32087857a06c846717734eb3c8235a7d1e45fb2fe06efc4e56",
+        "repository": "https://github.com/chrisgillis/nextbusclock",
+        "verified_license_url": "https://github.com/chrisgillis/nextbusclock/blob/9c7722846e11bf405ecefba4e91cd991bbea5dd7/LICENSE",
+        "license_revision": "9c7722846e11bf405ecefba4e91cd991bbea5dd7",
+        "license_file": "LICENSE"
+      }
+    },
+    {
+      "id": "paperino-hw-paperino-shield-j4",
+      "path": "cases/paperino-hw-paperino-shield-j4",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-v3/paperino-hw-paperino-shield/j4",
+      "board_id": "Paperino_HW_Paperino_shield",
+      "job": "J4",
+      "tier": "easy",
+      "source": {
+        "board_id": "Paperino_HW_Paperino_shield",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "b3c1ca3835a3e7b0e7a42f808cef77a7eef48002",
+        "raw_sha256": "907b7ee11a41e99839e44cf7dca666411148ae2afbd7ac5951594617ea3ec8b6",
+        "repository": "https://github.com/JohnnyKaramello/Paperino_HW",
+        "verified_license_url": "https://github.com/JohnnyKaramello/Paperino_HW/blob/52fcf8ef47f42dfd0aef1376b63a4cd6b4d2e665/license.txt",
+        "license_revision": "52fcf8ef47f42dfd0aef1376b63a4cd6b4d2e665",
+        "license_file": "license.txt"
+      }
+    },
+    {
+      "id": "photon-sprinkler-sprinkler-j1",
+      "path": "cases/photon-sprinkler-sprinkler-j1",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-v3/photon-sprinkler-sprinkler/j1",
+      "board_id": "photon_Sprinkler_sprinkler",
+      "job": "J1",
+      "tier": "easy",
+      "source": {
+        "board_id": "photon_Sprinkler_sprinkler",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "412e13d94a1d102c7c4672c9a0b5333daeb01a85",
+        "raw_sha256": "cc8ce7d288cc558e7aeac2e9f82b9ba4b0478460407c89d35ac536afd2d643b4",
+        "repository": "https://github.com/broncosis/photon_Sprinkler",
+        "verified_license_url": "https://github.com/broncosis/photon_Sprinkler/blob/a47b8e13ef795252f40fb399dc991114fde74d22/LICENSE",
+        "license_revision": "a47b8e13ef795252f40fb399dc991114fde74d22",
+        "license_file": "LICENSE"
+      }
+    },
+    {
+      "id": "photon-sprinkler-sprinkler-j3",
+      "path": "cases/photon-sprinkler-sprinkler-j3",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-v3/photon-sprinkler-sprinkler/j3",
+      "board_id": "photon_Sprinkler_sprinkler",
+      "job": "J3",
+      "tier": "easy",
+      "source": {
+        "board_id": "photon_Sprinkler_sprinkler",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "412e13d94a1d102c7c4672c9a0b5333daeb01a85",
+        "raw_sha256": "cc8ce7d288cc558e7aeac2e9f82b9ba4b0478460407c89d35ac536afd2d643b4",
+        "repository": "https://github.com/broncosis/photon_Sprinkler",
+        "verified_license_url": "https://github.com/broncosis/photon_Sprinkler/blob/a47b8e13ef795252f40fb399dc991114fde74d22/LICENSE",
+        "license_revision": "a47b8e13ef795252f40fb399dc991114fde74d22",
+        "license_file": "LICENSE"
+      }
+    },
+    {
+      "id": "qrpcard-qrpcard-j1",
+      "path": "cases/qrpcard-qrpcard-j1",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-v3/qrpcard-qrpcard/j1",
+      "board_id": "QRPCard_QRPCard",
+      "job": "J1",
+      "tier": "medium",
+      "source": {
+        "board_id": "QRPCard_QRPCard",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "ac9a8be6c366dd1fa3ed19acfdef2f2cb74362b7",
+        "raw_sha256": "90426237749a60b9bf6b71940dc5f1ae9cff804b8ea118aeb84b153e5382a4db",
+        "repository": "https://github.com/devttys0/QRPCard",
+        "verified_license_url": "https://github.com/devttys0/QRPCard/blob/b474df243eb6b7e60f512eb54c89913802a4fa8e/LICENSE",
+        "license_revision": "b474df243eb6b7e60f512eb54c89913802a4fa8e",
+        "license_file": "LICENSE"
+      }
+    },
+    {
+      "id": "qrpcard-qrpcard-j4",
+      "path": "cases/qrpcard-qrpcard-j4",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-v3/qrpcard-qrpcard/j4",
+      "board_id": "QRPCard_QRPCard",
+      "job": "J4",
+      "tier": "medium",
+      "source": {
+        "board_id": "QRPCard_QRPCard",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "ac9a8be6c366dd1fa3ed19acfdef2f2cb74362b7",
+        "raw_sha256": "90426237749a60b9bf6b71940dc5f1ae9cff804b8ea118aeb84b153e5382a4db",
+        "repository": "https://github.com/devttys0/QRPCard",
+        "verified_license_url": "https://github.com/devttys0/QRPCard/blob/b474df243eb6b7e60f512eb54c89913802a4fa8e/LICENSE",
+        "license_revision": "b474df243eb6b7e60f512eb54c89913802a4fa8e",
+        "license_file": "LICENSE"
+      }
+    },
+    {
+      "id": "rufs-smart-psu-j1",
+      "path": "cases/rufs-smart-psu-j1",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-v3/rufs-smart-psu/j1",
+      "board_id": "rufs_smart_psu",
+      "job": "J1",
+      "tier": "hard",
+      "source": {
+        "board_id": "rufs_smart_psu",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "17594ed1bb25b8218c60d0a3a496971d58a086f0",
+        "raw_sha256": "7487fc8f3e49b0c7aeb0f9d9495bb73339ea6a665c361e8da144b56b3ca630ab",
+        "repository": "https://github.com/mik4el/rufs",
+        "verified_license_url": "https://github.com/mik4el/rufs/blob/4b4f8d41ee2fd6713775db15ea5a9d9b5cb0d397/LICENSE",
+        "license_revision": "4b4f8d41ee2fd6713775db15ea5a9d9b5cb0d397",
+        "license_file": "LICENSE"
+      }
+    },
+    {
+      "id": "rufs-smart-psu-j3",
+      "path": "cases/rufs-smart-psu-j3",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-v3/rufs-smart-psu/j3",
+      "board_id": "rufs_smart_psu",
+      "job": "J3",
+      "tier": "hard",
+      "source": {
+        "board_id": "rufs_smart_psu",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "17594ed1bb25b8218c60d0a3a496971d58a086f0",
+        "raw_sha256": "7487fc8f3e49b0c7aeb0f9d9495bb73339ea6a665c361e8da144b56b3ca630ab",
+        "repository": "https://github.com/mik4el/rufs",
+        "verified_license_url": "https://github.com/mik4el/rufs/blob/4b4f8d41ee2fd6713775db15ea5a9d9b5cb0d397/LICENSE",
+        "license_revision": "4b4f8d41ee2fd6713775db15ea5a9d9b5cb0d397",
+        "license_file": "LICENSE"
+      }
+    },
+    {
+      "id": "rufs-smart-psu-j4",
+      "path": "cases/rufs-smart-psu-j4",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-v3/rufs-smart-psu/j4",
+      "board_id": "rufs_smart_psu",
+      "job": "J4",
+      "tier": "hard",
+      "source": {
+        "board_id": "rufs_smart_psu",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "17594ed1bb25b8218c60d0a3a496971d58a086f0",
+        "raw_sha256": "7487fc8f3e49b0c7aeb0f9d9495bb73339ea6a665c361e8da144b56b3ca630ab",
+        "repository": "https://github.com/mik4el/rufs",
+        "verified_license_url": "https://github.com/mik4el/rufs/blob/4b4f8d41ee2fd6713775db15ea5a9d9b5cb0d397/LICENSE",
+        "license_revision": "4b4f8d41ee2fd6713775db15ea5a9d9b5cb0d397",
+        "license_file": "LICENSE"
+      }
+    },
+    {
+      "id": "sv650sds-sds-tool-j4",
+      "path": "cases/sv650sds-sds-tool-j4",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-v3/sv650sds-sds-tool/j4",
+      "board_id": "sv650sds_sds_tool",
+      "job": "J4",
+      "tier": "medium",
+      "source": {
+        "board_id": "sv650sds_sds_tool",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "a52be8c692a76573607189a31857f38d19486b47",
+        "raw_sha256": "1d969d42a683515ffc7a638d15fb74ecca441f8669894e1a11997bf9ff7ced25",
+        "repository": "https://github.com/synfinatic/sv650sds",
+        "verified_license_url": "https://github.com/synfinatic/sv650sds/blob/bacf803a9056241ef270acf0e7e31467961aeba5/LICENSE",
+        "license_revision": "bacf803a9056241ef270acf0e7e31467961aeba5",
+        "license_file": "LICENSE"
+      }
+    }
+  ],
+  "seeds": [
+    1,
+    2,
+    3
+  ],
+  "checker": "native-check-v4.3.py",
+  "safety_stop_seconds": 3600,
+  "origin": "corrected open-router comparison; Aquarius J3 excluded by the original decision",
+  "source_commit": "92dae1e1d4c9dac067fe6e5bd7352b218ab08fd4",
+  "current_source": "evidence/open-router-comparison-2026-10-09/correction-2026-10-12/current.json",
+  "current_sha256": "ced70460ec91f3f678857994b5ddb7388fb7bf497e049a120041f3783f78cf1b",
+  "historical_kicad_cli_sha256": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402",
+  "routers": [
+    "freerouting",
+    "fastroute",
+    "fab-router",
+    "tracemaker",
+    "kicad-routing-tools"
+  ]
+}

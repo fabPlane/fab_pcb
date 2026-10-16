@@ -1,0 +1,556 @@
+{
+  "router": "kicad-routing-tools",
+  "status": "frozen D3 per-job settings; corrected inputs; pair settings documented and untuned",
+  "version": "0.23.0",
+  "source_commit": "9399bfb29e072bfe60b10d9cdae20c274fc2a17a",
+  "jobs": {
+    "J1": {
+      "support": "yes",
+      "evidence": [
+        "../../../../evidence/open-router-setup-d3-2026-10-09/selection.json",
+        "../../../diagnostics/open-router-setup-d3-2026-10-09/README.md"
+      ],
+      "command": [
+        "/usr/bin/python3",
+        "{benchmark}/harness/native-router-path-scoring-v3.py",
+        "--router",
+        "kicad-routing-tools",
+        "--input-dir",
+        "{input_dir}",
+        "--work-dir",
+        "{work_dir}",
+        "--output-pcb",
+        "{output_pcb}",
+        "route",
+        "--seed",
+        "{seed}",
+        "--cap-s",
+        "{cap_s}"
+      ],
+      "pre_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/native-router-path-scoring-v3.py",
+          "--router",
+          "kicad-routing-tools",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}",
+          "prepare"
+        ]
+      ],
+      "post_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/native-router-path-scoring-v3.py",
+          "--router",
+          "kicad-routing-tools",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}",
+          "finish"
+        ]
+      ],
+      "settings": {
+        "grid_step_mm": {
+          "value": 0.05,
+          "reason": "Contract selection: vias."
+        },
+        "smoothing": {
+          "value": false,
+          "reason": "Smoothing caused the observed CH340G hole error."
+        },
+        "floor_sync": {
+          "value": false,
+          "reason": "Prevent in-run native-rule rewriting."
+        },
+        "fix_drc_settings": {
+          "value": false,
+          "reason": "Preserve frozen rule floors."
+        },
+        "keep_input_copper": {
+          "value": true,
+          "reason": "Protect prior route stages and untouched copper from cleanup."
+        },
+        "rip_preexisting": {
+          "value": false,
+          "reason": "Prevent automatic blocker-net reroutes outside the target set."
+        },
+        "finalize_rip": {
+          "value": false,
+          "reason": "Prevent plane finalize from rewriting signal blockers."
+        },
+        "neckdown_length_mm": {
+          "value": 0,
+          "reason": "Do not taper below declared widths."
+        },
+        "power_tap_neckdown": {
+          "value": false,
+          "reason": "Keep declared power widths at plane taps."
+        },
+        "track_width_override": {
+          "value": null,
+          "reason": "Let each net read its native class width, with explicit job power minimums."
+        },
+        "power_width_scope": {
+          "value": "J3 only",
+          "reason": "Explicit task minimums apply only to J3; native rules retained elsewhere."
+        },
+        "scoring_resources": "Whole machine; documented default parallelism; no routing cap; 3600s safety stop."
+      },
+      "seed_supported": false,
+      "env": {
+        "OPEN_ROUTER_KRT_GRID_STEP_MM": "0.05"
+      },
+      "limitations": [
+        "Returned rule changes cause failure; preserve original custom-rule sidecar."
+      ],
+      "qualification": {
+        "router": "kicad-routing-tools",
+        "job": "J1",
+        "candidate": "grid-005",
+        "passes": 2,
+        "failures": 0,
+        "unsupported": 0,
+        "fixtures": 2,
+        "vias": 30,
+        "length_mm": 940.1222881274884,
+        "records": [
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-grid-005-ch340g-j1-01/kicad-routing-tools/record.json",
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-grid-005-teensy-v2-j1-01/kicad-routing-tools/record.json"
+        ],
+        "warnings_on_passes": [
+          1,
+          0
+        ],
+        "qualified": true,
+        "deciding_step": "vias",
+        "pair_qualified": null
+      }
+    },
+    "J2": {
+      "support": "yes",
+      "evidence": [
+        "../../../../evidence/open-router-setup-d3-2026-10-09/selection.json",
+        "../../../diagnostics/open-router-setup-d3-2026-10-09/README.md"
+      ],
+      "command": [
+        "/usr/bin/python3",
+        "{benchmark}/harness/native-router-path-scoring-v3.py",
+        "--router",
+        "kicad-routing-tools",
+        "--input-dir",
+        "{input_dir}",
+        "--work-dir",
+        "{work_dir}",
+        "--output-pcb",
+        "{output_pcb}",
+        "route",
+        "--seed",
+        "{seed}",
+        "--cap-s",
+        "{cap_s}"
+      ],
+      "pre_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/native-router-path-scoring-v3.py",
+          "--router",
+          "kicad-routing-tools",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}",
+          "prepare"
+        ]
+      ],
+      "post_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/native-router-path-scoring-v3.py",
+          "--router",
+          "kicad-routing-tools",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}",
+          "finish"
+        ]
+      ],
+      "settings": {
+        "grid_step_mm": {
+          "value": 0.05,
+          "reason": "Contract selection: vias."
+        },
+        "smoothing": {
+          "value": false,
+          "reason": "Smoothing caused the observed CH340G hole error."
+        },
+        "floor_sync": {
+          "value": false,
+          "reason": "Prevent in-run native-rule rewriting."
+        },
+        "fix_drc_settings": {
+          "value": false,
+          "reason": "Preserve frozen rule floors."
+        },
+        "keep_input_copper": {
+          "value": true,
+          "reason": "Protect prior route stages and untouched copper from cleanup."
+        },
+        "rip_preexisting": {
+          "value": false,
+          "reason": "Prevent automatic blocker-net reroutes outside the target set."
+        },
+        "finalize_rip": {
+          "value": false,
+          "reason": "Prevent plane finalize from rewriting signal blockers."
+        },
+        "neckdown_length_mm": {
+          "value": 0,
+          "reason": "Do not taper below declared widths."
+        },
+        "power_tap_neckdown": {
+          "value": false,
+          "reason": "Keep declared power widths at plane taps."
+        },
+        "track_width_override": {
+          "value": null,
+          "reason": "Let each net read its native class width, with explicit job power minimums."
+        },
+        "power_width_scope": {
+          "value": "J3 only",
+          "reason": "Explicit task minimums apply only to J3; native rules retained elsewhere."
+        },
+        "scoring_resources": "Whole machine; documented default parallelism; no routing cap; 3600s safety stop."
+      },
+      "seed_supported": false,
+      "env": {
+        "OPEN_ROUTER_KRT_GRID_STEP_MM": "0.05"
+      },
+      "limitations": [
+        "Returned rule changes cause failure; preserve original custom-rule sidecar."
+      ],
+      "qualification": {
+        "router": "kicad-routing-tools",
+        "job": "J2",
+        "candidate": "grid-005",
+        "passes": 6,
+        "failures": 0,
+        "unsupported": 0,
+        "fixtures": 6,
+        "vias": 78,
+        "length_mm": 2707.8492687854778,
+        "records": [
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-grid-005-ch340g-j2-large-01/kicad-routing-tools/record.json",
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-grid-005-ch340g-j2-medium-01/kicad-routing-tools/record.json",
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-grid-005-ch340g-j2-small-01/kicad-routing-tools/record.json",
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-grid-005-teensy-v2-j2-large-01/kicad-routing-tools/record.json",
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-grid-005-teensy-v2-j2-medium-01/kicad-routing-tools/record.json",
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-grid-005-teensy-v2-j2-small-01/kicad-routing-tools/record.json"
+        ],
+        "warnings_on_passes": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "qualified": true,
+        "deciding_step": "vias",
+        "pair_qualified": null
+      }
+    },
+    "J3": {
+      "support": "yes",
+      "evidence": [
+        "../../../../evidence/open-router-setup-d3-2026-10-09/selection.json",
+        "../../../diagnostics/open-router-setup-d3-2026-10-09/README.md"
+      ],
+      "command": [
+        "/usr/bin/python3",
+        "{benchmark}/harness/native-router-path-scoring-v3.py",
+        "--router",
+        "kicad-routing-tools",
+        "--input-dir",
+        "{input_dir}",
+        "--work-dir",
+        "{work_dir}",
+        "--output-pcb",
+        "{output_pcb}",
+        "route",
+        "--seed",
+        "{seed}",
+        "--cap-s",
+        "{cap_s}"
+      ],
+      "pre_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/native-router-path-scoring-v3.py",
+          "--router",
+          "kicad-routing-tools",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}",
+          "prepare"
+        ]
+      ],
+      "post_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/native-router-path-scoring-v3.py",
+          "--router",
+          "kicad-routing-tools",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}",
+          "finish"
+        ]
+      ],
+      "settings": {
+        "grid_step_mm": {
+          "value": 0.05,
+          "reason": "Contract selection: length."
+        },
+        "smoothing": {
+          "value": false,
+          "reason": "Smoothing caused the observed CH340G hole error."
+        },
+        "floor_sync": {
+          "value": false,
+          "reason": "Prevent in-run native-rule rewriting."
+        },
+        "fix_drc_settings": {
+          "value": false,
+          "reason": "Preserve frozen rule floors."
+        },
+        "keep_input_copper": {
+          "value": true,
+          "reason": "Protect prior route stages and untouched copper from cleanup."
+        },
+        "rip_preexisting": {
+          "value": false,
+          "reason": "Prevent automatic blocker-net reroutes outside the target set."
+        },
+        "finalize_rip": {
+          "value": false,
+          "reason": "Prevent plane finalize from rewriting signal blockers."
+        },
+        "neckdown_length_mm": {
+          "value": 0,
+          "reason": "Do not taper below declared widths."
+        },
+        "power_tap_neckdown": {
+          "value": false,
+          "reason": "Keep declared power widths at plane taps."
+        },
+        "track_width_override": {
+          "value": null,
+          "reason": "Let each net read its native class width, with explicit job power minimums."
+        },
+        "pair_interface": {
+          "value": "name-discovery",
+          "reason": "Pinned CLI discovers partners by name; declared arbitrary pairs are unsupported."
+        },
+        "power_width_scope": {
+          "value": "J3 only",
+          "reason": "Explicit task minimums apply only to J3; native rules retained elsewhere."
+        },
+        "pair_options": {
+          "value": "documented, untuned defaults with frozen width/gap",
+          "reason": "Amendment 4; no supported named tuning pair."
+        },
+        "scoring_resources": "Whole machine; documented default parallelism; no routing cap; 3600s safety stop."
+      },
+      "seed_supported": false,
+      "env": {
+        "OPEN_ROUTER_KRT_GRID_STEP_MM": "0.05"
+      },
+      "limitations": [
+        "Returned rule changes cause failure; preserve original custom-rule sidecar.",
+        "Requires engine-recognized partner names; no net renaming or mapping adapter on suite inputs.",
+        "Original CH340G anonymous USB pair is not supported; both negative discovery gates retained.",
+        "Anonymous CH340G pair unsupported; Teensy checks power only. No pair tuning or paired qualification. Scored pair settings are documented and untuned on one hard board (Aquarius)."
+      ],
+      "pair_documentation": {
+        "url": "https://github.com/drandyhaas/KiCadRoutingTools/blob/9399bfb29e072bfe60b10d9cdae20c274fc2a17a/docs/differential-pairs.md",
+        "section": "Identifying Differential Pairs; Usage; Configuration Options",
+        "sha256": "97aeea7f046481ebdcd059a2fb92d9e7e6f2098c8838495394b7c37f414bada2",
+        "captured_document": "../../../../evidence/open-router-setup-d3-2026-10-09/kicad-routing-tools-pair-documentation.md",
+        "tuned": false,
+        "policy": "Name discovery; fixture/native width and gap; all other pair options at release defaults. KRT paired stage then protected single-ended stage; TM --diff-pairs; no optional skew target."
+      },
+      "qualification": {
+        "router": "kicad-routing-tools",
+        "job": "J3",
+        "candidate": "grid-005",
+        "passes": 1,
+        "failures": 0,
+        "unsupported": 1,
+        "fixtures": 2,
+        "vias": 15,
+        "length_mm": 727.377863866091,
+        "records": [
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-grid-005-ch340g-j3-01/kicad-routing-tools/record.json",
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-grid-005-teensy-v2-j3-01/kicad-routing-tools/record.json"
+        ],
+        "warnings_on_passes": [
+          0
+        ],
+        "qualified": true,
+        "deciding_step": "length",
+        "pair_qualified": false
+      }
+    },
+    "J4": {
+      "support": "yes",
+      "evidence": [
+        "../../../../evidence/open-router-setup-d3-2026-10-09/selection.json",
+        "../../../diagnostics/open-router-setup-d3-2026-10-09/README.md"
+      ],
+      "command": [
+        "/usr/bin/python3",
+        "{benchmark}/harness/native-router-path-scoring-v3.py",
+        "--router",
+        "kicad-routing-tools",
+        "--input-dir",
+        "{input_dir}",
+        "--work-dir",
+        "{work_dir}",
+        "--output-pcb",
+        "{output_pcb}",
+        "route",
+        "--seed",
+        "{seed}",
+        "--cap-s",
+        "{cap_s}"
+      ],
+      "pre_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/native-router-path-scoring-v3.py",
+          "--router",
+          "kicad-routing-tools",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}",
+          "prepare"
+        ]
+      ],
+      "post_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/native-router-path-scoring-v3.py",
+          "--router",
+          "kicad-routing-tools",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}",
+          "finish"
+        ]
+      ],
+      "settings": {
+        "grid_step_mm": {
+          "value": 0.1,
+          "reason": "Contract selection: length."
+        },
+        "smoothing": {
+          "value": false,
+          "reason": "Smoothing caused the observed CH340G hole error."
+        },
+        "floor_sync": {
+          "value": false,
+          "reason": "Prevent in-run native-rule rewriting."
+        },
+        "fix_drc_settings": {
+          "value": false,
+          "reason": "Preserve frozen rule floors."
+        },
+        "keep_input_copper": {
+          "value": true,
+          "reason": "Protect prior route stages and untouched copper from cleanup."
+        },
+        "rip_preexisting": {
+          "value": false,
+          "reason": "Prevent automatic blocker-net reroutes outside the target set."
+        },
+        "finalize_rip": {
+          "value": false,
+          "reason": "Prevent plane finalize from rewriting signal blockers."
+        },
+        "neckdown_length_mm": {
+          "value": 0,
+          "reason": "Do not taper below declared widths."
+        },
+        "power_tap_neckdown": {
+          "value": false,
+          "reason": "Keep declared power widths at plane taps."
+        },
+        "track_width_override": {
+          "value": null,
+          "reason": "Let each net read its native class width, with explicit job power minimums."
+        },
+        "power_width_scope": {
+          "value": "J3 only",
+          "reason": "Explicit task minimums apply only to J3; native rules retained elsewhere."
+        },
+        "scoring_resources": "Whole machine; documented default parallelism; no routing cap; 3600s safety stop."
+      },
+      "seed_supported": false,
+      "env": {
+        "OPEN_ROUTER_KRT_GRID_STEP_MM": "0.1"
+      },
+      "limitations": [
+        "Returned rule changes cause failure; preserve original custom-rule sidecar."
+      ],
+      "qualification": {
+        "router": "kicad-routing-tools",
+        "job": "J4",
+        "candidate": "baseline",
+        "passes": 1,
+        "failures": 0,
+        "unsupported": 0,
+        "fixtures": 1,
+        "vias": 11,
+        "length_mm": 614.6483040656406,
+        "records": [
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-baseline-teensy-v2-j4-01/kicad-routing-tools/record.json"
+        ],
+        "warnings_on_passes": [
+          0
+        ],
+        "qualified": true,
+        "deciding_step": "length",
+        "pair_qualified": null
+      }
+    }
+  },
+  "support_gate_result": "{work_dir}/support-gate.json",
+  "config_scope": "Eleven tuning-ready-v2 cases only; no scored runs",
+  "tuning_ready_sha256": "7ecde5ceeb595b9011ca4be1a0e741872dda05e35ae778b742ce32afd1496c4d",
+  "frozen_helper_sha256": "5cbf78fb6157e64f08d46bc2f765c2a1a0450a510ba89d6d87e1b5b1a4492fc8"
+}
