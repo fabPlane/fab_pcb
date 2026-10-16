@@ -1,0 +1,38 @@
+name: Shared Mac runner smoke
+on:
+  push:
+    branches: [ci/continuous-macos]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  select:
+    uses: ./.github/workflows/select-macos-runner.yml
+  smoke:
+    needs: select
+    runs-on: ${{ fromJSON(needs.select.outputs.runner) }}
+    timeout-minutes: 8
+    steps:
+      - name: Verify Apple toolchain and compile native code
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = arm64
+          xcodebuild -version
+          printf '#include <stdio.h>\nint main(void) { puts("shared-mac-smoke-ok"); return 0; }\n' > "$RUNNER_TEMP/shared-mac-smoke.c"
+          xcrun clang "$RUNNER_TEMP/shared-mac-smoke.c" -o "$RUNNER_TEMP/shared-mac-smoke"
+          "$RUNNER_TEMP/shared-mac-smoke" | grep -q shared-mac-smoke-ok
+          # Verify the hosted fallback can execute the Intel-native packaging tools.
+          if [[ "${{ runner.environment }}" != self-hosted ]]; then
+            sudo softwareupdate --install-rosetta --agree-to-license
+            xcrun clang -arch x86_64 "$RUNNER_TEMP/shared-mac-smoke.c" -o "$RUNNER_TEMP/shared-mac-smoke-intel"
+            "$RUNNER_TEMP/shared-mac-smoke-intel" | grep -q shared-mac-smoke-ok
+          fi
+          # Leave time to exercise the shared busy signal from the other repository.
+          sleep 75
+  release:
+    needs: [select, smoke]
+    if: always() && needs.select.outputs.lease != ''
+    uses: ./.github/workflows/release-macos-runner.yml
+    with:
+      lease: ${{ needs.select.outputs.lease }}

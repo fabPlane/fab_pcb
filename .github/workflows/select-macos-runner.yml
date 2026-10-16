@@ -1,0 +1,86 @@
+name: Select macOS runner
+on:
+  workflow_call:
+    inputs:
+      mode:
+        type: string
+        default: auto
+      blacksmith-runner:
+        type: string
+        default: blacksmith-6vcpu-macos-15
+      minimum-memory-mib:
+        type: number
+        default: 0
+      require-ios:
+        type: boolean
+        default: false
+    outputs:
+      runner:
+        value: ${{ jobs.select.outputs.runner }}
+      lease:
+        value: ${{ jobs.select.outputs.lease }}
+permissions:
+  contents: write
+jobs:
+  select:
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    outputs:
+      runner: ${{ steps.pick.outputs.runner }}
+      lease: ${{ steps.pick.outputs.lease }}
+    steps:
+      - uses: actions/github-script@v8
+        id: pick
+        env:
+          MAC_RUNNER_HEARTBEAT: ${{ vars.MAC_RUNNER_HEARTBEAT }}
+          MAC_RUNNER_MEMORY_MIB: ${{ vars.MAC_RUNNER_MEMORY_MIB }}
+          MAC_RUNNER_IOS_READY: ${{ vars.MAC_RUNNER_IOS_READY }}
+        with:
+          script: |
+            const inputs = {mode: ${{ toJSON(inputs.mode) }}, fallback: ${{ toJSON(inputs.blacksmith-runner) }}, memory: ${{ inputs.minimum-memory-mib }}, ios: ${{ inputs.require-ios }}};
+            const fallback = JSON.stringify(inputs.fallback);
+            core.setOutput('runner', fallback);
+            core.setOutput('lease', '');
+            const now = Math.floor(Date.now() / 1000);
+            const heartbeat = Number(process.env.MAC_RUNNER_HEARTBEAT || 0);
+            const fork = context.eventName === 'pull_request' && context.payload.pull_request?.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}`;
+            if (inputs.mode === 'blacksmith' || fork || !Number.isSafeInteger(heartbeat) || heartbeat <= 0 || heartbeat > now || now - heartbeat > 45 || Number(process.env.MAC_RUNNER_MEMORY_MIB || 0) < inputs.memory || (inputs.ios && process.env.MAC_RUNNER_IOS_READY !== '1')) {
+              core.info('Using Blacksmith: Mac is busy, unavailable, or does not meet this job requirement.');
+              return;
+            }
+            // A fast-forward-only control ref acts as an atomic per-repository reservation.
+            // No checkout or project code runs in this privileged control job.
+            const ref = 'heads/ci-macos-lease';
+            const request = {...context.repo};
+            let current;
+            try {
+              current = (await github.rest.git.getRef({...request, ref})).data.object.sha;
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              const base = (await github.rest.git.getCommit({...request, commit_sha: context.sha})).data;
+              const init = (await github.rest.git.createCommit({...request, tree: base.tree.sha, parents: [context.sha], message: JSON.stringify({kind: 'mac-capacity-v1', state: 'free'})})).data;
+              try {
+                await github.rest.git.createRef({...request, ref: `refs/${ref}`, sha: init.sha});
+                current = init.sha;
+              } catch (race) {
+                if (race.status === 422 || race.status === 409) return;
+                throw race;
+              }
+            }
+            const parent = (await github.rest.git.getCommit({...request, commit_sha: current})).data;
+            let state;
+            try { state = JSON.parse(parent.message); } catch { core.warning('Control ref is not a Mac lease; leaving it unchanged.'); return; }
+            if (state.kind !== 'mac-capacity-v1') return;
+            if (state.state === 'reserved') {
+              const owner = (await github.request('GET /repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}', {...request, run_id: state.run, attempt_number: state.attempt})).data;
+              if (owner.status !== 'completed') { core.info('Mac capacity is already reserved; using Blacksmith.'); return; }
+            }
+            const lease = (await github.rest.git.createCommit({...request, tree: parent.tree.sha, parents: [current], message: JSON.stringify({kind: 'mac-capacity-v1', state: 'reserved', run: context.runId, attempt: Number(process.env.GITHUB_RUN_ATTEMPT), created: now})})).data;
+            try {
+              await github.rest.git.updateRef({...request, ref, sha: lease.sha, force: false});
+            } catch (race) {
+              if (race.status === 422 || race.status === 409) { core.info('Another job reserved the Mac first; using Blacksmith.'); return; }
+              throw race;
+            }
+            core.setOutput('lease', lease.sha);
+            core.setOutput('runner', JSON.stringify(['self-hosted', 'macOS', 'ARM64', 'mac-mini']));
+            core.info('Reserved the shared Apple Silicon Mac.');

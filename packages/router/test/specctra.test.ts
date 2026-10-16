@@ -266,6 +266,26 @@ describe("parseSes / sesToItems", () => {
     expect(items.routedNets.has("A")).toBe(true);
   });
 
+  test("sesToItems: an existing via whose drill the padstack name rounds to whole micrometres is an echo", () => {
+    const via = (id: string, drill: number) => ({
+      id,
+      net: "A",
+      netCode: 1,
+      position: { x: 10_000_000, y: 10_000_000 },
+      diameter: 800_000,
+      drill,
+      layers: [BoardLayer.BL_F_Cu, BoardLayer.BL_B_Cu],
+    });
+    // 0.3998 mm is named `400` um, 200 nm away; an imperial drill rounds the same way.
+    const rounded = twoNetBoard();
+    rounded.vias.push(via("v-rounded", 399_800));
+    expect(sesToItems(parseSes(SES), rounded).echoed.vias).toBe(1);
+    // A genuinely different drill at the same spot is still not an echo.
+    const different = twoNetBoard();
+    different.vias.push(via("v-different", 300_000));
+    expect(sesToItems(parseSes(SES), different).echoed.vias).toBe(0);
+  });
+
   test("sesToItems: tracks per polyline segment, vias sized from the padstack, unknown layers warned and skipped", () => {
     const items = sesToItems(parseSes(SES), twoNetBoard());
     expect(items.tracks.length).toBe(3);

@@ -143,6 +143,7 @@ export interface SesItems {
 
 /** Existing copper is matched to the session's echo of it within this distance, nm. */
 const ECHO_TOLERANCE = 100; // One KiCad/Freerouting DSN coordinate quantum, not a geometric proximity test.
+const NAME_SIZE_TOLERANCE = 500; // Half of the whole-micrometre rounding in via padstack names.
 
 /**
  * Turns a parsed session into board items for `input`'s layers and nets. Layer names are matched
@@ -187,13 +188,20 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
         Math.abs(t.width - width) <= ECHO_TOLERANCE &&
         ((near(t.start, start) && near(t.end, end)) || (near(t.start, end) && near(t.end, start))),
     );
-  const isEchoedVia = (net: string, position: { x: number; y: number }, diameter: number, drill: number, layers: BoardLayer[]) =>
+  const isEchoedVia = (
+    net: string,
+    position: { x: number; y: number },
+    diameter: number,
+    drill: number,
+    layers: BoardLayer[],
+    sizeTolerance = { diameter: ECHO_TOLERANCE, drill: ECHO_TOLERANCE },
+  ) =>
     input.vias.some(
       (v) =>
         v.net === net &&
         near(v.position, position) &&
-        Math.abs(v.diameter - diameter) <= ECHO_TOLERANCE &&
-        Math.abs(v.drill - drill) <= ECHO_TOLERANCE &&
+        Math.abs(v.diameter - diameter) <= sizeTolerance.diameter &&
+        Math.abs(v.drill - drill) <= sizeTolerance.drill &&
         v.layers.length === layers.length &&
         v.layers.every((l) => layers.includes(l)),
     );
@@ -227,7 +235,13 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
     const drill = m ? Number(m[2]) * 1000 : rules.viaDrill;
     let layers = (ps?.layers ?? []).map((n) => layerByName.get(n)).filter((l): l is BoardLayer => l !== undefined);
     if (layers.length < 2) layers = allLayers;
-    if (isEchoedVia(v.net, { x: v.x, y: v.y }, diameter, drill, layers)) {
+    // Padstack names carry whole micrometres (`viaPadstackName`), so a size read from the name can
+    // be up to 500 nm off the native via (e.g. a 0.3048 mm drill is named 305 um).
+    const sizeTolerance = {
+      diameter: !ps?.diameter && m ? NAME_SIZE_TOLERANCE : ECHO_TOLERANCE,
+      drill: m ? NAME_SIZE_TOLERANCE : ECHO_TOLERANCE,
+    };
+    if (isEchoedVia(v.net, { x: v.x, y: v.y }, diameter, drill, layers, sizeTolerance)) {
       echoed.vias++;
       continue;
     }

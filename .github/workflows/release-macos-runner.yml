@@ -1,0 +1,31 @@
+name: Release macOS runner reservation
+on:
+  workflow_call:
+    inputs:
+      lease:
+        type: string
+        required: true
+permissions:
+  contents: write
+jobs:
+  release:
+    if: inputs.lease != ''
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    steps:
+      - uses: actions/github-script@v8
+        env:
+          LEASE: ${{ inputs.lease }}
+        with:
+          script: |
+            const ref = 'heads/ci-macos-lease';
+            const request = {...context.repo};
+            let current;
+            try { current = (await github.rest.git.getRef({...request, ref})).data.object.sha; }
+            catch (error) { if (error.status === 404) return; throw error; }
+            if (current !== process.env.LEASE) { core.info('Lease has already changed; leaving it unchanged.'); return; }
+            const parent = (await github.rest.git.getCommit({...request, commit_sha: current})).data;
+            const state = JSON.parse(parent.message);
+            if (state.kind !== 'mac-capacity-v1' || state.run !== context.runId || state.attempt !== Number(process.env.GITHUB_RUN_ATTEMPT)) throw new Error('Refusing to release another workflow attempt\'s lease');
+            const free = (await github.rest.git.createCommit({...request, tree: parent.tree.sha, parents: [current], message: JSON.stringify({kind: 'mac-capacity-v1', state: 'free'})})).data;
+            try { await github.rest.git.updateRef({...request, ref, sha: free.sha, force: false}); }
+            catch (error) { if (error.status !== 422 && error.status !== 409) throw error; }
