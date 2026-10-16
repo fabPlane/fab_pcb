@@ -9,7 +9,7 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parent
 NAMES = {'freerouting': 'Freerouting', 'fastroute': 'fastroute', 'fab-router': 'fab_router',
-         'tracemaker': 'TraceMaker', 'kicad-routing-tools': 'KiCadRoutingTools'}
+         'tracemaker': 'TraceMaker', 'kicad-routing-tools': 'drandyhaas/KiCadRoutingTools'}
 JOBS = {'J1': 'Whole board', 'J2': 'Reroute after an edit', 'J3': 'Power widths', 'J4': 'Keep a ground pour'}
 
 

@@ -14,7 +14,7 @@ failure evidence. Keep its adjacent `boards/` and `runs/` directories with it wh
 No LLM is launched. This folder is independent of FabPCB's routing API and Fabdesk.
 
 The five engines are **Freerouting 2.5.0, fastroute 0.1.13, fab_router at 69cf598,
-TraceMaker 0.9.0 (CPU), and KiCadRoutingTools 0.23.0**. The inputs, per-job settings,
+TraceMaker 0.9.0 (CPU), and drandyhaas/KiCadRoutingTools 0.23.0**. The inputs, per-job settings,
 standalone adapters, checker v4.3 and scoring are from the corrected second comparison.
 Zap! remains excluded because its study was paused incomplete. Parked routers are not added.
 
