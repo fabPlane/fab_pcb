@@ -1,0 +1,7 @@
+self-hosted-runner:
+  labels:
+    - tf-nas-ephemeral
+    - fab-pcb
+    - tf-nas-windows
+    - blacksmith-4vcpu-ubuntu-2204
+    - blacksmith-6vcpu-macos-15
