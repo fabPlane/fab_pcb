@@ -26,7 +26,10 @@ export function detectDifferentialPairs(names: readonly string[], classes: Reado
           .replace(/(?:_P|\+|P)$/, "")
           .toLowerCase()
           .replace(/[^a-z0-9]/g, "");
-        return /(?:diff(?:erential)?|pair)/i.test(c.name) || (key.length >= 2 && stem.includes(key)) ? c.board : undefined;
+        return /(?:^|[^a-z])(?:diff(?:erential)?|pairs?)(?:$|[^a-z])/i.test(c.name) ||
+          (!["default", "power", "signal", "signals"].includes(key) && key.length >= 2 && stem.includes(key))
+          ? c.board
+          : undefined;
       };
       const pc = pairClass(p),
         nc = pairClass(n);
