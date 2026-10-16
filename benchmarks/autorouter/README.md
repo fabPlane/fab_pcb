@@ -18,6 +18,10 @@ TraceMaker 0.9.0 (CPU), and drandyhaas/KiCadRoutingTools 0.23.0**. The inputs, p
 standalone adapters, checker v4.3 and scoring are from the corrected second comparison.
 Zap! remains excluded because its study was paused incomplete. Parked routers are not added.
 
+The [inputs and rules](inputs-and-rules.md) include an index of all 26 starting boards, task
+definitions, native project/custom rules, baseline DRC and the fixed acceptance/scoring contract.
+Everything is committed alongside the benchmark; no separate board download is required.
+
 ## Setup
 
 Use the native script and [agent setup guide](SETUP.md); no Docker is required.

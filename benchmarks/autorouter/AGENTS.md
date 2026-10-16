@@ -1,6 +1,7 @@
 # Autorouter benchmark
 
 Read README.md. Run `bun run benchmark:autorouter` from the repository root.
+Read inputs-and-rules.md for starting inputs, per-case rule files and the fixed task/scoring contract.
 For a new machine, read SETUP.md first. Use native setup; do not introduce Docker.
 The current reference runtime is Linux x86-64. Do not claim native macOS support from Linux tests.
 
