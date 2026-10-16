@@ -41,7 +41,8 @@ env:
 
 jobs:
   select-linux-runner:
-    runs-on: [self-hosted, Linux, X64, tf-nas-ephemeral, fab-pcb]
+    # Metadata and capacity selection must run even while the NAS is busy.
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     outputs:
       runner: ${{ steps.select.outputs.runner }}
       choice: ${{ steps.select.outputs.choice }}

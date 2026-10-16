@@ -5,8 +5,8 @@ macOS to package and smoke-test the macOS-native KiCad runtime and target JDK.
 
 Apple Silicon release jobs prefer the shared company Mac when its shared
 heartbeat is fresh and idle. A busy, offline, stale, or already-reserved Mac
-selects `blacksmith-6vcpu-macos-15`. The control job itself runs on Blacksmith
-Linux. Intel packaging uses Blacksmith with Rosetta to execute the native
+selects `blacksmith-6vcpu-macos-15`. Both the release-metadata control job and the Mac capacity selector run on
+Blacksmith Linux, so a busy NAS cannot block selection of native Mac builds. Intel packaging uses Blacksmith with Rosetta to execute the native
 Intel JDK and backend; it does not consume the Apple Silicon local reservation.
 
 The Mac's existing repository listener is now connected continuously, alongside
