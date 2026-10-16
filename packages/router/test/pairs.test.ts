@@ -67,3 +67,18 @@ for (const [className, p, n] of [
       ),
     ).toEqual([{ p, n }]);
   });
+
+test("fresh review: a class matching only the hierarchy supplies no pair dimensions", () => {
+  const cls = create(NetClassSchema, { name: "Analog", board: { diffPairTrackWidth: toDistance(mm(0.2)) } });
+  const p = "/Analog/VBAT+",
+    n = "/Analog/VBAT-";
+  expect(
+    detectDifferentialPairs(
+      [p, n],
+      new Map([
+        [p, cls],
+        [n, cls],
+      ]),
+    ),
+  ).toEqual([{ p, n }]);
+});

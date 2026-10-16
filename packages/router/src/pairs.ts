@@ -23,6 +23,8 @@ export function detectDifferentialPairs(names: readonly string[], classes: Reado
         if (!c) return undefined;
         const key = c.name.toLowerCase().replace(/[^a-z0-9]/g, "");
         const stem = p
+          .split("/")
+          .at(-1)!
           .replace(/(?:_P|\+|P)$/, "")
           .toLowerCase()
           .replace(/[^a-z0-9]/g, "");
