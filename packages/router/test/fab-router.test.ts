@@ -99,7 +99,7 @@ describe("FabRouter", () => {
     expect(result.tracks[1]).toMatchObject({ net: "B", netCode: 2, width: mm(0.25), layer: B });
   });
 
-  test("drops partial copper for an incomplete net instead of applying dangling stubs", async () => {
+  test("retains copper on incomplete nets for native connection-level cleanup", async () => {
     const router = new FabRouter({
       routeDsn: () =>
         success([
@@ -109,10 +109,10 @@ describe("FabRouter", () => {
     });
     const result = await router.route(twoNetBoard());
 
-    expect(result.tracks.map((track) => track.net)).toEqual(["A"]);
-    expect(result.vias).toEqual([]);
+    expect(result.tracks.map((track) => track.net)).toEqual(["A", "B"]);
+    expect(result.vias).toHaveLength(1);
     expect(result.unrouted.map((connection) => connection.net)).toEqual(["B"]);
-    expect(result.log).toContain("discarded partial copper on 1 incomplete net(s): 1 track(s), 1 via(s)");
+    expect(result.diagnostics?.discarded).toEqual({ tracks: 0, vias: 0 });
   });
 
   test("surfaces parse diagnostics and honours cancellation", async () => {
@@ -179,7 +179,7 @@ test("coupled-capable solver outcomes are preserved without inventing measuremen
   const result = await new FabRouter({ routeDsn: () => native }).route(input);
   expect(result.pairRouting).toEqual({ capability: "coupled", pairs: native.report.pairs });
 });
-test("seven-net partial solver result reports 16 → 8, 15 discarded tracks and 7 vias", async () => {
+test("seven-net partial solver result preserves generated copper despite every net remaining open", async () => {
   const input = twoNetBoard();
   const nets = ["GND", "VBUS_USBA", "USB_A_DN", "USB_A_DP", "VBUS_USBA2", "USB_A2_DN", "USB_A2_DP"];
   input.nets = nets.map((name, i) => ({ name, code: i + 1, netClass: "Default" }));
@@ -203,12 +203,12 @@ test("seven-net partial solver result reports 16 → 8, 15 discarded tracks and 
     added: { tracks: 15, barrels: 7 },
   });
   const result = await new FabRouter({ routeDsn: () => native }).route(input);
-  expect(result.tracks).toHaveLength(0);
-  expect(result.vias).toHaveLength(0);
+  expect(result.tracks).toHaveLength(15);
+  expect(result.vias).toHaveLength(7);
   expect(result.diagnostics).toMatchObject({
     solverOpens: { before: 16, after: 8 },
     generated: { tracks: 15, vias: 7 },
-    discarded: { tracks: 15, vias: 7 },
+    discarded: { tracks: 0, vias: 0 },
     physicalBlockerEstablished: false,
     remaining: { nets: 7, opens: 8 },
   });
@@ -233,7 +233,7 @@ test("generated and discarded counts exclude protected copper echoed in SES", as
     { net: "B", incomplete: 1 },
   ]);
   const result = await new FabRouter({ routeDsn: () => native }).route(input);
-  expect(result.diagnostics).toMatchObject({ generated: { tracks: 1, vias: 1 }, discarded: { tracks: 1, vias: 1 } });
+  expect(result.diagnostics).toMatchObject({ generated: { tracks: 1, vias: 1 }, discarded: { tracks: 0, vias: 0 } });
   expect(input.tracks).toHaveLength(1);
 });
 

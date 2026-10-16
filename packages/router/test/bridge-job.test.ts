@@ -7,6 +7,39 @@ import { createRouteJobs, persistAppliedRoute, routeGeometry, withoutRejectedCre
 import { applyRouteResult } from "../src/apply";
 import { collisionBoard } from "./collision-fixture";
 
+test("empty routing reports affected endpoints, effective rules and measured blockers before failing", async () => {
+  const input = collisionBoard();
+  const board = { save: async () => {}, getTracks: async () => [] } as unknown as Board;
+  const jobs = createRouteJobs({
+    openBoard: async () => board,
+    extract: async () => input,
+    routers: () => ({
+      name: "freerouting",
+      route: async () => ({
+        router: "freerouting",
+        tracks: [],
+        vias: [],
+        totalConnections: input.connections.length,
+        unrouted: input.connections,
+        timedOut: false,
+        elapsedMs: 1,
+        log: ["Auto-routing stage completed: 1 unrouted"],
+      }),
+    }),
+    freerouting: { jar: "/test/router.jar", java: "/test/java", ok: true },
+    apply: async () => {
+      throw new Error("empty copper must never apply");
+    },
+  });
+  const result = await jobs.wait(jobs.start({ id: "empty-detail", transport: null }, { router: "freerouting", refillZones: false }).id);
+  expect(result.state).toBe("failed");
+  expect(result.error).toContain("Auto-routing stage completed: 1 unrouted");
+  expect(result.error).toContain("Remaining input connections: 1");
+  expect(result.error).toContain("clearance");
+  expect(result.error).toContain("blocker");
+  expect(result.error).toContain("does not prove the board is unroutable");
+});
+
 for (const router of ["js", "freerouting"] as const)
   test(`${router} probes native leftover opens after application using pre-route obstacles`, async () => {
     const input = collisionBoard();
@@ -441,4 +474,69 @@ test("native route application deletes reported stubs and creates replacement co
     { removeCopperIds: ["old-stub"] },
   );
   expect(calls).toEqual(["begin", "delete", "create", "end"]);
+});
+
+test("native cleanup keeps a useful connection behind a dangling chain longer than twenty items", async () => {
+  const input = collisionBoard();
+  const result: RouteResult = {
+    router: "fab-router",
+    tracks: Array.from({ length: 27 }, (_, i) => ({
+      net: "A",
+      netCode: 1,
+      start: { x: i * 1e6, y: 0 },
+      end: { x: (i + 1) * 1e6, y: 0 },
+      width: 200000,
+      layer: BoardLayer.BL_F_Cu,
+    })),
+    vias: [],
+    unrouted: input.connections,
+    totalConnections: input.connections.length,
+    timedOut: false,
+    elapsedMs: 1,
+    log: [],
+  };
+  let created: Track[] = [];
+  let checks = 0;
+  const board = {
+    save: async () => {},
+    getTracks: async () => created,
+    undo: async () => ({ applied: 1 }),
+    ratsnest: async () => ({ edges: [] }),
+    drc: {
+      run: async () => {
+        checks++;
+        return {
+          markers: created.length > 1 ? [{ errorType: DrcErrorType.DRCET_DANGLING_TRACK, items: [{ value: created.at(-1)!.id }] }] : [],
+        };
+      },
+    },
+  } as unknown as Board;
+  const jobs = createRouteJobs({
+    openBoard: async () => board,
+    extract: async () => input,
+    capacityRouter: { name: "fab-router", route: async () => result },
+    apply: async (_b, route) => {
+      created = route.tracks.map(
+        (t, i) =>
+          new Track(
+            create(TrackSchema, {
+              id: { value: `created-${i}` },
+              net: { name: t.net },
+              start: toVector2(t.start),
+              end: toVector2(t.end),
+              layer: t.layer,
+              width: toDistance(t.width),
+            }),
+          ),
+      );
+      return { commitId: "cleanup", created, updated: [], deleted: [], value: created };
+    },
+  });
+  const info = await jobs.wait(
+    jobs.start({ id: "long-chain", transport: null }, { router: "js", refillZones: false, message: "keep useful connection" }).id,
+  );
+  expect(info.state).toBe("done");
+  expect(info.summary!.tracks).toBe(1);
+  expect(checks).toBe(27);
+  expect(info.summary!.routed).toBe(1);
 });

@@ -233,29 +233,23 @@ export class FabRouter implements Autorouter {
     const generatedWires = session.wires.filter((wire) => sesToItems({ ...session, wires: [wire], vias: [] }, input).tracks.length > 0);
     log.push(...parsed.warnings.map((warning) => `ses: ${warning}`));
 
-    // A best-so-far SES can contain useful-looking stubs on nets the solver did not complete.
-    // Applying them creates dangling-track DRC findings. Apply only complete nets; the original
-    // board copper remains protected and the entire incomplete net stays honestly in the ratsnest.
+    // Preserve completed connections even when their net is incomplete. The native bridge
+    // tentatively imports these items, removes only native dangling copper, and remeasures
+    // connectivity before persisting. The caller's candidate DRC guard remains authoritative.
     const incompleteNets = new Set(result.report.perNet.filter((net) => net.incomplete > 0).map((net) => net.net));
-    const tracks = parsed.tracks.filter((track) => !incompleteNets.has(track.net));
-    const vias = parsed.vias.filter((via) => !incompleteNets.has(via.net));
-    const discardedTracks = parsed.tracks.length - tracks.length;
-    const discardedVias = parsed.vias.length - vias.length;
-    if (discardedTracks || discardedVias) {
-      log.push(
-        `discarded partial copper on ${incompleteNets.size} incomplete net(s): ${discardedTracks} track(s), ${discardedVias} via(s)`,
-      );
-    }
+    const tracks = parsed.tracks;
+    const vias = parsed.vias;
+    const discardedVias = 0;
     const unrouted: RouteConnection[] = input.connections.filter((connection) => incompleteNets.has(connection.net));
     const remaining = result.report.perNet.filter((net) => net.incomplete > 0);
     const endpoints = leftoverConnectionEndpoints(input).filter((end) => incompleteNets.has(end.net));
-    const discardedWires = generatedWires.filter((wire) => incompleteNets.has(wire.net)).length;
+    const discardedWires = 0;
     const remainingText =
       remaining
         .slice(0, 8)
         .map((net) => `${net.net} ${net.incomplete}`)
         .join("; ") + (remaining.length > 8 ? `; ${remaining.length - 8} more nets` : "");
-    const text = `fab_router stopped after ${result.report.passes} passes (${result.report.stoppedBy}): solver opens ${result.report.incompleteBefore} → ${result.report.incompleteAfter}; generated ${generatedWires.length} tracks and ${parsed.vias.length} vias; discarded ${discardedWires} tracks and ${discardedVias} vias because their nets were incomplete. Remaining (${remaining.length} nets, ${result.report.incompleteAfter} opens): ${remainingText || "none"}. Physical endpoint evidence is measured by the bridge after native connectivity is rechecked. Next: ${remaining.length ? "try Freerouting for these nets and check the remaining native opens" : "check native connectivity and DRC"}.`;
+    const text = `fab_router stopped after ${result.report.passes} passes (${result.report.stoppedBy}): solver opens ${result.report.incompleteBefore} → ${result.report.incompleteAfter}; generated ${generatedWires.length} tracks and ${parsed.vias.length} vias; discarded ${discardedWires} tracks and ${discardedVias} vias before native dangling cleanup. Remaining (${remaining.length} nets, ${result.report.incompleteAfter} opens): ${remainingText || "none"}. Physical endpoint evidence is measured by the bridge after native connectivity is rechecked. Next: ${remaining.length ? "try Freerouting for these nets and check the remaining native opens" : "check native connectivity and DRC"}.`;
     const diagnostics: import("./types").RoutingDiagnostics = {
       text,
       passes: result.report.passes,

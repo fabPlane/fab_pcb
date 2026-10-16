@@ -88,14 +88,50 @@ function pad(
   );
 }
 
-function footprint(id: string, reference: string) {
+function footprint(id: string, reference: string, embeddedZone = false) {
   return packAny(
     FootprintInstanceSchema,
-    create(FootprintInstanceSchema, { id: { value: id }, referenceField: { text: { text: { text: reference } } } }),
+    create(FootprintInstanceSchema, {
+      id: { value: id },
+      referenceField: { text: { text: { text: reference } } },
+      ...(embeddedZone
+        ? {
+            position: v(40, 30),
+            orientation: { valueDegrees: 90 },
+            definition: {
+              items: [
+                packAny(
+                  ZoneSchema,
+                  create(ZoneSchema, {
+                    id: { value: "footprint-keepout" },
+                    type: ZoneType.ZT_RULE_AREA,
+                    layers: [BoardLayer.BL_B_Cu],
+                    outline: {
+                      polygons: [
+                        {
+                          outline: {
+                            closed: true,
+                            nodes: [
+                              [7, 11],
+                              [9, 11],
+                              [9, 13],
+                            ].map(([x, y]) => ({ geometry: { case: "point" as const, value: v(x!, y!) } })),
+                          },
+                        },
+                      ],
+                    },
+                    settings: { case: "ruleAreaSettings", value: { keepoutTracks: true, keepoutVias: true } },
+                  }),
+                ),
+              ],
+            },
+          }
+        : {}),
+    }),
   );
 }
 
-function boardServer(): FakeTransport {
+function boardServer(embeddedZone = false): FakeTransport {
   const t = new FakeTransport();
   t.on(GetBoardEnabledLayersSchema, () =>
     reply(BoardEnabledLayersResponseSchema, {
@@ -112,7 +148,7 @@ function boardServer(): FakeTransport {
       items.push(segment("e1", 0, 0, 40, 0), segment("e2", 40, 0, 40, 30), segment("e3", 40, 30, 0, 30), segment("e4", 0, 30, 0, 0));
       items.push(segment("s1", 1, 1, 2, 2, BoardLayer.BL_F_SilkS)); // silk: ignored
     }
-    if (req.types.includes(KiCadObjectType.KOT_PCB_FOOTPRINT)) items.push(footprint("fp1", "R1"), footprint("fp2", "R2"));
+    if (req.types.includes(KiCadObjectType.KOT_PCB_FOOTPRINT)) items.push(footprint("fp1", "R1", embeddedZone), footprint("fp2", "R2"));
     if (req.types.includes(KiCadObjectType.KOT_PCB_PAD)) {
       items.push(pad("p1", "fp1", "1", "N1", 5, 5, { angle: 90 }), pad("p2", "fp1", "2", "GND", 5, 15));
       items.push(pad("p3", "fp2", "1", "N1", 35, 25, { smd: true, shape: PadStackShape.PSS_RECTANGLE }), pad("p4", "fp2", "2", "", 35, 5));
@@ -223,6 +259,21 @@ function boardServer(): FakeTransport {
 }
 
 describe("extractRouteInput", () => {
+  test("exports footprint rule areas with translation and rotation alongside absolute board zones", async () => {
+    const board = new KiCad(await KiCadClient.connect(boardServer(true), { clientName: "embedded-zone" })).boardFrom(DOC);
+    const input = await extractRouteInput(board!);
+    expect(input.keepouts).toHaveLength(2);
+    expect(input.keepouts.find((k) => k.id === "footprint-keepout")).toMatchObject({
+      layers: [BoardLayer.BL_B_Cu],
+      tracks: true,
+      vias: true,
+      polygon: [
+        { x: mm(51), y: mm(23) },
+        { x: mm(51), y: mm(21) },
+        { x: mm(53), y: mm(21) },
+      ],
+    });
+  });
   test("keeps exact roundrect radius and marks offset or differing-layer geometry unsupported", async () => {
     const t = boardServer();
     t.on(GetItemsSchema, (req) =>

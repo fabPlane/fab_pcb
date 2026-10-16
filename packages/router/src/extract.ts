@@ -12,6 +12,7 @@ import {
   Pad,
   Track,
   Via,
+  Zone,
   boxFromPoints,
   boxUnion,
   mm,
@@ -21,6 +22,7 @@ import {
   type Box,
   type Vec2,
 } from "@fp-pcb/client";
+import { detectDifferentialPairs } from "./pairs";
 import { arcPoints, chainOutline, circlePoints, type OutlinePiece } from "./geometry";
 import type {
   RouteConnection,
@@ -295,9 +297,26 @@ export async function extractRouteInput(board: Board, opts: ExtractOptions = {})
   // --- zones -----------------------------------------------------------------------------------
   const keepouts: RouteKeepout[] = [];
   const routeZones: RouteZone[] = [];
-  for (const z of zones) {
+  // KiCad embeds footprint rule areas in the footprint definition. GetItems(ZONE)
+  // can return only board-level zones. Zone outlines embedded in definitions are
+  // local to the footprint, unlike pads returned by GetItems(PAD).
+  const allZones = new Map(zones.map((z) => [z.id, z]));
+  const zoneTransforms = new Map<string, (point: Vec2) => Vec2>();
+  for (const footprint of footprints)
+    for (const item of footprint.items)
+      if (item instanceof Zone && !allZones.has(item.id)) {
+        allZones.set(item.id, item);
+        const angle = (footprint.orientation * Math.PI) / 180;
+        const origin = footprint.position;
+        zoneTransforms.set(item.id, (point) => ({
+          x: Math.round(origin.x + point.x * Math.cos(angle) + point.y * Math.sin(angle)),
+          y: Math.round(origin.y - point.x * Math.sin(angle) + point.y * Math.cos(angle)),
+        }));
+      }
+  for (const z of allZones.values()) {
     const layers = copperLayersInOrder(z.layers);
-    const polys = polygonsOf(z.outline);
+    const transform = zoneTransforms.get(z.id) ?? ((point: Vec2) => point);
+    const polys = polygonsOf(z.outline).map((polygon) => polygon.map(transform));
     if (!polys.length) continue;
     if (z.zoneType === ZoneType.ZT_RULE_AREA || z.proto.settings.case === "ruleAreaSettings") {
       const ra = z.proto.settings.case === "ruleAreaSettings" ? z.proto.settings.value : undefined;
@@ -320,7 +339,7 @@ export async function extractRouteInput(board: Board, opts: ExtractOptions = {})
         netCode: z.netCode ?? 0,
         layers,
         polygon: polys[0]!,
-        fills: z.filledPolygons.map((f) => ({ layer: f.layer, polygons: polygonsOf(f.shapes) })),
+        fills: z.filledPolygons.map((f) => ({ layer: f.layer, polygons: polygonsOf(f.shapes).map((polygon) => polygon.map(transform)) })),
       });
     }
   }
@@ -335,7 +354,7 @@ export async function extractRouteInput(board: Board, opts: ExtractOptions = {})
   for (const fp of footprints) {
     for (const item of fp.items) {
       const layer = item.layerId;
-      if (layer === undefined || !isCopperLayer(layer) || !item.id || item instanceof Pad) continue;
+      if (layer === undefined || !isCopperLayer(layer) || !item.id || item instanceof Pad || item instanceof Zone) continue;
       const kind = item instanceof BoardText || item instanceof BoardField ? "text" : item instanceof BoardShape ? "shape" : "other";
       copperGraphics.push({ id: item.id, kind, layer, net: "" });
     }
@@ -433,6 +452,10 @@ export async function extractRouteInput(board: Board, opts: ExtractOptions = {})
     zones: routeZones,
     obstacles,
     connections,
+    differentialPairs: detectDifferentialPairs(
+      nets.map((n) => n.name),
+      classes,
+    ),
     rules,
   };
 }
