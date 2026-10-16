@@ -20,6 +20,12 @@ Zap! remains excluded because its study was paused incomplete. Parked routers ar
 
 ## Setup
 
+Use the native script and [agent setup guide](SETUP.md); no Docker is required.
+Fresh router download/build installation and the five-router smoke have passed on Ubuntu 24.04
+x86-64 with system prerequisites installed. **Native macOS execution is not supported yet:**
+the original harness uses Linux executable paths, Linux router binaries and a Linux KiCad hash.
+Installing dependencies on a Mac alone does not resolve that. See the guide before setup.
+
 Supported environment: **Linux x86-64**, Python 3.12 with stock KiCad **10.0.6** `pcbnew` and
 `/usr/bin/kicad-cli`, and **Bun 1.4+**. The checker verifies the original KiCad binary hash.
 First-time router installation also needs `python3-venv`, CMake, a C++20 compiler, CLI11,

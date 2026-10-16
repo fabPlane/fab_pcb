@@ -41,6 +41,8 @@ def verify():
     bad = [p for p, digest in expected.items() if not (ROOT / p).is_file() or sha(ROOT / p) != digest]
     if bad:
         raise RuntimeError('Frozen benchmark input changed: ' + ', '.join(bad))
+    from setup import check_platform
+    check_platform()
     suite = read(ROOT / 'suite.json')
     if sha(Path('/usr/bin/kicad-cli')) != suite['historical_kicad_cli_sha256']:
         raise RuntimeError('Install the original stock KiCad 10.0.6 runtime; see README.md')

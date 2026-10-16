@@ -1,6 +1,8 @@
 # Autorouter benchmark
 
 Read README.md. Run `bun run benchmark:autorouter` from the repository root.
+For a new machine, read SETUP.md first. Use native setup; do not introduce Docker.
+The current reference runtime is Linux x86-64. Do not claim native macOS support from Linux tests.
 
 This is a standalone five-router benchmark. Do not call FabPCB's bridge or Fabdesk, change
 frozen cases/checker to improve a score, hand-repair returned boards, or omit failed attempts.

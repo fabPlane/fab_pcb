@@ -4,13 +4,22 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import platform
 import shutil
 import subprocess
+import sys
 import tarfile
 import urllib.request
 
 ROOT = Path(__file__).resolve().parent
 RUNTIME = ROOT / 'runtime'
+
+
+def check_platform():
+    if sys.platform != 'linux' or platform.machine().lower() not in ('x86_64', 'amd64'):
+        raise RuntimeError('The reference benchmark currently requires Linux x86-64. '
+                           'Native macOS needs compatibility work; see SETUP.md. '
+                           'No router assets were installed.')
 
 
 def sha(p):
@@ -51,6 +60,7 @@ def source_download(spec, target):
 
 
 def install(existing=None):
+    check_platform()
     lock = json.loads((ROOT / 'engines.lock.json').read_text())
     if existing:
         # Copy; no symlinks into another active checkout or old evaluation directory.
