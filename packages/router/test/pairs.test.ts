@@ -54,7 +54,7 @@ test("#2 a Power class's automatically saved differential fields do not constrai
 for (const [className, p, n] of [
   ["Power", "POWER+", "POWER-"],
   ["Repair", "D_P", "D_N"],
-])
+] as const)
   test(`pair intent does not infer dimensions from ${className}`, () => {
     const cls = create(NetClassSchema, { name: className, board: { diffPairTrackWidth: toDistance(mm(0.2)) } });
     expect(
