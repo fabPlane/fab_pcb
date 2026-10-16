@@ -4,13 +4,21 @@
  * merged into one `CreateItems` / `UpdateItems` / `DeleteItems` request, in order. Results are the
  * canonical items KiCad echoes back (with server-assigned ids and normalised fields).
  */
-import type { Message } from "@bufbuild/protobuf";
+import { equals, type Message } from "@bufbuild/protobuf";
 import type { Any } from "@bufbuild/protobuf/wkt";
-import { CommitAction, ItemDeletionStatus, ItemRequestStatus, ItemStatusCode, KiCadObjectType, type ItemStatus } from "@fp-pcb/proto";
+import {
+  CommitAction,
+  ItemDeletionStatus,
+  ItemRequestStatus,
+  ItemStatusCode,
+  KiCadObjectType,
+  SchematicSymbolSchema,
+  type ItemStatus,
+} from "@fp-pcb/proto";
 import * as cmd from "../commands";
-import { CommitDroppedError, KiCadItemError, type ItemFailure } from "../errors";
+import { CommitDroppedError, CommitRecoveryError, KiCadItemError, type ItemFailure } from "../errors";
 import type { Document, ItemScope, UndoRedoResult } from "./document";
-import { Item, toAnyItem, wrapAny } from "./items";
+import { Item, SchematicSymbol, toAnyItem, wrapAny } from "./items";
 
 export type ItemInput = Item | Message | Any;
 
@@ -77,6 +85,7 @@ export class Commit {
   private scheduled = false;
   private flushing: Promise<void> | null = null;
   private ended = false;
+  private finalizing = false;
   private readonly strict: boolean;
 
   constructor(
@@ -129,14 +138,22 @@ export class Commit {
   async push(message = ""): Promise<void> {
     await this.drain();
     if (this.ended) return;
-    this.ended = true;
-    if (!this.id) return;
-    await cmd.endCommit(this.doc.client, {
-      id: { value: this.id },
-      action: CommitAction.CMA_COMMIT,
-      message,
-      header: this.doc.header(this.scope),
-    });
+    if (this.finalizing) throw new Error(`commit ${this.id} is already finalizing`);
+    this.finalizing = true;
+    try {
+      if (this.id)
+        await cmd.endCommit(this.doc.client, {
+          id: { value: this.id },
+          action: CommitAction.CMA_COMMIT,
+          message,
+          header: this.doc.header(this.scope),
+        });
+      this.ended = true;
+    } catch (error) {
+      await this.failAndRecover(error);
+    } finally {
+      this.finalizing = false;
+    }
   }
 
   /** `EndCommit(CMA_DROP)`: reverts everything done in this commit. Never throws. */
@@ -147,12 +164,18 @@ export class Commit {
       /* the failed op is what we are dropping */
     }
     if (this.ended) return;
-    this.ended = true;
-    if (!this.id) return;
     try {
-      await cmd.endCommit(this.doc.client, { id: { value: this.id }, action: CommitAction.CMA_DROP, header: this.doc.header(this.scope) });
+      if (this.id)
+        await cmd.endCommit(this.doc.client, {
+          id: { value: this.id },
+          action: CommitAction.CMA_DROP,
+          header: this.doc.header(this.scope),
+        });
     } catch {
       /* best effort */
+    } finally {
+      // The caller discarded this work; a later push() must never commit it.
+      this.ended = true;
     }
   }
 
@@ -184,8 +207,7 @@ export class Commit {
       value = await fn(this);
       await this.drain();
     } catch (e) {
-      await this.drop();
-      throw new CommitDroppedError(this.id, e);
+      return this.failAndRecover(e);
     }
     await this.push(message);
     return { value, commitId: this.id, created: this.created, updated: this.updated, deleted: this.deleted };
@@ -193,8 +215,43 @@ export class Commit {
 
   // --- internals ---------------------------------------------------------------------------------
 
+  private async failAndRecover(cause: unknown): Promise<never> {
+    // Requests queued before the failure must land inside the transaction the drop reverts, not
+    // after it. drain() never throws: flush settles each op's own promise.
+    await this.drain();
+    try {
+      if (!this.id) throw new Error("one-shot operation has no native transaction to revert");
+      let recovery: "dropped" | "undone" = "dropped";
+      try {
+        // A rejected finalization may still leave the transaction pending.
+        await cmd.endCommit(this.doc.client, {
+          id: { value: this.id },
+          action: CommitAction.CMA_DROP,
+          header: this.doc.header(this.scope),
+        });
+      } catch {
+        // Headless KiCad can transfer the undo record before finalization throws. Undo only
+        // our exact newest entry; never undo another client's edit or reload saved files.
+        const top = (await this.doc.undoStack()).undo.at(-1);
+        if (top?.commitId?.value !== this.id)
+          throw new Error("failed transaction is not the newest native undo entry; refusing to undo other work");
+        const result = await this.doc.undo(1);
+        if (result.applied !== 1) throw new Error("native undo did not confirm reverting the failed transaction");
+        recovery = "undone";
+      }
+      this.ended = true;
+      throw new CommitDroppedError(this.id, cause, recovery);
+    } catch (error) {
+      if (error instanceof CommitDroppedError) throw error;
+      // State is unknown; stop this handle and preserve the server's live document for recovery.
+      this.ended = true;
+      throw new CommitRecoveryError(this.id, cause, error);
+    }
+  }
+
   private enqueue(kind: OpKind, wrappers: Item[], scope: ItemScope | undefined, ids?: string[]): Promise<unknown> {
-    if (this.ended) return Promise.reject(new Error(`commit ${this.id || "(one-shot)"} has already ended`));
+    if (this.ended || this.finalizing)
+      return Promise.reject(new Error(`commit ${this.id || "(one-shot)"} has already ended or is finalizing`));
     const groups = new Map<string, Op>();
     const promises: Promise<unknown>[] = [];
     const list = wrappers.length ? wrappers : (ids ?? []).map(() => undefined);
@@ -295,7 +352,7 @@ export class Commit {
         op.kind === "create"
           ? await cmd.createItems(doc.client, { header, items: op.anys }).then((r) => (this.checkStatus(r.status, command), r.createdItems))
           : await cmd
-              .updateItems(doc.client, { header, items: op.anys })
+              .updateItems(doc.client, { header, items: await this.instanceUpdates(op) })
               .then((r) => (this.checkStatus(r.status, command), r.updatedItems));
       const canonical: (Item | undefined)[] = [];
       const failures: ItemFailure[] = [];
@@ -327,6 +384,38 @@ export class Commit {
       emit("failed", op.wrappers, op.ids);
       throw e;
     }
+  }
+
+  /** Placed-symbol edits must not round-trip inactive-unit library pin identities into instances. */
+  private async instanceUpdates(op: Op): Promise<Any[]> {
+    const incoming = op.anys.map((any) => wrapAny(any));
+    const symbols = incoming.filter((item): item is SchematicSymbol => item instanceof SchematicSymbol);
+    if (!symbols.length) return op.anys;
+    const current = new Map(
+      (
+        await this.doc.getItemsById(
+          symbols.map((symbol) => symbol.id),
+          op.scope,
+        )
+      ).map((item) => [item.id, item]),
+    );
+    return incoming.map((item, index) => {
+      if (!(item instanceof SchematicSymbol)) return op.anys[index]!;
+      const before = current.get(item.id);
+      // Let KiCad report nonexistent/wrong-type items through the ordinary strict item checks.
+      if (!(before instanceof SchematicSymbol)) return op.anys[index]!;
+      if (
+        (item.libraryId && item.libraryId !== before.libraryId) ||
+        (item.proto.definition &&
+          (!before.proto.definition || !equals(SchematicSymbolSchema, item.proto.definition, before.proto.definition)))
+      )
+        throw new Error(
+          `cannot update the library definition of placed symbol ${item.reference || item.id}; replace the inspected symbol instead. Instance updates support position, rotation, mirror, fields and value.`,
+        );
+      // Work on decoded request copies, retaining the caller's definition for pin geometry/inspection.
+      delete item.proto.definition;
+      return item.toAny();
+    });
   }
 
   private checkStatus(status: ItemRequestStatus, command: string): void {
