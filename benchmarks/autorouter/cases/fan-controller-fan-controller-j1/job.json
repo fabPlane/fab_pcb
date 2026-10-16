@@ -1,0 +1,129 @@
+{
+  "job": "J1",
+  "tier": "hard",
+  "role": "scored",
+  "scope": null,
+  "target_nets": [],
+  "target_footprint": null,
+  "power_nets": [],
+  "pairs": [],
+  "kept_zones": [],
+  "rules": {
+    "classes": [
+      {
+        "name": "Default",
+        "clearance": 0.2,
+        "track_width": 0.25,
+        "via_diameter": 0.6,
+        "via_drill": 0.4,
+        "diff_pair_width": 0.25,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "nets": [
+          "+12V",
+          "+5V",
+          "/ENC_A(CN2)",
+          "/ENC_B(CN6)",
+          "/SW(CN7)",
+          "/pwm0(OC2B)",
+          "/pwm1(OC5)",
+          "/pwm2(OC4)",
+          "/pwm3(OC1E)",
+          "/pwm_in",
+          "/sense0(CN13)",
+          "/sense1",
+          "/sense2",
+          "/sense3",
+          "/sense_out",
+          "GND",
+          "Net-(C10-Pad1)",
+          "Net-(C12-Pad1)",
+          "Net-(D1-Pad1)",
+          "Net-(D2-Pad1)",
+          "Net-(D3-Pad1)",
+          "Net-(D4-Pad1)",
+          "Net-(P3-Pad4)",
+          "Net-(P4-Pad4)",
+          "Net-(P5-Pad4)",
+          "Net-(P6-Pad4)",
+          "Net-(Q1-Pad1)",
+          "Net-(Q2-Pad1)",
+          "Net-(Q3-Pad1)",
+          "Net-(Q4-Pad1)",
+          "Net-(Q5-Pad1)",
+          "Net-(R14-Pad1)",
+          "Net-(R5-Pad2)",
+          "Net-(U1-Pad11)",
+          "Net-(U1-Pad12)",
+          "Net-(U1-Pad16)",
+          "Net-(U1-Pad22)",
+          "Net-(U1-Pad26)",
+          "Net-(U1-Pad9)",
+          "PGEC",
+          "PGED",
+          "analog_cmd",
+          "~MCLR"
+        ]
+      }
+    ],
+    "clearance_mm": 0.0,
+    "copper_to_edge_mm": 0.5,
+    "copper_to_hole_mm": 0.25,
+    "hole_to_hole_mm": 0.25,
+    "minimum_track_mm": 0.2,
+    "minimum_via_mm": 0.4,
+    "minimum_annular_mm": 0.1,
+    "provenance": "legacy board net_class and stock pcbnew design settings; no human-routing fit"
+  },
+  "baseline": {
+    "errors": 0,
+    "warnings": 108,
+    "opens": 115,
+    "error_types": {},
+    "warning_types": {
+      "silk_overlap": 9,
+      "silk_over_copper": 33,
+      "lib_footprint_issues": 66
+    }
+  },
+  "source": {
+    "board_id": "fan_controller_fan_controller",
+    "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+    "raw_blob": "072fc9ab13ad4d39b19f3ee4acdad8c82223c302",
+    "raw_sha256": "39450c48bdfa861692edffd064018b825d80cd34e1ce052d28cfe064bd38734d",
+    "repository": "https://github.com/slightlynybbled/fan_controller",
+    "verified_license_url": "https://github.com/slightlynybbled/fan_controller/blob/27579e00bceebd0c3d04cc5c79289e0239c98e26/license.txt",
+    "license_revision": "27579e00bceebd0c3d04cc5c79289e0239c98e26",
+    "license_file": "license.txt"
+  },
+  "fidelity": {
+    "footprints": true,
+    "pads": true,
+    "outline": true,
+    "layers": true,
+    "nets": true
+  },
+  "gates": {
+    "fidelity": true,
+    "baseline_errors_zero": true
+  },
+  "gate_pass": true,
+  "selection": {
+    "job": "J1",
+    "tier": "hard",
+    "board_id": "fan_controller_fan_controller",
+    "why": "115 connections, 7.56 pads/cm\u00b2, 0.65mm pitch, 23 reference vias. Whole-board routing with clean human reference under original rules."
+  },
+  "sha256": {
+    "board.kicad_pcb": "c4e78eda74cae4e84526bd29971bc5f9134554080e49df7d3ead7eefb33e0ab1",
+    "board.kicad_pro": "b65a504ebcd06ba0068d044e224e0a8af23a9a4be128f4a5622369efc441652b",
+    "baseline-drc.json": "8d9d8cf16d0f512c233c4b3ad0af79beaa5af690e536c88f12e921f9af174c49",
+    "board.kicad_dru": "bbef6e119424cbf626d6fec0697069e203a9bde1d54f30517b179a0375f28b6b"
+  },
+  "utc": "2026-10-09T10:32:58.430370+00:00",
+  "correction": {
+    "source_fixture": "evidence/open-router-suite-2026-10-09/fixtures-v2/fan-controller-fan-controller/j1",
+    "record": "evidence/open-router-comparison-2026-10-09/correction-2026-10-12/fixture-proofs.json",
+    "changes": "zone UUIDs and study class-width rules only; baseline and hash metadata recomputed"
+  }
+}

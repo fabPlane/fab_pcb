@@ -1,0 +1,351 @@
+{
+  "router": "freerouting",
+  "status": "C3 final per-job settings; qualification on tuning fixtures only",
+  "jobs": {
+    "J1": {
+      "support": "yes",
+      "evidence": [
+        "../../../../runs/diagnostics/open-router-setup-c3-2026-10-09/README.md"
+      ],
+      "command": [
+        "/usr/bin/python3",
+        "{benchmark}/harness/dsn-engine-scoring-c2-v1.py",
+        "--router",
+        "freerouting",
+        "--work-dir",
+        "{work_dir}",
+        "--seed",
+        "{seed}",
+        "--cap-s",
+        "{cap_s}",
+        "--settings-file",
+        "{benchmark}/configs/settings/freerouting-c01-settings.json"
+      ],
+      "pre_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/dsn-path.py",
+          "export",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}"
+        ]
+      ],
+      "post_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/dsn-path.py",
+          "import",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}"
+        ]
+      ],
+      "settings": {
+        "max_passes": "100; reuse qualified CH340G baseline.",
+        "fanout": "Disabled to avoid below-minimum width fallback.",
+        "widths": "Project classes and J3 declared minima are exported identically for all three engines.",
+        "edge_and_hole": "Native project floors forwarded through supported settings.",
+        "zone_policy": "Native zone definition retained; native refill is a timed post step.",
+        "neckdown": "Disabled; full class width requested.",
+        "analytics": "Disabled (-da); isolate HOME/XDG.",
+        "java": "Use track B standalone JDK 25; C Temurin 25 fallback only if B is absent or still Java 21.",
+        "tuning_selection": "2: fewer valid-output vias",
+        "engine_candidate": "{\"label\": \"track-C baseline\", \"flags\": {}}; selected by shared contract, not a causal claim.",
+        "scoring_resources": "Whole machine; documented default parallelism; no routing cap; 3600s safety stop."
+      },
+      "seed_supported": false,
+      "freeze_status": "final; qualified on some/all tuning fixtures",
+      "candidate": "c01",
+      "candidate_settings": {
+        "label": "track-C baseline",
+        "flags": {}
+      },
+      "qualified": true,
+      "selection": {
+        "router": "freerouting",
+        "job": "J1",
+        "candidate": "c01",
+        "runs": 2,
+        "passes": 1,
+        "passing_fixtures": [
+          "evidence/open-router-suite-2026-10-09/fixtures/ch340g/j1"
+        ],
+        "valid_total_vias": 6,
+        "valid_total_length_mm": 261.0765893409004,
+        "default_distance": 0,
+        "setup_median_seconds": 14.0889133455,
+        "time_tiebreak_eligible": false,
+        "qualified": true,
+        "fully_qualified": false,
+        "deciding_step": "2: fewer valid-output vias",
+        "scope": "tuning only; supported-but-invalid results retained; qualification means at least one pass, not every fixture"
+      }
+    },
+    "J2": {
+      "support": "yes",
+      "evidence": [
+        "../../../../runs/diagnostics/open-router-setup-c3-2026-10-09/README.md"
+      ],
+      "command": [
+        "/usr/bin/python3",
+        "{benchmark}/harness/dsn-engine-scoring-c2-v1.py",
+        "--router",
+        "freerouting",
+        "--work-dir",
+        "{work_dir}",
+        "--seed",
+        "{seed}",
+        "--cap-s",
+        "{cap_s}",
+        "--settings-file",
+        "{benchmark}/configs/settings/freerouting-c01-settings.json"
+      ],
+      "pre_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/dsn-path.py",
+          "export",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}"
+        ]
+      ],
+      "post_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/dsn-path.py",
+          "import",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}"
+        ]
+      ],
+      "settings": {
+        "max_passes": "100; reuse qualified CH340G baseline.",
+        "fanout": "Disabled to avoid below-minimum width fallback.",
+        "widths": "Project classes and J3 declared minima are exported identically for all three engines.",
+        "edge_and_hole": "Native project floors forwarded through supported settings.",
+        "zone_policy": "Native zone definition retained; native refill is a timed post step.",
+        "neckdown": "Disabled; full class width requested.",
+        "analytics": "Disabled (-da); isolate HOME/XDG.",
+        "java": "Use track B standalone JDK 25; C Temurin 25 fallback only if B is absent or still Java 21.",
+        "tuning_selection": "5: closest defaults (time ineligible); incumbent if still tied",
+        "engine_candidate": "{\"label\": \"track-C baseline\", \"flags\": {}}; selected by shared contract, not a causal claim.",
+        "scoring_resources": "Whole machine; documented default parallelism; no routing cap; 3600s safety stop."
+      },
+      "seed_supported": false,
+      "freeze_status": "final; qualified on some/all tuning fixtures",
+      "candidate": "c01",
+      "candidate_settings": {
+        "label": "track-C baseline",
+        "flags": {}
+      },
+      "qualified": true,
+      "selection": {
+        "router": "freerouting",
+        "job": "J2",
+        "candidate": "c01",
+        "runs": 6,
+        "passes": 2,
+        "passing_fixtures": [
+          "evidence/open-router-suite-2026-10-09/fixtures/ch340g/j2-large",
+          "evidence/open-router-suite-2026-10-09/fixtures/ch340g/j2-small"
+        ],
+        "valid_total_vias": 19,
+        "valid_total_length_mm": 453.2038050468051,
+        "default_distance": 0,
+        "setup_median_seconds": 9.6512271895,
+        "time_tiebreak_eligible": false,
+        "qualified": true,
+        "fully_qualified": false,
+        "deciding_step": "5: closest defaults (time ineligible); incumbent if still tied",
+        "scope": "tuning only; supported-but-invalid results retained; qualification means at least one pass, not every fixture"
+      }
+    },
+    "J3": {
+      "support": "approximated",
+      "evidence": [
+        "../../../../runs/diagnostics/open-router-setup-c3-2026-10-09/README.md"
+      ],
+      "command": [
+        "/usr/bin/python3",
+        "{benchmark}/harness/dsn-engine-scoring-c2-v1.py",
+        "--router",
+        "freerouting",
+        "--work-dir",
+        "{work_dir}",
+        "--seed",
+        "{seed}",
+        "--cap-s",
+        "{cap_s}",
+        "--settings-file",
+        "{benchmark}/configs/settings/freerouting-c01-settings.json"
+      ],
+      "pre_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/dsn-path.py",
+          "export",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}"
+        ]
+      ],
+      "post_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/dsn-path.py",
+          "import",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}"
+        ]
+      ],
+      "settings": {
+        "max_passes": "100; reuse qualified CH340G baseline.",
+        "fanout": "Disabled to avoid below-minimum width fallback.",
+        "widths": "Project classes and J3 declared minima are exported identically for all three engines.",
+        "edge_and_hole": "Native project floors forwarded through supported settings.",
+        "zone_policy": "Native zone definition retained; native refill is a timed post step.",
+        "neckdown": "Disabled; full class width requested.",
+        "analytics": "Disabled (-da); isolate HOME/XDG.",
+        "java": "Use track B standalone JDK 25; C Temurin 25 fallback only if B is absent or still Java 21.",
+        "tuning_selection": "2: fewer valid-output vias",
+        "engine_candidate": "{\"label\": \"track-C baseline\", \"flags\": {}}; selected by shared contract, not a causal claim.",
+        "pairs": "No documented coupled-pair CLI in pinned settings; ordinary per-class routing of both halves; approximated support.",
+        "scoring_resources": "Whole machine; documented default parallelism; no routing cap; 3600s safety stop."
+      },
+      "seed_supported": false,
+      "freeze_status": "final; qualified on some/all tuning fixtures",
+      "candidate": "c01",
+      "candidate_settings": {
+        "label": "track-C baseline",
+        "flags": {}
+      },
+      "qualified": true,
+      "selection": {
+        "router": "freerouting",
+        "job": "J3",
+        "candidate": "c01",
+        "runs": 2,
+        "passes": 2,
+        "passing_fixtures": [
+          "evidence/open-router-suite-2026-10-09/fixtures/ch340g/j3",
+          "evidence/open-router-suite-2026-10-09/fixtures-teensy-v2/j3"
+        ],
+        "valid_total_vias": 6,
+        "valid_total_length_mm": 1084.7701577308108,
+        "default_distance": 0,
+        "setup_median_seconds": 15.2747508275,
+        "time_tiebreak_eligible": false,
+        "qualified": true,
+        "fully_qualified": true,
+        "deciding_step": "2: fewer valid-output vias",
+        "scope": "tuning only; supported-but-invalid results retained; qualification means at least one pass, not every fixture"
+      },
+      "pair_documentation": {
+        "section": "docs/settings.md: router Section and Command Line Arguments",
+        "snapshot": "../../../../evidence/open-router-setup-c3-2026-10-09/controls/freerouting-settings.md",
+        "url": "https://github.com/freerouting/freerouting/blob/b647a2f824cfbc54bc4dcaee71b03b7cd945eb76/docs/settings.md",
+        "options": "No documented coupled-pair CLI in pinned settings; ordinary per-class routing of both halves; approximated support."
+      },
+      "pair_tuning": "none: fixed documented pair options for every candidate; CH340G J3 contains an endpoint-declared pair with generic net names; Aquarius-only scored pair evidence remains future work"
+    },
+    "J4": {
+      "support": "approximated",
+      "evidence": [
+        "../../../../runs/diagnostics/open-router-setup-c3-2026-10-09/README.md"
+      ],
+      "command": [
+        "/usr/bin/python3",
+        "{benchmark}/harness/dsn-engine-scoring-c2-v1.py",
+        "--router",
+        "freerouting",
+        "--work-dir",
+        "{work_dir}",
+        "--seed",
+        "{seed}",
+        "--cap-s",
+        "{cap_s}",
+        "--settings-file",
+        "{benchmark}/configs/settings/freerouting-c01-settings.json"
+      ],
+      "pre_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/dsn-path.py",
+          "export",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}"
+        ]
+      ],
+      "post_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/dsn-path.py",
+          "import",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}"
+        ]
+      ],
+      "settings": {
+        "max_passes": "100; reuse qualified CH340G baseline.",
+        "fanout": "Disabled to avoid below-minimum width fallback.",
+        "widths": "Project classes and J3 declared minima are exported identically for all three engines.",
+        "edge_and_hole": "Native project floors forwarded through supported settings.",
+        "zone_policy": "Native zone definition retained; native refill is a timed post step.",
+        "neckdown": "Disabled; full class width requested.",
+        "analytics": "Disabled (-da); isolate HOME/XDG.",
+        "java": "Use track B standalone JDK 25; C Temurin 25 fallback only if B is absent or still Java 21.",
+        "tuning_selection": "default fallback: no candidate passes; nearest documented defaults, then incumbent",
+        "engine_candidate": "{\"label\": \"track-C baseline\", \"flags\": {}}; selected by shared contract, not a causal claim.",
+        "scoring_resources": "Whole machine; documented default parallelism; no routing cap; 3600s safety stop."
+      },
+      "seed_supported": false,
+      "freeze_status": "final; unqualified",
+      "candidate": "c01",
+      "candidate_settings": {
+        "label": "track-C baseline",
+        "flags": {}
+      },
+      "qualified": false,
+      "selection": {
+        "router": "freerouting",
+        "job": "J4",
+        "candidate": "c01",
+        "runs": 1,
+        "passes": 0,
+        "passing_fixtures": [],
+        "valid_total_vias": 0,
+        "valid_total_length_mm": 0,
+        "default_distance": 0,
+        "setup_median_seconds": 18.117580118,
+        "time_tiebreak_eligible": false,
+        "qualified": false,
+        "fully_qualified": false,
+        "deciding_step": "default fallback: no candidate passes; nearest documented defaults, then incumbent",
+        "scope": "tuning only; supported-but-invalid results retained; qualification means at least one pass, not every fixture"
+      }
+    }
+  },
+  "selection_record": "../../../../evidence/open-router-setup-c3-2026-10-09/selections.json"
+}

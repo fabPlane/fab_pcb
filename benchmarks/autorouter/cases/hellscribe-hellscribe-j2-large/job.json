@@ -1,0 +1,217 @@
+{
+  "job": "J2",
+  "role": "scored",
+  "tier": "medium",
+  "scope": "large",
+  "target_nets": [
+    "GND",
+    "Net-(Q2-Pad1)",
+    "Net-(Q3-Pad1)",
+    "Net-(Q4-Pad1)",
+    "Net-(Q5-Pad1)",
+    "Net-(Q6-Pad1)",
+    "Net-(Q7-Pad1)",
+    "Net-(Q8-Pad1)",
+    "Net-(Q9-Pad1)",
+    "Net-(R1-Pad2)",
+    "VDD"
+  ],
+  "target_footprint": "U2",
+  "target_connections": 31,
+  "power_nets": [],
+  "pairs": [],
+  "kept_zones": [],
+  "rules": {
+    "classes": [
+      {
+        "name": "Default",
+        "clearance": 0.2,
+        "track_width": 0.25,
+        "via_diameter": 0.6,
+        "via_drill": 0.4,
+        "diff_pair_width": 0.25,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "nets": [
+          "+12V",
+          "GND",
+          "Net-(C2-Pad2)",
+          "Net-(C3-Pad1)",
+          "Net-(C3-Pad2)",
+          "Net-(C4-Pad2)",
+          "Net-(C5-Pad2)",
+          "Net-(C6-Pad2)",
+          "Net-(D1-Pad1)",
+          "Net-(D1-Pad2)",
+          "Net-(D10-Pad1)",
+          "Net-(D10-Pad2)",
+          "Net-(D11-Pad1)",
+          "Net-(D11-Pad2)",
+          "Net-(D13-Pad1)",
+          "Net-(D13-Pad2)",
+          "Net-(D15-Pad1)",
+          "Net-(D15-Pad2)",
+          "Net-(D3-Pad1)",
+          "Net-(D3-Pad2)",
+          "Net-(D5-Pad1)",
+          "Net-(D5-Pad2)",
+          "Net-(D7-Pad1)",
+          "Net-(D7-Pad2)",
+          "Net-(D9-Pad2)",
+          "Net-(J1-Pad3)",
+          "Net-(J1-Pad4)",
+          "Net-(Q1-Pad1)",
+          "Net-(Q1-Pad3)",
+          "Net-(Q2-Pad1)",
+          "Net-(Q3-Pad1)",
+          "Net-(Q4-Pad1)",
+          "Net-(Q5-Pad1)",
+          "Net-(Q6-Pad1)",
+          "Net-(Q7-Pad1)",
+          "Net-(Q8-Pad1)",
+          "Net-(Q9-Pad1)",
+          "Net-(R1-Pad2)",
+          "Net-(R3-Pad1)",
+          "Net-(U2-Pad12)",
+          "VDD"
+        ]
+      }
+    ],
+    "clearance_mm": 0.0,
+    "copper_to_edge_mm": 0.5,
+    "copper_to_hole_mm": 0.25,
+    "hole_to_hole_mm": 0.25,
+    "minimum_track_mm": 0.2,
+    "minimum_via_mm": 0.4,
+    "minimum_annular_mm": 0.1,
+    "provenance": "legacy board net_class and stock pcbnew design settings; no human-routing fit"
+  },
+  "baseline": {
+    "errors": 0,
+    "warnings": 53,
+    "opens": 14,
+    "error_types": {},
+    "warning_types": {
+      "silk_overlap": 2,
+      "silk_over_copper": 2,
+      "lib_footprint_issues": 49
+    }
+  },
+  "selection": {
+    "job": "J2",
+    "tier": "medium",
+    "scope": "large",
+    "board_id": "HellScribe_HellScribe",
+    "target_nets": [
+      "GND",
+      "Net-(Q2-Pad1)",
+      "Net-(Q3-Pad1)",
+      "Net-(Q4-Pad1)",
+      "Net-(Q5-Pad1)",
+      "Net-(Q6-Pad1)",
+      "Net-(Q7-Pad1)",
+      "Net-(Q8-Pad1)",
+      "Net-(Q9-Pad1)",
+      "Net-(R1-Pad2)",
+      "VDD"
+    ],
+    "target_footprint": "U2",
+    "connections": 31,
+    "congestion": {
+      "scope": "large",
+      "footprint": "U2",
+      "value": "CD4022",
+      "library_id": "SMD_Packages:SO-16-N",
+      "target_nets": [
+        "GND",
+        "Net-(Q2-Pad1)",
+        "Net-(Q3-Pad1)",
+        "Net-(Q4-Pad1)",
+        "Net-(Q5-Pad1)",
+        "Net-(Q6-Pad1)",
+        "Net-(Q7-Pad1)",
+        "Net-(Q8-Pad1)",
+        "Net-(Q9-Pad1)",
+        "Net-(R1-Pad2)",
+        "VDD"
+      ],
+      "connections": 31,
+      "per_net_connections": {
+        "GND": 17,
+        "Net-(Q2-Pad1)": 1,
+        "Net-(Q3-Pad1)": 1,
+        "Net-(Q4-Pad1)": 1,
+        "Net-(Q5-Pad1)": 1,
+        "Net-(Q6-Pad1)": 1,
+        "Net-(Q7-Pad1)": 1,
+        "Net-(Q8-Pad1)": 1,
+        "Net-(Q9-Pad1)": 1,
+        "Net-(R1-Pad2)": 4,
+        "VDD": 2
+      },
+      "excluded_ground_supply_incident": [
+        "GND",
+        "VDD"
+      ],
+      "bbox_mm": [
+        39.52748,
+        101.219,
+        141.29,
+        123.444
+      ],
+      "kept_copper_in_bbox": 223,
+      "kept_segments_in_bbox": 165,
+      "kept_vias_in_bbox": 58,
+      "nearby_kept_copper_2mm": 0,
+      "arc_chord_proxy_items": 0,
+      "seed_order": "b4c975b61b4e3730e1c7eadaa9a79fd672b40cbfa7fea3e35b83b3a8c20f8671"
+    },
+    "why": "U2 (CD4022): all connected nets of one moved connector/IC; its entire incident group rerouted"
+  },
+  "source": {
+    "board_id": "HellScribe_HellScribe",
+    "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+    "raw_blob": "9b5de803ced7158936d7a86a276a186acb83696c",
+    "raw_sha256": "7b6d205fd5c304c74bf716e71aff95fbb7b0f196ab2e1ad5efec9726a03a74f2",
+    "repository": "https://github.com/devttys0/HellScribe",
+    "verified_license_url": "https://github.com/devttys0/HellScribe/blob/c9f7c3c3433a882272c53421727428b486a25bdf/LICENSE",
+    "license_revision": "c9f7c3c3433a882272c53421727428b486a25bdf",
+    "license_file": "LICENSE"
+  },
+  "fidelity": {
+    "footprints": true,
+    "pads": true,
+    "outline": true,
+    "layers": true,
+    "nets": true
+  },
+  "gates": {
+    "native_fidelity": true,
+    "baseline_errors_zero": true,
+    "kept_copper_exact": true,
+    "target_copper_absent": true,
+    "opens_in_scope": true,
+    "source_zones_preserved": true
+  },
+  "gate_checks": {
+    "native_fidelity": true,
+    "baseline_errors_zero": true,
+    "kept_copper_exact": true,
+    "target_copper_absent": true,
+    "opens_in_scope": true,
+    "source_zones_preserved": true
+  },
+  "gate_pass": true,
+  "sha256": {
+    "board.kicad_pcb": "49ad1819915d57020829ebb6900fdd94f1a133a0a26d849f450bc30a9d565913",
+    "board.kicad_pro": "ab1c79ea30f29d92047e094a526faaf2e0f335769e81667850f1ec9a63651950",
+    "baseline-drc.json": "a3c84276aa7b6919e1a10f469abd9c454898c0611e499cfbfe135937719e2325",
+    "board.kicad_dru": "bbef6e119424cbf626d6fec0697069e203a9bde1d54f30517b179a0375f28b6b"
+  },
+  "utc": "2026-10-09T10:52:42.235047+00:00",
+  "correction": {
+    "source_fixture": "evidence/open-router-suite-2026-10-09/fixtures-j2-v3/hellscribe-hellscribe/j2-large",
+    "record": "evidence/open-router-comparison-2026-10-09/correction-2026-10-12/fixture-proofs.json",
+    "changes": "zone UUIDs and study class-width rules only; baseline and hash metadata recomputed"
+  }
+}

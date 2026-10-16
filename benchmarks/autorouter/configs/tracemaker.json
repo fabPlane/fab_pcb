@@ -1,0 +1,448 @@
+{
+  "router": "tracemaker",
+  "status": "frozen D3 per-job settings; corrected inputs; pair settings documented and untuned",
+  "version": "0.9.0",
+  "source_commit": "24c847772e57ea8888e2cfe4bbf1aa00666390a4",
+  "jobs": {
+    "J1": {
+      "support": "yes",
+      "evidence": [
+        "../../../../evidence/open-router-setup-d3-2026-10-09/selection.json",
+        "../../../diagnostics/open-router-setup-d3-2026-10-09/README.md"
+      ],
+      "command": [
+        "/usr/bin/python3",
+        "{benchmark}/harness/native-router-path-scoring-v3.py",
+        "--router",
+        "tracemaker",
+        "--input-dir",
+        "{input_dir}",
+        "--work-dir",
+        "{work_dir}",
+        "--output-pcb",
+        "{output_pcb}",
+        "route",
+        "--seed",
+        "{seed}",
+        "--cap-s",
+        "{cap_s}"
+      ],
+      "pre_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/native-router-path-scoring-v3.py",
+          "--router",
+          "tracemaker",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}",
+          "prepare"
+        ]
+      ],
+      "post_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/native-router-path-scoring-v3.py",
+          "--router",
+          "tracemaker",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}",
+          "finish"
+        ]
+      ],
+      "settings": {
+        "gpu": {
+          "value": false,
+          "reason": "CPU-only comparison."
+        },
+        "knowledge_base": {
+          "value": false,
+          "reason": "No learned state between runs."
+        },
+        "via_cost_mm": {
+          "value": 3.0,
+          "reason": "Contract selection: vias."
+        },
+        "power_width_scope": {
+          "value": "J3 only",
+          "reason": "Explicit task minimums apply only to J3; native rules retained elsewhere."
+        },
+        "scoring_resources": "Whole machine; documented default parallelism; no routing cap; 3600s safety stop."
+      },
+      "seed_supported": true,
+      "env": {
+        "OPEN_ROUTER_TM_VIA_COST_MM": "3"
+      },
+      "limitations": [
+        "Per-input pad fidelity gate required."
+      ],
+      "qualification": {
+        "router": "tracemaker",
+        "job": "J1",
+        "candidate": "baseline",
+        "passes": 2,
+        "failures": 0,
+        "unsupported": 0,
+        "fixtures": 2,
+        "vias": 18,
+        "length_mm": 925.1053823280962,
+        "records": [
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-baseline-ch340g-j1-01/tracemaker/record.json",
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-baseline-teensy-v2-j1-01/tracemaker/record.json"
+        ],
+        "warnings_on_passes": [
+          0,
+          0
+        ],
+        "qualified": true,
+        "deciding_step": "vias",
+        "pair_qualified": null
+      }
+    },
+    "J2": {
+      "support": "approximated",
+      "evidence": [
+        "../../../../evidence/open-router-setup-d3-2026-10-09/selection.json",
+        "../../../diagnostics/open-router-setup-d3-2026-10-09/README.md"
+      ],
+      "command": [
+        "/usr/bin/python3",
+        "{benchmark}/harness/native-router-path-scoring-v3.py",
+        "--router",
+        "tracemaker",
+        "--input-dir",
+        "{input_dir}",
+        "--work-dir",
+        "{work_dir}",
+        "--output-pcb",
+        "{output_pcb}",
+        "route",
+        "--seed",
+        "{seed}",
+        "--cap-s",
+        "{cap_s}"
+      ],
+      "pre_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/native-router-path-scoring-v3.py",
+          "--router",
+          "tracemaker",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}",
+          "prepare"
+        ]
+      ],
+      "post_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/native-router-path-scoring-v3.py",
+          "--router",
+          "tracemaker",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}",
+          "finish"
+        ]
+      ],
+      "settings": {
+        "gpu": {
+          "value": false,
+          "reason": "CPU-only comparison."
+        },
+        "knowledge_base": {
+          "value": false,
+          "reason": "No learned state between runs."
+        },
+        "via_cost_mm": {
+          "value": 3.0,
+          "reason": "Contract selection: vias."
+        },
+        "power_width_scope": {
+          "value": "J3 only",
+          "reason": "Explicit task minimums apply only to J3; native rules retained elsewhere."
+        },
+        "scoring_resources": "Whole machine; documented default parallelism; no routing cap; 3600s safety stop."
+      },
+      "seed_supported": true,
+      "env": {
+        "OPEN_ROUTER_TM_VIA_COST_MM": "3"
+      },
+      "limitations": [
+        "Per-input pad fidelity gate required."
+      ],
+      "qualification": {
+        "router": "tracemaker",
+        "job": "J2",
+        "candidate": "baseline",
+        "passes": 6,
+        "failures": 0,
+        "unsupported": 0,
+        "fixtures": 6,
+        "vias": 60,
+        "length_mm": 2718.968439177199,
+        "records": [
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-baseline-ch340g-j2-large-01/tracemaker/record.json",
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-baseline-ch340g-j2-medium-01/tracemaker/record.json",
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-baseline-ch340g-j2-small-01/tracemaker/record.json",
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-baseline-teensy-v2-j2-large-01/tracemaker/record.json",
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-baseline-teensy-v2-j2-medium-01/tracemaker/record.json",
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-baseline-teensy-v2-j2-small-01/tracemaker/record.json"
+        ],
+        "warnings_on_passes": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "qualified": true,
+        "deciding_step": "vias",
+        "pair_qualified": null
+      }
+    },
+    "J3": {
+      "support": "yes",
+      "evidence": [
+        "../../../../evidence/open-router-setup-d3-2026-10-09/selection.json",
+        "../../../diagnostics/open-router-setup-d3-2026-10-09/README.md"
+      ],
+      "command": [
+        "/usr/bin/python3",
+        "{benchmark}/harness/native-router-path-scoring-v3.py",
+        "--router",
+        "tracemaker",
+        "--input-dir",
+        "{input_dir}",
+        "--work-dir",
+        "{work_dir}",
+        "--output-pcb",
+        "{output_pcb}",
+        "route",
+        "--seed",
+        "{seed}",
+        "--cap-s",
+        "{cap_s}"
+      ],
+      "pre_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/native-router-path-scoring-v3.py",
+          "--router",
+          "tracemaker",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}",
+          "prepare"
+        ]
+      ],
+      "post_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/native-router-path-scoring-v3.py",
+          "--router",
+          "tracemaker",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}",
+          "finish"
+        ]
+      ],
+      "settings": {
+        "gpu": {
+          "value": false,
+          "reason": "CPU-only comparison."
+        },
+        "knowledge_base": {
+          "value": false,
+          "reason": "No learned state between runs."
+        },
+        "pair_interface": {
+          "value": "name-discovery",
+          "reason": "Pinned CLI discovers partners by name; declared arbitrary pairs are unsupported."
+        },
+        "via_cost_mm": {
+          "value": 3.0,
+          "reason": "Contract selection: defaults after time tie."
+        },
+        "power_width_scope": {
+          "value": "J3 only",
+          "reason": "Explicit task minimums apply only to J3; native rules retained elsewhere."
+        },
+        "pair_options": {
+          "value": "documented, untuned defaults with frozen width/gap",
+          "reason": "Amendment 4; no supported named tuning pair."
+        },
+        "scoring_resources": "Whole machine; documented default parallelism; no routing cap; 3600s safety stop."
+      },
+      "seed_supported": true,
+      "env": {
+        "OPEN_ROUTER_TM_VIA_COST_MM": "3"
+      },
+      "limitations": [
+        "Per-input pad fidelity gate required.",
+        "Requires engine-recognized partner names; no net renaming or mapping adapter on suite inputs.",
+        "Original CH340G anonymous USB pair is not supported; both negative discovery gates retained.",
+        "Anonymous CH340G pair unsupported; Teensy checks power only. No pair tuning or paired qualification. Scored pair settings are documented and untuned on one hard board (Aquarius)."
+      ],
+      "pair_documentation": {
+        "url": "https://github.com/DingoOz/TraceMaker/blob/24c847772e57ea8888e2cfe4bbf1aa00666390a4/docs/05-routing.md",
+        "section": "15. Differential pairs, version 2 (M12, 2026-10-05)",
+        "sha256": "97be4cf25c411578b5872ba76ca8c141d365ee851ff60d18dfbe176a6e1cbe46",
+        "captured_document": "../../../../evidence/open-router-setup-d3-2026-10-09/tracemaker-pair-documentation.md",
+        "tuned": false,
+        "policy": "Name discovery; fixture/native width and gap; all other pair options at release defaults. KRT paired stage then protected single-ended stage; TM --diff-pairs; no optional skew target."
+      },
+      "qualification": {
+        "router": "tracemaker",
+        "job": "J3",
+        "candidate": "baseline",
+        "passes": 1,
+        "failures": 0,
+        "unsupported": 1,
+        "fixtures": 2,
+        "vias": 9,
+        "length_mm": 705.3175213252866,
+        "records": [
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-baseline-ch340g-j3-01/tracemaker/record.json",
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-baseline-teensy-v2-j3-01/tracemaker/record.json"
+        ],
+        "warnings_on_passes": [
+          0
+        ],
+        "median_seconds": 15.093919257,
+        "max_repeat_range_seconds": 10.352714708000002,
+        "qualified": true,
+        "deciding_step": "defaults after time tie",
+        "pair_qualified": false
+      }
+    },
+    "J4": {
+      "support": "yes",
+      "evidence": [
+        "../../../../evidence/open-router-setup-d3-2026-10-09/selection.json",
+        "../../../diagnostics/open-router-setup-d3-2026-10-09/README.md"
+      ],
+      "command": [
+        "/usr/bin/python3",
+        "{benchmark}/harness/native-router-path-scoring-v3.py",
+        "--router",
+        "tracemaker",
+        "--input-dir",
+        "{input_dir}",
+        "--work-dir",
+        "{work_dir}",
+        "--output-pcb",
+        "{output_pcb}",
+        "route",
+        "--seed",
+        "{seed}",
+        "--cap-s",
+        "{cap_s}"
+      ],
+      "pre_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/native-router-path-scoring-v3.py",
+          "--router",
+          "tracemaker",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}",
+          "prepare"
+        ]
+      ],
+      "post_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/native-router-path-scoring-v3.py",
+          "--router",
+          "tracemaker",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}",
+          "finish"
+        ]
+      ],
+      "settings": {
+        "gpu": {
+          "value": false,
+          "reason": "CPU-only comparison."
+        },
+        "knowledge_base": {
+          "value": false,
+          "reason": "No learned state between runs."
+        },
+        "soft_zones": {
+          "value": true,
+          "reason": "Allow native refill after routing while retaining zone definitions."
+        },
+        "via_cost_mm": {
+          "value": 3.0,
+          "reason": "Contract selection: defaults (no pass). No passing candidate; closest-default baseline unqualified."
+        },
+        "power_width_scope": {
+          "value": "J3 only",
+          "reason": "Explicit task minimums apply only to J3; native rules retained elsewhere."
+        },
+        "scoring_resources": "Whole machine; documented default parallelism; no routing cap; 3600s safety stop."
+      },
+      "seed_supported": true,
+      "env": {
+        "OPEN_ROUTER_TM_VIA_COST_MM": "3"
+      },
+      "limitations": [
+        "Per-input pad fidelity gate required."
+      ],
+      "qualification": {
+        "router": "tracemaker",
+        "job": "J4",
+        "candidate": "baseline",
+        "passes": 0,
+        "failures": 1,
+        "unsupported": 0,
+        "fixtures": 1,
+        "vias": null,
+        "length_mm": null,
+        "records": [
+          "evidence/open-router-setup-d3-2026-10-09/runs/d3-baseline-teensy-v2-j4-01/tracemaker/record.json"
+        ],
+        "warnings_on_passes": [],
+        "qualified": false,
+        "deciding_step": "defaults (no pass)",
+        "pair_qualified": null
+      }
+    }
+  },
+  "support_gate_result": "{work_dir}/support-gate.json",
+  "config_scope": "Eleven tuning-ready-v2 cases only; no scored runs",
+  "tuning_ready_sha256": "7ecde5ceeb595b9011ca4be1a0e741872dda05e35ae778b742ce32afd1496c4d",
+  "frozen_helper_sha256": "5cbf78fb6157e64f08d46bc2f765c2a1a0450a510ba89d6d87e1b5b1a4492fc8"
+}
