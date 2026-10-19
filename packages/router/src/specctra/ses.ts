@@ -103,6 +103,10 @@ export function parseSes(text: string): Session {
         const scaled = Math.round(value * nmPerUnit);
         if (!Number.isFinite(value) || !Number.isSafeInteger(scaled) || scaled <= 0)
           throw new SyntaxError("invalid session circle diameter");
+        // NewVia has one diameter for the entire barrel. Taking the last
+        // layer shape would silently enlarge or shrink copper on other layers.
+        if (diameter !== 0 && diameter !== scaled)
+          throw new SyntaxError("unsupported session via layer diameters");
         diameter = scaled;
       }
     }

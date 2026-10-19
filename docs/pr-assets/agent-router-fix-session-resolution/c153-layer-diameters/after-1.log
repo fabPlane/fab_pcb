@@ -1,0 +1,13 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+(pass) session via layer diameters > rejects nonuniform session via layer diameters 600/800 [0.43ms]
+(pass) session via layer diameters > rejects nonuniform session via layer diameters 800/600 [0.04ms]
+(pass) session via layer diameters > preserves uniform session via layer diameter 600 [0.30ms]
+(pass) session via layer diameters > preserves uniform session via layer diameter 800 [0.06ms]
+
+ 4 pass
+ 85 filtered out
+ 0 fail
+ 4 expect() calls
+Ran 4 tests across 1 file. [107.00ms]

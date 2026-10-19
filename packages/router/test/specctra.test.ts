@@ -475,3 +475,22 @@ describe("session via distinct layer span", () => {
     expect(sesToItems(session, twoNetBoard()).vias[0]!.layers).toEqual(twoNetBoard().copperLayers.map(l => l.id));
   });
 });
+
+describe("session via layer diameters", () => {
+  for (const diameters of [[600, 800], [800, 600]]) {
+    test(`rejects nonuniform session via layer diameters ${diameters.join("/")}`, () => {
+      const session = `(session s (routes (library_out (padstack V
+        (shape (circle F.Cu ${diameters[0]})) (shape (circle B.Cu ${diameters[1]}))))
+        (network_out (net A (via V 1000 -1000)))))`;
+      expect(() => sesToItems(parseSes(session), twoNetBoard())).toThrow(SyntaxError);
+    });
+  }
+  for (const diameter of [600, 800]) {
+    test(`preserves uniform session via layer diameter ${diameter}`, () => {
+      const session = parseSes(`(session s (routes (library_out (padstack V
+        (shape (circle F.Cu ${diameter})) (shape (circle B.Cu ${diameter}))))
+        (network_out (net A (via V 1000 -1000)))))`);
+      expect(sesToItems(session, twoNetBoard()).vias[0]!.diameter).toBe(diameter * 1000);
+    });
+  }
+});

@@ -1,0 +1,89 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+480 |   for (const diameters of [[600, 800], [800, 600]]) {
+481 |     test(`rejects nonuniform session via layer diameters ${diameters.join("/")}`, () => {
+482 |       const session = `(session s (routes (library_out (padstack V
+483 |         (shape (circle F.Cu ${diameters[0]})) (shape (circle B.Cu ${diameters[1]}))))
+484 |         (network_out (net A (via V 1000 -1000)))))`;
+485 |       expect(() => sesToItems(parseSes(session), twoNetBoard())).toThrow(SyntaxError);
+                                                                       ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 1000000,
+        y: 1000000,
+      },
+      diameter: 800000,
+      drill: 400000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:485:66)
+(fail) session via layer diameters > rejects nonuniform session via layer diameters 600/800 [0.69ms]
+480 |   for (const diameters of [[600, 800], [800, 600]]) {
+481 |     test(`rejects nonuniform session via layer diameters ${diameters.join("/")}`, () => {
+482 |       const session = `(session s (routes (library_out (padstack V
+483 |         (shape (circle F.Cu ${diameters[0]})) (shape (circle B.Cu ${diameters[1]}))))
+484 |         (network_out (net A (via V 1000 -1000)))))`;
+485 |       expect(() => sesToItems(parseSes(session), twoNetBoard())).toThrow(SyntaxError);
+                                                                       ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 1000000,
+        y: 1000000,
+      },
+      diameter: 600000,
+      drill: 400000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:485:66)
+(fail) session via layer diameters > rejects nonuniform session via layer diameters 800/600 [0.12ms]
+(pass) session via layer diameters > preserves uniform session via layer diameter 600 [0.07ms]
+(pass) session via layer diameters > preserves uniform session via layer diameter 800 [0.02ms]
+
+ 2 pass
+ 85 filtered out
+ 2 fail
+ 4 expect() calls
+Ran 4 tests across 1 file. [120.00ms]
