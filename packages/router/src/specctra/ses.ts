@@ -47,7 +47,12 @@ const UNIT_NM: Record<string, number> = { um: 1_000, mm: 1_000_000, cm: 10_000_0
 
 /** `(resolution um 10)` -> 100 nm per unit. */
 export function resolutionToNm(res: SExpr[] | undefined): number {
-  const [unit, count] = atoms(res);
+  // Resolution operands are positional. Filtering nested lists can silently
+  // replace an explicit scale with a default and resize all imported copper.
+  if (res && (res.length > 3 || res.slice(1).some((v) => typeof v !== "string")))
+    throw new SyntaxError("invalid session resolution operands");
+  const unit = res?.[1] as string | undefined;
+  const count = res?.[2] as string | undefined;
   const name = unit ?? "um";
   if (!Object.hasOwn(UNIT_NM, name)) throw new SyntaxError(`unsupported session resolution unit: ${name}`);
   const n = Number(count ?? "1");

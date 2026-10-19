@@ -630,3 +630,17 @@ describe("session wire path multiplicity", () => {
     expect(session.wires).toHaveLength(0);
   });
 });
+
+describe("session resolution operand structure", () => {
+  for (const resolution of ["(resolution um (count 10))", "(resolution (unit um) 10)", "(resolution um 10 100)"]) {
+    test(`rejects malformed resolution operands: ${resolution}`, () => {
+      expect(() => parseSes(`(session s (routes ${resolution} (network_out (net A
+        (wire (path F.Cu 250 0 0 1000 0))))))`)).toThrow(SyntaxError);
+    });
+  }
+  test("preserves omitted resolution defaults and explicit positional scales", () => {
+    expect(resolutionToNm(undefined)).toBe(1000);
+    expect(resolutionToNm(["resolution", "um"])).toBe(1000);
+    expect(resolutionToNm(["resolution", "um", "10"])).toBe(100);
+  });
+});

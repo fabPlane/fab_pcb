@@ -1,0 +1,87 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+633 | 
+634 | describe("session resolution operand structure", () => {
+635 |   for (const resolution of ["(resolution um (count 10))", "(resolution (unit um) 10)", "(resolution um 10 100)"]) {
+636 |     test(`rejects malformed resolution operands: ${resolution}`, () => {
+637 |       expect(() => parseSes(`(session s (routes ${resolution} (network_out (net A
+638 |         (wire (path F.Cu 250 0 0 1000 0))))))`)).toThrow(SyntaxError);
+                                                       ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 1000,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: 250000,
+      points: [
+        {
+          x: 0,
+          y: -0,
+        }, {
+          x: 1000000,
+          y: -0,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:638:50)
+(fail) session resolution operand structure > rejects malformed resolution operands: (resolution um (count 10)) [0.59ms]
+(pass) session resolution operand structure > rejects malformed resolution operands: (resolution (unit um) 10) [0.03ms]
+633 | 
+634 | describe("session resolution operand structure", () => {
+635 |   for (const resolution of ["(resolution um (count 10))", "(resolution (unit um) 10)", "(resolution um 10 100)"]) {
+636 |     test(`rejects malformed resolution operands: ${resolution}`, () => {
+637 |       expect(() => parseSes(`(session s (routes ${resolution} (network_out (net A
+638 |         (wire (path F.Cu 250 0 0 1000 0))))))`)).toThrow(SyntaxError);
+                                                       ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: 25000,
+      points: [
+        {
+          x: 0,
+          y: -0,
+        }, {
+          x: 100000,
+          y: -0,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:638:50)
+(fail) session resolution operand structure > rejects malformed resolution operands: (resolution um 10 100) [0.07ms]
+(pass) session resolution operand structure > preserves omitted resolution defaults and explicit positional scales [0.03ms]
+
+ 2 pass
+ 117 filtered out
+ 2 fail
+ 6 expect() calls
+Ran 4 tests across 1 file. [145.00ms]
