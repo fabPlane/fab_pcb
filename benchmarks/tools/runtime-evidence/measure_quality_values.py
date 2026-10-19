@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
-from repeat_identity import quality_values
+from repeat_identity import quality_values, batch_identities
 
 
 def controls():
@@ -27,9 +27,13 @@ def measure(output):
     rows = []
     for name, field, value, valid in controls():
         for repeat in range(3):
-            run = dict(exit={'state': 'completed'}, quality_validation='native-drc',
+            run = dict(fixture={'id': 'control'}, system={'cpu_name': 'control-cpu'},
+                       exit={'state': 'completed'}, quality_validation='native-drc',
                        quality=dict(completion_rate=1, unrouted_connections=0, drc_errors=0))
             run['quality'][field] = value
+            # Execute the previous identity admission boundary; it does not
+            # inspect quality. Numeric admission is added after this boundary.
+            batch_identities([copy.deepcopy(run) for _ in range(3)])
             try:
                 quality_values(copy.deepcopy(run))
                 accepted = True
