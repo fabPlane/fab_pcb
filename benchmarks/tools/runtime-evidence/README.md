@@ -68,3 +68,8 @@ CPU) pass per-backend admission but fail batch admission: 9 accepted before,
 0 after. Three unchanged batches remain accepted. Every batch has three backends
 with three repeats each. This is an opt-in evidence utility; frozen suite,
 adapters, ranking and caches are unchanged. No routing gain is claimed.
+
+The CPU field is a model/name string, not a physical-host identifier. Matching
+names cannot establish that runs used the same physical machine. Run provenance
+records the host separately; these constructed controls only exercise the stored
+fixture and CPU fields.
