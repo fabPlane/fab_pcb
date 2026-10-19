@@ -24,6 +24,7 @@
  * `RouteResult` for the kicad mode carries no tracks (KiCad already created them) and reports the
  * importer's counts in `log`; the bench measures completion with `GetRatsnest` in both modes.
  */
+import { runOwnedCommand } from "./owned-command";
 import { existsSync } from "node:fs";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -289,7 +290,7 @@ export async function runFreerouting(
     extraArgs?: string[];
     maxTimeMs?: number;
     threads?: number;
-    /** Kills the process (SIGTERM, SIGKILL after 5 s) when it fires. */
+    /** Stops the owned process group immediately when it fires. */
     signal?: AbortSignal;
   },
   progress?: (p: RouteProgress) => void,
@@ -309,74 +310,52 @@ export async function runFreerouting(
     "--gui.enabled=false",
     ...(opts.extraArgs ?? []),
   ];
-  const proc = Bun.spawn([opts.java, ...args], { stdout: "pipe", stderr: "pipe", cwd: dirname(dsnPath) });
   const log: string[] = [];
   let lastEvent: FreeroutingEvent | undefined;
-  let timedOut = false;
-  let cancelled = false;
   const total = { unrouted: 0 };
-  const kill = () => {
-    proc.kill("SIGTERM");
-    setTimeout(() => {
-      if (proc.exitCode === null && proc.signalCode === null) proc.kill("SIGKILL");
-    }, 5_000).unref?.();
+  const lineReceived = (line: string) => {
+    if (!line) return;
+    log.push(line);
+    const ev = parseFreeroutingLine(line);
+    if (ev.kind === "other") return;
+    lastEvent = ev;
+    if (ev.kind === "stage" && /stage started/.test(line) && ev.unrouted !== undefined)
+      total.unrouted = Math.max(total.unrouted, ev.unrouted);
+    if (ev.kind === "pass" || ev.kind === "optimizer") {
+      const routed = total.unrouted - (ev.unrouted ?? 0);
+      progress?.({
+        phase: ev.kind === "pass" ? `pass ${ev.pass}` : `optimizer pass ${ev.pass}`,
+        pass: ev.pass,
+        violations: ev.violations,
+        percent: ev.kind === "optimizer" ? 90 : total.unrouted ? Math.min(89, Math.round((routed / total.unrouted) * 89)) : undefined,
+        routed,
+        total: total.unrouted,
+        message: `${ev.unrouted} unrouted, ${ev.violations} violations`,
+      });
+    } else if (ev.kind === "finished") progress?.({ phase: "finished", percent: 95, message: ev.state });
+    else if (ev.kind === "saved") progress?.({ phase: "saved", percent: 98 });
   };
-  const onAbort = () => {
-    cancelled = true;
-    kill();
+  const streamLines = () => {
+    let buffer = "";
+    return {
+      chunk(text: string) {
+        buffer += text;
+        let nl: number;
+        while ((nl = buffer.indexOf("\n")) >= 0) {
+          const line = buffer.slice(0, nl).trimEnd();
+          buffer = buffer.slice(nl + 1);
+          lineReceived(line);
+        }
+      },
+      finish() { if (buffer.trim()) log.push(buffer.trimEnd()); },
+    };
   };
-  if (opts.signal?.aborted) onAbort();
-  else opts.signal?.addEventListener("abort", onAbort, { once: true });
-  const consume = async (stream: ReadableStream<Uint8Array> | null | number | undefined) => {
-    if (!stream || typeof stream === "number") return;
-    const reader = stream.getReader();
-    const dec = new TextDecoder();
-    let buf = "";
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buf += dec.decode(value, { stream: true });
-      let nl: number;
-      while ((nl = buf.indexOf("\n")) >= 0) {
-        const line = buf.slice(0, nl).trimEnd();
-        buf = buf.slice(nl + 1);
-        if (!line) continue;
-        log.push(line);
-        const ev = parseFreeroutingLine(line);
-        if (ev.kind === "other") continue;
-        lastEvent = ev;
-        if (ev.kind === "stage" && /stage started/.test(line) && ev.unrouted !== undefined)
-          total.unrouted = Math.max(total.unrouted, ev.unrouted);
-        if (ev.kind === "pass" || ev.kind === "optimizer") {
-          const routed = total.unrouted - (ev.unrouted ?? 0);
-          progress?.({
-            phase: ev.kind === "pass" ? `pass ${ev.pass}` : `optimizer pass ${ev.pass}`,
-            pass: ev.pass,
-            violations: ev.violations,
-            percent: ev.kind === "optimizer" ? 90 : total.unrouted ? Math.min(89, Math.round((routed / total.unrouted) * 89)) : undefined,
-            routed,
-            total: total.unrouted,
-            message: `${ev.unrouted} unrouted, ${ev.violations} violations`,
-          });
-        } else if (ev.kind === "finished") progress?.({ phase: "finished", percent: 95, message: ev.state });
-        else if (ev.kind === "saved") progress?.({ phase: "saved", percent: 98 });
-      }
-    }
-    if (buf.trim()) log.push(buf.trimEnd());
-  };
-  const timer =
-    opts.maxTimeMs && opts.maxTimeMs > 0
-      ? setTimeout(() => {
-          // Freerouting has no "stop and save" signal on the CLI; SIGTERM ends the run without a
-          // session, so a timeout means "nothing routed". The bench passes -mp instead.
-          timedOut = true;
-          kill();
-        }, opts.maxTimeMs)
-      : undefined;
-  await Promise.all([consume(proc.stdout), consume(proc.stderr)]);
-  const exitCode = await proc.exited;
-  if (timer) clearTimeout(timer);
-  opts.signal?.removeEventListener("abort", onAbort);
+  const out = streamLines(), err = streamLines();
+  const { exitCode, timedOut, cancelled } = await runOwnedCommand([opts.java, ...args], {
+    cwd: dirname(dsnPath), timeoutMs: opts.maxTimeMs, signal: opts.signal,
+    onStdout: out.chunk, onStderr: err.chunk,
+  });
+  out.finish(); err.finish();
   let ses = "";
   if (!cancelled && existsSync(sesPath)) ses = await readFile(sesPath, "utf8");
   return { ses, log, exitCode, timedOut, cancelled, lastEvent };

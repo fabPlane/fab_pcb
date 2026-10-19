@@ -1,0 +1,91 @@
+{
+  "machine": "hyper-ms-lin",
+  "cores": "0-5",
+  "nice": 10,
+  "constructed_deadline_ms": 250,
+  "repeats": 3,
+  "real_engine_passes": 1,
+  "real_engine_threads": 1,
+  "real_deadline_ms": 30000,
+  "before_commit": "12b7edb2047e7c4e2710167419f5781899281303",
+  "source_sha256": {
+    "benchmarks/tools/command-lifecycle/fixture/unrouted.dsn": "8ac1bff48e95d492eeeddb8ab1c201fbe604e94dc67a570309f9b6ef2ab71c52",
+    "benchmarks/tools/command-lifecycle/fixture/unrouted.kicad_pcb": "70fe2f36c9851e5a916d9461a56a738813df230e1435026e848081b716a9e3cf"
+  },
+  "runtime": {
+    "timing": "mid-run observation; no independent startup snapshot",
+    "source_heads": {
+      "in_repo_router": "e735f4742d025c8db9207969a5afe6e0972a30cc",
+      "fab_router": "69cf598db98c136bff16bbe02bccdded95674b18"
+    },
+    "binaries": {
+      "/home/hyper/bench/repos/fab_pcb/benchmarks/autorouter/runtime/c/freerouting-2.5.0.jar": "f6f51bb02245e8e717f9359bd260cc9c5c0b1bc0acc8b7cb2cd5b8ffeb5de3c7",
+      "/home/hyper/bench/wt/rb-new-routers/vendor/fastroute/fastroute": "09c357178ee64951f7699181f9ca284c289a9e524453d583a08ab0be9d9c127c",
+      "/home/hyper/bench/wt/rb-new-routers/vendor/tracemaker/tracemaker": "f5246e094cec95d54c993898c747dbee2243879a0a1c3f7cac2e5743bf119940",
+      "/usr/bin/kicad-cli": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402",
+      "/usr/lib/jvm/java-25-openjdk-amd64/bin/java": "e7a72a95ee0b931a5350a2a25d40dc3ff387f344df27188e7ca9263995efbb32"
+    }
+  },
+  "native_sessions": [
+    {
+      "repeat": 1,
+      "version": "before",
+      "engine_exit": 0,
+      "wall_ms": 3571.1243140000006,
+      "ses_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
+      "board_sha256": "c39794a8cee4c958c17c3136a559237e4d4407ae2d3b61223e2a8acb3edda410",
+      "report_sha256": "29c60719c67b430bc34bf54ef800e7913a28dd7aa1b38e33d45b1ef8640919d4"
+    },
+    {
+      "repeat": 1,
+      "version": "after",
+      "engine_exit": 0,
+      "wall_ms": 3704.2078139999976,
+      "ses_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
+      "board_sha256": "eb6340ff8f38ad978eaf064c26bc9b1eb61b079b0524f00aa1ace4599916dd99",
+      "report_sha256": "ad5303a3df4769a6505a3f801012a2012a72e2b1c86aa07aa61f913f347fb033"
+    },
+    {
+      "repeat": 2,
+      "version": "before",
+      "engine_exit": 0,
+      "wall_ms": 3745.222004999996,
+      "ses_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
+      "board_sha256": "fffaa30988b091335bae372c4f4fafd394b3d4e6a37cdaafa1551d2674d98dc3",
+      "report_sha256": "ecec9e7282502abd172e8b1c96db0917496d6c528ded57b1b750467f1a6a167d"
+    },
+    {
+      "repeat": 2,
+      "version": "after",
+      "engine_exit": 0,
+      "wall_ms": 3566.6456580000013,
+      "ses_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
+      "board_sha256": "43724e7c401e745fdb60e2f8b38bd10f9a83cbb2b514819f6acde8ca53ee2756",
+      "report_sha256": "855425170992e1647858d33e3c770ba45c75d5298450520c4e96ec895199633d"
+    },
+    {
+      "repeat": 3,
+      "version": "before",
+      "engine_exit": 0,
+      "wall_ms": 3576.9907280000043,
+      "ses_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
+      "board_sha256": "5a6526527fa829255388b2682498c41bfe89dbb68b8e53895fde5af0e42f4aff",
+      "report_sha256": "8857da4096f21899b50b8beaba74f859df30b8be86a802be770f8a2e62eccb0f"
+    },
+    {
+      "repeat": 3,
+      "version": "after",
+      "engine_exit": 0,
+      "wall_ms": 3647.367164000003,
+      "ses_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
+      "board_sha256": "600c62ebb6df4c1c68679aeb0c601ce0c808e89acd572a0c03883372f76ffd86",
+      "report_sha256": "11dd35c1588c331c6f64220ef246b63e6c762d56cb670ad5cedb55070e06373b"
+    }
+  ],
+  "limitations": [
+    "Constructed controls are not observed router defects.",
+    "Native runs are a one-net canary; no general routing-speed claim.",
+    "Detached descendants are outside group cleanup; their output reader is bounded.",
+    "Runtime observation is mid-run, not an independent startup snapshot."
+  ]
+}

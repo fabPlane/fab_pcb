@@ -8,7 +8,7 @@ import { chmod, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Board } from "@fp-pcb/client";
-import { DEFAULT_JAR, FreeroutingRouter, exportDsnViaKicad, findJava, parseFreeroutingLine, resolveFreerouting } from "../src/freerouting";
+import { DEFAULT_JAR, FreeroutingRouter, exportDsnViaKicad, findJava, parseFreeroutingLine, resolveFreerouting, runFreerouting } from "../src/freerouting";
 import type { RouteProgress } from "../src/types";
 import { checkedDownload, freeroutingDownloadSpec } from "../src/freerouting-runtime";
 import { twoNetBoard, F, B } from "./fixtures";
@@ -219,4 +219,24 @@ describe("exportDsnViaKicad", () => {
       await rm(dir, { recursive: true, force: true });
     }
   });
+});
+
+
+test.skipIf(process.platform === "win32")("progress callback failure stops the running command", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "router-progress-cleanup-"));
+  const marker = join(dir, "survived");
+  const executable = join(dir, "engine");
+  try {
+    await Bun.write(executable, `#!/bin/sh
+printf "Job 'test' finished with state: COMPLETED (elapsed: 0.27 seconds).\\n"
+sleep 0.6
+printf alive > '${marker}'
+`);
+    await chmod(executable, 0o755);
+    await expect(runFreerouting(join(dir, "in.dsn"), join(dir, "out.ses"), {
+      java: executable, jar: "unused", passes: 1,
+    }, () => { throw new Error("progress failed"); })).rejects.toThrow("progress failed");
+    await Bun.sleep(800);
+    expect(existsSync(marker)).toBe(false);
+  } finally { await rm(dir, { recursive: true, force: true }); }
 });
