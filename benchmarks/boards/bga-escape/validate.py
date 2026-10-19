@@ -16,6 +16,8 @@ import tempfile
 
 import pcbnew
 
+from report_audit import validate_report
+
 ROOT = Path(__file__).resolve().parent
 
 
@@ -35,12 +37,14 @@ def geometry(source, spec):
     require(board.GetCopperLayerCount() == 4, 'expected four copper layers')
     require(not list(board.GetTracks()) and board.GetAreaCount() == 0, 'input must be unrouted and have no zones')
     pads = {}
+    expected_pads = {}
     for footprint in board.GetFootprints():
         for pad in footprint.Pads():
             require(list(pad.GetLayerSet().CuStack()) == [pcbnew.F_Cu] and pad.GetAttribute() == pcbnew.PAD_ATTRIB_SMD, 'all pads must be front-side SMD')
             position, size = pad.GetPosition(), pad.GetSize()
             value = tuple(round(pcbnew.ToMM(v), 6) for v in [position.x, position.y, size.x, size.y])
             pads.setdefault(pad.GetNetname(), []).append(value)
+            expected_pads[(footprint.GetReference(), pad.GetNumber())] = (pad.GetNetname(), *value[:2])
     names = {f'N{n}' for n in range(1, 101)}
     require(set(pads) == names and all(len(values) == 2 for values in pads.values()), 'expected 100 two-terminal nets')
     require(srj['layerCount'] == 4 and srj['minTraceWidth'] == .15, 'unexpected SRJ rules')
@@ -57,7 +61,7 @@ def geometry(source, spec):
         require(sorted((p['x'], p['y']) for p in points) == sorted(v[:2] for v in pads[name]), f'{name}: native/SRJ positions differ')
         obstacles = sorted((o['center']['x'], o['center']['y'], o['width'], o['height']) for o in srj['obstacles'] if name in o['connectedTo'])
         require(obstacles == sorted(pads[name]), f'{name}: native/SRJ pad dimensions differ')
-    return len(pads), sum(map(len, pads.values()))
+    return len(pads), sum(map(len, pads.values())), expected_pads
 
 
 def main():
@@ -86,7 +90,7 @@ def main():
         for phase, source in phases:
             for spec in specs:
                 tier = spec['tier']
-                nets, pads = geometry(source, spec)
+                nets, pads, expected_pads = geometry(source, spec)
                 pcb = source / tier / f'{tier}.kicad_pcb'
                 srj = source / tier / 'unrouted.srj.json'
                 for repeat in range(1, args.repeats + 1):
@@ -94,8 +98,7 @@ def main():
                     report.unlink(missing_ok=True)
                     subprocess.run(['kicad-cli', 'pcb', 'drc', '--format', 'json', '-o', str(report), str(pcb)], check=True, timeout=180)
                     drc = json.loads(report.read_text())
-                    require(drc['violations'] == [] and drc['schematic_parity'] == [], f'{tier}: native input errors')
-                    require(len(drc['unconnected_items']) == 100, f'{tier}: expected 100 opens')
+                    validate_report(drc, expected_pads)
                     rows.append([phase, tier, repeat, nets, pads, 4, 0, 100, digest(pcb), digest(srj), digest(report)])
     with (args.out / 'summary.csv').open('w', newline='') as stream:
         writer = csv.writer(stream, lineterminator='\n')
