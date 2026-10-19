@@ -30,3 +30,10 @@ mutations. Each before attempt runs fresh native DRC through the unguarded
 baseline scorer. Each after attempt uses the same board, baseline, machine and
 checker, rejecting terminal mutations before running routed DRC. Raw evidence is
 written only to the chosen output directory; committed results contain summaries.
+
+For an existing original/candidate board pair with matching rules, measure
+three fresh before/after repetitions (the guard must accept the pair):
+
+```sh
+nice -n 10 taskset -c 0-5 timeout 300 /usr/bin/python3 benchmarks/boards/native-terminals/measure_pair.py --original /path/to/original.kicad_pcb --candidate /path/to/candidate.kicad_pcb --out /tmp/native-preserved-pair --repeats 3
+```
