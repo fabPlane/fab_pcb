@@ -377,3 +377,19 @@ test("session via preserves signed fractional coordinates and trailing attribute
     (network_out (net A (via V -1.5 2.5 (type normal))))))`);
   expect(parsed.vias).toEqual([{net: "A", padstack: "V", x: -150, y: -250}]);
 });
+
+for (const diameter of ["NaN", "Infinity", "1e308", "-2", "0", "0.0001", "(unexpected 2)", ""]) {
+  test(`session circle rejects malformed diameter: ${diameter || "missing"}`, () => {
+    expect(() => parseSes(`(session sample (routes (resolution um 10)
+      (library_out (padstack V (shape (circle F.Cu ${diameter}))))
+      (network_out (net A (via V 10 20)))))`)).toThrow(SyntaxError);
+  });
+}
+
+test("session circle preserves fractional diameters on both copper layers", () => {
+  const parsed = parseSes(`(session sample (routes (resolution um 10)
+    (library_out (padstack V (shape (circle F.Cu 6000.5)) (shape (circle B.Cu 6000.5))))
+    (network_out (net A (via V 10 20)))))`);
+  expect(parsed.padstacks.get("V")).toEqual({name: "V", layers: ["F.Cu", "B.Cu"], diameter: 600050});
+  expect(sesToItems(parsed, twoNetBoard()).vias[0]?.diameter).toBe(600050);
+});

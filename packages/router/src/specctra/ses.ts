@@ -96,7 +96,15 @@ export function parseSes(text: string): Session {
       if (!isList(geom)) continue;
       const layer = geom[1];
       if (typeof layer === "string") layers.push(layer);
-      if (geom[0] === "circle") diameter = Math.round((Number(geom[2]) || 0) * nmPerUnit);
+      if (geom[0] === "circle") {
+        // A malformed explicit circle must never become an invalid via size or
+        // silently select the name/net-class fallback reserved for absent circles.
+        const value = typeof geom[2] === "string" ? Number(geom[2]) : NaN;
+        const scaled = Math.round(value * nmPerUnit);
+        if (!Number.isFinite(value) || !Number.isSafeInteger(scaled) || scaled <= 0)
+          throw new SyntaxError("invalid session circle diameter");
+        diameter = scaled;
+      }
     }
     padstacks.set(name, { name, layers, diameter });
   }
