@@ -1,0 +1,69 @@
+{
+  "scope": "Compact measured evidence and reproduction files; manifest excludes itself",
+  "files": {
+    "README.md": {
+      "sha256": "a9221d385046e1d6f39b7c1f275f1c5a6b54157cd35dbb4de84ba52585405019",
+      "bytes": 1413
+    },
+    "dense-comparison.json": {
+      "sha256": "255d7b1bd4e0abd9bef195c793dfce81ef9eebf26b2e65a293ea7de9f7a5a328",
+      "bytes": 302866
+    },
+    "engine-checks.txt": {
+      "sha256": "9ec981d5e58873390d04db58c4a42b9385ccfbcc9ab812414dd06d0a45568b02",
+      "bytes": 89146
+    },
+    "large-comparison.json": {
+      "sha256": "95fa906c8e8c0f8115089e02e58c7643277ecaf9962d76e558340df807f8ff1c",
+      "bytes": 3983
+    },
+    "native-before-controls.json.gz": {
+      "sha256": "edfd55ccca07c1ae4e11cdd971d94de41e09996ac52b172378250bbe1f80fad7",
+      "bytes": 85019
+    },
+    "native-before-results.json.gz": {
+      "sha256": "1292297cc9af9b8eed6d1b1d5d2664fee84fd165d0c4dc886419fd69dfa97cd4",
+      "bytes": 59325
+    },
+    "native-comparison.json": {
+      "sha256": "dd714e629d6f709e9fa8edd470e492c0d936d01e106ecac5d433a777389c7a3f",
+      "bytes": 47651
+    },
+    "native-connection.json": {
+      "sha256": "e4b6cfee4eb3c3d506c70a1bbf0263d01d7d4e186b595565c9ac458125a96a76",
+      "bytes": 46570
+    },
+    "native-connection.png": {
+      "sha256": "c768be0d5c359783743daa5c5ca6b557ce596440c95e7b33a6568b2f41e656b3",
+      "bytes": 86566
+    },
+    "native-connection.svg": {
+      "sha256": "6975fc643dd9e9d333a99080e978f26f2e4b458ab15974b3d6f548d8b24e8f69",
+      "bytes": 36256
+    },
+    "native-final-controls.json.gz": {
+      "sha256": "e6f118b8b5c6b7c107411be384c11686d3870ad49ed128915783076379829109",
+      "bytes": 85026
+    },
+    "native-final-results.json.gz": {
+      "sha256": "151b7f1ce69403a7a2dc331716ab4a3fc84b0cf5de77c082a6875b4f98568a91",
+      "bytes": 58778
+    },
+    "package-checks.txt": {
+      "sha256": "a947dbb66860bcb6696be6bda5e87c1a8cae853e8b700d66703bcda13d48b230",
+      "bytes": 10215
+    },
+    "results.md": {
+      "sha256": "28b30487382a4fe9eb24bf69d3d947e09ea68ad4c63a764cd70727a99310f0eb",
+      "bytes": 9541
+    },
+    "source-audit.json": {
+      "sha256": "b5588eff308e659cea2f2096ecc82cb3977d97c44c7d9e3572c26f4ea28cd655",
+      "bytes": 17010
+    },
+    "supervisor-observations.json": {
+      "sha256": "bd34b5d4d22bddc6a63b75e9636bce31615fa2a1a8593326b3437e9f685b840e",
+      "bytes": 873
+    }
+  }
+}
