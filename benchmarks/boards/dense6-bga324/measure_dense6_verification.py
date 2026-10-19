@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # SPDX-License-Identifier: MIT
-"""Run three paired fixture verifications and nine constructed negative controls."""
+"""Run three paired fixture verifications and twelve constructed negative controls."""
 import argparse
 import json
 from pathlib import Path
@@ -22,7 +22,7 @@ def measure(reference, candidate, generator, verifier, out):
             assert result.returncode == 0, result.stderr
             records.append(dict(label=label, repeat=repeat, exit=result.returncode,
                                 summary=json.loads((dest / 'summary.json').read_text())))
-        for mutation in ('rules', 'geometry', 'dsn'):
+        for mutation in ('rules', 'minima', 'geometry', 'dsn'):
             fixture = out / f'{mutation}-fixture-{repeat}'
             fixture.mkdir()
             for suffix in ('kicad_pcb', 'kicad_pro', 'dsn'):
@@ -32,6 +32,11 @@ def measure(reference, candidate, generator, verifier, out):
                 path = fixture / 'dense6-bga324.kicad_pro'
                 data = json.loads(path.read_text())
                 data['net_settings']['classes'][0]['clearance'] = 0.2
+                path.write_text(json.dumps(data))
+            elif mutation == 'minima':
+                path = fixture / 'dense6-bga324.kicad_pro'
+                data = json.loads(path.read_text())
+                data['board']['design_settings']['rules']['min_clearance'] = 0.05
                 path.write_text(json.dumps(data))
             elif mutation == 'geometry':
                 path = fixture / 'dense6-bga324.kicad_pcb'
@@ -47,12 +52,12 @@ def measure(reference, candidate, generator, verifier, out):
                                      '--fixture', str(fixture), '--out', str(out / f'{mutation}-{repeat}')],
                                     capture_output=True, text=True, timeout=90)
             (out / f'{mutation}-{repeat}.log').write_text(result.stdout + result.stderr)
-            reason = {'rules': 'wrong default rules', 'geometry': 'generated geometry differs',
+            reason = {'rules': 'wrong default rules', 'minima': 'wrong native rule minima', 'geometry': 'generated geometry differs',
                       'dsn': 'exported DSN differs'}[mutation]
             assert result.returncode != 0 and reason in result.stderr, result.stderr
             records.append(dict(label=mutation, repeat=repeat, exit=result.returncode, reason=reason))
     (out / 'controls.json').write_text(json.dumps(records, indent=2) + '\n')
-    print('Valid fixtures retained: 6/6; constructed mutations rejected: 9/9')
+    print('Valid fixtures retained: 6/6; constructed mutations rejected: 12/12')
 
 
 if __name__ == '__main__':

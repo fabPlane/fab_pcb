@@ -23,6 +23,15 @@ class CanonicalDsnTests(unittest.TestCase):
                      (b'(net N (pins A B))', b'(net N (pins A C))')]:
             self.assertNotEqual(canonical_dsn(a), canonical_dsn(b))
 
+    def test_rejects_unclosed_lists(self):
+        for text in (b'(pcb board', b'(pcb board (network (net N (pins A B)))'):
+            with self.assertRaises(ValueError):
+                canonical_dsn(text)
+
+    def test_rejects_trailing_forms(self):
+        with self.assertRaises(AssertionError):
+            canonical_dsn(b'(pcb board))')
+
     def test_preserves_quoted_tokens(self):
         self.assertNotEqual(canonical_dsn(b'(net "a b" (pins A B))'),
                             canonical_dsn(b'(net a b (pins A B))'))

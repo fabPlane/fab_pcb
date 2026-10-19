@@ -21,10 +21,14 @@ def canonical_dsn(data):
     tokens = iter(re.findall(r'"(?:\\.|[^"\\])*"|[()]|[^\s()]+', data.decode()))
     def parse():
         values = []
+        closed = False
         for token in tokens:
             if token == ')':
+                closed = True
                 break
             values.append(parse() if token == '(' else token)
+        if not closed:
+            raise ValueError('Unclosed DSN list')
         if values and values[0] == 'pins':
             return ['pins'] + sorted(values[1:])
         if values and values[0] in {'placement', 'component', 'library', 'image',
@@ -76,6 +80,12 @@ def verify(generator, fixture, out):
     shutil.copyfile(fixture / 'dense6-bga324.kicad_pro', reference.with_suffix('.kicad_pro'))
     # Rules must travel with the native board. Test both the generated and bundled board.
     project = fixture / 'dense6-bga324.kicad_pro'
+    minima = json.loads(project.read_text())['board']['design_settings']['rules']
+    expected_minima = dict(min_clearance=0.1, min_track_width=0.1, min_via_diameter=0.45,
+                           min_through_hole_diameter=0.2, min_via_annular_width=0.1,
+                           min_hole_clearance=0.2, min_hole_to_hole=0.25,
+                           min_copper_edge_clearance=0.3, min_connection=0.0)
+    assert {key: minima[key] for key in expected_minima} == expected_minima, 'wrong native rule minima'
     shutil.copyfile(project, first.with_suffix('.kicad_pro'))
     generated_board = pcbnew.LoadBoard(str(first))
     reference_board = pcbnew.LoadBoard(str(reference))
