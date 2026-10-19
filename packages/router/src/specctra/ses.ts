@@ -114,9 +114,16 @@ export function parseSes(text: string): Session {
       if (p && p.points.length >= 2) wires.push({ net: netName, ...p });
     }
     for (const v of children(net, "via")) {
-      const [padstack, x, y] = atoms(v);
-      if (!padstack || x === undefined || y === undefined) continue;
-      vias.push({ net: netName, padstack, x: Math.round(Number(x) * nmPerUnit), y: Math.round(-Number(y) * nmPerUnit) });
+      // Read positional operands directly: filtering nested lists shifts coordinates.
+      // Later attributes such as (type normal) do not affect the via position.
+      const [, padstack, x, y] = v;
+      if (typeof padstack !== "string" || !padstack || typeof x !== "string" || typeof y !== "string")
+        throw new SyntaxError("invalid session via coordinates");
+      const px = Math.round(Number(x) * nmPerUnit);
+      const py = Math.round(-Number(y) * nmPerUnit);
+      if (!Number.isSafeInteger(px) || !Number.isSafeInteger(py))
+        throw new SyntaxError("invalid session via dimensions");
+      vias.push({ net: netName, padstack, x: px, y: py });
     }
   }
 

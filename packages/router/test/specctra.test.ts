@@ -364,3 +364,16 @@ test("session path retains signed fractional coordinates and positive widths", (
     (network_out (net A (wire (path F.Cu 2.5 -1.5 2.5 3.5 -4.5))))))`);
   expect(parsed.wires[0]).toMatchObject({width: 250, points: [{x: -150, y: -250}, {x: 350, y: 450}]});
 });
+
+for (const via of ["V NaN 20", "V 10 Infinity", "V 1e308 20", "V 10", "V (unexpected 10) 20", "(unexpected V) 10 20"]) {
+  test(`session via rejects malformed coordinates: ${via}`, () => {
+    expect(() => parseSes(`(session sample (routes (resolution um 10)
+      (network_out (net A (via ${via})))))`)).toThrow(SyntaxError);
+  });
+}
+
+test("session via preserves signed fractional coordinates and trailing attributes", () => {
+  const parsed = parseSes(`(session sample (routes (resolution um 10)
+    (network_out (net A (via V -1.5 2.5 (type normal))))))`);
+  expect(parsed.vias).toEqual([{net: "A", padstack: "V", x: -150, y: -250}]);
+});
