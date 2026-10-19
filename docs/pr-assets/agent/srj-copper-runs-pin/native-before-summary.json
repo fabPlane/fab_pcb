@@ -1,0 +1,1419 @@
+{
+  "version": "standalone-autorouter-v1",
+  "complete": true,
+  "full_suite": false,
+  "controls_preserved": true,
+  "smoke": false,
+  "expected_runs": 3,
+  "completed_runs": 3,
+  "valid_runs": 3,
+  "routers": [
+    {
+      "id": "fab-router",
+      "name": "fab_router",
+      "valid_runs": 3,
+      "completed_runs": 3,
+      "expected_runs": 3,
+      "valid_cases": 1,
+      "cases": 1,
+      "efficient": null,
+      "fast": null,
+      "scored_cases": 0,
+      "jobs": {
+        "J1": {
+          "valid": 1,
+          "cases": 1
+        },
+        "J2": {
+          "valid": 0,
+          "cases": 0
+        },
+        "J3": {
+          "valid": 0,
+          "cases": 0
+        },
+        "J4": {
+          "valid": 0,
+          "cases": 0
+        }
+      }
+    }
+  ],
+  "cases": [
+    {
+      "id": "kitspace-solenoid-driver-j1",
+      "path": "cases/kitspace-solenoid-driver-j1",
+      "fixture_source": "evidence/open-router-suite-2026-10-09/fixtures-v3/kitspace-solenoid-driver/j1",
+      "board_id": "kitspace_solenoid_driver",
+      "job": "J1",
+      "tier": "easy",
+      "source": {
+        "board_id": "kitspace_solenoid_driver",
+        "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+        "raw_blob": "dcae4ef2207e24c6c5853eb17f4a07299e01ca68",
+        "raw_sha256": "974893bfb394e83b2f609408eecd9c54a5e6db1759524e961ac47f7356d0d0cc",
+        "repository": "https://github.com/BeeHive-org/BeeHive",
+        "verified_license_url": "https://github.com/BeeHive-org/BeeHive/blob/a7bbd36c15c2fb293a4699d9088aaf81921192e2/LICENSE",
+        "license_revision": "a7bbd36c15c2fb293a4699d9088aaf81921192e2",
+        "license_file": "LICENSE"
+      },
+      "cells": {
+        "fab-router": {
+          "completed": 3,
+          "expected": 3,
+          "passed": 3,
+          "reliable": true,
+          "runs": [
+            {
+              "case": "kitspace-solenoid-driver-j1",
+              "router": "fab-router",
+              "seed": 1,
+              "status": "checked",
+              "passed": true,
+              "seconds": 0.897248232,
+              "vias": 12,
+              "length_mm": 352.6905969311543,
+              "opens": 0,
+              "new_errors": 0,
+              "new_error_types": {},
+              "failed_fidelity": [],
+              "evidence": "runs/run-20261019T231356.916922Z-001/fab-router",
+              "check": {
+                "native_version": "10.0.6",
+                "board_sha256": "c6a6d6e5582a670f6d560a3972951983d61ecd05734482aadd24f2e16c02fda6",
+                "integrity_checks": {
+                  "footprints": true,
+                  "pads": true,
+                  "outline": true,
+                  "layers": true,
+                  "zones": true,
+                  "kicad_pro_preserved": true,
+                  "kicad_dru_preserved": true,
+                  "checker_policy_preserved": true,
+                  "nets": true,
+                  "zone_definition": true,
+                  "board_setup": true
+                },
+                "integrity_pass": true,
+                "native_opens": 0,
+                "native_total_errors_excluding_opens": 0,
+                "inherited_errors": 0,
+                "new_errors": 0,
+                "new_error_details": [],
+                "new_warning_details": [
+                  {
+                    "description": "The current configuration does not include the footprint library 'MountingHole'",
+                    "items": [
+                      {
+                        "description": "Footprint REF**",
+                        "pos": {
+                          "x": 115.5,
+                          "y": 84.0
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ce23f4"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'MountingHole'",
+                    "items": [
+                      {
+                        "description": "Footprint REF**",
+                        "pos": {
+                          "x": 115.5,
+                          "y": 125.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ce23fb"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'MountingHole'",
+                    "items": [
+                      {
+                        "description": "Footprint REF**",
+                        "pos": {
+                          "x": 154.0,
+                          "y": 84.0
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ce2402"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'MountingHole'",
+                    "items": [
+                      {
+                        "description": "Footprint REF**",
+                        "pos": {
+                          "x": 154.0,
+                          "y": 125.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ce241b"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Connector_JST'",
+                    "items": [
+                      {
+                        "description": "Footprint J1",
+                        "pos": {
+                          "x": 116.975,
+                          "y": 98.873
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ce2996"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Resistor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint R1",
+                        "pos": {
+                          "x": 145.0,
+                          "y": 120.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ce2a81"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Symbol'",
+                    "items": [
+                      {
+                        "description": "Footprint REF**",
+                        "pos": {
+                          "x": 125.0,
+                          "y": 113.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ceadb2"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Diode_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint D1",
+                        "pos": {
+                          "x": 150.62,
+                          "y": 101.0
+                        },
+                        "uuid": "00000000-0000-0000-0000-0000622bbbd0"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Diode_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint D2",
+                        "pos": {
+                          "x": 150.62,
+                          "y": 108.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-0000622bbbef"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Connector_JST'",
+                    "items": [
+                      {
+                        "description": "Footprint J4",
+                        "pos": {
+                          "x": 151.0,
+                          "y": 118.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-0000622bbc6c"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Package_TO_SOT_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint Q1",
+                        "pos": {
+                          "x": 138.4935,
+                          "y": 84.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-0000622bbc86"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Package_TO_SOT_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint Q2",
+                        "pos": {
+                          "x": 143.54,
+                          "y": 125.055
+                        },
+                        "uuid": "00000000-0000-0000-0000-0000622bbca0"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Resistor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint R2",
+                        "pos": {
+                          "x": 145.0,
+                          "y": 94.0
+                        },
+                        "uuid": "00000000-0000-0000-0000-0000622bbcb3"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Connector_JST'",
+                    "items": [
+                      {
+                        "description": "Footprint J2",
+                        "pos": {
+                          "x": 116.9975,
+                          "y": 108.184
+                        },
+                        "uuid": "00000000-0000-0000-0000-000062744829"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Connector_JST'",
+                    "items": [
+                      {
+                        "description": "Footprint J3",
+                        "pos": {
+                          "x": 151.0,
+                          "y": 93.25
+                        },
+                        "uuid": "00000000-0000-0000-0000-000062744851"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Package_DIP'",
+                    "items": [
+                      {
+                        "description": "Footprint U1",
+                        "pos": {
+                          "x": 123.0,
+                          "y": 96.95
+                        },
+                        "uuid": "07848533-7ae5-4e87-bba6-e99fbab9841d"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Resistor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint R4",
+                        "pos": {
+                          "x": 145.0,
+                          "y": 115.5
+                        },
+                        "uuid": "5dadd2c0-c5a3-494f-b9df-a9ebd07146ab"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Resistor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint R3",
+                        "pos": {
+                          "x": 145.0,
+                          "y": 89.0
+                        },
+                        "uuid": "6be8be66-ef90-4a56-bd8a-9d5ed4e60a8b"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Resistor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint R6",
+                        "pos": {
+                          "x": 123.5,
+                          "y": 83.5
+                        },
+                        "uuid": "9128d436-8e9e-4ac6-9d6e-7c73d2490c8f"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Connector_JST'",
+                    "items": [
+                      {
+                        "description": "Footprint J5",
+                        "pos": {
+                          "x": 116.934,
+                          "y": 117.729
+                        },
+                        "uuid": "99d409fb-8a2d-4912-8582-272d5671b5f0"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Capacitor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint C1",
+                        "pos": {
+                          "x": 127.95,
+                          "y": 108.25
+                        },
+                        "uuid": "9d3486f5-12f0-4621-b2d1-934f6bec2a04"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Resistor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint R5",
+                        "pos": {
+                          "x": 130.0,
+                          "y": 83.5
+                        },
+                        "uuid": "d18a63b0-2d03-46ae-9b87-ec44dbe1f0ef"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  }
+                ],
+                "new_error_types": {},
+                "new_warnings": 22,
+                "new_warning_types": {
+                  "lib_footprint_issues": 22
+                },
+                "via_count": 12,
+                "track_count": 66,
+                "track_length_mm": 352.6905969311543,
+                "per_net_length_mm": {
+                  "+12V": 76.50287592394068,
+                  "GND": 113.04512215972291,
+                  "Net-(D1-Pad2)": 30.605838245460568,
+                  "Net-(D2-Pad2)": 34.12275656535309,
+                  "Net-(J1-Pad1)": 22.24490304413292,
+                  "Net-(Q1-Pad1)": 18.44388078262741,
+                  "Net-(Q2-Pad1)": 18.968816734416045,
+                  "Net-(U1-Pad2)": 14.784899145233988,
+                  "solenoid1": 11.789168757807705,
+                  "solenoid2": 12.182335572459001
+                },
+                "native_acceptance": true,
+                "manufacturing_clean": true,
+                "ignored_checks": [
+                  {
+                    "description": "Footprint has no courtyard defined",
+                    "key": "missing_courtyard"
+                  },
+                  {
+                    "description": "Track endpoint not centered on via",
+                    "key": "track_not_centered_on_via"
+                  },
+                  {
+                    "description": "Tuning profile track geometries",
+                    "key": "tuning_profile_track_geometries"
+                  },
+                  {
+                    "description": "Footprint doesn't match symbol's footprint filters",
+                    "key": "footprint_filters_mismatch"
+                  },
+                  {
+                    "description": "Footprint component type doesn't match footprint pads",
+                    "key": "footprint_type_mismatch"
+                  }
+                ],
+                "drc_command": [
+                  "/usr/bin/kicad-cli",
+                  "pcb",
+                  "drc",
+                  "--severity-all",
+                  "--format",
+                  "json",
+                  "-o",
+                  "/home/hyper/bench/agents/codex-new-routers/scratch/cycle476-native-before/runs/run-20261019T231356.916922Z-001/fab-router/drc.json",
+                  "/home/hyper/bench/agents/codex-new-routers/scratch/cycle476-native-before/runs/run-20261019T231356.916922Z-001/fab-router/final.kicad_pcb"
+                ],
+                "pass": true,
+                "opens": 0,
+                "fidelity": {
+                  "footprints": true,
+                  "pads": true,
+                  "outline": true,
+                  "layers": true,
+                  "zones": true,
+                  "kicad_pro_preserved": true,
+                  "kicad_dru_preserved": true,
+                  "checker_policy_preserved": true,
+                  "nets": true,
+                  "zone_definition": true,
+                  "board_setup": true
+                },
+                "vias": 12,
+                "length_mm": 352.6905969311543,
+                "job": "J1",
+                "raw_output_sha256": "c6a6d6e5582a670f6d560a3972951983d61ecd05734482aadd24f2e16c02fda6"
+              }
+            },
+            {
+              "case": "kitspace-solenoid-driver-j1",
+              "router": "fab-router",
+              "seed": 3,
+              "status": "checked",
+              "passed": true,
+              "seconds": 0.908458125,
+              "vias": 12,
+              "length_mm": 352.6905969311543,
+              "opens": 0,
+              "new_errors": 0,
+              "new_error_types": {},
+              "failed_fidelity": [],
+              "evidence": "runs/run-20261019T231356.916922Z-002/fab-router",
+              "check": {
+                "native_version": "10.0.6",
+                "board_sha256": "ad4b719c258a9d6ed662c8e29b3ab7270e7f3b2239abe42422f0458ff36757bc",
+                "integrity_checks": {
+                  "footprints": true,
+                  "pads": true,
+                  "outline": true,
+                  "layers": true,
+                  "zones": true,
+                  "kicad_pro_preserved": true,
+                  "kicad_dru_preserved": true,
+                  "checker_policy_preserved": true,
+                  "nets": true,
+                  "zone_definition": true,
+                  "board_setup": true
+                },
+                "integrity_pass": true,
+                "native_opens": 0,
+                "native_total_errors_excluding_opens": 0,
+                "inherited_errors": 0,
+                "new_errors": 0,
+                "new_error_details": [],
+                "new_warning_details": [
+                  {
+                    "description": "The current configuration does not include the footprint library 'MountingHole'",
+                    "items": [
+                      {
+                        "description": "Footprint REF**",
+                        "pos": {
+                          "x": 115.5,
+                          "y": 84.0
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ce23f4"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'MountingHole'",
+                    "items": [
+                      {
+                        "description": "Footprint REF**",
+                        "pos": {
+                          "x": 115.5,
+                          "y": 125.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ce23fb"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'MountingHole'",
+                    "items": [
+                      {
+                        "description": "Footprint REF**",
+                        "pos": {
+                          "x": 154.0,
+                          "y": 84.0
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ce2402"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'MountingHole'",
+                    "items": [
+                      {
+                        "description": "Footprint REF**",
+                        "pos": {
+                          "x": 154.0,
+                          "y": 125.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ce241b"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Connector_JST'",
+                    "items": [
+                      {
+                        "description": "Footprint J1",
+                        "pos": {
+                          "x": 116.975,
+                          "y": 98.873
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ce2996"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Resistor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint R1",
+                        "pos": {
+                          "x": 145.0,
+                          "y": 120.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ce2a81"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Symbol'",
+                    "items": [
+                      {
+                        "description": "Footprint REF**",
+                        "pos": {
+                          "x": 125.0,
+                          "y": 113.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ceadb2"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Diode_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint D1",
+                        "pos": {
+                          "x": 150.62,
+                          "y": 101.0
+                        },
+                        "uuid": "00000000-0000-0000-0000-0000622bbbd0"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Diode_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint D2",
+                        "pos": {
+                          "x": 150.62,
+                          "y": 108.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-0000622bbbef"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Connector_JST'",
+                    "items": [
+                      {
+                        "description": "Footprint J4",
+                        "pos": {
+                          "x": 151.0,
+                          "y": 118.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-0000622bbc6c"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Package_TO_SOT_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint Q1",
+                        "pos": {
+                          "x": 138.4935,
+                          "y": 84.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-0000622bbc86"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Package_TO_SOT_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint Q2",
+                        "pos": {
+                          "x": 143.54,
+                          "y": 125.055
+                        },
+                        "uuid": "00000000-0000-0000-0000-0000622bbca0"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Resistor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint R2",
+                        "pos": {
+                          "x": 145.0,
+                          "y": 94.0
+                        },
+                        "uuid": "00000000-0000-0000-0000-0000622bbcb3"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Connector_JST'",
+                    "items": [
+                      {
+                        "description": "Footprint J2",
+                        "pos": {
+                          "x": 116.9975,
+                          "y": 108.184
+                        },
+                        "uuid": "00000000-0000-0000-0000-000062744829"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Connector_JST'",
+                    "items": [
+                      {
+                        "description": "Footprint J3",
+                        "pos": {
+                          "x": 151.0,
+                          "y": 93.25
+                        },
+                        "uuid": "00000000-0000-0000-0000-000062744851"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Package_DIP'",
+                    "items": [
+                      {
+                        "description": "Footprint U1",
+                        "pos": {
+                          "x": 123.0,
+                          "y": 96.95
+                        },
+                        "uuid": "07848533-7ae5-4e87-bba6-e99fbab9841d"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Resistor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint R4",
+                        "pos": {
+                          "x": 145.0,
+                          "y": 115.5
+                        },
+                        "uuid": "5dadd2c0-c5a3-494f-b9df-a9ebd07146ab"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Resistor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint R3",
+                        "pos": {
+                          "x": 145.0,
+                          "y": 89.0
+                        },
+                        "uuid": "6be8be66-ef90-4a56-bd8a-9d5ed4e60a8b"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Resistor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint R6",
+                        "pos": {
+                          "x": 123.5,
+                          "y": 83.5
+                        },
+                        "uuid": "9128d436-8e9e-4ac6-9d6e-7c73d2490c8f"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Connector_JST'",
+                    "items": [
+                      {
+                        "description": "Footprint J5",
+                        "pos": {
+                          "x": 116.934,
+                          "y": 117.729
+                        },
+                        "uuid": "99d409fb-8a2d-4912-8582-272d5671b5f0"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Capacitor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint C1",
+                        "pos": {
+                          "x": 127.95,
+                          "y": 108.25
+                        },
+                        "uuid": "9d3486f5-12f0-4621-b2d1-934f6bec2a04"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Resistor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint R5",
+                        "pos": {
+                          "x": 130.0,
+                          "y": 83.5
+                        },
+                        "uuid": "d18a63b0-2d03-46ae-9b87-ec44dbe1f0ef"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  }
+                ],
+                "new_error_types": {},
+                "new_warnings": 22,
+                "new_warning_types": {
+                  "lib_footprint_issues": 22
+                },
+                "via_count": 12,
+                "track_count": 66,
+                "track_length_mm": 352.6905969311543,
+                "per_net_length_mm": {
+                  "+12V": 76.50287592394068,
+                  "GND": 113.04512215972291,
+                  "Net-(D1-Pad2)": 30.605838245460568,
+                  "Net-(D2-Pad2)": 34.12275656535309,
+                  "Net-(J1-Pad1)": 22.24490304413292,
+                  "Net-(Q1-Pad1)": 18.44388078262741,
+                  "Net-(Q2-Pad1)": 18.968816734416045,
+                  "Net-(U1-Pad2)": 14.784899145233988,
+                  "solenoid1": 11.789168757807705,
+                  "solenoid2": 12.182335572459001
+                },
+                "native_acceptance": true,
+                "manufacturing_clean": true,
+                "ignored_checks": [
+                  {
+                    "description": "Footprint has no courtyard defined",
+                    "key": "missing_courtyard"
+                  },
+                  {
+                    "description": "Track endpoint not centered on via",
+                    "key": "track_not_centered_on_via"
+                  },
+                  {
+                    "description": "Tuning profile track geometries",
+                    "key": "tuning_profile_track_geometries"
+                  },
+                  {
+                    "description": "Footprint doesn't match symbol's footprint filters",
+                    "key": "footprint_filters_mismatch"
+                  },
+                  {
+                    "description": "Footprint component type doesn't match footprint pads",
+                    "key": "footprint_type_mismatch"
+                  }
+                ],
+                "drc_command": [
+                  "/usr/bin/kicad-cli",
+                  "pcb",
+                  "drc",
+                  "--severity-all",
+                  "--format",
+                  "json",
+                  "-o",
+                  "/home/hyper/bench/agents/codex-new-routers/scratch/cycle476-native-before/runs/run-20261019T231356.916922Z-002/fab-router/drc.json",
+                  "/home/hyper/bench/agents/codex-new-routers/scratch/cycle476-native-before/runs/run-20261019T231356.916922Z-002/fab-router/final.kicad_pcb"
+                ],
+                "pass": true,
+                "opens": 0,
+                "fidelity": {
+                  "footprints": true,
+                  "pads": true,
+                  "outline": true,
+                  "layers": true,
+                  "zones": true,
+                  "kicad_pro_preserved": true,
+                  "kicad_dru_preserved": true,
+                  "checker_policy_preserved": true,
+                  "nets": true,
+                  "zone_definition": true,
+                  "board_setup": true
+                },
+                "vias": 12,
+                "length_mm": 352.6905969311543,
+                "job": "J1",
+                "raw_output_sha256": "ad4b719c258a9d6ed662c8e29b3ab7270e7f3b2239abe42422f0458ff36757bc"
+              }
+            },
+            {
+              "case": "kitspace-solenoid-driver-j1",
+              "router": "fab-router",
+              "seed": 2,
+              "status": "checked",
+              "passed": true,
+              "seconds": 0.740817321,
+              "vias": 12,
+              "length_mm": 352.6905969311543,
+              "opens": 0,
+              "new_errors": 0,
+              "new_error_types": {},
+              "failed_fidelity": [],
+              "evidence": "runs/run-20261019T231356.916922Z-003/fab-router",
+              "check": {
+                "native_version": "10.0.6",
+                "board_sha256": "b8e13e570ce1252d82cce899b304109b96bbe446619e0cd946572f4caef68f9f",
+                "integrity_checks": {
+                  "footprints": true,
+                  "pads": true,
+                  "outline": true,
+                  "layers": true,
+                  "zones": true,
+                  "kicad_pro_preserved": true,
+                  "kicad_dru_preserved": true,
+                  "checker_policy_preserved": true,
+                  "nets": true,
+                  "zone_definition": true,
+                  "board_setup": true
+                },
+                "integrity_pass": true,
+                "native_opens": 0,
+                "native_total_errors_excluding_opens": 0,
+                "inherited_errors": 0,
+                "new_errors": 0,
+                "new_error_details": [],
+                "new_warning_details": [
+                  {
+                    "description": "The current configuration does not include the footprint library 'MountingHole'",
+                    "items": [
+                      {
+                        "description": "Footprint REF**",
+                        "pos": {
+                          "x": 115.5,
+                          "y": 84.0
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ce23f4"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'MountingHole'",
+                    "items": [
+                      {
+                        "description": "Footprint REF**",
+                        "pos": {
+                          "x": 115.5,
+                          "y": 125.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ce23fb"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'MountingHole'",
+                    "items": [
+                      {
+                        "description": "Footprint REF**",
+                        "pos": {
+                          "x": 154.0,
+                          "y": 84.0
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ce2402"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'MountingHole'",
+                    "items": [
+                      {
+                        "description": "Footprint REF**",
+                        "pos": {
+                          "x": 154.0,
+                          "y": 125.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ce241b"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Connector_JST'",
+                    "items": [
+                      {
+                        "description": "Footprint J1",
+                        "pos": {
+                          "x": 116.975,
+                          "y": 98.873
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ce2996"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Resistor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint R1",
+                        "pos": {
+                          "x": 145.0,
+                          "y": 120.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ce2a81"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Symbol'",
+                    "items": [
+                      {
+                        "description": "Footprint REF**",
+                        "pos": {
+                          "x": 125.0,
+                          "y": 113.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-000060ceadb2"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Diode_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint D1",
+                        "pos": {
+                          "x": 150.62,
+                          "y": 101.0
+                        },
+                        "uuid": "00000000-0000-0000-0000-0000622bbbd0"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Diode_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint D2",
+                        "pos": {
+                          "x": 150.62,
+                          "y": 108.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-0000622bbbef"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Connector_JST'",
+                    "items": [
+                      {
+                        "description": "Footprint J4",
+                        "pos": {
+                          "x": 151.0,
+                          "y": 118.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-0000622bbc6c"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Package_TO_SOT_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint Q1",
+                        "pos": {
+                          "x": 138.4935,
+                          "y": 84.5
+                        },
+                        "uuid": "00000000-0000-0000-0000-0000622bbc86"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Package_TO_SOT_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint Q2",
+                        "pos": {
+                          "x": 143.54,
+                          "y": 125.055
+                        },
+                        "uuid": "00000000-0000-0000-0000-0000622bbca0"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Resistor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint R2",
+                        "pos": {
+                          "x": 145.0,
+                          "y": 94.0
+                        },
+                        "uuid": "00000000-0000-0000-0000-0000622bbcb3"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Connector_JST'",
+                    "items": [
+                      {
+                        "description": "Footprint J2",
+                        "pos": {
+                          "x": 116.9975,
+                          "y": 108.184
+                        },
+                        "uuid": "00000000-0000-0000-0000-000062744829"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Connector_JST'",
+                    "items": [
+                      {
+                        "description": "Footprint J3",
+                        "pos": {
+                          "x": 151.0,
+                          "y": 93.25
+                        },
+                        "uuid": "00000000-0000-0000-0000-000062744851"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Package_DIP'",
+                    "items": [
+                      {
+                        "description": "Footprint U1",
+                        "pos": {
+                          "x": 123.0,
+                          "y": 96.95
+                        },
+                        "uuid": "07848533-7ae5-4e87-bba6-e99fbab9841d"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Resistor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint R4",
+                        "pos": {
+                          "x": 145.0,
+                          "y": 115.5
+                        },
+                        "uuid": "5dadd2c0-c5a3-494f-b9df-a9ebd07146ab"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Resistor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint R3",
+                        "pos": {
+                          "x": 145.0,
+                          "y": 89.0
+                        },
+                        "uuid": "6be8be66-ef90-4a56-bd8a-9d5ed4e60a8b"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Resistor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint R6",
+                        "pos": {
+                          "x": 123.5,
+                          "y": 83.5
+                        },
+                        "uuid": "9128d436-8e9e-4ac6-9d6e-7c73d2490c8f"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Connector_JST'",
+                    "items": [
+                      {
+                        "description": "Footprint J5",
+                        "pos": {
+                          "x": 116.934,
+                          "y": 117.729
+                        },
+                        "uuid": "99d409fb-8a2d-4912-8582-272d5671b5f0"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Capacitor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint C1",
+                        "pos": {
+                          "x": 127.95,
+                          "y": 108.25
+                        },
+                        "uuid": "9d3486f5-12f0-4621-b2d1-934f6bec2a04"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  },
+                  {
+                    "description": "The current configuration does not include the footprint library 'Resistor_THT'",
+                    "items": [
+                      {
+                        "description": "Footprint R5",
+                        "pos": {
+                          "x": 130.0,
+                          "y": 83.5
+                        },
+                        "uuid": "d18a63b0-2d03-46ae-9b87-ec44dbe1f0ef"
+                      }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_footprint_issues"
+                  }
+                ],
+                "new_error_types": {},
+                "new_warnings": 22,
+                "new_warning_types": {
+                  "lib_footprint_issues": 22
+                },
+                "via_count": 12,
+                "track_count": 66,
+                "track_length_mm": 352.6905969311543,
+                "per_net_length_mm": {
+                  "+12V": 76.50287592394068,
+                  "GND": 113.04512215972291,
+                  "Net-(D1-Pad2)": 30.605838245460568,
+                  "Net-(D2-Pad2)": 34.12275656535309,
+                  "Net-(J1-Pad1)": 22.24490304413292,
+                  "Net-(Q1-Pad1)": 18.44388078262741,
+                  "Net-(Q2-Pad1)": 18.968816734416045,
+                  "Net-(U1-Pad2)": 14.784899145233988,
+                  "solenoid1": 11.789168757807705,
+                  "solenoid2": 12.182335572459001
+                },
+                "native_acceptance": true,
+                "manufacturing_clean": true,
+                "ignored_checks": [
+                  {
+                    "description": "Footprint has no courtyard defined",
+                    "key": "missing_courtyard"
+                  },
+                  {
+                    "description": "Track endpoint not centered on via",
+                    "key": "track_not_centered_on_via"
+                  },
+                  {
+                    "description": "Tuning profile track geometries",
+                    "key": "tuning_profile_track_geometries"
+                  },
+                  {
+                    "description": "Footprint doesn't match symbol's footprint filters",
+                    "key": "footprint_filters_mismatch"
+                  },
+                  {
+                    "description": "Footprint component type doesn't match footprint pads",
+                    "key": "footprint_type_mismatch"
+                  }
+                ],
+                "drc_command": [
+                  "/usr/bin/kicad-cli",
+                  "pcb",
+                  "drc",
+                  "--severity-all",
+                  "--format",
+                  "json",
+                  "-o",
+                  "/home/hyper/bench/agents/codex-new-routers/scratch/cycle476-native-before/runs/run-20261019T231356.916922Z-003/fab-router/drc.json",
+                  "/home/hyper/bench/agents/codex-new-routers/scratch/cycle476-native-before/runs/run-20261019T231356.916922Z-003/fab-router/final.kicad_pcb"
+                ],
+                "pass": true,
+                "opens": 0,
+                "fidelity": {
+                  "footprints": true,
+                  "pads": true,
+                  "outline": true,
+                  "layers": true,
+                  "zones": true,
+                  "kicad_pro_preserved": true,
+                  "kicad_dru_preserved": true,
+                  "checker_policy_preserved": true,
+                  "nets": true,
+                  "zone_definition": true,
+                  "board_setup": true
+                },
+                "vias": 12,
+                "length_mm": 352.6905969311543,
+                "job": "J1",
+                "raw_output_sha256": "b8e13e570ce1252d82cce899b304109b96bbe446619e0cd946572f4caef68f9f"
+              }
+            }
+          ],
+          "vias": 12,
+          "length": 352.6905969311543,
+          "seconds": 0.897248232,
+          "svg": "boards/kitspace-solenoid-driver-j1/fab-router.svg",
+          "shown_seed": 1
+        }
+      },
+      "input_svg": "boards/kitspace-solenoid-driver-j1/input.svg"
+    }
+  ],
+  "failures": [],
+  "jobs": {
+    "J1": "Whole board",
+    "J2": "Reroute after an edit",
+    "J3": "Power widths",
+    "J4": "Keep a ground pour"
+  },
+  "controls": "controls.json",
+  "caveat": "Valid cases require 3/3. Efficiency and time scores use medians, only on cases with at least two routers passing 3/3. Close timing differences require matched idle-machine runs."
+}

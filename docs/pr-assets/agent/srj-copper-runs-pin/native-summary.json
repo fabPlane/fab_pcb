@@ -1,0 +1,22 @@
+[
+  {
+    "mode": "before",
+    "repeats": 3,
+    "valid": 3,
+    "opens": 0,
+    "newErrors": 0,
+    "lengthMm": 352.6905969311543,
+    "vias": 12,
+    "medianSeconds": 0.897248232
+  },
+  {
+    "mode": "after",
+    "repeats": 3,
+    "valid": 3,
+    "opens": 0,
+    "newErrors": 0,
+    "lengthMm": 352.6905969311543,
+    "vias": 12,
+    "medianSeconds": 0.738679477
+  }
+]
