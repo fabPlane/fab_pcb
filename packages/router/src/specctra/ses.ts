@@ -93,7 +93,10 @@ export function parseSes(text: string): Session {
     let diameter = 0;
     for (const shape of children(ps, "shape")) {
       const geom = shape[1];
-      if (!isList(geom)) continue;
+      // NewVia has circular copper on every layer. Falling back to a name or
+      // another layer's circle for explicit noncircular geometry changes copper.
+      if (!isList(geom) || geom[0] !== "circle")
+        throw new SyntaxError("unsupported session via shape");
       const layer = geom[1];
       if (typeof layer === "string") layers.push(layer);
       if (geom[0] === "circle") {

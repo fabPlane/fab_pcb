@@ -496,6 +496,35 @@ describe("session via layer diameters", () => {
 });
 
 
+describe("session via shape representability", () => {
+  for (const shapes of [
+    "(shape (rect F.Cu -400 -300 400 300)) (shape (rect B.Cu -400 -300 400 300))",
+    "(shape (circle F.Cu 800)) (shape (rect B.Cu -400 -300 400 300))",
+    "(shape (polygon F.Cu 0 -400 -300 400 -300 400 300)) (shape (circle B.Cu 800))",
+  ]) {
+    test(`rejects unrepresentable session via shape ${shapes}`, () => {
+      const session = `(session s (routes (library_out (padstack V_800:300_um ${shapes}))
+        (network_out (net A (via V_800:300_um 1000 -1000)))))`;
+      expect(() => sesToItems(parseSes(session), twoNetBoard())).toThrow(SyntaxError);
+    });
+  }
+  test("preserves representable circular session via shapes", () => {
+    const session = parseSes(`(session s (routes (library_out (padstack V_800:300_um
+      (shape (circle F.Cu 800)) (shape (circle B.Cu 800))))
+      (network_out (net A (via V_800:300_um 1000 -1000)))))`);
+    const via = sesToItems(session, twoNetBoard()).vias[0]!;
+    expect(via.diameter).toBe(800000);
+    expect(via.drill).toBe(300000);
+  });
+  test("preserves missing session via shape fallback", () => {
+    const session = parseSes(`(session s (routes
+      (network_out (net A (via V_800:300_um 1000 -1000)))))`);
+    const via = sesToItems(session, twoNetBoard()).vias[0]!;
+    expect(via.diameter).toBe(800000);
+    expect(via.drill).toBe(300000);
+  });
+});
+
 describe("session via circle centers", () => {
   for (const center of ["100 0", "0 -100", "100", "NaN 0", "0 (bad)"]) {
     test(`rejects unsupported session circle center ${center}`, () => {
