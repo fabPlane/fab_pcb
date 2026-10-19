@@ -45,7 +45,10 @@ for left,right in zip(results['before'], results['after']):
 output = {
     'scope': 'Standalone native engine context only: the harness bypasses packages/router/src/bridge-job.ts. No rollback coverage or thermal improvement is claimed.',
     'machine': 'hyper-ms-lin', 'repeats_per_case': 3, 'attempt_outcomes_and_copper_identical': True,
-    'summary': summary, 'controls': controls, 'attempts': results,
+    'summary': summary, 'controls': controls,
+    'attempts': {name: [{k:v for k,v in row.items() if k != 'check'} for row in rows]
+                 for name,rows in results.items()},
+    'raw_native_reports': 'Retained in each sweep directory under the per-attempt evidence paths; verbose check objects omitted from this compact comparison.',
 }
 a.out.write_text(json.dumps(output, indent=2)+'\n')
 print(json.dumps(summary, indent=2))
