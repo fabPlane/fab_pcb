@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="480" viewBox="0 0 1100 480">
+<rect width="1100" height="480" fill="#fafafa"/>
+<g font-family="sans-serif" fill="#202735">
+<text x="50" y="50" font-size="27">Native scoring: preserve terminals before counting opens</text>
+<text x="50" y="85" font-size="18">Same boards and checker; three repeats; accepted attempts</text>
+<text x="50" y="150" font-size="21">Valid controls (12 attempts)</text>
+<text x="70" y="191" font-size="18">Before</text>
+<rect x="160" y="170" width="650.0" height="27" fill="#c36337"/>
+<text x="825.0" y="191" font-size="18">12/12</text>
+<text x="70" y="228" font-size="18">After</text>
+<rect x="160" y="207" width="650.0" height="27" fill="#21877a"/>
+<text x="825.0" y="228" font-size="18">12/12</text>
+<text x="50" y="295" font-size="21">Changed terminals (21 attempts)</text>
+<text x="70" y="336" font-size="18">Before</text>
+<rect x="160" y="315" width="650.0" height="27" fill="#c36337"/>
+<text x="825.0" y="336" font-size="18">21/21</text>
+<text x="70" y="373" font-size="18">After</text>
+<rect x="160" y="352" width="0.0" height="27" fill="#21877a"/>
+<text x="175.0" y="373" font-size="18">0/21</text>
+<text x="50" y="450" font-size="16">Standalone guard measurement; no routing or speed improvement claimed.</text></g></svg>
