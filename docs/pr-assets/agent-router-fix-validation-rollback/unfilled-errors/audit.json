@@ -1,0 +1,36 @@
+{
+  "before_source_commit": "6ca8207",
+  "after_source_sha256": {
+    "packages/router/src/bridge-job.ts": "7c0f1a778db9deaa2d34cf88955bb6800f7921e8862598cee86a0c10a0b36e03",
+    "packages/router/test/bridge-validation.test.ts": "5f6c2a4e1c9b9407ca008fcae4164f16273687171f3bc872e5eaeca75f2fbdf9",
+    "packages/router/test/bridge-validation-fixture.ts": "8b65ca223008c4339bf878d2af45e1fd1f5c6369f1aa8fd6ebd005ea16d7ccdc",
+    "packages/router/test/bridge-job.test.ts": "ad513a3d7932ae4516851e07783453749b6bde3479a492bcaa8227d8e26c12f5"
+  },
+  "repeats": 3,
+  "before_new_scenarios_pass": 0,
+  "after_new_scenarios_pass": 9,
+  "new_scenarios_total": 9,
+  "native_benchmark_run": false,
+  "after_source_commit": "3a249ff",
+  "checks": {
+    "adapter_typecheck": "pass",
+    "adapter_tests_pass": 131,
+    "adapter_tests_skip": 1,
+    "adapter_tests_fail": 0,
+    "engine_typecheck": "pass",
+    "engine_layer_files": 65,
+    "engine_layer_violations": 0,
+    "engine_tests_pass": 859,
+    "engine_tests_fail": 0
+  },
+  "log_sha256": {
+    "package-checks.log": "6d5c91334cd80ef6b0307262fa33862ed51e74754e65f3208052f75044be37da",
+    "before-2.log": "8a2aa8961d8d7499caf39aa9bd445122d8cb20d7d2656a5205d9a441d394c959",
+    "before-3.log": "9061446bc69698b9a3ecff6783b307bfb25e5edb8c3404606c4491f9592b5400",
+    "engine-checks.log": "fefdd8fe576f4137d786f4bf7f5592f1528a231597414f9cde0f192e2080a8f4",
+    "after-1.log": "3164f968644a30b8b91855cbc563551b891398baf4b55403d13088e65c7ea925",
+    "before-1.log": "158d33f9f63725a4735d789d05cb851e664f21b2ef8e54a096e75fd1a54688d7",
+    "after-3.log": "6e4ecdc02a4f24c05438149a89cd8e8e906443bff47ddbf3b77a1a6cf202a8a2",
+    "after-2.log": "b3cf071f5c7e6d865606e00e650bcd5cb8bcb15f998766fce00a0ec074d8c73e"
+  }
+}
