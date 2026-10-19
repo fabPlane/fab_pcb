@@ -49,3 +49,22 @@ The constructed comparison has three repeats for each of three mixed-identity
 controls and three unchanged controls. Equal-set comparison accepts all nine
 mixed controls; the guard rejects all nine and retains all three unchanged
 controls. These are deliberate counterexamples, not observed router failures.
+
+## Batch identity guard
+
+`batch_identities(runs)` requires one `system.cpu_name` across the entire batch
+and one full `fixture` identity per `fixture.id` across all backends. Distinct
+fixture IDs may describe distinct boards. Per-backend repeat checks alone allow
+uniform groups that collectively compare different inputs or machines. Call this
+guard before summarizing a batch; repeat counts, sample keys, backend versions
+and before/after comparison remain the caller's responsibility.
+
+```sh
+python3 benchmarks/tools/runtime-evidence/measure_batch_identity.py /tmp/batch-identity-controls
+```
+
+Three deliberately mismatched batches per field (fixture hash, fixture tier,
+CPU) pass per-backend admission but fail batch admission: 9 accepted before,
+0 after. Three unchanged batches remain accepted. Every batch has three backends
+with three repeats each. This is an opt-in evidence utility; frozen suite,
+adapters, ranking and caches are unchanged. No routing gain is claimed.
