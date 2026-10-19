@@ -1,0 +1,374 @@
+[
+  {
+    "scenario": "first-check-failure",
+    "repeat": 1,
+    "state": "failed",
+    "error": "native DRC transport unavailable",
+    "copper": [
+      "stub",
+      "protected",
+      "other-net",
+      "new-route"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc"
+    ],
+    "addedCopper": 1,
+    "missingOriginal": 0
+  },
+  {
+    "scenario": "cleanup-retry-failure",
+    "repeat": 1,
+    "state": "failed",
+    "error": "native DRC transport unavailable",
+    "copper": [
+      "protected",
+      "other-net",
+      "new-route"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc",
+      "undo",
+      "apply",
+      "drc"
+    ],
+    "addedCopper": 1,
+    "missingOriginal": 1
+  },
+  {
+    "scenario": "undo-zero",
+    "repeat": 1,
+    "state": "failed",
+    "error": "native DRC transport unavailable",
+    "copper": [
+      "stub",
+      "protected",
+      "other-net",
+      "new-route"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc"
+    ],
+    "addedCopper": 1,
+    "missingOriginal": 0
+  },
+  {
+    "scenario": "undo-throws",
+    "repeat": 1,
+    "state": "failed",
+    "error": "native DRC transport unavailable",
+    "copper": [
+      "stub",
+      "protected",
+      "other-net",
+      "new-route"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc"
+    ],
+    "addedCopper": 1,
+    "missingOriginal": 0
+  },
+  {
+    "scenario": "valid-control",
+    "repeat": 1,
+    "state": "done",
+    "error": null,
+    "copper": [
+      "stub",
+      "protected",
+      "other-net",
+      "new-route"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc",
+      "save",
+      "ratsnest"
+    ],
+    "addedCopper": 1,
+    "missingOriginal": 0
+  },
+  {
+    "scenario": "first-check-failure",
+    "repeat": 2,
+    "state": "failed",
+    "error": "native DRC transport unavailable",
+    "copper": [
+      "stub",
+      "protected",
+      "other-net",
+      "new-route"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc"
+    ],
+    "addedCopper": 1,
+    "missingOriginal": 0
+  },
+  {
+    "scenario": "cleanup-retry-failure",
+    "repeat": 2,
+    "state": "failed",
+    "error": "native DRC transport unavailable",
+    "copper": [
+      "protected",
+      "other-net",
+      "new-route"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc",
+      "undo",
+      "apply",
+      "drc"
+    ],
+    "addedCopper": 1,
+    "missingOriginal": 1
+  },
+  {
+    "scenario": "undo-zero",
+    "repeat": 2,
+    "state": "failed",
+    "error": "native DRC transport unavailable",
+    "copper": [
+      "stub",
+      "protected",
+      "other-net",
+      "new-route"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc"
+    ],
+    "addedCopper": 1,
+    "missingOriginal": 0
+  },
+  {
+    "scenario": "undo-throws",
+    "repeat": 2,
+    "state": "failed",
+    "error": "native DRC transport unavailable",
+    "copper": [
+      "stub",
+      "protected",
+      "other-net",
+      "new-route"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc"
+    ],
+    "addedCopper": 1,
+    "missingOriginal": 0
+  },
+  {
+    "scenario": "valid-control",
+    "repeat": 2,
+    "state": "done",
+    "error": null,
+    "copper": [
+      "stub",
+      "protected",
+      "other-net",
+      "new-route"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc",
+      "save",
+      "ratsnest"
+    ],
+    "addedCopper": 1,
+    "missingOriginal": 0
+  },
+  {
+    "scenario": "first-check-failure",
+    "repeat": 3,
+    "state": "failed",
+    "error": "native DRC transport unavailable",
+    "copper": [
+      "stub",
+      "protected",
+      "other-net",
+      "new-route"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc"
+    ],
+    "addedCopper": 1,
+    "missingOriginal": 0
+  },
+  {
+    "scenario": "cleanup-retry-failure",
+    "repeat": 3,
+    "state": "failed",
+    "error": "native DRC transport unavailable",
+    "copper": [
+      "protected",
+      "other-net",
+      "new-route"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc",
+      "undo",
+      "apply",
+      "drc"
+    ],
+    "addedCopper": 1,
+    "missingOriginal": 1
+  },
+  {
+    "scenario": "undo-zero",
+    "repeat": 3,
+    "state": "failed",
+    "error": "native DRC transport unavailable",
+    "copper": [
+      "stub",
+      "protected",
+      "other-net",
+      "new-route"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc"
+    ],
+    "addedCopper": 1,
+    "missingOriginal": 0
+  },
+  {
+    "scenario": "undo-throws",
+    "repeat": 3,
+    "state": "failed",
+    "error": "native DRC transport unavailable",
+    "copper": [
+      "stub",
+      "protected",
+      "other-net",
+      "new-route"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc"
+    ],
+    "addedCopper": 1,
+    "missingOriginal": 0
+  },
+  {
+    "scenario": "valid-control",
+    "repeat": 3,
+    "state": "done",
+    "error": null,
+    "copper": [
+      "stub",
+      "protected",
+      "other-net",
+      "new-route"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc",
+      "save",
+      "ratsnest"
+    ],
+    "addedCopper": 1,
+    "missingOriginal": 0
+  }
+]
