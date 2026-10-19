@@ -1,7 +1,7 @@
 # Recovery pin verification
 
 The pin advances to f1680db, with recovery default off. The previous pin 5be94a0
-and fresh before control a284bef match across all 76 source/type files. The new
+and fresh before control a284bef match across all 84 captured files (75 TypeScript files and nine module READMEs). The new
 engine supports barrel endpoints on their real copper sheets.
 
 See results.md for complete measured tables. Frozen native engine outputs match
