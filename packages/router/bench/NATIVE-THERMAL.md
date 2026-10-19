@@ -36,3 +36,10 @@ rule files or source inputs. It assumes exclusive ownership of the disposable bo
 and its directory throughout the run. It provides no live-editor transaction,
 concurrent-writer protection, signed attestation or power-loss durability guarantee.
 The benchmark's independent checks remain authoritative.
+
+Current search limitation: scoped native import can assign fresh UUIDs to retained
+tracks. A UUID-only proposal exclusion can then select authored copper; the strict
+source-copper validator refuses the proposal and the search is recorded as failed.
+The postprocessor keeps the original board for independent scoring. A search tool
+revision that identifies retained copper by physical inventory is needed to remove
+this blocker; do not weaken the source-copper check.
