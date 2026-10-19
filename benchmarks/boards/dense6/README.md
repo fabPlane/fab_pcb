@@ -90,3 +90,32 @@ python3 benchmarks/boards/dense6/tools/plot_output_safety.py /tmp/native-output-
 
 Absent rule-sidecar destinations and dangling sidecar symlink targets are also
 rejected before report creation; regressions preserve the sidecar absence.
+
+
+Reusable baseline evidence (cycle 28): `baseline.capture(board, report)` runs
+fresh input DRC and returns a JSON-serializable record binding the original edge
+count to board, project, custom rules, checker and report hashes. Persist that
+record and the input report together. `baseline.score(record, routed, report)`
+verifies the saved evidence before and after fresh routed DRC, requires identical
+project/custom-rule bytes and checker identity, and returns the baseline ID,
+initial/remaining opens and edge completion. Absent sidecars count as an identity.
+It rejects changed evidence, rules and tools instead of falling back to net count.
+The routed report cannot overwrite baseline evidence.
+
+This is a reusable integration primitive, still outside ranked harness adapters
+and caches. Callers must establish that routed output retains the input's pads
+and nets; native DRC alone cannot establish that topology correspondence. The
+baseline ID is evidence identity, not a replacement for router/result cache keys.
+
+```sh
+nice -n 10 taskset -c 0-5 timeout 1800 env PYTHONDONTWRITEBYTECODE=1 \
+  python3 benchmarks/boards/dense6/tools/measure_baseline.py \
+  --out /tmp/native-baseline-roundtrip --repeats 3 \
+  --dense benchmarks/boards/dense6/dense6-bga324.kicad_pcb
+python3 benchmarks/boards/dense6/tools/plot.py \
+  /tmp/native-baseline-roundtrip/summary.csv /tmp/native-baseline-roundtrip.png
+```
+
+The measurement persists and reloads each baseline before scoring controlled
+partial routes. It includes two-/three-terminal inputs, preconnected and zero-open
+baselines, plus the unchanged dense input. Each row requires two fresh checks.
