@@ -55,10 +55,11 @@ def geometry(board):
     pads = sorted((f.GetReference(), p.GetNumber(), p.GetNetname(),
                    point(p.GetPosition()), point(p.GetSize()), int(p.GetShape()),
                    p.GetLayerSet().FmtHex(), point(p.GetDrillSize()),
-                   p.GetOrientationDegrees(), int(p.GetAttribute()), point(p.GetOffset()))
+                   p.GetOrientationDegrees(), int(p.GetAttribute()), point(p.GetOffset()),
+                   p.GetLocalClearance())
                   for f in board.GetFootprints() for p in f.Pads())
     footprints = sorted((f.GetReference(), f.GetValue(), point(f.GetPosition()),
-                         int(f.GetLayer()), f.GetOrientationDegrees())
+                         int(f.GetLayer()), f.GetOrientationDegrees(), f.GetLocalClearance())
                         for f in board.GetFootprints())
     outline = sorted((int(d.GetShape()), int(d.GetLayer()), point(d.GetStart()), point(d.GetEnd()), d.GetWidth())
                      for d in board.GetDrawings())

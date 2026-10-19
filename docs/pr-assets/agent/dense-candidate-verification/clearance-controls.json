@@ -1,0 +1,128 @@
+[
+  {
+    "repeat": 1,
+    "case": "valid",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 2.99900789198
+  },
+  {
+    "repeat": 1,
+    "case": "valid",
+    "version": "after",
+    "accepted": true,
+    "wall_s": 3.090354637010023
+  },
+  {
+    "repeat": 1,
+    "case": "pad",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 3.2388361119665205
+  },
+  {
+    "repeat": 1,
+    "case": "pad",
+    "version": "after",
+    "accepted": false,
+    "wall_s": 0.5311838999623433
+  },
+  {
+    "repeat": 1,
+    "case": "footprint",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 3.199778496986255
+  },
+  {
+    "repeat": 1,
+    "case": "footprint",
+    "version": "after",
+    "accepted": false,
+    "wall_s": 0.5172259209211916
+  },
+  {
+    "repeat": 2,
+    "case": "valid",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 3.0760313980281353
+  },
+  {
+    "repeat": 2,
+    "case": "valid",
+    "version": "after",
+    "accepted": true,
+    "wall_s": 3.0290134800598025
+  },
+  {
+    "repeat": 2,
+    "case": "pad",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 3.0166632459731773
+  },
+  {
+    "repeat": 2,
+    "case": "pad",
+    "version": "after",
+    "accepted": false,
+    "wall_s": 0.5154881299240515
+  },
+  {
+    "repeat": 2,
+    "case": "footprint",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 2.9390727090649307
+  },
+  {
+    "repeat": 2,
+    "case": "footprint",
+    "version": "after",
+    "accepted": false,
+    "wall_s": 0.5062487120740116
+  },
+  {
+    "repeat": 3,
+    "case": "valid",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 2.991457477910444
+  },
+  {
+    "repeat": 3,
+    "case": "valid",
+    "version": "after",
+    "accepted": true,
+    "wall_s": 3.1617191680707037
+  },
+  {
+    "repeat": 3,
+    "case": "pad",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 3.3971530450508
+  },
+  {
+    "repeat": 3,
+    "case": "pad",
+    "version": "after",
+    "accepted": false,
+    "wall_s": 0.6111369419377297
+  },
+  {
+    "repeat": 3,
+    "case": "footprint",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 3.9154350390890613
+  },
+  {
+    "repeat": 3,
+    "case": "footprint",
+    "version": "after",
+    "accepted": false,
+    "wall_s": 0.546014791005291
+  }
+]

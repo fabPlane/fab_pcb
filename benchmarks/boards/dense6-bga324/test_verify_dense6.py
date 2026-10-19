@@ -3,13 +3,13 @@ import unittest
 import subprocess
 import sys
 from pathlib import Path
-from verify_dense6 import canonical_dsn
+from verify_dense6 import canonical_dsn, geometry
 
 
 class CanonicalDsnTests(unittest.TestCase):
     def test_optimized_python_keeps_evidence_gates(self):
         code = """
-from verify_dense6 import canonical_dsn, require
+from verify_dense6 import canonical_dsn, geometry, require
 for operation in (lambda: require(False, 'evidence rejected'),
                   lambda: canonical_dsn(b'(pcb board))'),
                   lambda: canonical_dsn(b'pcb board')):
@@ -55,6 +55,35 @@ for operation in (lambda: require(False, 'evidence rejected'),
     def test_preserves_quoted_tokens(self):
         self.assertNotEqual(canonical_dsn(b'(net "a b" (pins A B))'),
                             canonical_dsn(b'(net a b (pins A B))'))
+
+
+class NativeClearanceTests(unittest.TestCase):
+    def test_local_clearance_overrides_change_native_signature(self):
+        try:
+            import pcbnew
+        except ImportError:
+            self.skipTest("requires KiCad pcbnew")
+        # An unset override and explicit zero have different rule inheritance.
+        for owner in ("pad", "footprint"):
+            board = pcbnew.BOARD()
+            footprint = pcbnew.FOOTPRINT(board)
+            footprint.SetReference("U1")
+            pad = pcbnew.PAD(footprint)
+            pad.SetNumber("1")
+            footprint.Add(pad)
+            board.Add(footprint)
+            item = pad if owner == "pad" else footprint
+            original = geometry(board)
+            self.assertIsNone(item.GetLocalClearance())
+            observed = []
+            for clearance in (0, 50000, 100000):
+                item.SetLocalClearance(clearance)
+                signature = geometry(board)
+                self.assertNotEqual(original, signature, (owner, clearance))
+                self.assertNotIn(signature, observed)
+                observed.append(signature)
+            item.SetLocalClearance(None)
+            self.assertEqual(original, geometry(board))
 
 
 if __name__ == '__main__':

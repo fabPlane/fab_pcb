@@ -101,3 +101,10 @@ rules; the verifier normalizes explicitly unordered containers and preserves
 path-coordinate order. Expected native output: 0 errors, 439 opens and 30
 `lib_footprint_issues` warnings. Missing-library warnings remain visible.
 This is an unrouted regression check, not proof of a feasible complete route.
+
+## Local clearance equivalence
+
+The verifier includes pad and footprint clearance overrides in its native signature,
+including unset versus explicit zero. See
+[measured controls and reproduction](../../../docs/pr-assets/agent/dense-candidate-verification/CLEARANCE.md).
+This check does not establish complete native identity or routed feasibility.
