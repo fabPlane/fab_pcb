@@ -10,6 +10,7 @@ import { collisionBoard } from "./collision-fixture";
 export function validationFixture(
   options: {
     baselineGate?: () => Promise<void>;
+    ratsnestGate?: () => Promise<void>;
     validationGate?: () => Promise<void>;
     filledValidationGate?: () => Promise<void>;
     refill?: "valid" | "throws" | "commit-then-throws" | "commit-valid";
@@ -57,6 +58,7 @@ export function validationFixture(
     getTracks: async () => copper,
     ratsnest: async () => {
       calls.push("ratsnest");
+      await options.ratsnestGate?.();
       if (options.ratsnestFailure) throw new Error("native ratsnest transport unavailable");
       const open = options.relabel && (!options.oscillatingCount || checks % 2 === 1);
       return { edges: open ? [{
@@ -167,7 +169,7 @@ export function validationFixture(
     {
       router: "js",
       refillZones: !!options.refill,
-      ...(options.ratsnestFailure || options.relabel ? {} : { message: "validation regression" }),
+      ...(options.ratsnestFailure || options.relabel || options.ratsnestGate ? {} : { message: "validation regression" }),
       options: { nets: ["A"] },
     },
   );

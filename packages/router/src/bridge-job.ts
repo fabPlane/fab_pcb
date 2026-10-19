@@ -525,6 +525,9 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
                 let nativeOpen: number;
                 try {
                   nativeOpen = (await board.ratsnest(request.options?.nets ?? [])).edges.length;
+                  // This query still belongs to the tentative commit. Cancellation
+                  // must reject it before relabelling, refill, or durable save.
+                  checkCancelled();
                 } catch (validationError) {
                   return await rejectTentativeValidation(board, committed.commitId, "native ratsnest", validationError);
                 }
