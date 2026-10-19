@@ -9,6 +9,7 @@ import { collisionBoard } from "./collision-fixture";
 // restored along with removal of the route when native validation is unavailable.
 export function validationFixture(
   options: {
+    baselineGate?: () => Promise<void>;
     refill?: "valid" | "throws" | "commit-then-throws" | "commit-valid";
     filledMarkers?: "new" | "existing" | "duplicate" | "replacement" | "excluded";
     markerChange?: "position" | "layer" | "item-order";
@@ -95,6 +96,7 @@ export function validationFixture(
           id: { value: id }, excluded,
         });
         if (!copper.includes(generated)) {
+          await options.baselineGate?.();
           const baselineMarker = marker("pad", "before-id");
           if (options.baselineStatus === "warning") baselineMarker.severity = RuleSeverity.RS_WARNING;
           if (options.baselineStatus === "excluded") baselineMarker.excluded = true;
@@ -156,16 +158,15 @@ export function validationFixture(
       return { commitId: "route-commit", created: [generated], updated: [], deleted: [], value: [generated] };
     },
   });
-  const done = jobs.wait(
-    jobs.start(
-      { id: "validation", transport: null },
-      {
-        router: "js",
-        refillZones: !!options.refill,
-        ...(options.ratsnestFailure || options.relabel ? {} : { message: "validation regression" }),
-        options: { nets: ["A"] },
-      },
-    ).id,
+  const job = jobs.start(
+    { id: "validation", transport: null },
+    {
+      router: "js",
+      refillZones: !!options.refill,
+      ...(options.ratsnestFailure || options.relabel ? {} : { message: "validation regression" }),
+      options: { nets: ["A"] },
+    },
   );
-  return { done, calls, original, copper: () => copper };
+  const done = jobs.wait(job.id);
+  return { done, calls, original, cancel: () => jobs.cancel(job.id), copper: () => copper };
 }

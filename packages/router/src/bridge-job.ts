@@ -470,6 +470,9 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           // Each cleanup pass removes an item; allow one extra pass to validate a relabelled commit.
           const maxCleanupPasses = result.tracks.length + result.vias.length + removableExisting.size + 2;
           for (let cleanupPass = 0; cleanupPass < maxCleanupPasses; cleanupPass++) {
+            // Cancellation may arrive during the baseline query or a cleanup undo.
+            // Stop before creating the next tentative commit.
+            checkCancelled();
             const committed = await (deps.apply ?? applyRouteResult)(board, result, {
               message,
               removeCopperIds: [...removedExistingCopper.keys()],
