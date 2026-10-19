@@ -273,8 +273,11 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
     // Missing padstack metadata may use the legacy fallback; unsupported metadata cannot.
     if (ps?.layers.some((name) => !layerByName.has(name)))
       throw new SyntaxError("unknown session via layer");
-    let layers = (ps?.layers ?? []).map((name) => layerByName.get(name)!);
-    if (layers.length < 2) layers = allLayers;
+    let layers = [...new Set((ps?.layers ?? []).map((name) => layerByName.get(name)!))];
+    // Repeated shapes and aliases do not create a barrel between distinct layers.
+    // A declared single-layer padstack must not become a through via.
+    if (layers.length === 1) throw new SyntaxError("session via requires two distinct layers");
+    if (layers.length === 0) layers = allLayers;
     // Padstack names carry whole micrometres (`viaPadstackName`), so a size read from the name can
     // be up to 500 nm off the native via (e.g. a 0.3048 mm drill is named 305 um).
     const sizeTolerance = {

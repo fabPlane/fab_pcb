@@ -454,3 +454,24 @@ describe("session via layer identity", () => {
     expect(sesToItems(session, twoNetBoard()).vias[0]!.layers).toEqual(twoNetBoard().copperLayers.map(l => l.id));
   });
 });
+
+describe("session via distinct layer span", () => {
+  for (const layers of [["F.Cu"], ["F.Cu", "F.Cu"], ["F.Cu", "BL_F_Cu"]]) {
+    test(`rejects one distinct via layer: ${layers.join(",")}`, () => {
+      const shapes = layers.map(layer => `(shape (circle ${layer} 800))`).join(" ");
+      const session = parseSes(`(session s (routes (library_out (padstack V ${shapes}))
+        (network_out (net A (via V 1000 -1000)))))`);
+      expect(() => sesToItems(session, twoNetBoard())).toThrow(SyntaxError);
+    });
+  }
+  test("normalizes repeated aliases in a valid via span", () => {
+    const session = parseSes(`(session s (routes (library_out (padstack V
+      (shape (circle F.Cu 800)) (shape (circle BL_F_Cu 800)) (shape (circle B.Cu 800))))
+      (network_out (net A (via V 1000 -1000)))))`);
+    expect(sesToItems(session, twoNetBoard()).vias[0]!.layers).toEqual(twoNetBoard().copperLayers.map(l => l.id));
+  });
+  test("retains via fallback when layer metadata is absent", () => {
+    const session = parseSes(`(session s (routes (network_out (net A (via V 1000 -1000)))))`);
+    expect(sesToItems(session, twoNetBoard()).vias[0]!.layers).toEqual(twoNetBoard().copperLayers.map(l => l.id));
+  });
+});
