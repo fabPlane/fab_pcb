@@ -16,6 +16,12 @@ import subprocess
 import sys
 
 
+def require(condition, message):
+    """Evidence gates must remain active under Python optimization."""
+    if not condition:
+        raise AssertionError(message)
+
+
 def canonical_dsn(data):
     # Preserve atom/path order; only sort child records in unordered containers.
     tokens = iter(re.findall(r'"(?:\\.|[^"\\])*"|[()]|[^\s()]+', data.decode()))
@@ -37,9 +43,9 @@ def canonical_dsn(data):
             records = sorted((v for v in values if isinstance(v, list)), key=repr)
             return atoms + records
         return values
-    assert next(tokens) == '('
+    require(next(tokens, None) == '(', 'Expected DSN opening list')
     result = parse()
-    assert next(tokens, None) is None
+    require(next(tokens, None) is None, 'Unexpected trailing DSN tokens')
     return result
 
 
@@ -69,10 +75,10 @@ def verify(generator, fixture, out):
                        check=True, timeout=30, capture_output=True)
     filename = 'dense6-bga324.kicad_pcb'
     first, second = out / 'first' / filename, out / 'second' / filename
-    assert first.read_bytes() == second.read_bytes(), 'generator is not byte deterministic'
+    require(first.read_bytes() == second.read_bytes(), 'generator is not byte deterministic')
     stats = json.loads((out / 'first/stats.json').read_text())
-    assert {k: stats[k] for k in ('nets', 'pads', 'connections', 'layers', 'footprints')} == dict(
-        nets=263, pads=702, connections=439, layers=6, footprints=30), 'unexpected board topology'
+    require({k: stats[k] for k in ('nets', 'pads', 'connections', 'layers', 'footprints')} == dict(
+        nets=263, pads=702, connections=439, layers=6, footprints=30), 'unexpected board topology')
     reference_dir = out / 'reference'
     reference_dir.mkdir()
     reference = reference_dir / filename
@@ -85,22 +91,22 @@ def verify(generator, fixture, out):
                            min_through_hole_diameter=0.2, min_via_annular_width=0.1,
                            min_hole_clearance=0.2, min_hole_to_hole=0.25,
                            min_copper_edge_clearance=0.3, min_connection=0.0)
-    assert {key: minima[key] for key in expected_minima} == expected_minima, 'wrong native rule minima'
+    require({key: minima[key] for key in expected_minima} == expected_minima, 'wrong native rule minima')
     shutil.copyfile(project, first.with_suffix('.kicad_pro'))
     generated_board = pcbnew.LoadBoard(str(first))
     reference_board = pcbnew.LoadBoard(str(reference))
-    assert geometry(generated_board) == geometry(reference_board), 'generated geometry differs'
+    require(geometry(generated_board) == geometry(reference_board), 'generated geometry differs')
     for board in (generated_board, reference_board):
         nc = board.GetDesignSettings().m_NetSettings.GetDefaultNetclass()
         values = [nc.GetClearance(), nc.GetTrackWidth(), nc.GetViaDiameter(), nc.GetViaDrill()]
-        assert values == [100000, 100000, 450000, 200000], f'wrong default rules: {values}'
+        require(values == [100000, 100000, 450000, 200000], f'wrong default rules: {values}')
     # A fresh process is intentional: project settings must be loaded from disk.
     export_code = ('import pcbnew,sys; b=pcbnew.LoadBoard(sys.argv[1]); '
-                   'assert pcbnew.ExportSpecctraDSN(b,"board.dsn")')
+                   'sys.exit(0 if pcbnew.ExportSpecctraDSN(b,"board.dsn") else 1)')
     subprocess.run([sys.executable, '-c', export_code, str(first.resolve())],
                    cwd=out, check=True, timeout=60, capture_output=True)
     expected = (fixture / 'dense6-bga324.dsn').read_bytes()
-    assert canonical_dsn((out / 'board.dsn').read_bytes()) == canonical_dsn(expected), 'exported DSN differs'
+    require(canonical_dsn((out / 'board.dsn').read_bytes()) == canonical_dsn(expected), 'exported DSN differs')
     reports = []
     for name, board in (('generated', first), ('bundled', reference)):
         report = out / (name + '-drc.json')
@@ -109,9 +115,9 @@ def verify(generator, fixture, out):
         data = json.loads(report.read_text())
         errors = [v for v in data['violations'] if v['severity'] == 'error']
         warnings = Counter(v['type'] for v in data['violations'] if v['severity'] == 'warning')
-        assert not errors, f'{name}: native DRC errors'
-        assert warnings == {'lib_footprint_issues': 30}, f'{name}: unexpected warnings: {warnings}'
-        assert len(data['unconnected_items']) == 439, f'{name}: unexpected connection count'
+        require(not errors, f'{name}: native DRC errors')
+        require(warnings == {'lib_footprint_issues': 30}, f'{name}: unexpected warnings: {warnings}')
+        require(len(data['unconnected_items']) == 439, f'{name}: unexpected connection count')
         reports.append(dict(board=name, errors=0, opens=439, warnings=dict(warnings)))
     summary = dict(seed=6406, stats=stats, generator_sha256=hashlib.sha256(generator.read_bytes()).hexdigest(),
                    dsn_sha256=hashlib.sha256(expected).hexdigest(), deterministic=True,

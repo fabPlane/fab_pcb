@@ -1,9 +1,29 @@
 # SPDX-License-Identifier: MIT
 import unittest
+import subprocess
+import sys
+from pathlib import Path
 from verify_dense6 import canonical_dsn
 
 
 class CanonicalDsnTests(unittest.TestCase):
+    def test_optimized_python_keeps_evidence_gates(self):
+        code = """
+from verify_dense6 import canonical_dsn, require
+for operation in (lambda: require(False, 'evidence rejected'),
+                  lambda: canonical_dsn(b'(pcb board))'),
+                  lambda: canonical_dsn(b'pcb board')):
+    try:
+        operation()
+    except AssertionError:
+        continue
+    raise RuntimeError('evidence gate was bypassed')
+"""
+        result = subprocess.run([sys.executable, '-O', '-c', code],
+                                cwd=Path(__file__).resolve().parent,
+                                capture_output=True, text=True, timeout=10)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_reorders_unordered_pins_and_components(self):
         a = b'(pcb board (placement (component X (place A 1 2 front 0)) (component Y (place B 3 4 front 0))) (network (net N (pins A-1 B-1))))'
         b = b'(pcb board (placement (component Y (place B 3 4 front 0)) (component X (place A 1 2 front 0))) (network (net N (pins B-1 A-1))))'

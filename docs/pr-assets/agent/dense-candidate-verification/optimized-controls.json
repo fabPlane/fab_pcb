@@ -1,0 +1,182 @@
+[
+  {
+    "version": "before",
+    "label": "valid",
+    "repeat": 1,
+    "exit": 0
+  },
+  {
+    "version": "after",
+    "label": "valid",
+    "repeat": 1,
+    "exit": 0
+  },
+  {
+    "version": "before",
+    "label": "rules",
+    "repeat": 1,
+    "exit": 0
+  },
+  {
+    "version": "after",
+    "label": "rules",
+    "repeat": 1,
+    "exit": 1
+  },
+  {
+    "version": "before",
+    "label": "minima",
+    "repeat": 1,
+    "exit": 0
+  },
+  {
+    "version": "after",
+    "label": "minima",
+    "repeat": 1,
+    "exit": 1
+  },
+  {
+    "version": "before",
+    "label": "geometry",
+    "repeat": 1,
+    "exit": 0
+  },
+  {
+    "version": "after",
+    "label": "geometry",
+    "repeat": 1,
+    "exit": 1
+  },
+  {
+    "version": "before",
+    "label": "dsn",
+    "repeat": 1,
+    "exit": 0
+  },
+  {
+    "version": "after",
+    "label": "dsn",
+    "repeat": 1,
+    "exit": 1
+  },
+  {
+    "version": "before",
+    "label": "valid",
+    "repeat": 2,
+    "exit": 0
+  },
+  {
+    "version": "after",
+    "label": "valid",
+    "repeat": 2,
+    "exit": 0
+  },
+  {
+    "version": "before",
+    "label": "rules",
+    "repeat": 2,
+    "exit": 0
+  },
+  {
+    "version": "after",
+    "label": "rules",
+    "repeat": 2,
+    "exit": 1
+  },
+  {
+    "version": "before",
+    "label": "minima",
+    "repeat": 2,
+    "exit": 0
+  },
+  {
+    "version": "after",
+    "label": "minima",
+    "repeat": 2,
+    "exit": 1
+  },
+  {
+    "version": "before",
+    "label": "geometry",
+    "repeat": 2,
+    "exit": 0
+  },
+  {
+    "version": "after",
+    "label": "geometry",
+    "repeat": 2,
+    "exit": 1
+  },
+  {
+    "version": "before",
+    "label": "dsn",
+    "repeat": 2,
+    "exit": 0
+  },
+  {
+    "version": "after",
+    "label": "dsn",
+    "repeat": 2,
+    "exit": 1
+  },
+  {
+    "version": "before",
+    "label": "valid",
+    "repeat": 3,
+    "exit": 0
+  },
+  {
+    "version": "after",
+    "label": "valid",
+    "repeat": 3,
+    "exit": 0
+  },
+  {
+    "version": "before",
+    "label": "rules",
+    "repeat": 3,
+    "exit": 0
+  },
+  {
+    "version": "after",
+    "label": "rules",
+    "repeat": 3,
+    "exit": 1
+  },
+  {
+    "version": "before",
+    "label": "minima",
+    "repeat": 3,
+    "exit": 0
+  },
+  {
+    "version": "after",
+    "label": "minima",
+    "repeat": 3,
+    "exit": 1
+  },
+  {
+    "version": "before",
+    "label": "geometry",
+    "repeat": 3,
+    "exit": 0
+  },
+  {
+    "version": "after",
+    "label": "geometry",
+    "repeat": 3,
+    "exit": 1
+  },
+  {
+    "version": "before",
+    "label": "dsn",
+    "repeat": 3,
+    "exit": 0
+  },
+  {
+    "version": "after",
+    "label": "dsn",
+    "repeat": 3,
+    "exit": 1
+  }
+]
