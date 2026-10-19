@@ -49,6 +49,20 @@ def canonical_dsn(data):
     return result
 
 
+# Pin the candidate project checking sections independently of the supplied project.
+# Includes rule severity/exclusion and netclass settings; UI-only state and other project sections are excluded.
+# To change this contract, review the fixture policy and update its controls too.
+EXPECTED_POLICY_SHA256 = "767e8b10ea025f657d356a7c8fe8f7775a78b9c59cf06ec58bb253c725e8c6dd"
+
+
+def project_policy_digest(project):
+    settings = project['board']['design_settings']
+    policy = {key: settings[key] for key in ('rules', 'rule_severities', 'drc_exclusions')}
+    policy['net_settings'] = project['net_settings']
+    return hashlib.sha256(json.dumps(policy, sort_keys=True, separators=(',', ':'),
+                                     allow_nan=False).encode()).hexdigest()
+
+
 def geometry(board):
     def point(p):
         return [p.x, p.y]
@@ -87,7 +101,10 @@ def verify(generator, fixture, out):
     shutil.copyfile(fixture / 'dense6-bga324.kicad_pro', reference.with_suffix('.kicad_pro'))
     # Rules must travel with the native board. Test both the generated and bundled board.
     project = fixture / 'dense6-bga324.kicad_pro'
-    minima = json.loads(project.read_text())['board']['design_settings']['rules']
+    project_data = json.loads(project.read_text())
+    require(project_policy_digest(project_data) == EXPECTED_POLICY_SHA256,
+            'native project checking policy differs')
+    minima = project_data['board']['design_settings']['rules']
     expected_minima = dict(min_clearance=0.1, min_track_width=0.1, min_via_diameter=0.45,
                            min_through_hole_diameter=0.2, min_via_annular_width=0.1,
                            min_hole_clearance=0.2, min_hole_to_hole=0.25,
@@ -123,6 +140,7 @@ def verify(generator, fixture, out):
     summary = dict(seed=6406, stats=stats, generator_sha256=hashlib.sha256(generator.read_bytes()).hexdigest(),
                    dsn_sha256=hashlib.sha256(expected).hexdigest(), deterministic=True,
                    geometry_equal=True, dsn_semantically_equal=True, reports=reports,
+                   project_policy_sha256=project_policy_digest(project_data),
                    limitation='Unrouted candidate only; feasibility is unproven.')
     (out / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
     print(json.dumps(summary, indent=2))

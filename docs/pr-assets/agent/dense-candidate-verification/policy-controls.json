@@ -1,0 +1,181 @@
+{
+  "cycle": 55,
+  "before_commit": "eb7e78f",
+  "machine": "hyper-ms-lin",
+  "cores": "0-5",
+  "nice": 10,
+  "repeats_per_case": 3,
+  "python_optimized": true,
+  "records": [
+    {
+      "repeat": 1,
+      "case": "valid",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.979710123967379
+    },
+    {
+      "repeat": 1,
+      "case": "valid",
+      "version": "after",
+      "accepted": true,
+      "wall_s": 4.795470999903046
+    },
+    {
+      "repeat": 1,
+      "case": "severity",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.662605362012982
+    },
+    {
+      "repeat": 1,
+      "case": "severity",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5496899010613561
+    },
+    {
+      "repeat": 1,
+      "case": "microvia",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.577224290929735
+    },
+    {
+      "repeat": 1,
+      "case": "microvia",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.7171689110109583
+    },
+    {
+      "repeat": 1,
+      "case": "length-policy",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.1668135789223015
+    },
+    {
+      "repeat": 1,
+      "case": "length-policy",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 1.0743080619722605
+    },
+    {
+      "repeat": 2,
+      "case": "valid",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.1756793290842324
+    },
+    {
+      "repeat": 2,
+      "case": "valid",
+      "version": "after",
+      "accepted": true,
+      "wall_s": 4.5102650839835405
+    },
+    {
+      "repeat": 2,
+      "case": "severity",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 3.9248546179151163
+    },
+    {
+      "repeat": 2,
+      "case": "severity",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.9473619130440056
+    },
+    {
+      "repeat": 2,
+      "case": "microvia",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.257794618024491
+    },
+    {
+      "repeat": 2,
+      "case": "microvia",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 1.1277733210008591
+    },
+    {
+      "repeat": 2,
+      "case": "length-policy",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 3.946145539986901
+    },
+    {
+      "repeat": 2,
+      "case": "length-policy",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5094863870181143
+    },
+    {
+      "repeat": 3,
+      "case": "valid",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 3.332405491033569
+    },
+    {
+      "repeat": 3,
+      "case": "valid",
+      "version": "after",
+      "accepted": true,
+      "wall_s": 3.729724343982525
+    },
+    {
+      "repeat": 3,
+      "case": "severity",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 3.4330874719889835
+    },
+    {
+      "repeat": 3,
+      "case": "severity",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5391945040319115
+    },
+    {
+      "repeat": 3,
+      "case": "microvia",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 3.280227849027142
+    },
+    {
+      "repeat": 3,
+      "case": "microvia",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5384804770583287
+    },
+    {
+      "repeat": 3,
+      "case": "length-policy",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 3.1118674620520324
+    },
+    {
+      "repeat": 3,
+      "case": "length-policy",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.49300437490455806
+    }
+  ],
+  "after_verifier_sha256": "1ae3941d9ff8de714ee841c73109ac95d4e88f6b382278509107f3716f01d0d6",
+  "limitation": "Constructed project-policy controls, no routing. Pins rules, rule_severities, drc_exclusions and net_settings only; not all native serialization or external custom rules."
+}

@@ -1,15 +1,17 @@
 # SPDX-License-Identifier: MIT
+import copy
+import json
 import unittest
 import subprocess
 import sys
 from pathlib import Path
-from verify_dense6 import canonical_dsn, geometry
+from verify_dense6 import canonical_dsn, geometry, project_policy_digest, EXPECTED_POLICY_SHA256
 
 
 class CanonicalDsnTests(unittest.TestCase):
     def test_optimized_python_keeps_evidence_gates(self):
         code = """
-from verify_dense6 import canonical_dsn, geometry, require
+from verify_dense6 import canonical_dsn, require
 for operation in (lambda: require(False, 'evidence rejected'),
                   lambda: canonical_dsn(b'(pcb board))'),
                   lambda: canonical_dsn(b'pcb board')):
@@ -55,6 +57,41 @@ for operation in (lambda: require(False, 'evidence rejected'),
     def test_preserves_quoted_tokens(self):
         self.assertNotEqual(canonical_dsn(b'(net "a b" (pins A B))'),
                             canonical_dsn(b'(net a b (pins A B))'))
+
+
+class ProjectPolicyTests(unittest.TestCase):
+    def test_project_policy_pins_every_native_checking_field(self):
+        fixture = Path(__file__).resolve().parents[2] / 'corpus/dense-candidate/dense6-bga324.kicad_pro'
+        if not fixture.exists():
+            fixture = Path(__file__).resolve().parent / 'dense6-bga324.kicad_pro'
+        project = json.loads(fixture.read_text())
+        self.assertEqual(project_policy_digest(project), EXPECTED_POLICY_SHA256)
+        # Every rule and severity, including currently unused microvia rules,
+        # belongs to the contract even when an unrouted DRC has no such item.
+        for group in ('rules', 'rule_severities'):
+            for key, value in project['board']['design_settings'][group].items():
+                altered = copy.deepcopy(project)
+                altered['board']['design_settings'][group][key] = (
+                    not value if isinstance(value, bool) else
+                    value + 0.01 if isinstance(value, (int, float)) else
+                    'ignore' if value != 'ignore' else 'error')
+                self.assertNotEqual(project_policy_digest(altered), EXPECTED_POLICY_SHA256, (group, key))
+        for field, value in [('drc_exclusions', ['unexpected exclusion']),
+                             ('rules', {}), ('rule_severities', {})]:
+            altered = copy.deepcopy(project)
+            altered['board']['design_settings'][field] = value
+            self.assertNotEqual(project_policy_digest(altered), EXPECTED_POLICY_SHA256, field)
+        altered = copy.deepcopy(project)
+        altered['net_settings']['classes'][0]['clearance'] = 0.05
+        self.assertNotEqual(project_policy_digest(altered), EXPECTED_POLICY_SHA256)
+        altered = copy.deepcopy(project)
+        altered['net_settings']['netclass_patterns'] = [{'netclass': 'Default', 'pattern': '*'}]
+        self.assertNotEqual(project_policy_digest(altered), EXPECTED_POLICY_SHA256)
+        # JSON formatting/key order and UI state do not change checking policy.
+        project['pcbnew']['last_paths']['specctra_dsn'] = '/tmp/another-export'
+        self.assertEqual(project_policy_digest(project), EXPECTED_POLICY_SHA256)
+        self.assertEqual(project_policy_digest(json.loads(json.dumps(project, sort_keys=True))),
+                         EXPECTED_POLICY_SHA256)
 
 
 class NativeClearanceTests(unittest.TestCase):

@@ -108,3 +108,10 @@ The verifier includes pad and footprint clearance overrides in its native signat
 including unset versus explicit zero. See
 [measured controls and reproduction](../../../docs/pr-assets/agent/dense-candidate-verification/CLEARANCE.md).
 This check does not establish complete native identity or routed feasibility.
+
+The candidate verifier independently pins the `rules`, `rule_severities`,
+`drc_exclusions` and `net_settings` project sections. Intentional changes require
+reviewing the fixture, updating the digest contract and rerunning the policy
+controls. JSON formatting and UI state do not affect this contract. Other native
+properties and external custom-rule files remain outside this selected signature.
+See committed `policy-controls.json` and `policy-controls.png` in the PR assets.
