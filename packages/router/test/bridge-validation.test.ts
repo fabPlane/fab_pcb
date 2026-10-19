@@ -129,7 +129,7 @@ test("successful post-apply refill keeps the route and saves", async () => {
   const info = await fixture.done;
   expect(info.state).toBe("done");
   expect(info.zoneRefill).toEqual({ before: true, after: true });
-  expect(fixture.calls).toEqual(["refill", "save", "apply", "drc", "refill", "drc", "save", "ratsnest"]);
+  expect(fixture.calls).toEqual(["refill", "save", "drc", "apply", "drc", "refill", "drc", "save", "ratsnest"]);
   expect(fixture.copper().some((item) => item.id === "new-route")).toBe(true);
 });
 
@@ -141,7 +141,7 @@ for (const undo of [undefined, "zero", "throws"] as const) {
     expect(info.error).toContain("filled DRC unavailable");
     expect(info.summary).toBeUndefined();
     expect(fixture.calls.filter((call) => call === "save")).toHaveLength(1);
-    expect(fixture.calls.filter((call) => call === "drc")).toHaveLength(2);
+    expect(fixture.calls.filter((call) => call === "drc")).toHaveLength(3);
     if (!undo) expect(fixture.copper()).toEqual(fixture.original);
     else expect(info.error).toContain("rollback failed");
   });
@@ -158,3 +158,24 @@ test("failed filled DRC query preserves a newer unrelated edit", async () => {
   expect(fixture.calls.filter((call) => call === "save")).toHaveLength(1);
   expect(fixture.copper().map((item) => item.id)).toEqual(["stub", "protected", "other-net", "new-route", "unrelated-edit"]);
 });
+
+for (const filledMarkers of ["new", "duplicate", "replacement"] as const) {
+  test(`rejects newly introduced filled native errors (${filledMarkers})`, async () => {
+    const fixture = validationFixture({ valid: true, refill: "valid", filledMarkers });
+    const info = await fixture.done;
+    expect(info.state).toBe("failed");
+    expect(info.error).toContain("new filled native DRC");
+    expect(info.summary).toBeUndefined();
+    expect(fixture.calls.filter((call) => call === "save")).toHaveLength(1);
+    expect(fixture.copper()).toEqual(fixture.original);
+  });
+}
+for (const filledMarkers of ["existing", "excluded"] as const) {
+  test(`allows unchanged or excluded filled markers (${filledMarkers})`, async () => {
+    const fixture = validationFixture({ valid: true, refill: "valid", filledMarkers });
+    const info = await fixture.done;
+    expect(info.state).toBe("done");
+    expect(fixture.calls.filter((call) => call === "save")).toHaveLength(2);
+    expect(fixture.calls).not.toContain("undo");
+  });
+}

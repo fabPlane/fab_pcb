@@ -29,7 +29,7 @@
  * saving it.
  */
 import { Arc, KiCad, KiCadClient, Track, Via, type Transport } from "@fp-pcb/client";
-import { DrcErrorType } from "@fp-pcb/proto";
+import { DrcErrorType, RuleSeverity, type DrcMarker } from "@fp-pcb/proto";
 import { applyRouteResult } from "./apply";
 import { extractRouteInput } from "./extract";
 import { endpointCollisions } from "./endpoint-collisions";
@@ -451,6 +451,13 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         const removableExisting = new Map(
           originalCopper.filter((item) => !item.locked && item.net && repairNets.has(item.net)).map((item) => [item.id, item.net!]),
         );
+        // Compare two filled states, never stale post-apply fills. Marker UUIDs
+        // change on each native check; retain multiplicity of stable identities.
+        let filledBaseline: DrcMarker[] | undefined;
+        if (result.router === "fab-router" && info.zoneRefill.before && !alreadyApplied(result) &&
+            (result.tracks.length || result.vias.length || result.claimedVias?.length)) {
+          filledBaseline = (await board.drc.run({ refillZones: false })).markers;
+        }
         if (!alreadyApplied(result) && (result.tracks.length || result.vias.length || result.claimedVias?.length)) {
           // Each cleanup pass removes an item; allow one extra pass to validate a relabelled commit.
           const maxCleanupPasses = result.tracks.length + result.vias.length + removableExisting.size + 2;
@@ -548,9 +555,9 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           }
           if (result.router === "fab-router" && acceptedCommitId && info.zoneRefill.after) {
             try {
-              // The pre-refill query cannot establish whether native filled DRC
-              // is available. Do not persist a route after that final query fails.
-              await board.drc.run({ refillZones: false });
+              const filled = await board.drc.run({ refillZones: false });
+              const added = newFilledErrors(filledBaseline ?? [], filled.markers);
+              if (added) throw new Error(`${added} new filled native DRC error(s)`);
             } catch (validationError) {
               return await rejectTentativeValidation(board, acceptedCommitId, "post-refill native DRC", validationError);
             }
@@ -782,4 +789,26 @@ export function matchRouteJobPath(pathname: string): { sessionId: string; jobId?
   const m = /^\/sessions\/([^/]+)\/route(?:\/([^/]+))?$/.exec(pathname);
   if (!m) return undefined;
   return { sessionId: decodeURIComponent(m[1]!), jobId: m[2] ? decodeURIComponent(m[2]) : undefined };
+}
+
+/** Stable marker identity excludes regenerated marker UUIDs and human descriptions. */
+function newFilledErrors(before: readonly DrcMarker[], after: readonly DrcMarker[]): number {
+  const key = (m: DrcMarker) => JSON.stringify([
+    m.errorType, m.layer, m.position ? [String(m.position.xNm), String(m.position.yNm)] : null,
+    m.items.map((item) => item.value).sort(),
+  ]);
+  const active = (m: DrcMarker) => !m.excluded && m.severity === RuleSeverity.RS_ERROR;
+  const remaining = new Map<string, number>();
+  for (const marker of before.filter(active)) {
+    const id = key(marker);
+    remaining.set(id, (remaining.get(id) ?? 0) + 1);
+  }
+  let added = 0;
+  for (const marker of after.filter(active)) {
+    const id = key(marker);
+    const count = remaining.get(id) ?? 0;
+    if (count) remaining.set(id, count - 1);
+    else added++;
+  }
+  return added;
 }

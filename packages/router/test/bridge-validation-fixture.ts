@@ -1,5 +1,5 @@
 import { create } from "@bufbuild/protobuf";
-import { BoardLayer, DrcErrorType, LockedState, TrackSchema } from "@fp-pcb/proto";
+import { BoardLayer, DrcErrorType, DrcMarkerSchema, RuleSeverity, LockedState, TrackSchema } from "@fp-pcb/proto";
 import { Track, type Board } from "@fp-pcb/client";
 import { createRouteJobs } from "../src/bridge-job";
 import type { RouteResult } from "../src/types";
@@ -10,6 +10,7 @@ import { collisionBoard } from "./collision-fixture";
 export function validationFixture(
   options: {
     refill?: "valid" | "throws" | "commit-then-throws";
+    filledMarkers?: "new" | "existing" | "duplicate" | "replacement" | "excluded";
     finalDrcFailure?: boolean;
     finalForeignEdit?: boolean;
     cleanupFirst?: boolean;
@@ -67,6 +68,19 @@ export function validationFixture(
     drc: {
       run: async () => {
         calls.push("drc");
+        const marker = (item: string, id: string, excluded = false) => create(DrcMarkerSchema, {
+          errorType: DrcErrorType.DRCET_STARVED_THERMAL, severity: RuleSeverity.RS_ERROR,
+          items: [{ value: item }], id: { value: id }, excluded,
+        });
+        if (options.refill && !copper.includes(generated)) {
+          return { markers: options.filledMarkers && options.filledMarkers !== "new" && options.filledMarkers !== "excluded"
+            ? [marker("pad", "before-id")] : [] };
+        }
+        if (fills === 2 && options.filledMarkers) {
+          const kind = options.filledMarkers;
+          return { markers: kind === "duplicate" ? [marker("pad", "after-1"), marker("pad", "after-2")]
+            : [marker(kind === "replacement" ? "other-pad" : "pad", "after-id", kind === "excluded")] };
+        }
         checks++;
         if (options.finalDrcFailure && fills === 2) {
           if (options.finalForeignEdit) {
