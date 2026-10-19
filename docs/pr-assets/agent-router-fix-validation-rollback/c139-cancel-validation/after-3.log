@@ -1,0 +1,11 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-validation.test.ts:
+(pass) cancellation during tentative DRC restores copper (refill=false) [3.29ms]
+(pass) cancellation during tentative DRC restores copper (refill=true) [0.15ms]
+
+ 2 pass
+ 57 filtered out
+ 0 fail
+ 16 expect() calls
+Ran 2 tests across 1 file. [95.00ms]
