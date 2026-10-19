@@ -136,7 +136,11 @@ export function parseSes(text: string): Session {
     const netName = typeof net[1] === "string" ? net[1] : "";
     nets.push(netName);
     for (const w of children(net, "wire")) {
-      const path = child(w, "path");
+      const paths = children(w, "path");
+      // A wire has one geometry. Selecting only the first path silently loses
+      // copper and makes the imported result depend on declaration order.
+      if (paths.length > 1) throw new SyntaxError("multiple session wire paths");
+      const path = paths[0];
       if (!path) continue; // (wire (polygon ...)) = plane echo; ignored
       const p = pathOf(path, nmPerUnit);
       if (p && p.points.length >= 2) wires.push({ net: netName, ...p });

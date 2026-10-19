@@ -609,3 +609,24 @@ describe("session duplicate padstack definitions", () => {
     expect(result.vias.map(v => v.position)).toEqual([{ x: 1000000, y: 1000000 }, { x: 2000000, y: 1000000 }]);
   });
 });
+
+describe("session wire path multiplicity", () => {
+  const paths = ["(path F.Cu 250 0 0 1000 1000)", "(path B.Cu 300 1000 1000 2000 1000)"];
+  for (const order of [paths, [...paths].reverse()]) {
+    test(`rejects multiple paths instead of dropping copper: ${order[0]}`, () => {
+      expect(() => parseSes(`(session s (routes (network_out (net A (wire ${order.join(" ")})))))`))
+        .toThrow("multiple session wire paths");
+    });
+  }
+  test("preserves both paths when represented by separate wires", () => {
+    const result = sesToItems(parseSes(`(session s (routes (network_out (net A
+      ${paths.map(p => `(wire ${p})`).join(" ")}))))`), twoNetBoard());
+    expect(result.tracks).toHaveLength(2);
+    expect(result.tracks.map(t => t.width)).toEqual([250000, 300000]);
+    expect(result.tracks.map(t => t.end)).toEqual([{ x: 1000000, y: -1000000 }, { x: 2000000, y: -1000000 }]);
+  });
+  test("preserves a polygon-only plane echo", () => {
+    const session = parseSes("(session s (routes (network_out (net A (wire (polygon F.Cu 0 0 0 1000 0 1000 1000))))))");
+    expect(session.wires).toHaveLength(0);
+  });
+});
