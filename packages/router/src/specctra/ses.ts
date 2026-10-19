@@ -62,7 +62,8 @@ export function resolutionToNm(res: SExpr[] | undefined): number {
 function pathOf(list: SExpr[], nmPerUnit: number): { layer: string; width: number; points: { x: number; y: number }[] } | undefined {
   // (path <layer> <aperture_width> x0 y0 x1 y1 ...)
   const layer = list[1];
-  if (typeof layer !== "string") return undefined;
+  if (typeof layer !== "string" || !layer)
+    throw new SyntaxError("invalid session path layer");
   const values = list.slice(2);
   // A path requires a width and at least two complete coordinate pairs.
   // Never drop nested values or a trailing coordinate: that silently changes copper.

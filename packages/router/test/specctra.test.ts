@@ -566,3 +566,22 @@ describe("session circle layer operands", () => {
     });
   }
 });
+
+
+describe("session path layer operands", () => {
+  for (const layer of ["(F.Cu)", '\"\"']) {
+    test(`rejects invalid path layer ${layer}`, () => {
+      expect(() => parseSes(`(session s (routes (network_out (net A
+        (wire (path ${layer} 250 0 0 1000 1000))))))`)).toThrow(SyntaxError);
+    });
+  }
+  for (const layer of ["F.Cu", '\"F.Cu\"']) {
+    test(`preserves valid path layer ${layer}`, () => {
+      const result = sesToItems(parseSes(`(session s (routes (network_out (net A
+        (wire (path ${layer} 250 0 0 1000 1000))))))`), twoNetBoard());
+      expect(result.tracks).toHaveLength(1);
+      expect(result.tracks[0]!.width).toBe(250000);
+      expect(result.tracks[0]!.end).toEqual({ x: 1000000, y: -1000000 });
+    });
+  }
+});
