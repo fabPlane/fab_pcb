@@ -1,0 +1,14 @@
+{
+  "typecheck.log": {
+    "sha256": "faeaa94bcf7012d86f91ca647580449f56a263fb7eaf572c54789764f60a9b8f",
+    "tail": "$ tsc -b\n"
+  },
+  "unit.log": {
+    "sha256": "bc7055acd88cd1e173636f2a17ecde60790ae7e5c85f958a3c125687908fc281",
+    "tail": "tline that does not close is reported\u001b[0m \u001b[0m\u001b[2m[0.71ms\u001b[0m\u001b[2m]\u001b[0m\n\u001b[0m\ntest/session-filter.test.ts:\n\u001b[0m\u001b[32m\u2713\u001b[0m\u001b[0m\u001b[1m additive native session excludes outside scope and reversed protected segments/vias\u001b[0m \u001b[0m\u001b[2m[0.48ms\u001b[0m\u001b[2m]\u001b[0m\n\u001b[0m\u001b[32m\u2713\u001b[0m\u001b[0m\u001b[1m different width, nearby track, drill and via span are legitimate new items\u001b[0m \u001b[0m\u001b[2m[0.13ms\u001b[0m\u001b[2m]\u001b[0m\n\u001b[0m\u001b[32m\u2713\u001b[0m\u001b[0m\u001b[1m an all-echo or empty session adds nothing; metadata remains usable\u001b[0m \u001b[0m\u001b[2m[0.11ms\u001b[0m\u001b[2m]\u001b[0m\n\u001b[0m\u001b[32m\u2713\u001b[0m\u001b[0m\u001b[1m scoped DSN retains protected net identities without routing their pads\u001b[0m \u001b[0m\u001b[2m[0.27ms\u001b[0m\u001b[2m]\u001b[0m\n\n\u001b[0m\u001b[2m1 tests skipped:\u001b[0m\n\u001b[0m\u001b[33m\u00bb\u001b[2m \u001b[0m\u001b[2mFreeroutingRouter builtin round trip\u001b[2m >\u001b[0m\u001b[2m routes the synthetic two-net board through the jar and reads the session back\u001b[0m\n\n\u001b[0m\u001b[32m 106 pass\u001b[0m\n \u001b[0m\u001b[33m1 skip\u001b[0m\n\u001b[0m\u001b[2m 0 fail\u001b[0m\n 429 expect() calls\nRan 107 tests across 14 files. \u001b[0m\u001b[2m[\u001b[1m605.00ms\u001b[0m\u001b[2m]\u001b[0m\n\nunit: 1/1 package(s) passed in 0.6s\n"
+  },
+  "engine-checks.log": {
+    "sha256": "f15623dc15228a249adeed368945af21c49290cc3a78a60ae0cc90dafbb8a762",
+    "tail": " (R-2 baked in) > a clear boundary carries floor(binLu / pitch) tracks [0.16ms]\n(pass) Bridge capacity from fixed blockage (R-2 baked in) > a partial blockage reduces capacity to the brute-force count [0.44ms]\n(pass) Bridge capacity from fixed blockage (R-2 baked in) > a Track that spans the whole boundary gives capacity 0 [0.21ms]\n(pass) Bridge capacity from fixed blockage (R-2 baked in) > free other-net copper does NOT reduce capacity [0.04ms]\n(pass) Bridge capacity from fixed blockage (R-2 baked in) > capacity matches the brute-force count over a swept boundary column [0.48ms]\n(pass) determinism > two builds of the same board give identical capacities across every Bridge [40.04ms]\n(pass) congestion report > hand-set overflow is summarised per Bridge and per Bin [0.60ms]\n(pass) R-1 safety: globalPlan:\"off\" changes no routing > routing with globalPlan:\"off\" is byte-identical to the default run [8.78ms]\n\n 859 pass\n 0 fail\n 398454 expect() calls\nRan 859 tests across 29 files. [250.62s]\n"
+  }
+}

@@ -355,6 +355,7 @@ describe("route summary messages with fab_router diagnostics", () => {
         drc: { run: async () => ({ markers: [] }) },
         save: async () => {},
         getTracks: async () => [],
+        undoStack: async () => ({ undo: [{ commitId: { value: "commit" } }], redo: [] }),
         undo: async () => ({ applied: 1 }),
         ratsnest: async () => ({ edges }),
       } as unknown as Board;
@@ -400,6 +401,7 @@ test("fab_router prunes and reports pre-existing scoped stubs in the same route 
   const board = {
     save: async () => {},
     getTracks: async () => [stub, outside, locked].filter((t) => !removed.includes(t.id)),
+    undoStack: async () => ({ undo: [{ commitId: { value: "commit" } }], redo: [] }),
     undo: async () => {
       undos++;
       removed = [];
@@ -500,6 +502,7 @@ test("native cleanup keeps a useful connection behind a dangling chain longer th
   const board = {
     save: async () => {},
     getTracks: async () => created,
+    undoStack: async () => ({ undo: [{ commitId: { value: "cleanup" } }], redo: [] }),
     undo: async () => ({ applied: 1 }),
     ratsnest: async () => ({ edges: [] }),
     drc: {

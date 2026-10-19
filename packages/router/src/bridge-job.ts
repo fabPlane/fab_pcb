@@ -214,6 +214,16 @@ export function trackLength(result: Pick<RouteResult, "tracks">): number {
   return Math.round(sum);
 }
 
+// Every tentative-commit undo must verify ownership after asynchronous native
+// queries. Refuse to undo a newer edit, even if that leaves tentative copper.
+async function undoTentativeRoute(board: NonNullable<Awaited<ReturnType<KiCad["currentBoard"]>>>, commitId: string): Promise<void> {
+  const top = (await board.undoStack()).undo.at(-1);
+  if (!commitId || top?.commitId?.value !== commitId)
+    throw new Error("tentative route commit is not at the top of the undo stack; tentative route may remain in KiCad memory");
+  const undone = await board.undo(1);
+  if (undone.applied !== 1) throw new Error(`expected one undone commit, got ${undone.applied}`);
+}
+
 /** Remove created tracks/vias named by a DRC marker after undoing their tentative commit. */
 export function withoutRejectedCreatedCopper(
   result: RouteResult,
@@ -440,11 +450,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
             } catch (validationError) {
               const detail = validationError instanceof Error ? validationError.message : String(validationError);
               try {
-                const top = (await board.undoStack()).undo.at(-1);
-                if (!committed.commitId || top?.commitId?.value !== committed.commitId)
-                  throw new Error("tentative route commit is not at the top of the undo stack");
-                const undone = await board.undo(1);
-                if (undone.applied !== 1) throw new Error(`expected one undone commit, got ${undone.applied}`);
+                await undoTentativeRoute(board, committed.commitId);
               } catch (rollbackError) {
                 const rollbackDetail = rollbackError instanceof Error ? rollbackError.message : String(rollbackError);
                 throw new Error(
@@ -477,8 +483,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
                 const nativeOpen = (await board.ratsnest(request.options?.nets ?? [])).edges.length;
                 const nativeMessage = autorouteMessage(request.router, Math.max(0, result.totalConnections - nativeOpen));
                 if (nativeMessage !== message) {
-                  const undone = await board.undo(1);
-                  if (undone.applied !== 1) throw new Error("could not relabel fab_router's tentative route commit");
+                  await undoTentativeRoute(board, committed.commitId);
                   message = nativeMessage;
                   await (deps.apply ?? applyRouteResult)(board, result, { message, removeCopperIds: [...removedExistingCopper.keys()] });
                 }
@@ -486,8 +491,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
               applied = true;
               break;
             }
-            const undone = await board.undo(1);
-            if (undone.applied !== 1) throw new Error("could not undo fab_router's tentative dangling-copper commit");
+            await undoTentativeRoute(board, committed.commitId);
             for (const id of existingIds) {
               removedExistingCopper.set(id, removableExisting.get(id)!);
               result.log.push(`Removed pre-existing dangling copper on requested net ${removableExisting.get(id)}: ${id}`);

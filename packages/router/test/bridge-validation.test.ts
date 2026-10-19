@@ -10,7 +10,7 @@ for (const cleanupFirst of [false, true]) {
     expect(info.summary).toBeUndefined();
     expect(fixture.copper()).toEqual(fixture.original);
     expect(fixture.calls).toEqual(
-      cleanupFirst ? ["save", "apply", "drc", "undo", "apply", "drc", "undoStack", "undo"] : ["save", "apply", "drc", "undoStack", "undo"],
+      cleanupFirst ? ["save", "apply", "drc", "undoStack", "undo", "apply", "drc", "undoStack", "undo"] : ["save", "apply", "drc", "undoStack", "undo"],
     );
   });
 }
