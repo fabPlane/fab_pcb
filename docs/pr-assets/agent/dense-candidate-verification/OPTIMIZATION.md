@@ -25,14 +25,14 @@ clearance or routed feasibility.
 From repository root:
 
 ```sh
-git show 04992e9:benchmarks/boards/dense6-bga324/verify_gen_dense6.py > /tmp/dense6-verifier-before45.py
-nice -n 10 taskset -c 0-5 timeout 1200 /usr/bin/python3 benchmarks/boards/dense6-bga324/measure_optimized_gen_dense6.py \
-  --before /tmp/dense6-verifier-before45.py --after benchmarks/boards/dense6-bga324/verify_gen_dense6.py \
+git show 04992e9:benchmarks/boards/dense6-bga324/verify_dense6.py > /tmp/dense6-verifier-before45.py
+nice -n 10 taskset -c 0-5 timeout 1200 /usr/bin/python3 benchmarks/boards/dense6-bga324/measure_optimized_dense6.py \
+  --before /tmp/dense6-verifier-before45.py --after benchmarks/boards/dense6-bga324/verify_dense6.py \
   --generator benchmarks/boards/dense6-bga324/gen_dense6.py --fixture benchmarks/boards/dense6-bga324 \
   --out /tmp/dense6-optimized-controls45
 bun run typecheck
 bun test
-/usr/bin/python3 -m unittest discover -s scripts/gen -p test_verify_gen_dense6.py
+/usr/bin/python3 -m unittest discover -s benchmarks/boards/dense6-bga324 -p test_verify_dense6.py
 ```
 
 Output directory must not already exist. Native KiCad Python bindings and
