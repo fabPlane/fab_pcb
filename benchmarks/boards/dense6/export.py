@@ -8,8 +8,9 @@ import tempfile
 import pcbnew
 
 source, target = map(lambda p: Path(p).resolve(), sys.argv[1:])
-board = pcbnew.LoadBoard(str(source))
 target.parent.mkdir(parents=True, exist_ok=True)
+target.unlink(missing_ok=True)
+board = pcbnew.LoadBoard(str(source))
 with tempfile.TemporaryDirectory(dir=target.parent) as temp:
     original = Path.cwd()
     try:
