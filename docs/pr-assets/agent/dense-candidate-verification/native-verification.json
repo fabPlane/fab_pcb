@@ -1,0 +1,45 @@
+{
+  "seed": 6406,
+  "stats": {
+    "nets": 263,
+    "pads": 702,
+    "connections": 439,
+    "two_pin_nets": 260,
+    "power_pins": {
+      "GND": 102,
+      "VCC_CORE": 26,
+      "VCCIO": 54
+    },
+    "footprints": 30,
+    "seed": 6406,
+    "layers": 6,
+    "board_mm": [
+      70,
+      56
+    ]
+  },
+  "generator_sha256": "b65758714fa0a1f45255d8c43e857437014df905d98086a062dda7261fa6e584",
+  "dsn_sha256": "1dbf3cd5a55dfd8c64f643ad06e136c87431ffa28447235bb9a84fbb3796eea7",
+  "deterministic": true,
+  "geometry_equal": true,
+  "dsn_semantically_equal": true,
+  "reports": [
+    {
+      "board": "generated",
+      "errors": 0,
+      "opens": 439,
+      "warnings": {
+        "lib_footprint_issues": 30
+      }
+    },
+    {
+      "board": "bundled",
+      "errors": 0,
+      "opens": 439,
+      "warnings": {
+        "lib_footprint_issues": 30
+      }
+    }
+  ],
+  "limitation": "Unrouted candidate only; feasibility is unproven."
+}

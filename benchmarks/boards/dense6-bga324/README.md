@@ -77,3 +77,27 @@ copy's `suite.json` and update its `inputs.sha256.json` entry for `suite.json`, 
 `python3 benchmark.py --smoke --case dense6-bga324-j1 --router fab-router --out results/dense6`.
 
 Licence: MIT (see `LICENSE`), covering the generator, scripts and generated board files.
+
+## Verify a regenerated candidate
+
+The opt-in verifier checks two byte-identical generator runs at seed 6406, native
+pad/footprint/outline geometry, default netclass dimensions, DSN content, and
+native DRC on generated and bundled boards. It works on copies in a fresh evidence
+directory. It does not change the frozen suite, routing inputs or promotion gate.
+
+From the repository root:
+
+```sh
+python3 -m unittest discover -s benchmarks/boards/dense6-bga324 -p 'test_*.py'
+/usr/bin/python3 benchmarks/boards/dense6-bga324/verify_dense6.py \
+  --generator benchmarks/boards/dense6-bga324/gen_dense6.py \
+  --fixture benchmarks/boards/dense6-bga324 \
+  --out /tmp/dense6-verification
+```
+
+Use a new output directory. KiCad 10.0.6 and its `pcbnew` Python module are
+required. DSN record and pin order can change without changing geometry, nets or
+rules; the verifier normalizes explicitly unordered containers and preserves
+path-coordinate order. Expected native output: 0 errors, 439 opens and 30
+`lib_footprint_issues` warnings. Missing-library warnings remain visible.
+This is an unrouted regression check, not proof of a feasible complete route.

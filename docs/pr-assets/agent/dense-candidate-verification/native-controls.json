@@ -1,0 +1,92 @@
+[
+  {
+    "label": "source",
+    "repeat": 1,
+    "exit": 0,
+    "seconds": 3.1816267740214244
+  },
+  {
+    "label": "bundled",
+    "repeat": 1,
+    "exit": 0,
+    "seconds": 3.841619579005055
+  },
+  {
+    "label": "rules",
+    "repeat": 1,
+    "exit": 1,
+    "seconds": null
+  },
+  {
+    "label": "geometry",
+    "repeat": 1,
+    "exit": 1,
+    "seconds": null
+  },
+  {
+    "label": "dsn",
+    "repeat": 1,
+    "exit": 1,
+    "seconds": null
+  },
+  {
+    "label": "source",
+    "repeat": 2,
+    "exit": 0,
+    "seconds": 3.1901202769950032
+  },
+  {
+    "label": "bundled",
+    "repeat": 2,
+    "exit": 0,
+    "seconds": 3.2187381359981373
+  },
+  {
+    "label": "rules",
+    "repeat": 2,
+    "exit": 1,
+    "seconds": null
+  },
+  {
+    "label": "geometry",
+    "repeat": 2,
+    "exit": 1,
+    "seconds": null
+  },
+  {
+    "label": "dsn",
+    "repeat": 2,
+    "exit": 1,
+    "seconds": null
+  },
+  {
+    "label": "source",
+    "repeat": 3,
+    "exit": 0,
+    "seconds": 3.265334462048486
+  },
+  {
+    "label": "bundled",
+    "repeat": 3,
+    "exit": 0,
+    "seconds": 3.2265719750430435
+  },
+  {
+    "label": "rules",
+    "repeat": 3,
+    "exit": 1,
+    "seconds": null
+  },
+  {
+    "label": "geometry",
+    "repeat": 3,
+    "exit": 1,
+    "seconds": null
+  },
+  {
+    "label": "dsn",
+    "repeat": 3,
+    "exit": 1,
+    "seconds": null
+  }
+]
