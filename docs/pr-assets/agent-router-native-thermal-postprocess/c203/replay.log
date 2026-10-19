@@ -1,0 +1,174 @@
+{
+  "before": {
+    "runs": 78,
+    "passed": 39,
+    "valid_cases_3of3": 13,
+    "opens": 120,
+    "new_errors": 27,
+    "median_route_s": 1.125023374,
+    "median_length_mm": 546.9284458263046,
+    "total_vias": 2826,
+    "total_length_mm": 58809.32139721951
+  },
+  "after": {
+    "runs": 78,
+    "passed": 42,
+    "valid_cases_3of3": 14,
+    "opens": 120,
+    "new_errors": 24,
+    "median_route_s": 8.6761150935,
+    "median_length_mm": 546.9284458263046,
+    "total_vias": 2826,
+    "total_length_mm": 58813.12959634671
+  },
+  "regressions": [],
+  "changes": [
+    {
+      "case": "qrpcard-qrpcard-j4",
+      "seed": 3,
+      "before": {
+        "passed": false,
+        "opens": 0,
+        "new_errors": 1,
+        "new_error_types": {
+          "starved_thermal": 1
+        }
+      },
+      "after": {
+        "passed": true,
+        "opens": 0,
+        "new_errors": 0,
+        "new_error_types": {}
+      }
+    },
+    {
+      "case": "qrpcard-qrpcard-j4",
+      "seed": 1,
+      "before": {
+        "passed": false,
+        "opens": 0,
+        "new_errors": 1,
+        "new_error_types": {
+          "starved_thermal": 1
+        }
+      },
+      "after": {
+        "passed": true,
+        "opens": 0,
+        "new_errors": 0,
+        "new_error_types": {}
+      }
+    },
+    {
+      "case": "qrpcard-qrpcard-j4",
+      "seed": 2,
+      "before": {
+        "passed": false,
+        "opens": 0,
+        "new_errors": 1,
+        "new_error_types": {
+          "starved_thermal": 1
+        }
+      },
+      "after": {
+        "passed": true,
+        "opens": 0,
+        "new_errors": 0,
+        "new_error_types": {}
+      }
+    }
+  ],
+  "postprocess_statuses": {
+    "search-failed": 15,
+    "accepted": 60,
+    "rejected": 3
+  },
+  "changed_boards": [
+    [
+      "qrpcard-qrpcard-j4",
+      3
+    ],
+    [
+      "qrpcard-qrpcard-j4",
+      1
+    ],
+    [
+      "qrpcard-qrpcard-j4",
+      2
+    ]
+  ],
+  "groups": {
+    "J2small": {
+      "before": {
+        "runs": 3,
+        "passed": 0,
+        "valid_cases_3of3": 0,
+        "opens": 0,
+        "new_errors": 6,
+        "median_route_s": 0.7227719939999999,
+        "median_length_mm": 480.4329510930379,
+        "total_vias": 51,
+        "total_length_mm": 1441.2988532791137
+      },
+      "after": {
+        "runs": 3,
+        "passed": 0,
+        "valid_cases_3of3": 0,
+        "opens": 0,
+        "new_errors": 6,
+        "median_route_s": 24.730387740999998,
+        "median_length_mm": 480.4329510930379,
+        "total_vias": 51,
+        "total_length_mm": 1441.2988532791137
+      }
+    },
+    "J4": {
+      "before": {
+        "runs": 3,
+        "passed": 0,
+        "valid_cases_3of3": 0,
+        "opens": 0,
+        "new_errors": 3,
+        "median_route_s": 0.986067009,
+        "median_length_mm": 523.1989115428624,
+        "total_vias": 114,
+        "total_length_mm": 1569.5967346285875
+      },
+      "after": {
+        "runs": 3,
+        "passed": 3,
+        "valid_cases_3of3": 1,
+        "opens": 0,
+        "new_errors": 0,
+        "median_route_s": 11.165967509,
+        "median_length_mm": 524.4683112519308,
+        "total_vias": 114,
+        "total_length_mm": 1573.4049337557924
+      }
+    },
+    "Aquarius": {
+      "before": {
+        "runs": 3,
+        "passed": 0,
+        "valid_cases_3of3": 0,
+        "opens": 45,
+        "new_errors": 18,
+        "median_route_s": 45.579365673,
+        "median_length_mm": 1731.1131265365616,
+        "total_vias": 390,
+        "total_length_mm": 5193.339379609684
+      },
+      "after": {
+        "runs": 3,
+        "passed": 0,
+        "valid_cases_3of3": 0,
+        "opens": 45,
+        "new_errors": 18,
+        "median_route_s": 63.193225812,
+        "median_length_mm": 1731.1131265365616,
+        "total_vias": 390,
+        "total_length_mm": 5193.339379609684
+      }
+    }
+  }
+}
