@@ -18,6 +18,16 @@ class ExportTest(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertFalse(target.exists())
 
+    def test_source_cannot_be_used_as_the_export_destination(self):
+        script = Path(__file__).resolve().parents[1] / 'export.py'
+        with tempfile.TemporaryDirectory() as temp:
+            source = Path(temp) / 'board.kicad_pcb'
+            source.write_text('preserve source')
+            result = subprocess.run([sys.executable, str(script), str(source), str(source)],
+                                    capture_output=True, timeout=30)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(source.read_text(), 'preserve source')
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -8,6 +8,8 @@ import tempfile
 import pcbnew
 
 source, target = map(lambda p: Path(p).resolve(), sys.argv[1:])
+if source == target:
+    raise ValueError('source board must not be the export destination')
 target.parent.mkdir(parents=True, exist_ok=True)
 target.unlink(missing_ok=True)
 board = pcbnew.LoadBoard(str(source))
