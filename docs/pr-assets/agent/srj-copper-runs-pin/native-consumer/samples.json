@@ -1,0 +1,1079 @@
+[
+  {
+    "mode": "before",
+    "repeat": 1,
+    "seconds": 0.006589175000000004,
+    "result": {
+      "ok": true,
+      "srj": {
+        "layerCount": 2,
+        "minTraceWidth": 0.2,
+        "bounds": {
+          "minX": 0,
+          "maxX": 20,
+          "minY": 0,
+          "maxY": 12
+        },
+        "obstacles": [
+          {
+            "type": "rect",
+            "layers": [
+              "top"
+            ],
+            "center": {
+              "x": 2,
+              "y": 5
+            },
+            "width": 1.2,
+            "height": 1,
+            "connectedTo": [
+              "NET1"
+            ]
+          },
+          {
+            "type": "rect",
+            "layers": [
+              "top"
+            ],
+            "center": {
+              "x": 18,
+              "y": 5
+            },
+            "width": 1.2,
+            "height": 1,
+            "connectedTo": [
+              "NET1"
+            ]
+          },
+          {
+            "type": "rect",
+            "layers": [
+              "top"
+            ],
+            "center": {
+              "x": 10,
+              "y": 9
+            },
+            "width": 1.2,
+            "height": 1,
+            "connectedTo": [
+              "NET1"
+            ]
+          }
+        ],
+        "connections": [
+          {
+            "name": "NET1",
+            "pointsToConnect": [
+              {
+                "x": 2,
+                "y": 5,
+                "layer": "top"
+              },
+              {
+                "x": 18,
+                "y": 5,
+                "layer": "top"
+              },
+              {
+                "x": 10,
+                "y": 9,
+                "layer": "top"
+              }
+            ]
+          }
+        ],
+        "traces": [
+          {
+            "type": "pcb_trace",
+            "pcb_trace_id": "pcb_trace_NET1",
+            "connection_name": "NET1",
+            "route": [
+              {
+                "route_type": "wire",
+                "x": 2.6,
+                "y": 5.5,
+                "width": 0.2,
+                "layer": "top"
+              },
+              {
+                "route_type": "wire",
+                "x": 9.4,
+                "y": 8.5,
+                "width": 0.2,
+                "layer": "top"
+              },
+              {
+                "route_type": "wire",
+                "x": 17.4,
+                "y": 5.5,
+                "width": 0.2,
+                "layer": "top"
+              },
+              {
+                "route_type": "wire",
+                "x": 10.6,
+                "y": 8.5,
+                "width": 0.2,
+                "layer": "top"
+              }
+            ]
+          }
+        ]
+      },
+      "report": {
+        "passes": 1,
+        "attempted": 2,
+        "completed": 2,
+        "incompleteBefore": 2,
+        "incompleteAfter": 0,
+        "added": {
+          "tracks": 2,
+          "barrels": 0
+        },
+        "ripped": 0,
+        "violationsBefore": 0,
+        "violationsAdded": 0,
+        "timedOut": false,
+        "aborted": false,
+        "stoppedBy": "complete",
+        "effectiveSettings": {
+          "maxPasses": 100,
+          "maxStagnantPasses": 3,
+          "viaCost": 50,
+          "planeViaCost": 5,
+          "bendCost": 0,
+          "preferredDirectionCost": 1.5,
+          "startRipupCost": 100,
+          "ripupEnabled": true,
+          "fanoutEnabled": false,
+          "routerEnabled": true,
+          "optimizerEnabled": true,
+          "strictDrc": false,
+          "layers": {},
+          "viasAllowed": true,
+          "ignoreNetGroups": [],
+          "seed": 1,
+          "shoveEnabled": true,
+          "orderByDifficulty": true,
+          "detailedRouter": "off",
+          "globalPlan": "off",
+          "angleMode": "45"
+        },
+        "wallClockMs": 5,
+        "perNet": [
+          {
+            "net": "NET1",
+            "incomplete": 0
+          }
+        ]
+      },
+      "violationsBefore": 0,
+      "violationsAdded": 0,
+      "pairs": [],
+      "diagnostics": []
+    },
+    "exportedLengthMm": 23.40872708616717
+  },
+  {
+    "mode": "before",
+    "repeat": 2,
+    "seconds": 0.0014627359999999498,
+    "result": {
+      "ok": true,
+      "srj": {
+        "layerCount": 2,
+        "minTraceWidth": 0.2,
+        "bounds": {
+          "minX": 0,
+          "maxX": 20,
+          "minY": 0,
+          "maxY": 12
+        },
+        "obstacles": [
+          {
+            "type": "rect",
+            "layers": [
+              "top"
+            ],
+            "center": {
+              "x": 2,
+              "y": 5
+            },
+            "width": 1.2,
+            "height": 1,
+            "connectedTo": [
+              "NET1"
+            ]
+          },
+          {
+            "type": "rect",
+            "layers": [
+              "top"
+            ],
+            "center": {
+              "x": 18,
+              "y": 5
+            },
+            "width": 1.2,
+            "height": 1,
+            "connectedTo": [
+              "NET1"
+            ]
+          },
+          {
+            "type": "rect",
+            "layers": [
+              "top"
+            ],
+            "center": {
+              "x": 10,
+              "y": 9
+            },
+            "width": 1.2,
+            "height": 1,
+            "connectedTo": [
+              "NET1"
+            ]
+          }
+        ],
+        "connections": [
+          {
+            "name": "NET1",
+            "pointsToConnect": [
+              {
+                "x": 2,
+                "y": 5,
+                "layer": "top"
+              },
+              {
+                "x": 18,
+                "y": 5,
+                "layer": "top"
+              },
+              {
+                "x": 10,
+                "y": 9,
+                "layer": "top"
+              }
+            ]
+          }
+        ],
+        "traces": [
+          {
+            "type": "pcb_trace",
+            "pcb_trace_id": "pcb_trace_NET1",
+            "connection_name": "NET1",
+            "route": [
+              {
+                "route_type": "wire",
+                "x": 2.6,
+                "y": 5.5,
+                "width": 0.2,
+                "layer": "top"
+              },
+              {
+                "route_type": "wire",
+                "x": 9.4,
+                "y": 8.5,
+                "width": 0.2,
+                "layer": "top"
+              },
+              {
+                "route_type": "wire",
+                "x": 17.4,
+                "y": 5.5,
+                "width": 0.2,
+                "layer": "top"
+              },
+              {
+                "route_type": "wire",
+                "x": 10.6,
+                "y": 8.5,
+                "width": 0.2,
+                "layer": "top"
+              }
+            ]
+          }
+        ]
+      },
+      "report": {
+        "passes": 1,
+        "attempted": 2,
+        "completed": 2,
+        "incompleteBefore": 2,
+        "incompleteAfter": 0,
+        "added": {
+          "tracks": 2,
+          "barrels": 0
+        },
+        "ripped": 0,
+        "violationsBefore": 0,
+        "violationsAdded": 0,
+        "timedOut": false,
+        "aborted": false,
+        "stoppedBy": "complete",
+        "effectiveSettings": {
+          "maxPasses": 100,
+          "maxStagnantPasses": 3,
+          "viaCost": 50,
+          "planeViaCost": 5,
+          "bendCost": 0,
+          "preferredDirectionCost": 1.5,
+          "startRipupCost": 100,
+          "ripupEnabled": true,
+          "fanoutEnabled": false,
+          "routerEnabled": true,
+          "optimizerEnabled": true,
+          "strictDrc": false,
+          "layers": {},
+          "viasAllowed": true,
+          "ignoreNetGroups": [],
+          "seed": 1,
+          "shoveEnabled": true,
+          "orderByDifficulty": true,
+          "detailedRouter": "off",
+          "globalPlan": "off",
+          "angleMode": "45"
+        },
+        "wallClockMs": 1,
+        "perNet": [
+          {
+            "net": "NET1",
+            "incomplete": 0
+          }
+        ]
+      },
+      "violationsBefore": 0,
+      "violationsAdded": 0,
+      "pairs": [],
+      "diagnostics": []
+    },
+    "exportedLengthMm": 23.40872708616717
+  },
+  {
+    "mode": "before",
+    "repeat": 3,
+    "seconds": 0.0010868169999994279,
+    "result": {
+      "ok": true,
+      "srj": {
+        "layerCount": 2,
+        "minTraceWidth": 0.2,
+        "bounds": {
+          "minX": 0,
+          "maxX": 20,
+          "minY": 0,
+          "maxY": 12
+        },
+        "obstacles": [
+          {
+            "type": "rect",
+            "layers": [
+              "top"
+            ],
+            "center": {
+              "x": 2,
+              "y": 5
+            },
+            "width": 1.2,
+            "height": 1,
+            "connectedTo": [
+              "NET1"
+            ]
+          },
+          {
+            "type": "rect",
+            "layers": [
+              "top"
+            ],
+            "center": {
+              "x": 18,
+              "y": 5
+            },
+            "width": 1.2,
+            "height": 1,
+            "connectedTo": [
+              "NET1"
+            ]
+          },
+          {
+            "type": "rect",
+            "layers": [
+              "top"
+            ],
+            "center": {
+              "x": 10,
+              "y": 9
+            },
+            "width": 1.2,
+            "height": 1,
+            "connectedTo": [
+              "NET1"
+            ]
+          }
+        ],
+        "connections": [
+          {
+            "name": "NET1",
+            "pointsToConnect": [
+              {
+                "x": 2,
+                "y": 5,
+                "layer": "top"
+              },
+              {
+                "x": 18,
+                "y": 5,
+                "layer": "top"
+              },
+              {
+                "x": 10,
+                "y": 9,
+                "layer": "top"
+              }
+            ]
+          }
+        ],
+        "traces": [
+          {
+            "type": "pcb_trace",
+            "pcb_trace_id": "pcb_trace_NET1",
+            "connection_name": "NET1",
+            "route": [
+              {
+                "route_type": "wire",
+                "x": 2.6,
+                "y": 5.5,
+                "width": 0.2,
+                "layer": "top"
+              },
+              {
+                "route_type": "wire",
+                "x": 9.4,
+                "y": 8.5,
+                "width": 0.2,
+                "layer": "top"
+              },
+              {
+                "route_type": "wire",
+                "x": 17.4,
+                "y": 5.5,
+                "width": 0.2,
+                "layer": "top"
+              },
+              {
+                "route_type": "wire",
+                "x": 10.6,
+                "y": 8.5,
+                "width": 0.2,
+                "layer": "top"
+              }
+            ]
+          }
+        ]
+      },
+      "report": {
+        "passes": 1,
+        "attempted": 2,
+        "completed": 2,
+        "incompleteBefore": 2,
+        "incompleteAfter": 0,
+        "added": {
+          "tracks": 2,
+          "barrels": 0
+        },
+        "ripped": 0,
+        "violationsBefore": 0,
+        "violationsAdded": 0,
+        "timedOut": false,
+        "aborted": false,
+        "stoppedBy": "complete",
+        "effectiveSettings": {
+          "maxPasses": 100,
+          "maxStagnantPasses": 3,
+          "viaCost": 50,
+          "planeViaCost": 5,
+          "bendCost": 0,
+          "preferredDirectionCost": 1.5,
+          "startRipupCost": 100,
+          "ripupEnabled": true,
+          "fanoutEnabled": false,
+          "routerEnabled": true,
+          "optimizerEnabled": true,
+          "strictDrc": false,
+          "layers": {},
+          "viasAllowed": true,
+          "ignoreNetGroups": [],
+          "seed": 1,
+          "shoveEnabled": true,
+          "orderByDifficulty": true,
+          "detailedRouter": "off",
+          "globalPlan": "off",
+          "angleMode": "45"
+        },
+        "wallClockMs": 1,
+        "perNet": [
+          {
+            "net": "NET1",
+            "incomplete": 0
+          }
+        ]
+      },
+      "violationsBefore": 0,
+      "violationsAdded": 0,
+      "pairs": [],
+      "diagnostics": []
+    },
+    "exportedLengthMm": 23.40872708616717
+  },
+  {
+    "mode": "after",
+    "repeat": 1,
+    "seconds": 0.002867232000000513,
+    "result": {
+      "ok": true,
+      "srj": {
+        "layerCount": 2,
+        "minTraceWidth": 0.2,
+        "bounds": {
+          "minX": 0,
+          "maxX": 20,
+          "minY": 0,
+          "maxY": 12
+        },
+        "obstacles": [
+          {
+            "type": "rect",
+            "layers": [
+              "top"
+            ],
+            "center": {
+              "x": 2,
+              "y": 5
+            },
+            "width": 1.2,
+            "height": 1,
+            "connectedTo": [
+              "NET1"
+            ]
+          },
+          {
+            "type": "rect",
+            "layers": [
+              "top"
+            ],
+            "center": {
+              "x": 18,
+              "y": 5
+            },
+            "width": 1.2,
+            "height": 1,
+            "connectedTo": [
+              "NET1"
+            ]
+          },
+          {
+            "type": "rect",
+            "layers": [
+              "top"
+            ],
+            "center": {
+              "x": 10,
+              "y": 9
+            },
+            "width": 1.2,
+            "height": 1,
+            "connectedTo": [
+              "NET1"
+            ]
+          }
+        ],
+        "connections": [
+          {
+            "name": "NET1",
+            "pointsToConnect": [
+              {
+                "x": 2,
+                "y": 5,
+                "layer": "top"
+              },
+              {
+                "x": 18,
+                "y": 5,
+                "layer": "top"
+              },
+              {
+                "x": 10,
+                "y": 9,
+                "layer": "top"
+              }
+            ]
+          }
+        ],
+        "traces": [
+          {
+            "type": "pcb_trace",
+            "pcb_trace_id": "pcb_trace_NET1_track_9",
+            "connection_name": "NET1",
+            "route": [
+              {
+                "route_type": "wire",
+                "x": 2.6,
+                "y": 5.5,
+                "width": 0.2,
+                "layer": "top"
+              },
+              {
+                "route_type": "wire",
+                "x": 9.4,
+                "y": 8.5,
+                "width": 0.2,
+                "layer": "top"
+              }
+            ]
+          },
+          {
+            "type": "pcb_trace",
+            "pcb_trace_id": "pcb_trace_NET1_track_10",
+            "connection_name": "NET1",
+            "route": [
+              {
+                "route_type": "wire",
+                "x": 17.4,
+                "y": 5.5,
+                "width": 0.2,
+                "layer": "top"
+              },
+              {
+                "route_type": "wire",
+                "x": 10.6,
+                "y": 8.5,
+                "width": 0.2,
+                "layer": "top"
+              }
+            ]
+          }
+        ]
+      },
+      "report": {
+        "passes": 1,
+        "attempted": 2,
+        "completed": 2,
+        "incompleteBefore": 2,
+        "incompleteAfter": 0,
+        "added": {
+          "tracks": 2,
+          "barrels": 0
+        },
+        "ripped": 0,
+        "violationsBefore": 0,
+        "violationsAdded": 0,
+        "timedOut": false,
+        "aborted": false,
+        "stoppedBy": "complete",
+        "effectiveSettings": {
+          "maxPasses": 100,
+          "maxStagnantPasses": 3,
+          "viaCost": 50,
+          "planeViaCost": 5,
+          "bendCost": 0,
+          "preferredDirectionCost": 1.5,
+          "startRipupCost": 100,
+          "ripupEnabled": true,
+          "fanoutEnabled": false,
+          "routerEnabled": true,
+          "optimizerEnabled": true,
+          "strictDrc": false,
+          "layers": {},
+          "viasAllowed": true,
+          "ignoreNetGroups": [],
+          "seed": 1,
+          "shoveEnabled": true,
+          "orderByDifficulty": true,
+          "detailedRouter": "off",
+          "globalPlan": "off",
+          "angleMode": "45"
+        },
+        "wallClockMs": 3,
+        "perNet": [
+          {
+            "net": "NET1",
+            "incomplete": 0
+          }
+        ]
+      },
+      "violationsBefore": 0,
+      "violationsAdded": 0,
+      "pairs": [],
+      "diagnostics": []
+    },
+    "exportedLengthMm": 14.864723340849636
+  },
+  {
+    "mode": "after",
+    "repeat": 2,
+    "seconds": 0.001182186999998521,
+    "result": {
+      "ok": true,
+      "srj": {
+        "layerCount": 2,
+        "minTraceWidth": 0.2,
+        "bounds": {
+          "minX": 0,
+          "maxX": 20,
+          "minY": 0,
+          "maxY": 12
+        },
+        "obstacles": [
+          {
+            "type": "rect",
+            "layers": [
+              "top"
+            ],
+            "center": {
+              "x": 2,
+              "y": 5
+            },
+            "width": 1.2,
+            "height": 1,
+            "connectedTo": [
+              "NET1"
+            ]
+          },
+          {
+            "type": "rect",
+            "layers": [
+              "top"
+            ],
+            "center": {
+              "x": 18,
+              "y": 5
+            },
+            "width": 1.2,
+            "height": 1,
+            "connectedTo": [
+              "NET1"
+            ]
+          },
+          {
+            "type": "rect",
+            "layers": [
+              "top"
+            ],
+            "center": {
+              "x": 10,
+              "y": 9
+            },
+            "width": 1.2,
+            "height": 1,
+            "connectedTo": [
+              "NET1"
+            ]
+          }
+        ],
+        "connections": [
+          {
+            "name": "NET1",
+            "pointsToConnect": [
+              {
+                "x": 2,
+                "y": 5,
+                "layer": "top"
+              },
+              {
+                "x": 18,
+                "y": 5,
+                "layer": "top"
+              },
+              {
+                "x": 10,
+                "y": 9,
+                "layer": "top"
+              }
+            ]
+          }
+        ],
+        "traces": [
+          {
+            "type": "pcb_trace",
+            "pcb_trace_id": "pcb_trace_NET1_track_9",
+            "connection_name": "NET1",
+            "route": [
+              {
+                "route_type": "wire",
+                "x": 2.6,
+                "y": 5.5,
+                "width": 0.2,
+                "layer": "top"
+              },
+              {
+                "route_type": "wire",
+                "x": 9.4,
+                "y": 8.5,
+                "width": 0.2,
+                "layer": "top"
+              }
+            ]
+          },
+          {
+            "type": "pcb_trace",
+            "pcb_trace_id": "pcb_trace_NET1_track_10",
+            "connection_name": "NET1",
+            "route": [
+              {
+                "route_type": "wire",
+                "x": 17.4,
+                "y": 5.5,
+                "width": 0.2,
+                "layer": "top"
+              },
+              {
+                "route_type": "wire",
+                "x": 10.6,
+                "y": 8.5,
+                "width": 0.2,
+                "layer": "top"
+              }
+            ]
+          }
+        ]
+      },
+      "report": {
+        "passes": 1,
+        "attempted": 2,
+        "completed": 2,
+        "incompleteBefore": 2,
+        "incompleteAfter": 0,
+        "added": {
+          "tracks": 2,
+          "barrels": 0
+        },
+        "ripped": 0,
+        "violationsBefore": 0,
+        "violationsAdded": 0,
+        "timedOut": false,
+        "aborted": false,
+        "stoppedBy": "complete",
+        "effectiveSettings": {
+          "maxPasses": 100,
+          "maxStagnantPasses": 3,
+          "viaCost": 50,
+          "planeViaCost": 5,
+          "bendCost": 0,
+          "preferredDirectionCost": 1.5,
+          "startRipupCost": 100,
+          "ripupEnabled": true,
+          "fanoutEnabled": false,
+          "routerEnabled": true,
+          "optimizerEnabled": true,
+          "strictDrc": false,
+          "layers": {},
+          "viasAllowed": true,
+          "ignoreNetGroups": [],
+          "seed": 1,
+          "shoveEnabled": true,
+          "orderByDifficulty": true,
+          "detailedRouter": "off",
+          "globalPlan": "off",
+          "angleMode": "45"
+        },
+        "wallClockMs": 1,
+        "perNet": [
+          {
+            "net": "NET1",
+            "incomplete": 0
+          }
+        ]
+      },
+      "violationsBefore": 0,
+      "violationsAdded": 0,
+      "pairs": [],
+      "diagnostics": []
+    },
+    "exportedLengthMm": 14.864723340849636
+  },
+  {
+    "mode": "after",
+    "repeat": 3,
+    "seconds": 0.0013136450000001787,
+    "result": {
+      "ok": true,
+      "srj": {
+        "layerCount": 2,
+        "minTraceWidth": 0.2,
+        "bounds": {
+          "minX": 0,
+          "maxX": 20,
+          "minY": 0,
+          "maxY": 12
+        },
+        "obstacles": [
+          {
+            "type": "rect",
+            "layers": [
+              "top"
+            ],
+            "center": {
+              "x": 2,
+              "y": 5
+            },
+            "width": 1.2,
+            "height": 1,
+            "connectedTo": [
+              "NET1"
+            ]
+          },
+          {
+            "type": "rect",
+            "layers": [
+              "top"
+            ],
+            "center": {
+              "x": 18,
+              "y": 5
+            },
+            "width": 1.2,
+            "height": 1,
+            "connectedTo": [
+              "NET1"
+            ]
+          },
+          {
+            "type": "rect",
+            "layers": [
+              "top"
+            ],
+            "center": {
+              "x": 10,
+              "y": 9
+            },
+            "width": 1.2,
+            "height": 1,
+            "connectedTo": [
+              "NET1"
+            ]
+          }
+        ],
+        "connections": [
+          {
+            "name": "NET1",
+            "pointsToConnect": [
+              {
+                "x": 2,
+                "y": 5,
+                "layer": "top"
+              },
+              {
+                "x": 18,
+                "y": 5,
+                "layer": "top"
+              },
+              {
+                "x": 10,
+                "y": 9,
+                "layer": "top"
+              }
+            ]
+          }
+        ],
+        "traces": [
+          {
+            "type": "pcb_trace",
+            "pcb_trace_id": "pcb_trace_NET1_track_9",
+            "connection_name": "NET1",
+            "route": [
+              {
+                "route_type": "wire",
+                "x": 2.6,
+                "y": 5.5,
+                "width": 0.2,
+                "layer": "top"
+              },
+              {
+                "route_type": "wire",
+                "x": 9.4,
+                "y": 8.5,
+                "width": 0.2,
+                "layer": "top"
+              }
+            ]
+          },
+          {
+            "type": "pcb_trace",
+            "pcb_trace_id": "pcb_trace_NET1_track_10",
+            "connection_name": "NET1",
+            "route": [
+              {
+                "route_type": "wire",
+                "x": 17.4,
+                "y": 5.5,
+                "width": 0.2,
+                "layer": "top"
+              },
+              {
+                "route_type": "wire",
+                "x": 10.6,
+                "y": 8.5,
+                "width": 0.2,
+                "layer": "top"
+              }
+            ]
+          }
+        ]
+      },
+      "report": {
+        "passes": 1,
+        "attempted": 2,
+        "completed": 2,
+        "incompleteBefore": 2,
+        "incompleteAfter": 0,
+        "added": {
+          "tracks": 2,
+          "barrels": 0
+        },
+        "ripped": 0,
+        "violationsBefore": 0,
+        "violationsAdded": 0,
+        "timedOut": false,
+        "aborted": false,
+        "stoppedBy": "complete",
+        "effectiveSettings": {
+          "maxPasses": 100,
+          "maxStagnantPasses": 3,
+          "viaCost": 50,
+          "planeViaCost": 5,
+          "bendCost": 0,
+          "preferredDirectionCost": 1.5,
+          "startRipupCost": 100,
+          "ripupEnabled": true,
+          "fanoutEnabled": false,
+          "routerEnabled": true,
+          "optimizerEnabled": true,
+          "strictDrc": false,
+          "layers": {},
+          "viasAllowed": true,
+          "ignoreNetGroups": [],
+          "seed": 1,
+          "shoveEnabled": true,
+          "orderByDifficulty": true,
+          "detailedRouter": "off",
+          "globalPlan": "off",
+          "angleMode": "45"
+        },
+        "wallClockMs": 1,
+        "perNet": [
+          {
+            "net": "NET1",
+            "incomplete": 0
+          }
+        ]
+      },
+      "violationsBefore": 0,
+      "violationsAdded": 0,
+      "pairs": [],
+      "diagnostics": []
+    },
+    "exportedLengthMm": 14.864723340849636
+  }
+]

@@ -34,8 +34,8 @@ PYTHONDONTWRITEBYTECODE=1 nice -n 10 taskset -c 6-11 timeout 300 python3 benchma
 PYTHONDONTWRITEBYTECODE=1 nice -n 10 taskset -c 6-11 timeout 300 python3 benchmarks/autorouter/benchmark.py --router fab-router --case kitspace-solenoid-driver-j1 --fab-router-source "$CANDIDATE" --out /tmp/native-after
 ```
 
-branch-results.json contains actual routeSrj results; native-summary.json records the independent native subset comparison. The image is generated from those actual before/after SRJ results.
+native-consumer/samples.json contains actual routeSrj results; native-summary.json records the independent native subset comparison. The image is generated from those actual before/after SRJ results.
 
-This companion pins the serializer repair and offers the original fixture outside the frozen suite. Engine regression and native DSN subset results are distinct; no native SRJ consumer guarantee.
+This companion pins the serializer repair and offers the original fixture outside the frozen suite. Engine regression and native DSN subset results are distinct; the native-consumer subdirectory now qualifies the narrow three-terminal top-copper fixture. General native SRJ consumption remains unqualified.
 
 Adapter validation: package typecheck passes; focused adapter suite 10 passed, zero failed, 38 assertions. Engine suite: 861 passed, zero failed; layer check zero violations.
