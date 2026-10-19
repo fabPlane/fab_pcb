@@ -62,7 +62,7 @@ for name, result in results.items():
         elif scenario == 'valid-control':
             assert row['state'] == 'done' and row['addedCopper'] == 1 and row['missingOriginal'] == 0
         else:
-            assert row['state'] == 'failed' and row['addedCopper'] == 1
+            assert row['state'] == 'failed' and row['addedCopper'] == (2 if scenario == 'foreign-edit' else 1)
             assert ('rollback failed' in row['error']) == (name == 'after')
 results['scope'] = 'stateful adapter fault injection, not native DRC or standalone engine scoring'
 results['baseline'] = subprocess.check_output(['git', '-C', str(repo), 'rev-parse', args.baseline], text=True).strip()

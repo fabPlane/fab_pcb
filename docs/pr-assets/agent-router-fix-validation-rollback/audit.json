@@ -126,6 +126,31 @@
         "missingOriginal": 0
       },
       {
+        "scenario": "foreign-edit",
+        "repeat": 1,
+        "state": "failed",
+        "error": "native DRC transport unavailable",
+        "copper": [
+          "stub",
+          "protected",
+          "other-net",
+          "new-route",
+          "unrelated-edit"
+        ],
+        "original": [
+          "stub",
+          "protected",
+          "other-net"
+        ],
+        "calls": [
+          "save",
+          "apply",
+          "drc"
+        ],
+        "addedCopper": 2,
+        "missingOriginal": 0
+      },
+      {
         "scenario": "first-check-failure",
         "repeat": 2,
         "state": "failed",
@@ -250,6 +275,31 @@
         "missingOriginal": 0
       },
       {
+        "scenario": "foreign-edit",
+        "repeat": 2,
+        "state": "failed",
+        "error": "native DRC transport unavailable",
+        "copper": [
+          "stub",
+          "protected",
+          "other-net",
+          "new-route",
+          "unrelated-edit"
+        ],
+        "original": [
+          "stub",
+          "protected",
+          "other-net"
+        ],
+        "calls": [
+          "save",
+          "apply",
+          "drc"
+        ],
+        "addedCopper": 2,
+        "missingOriginal": 0
+      },
+      {
         "scenario": "first-check-failure",
         "repeat": 3,
         "state": "failed",
@@ -371,6 +421,31 @@
           "ratsnest"
         ],
         "addedCopper": 1,
+        "missingOriginal": 0
+      },
+      {
+        "scenario": "foreign-edit",
+        "repeat": 3,
+        "state": "failed",
+        "error": "native DRC transport unavailable",
+        "copper": [
+          "stub",
+          "protected",
+          "other-net",
+          "new-route",
+          "unrelated-edit"
+        ],
+        "original": [
+          "stub",
+          "protected",
+          "other-net"
+        ],
+        "calls": [
+          "save",
+          "apply",
+          "drc"
+        ],
+        "addedCopper": 2,
         "missingOriginal": 0
       }
     ],
@@ -389,7 +464,7 @@
       }
     ],
     "sha256": {
-      "packages/router/audit.ts": "2ee498e958c2a82f92b421f2c0ca6347b239ce88952485aab3896269165ec2e2",
+      "packages/router/audit.ts": "fe22674d4b64dc8a2b8cf688f098565721997159fe01aff45c030631e2cc4221",
       "packages/router/src/apply.ts": "9025f45c9d454a7786e8f6cec59975a8b256e9a3f491289f1324ca0c55b1d17c",
       "packages/router/src/bridge-job.ts": "a4353d5276ebf33c1f14593474ab8fdb0709302c8060d4387cc86b729a3d779e",
       "packages/router/src/endpoint-collisions.ts": "b5b88409d715e875c952ff237d70c775018d905ac9acd7e3ede7ca12ca4b1572",
@@ -411,8 +486,8 @@
       "packages/router/src/specctra/session-filter.ts": "8f4c1acec4159ab6c102620522508f8cda7ee10ff9352b42d75eb494f1faefd4",
       "packages/router/src/specctra/sexpr.ts": "4716c2bb26240ca46ec4d8b51ddc481ddaca5b9ab21d1c3a1cc826d7ab7c01b0",
       "packages/router/src/types.ts": "fdf0bfb9726cc21d5b736a725f486f8ae1c89e2df4e47b17c77c98e64f2cd1e0",
-      "packages/router/test/bridge-validation-fixture.ts": "a51d8f08521fba5028b04a7b4b54932ae24c793ee0d63a2d194f520867903f10",
-      "packages/router/test/bridge-validation.test.ts": "e7838454e97d48b2decc33b95c40e77cc0b4779541451a3fc9ee994d3b6bb23c",
+      "packages/router/test/bridge-validation-fixture.ts": "cc155f0de87c7980d5ff9609829dcfcfa99fabf4dee21c51b9a9492530c8372f",
+      "packages/router/test/bridge-validation.test.ts": "4fe91bb6ea4731b8fe73ac60c844a302df086a38dd5f94fa1c4ecf4f745041a2",
       "packages/router/test/collision-fixture.ts": "2d030109e2205096c831467ee64a22166c3eb2ce08f677966af17d9ec1363cb5"
     }
   },
@@ -437,6 +512,7 @@
           "save",
           "apply",
           "drc",
+          "undoStack",
           "undo"
         ],
         "addedCopper": 0,
@@ -464,6 +540,7 @@
           "undo",
           "apply",
           "drc",
+          "undoStack",
           "undo"
         ],
         "addedCopper": 0,
@@ -489,6 +566,7 @@
           "save",
           "apply",
           "drc",
+          "undoStack",
           "undo"
         ],
         "addedCopper": 1,
@@ -514,6 +592,7 @@
           "save",
           "apply",
           "drc",
+          "undoStack",
           "undo"
         ],
         "addedCopper": 1,
@@ -543,6 +622,32 @@
           "ratsnest"
         ],
         "addedCopper": 1,
+        "missingOriginal": 0
+      },
+      {
+        "scenario": "foreign-edit",
+        "repeat": 1,
+        "state": "failed",
+        "error": "native DRC validation failed: native DRC transport unavailable; rollback failed: tentative route commit is not at the top of the undo stack; tentative route may remain in KiCad memory",
+        "copper": [
+          "stub",
+          "protected",
+          "other-net",
+          "new-route",
+          "unrelated-edit"
+        ],
+        "original": [
+          "stub",
+          "protected",
+          "other-net"
+        ],
+        "calls": [
+          "save",
+          "apply",
+          "drc",
+          "undoStack"
+        ],
+        "addedCopper": 2,
         "missingOriginal": 0
       },
       {
@@ -564,6 +669,7 @@
           "save",
           "apply",
           "drc",
+          "undoStack",
           "undo"
         ],
         "addedCopper": 0,
@@ -591,6 +697,7 @@
           "undo",
           "apply",
           "drc",
+          "undoStack",
           "undo"
         ],
         "addedCopper": 0,
@@ -616,6 +723,7 @@
           "save",
           "apply",
           "drc",
+          "undoStack",
           "undo"
         ],
         "addedCopper": 1,
@@ -641,6 +749,7 @@
           "save",
           "apply",
           "drc",
+          "undoStack",
           "undo"
         ],
         "addedCopper": 1,
@@ -670,6 +779,32 @@
           "ratsnest"
         ],
         "addedCopper": 1,
+        "missingOriginal": 0
+      },
+      {
+        "scenario": "foreign-edit",
+        "repeat": 2,
+        "state": "failed",
+        "error": "native DRC validation failed: native DRC transport unavailable; rollback failed: tentative route commit is not at the top of the undo stack; tentative route may remain in KiCad memory",
+        "copper": [
+          "stub",
+          "protected",
+          "other-net",
+          "new-route",
+          "unrelated-edit"
+        ],
+        "original": [
+          "stub",
+          "protected",
+          "other-net"
+        ],
+        "calls": [
+          "save",
+          "apply",
+          "drc",
+          "undoStack"
+        ],
+        "addedCopper": 2,
         "missingOriginal": 0
       },
       {
@@ -691,6 +826,7 @@
           "save",
           "apply",
           "drc",
+          "undoStack",
           "undo"
         ],
         "addedCopper": 0,
@@ -718,6 +854,7 @@
           "undo",
           "apply",
           "drc",
+          "undoStack",
           "undo"
         ],
         "addedCopper": 0,
@@ -743,6 +880,7 @@
           "save",
           "apply",
           "drc",
+          "undoStack",
           "undo"
         ],
         "addedCopper": 1,
@@ -768,6 +906,7 @@
           "save",
           "apply",
           "drc",
+          "undoStack",
           "undo"
         ],
         "addedCopper": 1,
@@ -797,6 +936,32 @@
           "ratsnest"
         ],
         "addedCopper": 1,
+        "missingOriginal": 0
+      },
+      {
+        "scenario": "foreign-edit",
+        "repeat": 3,
+        "state": "failed",
+        "error": "native DRC validation failed: native DRC transport unavailable; rollback failed: tentative route commit is not at the top of the undo stack; tentative route may remain in KiCad memory",
+        "copper": [
+          "stub",
+          "protected",
+          "other-net",
+          "new-route",
+          "unrelated-edit"
+        ],
+        "original": [
+          "stub",
+          "protected",
+          "other-net"
+        ],
+        "calls": [
+          "save",
+          "apply",
+          "drc",
+          "undoStack"
+        ],
+        "addedCopper": 2,
         "missingOriginal": 0
       }
     ],
@@ -815,9 +980,9 @@
       }
     ],
     "sha256": {
-      "packages/router/audit.ts": "2ee498e958c2a82f92b421f2c0ca6347b239ce88952485aab3896269165ec2e2",
+      "packages/router/audit.ts": "fe22674d4b64dc8a2b8cf688f098565721997159fe01aff45c030631e2cc4221",
       "packages/router/src/apply.ts": "9025f45c9d454a7786e8f6cec59975a8b256e9a3f491289f1324ca0c55b1d17c",
-      "packages/router/src/bridge-job.ts": "662296da14b2740030a6e0e76a63f5002fc7fda5d7198de57ec1ff79cf1ce2ce",
+      "packages/router/src/bridge-job.ts": "672676d42fff7e5cbdb644a297d6614269e26fbeb769bdaaafa24987edcaadd4",
       "packages/router/src/endpoint-collisions.ts": "b5b88409d715e875c952ff237d70c775018d905ac9acd7e3ede7ca12ca4b1572",
       "packages/router/src/extract.ts": "7543e5ec49091cbc225420539efbe60de5c478906521189d6a64e01bf455df60",
       "packages/router/src/fab-router.ts": "f448f5c6147cbea94eba19c66a7153c7ace0c3b711842c1623e64cf86c3d67ab",
@@ -837,12 +1002,12 @@
       "packages/router/src/specctra/session-filter.ts": "8f4c1acec4159ab6c102620522508f8cda7ee10ff9352b42d75eb494f1faefd4",
       "packages/router/src/specctra/sexpr.ts": "4716c2bb26240ca46ec4d8b51ddc481ddaca5b9ab21d1c3a1cc826d7ab7c01b0",
       "packages/router/src/types.ts": "fdf0bfb9726cc21d5b736a725f486f8ae1c89e2df4e47b17c77c98e64f2cd1e0",
-      "packages/router/test/bridge-validation-fixture.ts": "a51d8f08521fba5028b04a7b4b54932ae24c793ee0d63a2d194f520867903f10",
-      "packages/router/test/bridge-validation.test.ts": "e7838454e97d48b2decc33b95c40e77cc0b4779541451a3fc9ee994d3b6bb23c",
+      "packages/router/test/bridge-validation-fixture.ts": "cc155f0de87c7980d5ff9609829dcfcfa99fabf4dee21c51b9a9492530c8372f",
+      "packages/router/test/bridge-validation.test.ts": "4fe91bb6ea4731b8fe73ac60c844a302df086a38dd5f94fa1c4ecf4f745041a2",
       "packages/router/test/collision-fixture.ts": "2d030109e2205096c831467ee64a22166c3eb2ce08f677966af17d9ec1363cb5"
     }
   },
   "scope": "stateful adapter fault injection, not native DRC or standalone engine scoring",
   "baseline": "12b7edb2047e7c4e2710167419f5781899281303",
-  "candidateHead": "4917976c7b255cba6235d2b7618d71e128fe794d"
+  "candidateHead": "56591cdfa9ad4630fcb59acd90e755651f3a4e58"
 }

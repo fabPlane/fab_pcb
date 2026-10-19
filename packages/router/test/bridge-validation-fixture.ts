@@ -7,7 +7,9 @@ import { collisionBoard } from "./collision-fixture";
 
 // Stateful commit/undo stand-in: deletion during a later cleanup pass must be
 // restored along with removal of the route when native validation is unavailable.
-export function validationFixture(options: { cleanupFirst?: boolean; undo?: "zero" | "throws"; valid?: boolean } = {}) {
+export function validationFixture(
+  options: { cleanupFirst?: boolean; undo?: "zero" | "throws"; valid?: boolean; foreignEdit?: boolean } = {},
+) {
   const original = [
     new Track(create(TrackSchema, { id: { value: "stub" }, net: { name: "A" } })),
     new Track(create(TrackSchema, { id: { value: "protected" }, net: { name: "A" }, locked: LockedState.LS_LOCKED })),
@@ -18,6 +20,7 @@ export function validationFixture(options: { cleanupFirst?: boolean; undo?: "zer
   let snapshot = [...original];
   const calls: string[] = [];
   let checks = 0;
+  let topCommitId = "route-commit";
   const board = {
     save: async () => {
       calls.push("save");
@@ -26,6 +29,10 @@ export function validationFixture(options: { cleanupFirst?: boolean; undo?: "zer
     ratsnest: async () => {
       calls.push("ratsnest");
       return { edges: [] };
+    },
+    undoStack: async () => {
+      calls.push("undoStack");
+      return { undo: [{ commitId: { value: topCommitId } }], redo: [] };
     },
     undo: async () => {
       calls.push("undo");
@@ -43,6 +50,10 @@ export function validationFixture(options: { cleanupFirst?: boolean; undo?: "zer
           return {
             markers: [{ errorType: DrcErrorType.DRCET_DANGLING_TRACK, items: [{ value: "stub" }] }],
           };
+        if (options.foreignEdit) {
+          copper.push(new Track(create(TrackSchema, { id: { value: "unrelated-edit" }, net: { name: "OTHER" } })));
+          topCommitId = "unrelated-commit";
+        }
         throw new Error("native DRC transport unavailable");
       },
     },

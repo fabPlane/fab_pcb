@@ -18,6 +18,7 @@
       "save",
       "apply",
       "drc",
+      "undoStack",
       "undo"
     ],
     "addedCopper": 0,
@@ -45,6 +46,7 @@
       "undo",
       "apply",
       "drc",
+      "undoStack",
       "undo"
     ],
     "addedCopper": 0,
@@ -70,6 +72,7 @@
       "save",
       "apply",
       "drc",
+      "undoStack",
       "undo"
     ],
     "addedCopper": 1,
@@ -95,6 +98,7 @@
       "save",
       "apply",
       "drc",
+      "undoStack",
       "undo"
     ],
     "addedCopper": 1,
@@ -124,6 +128,32 @@
       "ratsnest"
     ],
     "addedCopper": 1,
+    "missingOriginal": 0
+  },
+  {
+    "scenario": "foreign-edit",
+    "repeat": 1,
+    "state": "failed",
+    "error": "native DRC validation failed: native DRC transport unavailable; rollback failed: tentative route commit is not at the top of the undo stack; tentative route may remain in KiCad memory",
+    "copper": [
+      "stub",
+      "protected",
+      "other-net",
+      "new-route",
+      "unrelated-edit"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc",
+      "undoStack"
+    ],
+    "addedCopper": 2,
     "missingOriginal": 0
   },
   {
@@ -145,6 +175,7 @@
       "save",
       "apply",
       "drc",
+      "undoStack",
       "undo"
     ],
     "addedCopper": 0,
@@ -172,6 +203,7 @@
       "undo",
       "apply",
       "drc",
+      "undoStack",
       "undo"
     ],
     "addedCopper": 0,
@@ -197,6 +229,7 @@
       "save",
       "apply",
       "drc",
+      "undoStack",
       "undo"
     ],
     "addedCopper": 1,
@@ -222,6 +255,7 @@
       "save",
       "apply",
       "drc",
+      "undoStack",
       "undo"
     ],
     "addedCopper": 1,
@@ -251,6 +285,32 @@
       "ratsnest"
     ],
     "addedCopper": 1,
+    "missingOriginal": 0
+  },
+  {
+    "scenario": "foreign-edit",
+    "repeat": 2,
+    "state": "failed",
+    "error": "native DRC validation failed: native DRC transport unavailable; rollback failed: tentative route commit is not at the top of the undo stack; tentative route may remain in KiCad memory",
+    "copper": [
+      "stub",
+      "protected",
+      "other-net",
+      "new-route",
+      "unrelated-edit"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc",
+      "undoStack"
+    ],
+    "addedCopper": 2,
     "missingOriginal": 0
   },
   {
@@ -272,6 +332,7 @@
       "save",
       "apply",
       "drc",
+      "undoStack",
       "undo"
     ],
     "addedCopper": 0,
@@ -299,6 +360,7 @@
       "undo",
       "apply",
       "drc",
+      "undoStack",
       "undo"
     ],
     "addedCopper": 0,
@@ -324,6 +386,7 @@
       "save",
       "apply",
       "drc",
+      "undoStack",
       "undo"
     ],
     "addedCopper": 1,
@@ -349,6 +412,7 @@
       "save",
       "apply",
       "drc",
+      "undoStack",
       "undo"
     ],
     "addedCopper": 1,
@@ -378,6 +442,32 @@
       "ratsnest"
     ],
     "addedCopper": 1,
+    "missingOriginal": 0
+  },
+  {
+    "scenario": "foreign-edit",
+    "repeat": 3,
+    "state": "failed",
+    "error": "native DRC validation failed: native DRC transport unavailable; rollback failed: tentative route commit is not at the top of the undo stack; tentative route may remain in KiCad memory",
+    "copper": [
+      "stub",
+      "protected",
+      "other-net",
+      "new-route",
+      "unrelated-edit"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc",
+      "undoStack"
+    ],
+    "addedCopper": 2,
     "missingOriginal": 0
   }
 ]

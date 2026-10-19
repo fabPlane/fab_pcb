@@ -440,6 +440,9 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
             } catch (validationError) {
               const detail = validationError instanceof Error ? validationError.message : String(validationError);
               try {
+                const top = (await board.undoStack()).undo.at(-1);
+                if (!committed.commitId || top?.commitId?.value !== committed.commitId)
+                  throw new Error("tentative route commit is not at the top of the undo stack");
                 const undone = await board.undo(1);
                 if (undone.applied !== 1) throw new Error(`expected one undone commit, got ${undone.applied}`);
               } catch (rollbackError) {

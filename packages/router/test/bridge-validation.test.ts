@@ -10,7 +10,7 @@ for (const cleanupFirst of [false, true]) {
     expect(info.summary).toBeUndefined();
     expect(fixture.copper()).toEqual(fixture.original);
     expect(fixture.calls).toEqual(
-      cleanupFirst ? ["save", "apply", "drc", "undo", "apply", "drc", "undo"] : ["save", "apply", "drc", "undo"],
+      cleanupFirst ? ["save", "apply", "drc", "undo", "apply", "drc", "undoStack", "undo"] : ["save", "apply", "drc", "undoStack", "undo"],
     );
   });
 }
@@ -23,7 +23,7 @@ for (const undo of ["zero", "throws"] as const) {
     expect(info.error).toContain("native DRC transport unavailable");
     expect(info.error).toContain("rollback failed");
     expect(info.error).toContain("KiCad memory");
-    expect(fixture.calls).toEqual(["save", "apply", "drc", "undo"]);
+    expect(fixture.calls).toEqual(["save", "apply", "drc", "undoStack", "undo"]);
     expect(fixture.copper().some((item) => item.id === "new-route")).toBe(true);
   });
 }
@@ -34,4 +34,15 @@ test("successful native validation keeps and saves the applied route without und
   expect(info.state).toBe("done");
   expect(fixture.copper().map((item) => item.id)).toEqual(["stub", "protected", "other-net", "new-route"]);
   expect(fixture.calls).toEqual(["save", "apply", "drc", "save", "ratsnest"]);
+});
+
+test("failed validation preserves an unrelated edit above the route commit", async () => {
+  const fixture = validationFixture({ foreignEdit: true });
+  const info = await fixture.done;
+  expect(info.state).toBe("failed");
+  expect(info.error).toContain("native DRC transport unavailable");
+  expect(info.error).toContain("rollback failed");
+  expect(info.error).toContain("not at the top of the undo stack");
+  expect(fixture.calls).toEqual(["save", "apply", "drc", "undoStack"]);
+  expect(fixture.copper().map((item) => item.id)).toEqual(["stub", "protected", "other-net", "new-route", "unrelated-edit"]);
 });

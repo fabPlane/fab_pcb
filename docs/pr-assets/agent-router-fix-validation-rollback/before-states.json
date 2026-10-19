@@ -124,6 +124,31 @@
     "missingOriginal": 0
   },
   {
+    "scenario": "foreign-edit",
+    "repeat": 1,
+    "state": "failed",
+    "error": "native DRC transport unavailable",
+    "copper": [
+      "stub",
+      "protected",
+      "other-net",
+      "new-route",
+      "unrelated-edit"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc"
+    ],
+    "addedCopper": 2,
+    "missingOriginal": 0
+  },
+  {
     "scenario": "first-check-failure",
     "repeat": 2,
     "state": "failed",
@@ -248,6 +273,31 @@
     "missingOriginal": 0
   },
   {
+    "scenario": "foreign-edit",
+    "repeat": 2,
+    "state": "failed",
+    "error": "native DRC transport unavailable",
+    "copper": [
+      "stub",
+      "protected",
+      "other-net",
+      "new-route",
+      "unrelated-edit"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc"
+    ],
+    "addedCopper": 2,
+    "missingOriginal": 0
+  },
+  {
     "scenario": "first-check-failure",
     "repeat": 3,
     "state": "failed",
@@ -369,6 +419,31 @@
       "ratsnest"
     ],
     "addedCopper": 1,
+    "missingOriginal": 0
+  },
+  {
+    "scenario": "foreign-edit",
+    "repeat": 3,
+    "state": "failed",
+    "error": "native DRC transport unavailable",
+    "copper": [
+      "stub",
+      "protected",
+      "other-net",
+      "new-route",
+      "unrelated-edit"
+    ],
+    "original": [
+      "stub",
+      "protected",
+      "other-net"
+    ],
+    "calls": [
+      "save",
+      "apply",
+      "drc"
+    ],
+    "addedCopper": 2,
     "missingOriginal": 0
   }
 ]
