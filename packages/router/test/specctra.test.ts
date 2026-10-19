@@ -585,3 +585,27 @@ describe("session path layer operands", () => {
     });
   }
 });
+
+
+describe("session duplicate padstack definitions", () => {
+  const shape = (name: string, diameter: number) =>
+    `(padstack ${name} (shape (circle F.Cu ${diameter})) (shape (circle B.Cu ${diameter})))`;
+  for (const [first, second] of [[800, 600], [600, 800]] as const) {
+    test(`rejects ambiguous via diameter ${first} then ${second}`, () => {
+      const text = `(session s (routes (library_out ${shape("V", first)} ${shape("V", second)})
+        (network_out (net A (via V 1000 -1000)))))`;
+      expect(() => parseSes(text)).toThrow("duplicate session padstack");
+    });
+  }
+  test("rejects duplicate identifiers across quoting forms", () => {
+    expect(() => parseSes(`(session s (routes (library_out ${shape("V", 800)} ${shape('"V"', 800)})))`))
+      .toThrow("duplicate session padstack");
+  });
+  test("preserves distinct padstack identities and their via sizes", () => {
+    const session = parseSes(`(session s (routes (library_out ${shape("V", 800)} ${shape("W", 900)})
+      (network_out (net A (via V 1000 -1000) (via W 2000 -1000)))))`);
+    const result = sesToItems(session, twoNetBoard());
+    expect(result.vias.map(v => v.diameter)).toEqual([800000, 900000]);
+    expect(result.vias.map(v => v.position)).toEqual([{ x: 1000000, y: 1000000 }, { x: 2000000, y: 1000000 }]);
+  });
+});

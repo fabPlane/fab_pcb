@@ -90,6 +90,9 @@ export function parseSes(text: string): Session {
   const padstacks = new Map<string, SesPadstack>();
   for (const ps of children(child(routes, "library_out"), "padstack")) {
     const name = typeof ps[1] === "string" ? ps[1] : "";
+    // A later definition must not silently replace the copper used by every via
+    // referencing this identifier. Quoted and unquoted names share an identity.
+    if (padstacks.has(name)) throw new SyntaxError(`duplicate session padstack: ${name}`);
     const layers: string[] = [];
     let diameter = 0;
     for (const shape of children(ps, "shape")) {

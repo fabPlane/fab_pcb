@@ -1,0 +1,17 @@
+{
+  "docs/pr-assets/agent-router-fix-session-resolution/c159-duplicate-padstacks/after-1.log": "d866d83bf57ec87df2a6abb390403ac73001961f48c81b036205284ade367b7a",
+  "docs/pr-assets/agent-router-fix-session-resolution/c159-duplicate-padstacks/after-2.log": "d89d09407ecbc7a299883a4dd7762c4933aeb7dc2d369ea0a2ee49f7081acd11",
+  "docs/pr-assets/agent-router-fix-session-resolution/c159-duplicate-padstacks/after-3.log": "1b59ea0d2b902f229a26daa30793dd93a046a2ba0f30187cc54b514e4f308692",
+  "docs/pr-assets/agent-router-fix-session-resolution/c159-duplicate-padstacks/before-1.log": "df05dc8c601d08ca60ec0276c228cf80c7949d29e563e6f4b693821ed89b312d",
+  "docs/pr-assets/agent-router-fix-session-resolution/c159-duplicate-padstacks/before-2.log": "a2faa54ccb1777655d764cc3293f8334c5555fe7e89ed7f00f29d350e05d2ad5",
+  "docs/pr-assets/agent-router-fix-session-resolution/c159-duplicate-padstacks/before-3.log": "08a8a195dfcab6cd23c4803805e3389c926d0ad9ac54c93c42ad0e8a6957c797",
+  "docs/pr-assets/agent-router-fix-session-resolution/c159-duplicate-padstacks/comparison.png": "56073c60e77cf68b66296cee1304b9cf0a5b2de8692b8125f50ba89315513126",
+  "docs/pr-assets/agent-router-fix-session-resolution/c159-duplicate-padstacks/comparison.svg": "d638c52b5541113f38912fe2f4a78cedbee933a657992c47459ea8b33c0f64c5",
+  "docs/pr-assets/agent-router-fix-session-resolution/c159-duplicate-padstacks/engine-checks.log": "504bb6111e0c96e66933cabd22ac3c78646825d20151561993ff1c080e4dd4a0",
+  "docs/pr-assets/agent-router-fix-session-resolution/c159-duplicate-padstacks/package-tests.log": "e4ab193a54cf231eb9e809b15f2be3c312cb4a23774d8d012de391374486ff3f",
+  "docs/pr-assets/agent-router-fix-session-resolution/c159-duplicate-padstacks/render.py": "975a082fd8a8e810cfe49e60a175c84aad7dcce550f966afc64efc3b4c72860a",
+  "docs/pr-assets/agent-router-fix-session-resolution/c159-duplicate-padstacks/repro.md": "0f7631f0335f20a27c6b0b2ba26ba3f2f327b5039b92b3406efd5ea6f9811883",
+  "docs/pr-assets/agent-router-fix-session-resolution/c159-duplicate-padstacks/typecheck.log": "fe89e10caa3908a764784066d877bbc05895eb09e7524630f19a906babdf3809",
+  "packages/router/src/specctra/ses.ts": "5f2d6ba3b8e87e8cc319bd8ead8086d251a9f6220168f72de2316692ade5f4bd",
+  "packages/router/test/specctra.test.ts": "fa2c21456a84450d36d2a7090c8765b77d26ead556a8759c0e273462e410f140"
+}

@@ -1,0 +1,13 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+(pass) session duplicate padstack definitions > rejects ambiguous via diameter 800 then 600 [1.13ms]
+(pass) session duplicate padstack definitions > rejects ambiguous via diameter 600 then 800 [0.03ms]
+(pass) session duplicate padstack definitions > rejects duplicate identifiers across quoting forms [0.05ms]
+(pass) session duplicate padstack definitions > preserves distinct padstack identities and their via sizes [1.36ms]
+
+ 4 pass
+ 109 filtered out
+ 0 fail
+ 5 expect() calls
+Ran 4 tests across 1 file. [146.00ms]
