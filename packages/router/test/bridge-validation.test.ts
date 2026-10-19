@@ -307,3 +307,23 @@ for (const refill of [false, true]) {
     });
   }
 }
+
+for (const refill of [false, true]) {
+  for (const maskedTrackError of ["new", "existing"] as const) {
+    test(`checks every track clearance finding (${maskedTrackError}, refill=${refill})`, async () => {
+      const fixture = validationFixture({ maskedTrackError,
+        ...(refill ? { refill: "valid" as const } : {}),
+      });
+      const info = await fixture.done;
+      const rejected = maskedTrackError === "new";
+      expect(info.state).toBe(rejected ? "failed" : "done");
+      expect(fixture.calls.filter(call => call === "save")).toHaveLength(rejected ? 1 : 2);
+      expect(fixture.calls.filter(call => call === "undo")).toHaveLength(rejected ? 1 : 0);
+      if (rejected) {
+        expect(info.error).toContain("1 new");
+        expect(info.summary).toBeUndefined();
+        expect(fixture.copper()).toEqual(fixture.original);
+      } else expect(fixture.copper().map(item => item.id)).toContain("new-route");
+    });
+  }
+}

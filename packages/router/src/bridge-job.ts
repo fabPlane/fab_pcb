@@ -459,10 +459,12 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         );
         // Compare matching states: filled when requested, otherwise unfilled. Marker UUIDs
         // change on each native check; retain multiplicity of stable identities.
+        // Report every track finding so an existing clearance error cannot mask
+        // a new violation on the same track. Use the same mode in every check.
         let nativeBaseline: DrcMarker[] | undefined;
         if (result.router === "fab-router" && !alreadyApplied(result) &&
             (result.tracks.length || result.vias.length || result.claimedVias?.length)) {
-          nativeBaseline = (await board.drc.run({ refillZones: false })).markers;
+          nativeBaseline = (await board.drc.run({ refillZones: false, reportAllTrackErrors: true })).markers;
         }
         if (!alreadyApplied(result) && (result.tracks.length || result.vias.length || result.claimedVias?.length)) {
           // Each cleanup pass removes an item; allow one extra pass to validate a relabelled commit.
@@ -479,7 +481,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
             const createdIds = new Set(committed.created.map((item) => item.id));
             let drc;
             try {
-              drc = await board.drc.run({ refillZones: false });
+              drc = await board.drc.run({ refillZones: false, reportAllTrackErrors: true });
             } catch (validationError) {
               return await rejectTentativeValidation(board, committed.commitId, "native DRC", validationError);
             }
@@ -572,7 +574,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           }
           if (result.router === "fab-router" && acceptedCommitId && info.zoneRefill.after) {
             try {
-              const filled = await board.drc.run({ refillZones: false });
+              const filled = await board.drc.run({ refillZones: false, reportAllTrackErrors: true });
               const added = newNativeErrors(nativeBaseline ?? [], filled.markers);
               if (added) throw new Error(`${added} new filled native DRC error(s)`);
             } catch (validationError) {

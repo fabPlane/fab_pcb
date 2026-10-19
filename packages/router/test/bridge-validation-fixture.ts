@@ -14,6 +14,7 @@ export function validationFixture(
     markerChange?: "position" | "layer" | "item-order";
     baselineStatus?: "warning" | "excluded";
     unfilledErrors?: boolean;
+    maskedTrackError?: "new" | "existing";
     danglingSeverity?: RuleSeverity;
     excludedDangling?: "existing" | "generated";
     finalDrcFailure?: boolean;
@@ -72,8 +73,18 @@ export function validationFixture(
       return { applied: 1 };
     },
     drc: {
-      run: async () => {
+      run: async (opts?: { reportAllTrackErrors?: boolean }) => {
         calls.push("drc");
+        if (options.maskedTrackError) {
+          const clearance = (id: string) => create(DrcMarkerSchema, {
+            errorType: DrcErrorType.DRCET_CLEARANCE, severity: RuleSeverity.RS_ERROR,
+            items: [{ value: "existing-track" }, { value: id }],
+          });
+          // Native default reports only the first clearance finding per track.
+          return { markers: [clearance("old-neighbour"),
+            ...(opts?.reportAllTrackErrors && (options.maskedTrackError === "existing" || copper.includes(generated))
+              ? [clearance(options.maskedTrackError === "existing" ? "second-old-neighbour" : "new-route")] : [])] };
+        }
         const marker = (item: string, id: string, excluded = false) => create(DrcMarkerSchema, {
           errorType: DrcErrorType.DRCET_STARVED_THERMAL, severity: RuleSeverity.RS_ERROR,
           items: options.markerChange === "item-order"
