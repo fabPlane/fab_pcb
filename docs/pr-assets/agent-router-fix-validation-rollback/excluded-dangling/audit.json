@@ -1,0 +1,18 @@
+{
+  "scope": "stateful adapter unit diagnostics, not scored native benchmark",
+  "repeats": 3,
+  "scenarios": 2,
+  "before": {
+    "preservation_passed": 0,
+    "prior_controls_passed": 93
+  },
+  "after": {
+    "preservation_passed": 6,
+    "prior_controls_passed": 93
+  },
+  "sha256": {
+    "packages/router/src/bridge-job.ts": "3ac7f8c31fe45bf52e0bc4309244308d399ddbd9c43ec59f3889369a2f3b1355",
+    "packages/router/test/bridge-validation-fixture.ts": "85c3d8e7fbf14722ee7b9e1d55fb0260c252f15f4edfe5d8c1b1757d88c123d6",
+    "packages/router/test/bridge-validation.test.ts": "12c73d917f5d171d135dc7707049d34ede0713a6b14b023afd914ff32e267c10"
+  }
+}

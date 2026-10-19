@@ -12,6 +12,7 @@ export function validationFixture(
     refill?: "valid" | "throws" | "commit-then-throws";
     filledMarkers?: "new" | "existing" | "duplicate" | "replacement" | "excluded";
     unfilledErrors?: boolean;
+    excludedDangling?: "existing" | "generated";
     finalDrcFailure?: boolean;
     finalForeignEdit?: boolean;
     cleanupFirst?: boolean;
@@ -90,6 +91,10 @@ export function validationFixture(
           }
           throw new Error("filled DRC unavailable");
         }
+        if (options.excludedDangling) return { markers: [create(DrcMarkerSchema, {
+          errorType: DrcErrorType.DRCET_DANGLING_TRACK, excluded: true,
+          items: [{ value: options.excludedDangling === "existing" ? "stub" : generated.id }],
+        })] };
         if (options.valid || options.ratsnestFailure || (options.relabel && checks === 1)) return { markers: [] };
         if (options.cleanupFirst && checks === 1)
           return {

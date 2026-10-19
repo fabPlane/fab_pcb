@@ -200,3 +200,16 @@ for (const filledMarkers of ["existing", "excluded"] as const) {
     expect(fixture.calls).not.toContain("undo");
   });
 }
+
+for (const excludedDangling of ["existing", "generated"] as const) {
+  test(`excluded dangling finding preserves ${excludedDangling} copper`, async () => {
+    const fixture = validationFixture({ valid: true, excludedDangling });
+    const info = await fixture.done;
+    expect(info.state).toBe("done");
+    expect(fixture.copper().map((item) => item.id)).toEqual(["stub", "protected", "other-net", "new-route"]);
+    expect(fixture.calls.filter((call) => call === "apply")).toHaveLength(1);
+    expect(fixture.calls).not.toContain("undo");
+    expect(fixture.calls.filter((call) => call === "save")).toHaveLength(2);
+    expect(info.summary?.removedExistingCopper ?? []).toEqual([]);
+  });
+}

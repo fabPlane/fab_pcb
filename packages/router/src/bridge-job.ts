@@ -482,7 +482,8 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
               drc.markers
                 .filter(
                   (marker) =>
-                    marker.errorType === DrcErrorType.DRCET_DANGLING_TRACK || marker.errorType === DrcErrorType.DRCET_DANGLING_VIA,
+                    !marker.excluded &&
+                    (marker.errorType === DrcErrorType.DRCET_DANGLING_TRACK || marker.errorType === DrcErrorType.DRCET_DANGLING_VIA),
                 )
                 .flatMap((marker) => marker.items.map((item) => item.value)),
             );
