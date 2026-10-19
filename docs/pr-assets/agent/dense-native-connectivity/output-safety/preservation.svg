@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="390">
+<rect width="1200" height="390" fill="#f8fafc"/>
+<g font-family="sans-serif" fill="#172033">
+<text x="30" y="45" font-size="27">Native report destinations: preserve inputs before cleanup</text>
+<text x="30" y="80" font-size="18">4 protected paths × 3 alias types × 3 repeats; disposable files, same machine.</text>
+<text x="30" y="116" font-size="17">Grey: before guard. Teal: after guard. Higher is safer.</text>
+<text x="30" y="176" font-size="18">All input files preserved</text>
+<rect x="440" y="160" width="192" height="22" fill="#8895a7"/>
+<text x="642" y="178" font-size="17">12/36</text>
+<rect x="440" y="189" width="576" height="22" fill="#0b7c77"/>
+<text x="1026" y="207" font-size="17">36/36</text>
+<text x="30" y="266" font-size="18">Rejected before checker launch</text>
+<rect x="440" y="250" width="0" height="22" fill="#8895a7"/>
+<text x="450" y="268" font-size="17">0/36</text>
+<rect x="440" y="279" width="576" height="22" fill="#0b7c77"/>
+<text x="1026" y="297" font-size="17">36/36</text>
+<text x="30" y="370" font-size="16">Standalone checker safety only. Routing, ranked scores, and rule files are unchanged.</text></g></svg>

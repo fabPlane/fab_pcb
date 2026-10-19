@@ -50,10 +50,14 @@ def counts(report, board):
 
 def snapshot(board, out, cli='kicad-cli'):
     board, out = Path(board).resolve(), Path(out).resolve()
-    out.parent.mkdir(parents=True, exist_ok=True)
     # Check all identities before and after DRC, including absent rule sidecars.
     executable = Path(shutil.which(cli) or cli).resolve()
     paths = [board, board.with_suffix('.kicad_pro'), board.with_suffix('.kicad_dru'), executable]
+    # Resolve symbolic aliases and detect hard links before removing stale output.
+    # An output path may never name an input, a rule sidecar, or the checker.
+    if any(out == p or (out.exists() and p.exists() and out.samefile(p)) for p in paths):
+        raise ValueError('native report destination aliases an input or tool')
+    out.parent.mkdir(parents=True, exist_ok=True)
     identity = lambda: {str(p): digest(p) if p.exists() else None for p in paths}
     before = identity()
     out.unlink(missing_ok=True)

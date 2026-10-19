@@ -70,3 +70,20 @@ PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 benchmarks/boards/dense6/tools/measur
 The evidence CSV records both script digests. Failed board loads retain old DSNs
 3/3 before and 0/3 after. The exporter also rejects a source/destination alias
 while preserving the input, covered by its regression test.
+
+
+Report destination safety (cycle 27): the native checker rejects direct,
+symlink and hard-link aliases of the board, project/custom rules or checker
+executable before deleting stale output or launching the checker. In 36
+same-machine disposable-file cases (four protected paths × three alias types ×
+three repeats), all inputs survived 12/36 before and 36/36 after. Alias rejection
+before launch improved 0/36 to 36/36. A separate valid-output-path regression
+still requires failed checks to remove stale reports. No input rules or ranked
+scoring changed.
+
+```sh
+git show 76b4637:benchmarks/boards/dense6/tools/audit.py > /tmp/native-output-before.py
+PYTHONDONTWRITEBYTECODE=1 python3 benchmarks/boards/dense6/tools/measure_output_safety.py --audit /tmp/native-output-before.py --out /tmp/native-output-before.csv
+PYTHONDONTWRITEBYTECODE=1 python3 benchmarks/boards/dense6/tools/measure_output_safety.py --out /tmp/native-output-after.csv
+python3 benchmarks/boards/dense6/tools/plot_output_safety.py /tmp/native-output-before.csv /tmp/native-output-after.csv /tmp/native-output-safety.png
+```

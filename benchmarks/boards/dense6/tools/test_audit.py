@@ -35,6 +35,29 @@ class ConnectivityTest(unittest.TestCase):
             with self.subTest(key=key), self.assertRaises(ValueError):
                 counts(changed, 'board.kicad_pcb')
 
+    def test_report_alias_cannot_remove_native_inputs(self):
+        for target in ('board.kicad_pcb', 'board.kicad_pro', 'board.kicad_dru', 'cli'):
+            for alias in ('direct', 'symlink', 'hardlink'):
+                with self.subTest(target=target, alias=alias), tempfile.TemporaryDirectory() as temp:
+                    root = Path(temp)
+                    board, cli = root / 'board.kicad_pcb', root / 'cli'
+                    for name in ('board.kicad_pcb', 'board.kicad_pro', 'board.kicad_dru'):
+                        (root / name).write_text(name)
+                    cli.write_text('#!/bin/sh\nexit 1\n')
+                    cli.chmod(0o755)
+                    protected = root / target
+                    output = protected if alias == 'direct' else root / 'report.json'
+                    if alias == 'symlink':
+                        output.symlink_to(protected)
+                    elif alias == 'hardlink':
+                        output.hardlink_to(protected)
+                    before = {p.name: p.read_bytes() for p in (board, board.with_suffix('.kicad_pro'),
+                                                             board.with_suffix('.kicad_dru'), cli)}
+                    with self.assertRaisesRegex(ValueError, 'aliases'):
+                        snapshot(board, output, str(cli))
+                    self.assertEqual(before, {name: (root / name).read_bytes() for name in before})
+                    self.assertTrue(output.exists())
+
     def test_failed_native_check_cannot_reuse_a_stale_report(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
