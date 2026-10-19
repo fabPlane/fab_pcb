@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="650">
+<rect width="1100" height="650" fill="#fafafa"/>
+<g font-family="sans-serif" fill="#202735">
+<text x="40" y="45" font-size="27">Native baseline relocation preserves remaining opens</text>
+<text x="40" y="80" font-size="18">Three repeats per case; fresh DRC before and after; original input directory deleted</text>
+<text x="40" y="125" font-size="20">unchanged (2 initial edges)</text>
+<text x="60" y="160" font-size="17">Before</text>
+<rect x="175" y="140" width="630.0" height="24" fill="#c36337"/>
+<text x="820.0" y="160" font-size="17">2/2 opens</text>
+<text x="60" y="192" font-size="17">Relocated</text>
+<rect x="175" y="172" width="630.0" height="24" fill="#21877a"/>
+<text x="820.0" y="192" font-size="17">2/2 opens</text>
+<text x="40" y="250" font-size="20">partial (2 initial edges)</text>
+<text x="60" y="285" font-size="17">Before</text>
+<rect x="175" y="265" width="315.0" height="24" fill="#c36337"/>
+<text x="505.0" y="285" font-size="17">1/2 opens</text>
+<text x="60" y="317" font-size="17">Relocated</text>
+<rect x="175" y="297" width="315.0" height="24" fill="#21877a"/>
+<text x="505.0" y="317" font-size="17">1/2 opens</text>
+<text x="40" y="375" font-size="20">complete (2 initial edges)</text>
+<text x="60" y="410" font-size="17">Before</text>
+<rect x="175" y="390" width="0.0" height="24" fill="#c36337"/>
+<text x="190.0" y="410" font-size="17">0/2 opens</text>
+<text x="60" y="442" font-size="17">Relocated</text>
+<rect x="175" y="422" width="0.0" height="24" fill="#21877a"/>
+<text x="190.0" y="442" font-size="17">0/2 opens</text>
+<text x="40" y="500" font-size="20">dense6-unchanged (439 initial edges)</text>
+<text x="60" y="535" font-size="17">Before</text>
+<rect x="175" y="515" width="630.0" height="24" fill="#c36337"/>
+<text x="820.0" y="535" font-size="17">439/439 opens</text>
+<text x="60" y="567" font-size="17">Relocated</text>
+<rect x="175" y="547" width="630.0" height="24" fill="#21877a"/>
+<text x="820.0" y="567" font-size="17">439/439 opens</text>
+<text x="40" y="625" font-size="16">Bars show remaining fraction per case. Zero geometric errors; dense board retains 30 library warnings.</text></g></svg>

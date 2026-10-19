@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "cycle": 32,
+  "machine": "hyper-ms-lin",
+  "cores": "0-5",
+  "nice": 10,
+  "repeats": 3,
+  "cases": 4,
+  "paired_scores": 12,
+  "fresh_drc_checks": 36,
+  "checker_sha256": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402",
+  "source_files": {
+    "archive.py": "f5edab5287f4ab09320bffcb80efb3e6303d74e3894efc006e9d27bf323dafdd",
+    "audit.py": "4eb1ecbe17d02c839c394a17542a4730193d5e900409996a949c70042017f46a",
+    "baseline.py": "9d87d97a79eeca5647c334d32fa40a0bba708d597fa685183f096e27bf234039",
+    "terminals.py": "a887975db277ae2ba8c790ad8d66a8d371c383d1666c89e24ddcc3d179981e04",
+    "route.py": "767281243b4d630e67793c44c963dc9a1719079efccbc5d56c6728cc4b16e43e",
+    "session_command.py": "eb2d691163dface1c8f10ca7d4b1d774132552a092214f5a2c907b82f290b8bd",
+    "measure_archive.py": "52170c3455b081aa94ac6f8b9d019bb88d60d1b25ab14b536abab8298b494eaa",
+    "generate_probes.py": "29215f54c14c85cee200f751068f0a2fe5d9863cb4666b82c4e3e07a18fda5cf",
+    "test_archive.py": "5e915a98b61e0205c598da69db6cf05076cddb44224cae842507f7e328d352d7",
+    "test_route.py": "4f5d3284bdf88aa2378fb61f12d5e78eb18d00192d6fa3cc6043cdc39a0ff391",
+    "plot_archive.py": "2eb1ba893b223aca13cf0dcc6d1abfb4d974055817dfc053d3222774544471d7"
+  },
+  "dense_board_sha256": "f5841d12f854d2ae538bf9ae2996c72718028ba9702f627f726c1ccfc67a4635",
+  "dense_project_sha256": "346003c12025d81e04dcdfc1c0e64e54845aa74405df6a57b84876471d0ef902",
+  "csv_sha256": "30440cd65faf534324f19238b4ecb0b1153874eb4de55459556493d6d341b129",
+  "public_private_summary_identical": true,
+  "limitations": [
+    "Trusted manifest, not a signature or authentication boundary.",
+    "External checker must remain at identical path and digest.",
+    "New path-bound baseline ID after relocation.",
+    "Ranked adapters/caches unchanged; no routing/speed gain."
+  ]
+}

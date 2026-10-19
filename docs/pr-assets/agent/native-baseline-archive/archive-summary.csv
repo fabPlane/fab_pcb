@@ -1,0 +1,13 @@
+case,repeat,initial_opens,before_completion,after_completion,before_opens,after_opens,before_errors,after_errors,before_warnings,after_warnings,original_paths_rejected,relocated_verified,terminal_sha256
+unchanged,1,2,0.0,0.0,2,2,0,0,0,0,True,True,42a663988f997b0701adb837ad1b64b122dcb96883c85635ba92411ad5d67d1e
+unchanged,2,2,0.0,0.0,2,2,0,0,0,0,True,True,42a663988f997b0701adb837ad1b64b122dcb96883c85635ba92411ad5d67d1e
+unchanged,3,2,0.0,0.0,2,2,0,0,0,0,True,True,42a663988f997b0701adb837ad1b64b122dcb96883c85635ba92411ad5d67d1e
+partial,1,2,0.5,0.5,1,1,0,0,0,0,True,True,42a663988f997b0701adb837ad1b64b122dcb96883c85635ba92411ad5d67d1e
+partial,2,2,0.5,0.5,1,1,0,0,0,0,True,True,42a663988f997b0701adb837ad1b64b122dcb96883c85635ba92411ad5d67d1e
+partial,3,2,0.5,0.5,1,1,0,0,0,0,True,True,42a663988f997b0701adb837ad1b64b122dcb96883c85635ba92411ad5d67d1e
+complete,1,2,1.0,1.0,0,0,0,0,0,0,True,True,42a663988f997b0701adb837ad1b64b122dcb96883c85635ba92411ad5d67d1e
+complete,2,2,1.0,1.0,0,0,0,0,0,0,True,True,42a663988f997b0701adb837ad1b64b122dcb96883c85635ba92411ad5d67d1e
+complete,3,2,1.0,1.0,0,0,0,0,0,0,True,True,42a663988f997b0701adb837ad1b64b122dcb96883c85635ba92411ad5d67d1e
+dense6-unchanged,1,439,0.0,0.0,439,439,0,0,30,30,True,True,33506e8f68988455736dbd4f2f6a41f8cc980055e831624e73bcf6cc0ec5aeff
+dense6-unchanged,2,439,0.0,0.0,439,439,0,0,30,30,True,True,33506e8f68988455736dbd4f2f6a41f8cc980055e831624e73bcf6cc0ec5aeff
+dense6-unchanged,3,439,0.0,0.0,439,439,0,0,30,30,True,True,33506e8f68988455736dbd4f2f6a41f8cc980055e831624e73bcf6cc0ec5aeff
