@@ -9,7 +9,7 @@ import { collisionBoard } from "./collision-fixture";
 // restored along with removal of the route when native validation is unavailable.
 export function validationFixture(
   options: {
-    refill?: "valid" | "throws" | "commit-then-throws";
+    refill?: "valid" | "throws" | "commit-then-throws" | "commit-valid";
     filledMarkers?: "new" | "existing" | "duplicate" | "replacement" | "excluded";
     unfilledErrors?: boolean;
     danglingSeverity?: RuleSeverity;
@@ -41,7 +41,8 @@ export function validationFixture(
     refillZones: async () => {
       calls.push("refill");
       if (++fills === 1 || options.refill === "valid") return;
-      if (options.refill === "commit-then-throws") topCommitId = "refill-commit";
+      if (options.refill === "commit-then-throws" || options.refill === "commit-valid") topCommitId = "refill-commit";
+      if (options.refill === "commit-valid") return;
       throw new Error("native refill unavailable");
     },
     save: async () => {

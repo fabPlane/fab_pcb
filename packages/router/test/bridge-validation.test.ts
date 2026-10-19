@@ -236,3 +236,34 @@ for (const danglingSeverity of [RuleSeverity.RS_WARNING, RuleSeverity.RS_ERROR])
     expect(fixture.calls.filter((call) => call === "undo")).toHaveLength(1);
   });
 }
+
+// A successful refill can push a native undo record too. Query failure and
+// actual thermal rejection must both refuse to undo an unowned newer entry.
+for (const failure of ["query", "thermal"] as const) {
+  test(`successful committed refill followed by ${failure} failure reports unrestored copper`, async () => {
+    const fixture = validationFixture({ valid: true, refill: "commit-valid",
+      ...(failure === "query" ? { finalDrcFailure: true } : { filledMarkers: "new" as const }),
+    });
+    const info = await fixture.done;
+    expect(info.state).toBe("failed");
+    expect(info.zoneRefill).toEqual({ before: true, after: true });
+    expect(info.error).toContain(failure === "query" ? "filled DRC unavailable" : "new filled native DRC error(s)");
+    expect(info.error).toContain("rollback failed");
+    expect(info.error).toContain("not at the top of the undo stack");
+    expect(info.error).toContain("KiCad memory");
+    expect(info.summary).toBeUndefined();
+    expect(fixture.calls).not.toContain("undo");
+    expect(fixture.calls.filter((call) => call === "save")).toHaveLength(1);
+    expect(fixture.copper().map((item) => item.id)).toEqual(["stub", "protected", "other-net", "new-route"]);
+  });
+}
+
+test("successful committed refill and clean final DRC saves without undoing native entries", async () => {
+  const fixture = validationFixture({ valid: true, refill: "commit-valid" });
+  const info = await fixture.done;
+  expect(info.state).toBe("done");
+  expect(info.zoneRefill).toEqual({ before: true, after: true });
+  expect(fixture.calls).not.toContain("undo");
+  expect(fixture.calls.filter((call) => call === "save")).toHaveLength(2);
+  expect(fixture.copper().map((item) => item.id)).toEqual(["stub", "protected", "other-net", "new-route"]);
+});
