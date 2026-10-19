@@ -1,13 +1,15 @@
 #!/usr/bin/python3
 """Turn a generated board into: normalized .kicad_pcb + .kicad_pro, DSN, native DRC report,
 and a fab_pcb-benchmark-style case dir (board.*, baseline-drc.json, job.json)."""
-import json, subprocess, sys, hashlib, shutil, os, tempfile, datetime
+import json, subprocess, sys, hashlib, shutil, datetime
 from pathlib import Path
 import pcbnew
 src, out, name = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3]
+SEED = int(sys.argv[4]) if len(sys.argv) > 4 else 6406  # must match the seed passed to gen_dense6.py
 RULES = dict(clearance=0.1, track=0.1, via=0.45, drill=0.2, edge=0.3)
 out.mkdir(parents=True, exist_ok=True)
-pro_tpl = json.loads((Path(__file__).resolve().parents[2] / "autorouter/cases/qrpcard-qrpcard-j1/board.kicad_pro").read_text())
+HERE = Path(__file__).resolve().parent
+pro_tpl = json.loads((HERE / "project-template.kicad_pro").read_text())  # vendored; no dependency on the frozen suite
 def write_pro(path):
     d = json.loads(json.dumps(pro_tpl))
     r = d['board']['design_settings']['rules']
@@ -32,7 +34,7 @@ print('copper layers', b.GetCopperLayerCount(), 'footprints', len(b.GetFootprint
 # DSN in a fresh process so the project rules written above are picked up
 subprocess.run(['/usr/bin/python3', str(Path(__file__).with_name('export_dsn.py')), str(pcb), str(out / f'{name}.dsn')], check=True)
 drc = out / f'{name}.drc.json'
-subprocess.run(['kicad-cli', 'pcb', 'drc', '--format', 'json', '--severity-all', '--schematic-parity' if False else '--units', 'mm', '-o', str(drc), str(pcb)], check=True, capture_output=True)
+subprocess.run(['kicad-cli', 'pcb', 'drc', '--format', 'json', '--severity-all', '--units', 'mm', '-o', str(drc), str(pcb)], check=True, capture_output=True)
 d = json.loads(drc.read_text())
 viol = [v for v in d.get('violations', [])]
 import collections
@@ -40,7 +42,8 @@ print('drc violations', collections.Counter((v['type'], v['severity']) for v in 
 # fab_pcb-style case dir
 case = out / 'case'
 case.mkdir(exist_ok=True)
-shutil.copy(pcb, case / 'board.kicad_pcb'); shutil.copy(pcb.with_suffix('.kicad_pro'), case / 'board.kicad_pro')
+shutil.copy(pcb, case / 'board.kicad_pcb'); write_pro(case / 'board.kicad_pro')
+shutil.copy(HERE / 'LICENSE', case / 'LICENSE')
 (case / 'board.kicad_dru').write_text('(version 1)\n')
 shutil.copy(drc, case / 'baseline-drc.json')
 errs = [v for v in viol if v['severity'] == 'error']; warns = [v for v in viol if v['severity'] == 'warning']
@@ -56,11 +59,13 @@ job = {"job": "J1", "tier": "hard", "role": "scored", "scope": None, "target_net
        "baseline": {"errors": len(errs), "warnings": len(warns), "opens": len(d.get('unconnected_items', [])),
                     "error_types": dict(collections.Counter(v['type'] for v in errs)),
                     "warning_types": dict(collections.Counter(v['type'] for v in warns))},
-       "source": {"board_id": name, "repository": "synthetic (gen_dense6.py)", "license": "MIT"},
+       "source": {"board_id": name, "repository": "synthetic (benchmarks/boards/dense6-bga324/gen_dense6.py)", "license": "MIT",
+                  "license_file": "LICENSE", "generator": "gen_dense6.py", "seed": SEED,
+                  "generator_sha256": hashlib.sha256((HERE / 'gen_dense6.py').read_bytes()).hexdigest()},
        "fidelity": {"footprints": True, "pads": True, "outline": True, "layers": True, "nets": True},
        "gates": {"fidelity": True, "baseline_errors_zero": len(errs) == 0}, "gate_pass": len(errs) == 0,
        "selection": {"job": "J1", "tier": "hard", "board_id": name, "why": "dense 6-layer BGA/QFN fanout stress board"},
-       "sha256": {f: hashlib.sha256((case / f).read_bytes()).hexdigest() for f in ('board.kicad_pcb', 'board.kicad_pro', 'baseline-drc.json', 'board.kicad_dru')},
+       "sha256": {f: hashlib.sha256((case / f).read_bytes()).hexdigest() for f in ('board.kicad_pcb', 'board.kicad_pro', 'baseline-drc.json', 'board.kicad_dru', 'LICENSE')},
        "utc": datetime.datetime.now(datetime.timezone.utc).isoformat()}
 (case / 'job.json').write_text(json.dumps(job, indent=2) + '\n')
 print('case baseline', job['baseline'])

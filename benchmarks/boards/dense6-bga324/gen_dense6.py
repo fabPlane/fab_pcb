@@ -14,16 +14,20 @@ from pathlib import Path
 ROWS = "ABCDEFGHJKLMNPRTUV"  # JEDEC row letters, 18 rows
 
 def U(rng):
-    return str(uuid.UUID(int=rng.getrandbits(128)))
+    return str(uuid.UUID(int=rng.getrandbits(128), version=4))
 
 def build(seed):
     rng = random.Random(seed)
     uid = random.Random(seed + 1000)
     nets = {"": 0}
     def net(name):
+        """Register a net (allocating its code) and return its name."""
         if name not in nets:
             nets[name] = len(nets)
         return name
+    POWER = ("GND", "VCC_CORE", "VCCIO")
+    for n in POWER:  # register supply rails up front, before any pad uses them
+        net(n)
     fps = []  # (ref, value, layer, x, y, pads[(num, shape, x, y, w, h, netname)])
 
     # ---------- U1: 324-ball BGA, 0.8 mm pitch, centred at (32, 28)
@@ -167,7 +171,9 @@ def build(seed):
         caps.append((f"C{i+1}", "100nF_0402", "B", round(x, 4), round(y, 4),
                      [("1", "rect", -0.48, 0, 0.56, 0.62, rail), ("2", "rect", 0.48, 0, 0.56, 0.62, "GND")]))
     fps += caps
-    for n in ("GND", "VCC_CORE", "VCCIO"): net(n)
+    for ref, _, _, _, _, pads in fps:  # every pad net must have been registered where it was assigned
+        for p in pads:
+            assert p[6] in nets, f"{ref} pad {p[0]}: net {p[6]!r} was never registered"
     return fps, nets, uid
 
 LAYERS = """	(layers
@@ -184,7 +190,7 @@ LAYERS = """	(layers
 	)"""
 
 def write_pcb(path, fps, nets, uid, W=70.0, H=56.0):
-    o = ['(kicad_pcb', '\t(version 20260206)', '\t(generator "dense6-gen")', '\t(generator_version "10.0")',
+    o = ['(kicad_pcb', '\t(version 20240108)', '\t(generator "dense6-gen")', '\t(generator_version "8.0")',
          '\t(general (thickness 1.6) (legacy_teardrops no))', '\t(paper "A4")', LAYERS,
          '\t(setup (pad_to_mask_clearance 0) (allow_soldermask_bridges_in_footprints yes))']
     for name, code in sorted(nets.items(), key=lambda kv: kv[1]):

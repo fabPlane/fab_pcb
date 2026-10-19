@@ -306,8 +306,12 @@
   },
   "source": {
     "board_id": "dense6-bga324",
-    "repository": "synthetic (gen_dense6.py)",
-    "license": "MIT"
+    "repository": "synthetic (benchmarks/boards/dense6-bga324/gen_dense6.py)",
+    "license": "MIT",
+    "license_file": "LICENSE",
+    "generator": "gen_dense6.py",
+    "seed": 6406,
+    "generator_sha256": "b65758714fa0a1f45255d8c43e857437014df905d98086a062dda7261fa6e584"
   },
   "fidelity": {
     "footprints": true,
@@ -328,10 +332,11 @@
     "why": "dense 6-layer BGA/QFN fanout stress board"
   },
   "sha256": {
-    "board.kicad_pcb": "f5841d12f854d2ae538bf9ae2996c72718028ba9702f627f726c1ccfc67a4635",
-    "board.kicad_pro": "346003c12025d81e04dcdfc1c0e64e54845aa74405df6a57b84876471d0ef902",
-    "baseline-drc.json": "598ec95b83243d52e9e40fab3d81bb641bee696ee9dd3764bedfdbf099228e2b",
-    "board.kicad_dru": "edd74546c3a662048c2f81cace7014020026bf6586abc6b7333db7df5644bfc7"
+    "board.kicad_pcb": "25f18cc6d5d0c4901620c5262708073908ad1b9c5bb786f8c8903966287d7f54",
+    "board.kicad_pro": "c0cf41045761466e1be6ccc2ffe6a23a4af56f5a763dcf8e35a0162648c804fa",
+    "baseline-drc.json": "51057feb9cb95b1ea5349cd83b709ce173db43377c506808effa4e61fa7d547f",
+    "board.kicad_dru": "edd74546c3a662048c2f81cace7014020026bf6586abc6b7333db7df5644bfc7",
+    "LICENSE": "22b49357327911d213f8ce1166dbaf2e06176ed175f716a557fe16a5410248d9"
   },
-  "utc": "2026-10-18T23:53:10.257270+00:00"
+  "utc": "2026-10-19T14:59:38.695803+00:00"
 }
