@@ -58,3 +58,15 @@ kicad-cli pcb export svg --mode-single --layers F.Cu,B.Cu,Edge.Cuts \
   benchmarks/boards/dense6/dense6-bga324.kicad_pcb
 rsvg-convert -w 1600 /tmp/dense6.svg -o /tmp/dense6.png
 ```
+
+Replay the three-repeat failed-export comparison from the published prior exporter:
+
+```sh
+git show 2cdd154:benchmarks/boards/dense6/export.py > /tmp/dense6-export-before.py
+PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 benchmarks/boards/dense6/tools/measure_export_freshness.py \
+  --before /tmp/dense6-export-before.py --out /tmp/dense6-export-freshness.csv
+```
+
+The evidence CSV records both script digests. Failed board loads retain old DSNs
+3/3 before and 0/3 after. The exporter also rejects a source/destination alias
+while preserving the input, covered by its regression test.
