@@ -393,3 +393,22 @@ test("session circle preserves fractional diameters on both copper layers", () =
   expect(parsed.padstacks.get("V")).toEqual({name: "V", layers: ["F.Cu", "B.Cu"], diameter: 600050});
   expect(sesToItems(parsed, twoNetBoard()).vias[0]?.diameter).toBe(600050);
 });
+
+for (const name of ["V_0:300_um", "V_600:0_um", "V_600:600_um", "V_600:700_um", "V_99999999999999999999:300_um", "V_600:99999999999999999999_um"]) {
+  test(`session via sizes reject invalid name dimensions: ${name}`, () => {
+    const parsed = parseSes(`(session sample (routes (network_out (net A (via ${name} 10 20)))))`);
+    expect(() => sesToItems(parsed, twoNetBoard())).toThrow(SyntaxError);
+  });
+}
+
+test("session via sizes validate explicit circle against name drill", () => {
+  const parsed = parseSes(`(session sample (routes
+    (library_out (padstack V_800:400_um (shape (circle F.Cu 300))))
+    (network_out (net A (via V_800:400_um 10 20)))))`);
+  expect(() => sesToItems(parsed, twoNetBoard())).toThrow(SyntaxError);
+});
+
+test("session via sizes retain valid name fallback", () => {
+  const parsed = parseSes(`(session sample (routes (network_out (net A (via V_600:300_um 10 20)))))`);
+  expect(sesToItems(parsed, twoNetBoard()).vias[0]).toMatchObject({diameter: 600000, drill: 300000});
+});

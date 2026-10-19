@@ -259,6 +259,10 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
     const m = /_(\d+):(\d+)_um$/.exec(v.padstack);
     const diameter = ps?.diameter || (m ? Number(m[1]) * 1000 : rules.viaDiameter);
     const drill = m ? Number(m[2]) * 1000 : rules.viaDrill;
+    // Validate every dimension source, including encoded names and net-class fallback,
+    // before echo matching or creation can accept physically impossible barrels.
+    if (!Number.isSafeInteger(diameter) || !Number.isSafeInteger(drill) || drill <= 0 || diameter <= drill)
+      throw new SyntaxError("invalid session via diameter or drill");
     let layers = (ps?.layers ?? []).map((n) => layerByName.get(n)).filter((l): l is BoardLayer => l !== undefined);
     if (layers.length < 2) layers = allLayers;
     // Padstack names carry whole micrometres (`viaPadstackName`), so a size read from the name can
