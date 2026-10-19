@@ -3,8 +3,10 @@
 The production command wrapper now resolves the direct child's exit before
 waiting for inherited output pipes. It owns a POSIX process group, stops that
 group on every exit path, removes abort listeners and timers, and bounds final
-pipe draining to 100 ms. Timeout and cancellation use immediate SIGKILL;
-there is no graceful shutdown interval. Windows stops the direct child only.
+pipe draining to 100 ms. Timeout defaults and cancellation use immediate SIGKILL. An explicit
+`killSignal` is validated before spawn and gets at most 100 ms before SIGKILL;
+the escalation timer is cleared on direct-child exit. The session wrapper
+continues using the immediate default. Windows stops the direct child only.
 A deliberately detached descendant is outside group cleanup. Its pipe cannot
 block return, and trailing output beyond the final drain can be truncated.
 A callback failure rejects after cleanup. Nonzero parent exits remain nonzero.
@@ -37,3 +39,38 @@ imports every saved session into the original board, restores rule sidecars,
 and runs a fresh native DRC before comparing before/after counts. An outer
 timeout bounds the verifier's native module load. Existing scoring rules remain.
 `plot.py` reads the committed controls CSV and produces the review PNG.
+
+## Custom signal compatibility
+
+Cycle 35 adds the integration branch's numeric `killSignal` option without
+removing group ownership, parent-exit precedence, or bounded pipe draining.
+A requested signal can run a shutdown handler; ignored or nonterminating
+signals still reach forced cleanup. Invalid signals reject before spawn.
+Cancellation and callback failures still stop immediately. Signal numbers
+follow the local operating system; the measurements use POSIX SIGTERM (15).
+Timeout output can be truncated as before, including shutdown diagnostics.
+
+On the same host, three paired constructed cases per mode give:
+
+| Case | Before | After |
+|---|---:|---:|
+| Requested handler ran | 0/3 | 3/3 |
+| Ignored signal left a descendant alive | 0/3 | 0/3 |
+| Invalid signal launched a command | 3/3 | 0/3 |
+
+These were constructed API counterexamples, not observed routing failures.
+The existing integration API already handles the three modes correctly; the
+purpose is preserving that behavior while adopting parent-exit precedence.
+Three paired real reroutes per repository preserve native one-net quality;
+this does not establish general board parity or a routing speed gain.
+
+Reproduce with fresh output paths and the previous helper saved from
+`f6f4d66` (private) or `e657a13` (public):
+
+```sh
+bun measure_signals.ts /absolute/path/before-owned.ts /absolute/path/after-owned.ts /tmp/fresh-signal-controls
+python3 plot_signals.py /absolute/path/signals.csv /tmp/signals.png
+```
+
+Run these tools from their directory. The CSV is a faithful flattening of
+`signals.json`, with the union of its fields and booleans retained as booleans.

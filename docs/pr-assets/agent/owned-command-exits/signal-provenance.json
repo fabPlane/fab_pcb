@@ -1,0 +1,107 @@
+{
+  "cycle": 35,
+  "machine": "hyper-ms-lin",
+  "cores": "0-5",
+  "nice": 10,
+  "repeats": 3,
+  "deadline_ms": 300,
+  "grace_ms": 100,
+  "source_commit": "b58aa5b6ac042173c9b608fac65987a7f2b30acb",
+  "before_commit": "e657a13",
+  "controls": 18,
+  "before_helper_sha256": "820f898c0ce65dcaca1512a60e72c6e4f2ceb3a974913eae0aaea596a3be7a35",
+  "helper_sha256": "7289b93818e4d7892a4318f77e502e65033da79086c1463ccca2f30876f4c8b8",
+  "limits": [
+    "Constructed counterexamples, not observed router failures.",
+    "Signal controls were run before the final equivalent deadline-error-message split.",
+    "Canary native parity is not general board parity or a speed gain."
+  ],
+  "native_cohorts": [
+    {
+      "cohort": "native",
+      "repeat": 1,
+      "version": "before",
+      "session_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
+      "report_sha256": "bc87756c3479003ed2b45fe35b3bfe9ddedb6cf5b5de4b97aac387641cb1a6f2"
+    },
+    {
+      "cohort": "native",
+      "repeat": 1,
+      "version": "after",
+      "session_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
+      "report_sha256": "08e0acc5310ed4664df9ffc1c81f3408caeaceda7f50e75dc105484624a41a3d"
+    },
+    {
+      "cohort": "native",
+      "repeat": 2,
+      "version": "before",
+      "session_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
+      "report_sha256": "29fcd6b68b3ee93e891ef3edbcf00219f47f067c1b81f5b63e730ccb547df48e"
+    },
+    {
+      "cohort": "native",
+      "repeat": 2,
+      "version": "after",
+      "session_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
+      "report_sha256": "432095d292b6d63e0d29cfd4a9cf9875343f9e4bd123a55c2b95715c0f5d8c8e"
+    },
+    {
+      "cohort": "native",
+      "repeat": 3,
+      "version": "before",
+      "session_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
+      "report_sha256": "605a6385c82e7f32ec1044a2f0e1886197851782756ce1a99491996a1b489fb6"
+    },
+    {
+      "cohort": "native",
+      "repeat": 3,
+      "version": "after",
+      "session_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
+      "report_sha256": "b6c79309648bf72a6afa35c703ecb853efdd0950ed64d1d92aa5012d727cfbc0"
+    },
+    {
+      "cohort": "committed-native",
+      "repeat": 1,
+      "version": "before",
+      "session_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
+      "report_sha256": "8c8bcea94d0922dbe5d489cc0acda2cd1d71ff8e812cb9e84cb9f8e30464f970"
+    },
+    {
+      "cohort": "committed-native",
+      "repeat": 1,
+      "version": "after",
+      "session_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
+      "report_sha256": "1d1d96b8d57ccb16352d2615110e2e156428e96cef9b33367baf53134346f046"
+    },
+    {
+      "cohort": "committed-native",
+      "repeat": 2,
+      "version": "before",
+      "session_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
+      "report_sha256": "193c3a1ce9648747c47517fc47fefe605d3230444ae7403364e6b4a69c9d7ab2"
+    },
+    {
+      "cohort": "committed-native",
+      "repeat": 2,
+      "version": "after",
+      "session_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
+      "report_sha256": "ef7e9181f38159ddb091cb88c6f2a9ef40849815c22e1ebfc710ff934ffa8195"
+    },
+    {
+      "cohort": "committed-native",
+      "repeat": 3,
+      "version": "before",
+      "session_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
+      "report_sha256": "072ceeb096197169ab57e7c1a443ace546af11c12704afaf83609f9ca2f3dd49"
+    },
+    {
+      "cohort": "committed-native",
+      "repeat": 3,
+      "version": "after",
+      "session_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
+      "report_sha256": "02421f2f16fe9f0fa4a4e17a26150d5e93cd91c057e1eeb4027d6f1cc22644e8"
+    }
+  ],
+  "native_checks": 14,
+  "native_reroutes": 12
+}
