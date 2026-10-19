@@ -317,6 +317,10 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
     // A declared single-layer padstack must not become a through via.
     if (layers.length === 1) throw new SyntaxError("session via requires two distinct layers");
     if (layers.length === 0) layers = allLayers;
+    // Padstack shape declarations are a set, not drill endpoints. Native via
+    // creation uses the first/last layers, so use board stack order even when
+    // the session lists shapes back-to-front or interleaves layer aliases.
+    layers = allLayers.filter((layer) => layers.includes(layer));
     // Padstack names carry whole micrometres (`viaPadstackName`), so a size read from the name can
     // be up to 500 nm off the native via (e.g. a 0.3048 mm drill is named 305 um).
     const sizeTolerance = {

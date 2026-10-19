@@ -1,6 +1,7 @@
 /** DSN writer, SES reader and the s-expression helpers, on the synthetic two-net board. */
 import { describe, expect, test } from "bun:test";
-import { BoardLayer } from "@fp-pcb/proto";
+import { viaProto } from "../src/apply";
+import { BoardLayer, ViaType } from "@fp-pcb/proto";
 import { mm } from "@fp-pcb/client";
 import { parseSExpr, quote, child, children, head } from "../src/specctra/sexpr";
 import { writeDsn, viaPadstackName, extraViasFromRouteOptions } from "../src/specctra/dsn";
@@ -688,4 +689,29 @@ describe("session resolution multiplicity", () => {
     expect(parsed.nmPerUnit).toBe(1000000);
     expect(parsed.wires[0]!.points[1]).toEqual({ x: 2000000, y: -3000000 });
   });
+});
+
+describe("session via stack order", () => {
+  for (const reverse of [false, true]) {
+    for (const blind of [false, true]) {
+      test(`${reverse ? "reversed" : "ordered"} ${blind ? "blind" : "through"} shapes retain native endpoints`, () => {
+        const input = twoNetBoard();
+        const inner = { id: BoardLayer.BL_In1_Cu, name: "BL_In1_Cu", userName: "In1.Cu", index: 1 };
+        input.copperLayers[1]!.index = 2;
+        input.copperLayers.splice(1, 0, inner);
+        const expected = blind ? [F, inner.id] : [F, inner.id, B];
+        const names = blind ? ["F.Cu", "In1.Cu"] : ["F.Cu", "In1.Cu", "B.Cu"];
+        if (reverse) names.reverse();
+        const shapes = names.map(layer => `(shape (circle ${layer} 800))`).join(" ");
+        const session = parseSes(`(session s (routes (library_out (padstack V ${shapes}))
+          (network_out (net A (via V 1000 -1000)))))`);
+        const via = sesToItems(session, input).vias[0]!;
+        expect(via.layers).toEqual(expected);
+        const native = viaProto(via);
+        expect(native.type).toBe(blind ? ViaType.VT_BLIND_BURIED : ViaType.VT_THROUGH);
+        expect(native.padStack!.drill!.startLayer).toBe(F);
+        expect(native.padStack!.drill!.endLayer).toBe(expected.at(-1)!);
+      });
+    }
+  }
 });
