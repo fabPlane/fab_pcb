@@ -1,0 +1,59 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-validation.test.ts:
+(pass) failed native validation restores tentative copper [5.00ms]
+(pass) failed native validation restores tentative copper after a cleanup retry [0.48ms]
+(pass) failed validation reports an unsuccessful rollback (zero) without claiming restoration [0.30ms]
+(pass) failed validation reports an unsuccessful rollback (throws) without claiming restoration [0.14ms]
+(pass) successful native validation keeps and saves the applied route without undo [0.92ms]
+(pass) failed validation preserves an unrelated edit above the route commit [0.23ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (owned) [0.33ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (zero) [0.11ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (throws) [0.16ms]
+62 | }
+63 | 
+64 | test("relabelled route is validated and restored before a failed job", async () => {
+65 |   const fixture = validationFixture({ relabel: true });
+66 |   const info = await fixture.done;
+67 |   expect(info.state).toBe("failed");
+                          ^
+error: expect(received).toBe(expected)
+
+Expected: "failed"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:67:22)
+(fail) relabelled route is validated and restored before a failed job [0.85ms]
+75 | 
+76 | test("relabelled route with successful validation is saved", async () => {
+77 |   const fixture = validationFixture({ relabel: true, valid: true });
+78 |   const info = await fixture.done;
+79 |   expect(info.state).toBe("done");
+80 |   expect(fixture.calls.filter((call) => call === "drc")).toHaveLength(2);
+                                                              ^
+error: expect(received).toHaveLength(expected)
+
+Expected length: 2
+Received length: 1
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:80:58)
+(fail) relabelled route with successful validation is saved [0.42ms]
+84 | });
+85 | 
+86 | test("unstable native connection counts stop without saving a replacement", async () => {
+87 |   const fixture = validationFixture({ relabel: true, valid: true, oscillatingCount: true });
+88 |   const info = await fixture.done;
+89 |   expect(info.state).toBe("failed");
+                          ^
+error: expect(received).toBe(expected)
+
+Expected: "failed"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:89:22)
+(fail) unstable native connection counts stop without saving a replacement [0.28ms]
+
+ 9 pass
+ 3 fail
+ 53 expect() calls
+Ran 12 tests across 1 file. [202.00ms]

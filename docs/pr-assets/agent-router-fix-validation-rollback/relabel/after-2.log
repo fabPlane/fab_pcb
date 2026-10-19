@@ -1,0 +1,20 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-validation.test.ts:
+(pass) failed native validation restores tentative copper [4.99ms]
+(pass) failed native validation restores tentative copper after a cleanup retry [0.44ms]
+(pass) failed validation reports an unsuccessful rollback (zero) without claiming restoration [0.29ms]
+(pass) failed validation reports an unsuccessful rollback (throws) without claiming restoration [0.13ms]
+(pass) successful native validation keeps and saves the applied route without undo [0.84ms]
+(pass) failed validation preserves an unrelated edit above the route commit [0.36ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (owned) [0.34ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (zero) [0.11ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (throws) [0.17ms]
+(pass) relabelled route is validated and restored before a failed job [0.24ms]
+(pass) relabelled route with successful validation is saved [0.55ms]
+(pass) unstable native connection counts stop without saving a replacement [0.23ms]
+
+ 12 pass
+ 0 fail
+ 67 expect() calls
+Ran 12 tests across 1 file. [162.00ms]
