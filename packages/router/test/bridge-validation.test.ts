@@ -267,3 +267,25 @@ test("successful committed refill and clean final DRC saves without undoing nati
   expect(fixture.calls.filter((call) => call === "save")).toHaveLength(2);
   expect(fixture.copper().map((item) => item.id)).toEqual(["stub", "protected", "other-net", "new-route"]);
 });
+
+
+for (const refill of [false, true]) {
+  for (const markerChange of ["position", "layer", "item-order"] as const) {
+    test(`native marker identity ${markerChange} with refill=${refill}`, async () => {
+      const fixture = validationFixture({ valid: true, filledMarkers: "existing", markerChange,
+        ...(refill ? { refill: "valid" as const } : { unfilledErrors: true }),
+      });
+      const info = await fixture.done;
+      const sameFinding = markerChange === "item-order";
+      expect(info.state).toBe(sameFinding ? "done" : "failed");
+      expect(fixture.calls.filter(call => call === "save")).toHaveLength(sameFinding ? 2 : 1);
+      expect(fixture.calls.filter(call => call === "undo")).toHaveLength(sameFinding ? 0 : 1);
+      if (sameFinding) expect(fixture.copper().map(item => item.id)).toContain("new-route");
+      else {
+        expect(info.error).toContain("native DRC error(s)");
+        expect(fixture.copper()).toEqual(fixture.original);
+        expect(info.summary).toBeUndefined();
+      }
+    });
+  }
+}

@@ -11,6 +11,7 @@ export function validationFixture(
   options: {
     refill?: "valid" | "throws" | "commit-then-throws" | "commit-valid";
     filledMarkers?: "new" | "existing" | "duplicate" | "replacement" | "excluded";
+    markerChange?: "position" | "layer" | "item-order";
     unfilledErrors?: boolean;
     danglingSeverity?: RuleSeverity;
     excludedDangling?: "existing" | "generated";
@@ -74,7 +75,12 @@ export function validationFixture(
         calls.push("drc");
         const marker = (item: string, id: string, excluded = false) => create(DrcMarkerSchema, {
           errorType: DrcErrorType.DRCET_STARVED_THERMAL, severity: RuleSeverity.RS_ERROR,
-          items: [{ value: item }], id: { value: id }, excluded,
+          items: options.markerChange === "item-order"
+            ? (id === "before-id" ? ["pad", "track"] : ["track", "pad"]).map(value => ({ value }))
+            : [{ value: item }],
+          position: { xNm: options.markerChange === "position" && id !== "before-id" ? 1n : 0n, yNm: 0n },
+          layer: options.markerChange === "layer" && id !== "before-id" ? BoardLayer.BL_B_Cu : BoardLayer.BL_F_Cu,
+          id: { value: id }, excluded,
         });
         if (!copper.includes(generated)) {
           return { markers: options.filledMarkers && options.filledMarkers !== "new" && options.filledMarkers !== "excluded"
