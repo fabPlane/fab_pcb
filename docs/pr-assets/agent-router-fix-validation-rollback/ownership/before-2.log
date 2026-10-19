@@ -1,0 +1,38 @@
+bun test v1.4.0 (34cbb9a40)
+
+test/bridge-undo-ownership.test.ts:
+(pass) cleanup preserves undo ownership (owned control) [3.34ms]
+55 |         },
+56 |       });
+57 |       const info = await jobs.wait(jobs.start({ id: "ownership", transport: null }, {
+58 |         router: "js", refillZones: false, ...(path === "cleanup" ? { message: "repair" } : {}),
+59 |       }).id);
+60 |       expect(info.state).toBe(foreign ? "failed" : "done");
+                              ^
+error: expect(received).toBe(expected)
+
+Expected: "failed"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/agents/codex-fabpcb-bugs/scratch/c57/ownership-audit/before/packages/router/test/bridge-undo-ownership.test.ts:60:26)
+(fail) cleanup preserves undo ownership (newer edit) [0.32ms]
+(pass) relabel preserves undo ownership (owned control) [0.18ms]
+55 |         },
+56 |       });
+57 |       const info = await jobs.wait(jobs.start({ id: "ownership", transport: null }, {
+58 |         router: "js", refillZones: false, ...(path === "cleanup" ? { message: "repair" } : {}),
+59 |       }).id);
+60 |       expect(info.state).toBe(foreign ? "failed" : "done");
+                              ^
+error: expect(received).toBe(expected)
+
+Expected: "failed"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/agents/codex-fabpcb-bugs/scratch/c57/ownership-audit/before/packages/router/test/bridge-undo-ownership.test.ts:60:26)
+(fail) relabel preserves undo ownership (newer edit) [0.12ms]
+
+ 2 pass
+ 2 fail
+ 10 expect() calls
+Ran 4 tests across 1 file. [69.00ms]
