@@ -1,0 +1,18 @@
+{
+  "engine_source": "f1680db",
+  "sha256": {
+    "native-connection-verified.json": "60920bbec43cc3b749ec6ef322488f54638cf73cac3c73e7ae09491c822bdd69",
+    "adapter-checks.log": "4295e0a6d39250f05218bf8ddface4e2dc3fe3e49834429f2674fc4dc390045a",
+    "results.md": "e0e7550b25374eac5b5462806f4f2664a72bf9cfb95ff17fccaec8d536522f6d",
+    "native-closure.png": "4e8afd64ebcf6c542d36014dc56ab823d4fcfd23b961b7f770e710fbe42ef826",
+    "dense-comparison.json": "316e7a5a6e221c0866188542f5a2c620cf14a978181a5c3442e374acf1b1bd61",
+    "source-hashes.json": "8b80b369f242cee6ecda88818fb72f363950758dbaca0acd08dea5934effaac9",
+    "plot-native.py": "4f56e856781f5f4db781479df0879badc76e82ddb07b2bedf437be73a51d59b4",
+    "pin-source-equivalence.json": "e9cfc54f9198dc0142fd766f1fafaf3bbb0ce60e3b1de13a80021233e19f2085",
+    "README.md": "d9b51b67a06c196a38f4e1c8ff0110634e8fd90a020ccbf9b7e94e6cbfa70def",
+    "native-comparison.json": "5ca6d4a9d2af4164ea04297564b5f05877946395825405e582fd6bf8ae5d098a",
+    "timed-repeats.json": "f83c82038f3b88efd1c233f51743e42bda800f9ff9169c342ff355796df9ab8e",
+    "enabled-comparison.json": "2c3df9fb197261b2e63d59af7860d4490ab860cc08238bc58ccefe059cc45f00",
+    "slow-comparison.json": "576a0d2c4dcee8c958cc206df1c323c5eabaadcd66d2550a7c0866155aa3fa0b"
+  }
+}

@@ -1,0 +1,323 @@
+{
+  "scope": "Two targeted unchanged-budget fresh-process pairs, not a full slow rerun; original adverse observations retained",
+  "pairs": [
+    {
+      "id": "routing-slow-issue555-bbd-mars64-timebudget",
+      "before": {
+        "scope": "Fresh process, original case/expectations/budget, recovery enabled",
+        "source": "/home/hyper/bench/agents/codex-fabpcb-perf/scratch/cycle35/native-old-checkout",
+        "case": {
+          "id": "routing-slow-issue555-bbd-mars64-timebudget",
+          "kind": "routing",
+          "origin": "new",
+          "tier": "slow",
+          "board": "Issue555-BBD_Mars-64.dsn",
+          "settings": {
+            "maxPasses": 100,
+            "timeoutSeconds": 2
+          },
+          "expect": {
+            "stoppedBy": {
+              "exact": "timeBudget"
+            },
+            "violations": {
+              "maxAdded": 0
+            },
+            "wallClockMs": {
+              "max": 4000,
+              "advisory": true
+            }
+          },
+          "note": "A 2 s budget on a board that needs minutes: the run stops by its time budget, returns the best snapshot, and R-1..R-5 hold. Under the 'default' profile reference A hit the profile's 60 s budget with 31 incomplete; reference B hit the profile's 60 s budget with 57 incomplete (see the reference file); the case's own budget is what its settings say.",
+          "file": "routing-slow-issue555-bbd-mars64-timebudget.json"
+        },
+        "result": {
+          "id": "routing-slow-issue555-bbd-mars64-timebudget",
+          "kind": "routing",
+          "tier": "slow",
+          "expected": {
+            "stoppedBy": {
+              "exact": "timeBudget"
+            },
+            "violations": {
+              "maxAdded": 0
+            },
+            "wallClockMs": {
+              "max": 4000,
+              "advisory": true
+            }
+          },
+          "board": "Issue555-BBD_Mars-64.dsn",
+          "pass": true,
+          "stub": false,
+          "measured": {
+            "incomplete": 74,
+            "incompleteBefore": 106,
+            "completed": 32,
+            "violations": 0,
+            "violationsBefore": 0,
+            "violationsAdded": 0,
+            "passes": 1,
+            "barrels": 44,
+            "vias": 44,
+            "traceLengthMm": 685.5143520719589,
+            "addedTracks": 76,
+            "addedBarrels": 44,
+            "wallClockMs": 2009,
+            "stoppedBy": "timeBudget",
+            "timedOut": true,
+            "aborted": false,
+            "invariant:R-3": true,
+            "invariant:R-5": true
+          },
+          "mismatches": [],
+          "advisoryMismatches": [],
+          "ms": 2025.772211
+        }
+      },
+      "after": {
+        "scope": "Fresh process, original case/expectations/budget, recovery enabled",
+        "source": "/home/hyper/bench/wt/fr-perf",
+        "case": {
+          "id": "routing-slow-issue555-bbd-mars64-timebudget",
+          "kind": "routing",
+          "origin": "new",
+          "tier": "slow",
+          "board": "Issue555-BBD_Mars-64.dsn",
+          "settings": {
+            "maxPasses": 100,
+            "timeoutSeconds": 2
+          },
+          "expect": {
+            "stoppedBy": {
+              "exact": "timeBudget"
+            },
+            "violations": {
+              "maxAdded": 0
+            },
+            "wallClockMs": {
+              "max": 4000,
+              "advisory": true
+            }
+          },
+          "note": "A 2 s budget on a board that needs minutes: the run stops by its time budget, returns the best snapshot, and R-1..R-5 hold. Under the 'default' profile reference A hit the profile's 60 s budget with 31 incomplete; reference B hit the profile's 60 s budget with 57 incomplete (see the reference file); the case's own budget is what its settings say.",
+          "file": "routing-slow-issue555-bbd-mars64-timebudget.json"
+        },
+        "result": {
+          "id": "routing-slow-issue555-bbd-mars64-timebudget",
+          "kind": "routing",
+          "tier": "slow",
+          "expected": {
+            "stoppedBy": {
+              "exact": "timeBudget"
+            },
+            "violations": {
+              "maxAdded": 0
+            },
+            "wallClockMs": {
+              "max": 4000,
+              "advisory": true
+            }
+          },
+          "board": "Issue555-BBD_Mars-64.dsn",
+          "pass": true,
+          "stub": false,
+          "measured": {
+            "incomplete": 74,
+            "incompleteBefore": 106,
+            "completed": 32,
+            "violations": 0,
+            "violationsBefore": 0,
+            "violationsAdded": 0,
+            "passes": 1,
+            "barrels": 44,
+            "vias": 44,
+            "traceLengthMm": 685.5143520719589,
+            "addedTracks": 76,
+            "addedBarrels": 44,
+            "wallClockMs": 2009,
+            "stoppedBy": "timeBudget",
+            "timedOut": true,
+            "aborted": false,
+            "invariant:R-3": true,
+            "invariant:R-5": true
+          },
+          "mismatches": [],
+          "advisoryMismatches": [],
+          "ms": 2027.459188
+        }
+      }
+    },
+    {
+      "id": "routing-slow-issue555-cnh-maxpasses40",
+      "before": {
+        "scope": "Fresh process, original case/expectations/budget, recovery enabled",
+        "source": "/home/hyper/bench/agents/codex-fabpcb-perf/scratch/cycle35/native-old-checkout",
+        "case": {
+          "id": "routing-slow-issue555-cnh-maxpasses40",
+          "kind": "routing",
+          "origin": "refA-suite",
+          "tier": "slow",
+          "board": "Issue555-CNH_Functional_Tester_1.dsn",
+          "settings": {
+            "maxPasses": 40,
+            "timeoutSeconds": 180
+          },
+          "expect": {
+            "passes": {
+              "min": 1,
+              "max": 40
+            },
+            "incomplete": {
+              "max": 6
+            },
+            "violations": {
+              "maxAdded": 0
+            },
+            "wallClockMs": {
+              "max": 180000,
+              "advisory": true
+            }
+          },
+          "note": "Suite A: between 1 and 40 passes, at most 6 incomplete, within 3 min. Under the 'default' profile reference A hit the profile's 60 s budget with 1 incomplete; reference B hit the profile's 60 s budget with 24 incomplete (see the reference file); the case's own budget is what its settings say.",
+          "file": "routing-slow-issue555-cnh-maxpasses40.json"
+        },
+        "result": {
+          "id": "routing-slow-issue555-cnh-maxpasses40",
+          "kind": "routing",
+          "tier": "slow",
+          "expected": {
+            "passes": {
+              "min": 1,
+              "max": 40
+            },
+            "incomplete": {
+              "max": 6
+            },
+            "violations": {
+              "maxAdded": 0
+            },
+            "wallClockMs": {
+              "max": 180000,
+              "advisory": true
+            }
+          },
+          "board": "Issue555-CNH_Functional_Tester_1.dsn",
+          "pass": false,
+          "stub": false,
+          "measured": {
+            "incomplete": 21,
+            "incompleteBefore": 144,
+            "completed": 183,
+            "violations": 16,
+            "violationsBefore": 16,
+            "violationsAdded": 0,
+            "passes": 6,
+            "barrels": 176,
+            "vias": 176,
+            "traceLengthMm": 4606.368016962171,
+            "addedTracks": 308,
+            "addedBarrels": 176,
+            "wallClockMs": 180082,
+            "stoppedBy": "timeBudget",
+            "timedOut": true,
+            "aborted": false,
+            "invariant:R-3": true,
+            "invariant:R-5": true
+          },
+          "mismatches": [
+            "incomplete: expected \u2264 6, got 21"
+          ],
+          "advisoryMismatches": [
+            "wallClockMs: expected \u2264 180000, got 180082"
+          ],
+          "ms": 180162.667296
+        }
+      },
+      "after": {
+        "scope": "Fresh process, original case/expectations/budget, recovery enabled",
+        "source": "/home/hyper/bench/wt/fr-perf",
+        "case": {
+          "id": "routing-slow-issue555-cnh-maxpasses40",
+          "kind": "routing",
+          "origin": "refA-suite",
+          "tier": "slow",
+          "board": "Issue555-CNH_Functional_Tester_1.dsn",
+          "settings": {
+            "maxPasses": 40,
+            "timeoutSeconds": 180
+          },
+          "expect": {
+            "passes": {
+              "min": 1,
+              "max": 40
+            },
+            "incomplete": {
+              "max": 6
+            },
+            "violations": {
+              "maxAdded": 0
+            },
+            "wallClockMs": {
+              "max": 180000,
+              "advisory": true
+            }
+          },
+          "note": "Suite A: between 1 and 40 passes, at most 6 incomplete, within 3 min. Under the 'default' profile reference A hit the profile's 60 s budget with 1 incomplete; reference B hit the profile's 60 s budget with 24 incomplete (see the reference file); the case's own budget is what its settings say.",
+          "file": "routing-slow-issue555-cnh-maxpasses40.json"
+        },
+        "result": {
+          "id": "routing-slow-issue555-cnh-maxpasses40",
+          "kind": "routing",
+          "tier": "slow",
+          "expected": {
+            "passes": {
+              "min": 1,
+              "max": 40
+            },
+            "incomplete": {
+              "max": 6
+            },
+            "violations": {
+              "maxAdded": 0
+            },
+            "wallClockMs": {
+              "max": 180000,
+              "advisory": true
+            }
+          },
+          "board": "Issue555-CNH_Functional_Tester_1.dsn",
+          "pass": false,
+          "stub": false,
+          "measured": {
+            "incomplete": 21,
+            "incompleteBefore": 144,
+            "completed": 183,
+            "violations": 16,
+            "violationsBefore": 16,
+            "violationsAdded": 0,
+            "passes": 6,
+            "barrels": 176,
+            "vias": 176,
+            "traceLengthMm": 4606.36801696217,
+            "addedTracks": 308,
+            "addedBarrels": 176,
+            "wallClockMs": 180088,
+            "stoppedBy": "timeBudget",
+            "timedOut": true,
+            "aborted": false,
+            "invariant:R-3": true,
+            "invariant:R-5": true
+          },
+          "mismatches": [
+            "incomplete: expected \u2264 6, got 21"
+          ],
+          "advisoryMismatches": [
+            "wallClockMs: expected \u2264 180000, got 180088"
+          ],
+          "ms": 180196.835388
+        }
+      }
+    }
+  ]
+}
