@@ -87,3 +87,6 @@ PYTHONDONTWRITEBYTECODE=1 python3 benchmarks/boards/dense6/tools/measure_output_
 PYTHONDONTWRITEBYTECODE=1 python3 benchmarks/boards/dense6/tools/measure_output_safety.py --out /tmp/native-output-after.csv
 python3 benchmarks/boards/dense6/tools/plot_output_safety.py /tmp/native-output-before.csv /tmp/native-output-after.csv /tmp/native-output-safety.png
 ```
+
+Absent rule-sidecar destinations and dangling sidecar symlink targets are also
+rejected before report creation; regressions preserve the sidecar absence.

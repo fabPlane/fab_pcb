@@ -58,6 +58,26 @@ class ConnectivityTest(unittest.TestCase):
                     self.assertEqual(before, {name: (root / name).read_bytes() for name in before})
                     self.assertTrue(output.exists())
 
+        # Absent sidecars, including dangling symlinks, are protected too.
+        for extension in ('.kicad_pro', '.kicad_dru'):
+            for dangling in (False, True):
+                with self.subTest(extension=extension, dangling=dangling), tempfile.TemporaryDirectory() as temp:
+                    root = Path(temp)
+                    board, cli = root / 'board.kicad_pcb', root / 'cli'
+                    board.write_text('board')
+                    cli.write_text('#!/bin/sh\nexit 1\n')
+                    cli.chmod(0o755)
+                    sidecar = board.with_suffix(extension)
+                    output = root / 'missing-rule-target' if dangling else sidecar
+                    if dangling:
+                        sidecar.symlink_to(output)
+                    with self.assertRaisesRegex(ValueError, 'aliases'):
+                        snapshot(board, output, str(cli))
+                    self.assertFalse(output.exists())
+                    self.assertEqual(board.read_text(), 'board')
+                    if dangling:
+                        self.assertTrue(sidecar.is_symlink())
+
     def test_failed_native_check_cannot_reuse_a_stale_report(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

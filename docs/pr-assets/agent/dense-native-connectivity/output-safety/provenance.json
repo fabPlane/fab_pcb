@@ -15,7 +15,7 @@
     "hardlink"
   ],
   "before_commit": "76b4637",
-  "after_audit_sha256": "ec8be55f9f0768bcb4ee59f21a130395ac61f0eb09b2a46fd7f43d8bf1ecb7df",
+  "after_audit_sha256": "ea69ce93e77b04bcd3a4fdadbf386d153977e05a2d309f265bf06db0c6995060",
   "before_audit_sha256": "4afcc32748f4abc63a4f4b009c8ffcf0821df99dc67095a80272f3308599203f",
   "measurement_script_sha256": "58556f763b5b5c06859b45a41dfb5325b51398f1a7925c1246fdbbe4f47bf9b3",
   "scope": "Disposable files and failing checker; no router or native rule changes.",
@@ -46,5 +46,6 @@
       "open_items_sum": 1329,
       "warnings_sum": 90
     }
-  ]
+  ],
+  "additional_regressions": "Absent project/custom-rule destinations, including dangling sidecar symlink targets, reject before report creation."
 }

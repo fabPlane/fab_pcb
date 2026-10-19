@@ -55,7 +55,7 @@ def snapshot(board, out, cli='kicad-cli'):
     paths = [board, board.with_suffix('.kicad_pro'), board.with_suffix('.kicad_dru'), executable]
     # Resolve symbolic aliases and detect hard links before removing stale output.
     # An output path may never name an input, a rule sidecar, or the checker.
-    if any(out == p or (out.exists() and p.exists() and out.samefile(p)) for p in paths):
+    if any(out == p.resolve() or (out.exists() and p.exists() and out.samefile(p)) for p in paths):
         raise ValueError('native report destination aliases an input or tool')
     out.parent.mkdir(parents=True, exist_ok=True)
     identity = lambda: {str(p): digest(p) if p.exists() else None for p in paths}
