@@ -10,6 +10,8 @@ import { collisionBoard } from "./collision-fixture";
 export function validationFixture(
   options: {
     refill?: "valid" | "throws" | "commit-then-throws";
+    finalDrcFailure?: boolean;
+    finalForeignEdit?: boolean;
     cleanupFirst?: boolean;
     undo?: "zero" | "throws";
     valid?: boolean;
@@ -66,6 +68,13 @@ export function validationFixture(
       run: async () => {
         calls.push("drc");
         checks++;
+        if (options.finalDrcFailure && fills === 2) {
+          if (options.finalForeignEdit) {
+            copper.push(new Track(create(TrackSchema, { id: { value: "unrelated-edit" }, net: { name: "OTHER" } })));
+            topCommitId = "unrelated-commit";
+          }
+          throw new Error("filled DRC unavailable");
+        }
         if (options.valid || options.ratsnestFailure || (options.relabel && checks === 1)) return { markers: [] };
         if (options.cleanupFirst && checks === 1)
           return {

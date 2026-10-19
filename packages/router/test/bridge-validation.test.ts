@@ -129,6 +129,32 @@ test("successful post-apply refill keeps the route and saves", async () => {
   const info = await fixture.done;
   expect(info.state).toBe("done");
   expect(info.zoneRefill).toEqual({ before: true, after: true });
-  expect(fixture.calls).toEqual(["refill", "save", "apply", "drc", "refill", "save", "ratsnest"]);
+  expect(fixture.calls).toEqual(["refill", "save", "apply", "drc", "refill", "drc", "save", "ratsnest"]);
   expect(fixture.copper().some((item) => item.id === "new-route")).toBe(true);
+});
+
+for (const undo of [undefined, "zero", "throws"] as const) {
+  test(`failed filled native DRC query rejects before saving (${undo ?? "owned"})`, async () => {
+    const fixture = validationFixture({ valid: true, refill: "valid", finalDrcFailure: true, ...(undo ? { undo } : {}) });
+    const info = await fixture.done;
+    expect(info.state).toBe("failed");
+    expect(info.error).toContain("filled DRC unavailable");
+    expect(info.summary).toBeUndefined();
+    expect(fixture.calls.filter((call) => call === "save")).toHaveLength(1);
+    expect(fixture.calls.filter((call) => call === "drc")).toHaveLength(2);
+    if (!undo) expect(fixture.copper()).toEqual(fixture.original);
+    else expect(info.error).toContain("rollback failed");
+  });
+}
+
+test("failed filled DRC query preserves a newer unrelated edit", async () => {
+  const fixture = validationFixture({ valid: true, refill: "valid", finalDrcFailure: true, finalForeignEdit: true });
+  const info = await fixture.done;
+  expect(info.state).toBe("failed");
+  expect(info.error).toContain("filled DRC unavailable");
+  expect(info.error).toContain("not at the top of the undo stack");
+  expect(info.summary).toBeUndefined();
+  expect(fixture.calls).not.toContain("undo");
+  expect(fixture.calls.filter((call) => call === "save")).toHaveLength(1);
+  expect(fixture.copper().map((item) => item.id)).toEqual(["stub", "protected", "other-net", "new-route", "unrelated-edit"]);
 });

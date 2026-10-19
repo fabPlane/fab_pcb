@@ -1,0 +1,8 @@
+{
+  "adapter": "typecheck PASS; 121 pass, 1 existing jar-dependent skip, 0 fail, 522 assertions",
+  "engine": "typecheck PASS; layers 65 files/0 violations; 859 pass/0 fail/398454 assertions/230.05s",
+  "logs": {
+    "engine-checks.log": "83f4da71fe96e1e1f08822fe0004206ea3fb8c9db421290af7887f120962f5b7",
+    "package-checks.log": "ef2d644654dbf6ac0d4363af215f45d21c561ea2ffad035607ce22084de30884"
+  }
+}

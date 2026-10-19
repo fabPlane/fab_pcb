@@ -546,6 +546,15 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
               result.log.push(`RefillZones after the apply failed: ${detail}; saving the applied route without a fresh fill`);
             }
           }
+          if (result.router === "fab-router" && acceptedCommitId && info.zoneRefill.after) {
+            try {
+              // The pre-refill query cannot establish whether native filled DRC
+              // is available. Do not persist a route after that final query fails.
+              await board.drc.run({ refillZones: false });
+            } catch (validationError) {
+              return await rejectTentativeValidation(board, acceptedCommitId, "post-refill native DRC", validationError);
+            }
+          }
           setState("saving");
           await persistAppliedRoute(board);
         }
