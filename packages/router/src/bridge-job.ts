@@ -581,6 +581,9 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           if (result.router === "fab-router" && acceptedCommitId && info.zoneRefill.after) {
             try {
               const filled = await board.drc.run({ refillZones: false, reportAllTrackErrors: true });
+              // Refill validation can outlive cancellation just like the initial
+              // tentative check. Reject before saving, respecting undo ownership.
+              checkCancelled();
               const added = newNativeErrors(nativeBaseline ?? [], filled.markers);
               if (added) throw new Error(`${added} new filled native DRC error(s)`);
             } catch (validationError) {

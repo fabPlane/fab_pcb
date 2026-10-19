@@ -371,3 +371,32 @@ for (const refill of [false, true]) {
     expect(fixture.calls.filter(call => call === "save")).toHaveLength(1);
   });
 }
+
+for (const refill of ["valid", "commit-valid"] as const) {
+  test(`cancellation during filled DRC rejects without saving (refill=${refill})`, async () => {
+    let entered!: () => void;
+    let release!: () => void;
+    const waiting = new Promise<void>(resolve => { entered = resolve; });
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const fixture = validationFixture({ valid: true, refill,
+      filledValidationGate: async () => { entered(); await gate; },
+    });
+    await waiting;
+    expect(fixture.cancel()).toBe(true);
+    release();
+    const info = await fixture.done;
+    expect(info.state).toBe("cancelled");
+    expect(info.summary).toBeUndefined();
+    expect(info.error).toContain("post-refill native DRC validation failed");
+    expect(fixture.calls.filter(call => call === "save")).toHaveLength(1);
+    if (refill === "valid") {
+      expect(fixture.calls.filter(call => call === "undo")).toHaveLength(1);
+      expect(fixture.copper()).toEqual(fixture.original);
+    } else {
+      expect(fixture.calls).not.toContain("undo");
+      expect(info.error).toContain("not at the top of the undo stack");
+      expect(info.error).toContain("tentative route may remain");
+      expect(fixture.copper().some(item => item.id === "new-route")).toBe(true);
+    }
+  });
+}
