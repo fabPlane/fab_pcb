@@ -19,3 +19,6 @@ packages/router/bench/results/*.svg
 
 # Frozen comparison captures and checksum-controlled harness/configuration.
 benchmarks/autorouter/
+
+# Generated, checksum-controlled board fixtures (job.json records their sha256).
+benchmarks/boards/*/case/
