@@ -20,7 +20,9 @@
  * `applyRouteResult` (one commit, message "Autoroute (<router>): <n> connections"), refills again,
  * then saves and re-measures the routed board. The post-apply refill is best-effort: its outcome
  * is reported in `zoneRefill`, but a failure does not discard the applied route or prevent the
- * final save. The browser only has to pick up the `DocumentChanged` event as usual. Cancelling
+ * final save. A failed native DRC query during fab_router's tentative cleanup undoes that route
+ * commit before failing the job; a failed undo is reported explicitly. The browser only has to
+ * pick up the `DocumentChanged` event as usual. Cancelling
  * before the apply leaves the board untouched; a failed router run (a fab_router error, a
  * Freerouting crash) applies nothing and reports the error. A failure of the final save reports
  * the job as failed but leaves the applied route in KiCad memory, where the caller can retry
@@ -432,7 +434,23 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
               break;
             }
             const createdIds = new Set(committed.created.map((item) => item.id));
-            const drc = await board.drc.run({ refillZones: false });
+            let drc;
+            try {
+              drc = await board.drc.run({ refillZones: false });
+            } catch (validationError) {
+              const detail = validationError instanceof Error ? validationError.message : String(validationError);
+              try {
+                const undone = await board.undo(1);
+                if (undone.applied !== 1) throw new Error(`expected one undone commit, got ${undone.applied}`);
+              } catch (rollbackError) {
+                const rollbackDetail = rollbackError instanceof Error ? rollbackError.message : String(rollbackError);
+                throw new Error(
+                  `native DRC validation failed: ${detail}; rollback failed: ${rollbackDetail}; tentative route may remain in KiCad memory`,
+                  { cause: validationError },
+                );
+              }
+              throw new Error(`native DRC validation failed: ${detail}; tentative route commit undone`, { cause: validationError });
+            }
             const danglingIds = new Set(
               drc.markers
                 .filter(
