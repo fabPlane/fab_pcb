@@ -424,3 +424,17 @@ for (const refill of [false, true]) {
     expect(fixture.calls.filter(call => call === "save")).toHaveLength(1);
   });
 }
+
+for (const serverUndo of ["unsupported", "throws"] as const) {
+  test(`undo capability preflight rejects before tentative copper (${serverUndo})`, async () => {
+    const fixture = validationFixture({ serverUndo, valid: true });
+    const info = await fixture.done;
+    expect(info.state).toBe("failed");
+    expect(info.error).toContain(serverUndo === "unsupported" ? "server undo" : "undo capability unavailable");
+    expect(info.summary).toBeUndefined();
+    expect(fixture.calls).not.toContain("apply");
+    expect(fixture.calls).not.toContain("drc");
+    expect(fixture.copper()).toEqual(fixture.original);
+    expect(fixture.calls.filter(call => call === "save")).toHaveLength(1);
+  });
+}

@@ -464,6 +464,11 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         let nativeBaseline: DrcMarker[] | undefined;
         if (result.router === "fab-router" && !alreadyApplied(result) &&
             (result.tracks.length || result.vias.length || result.claimedVias?.length)) {
+          // Validation can reject tentative copper only through server undo.
+          // Refuse before applying when that primitive is unavailable; discovering
+          // this during rollback would leave an unsafe route in editor memory.
+          if (!await board.supportsServerUndo())
+            throw new Error("fab_router native validation requires server undo before applying tentative copper");
           nativeBaseline = (await board.drc.run({ refillZones: false, reportAllTrackErrors: true })).markers;
         }
         if (!alreadyApplied(result) && (result.tracks.length || result.vias.length || result.claimedVias?.length)) {

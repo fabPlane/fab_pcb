@@ -44,6 +44,7 @@ for (const router of ["js", "freerouting"] as const)
   test(`${router} probes native leftover opens after application using pre-route obstacles`, async () => {
     const input = collisionBoard();
     const board = {
+      supportsServerUndo: async () => true,
       drc: { run: async () => ({ markers: [] }) },
       save: async () => {},
       getTracks: async () => [],
@@ -355,6 +356,7 @@ describe("route summary messages with fab_router diagnostics", () => {
         drc: { run: async () => ({ markers: [] }) },
         save: async () => {},
         getTracks: async () => [],
+        supportsServerUndo: async () => true,
         undoStack: async () => ({ undo: [{ commitId: { value: "commit" } }], redo: [] }),
         undo: async () => ({ applied: 1 }),
         ratsnest: async () => ({ edges }),
@@ -401,6 +403,7 @@ test("fab_router prunes and reports pre-existing scoped stubs in the same route 
   const board = {
     save: async () => {},
     getTracks: async () => [stub, outside, locked].filter((t) => !removed.includes(t.id)),
+    supportsServerUndo: async () => true,
     undoStack: async () => ({ undo: [{ commitId: { value: "commit" } }], redo: [] }),
     undo: async () => {
       undos++;
@@ -502,6 +505,7 @@ test("native cleanup keeps a useful connection behind a dangling chain longer th
   const board = {
     save: async () => {},
     getTracks: async () => created,
+    supportsServerUndo: async () => true,
     undoStack: async () => ({ undo: [{ commitId: { value: "cleanup" } }], redo: [] }),
     undo: async () => ({ applied: 1 }),
     ratsnest: async () => ({ edges: [] }),

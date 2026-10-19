@@ -23,6 +23,7 @@ for (const path of ["cleanup", "relabel"] as const) {
           saves++;
         },
         getTracks: async () => [],
+        supportsServerUndo: async () => true,
         undoStack: async () => {
           if (state === "history-error") throw new Error("history transport unavailable");
           return { undo: [{ commitId: { value: top } }], redo: [] };

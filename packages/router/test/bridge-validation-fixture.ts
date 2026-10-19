@@ -9,6 +9,7 @@ import { collisionBoard } from "./collision-fixture";
 // restored along with removal of the route when native validation is unavailable.
 export function validationFixture(
   options: {
+    serverUndo?: "unsupported" | "throws";
     baselineGate?: () => Promise<void>;
     ratsnestGate?: () => Promise<void>;
     validationGate?: () => Promise<void>;
@@ -45,6 +46,10 @@ export function validationFixture(
   let topCommitId = "route-commit";
   let fills = 0;
   const board = {
+    supportsServerUndo: async () => {
+      if (options.serverUndo === "throws") throw new Error("undo capability unavailable");
+      return options.serverUndo !== "unsupported";
+    },
     refillZones: async () => {
       calls.push("refill");
       if (++fills === 1 || options.refill === "valid") return;
