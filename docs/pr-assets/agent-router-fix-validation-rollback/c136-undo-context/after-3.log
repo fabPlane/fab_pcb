@@ -1,0 +1,16 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-undo-ownership.test.ts:
+(pass) cleanup preserves undo ownership (owned) [3.43ms]
+(pass) cleanup preserves undo ownership (foreign) [0.18ms]
+(pass) cleanup preserves undo ownership (history-error) [0.07ms]
+(pass) cleanup preserves undo ownership (undo-error) [0.05ms]
+(pass) relabel preserves undo ownership (owned) [0.21ms]
+(pass) relabel preserves undo ownership (foreign) [0.08ms]
+(pass) relabel preserves undo ownership (history-error) [0.12ms]
+(pass) relabel preserves undo ownership (undo-error) [0.08ms]
+
+ 8 pass
+ 0 fail
+ 56 expect() calls
+Ran 8 tests across 1 file. [131.00ms]

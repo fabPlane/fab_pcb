@@ -1,0 +1,68 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-undo-ownership.test.ts:
+(pass) cleanup preserves undo ownership (owned) [3.35ms]
+(pass) cleanup preserves undo ownership (foreign) [0.16ms]
+ 95 |       expect(applies).toBe(path === "relabel" && !failed ? 2 : 1);
+ 96 |       if (failed) {
+ 97 |         if (foreign) expect(info.error).toContain("not at the top of the undo stack");
+ 98 |         if (state.endsWith("-error"))
+ 99 |           expect(info.error).toContain(state === "history-error" ? "history transport unavailable" : "undo transport unavailable");
+100 |         expect(info.error).toContain("tentative route may remain in KiCad memory");
+                                 ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "tentative route may remain in KiCad memory"
+Received: "history transport unavailable"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-undo-ownership.test.ts:100:28)
+(fail) cleanup preserves undo ownership (history-error) [0.19ms]
+ 95 |       expect(applies).toBe(path === "relabel" && !failed ? 2 : 1);
+ 96 |       if (failed) {
+ 97 |         if (foreign) expect(info.error).toContain("not at the top of the undo stack");
+ 98 |         if (state.endsWith("-error"))
+ 99 |           expect(info.error).toContain(state === "history-error" ? "history transport unavailable" : "undo transport unavailable");
+100 |         expect(info.error).toContain("tentative route may remain in KiCad memory");
+                                 ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "tentative route may remain in KiCad memory"
+Received: "undo transport unavailable"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-undo-ownership.test.ts:100:28)
+(fail) cleanup preserves undo ownership (undo-error) [0.09ms]
+(pass) relabel preserves undo ownership (owned) [0.23ms]
+(pass) relabel preserves undo ownership (foreign) [0.06ms]
+ 95 |       expect(applies).toBe(path === "relabel" && !failed ? 2 : 1);
+ 96 |       if (failed) {
+ 97 |         if (foreign) expect(info.error).toContain("not at the top of the undo stack");
+ 98 |         if (state.endsWith("-error"))
+ 99 |           expect(info.error).toContain(state === "history-error" ? "history transport unavailable" : "undo transport unavailable");
+100 |         expect(info.error).toContain("tentative route may remain in KiCad memory");
+                                 ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "tentative route may remain in KiCad memory"
+Received: "history transport unavailable"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-undo-ownership.test.ts:100:28)
+(fail) relabel preserves undo ownership (history-error) [1.56ms]
+ 95 |       expect(applies).toBe(path === "relabel" && !failed ? 2 : 1);
+ 96 |       if (failed) {
+ 97 |         if (foreign) expect(info.error).toContain("not at the top of the undo stack");
+ 98 |         if (state.endsWith("-error"))
+ 99 |           expect(info.error).toContain(state === "history-error" ? "history transport unavailable" : "undo transport unavailable");
+100 |         expect(info.error).toContain("tentative route may remain in KiCad memory");
+                                 ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "tentative route may remain in KiCad memory"
+Received: "undo transport unavailable"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-undo-ownership.test.ts:100:28)
+(fail) relabel preserves undo ownership (undo-error) [0.14ms]
+
+ 4 pass
+ 4 fail
+ 48 expect() calls
+Ran 8 tests across 1 file. [158.00ms]

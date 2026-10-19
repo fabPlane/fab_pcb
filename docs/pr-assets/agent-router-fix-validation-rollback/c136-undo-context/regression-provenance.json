@@ -1,0 +1,9 @@
+{
+  "before_commit": "59d589355e1c4c1edd062afff123434914c6ab11",
+  "before_source_sha256": "2bc24fcd0a4958fbccb7bf9f937a59ce75e57d312ee85b1e7c7faaf2b4a4add6",
+  "after_source_sha256": "98d670237fc7286a74f688d2f2b07e7f7f85b415b3d45771513fd3bdda70d7de",
+  "test_sha256": "2341f27d6ad5cf0ecccab9dfb2ef49b1ebcaf9b32eb358a8b09c7801a9646d19",
+  "repeats": 3,
+  "cpus": "20-25",
+  "live_editor": false
+}

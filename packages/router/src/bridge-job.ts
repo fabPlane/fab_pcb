@@ -218,11 +218,16 @@ export function trackLength(result: Pick<RouteResult, "tracks">): number {
 // Every tentative-commit undo must verify ownership after asynchronous native
 // queries. Refuse to undo a newer edit, even if that leaves tentative copper.
 async function undoTentativeRoute(board: NonNullable<Awaited<ReturnType<KiCad["currentBoard"]>>>, commitId: string): Promise<void> {
-  const top = (await board.undoStack()).undo.at(-1);
-  if (!commitId || top?.commitId?.value !== commitId)
-    throw new Error("tentative route commit is not at the top of the undo stack; tentative route may remain in KiCad memory");
-  const undone = await board.undo(1);
-  if (undone.applied !== 1) throw new Error(`expected one undone commit, got ${undone.applied}`);
+  try {
+    const top = (await board.undoStack()).undo.at(-1);
+    if (!commitId || top?.commitId?.value !== commitId)
+      throw new Error("tentative route commit is not at the top of the undo stack");
+    const undone = await board.undo(1);
+    if (undone.applied !== 1) throw new Error(`expected one undone commit, got ${undone.applied}`);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(`could not undo tentative route: ${detail}; tentative route may remain in KiCad memory`, { cause: error });
+  }
 }
 
 async function rejectTentativeValidation(
