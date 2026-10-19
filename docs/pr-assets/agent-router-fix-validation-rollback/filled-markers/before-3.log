@@ -1,0 +1,78 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-validation.test.ts:
+(pass) failed native validation restores tentative copper [3.19ms]
+(pass) failed native validation restores tentative copper after a cleanup retry [0.26ms]
+(pass) failed validation reports an unsuccessful rollback (zero) without claiming restoration [0.17ms]
+(pass) failed validation reports an unsuccessful rollback (throws) without claiming restoration [0.07ms]
+(pass) successful native validation keeps and saves the applied route without undo [0.49ms]
+(pass) failed validation preserves an unrelated edit above the route commit [0.13ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (owned) [0.18ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (zero) [0.06ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (throws) [0.06ms]
+(pass) relabelled route is validated and restored before a failed job [0.13ms]
+(pass) relabelled route with successful validation is saved [0.32ms]
+(pass) unstable native connection counts stop without saving a replacement [0.14ms]
+(pass) failed post-apply refill rejects without saving (owned) [0.16ms]
+(pass) failed post-apply refill rejects without saving (zero) [0.06ms]
+(pass) failed post-apply refill rejects without saving (throws) [0.04ms]
+(pass) failed refill with its own newer commit refuses a one-entry route rollback [0.12ms]
+(pass) successful post-apply refill keeps the route and saves [0.13ms]
+(pass) failed filled native DRC query rejects before saving (owned) [0.11ms]
+(pass) failed filled native DRC query rejects before saving (zero) [0.04ms]
+(pass) failed filled native DRC query rejects before saving (throws) [0.04ms]
+(pass) failed filled DRC query preserves a newer unrelated edit [0.09ms]
+161 | 
+162 | for (const filledMarkers of ["new", "duplicate", "replacement"] as const) {
+163 |   test(`rejects newly introduced filled native errors (${filledMarkers})`, async () => {
+164 |     const fixture = validationFixture({ valid: true, refill: "valid", filledMarkers });
+165 |     const info = await fixture.done;
+166 |     expect(info.state).toBe("failed");
+                             ^
+error: expect(received).toBe(expected)
+
+Expected: "failed"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:166:24)
+(fail) rejects newly introduced filled native errors (new) [0.32ms]
+161 | 
+162 | for (const filledMarkers of ["new", "duplicate", "replacement"] as const) {
+163 |   test(`rejects newly introduced filled native errors (${filledMarkers})`, async () => {
+164 |     const fixture = validationFixture({ valid: true, refill: "valid", filledMarkers });
+165 |     const info = await fixture.done;
+166 |     expect(info.state).toBe("failed");
+                             ^
+error: expect(received).toBe(expected)
+
+Expected: "failed"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:166:24)
+(fail) rejects newly introduced filled native errors (duplicate) [0.10ms]
+161 | 
+162 | for (const filledMarkers of ["new", "duplicate", "replacement"] as const) {
+163 |   test(`rejects newly introduced filled native errors (${filledMarkers})`, async () => {
+164 |     const fixture = validationFixture({ valid: true, refill: "valid", filledMarkers });
+165 |     const info = await fixture.done;
+166 |     expect(info.state).toBe("failed");
+                             ^
+error: expect(received).toBe(expected)
+
+Expected: "failed"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:166:24)
+(fail) rejects newly introduced filled native errors (replacement) [0.07ms]
+(pass) allows unchanged or excluded filled markers (existing) [0.11ms]
+(pass) allows unchanged or excluded filled markers (excluded) [0.06ms]
+
+3 tests failed:
+(fail) rejects newly introduced filled native errors (new) [0.32ms]
+(fail) rejects newly introduced filled native errors (duplicate) [0.10ms]
+(fail) rejects newly introduced filled native errors (replacement) [0.07ms]
+
+ 23 pass
+ 3 fail
+ 133 expect() calls
+Ran 26 tests across 1 file. [148.00ms]
