@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { create } from "@bufbuild/protobuf";
-import { BoardLayer, DrcErrorType, TrackSchema } from "@fp-pcb/proto";
+import { BoardLayer, DrcErrorType, RuleSeverity, TrackSchema } from "@fp-pcb/proto";
 import { Track, type Board } from "@fp-pcb/client";
 import { createRouteJobs } from "../src/bridge-job";
 import { collisionBoard } from "./collision-fixture";
@@ -35,7 +35,7 @@ for (const path of ["cleanup", "relabel"] as const) {
         drc: { run: async () => {
           if (path === "cleanup") {
             if (foreign) { top = "foreign"; foreignPresent = true; }
-            return { markers: [{ errorType: DrcErrorType.DRCET_DANGLING_TRACK, items: [{ value: "generated" }] }] };
+            return { markers: [{ errorType: DrcErrorType.DRCET_DANGLING_TRACK, severity: RuleSeverity.RS_WARNING, items: [{ value: "generated" }] }] };
           }
           return { markers: [] };
         } },

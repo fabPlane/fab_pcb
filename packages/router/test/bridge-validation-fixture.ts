@@ -12,6 +12,7 @@ export function validationFixture(
     refill?: "valid" | "throws" | "commit-then-throws";
     filledMarkers?: "new" | "existing" | "duplicate" | "replacement" | "excluded";
     unfilledErrors?: boolean;
+    danglingSeverity?: RuleSeverity;
     excludedDangling?: "existing" | "generated";
     finalDrcFailure?: boolean;
     finalForeignEdit?: boolean;
@@ -91,14 +92,18 @@ export function validationFixture(
           }
           throw new Error("filled DRC unavailable");
         }
+        if (options.danglingSeverity !== undefined) return { markers: copper.some((item) => item.id === "stub") ? [create(DrcMarkerSchema, {
+          errorType: DrcErrorType.DRCET_DANGLING_TRACK, severity: options.danglingSeverity,
+          items: [{ value: "stub" }],
+        })] : [] };
         if (options.excludedDangling) return { markers: [create(DrcMarkerSchema, {
-          errorType: DrcErrorType.DRCET_DANGLING_TRACK, excluded: true,
+          errorType: DrcErrorType.DRCET_DANGLING_TRACK, severity: RuleSeverity.RS_WARNING, excluded: true,
           items: [{ value: options.excludedDangling === "existing" ? "stub" : generated.id }],
         })] };
         if (options.valid || options.ratsnestFailure || (options.relabel && checks === 1)) return { markers: [] };
         if (options.cleanupFirst && checks === 1)
           return {
-            markers: [{ errorType: DrcErrorType.DRCET_DANGLING_TRACK, items: [{ value: "stub" }] }],
+            markers: [{ errorType: DrcErrorType.DRCET_DANGLING_TRACK, severity: RuleSeverity.RS_WARNING, items: [{ value: "stub" }] }],
           };
         if (options.foreignEdit) {
           copper.push(new Track(create(TrackSchema, { id: { value: "unrelated-edit" }, net: { name: "OTHER" } })));

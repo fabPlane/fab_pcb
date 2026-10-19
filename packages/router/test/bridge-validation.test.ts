@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import { RuleSeverity } from "@fp-pcb/proto";
 import { validationFixture } from "./bridge-validation-fixture";
 
 for (const cleanupFirst of [false, true]) {
@@ -211,5 +212,27 @@ for (const excludedDangling of ["existing", "generated"] as const) {
     expect(fixture.calls).not.toContain("undo");
     expect(fixture.calls.filter((call) => call === "save")).toHaveLength(2);
     expect(info.summary?.removedExistingCopper ?? []).toEqual([]);
+  });
+}
+
+for (const danglingSeverity of [RuleSeverity.RS_IGNORE, RuleSeverity.RS_EXCLUSION, RuleSeverity.RS_INFO]) {
+  test(`inactive dangling severity preserves existing copper (${danglingSeverity})`, async () => {
+    const fixture = validationFixture({ valid: true, danglingSeverity });
+    const info = await fixture.done;
+    expect(info.state).toBe("done");
+    expect(fixture.copper().map((item) => item.id)).toEqual(["stub", "protected", "other-net", "new-route"]);
+    expect(fixture.calls.filter((call) => call === "apply")).toHaveLength(1);
+    expect(fixture.calls).not.toContain("undo");
+    expect(info.summary?.removedExistingCopper ?? []).toEqual([]);
+  });
+}
+for (const danglingSeverity of [RuleSeverity.RS_WARNING, RuleSeverity.RS_ERROR]) {
+  test(`active dangling severity still cleans scoped existing copper (${danglingSeverity})`, async () => {
+    const fixture = validationFixture({ valid: true, danglingSeverity });
+    const info = await fixture.done;
+    expect(info.state).toBe("done");
+    expect(fixture.copper().map((item) => item.id)).toEqual(["protected", "other-net", "new-route"]);
+    expect(fixture.calls.filter((call) => call === "apply")).toHaveLength(2);
+    expect(fixture.calls.filter((call) => call === "undo")).toHaveLength(1);
   });
 }

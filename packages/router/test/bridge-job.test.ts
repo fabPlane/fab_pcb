@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { create } from "@bufbuild/protobuf";
-import { ArcSchema, BoardLayer, DrcErrorType, LockedState, TrackSchema, ViaSchema } from "@fp-pcb/proto";
+import { ArcSchema, BoardLayer, DrcErrorType, RuleSeverity, LockedState, TrackSchema, ViaSchema } from "@fp-pcb/proto";
 import { Arc, Track, Via, toDistance, toVector2, type Board } from "@fp-pcb/client";
 import type { RouteInput, RouteResult } from "../src/types";
 import { createRouteJobs, persistAppliedRoute, routeGeometry, withoutRejectedCreatedCopper } from "../src/bridge-job";
@@ -412,7 +412,7 @@ test("fab_router prunes and reports pre-existing scoped stubs in the same route 
       run: async () => ({
         markers: [stub, outside, locked]
           .filter((t) => !removed.includes(t.id))
-          .map((t) => ({ errorType: DrcErrorType.DRCET_DANGLING_TRACK, items: [{ value: t.id }] })),
+          .map((t) => ({ errorType: DrcErrorType.DRCET_DANGLING_TRACK, severity: RuleSeverity.RS_WARNING, items: [{ value: t.id }] })),
       }),
     },
   } as unknown as Board;
@@ -509,7 +509,7 @@ test("native cleanup keeps a useful connection behind a dangling chain longer th
       run: async () => {
         checks++;
         return {
-          markers: created.length > 1 ? [{ errorType: DrcErrorType.DRCET_DANGLING_TRACK, items: [{ value: created.at(-1)!.id }] }] : [],
+          markers: created.length > 1 ? [{ errorType: DrcErrorType.DRCET_DANGLING_TRACK, severity: RuleSeverity.RS_WARNING, items: [{ value: created.at(-1)!.id }] }] : [],
         };
       },
     },
