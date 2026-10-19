@@ -63,3 +63,32 @@ test("offline handoff refuses directory aliases of the authored source", async (
     expect(await readFile(source, "utf8")).toBe("authored board");
   });
 });
+
+// Native integration is opt-in because released engine checkouts need not yet
+// contain the offline search tools. Pure handoff tests above always run.
+const nativeEngine = process.env.FAB_ROUTER_NATIVE_SEARCH_SOURCE;
+test.skipIf(!nativeEngine)("native post-import pipeline removes a real thermal before independent scoring", async () => {
+  const { gunzipSync } = await import("node:zlib");
+  const root = await mkdtemp(join(tmpdir(), "native-thermal-integration-"));
+  const fixtures = new URL("./fixtures/native-thermal-j4/", import.meta.url);
+  try {
+    for (const role of ["source", "routed"]) {
+      await writeFile(join(root, role + ".kicad_pcb"), gunzipSync(await readFile(new URL(role + ".kicad_pcb.gz", fixtures))));
+      for (const ext of [".kicad_pro", ".kicad_dru"]) await writeFile(join(root, role + ext), await readFile(new URL("board" + ext, fixtures)));
+    }
+    const source = join(root, "source.kicad_pcb"), routed = join(root, "routed.kicad_pcb"), work = join(root, "work");
+    const original = { source: await readFile(source), routed: await readFile(routed) };
+    const result = await postprocess(source, routed, nativeEngine!, work);
+    const baseline = JSON.parse(await readFile(join(work, "search/baseline.json"), "utf8"));
+    expect(baseline.newErrors.map((e: { type: string }) => e.type)).toEqual(["starved_thermal"]);
+    expect(result.applied).toBe(true);
+    const bundle = JSON.parse(await readFile(join(work, "accepted.json"), "utf8"));
+    expect(bundle.validation.newErrors).toHaveLength(0);
+    expect(bundle.validation.opensAfter).toBe(0);
+    expect(bundle.validation.lostTerminalPairs).toBe(0);
+    expect(bundle.validation.repair.lostTerminalPairs).toBe(0);
+    expect(await readFile(source)).toEqual(original.source);
+    expect(await readFile(routed)).not.toEqual(original.routed);
+    expect(await readFile(routed)).toEqual(Buffer.from(bundle.candidate[0].base64, "base64"));
+  } finally { await rm(root, { recursive: true, force: true }); }
+}, 180_000);
