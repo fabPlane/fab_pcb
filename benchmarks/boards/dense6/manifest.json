@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "id": "dense6-bga324",
+  "license": "MIT",
+  "seed": 6406,
+  "generator": "gen_dense6.py",
+  "regenerate": "python3 generate.py OUT",
+  "layers": 6,
+  "copper_layers": [
+    "F.Cu",
+    "In1.Cu",
+    "In2.Cu",
+    "In3.Cu",
+    "In4.Cu",
+    "B.Cu"
+  ],
+  "board_mm": [
+    70,
+    56
+  ],
+  "nets": 263,
+  "pads": 702,
+  "initial_native_opens": 439,
+  "minimum_track_mm": 0.1,
+  "minimum_clearance_mm": 0.1,
+  "bga_pitch_mm": 0.8,
+  "bga_pads": [
+    324,
+    96
+  ],
+  "qfn_pitch_mm": [
+    0.5,
+    0.4
+  ],
+  "plane_layers": false,
+  "differential_pair_constraints": false,
+  "ranking_status": "Standalone input/connection-edge audit; excluded from frozen and ranked suites.",
+  "sha256": {
+    "gen_dense6.py": "7a01aa5537e7bf9a09db7d542f5ff4603d555e12b82bba67e9d16f7fd5c244d9",
+    "dense6-bga324.kicad_pcb": "f5841d12f854d2ae538bf9ae2996c72718028ba9702f627f726c1ccfc67a4635",
+    "dense6-bga324.kicad_pro": "346003c12025d81e04dcdfc1c0e64e54845aa74405df6a57b84876471d0ef902"
+  },
+  "generated_sha256": {
+    "dense6-bga324.kicad_pcb": "2ef0e891062c8006d94e521e1e150261adff09af409c9a21b26512aa2610b4e4",
+    "dense6-bga324.kicad_pro": "346003c12025d81e04dcdfc1c0e64e54845aa74405df6a57b84876471d0ef902"
+  },
+  "serialization": "Bundled board was saved by native editor. Regenerated raw board is byte-stable; copper geometry and rules are equivalent, not byte-identical."
+}

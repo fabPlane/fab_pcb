@@ -1,0 +1,239 @@
+{
+  "repeats": 3,
+  "snapshots": [
+    {
+      "opens": 1,
+      "errors": 0,
+      "warnings": 0,
+      "identity": {
+        "/tmp/native-connectivity-tyncim0i/t2-r0.kicad_pcb": "5187c653bee828c14e99b98f43e78f23ae85286b9f016b877ed43e983997582f",
+        "/tmp/native-connectivity-tyncim0i/t2-r0.kicad_pro": null,
+        "/tmp/native-connectivity-tyncim0i/t2-r0.kicad_dru": null,
+        "/usr/bin/kicad-cli": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402"
+      },
+      "report_sha256": "06aea97586da5df70cb69de95d2705156edb3945f97c31433e979554adffdfb7",
+      "kicad_version": "10.0.6"
+    },
+    {
+      "opens": 0,
+      "errors": 0,
+      "warnings": 0,
+      "identity": {
+        "/tmp/native-connectivity-tyncim0i/t2-r1.kicad_pcb": "dac62516b9fc26aad661c21f754ac2bff700194c5994dd8408ad6f30597d41dd",
+        "/tmp/native-connectivity-tyncim0i/t2-r1.kicad_pro": null,
+        "/tmp/native-connectivity-tyncim0i/t2-r1.kicad_dru": null,
+        "/usr/bin/kicad-cli": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402"
+      },
+      "report_sha256": "9bd210011501e139f49bdbd7a08211f9d03cdac999cc63d65ed8ad20a558ac50",
+      "kicad_version": "10.0.6"
+    },
+    {
+      "opens": 2,
+      "errors": 0,
+      "warnings": 0,
+      "identity": {
+        "/tmp/native-connectivity-tyncim0i/t3-r0.kicad_pcb": "bf9699f0add4d50fa961e5c90c005cb6d4e5bcc7a837bc6634a62015e56f7866",
+        "/tmp/native-connectivity-tyncim0i/t3-r0.kicad_pro": null,
+        "/tmp/native-connectivity-tyncim0i/t3-r0.kicad_dru": null,
+        "/usr/bin/kicad-cli": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402"
+      },
+      "report_sha256": "2e394d21891625adbc375843e9dbf7acf25506fc707799d5240ed213d7610b1a",
+      "kicad_version": "10.0.6"
+    },
+    {
+      "opens": 1,
+      "errors": 0,
+      "warnings": 0,
+      "identity": {
+        "/tmp/native-connectivity-tyncim0i/t3-r1.kicad_pcb": "113a410d8a58c1014f70b3955684c5a626d5b663318a5d77870df4568d186007",
+        "/tmp/native-connectivity-tyncim0i/t3-r1.kicad_pro": null,
+        "/tmp/native-connectivity-tyncim0i/t3-r1.kicad_dru": null,
+        "/usr/bin/kicad-cli": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402"
+      },
+      "report_sha256": "0e67fb8dc0660a06e47fcbac0bd9d89d7357162b6cb2b2167282dbc1e027c9e2",
+      "kicad_version": "10.0.6"
+    },
+    {
+      "opens": 0,
+      "errors": 0,
+      "warnings": 0,
+      "identity": {
+        "/tmp/native-connectivity-tyncim0i/t3-r2.kicad_pcb": "a16b2528e6938e0cc5fbc16f466e109e8ec644a1a9e6c6bc09ff733afe8b961f",
+        "/tmp/native-connectivity-tyncim0i/t3-r2.kicad_pro": null,
+        "/tmp/native-connectivity-tyncim0i/t3-r2.kicad_dru": null,
+        "/usr/bin/kicad-cli": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402"
+      },
+      "report_sha256": "bd1d6c1ccdf769643961de0ff5897a9dbc8d186cd0737f98d13b5e02a14757b7",
+      "kicad_version": "10.0.6"
+    },
+    {
+      "opens": 439,
+      "errors": 0,
+      "warnings": 30,
+      "identity": {
+        "/tmp/dense6-regenerate-98eiwtf0/dense6-bga324.kicad_pcb": "2ef0e891062c8006d94e521e1e150261adff09af409c9a21b26512aa2610b4e4",
+        "/tmp/dense6-regenerate-98eiwtf0/dense6-bga324.kicad_pro": "346003c12025d81e04dcdfc1c0e64e54845aa74405df6a57b84876471d0ef902",
+        "/tmp/dense6-regenerate-98eiwtf0/dense6-bga324.kicad_dru": null,
+        "/usr/bin/kicad-cli": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402"
+      },
+      "report_sha256": "38e797611ca6b9cfa1597398c1e7a9c22752fbabaf1283687d4fff1444d6ea58",
+      "kicad_version": "10.0.6"
+    },
+    {
+      "opens": 1,
+      "errors": 0,
+      "warnings": 0,
+      "identity": {
+        "/tmp/native-connectivity-tyncim0i/t2-r0.kicad_pcb": "5187c653bee828c14e99b98f43e78f23ae85286b9f016b877ed43e983997582f",
+        "/tmp/native-connectivity-tyncim0i/t2-r0.kicad_pro": null,
+        "/tmp/native-connectivity-tyncim0i/t2-r0.kicad_dru": null,
+        "/usr/bin/kicad-cli": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402"
+      },
+      "report_sha256": "79dd1b5b297fb897a617a7b5617c6689d2216dba3766f164e6ec5710c0adbbd1",
+      "kicad_version": "10.0.6"
+    },
+    {
+      "opens": 0,
+      "errors": 0,
+      "warnings": 0,
+      "identity": {
+        "/tmp/native-connectivity-tyncim0i/t2-r1.kicad_pcb": "dac62516b9fc26aad661c21f754ac2bff700194c5994dd8408ad6f30597d41dd",
+        "/tmp/native-connectivity-tyncim0i/t2-r1.kicad_pro": null,
+        "/tmp/native-connectivity-tyncim0i/t2-r1.kicad_dru": null,
+        "/usr/bin/kicad-cli": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402"
+      },
+      "report_sha256": "12dcc6ba29eedc674f900fd65616b7062df6b880216e064df09d52625e3b0a84",
+      "kicad_version": "10.0.6"
+    },
+    {
+      "opens": 2,
+      "errors": 0,
+      "warnings": 0,
+      "identity": {
+        "/tmp/native-connectivity-tyncim0i/t3-r0.kicad_pcb": "bf9699f0add4d50fa961e5c90c005cb6d4e5bcc7a837bc6634a62015e56f7866",
+        "/tmp/native-connectivity-tyncim0i/t3-r0.kicad_pro": null,
+        "/tmp/native-connectivity-tyncim0i/t3-r0.kicad_dru": null,
+        "/usr/bin/kicad-cli": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402"
+      },
+      "report_sha256": "84c1855f9578573bb7ecb6deed908ee69967d90f73be428cd567f74c012235fe",
+      "kicad_version": "10.0.6"
+    },
+    {
+      "opens": 1,
+      "errors": 0,
+      "warnings": 0,
+      "identity": {
+        "/tmp/native-connectivity-tyncim0i/t3-r1.kicad_pcb": "113a410d8a58c1014f70b3955684c5a626d5b663318a5d77870df4568d186007",
+        "/tmp/native-connectivity-tyncim0i/t3-r1.kicad_pro": null,
+        "/tmp/native-connectivity-tyncim0i/t3-r1.kicad_dru": null,
+        "/usr/bin/kicad-cli": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402"
+      },
+      "report_sha256": "0bfd51b112d6ca5d7b8283447acf50a51eea492603ed3e63c7bca77a3ced901d",
+      "kicad_version": "10.0.6"
+    },
+    {
+      "opens": 0,
+      "errors": 0,
+      "warnings": 0,
+      "identity": {
+        "/tmp/native-connectivity-tyncim0i/t3-r2.kicad_pcb": "a16b2528e6938e0cc5fbc16f466e109e8ec644a1a9e6c6bc09ff733afe8b961f",
+        "/tmp/native-connectivity-tyncim0i/t3-r2.kicad_pro": null,
+        "/tmp/native-connectivity-tyncim0i/t3-r2.kicad_dru": null,
+        "/usr/bin/kicad-cli": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402"
+      },
+      "report_sha256": "584ebf16821d654e381555e1f423123b787cdc48edc4d5f1d598d649b7940ba7",
+      "kicad_version": "10.0.6"
+    },
+    {
+      "opens": 439,
+      "errors": 0,
+      "warnings": 30,
+      "identity": {
+        "/tmp/dense6-regenerate-98eiwtf0/dense6-bga324.kicad_pcb": "2ef0e891062c8006d94e521e1e150261adff09af409c9a21b26512aa2610b4e4",
+        "/tmp/dense6-regenerate-98eiwtf0/dense6-bga324.kicad_pro": "346003c12025d81e04dcdfc1c0e64e54845aa74405df6a57b84876471d0ef902",
+        "/tmp/dense6-regenerate-98eiwtf0/dense6-bga324.kicad_dru": null,
+        "/usr/bin/kicad-cli": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402"
+      },
+      "report_sha256": "7b40861c100cb4179016dfe0daa9e0747f5bf58e9aabda08748d804b1d741899",
+      "kicad_version": "10.0.6"
+    },
+    {
+      "opens": 1,
+      "errors": 0,
+      "warnings": 0,
+      "identity": {
+        "/tmp/native-connectivity-tyncim0i/t2-r0.kicad_pcb": "5187c653bee828c14e99b98f43e78f23ae85286b9f016b877ed43e983997582f",
+        "/tmp/native-connectivity-tyncim0i/t2-r0.kicad_pro": null,
+        "/tmp/native-connectivity-tyncim0i/t2-r0.kicad_dru": null,
+        "/usr/bin/kicad-cli": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402"
+      },
+      "report_sha256": "0590cbde75a6cc2b10e3b93d1da02b0ed3f93ba5d4c54ca5490147a04a1fe4f9",
+      "kicad_version": "10.0.6"
+    },
+    {
+      "opens": 0,
+      "errors": 0,
+      "warnings": 0,
+      "identity": {
+        "/tmp/native-connectivity-tyncim0i/t2-r1.kicad_pcb": "dac62516b9fc26aad661c21f754ac2bff700194c5994dd8408ad6f30597d41dd",
+        "/tmp/native-connectivity-tyncim0i/t2-r1.kicad_pro": null,
+        "/tmp/native-connectivity-tyncim0i/t2-r1.kicad_dru": null,
+        "/usr/bin/kicad-cli": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402"
+      },
+      "report_sha256": "bc48362aa73608adb2b7d28857ece4de6195822c4bcfb5a5b2aaa189e0646da3",
+      "kicad_version": "10.0.6"
+    },
+    {
+      "opens": 2,
+      "errors": 0,
+      "warnings": 0,
+      "identity": {
+        "/tmp/native-connectivity-tyncim0i/t3-r0.kicad_pcb": "bf9699f0add4d50fa961e5c90c005cb6d4e5bcc7a837bc6634a62015e56f7866",
+        "/tmp/native-connectivity-tyncim0i/t3-r0.kicad_pro": null,
+        "/tmp/native-connectivity-tyncim0i/t3-r0.kicad_dru": null,
+        "/usr/bin/kicad-cli": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402"
+      },
+      "report_sha256": "24e6ccbeb108ef6da00e6652deaa149b1373b2777061d92d4be61a761676d745",
+      "kicad_version": "10.0.6"
+    },
+    {
+      "opens": 1,
+      "errors": 0,
+      "warnings": 0,
+      "identity": {
+        "/tmp/native-connectivity-tyncim0i/t3-r1.kicad_pcb": "113a410d8a58c1014f70b3955684c5a626d5b663318a5d77870df4568d186007",
+        "/tmp/native-connectivity-tyncim0i/t3-r1.kicad_pro": null,
+        "/tmp/native-connectivity-tyncim0i/t3-r1.kicad_dru": null,
+        "/usr/bin/kicad-cli": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402"
+      },
+      "report_sha256": "fa88f773d06ad1e5f2713d152892949f828387064167b57bd051888303f0c340",
+      "kicad_version": "10.0.6"
+    },
+    {
+      "opens": 0,
+      "errors": 0,
+      "warnings": 0,
+      "identity": {
+        "/tmp/native-connectivity-tyncim0i/t3-r2.kicad_pcb": "a16b2528e6938e0cc5fbc16f466e109e8ec644a1a9e6c6bc09ff733afe8b961f",
+        "/tmp/native-connectivity-tyncim0i/t3-r2.kicad_pro": null,
+        "/tmp/native-connectivity-tyncim0i/t3-r2.kicad_dru": null,
+        "/usr/bin/kicad-cli": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402"
+      },
+      "report_sha256": "82a028380ef07d9d91ce9e70ecf6f8d6b09a5e0570474695796dadcb1f9922af",
+      "kicad_version": "10.0.6"
+    },
+    {
+      "opens": 439,
+      "errors": 0,
+      "warnings": 30,
+      "identity": {
+        "/tmp/dense6-regenerate-98eiwtf0/dense6-bga324.kicad_pcb": "2ef0e891062c8006d94e521e1e150261adff09af409c9a21b26512aa2610b4e4",
+        "/tmp/dense6-regenerate-98eiwtf0/dense6-bga324.kicad_pro": "346003c12025d81e04dcdfc1c0e64e54845aa74405df6a57b84876471d0ef902",
+        "/tmp/dense6-regenerate-98eiwtf0/dense6-bga324.kicad_dru": null,
+        "/usr/bin/kicad-cli": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402"
+      },
+      "report_sha256": "79f6521afcd2c9bbb0318995b422d092b0bd2a8627d328366aee6f9729093d0a",
+      "kicad_version": "10.0.6"
+    }
+  ]
+}
