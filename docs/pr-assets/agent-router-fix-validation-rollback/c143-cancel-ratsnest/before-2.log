@@ -1,0 +1,37 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-validation.test.ts:
+412 |     });
+413 |     await waiting;
+414 |     expect(fixture.cancel()).toBe(true);
+415 |     release();
+416 |     const info = await fixture.done;
+417 |     expect(info.state).toBe("cancelled");
+                             ^
+error: expect(received).toBe(expected)
+
+Expected: "cancelled"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:417:24)
+(fail) cancellation during tentative ratsnest restores copper (refill=false) [3.29ms]
+414 |     expect(fixture.cancel()).toBe(true);
+415 |     release();
+416 |     const info = await fixture.done;
+417 |     expect(info.state).toBe("cancelled");
+418 |     expect(info.summary).toBeUndefined();
+419 |     expect(info.error).toContain("native ratsnest validation failed");
+                             ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "native ratsnest validation failed"
+Received: "cancelled: post-refill native DRC validation failed: routing cancelled; tentative route commit undone"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:419:24)
+(fail) cancellation during tentative ratsnest restores copper (refill=true) [0.91ms]
+
+ 0 pass
+ 61 filtered out
+ 2 fail
+ 6 expect() calls
+Ran 2 tests across 1 file. [132.00ms]

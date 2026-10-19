@@ -1,0 +1,11 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-validation.test.ts:
+(pass) cancellation during tentative ratsnest restores copper (refill=false) [3.56ms]
+(pass) cancellation during tentative ratsnest restores copper (refill=true) [0.17ms]
+
+ 2 pass
+ 61 filtered out
+ 0 fail
+ 18 expect() calls
+Ran 2 tests across 1 file. [152.00ms]
