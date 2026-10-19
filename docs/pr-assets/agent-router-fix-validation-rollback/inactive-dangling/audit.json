@@ -1,0 +1,41 @@
+{
+  "source_commit": "8d9da79a5b3d0552d67b88357db3e94a49dc117b",
+  "before_source_commit": "4647d1e",
+  "repeats": 3,
+  "cores": "20-25",
+  "scope": "Stateful adapter diagnostic; no live native or benchmark safety coverage",
+  "results": {
+    "inactive_preservation": {
+      "before": 0,
+      "after": 9,
+      "total": 9
+    },
+    "active_cleanup": {
+      "before": 6,
+      "after": 6,
+      "total": 6
+    },
+    "prior_controls": {
+      "before": 99,
+      "after": 99,
+      "total": 99
+    }
+  },
+  "sha256": {
+    "packages/router/src/bridge-job.ts": "2bc24fcd0a4958fbccb7bf9f937a59ce75e57d312ee85b1e7c7faaf2b4a4add6",
+    "packages/router/test/bridge-validation.test.ts": "2f6d437f3fe4cb648c84bce875268fbfef2a616c55f7de75dc035bc1b6c9817b",
+    "packages/router/test/bridge-validation-fixture.ts": "fccb973302317722ec5462aeeb3e13a481f384f68c86437a5518c488012ef0ad",
+    "packages/router/test/bridge-job.test.ts": "942527b179bc45a084e6dc0dc1542e71ac68e7171b61438634a660173e4ff922",
+    "packages/router/test/bridge-undo-ownership.test.ts": "66ce1a229c6cec7613d478f1c607fe27aa9ac48211f543bedb8ec379efdf97ee"
+  },
+  "check_logs_sha256": {
+    "package-checks.log": "bbecbbe9c9efe58184e14447aa0c958c93f2ac46386480a70ce4ed483d30e335",
+    "before-2.log": "ba73059243a1f71c83363c6a5b8565d2730347f224cfe850a27d9928ce3a9631",
+    "before-3.log": "4246f7e50840c730919ad3971ede08689b4c218851a89c41bd405fe7f873f689",
+    "engine-checks.log": "1495587af90e1dc5083108237234058ba02285af45e373b4185e37df182e2132",
+    "after-1.log": "26033676cd68e1a20af1ae8821296dcdae33503a7b03f5953af33b22b35ddcb6",
+    "before-1.log": "cafe57ff4eb75f3e3902273322afdc3440b94aa77400388ce0b7e19f1916e549",
+    "after-3.log": "34fbf33a355b98f81ef9a3411b8713e051518bbcc6da54eae541271e67762d1d",
+    "after-2.log": "6c80fd049730b31f8294bacc2ea8e2783326bf524e8f3b9589b7ce8f3ff39202"
+  }
+}
