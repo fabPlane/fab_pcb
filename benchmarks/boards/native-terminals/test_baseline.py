@@ -27,11 +27,12 @@ class BaselineTest(unittest.TestCase):
     def snapshot(self, board, report, cli):
         board, report = Path(board), Path(report)
         opens = 2 if board == self.board else 1
-        finding = dict(type='unconnected_items', severity='error',
-                       items=[dict(uuid=str(i), pos=dict(x=i, y=0)) for i in range(2)])
+        findings = [dict(type='unconnected_items', severity='error',
+                       items=[dict(uuid=str(i + edge), pos=dict(x=i + edge, y=0)) for i in range(2)])
+                    for edge in range(opens)]
         report.write_text(json.dumps(dict(source=board.name, coordinate_units='mm',
               included_severities=['error', 'warning'], violations=[], schematic_parity=[],
-              unconnected_items=[finding] * opens)))
+              unconnected_items=findings)))
         return dict(opens=opens, errors=0, warnings=0, kicad_version='test',
                     report_sha256=digest(report), identity={str(p): digest(p) if p.exists() else None
                     for p in (board, board.with_suffix('.kicad_pro'), board.with_suffix('.kicad_dru'), Path(cli))})

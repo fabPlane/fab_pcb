@@ -30,6 +30,7 @@ def counts(report, board):
     for key in ('violations', 'unconnected_items', 'schematic_parity'):
         if not isinstance(report.get(key), list):
             raise ValueError('native report missing findings section')
+    seen_edges = set()
     for finding in report['unconnected_items']:
         if (finding.get('type') != 'unconnected_items' or finding.get('severity') != 'error'
                 or len(finding.get('items', [])) != 2):
@@ -40,6 +41,14 @@ def counts(report, board):
             if any(type(item.get('pos', {}).get(axis)) not in (int, float)
                    or not math.isfinite(item['pos'][axis]) for axis in ('x', 'y')):
                 raise ValueError('invalid native endpoint position')
+        endpoints = [(item['uuid'], item['pos']['x'], item['pos']['y'])
+                     for item in finding['items']]
+        if endpoints[0] == endpoints[1]:
+            raise ValueError('native open edge has identical endpoints')
+        edge = tuple(sorted(endpoints))
+        if edge in seen_edges:
+            raise ValueError('duplicate native open edge')
+        seen_edges.add(edge)
     findings = report['violations'] + report['schematic_parity']
     if any(f.get('severity') not in ('error', 'warning', 'exclusion') for f in findings):
         raise ValueError('unknown native severity')

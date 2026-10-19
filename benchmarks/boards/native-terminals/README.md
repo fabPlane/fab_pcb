@@ -9,7 +9,7 @@ and iteration order do not participate: editor serialization and additional
 tracks are supported transformations.
 
 This standalone experiment reuses the persisted edge-baseline helper from the
-native connectivity audit, included verbatim as `baseline.py` and `audit.py`.
+native connectivity audit, included as `baseline.py` and `audit.py` with the report-integrity checks below.
 It does not modify ranked scoring, adapters, caches, or the frozen benchmark.
 The new check is a prerequisite for integrating native edge counts into those
 paths. It does not establish preservation of outlines, keepouts, zones, arbitrary
@@ -37,3 +37,23 @@ three fresh before/after repetitions (the guard must accept the pair):
 ```sh
 nice -n 10 taskset -c 0-5 timeout 300 /usr/bin/python3 benchmarks/boards/native-terminals/measure_pair.py --original /path/to/original.kicad_pcb --candidate /path/to/candidate.kicad_pcb --out /tmp/native-preserved-pair --repeats 3
 ```
+
+Open-edge records must identify distinct physical endpoints and be unique even
+when endpoint order is reversed. Endpoint identity includes UUID and position:
+a track may legitimately contribute more than one endpoint. Shared endpoints
+across distinct edges remain valid. Duplicate or self-edge reports are rejected,
+not deduplicated into an apparently valid score. Previously these records could
+inflate an input baseline and imply completion on an unchanged board.
+
+Measure report integrity on nine fresh native reports (three boards, three
+repeats), comparing an earlier parser with this parser:
+
+```sh
+git show bfa6330:benchmarks/boards/native-terminals/audit.py > /tmp/native-before-audit.py
+nice -n 10 taskset -c 0-5 timeout 180 /usr/bin/python3 benchmarks/boards/native-terminals/measure_edges.py --before /tmp/native-before-audit.py --out /tmp/native-edges --repeats 3
+/usr/bin/python3 benchmarks/boards/native-terminals/plot.py /tmp/native-edges/summary.csv /tmp/native-edges.png
+```
+
+The measurement injects exact/reversed duplicate and self edges into fresh reports;
+these are parser counterexamples, not outputs observed from the native checker.
+Ranked adapters remain unchanged.

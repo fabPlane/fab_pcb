@@ -1,0 +1,21 @@
+{
+  "machine": "hyper-ms-lin",
+  "cores": "0-5",
+  "nice": 10,
+  "repeats": 3,
+  "fresh_native_checks_per_repository": 9,
+  "paired_parser_checks_per_repository": 36,
+  "invalid_before_accepted": 18,
+  "invalid_after_accepted": 0,
+  "valid_before_accepted": 18,
+  "valid_after_accepted": 18,
+  "max_false_completion_before": 0.5,
+  "after_sha256": "4eb1ecbe17d02c839c394a17542a4730193d5e900409996a949c70042017f46a",
+  "summary_sha256": "75f88a079392bc9eae818e3c368466e449925f6db215ec68c75b8db0d0379708",
+  "limitations": [
+    "Injected report corruptions, not observed checker output.",
+    "Standalone baseline parser; ranked adapters and caches unchanged.",
+    "No routing or speed gain claimed."
+  ],
+  "before_sha256": "ea69ce93e77b04bcd3a4fdadbf386d153977e05a2d309f265bf06db0c6995060"
+}

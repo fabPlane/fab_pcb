@@ -35,6 +35,24 @@ class ConnectivityTest(unittest.TestCase):
             with self.subTest(key=key), self.assertRaises(ValueError):
                 counts(changed, 'board.kicad_pcb')
 
+    def test_duplicate_and_self_edges_reject_but_shared_endpoints_pass(self):
+        a = dict(uuid='a', pos=dict(x=0, y=0))
+        b = dict(uuid='b', pos=dict(x=1, y=0))
+        c = dict(uuid='c', pos=dict(x=2, y=0))
+        def report(pairs):
+            return dict(source='board.kicad_pcb', coordinate_units='mm',
+                        included_severities=['error', 'warning'], violations=[],
+                        schematic_parity=[], unconnected_items=[
+                            dict(type='unconnected_items', severity='error', items=pair)
+                            for pair in pairs])
+        self.assertEqual(counts(report([(a, b), (b, c)]), 'board.kicad_pcb')['opens'], 2)
+        # A track UUID can identify different physical endpoints; retain position.
+        c['uuid'] = b['uuid']
+        self.assertEqual(counts(report([(a, b), (a, c)]), 'board.kicad_pcb')['opens'], 2)
+        for pairs in ([(a, b), (a, b)], [(a, b), (b, a)], [(a, a)]):
+            with self.subTest(pairs=pairs), self.assertRaisesRegex(ValueError, 'edge'):
+                counts(report(pairs), 'board.kicad_pcb')
+
     def test_report_alias_cannot_remove_native_inputs(self):
         for target in ('board.kicad_pcb', 'board.kicad_pro', 'board.kicad_dru', 'cli'):
             for alias in ('direct', 'symlink', 'hardlink'):

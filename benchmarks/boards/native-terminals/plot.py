@@ -8,13 +8,18 @@ import subprocess
 
 def plot(source, output):
     rows = list(csv.DictReader(source.open()))
-    valid_names = {'unchanged', 'partial-route', 'complete-route', 'reserialized'}
-    groups = [('Valid controls', [r for r in rows if r['case'] in valid_names]),
-              ('Changed terminals', [r for r in rows if r['case'] not in valid_names])]
+    edge_report = 'valid' in rows[0]
+    valid = lambda r: r['valid'] == 'True' if edge_report else r['case'] in {
+        'unchanged', 'partial-route', 'complete-route', 'reserialized'}
+    groups = [('Valid controls', [r for r in rows if valid(r)]),
+              ('Invalid edge reports' if edge_report else 'Changed terminals',
+               [r for r in rows if not valid(r)])]
+    title = ('Native scoring: reject duplicate and self edges' if edge_report else
+             'Native scoring: preserve terminals before counting opens')
     svg = ['<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="480" viewBox="0 0 1100 480">',
            '<rect width="1100" height="480" fill="#fafafa"/>',
            '<g font-family="sans-serif" fill="#202735">',
-           '<text x="50" y="50" font-size="27">Native scoring: preserve terminals before counting opens</text>',
+           f'<text x="50" y="50" font-size="27">{title}</text>',
            '<text x="50" y="85" font-size="18">Same boards and checker; three repeats; accepted attempts</text>']
     for i, (name, cohort) in enumerate(groups):
         y = 150 + i * 145
