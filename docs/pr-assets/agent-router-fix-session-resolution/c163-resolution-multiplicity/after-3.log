@@ -1,0 +1,13 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+(pass) session resolution multiplicity > rejects conflicting resolutions within routes [0.41ms]
+(pass) session resolution multiplicity > rejects conflicting resolutions within placement [0.01ms]
+(pass) session resolution multiplicity > preserves separate routing and placement scales [0.19ms]
+(pass) session resolution multiplicity > preserves a single placement resolution as route fallback [0.51ms]
+
+ 4 pass
+ 125 filtered out
+ 0 fail
+ 7 expect() calls
+Ran 4 tests across 1 file. [129.00ms]

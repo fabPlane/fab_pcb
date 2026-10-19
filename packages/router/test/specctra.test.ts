@@ -666,3 +666,26 @@ describe("session shape geometry multiplicity", () => {
     });
   }
 });
+
+describe("session resolution multiplicity", () => {
+  for (const section of ["routes", "placement"]) {
+    test(`rejects conflicting resolutions within ${section}`, () => {
+      expect(() => parseSes(`(session s (${section}
+        (resolution um 10) (resolution mm 1)))`)).toThrow(SyntaxError);
+    });
+  }
+  test("preserves separate routing and placement scales", () => {
+    const parsed = parseSes(`(session s
+      (placement (resolution mm 1) (component C (place R1 2 3 front 90)))
+      (routes (resolution um 10) (network_out (net A (wire (path F.Cu 10 0 0 20 30))))))`);
+    expect(parsed.nmPerUnit).toBe(100);
+    expect(parsed.wires[0]!.points[1]).toEqual({ x: 2000, y: -3000 });
+    expect(parsed.placements[0]).toMatchObject({ x: 2000000, y: -3000000 });
+  });
+  test("preserves a single placement resolution as route fallback", () => {
+    const parsed = parseSes(`(session s (placement (resolution mm 1))
+      (routes (network_out (net A (wire (path F.Cu 1 0 0 2 3))))))`);
+    expect(parsed.nmPerUnit).toBe(1000000);
+    expect(parsed.wires[0]!.points[1]).toEqual({ x: 2000000, y: -3000000 });
+  });
+});

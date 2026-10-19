@@ -1,0 +1,57 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+670 | 
+671 | describe("session resolution multiplicity", () => {
+672 |   for (const section of ["routes", "placement"]) {
+673 |     test(`rejects conflicting resolutions within ${section}`, () => {
+674 |       expect(() => parseSes(`(session s (${section}
+675 |         (resolution um 10) (resolution mm 1)))`)).toThrow(SyntaxError);
+                                                        ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [],
+  vias: [],
+  nets: [],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:675:51)
+(fail) session resolution multiplicity > rejects conflicting resolutions within routes [0.45ms]
+670 | 
+671 | describe("session resolution multiplicity", () => {
+672 |   for (const section of ["routes", "placement"]) {
+673 |     test(`rejects conflicting resolutions within ${section}`, () => {
+674 |       expect(() => parseSes(`(session s (${section}
+675 |         (resolution um 10) (resolution mm 1)))`)).toThrow(SyntaxError);
+                                                        ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [],
+  vias: [],
+  nets: [],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:675:51)
+(fail) session resolution multiplicity > rejects conflicting resolutions within placement [0.06ms]
+(pass) session resolution multiplicity > preserves separate routing and placement scales [0.14ms]
+(pass) session resolution multiplicity > preserves a single placement resolution as route fallback [0.04ms]
+
+ 2 pass
+ 125 filtered out
+ 2 fail
+ 7 expect() calls
+Ran 4 tests across 1 file. [98.00ms]

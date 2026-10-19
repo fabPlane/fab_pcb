@@ -90,7 +90,14 @@ export function parseSes(text: string): Session {
   const session = root.find((x) => head(x) === "session") as SExpr[] | undefined;
   if (!session) throw new SyntaxError("not a Specctra session: no (session ...) form");
   const routes = child(session, "routes");
-  const nmPerUnit = resolutionToNm(child(routes, "resolution") ?? child(child(session, "placement"), "resolution"));
+  const placement = child(session, "placement");
+  // A section has one scale. Selecting its first declaration silently makes
+  // imported copper dimensions depend on the order of conflicting metadata.
+  for (const section of [routes, placement]) {
+    if (children(section, "resolution").length > 1)
+      throw new SyntaxError("multiple session resolutions in one section");
+  }
+  const nmPerUnit = resolutionToNm(child(routes, "resolution") ?? child(placement, "resolution"));
 
   const padstacks = new Map<string, SesPadstack>();
   for (const ps of children(child(routes, "library_out"), "padstack")) {
@@ -169,7 +176,6 @@ export function parseSes(text: string): Session {
   }
 
   const placements: Session["placements"] = [];
-  const placement = child(session, "placement");
   const placeNm = resolutionToNm(child(placement, "resolution") ?? child(routes, "resolution"));
   for (const comp of children(placement, "component")) {
     const component = typeof comp[1] === "string" ? comp[1] : "";
