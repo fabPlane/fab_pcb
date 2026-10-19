@@ -1,0 +1,14 @@
+{
+  "typecheck-final.log": {
+    "sha256": "faeaa94bcf7012d86f91ca647580449f56a263fb7eaf572c54789764f60a9b8f",
+    "tail": "$ tsc -b\n"
+  },
+  "unit.log": {
+    "sha256": "86256e121e5c7b0065f466967de563870fa55df48f8c959ec3b47e37fce1f4d3",
+    "tail": "gments/vias\u001b[0m \u001b[0m\u001b[2m[0.51ms\u001b[0m\u001b[2m]\u001b[0m\n\u001b[0m\u001b[32m\u2713\u001b[0m\u001b[0m\u001b[1m different width, nearby track, drill and via span are legitimate new items\u001b[0m \u001b[0m\u001b[2m[0.17ms\u001b[0m\u001b[2m]\u001b[0m\n\u001b[0m\u001b[32m\u2713\u001b[0m\u001b[0m\u001b[1m an all-echo or empty session adds nothing; metadata remains usable\u001b[0m \u001b[0m\u001b[2m[0.13ms\u001b[0m\u001b[2m]\u001b[0m\n\u001b[0m\u001b[32m\u2713\u001b[0m\u001b[0m\u001b[1m scoped DSN retains protected net identities without routing their pads\u001b[0m \u001b[0m\u001b[2m[0.31ms\u001b[0m\u001b[2m]\u001b[0m\n\n\u001b[0m\u001b[2m1 tests skipped:\u001b[0m\n\u001b[0m\u001b[33m\u00bb\u001b[2m \u001b[0m\u001b[2mFreeroutingRouter builtin round trip\u001b[2m >\u001b[0m\u001b[2m routes the synthetic two-net board through the jar and reads the session back\u001b[0m\n\n\u001b[0m\u001b[32m 109 pass\u001b[0m\n \u001b[0m\u001b[33m1 skip\u001b[0m\n\u001b[0m\u001b[2m 0 fail\u001b[0m\n 447 expect() calls\nRan 110 tests across 14 files. \u001b[0m\u001b[2m[\u001b[1m628.00ms\u001b[0m\u001b[2m]\u001b[0m\n\nunit: 1/1 package(s) passed in 0.6s\n"
+  },
+  "engine.log": {
+    "sha256": "8ffb4a00b679328cdecaeab52224deadcf5229ac0670858b053a34d7525392a2",
+    "tail": " [0.35ms]\n(pass) Bridge capacity from fixed blockage (R-2 baked in) > a Track that spans the whole boundary gives capacity 0 [0.21ms]\n(pass) Bridge capacity from fixed blockage (R-2 baked in) > free other-net copper does NOT reduce capacity [0.04ms]\n(pass) Bridge capacity from fixed blockage (R-2 baked in) > capacity matches the brute-force count over a swept boundary column [0.51ms]\n(pass) determinism > two builds of the same board give identical capacities across every Bridge [41.99ms]\n(pass) congestion report > hand-set overflow is summarised per Bridge and per Bin [0.68ms]\n(pass) R-1 safety: globalPlan:\"off\" changes no routing > routing with globalPlan:\"off\" is byte-identical to the default run [8.69ms]\n\n 859 pass\n 0 fail\n 398454 expect() calls\nRan 859 tests across 29 files. [247.56s]\n"
+  }
+}

@@ -46,3 +46,17 @@ test("failed validation preserves an unrelated edit above the route commit", asy
   expect(fixture.calls).toEqual(["save", "apply", "drc", "undoStack"]);
   expect(fixture.copper().map((item) => item.id)).toEqual(["stub", "protected", "other-net", "new-route", "unrelated-edit"]);
 });
+
+for (const undo of [undefined, "zero", "throws"] as const) {
+  test(`failed tentative ratsnest validation rolls back or reports rollback failure (${undo ?? "owned"})`, async () => {
+    const fixture = validationFixture({ ratsnestFailure: true, ...(undo ? { undo } : {}) });
+    const info = await fixture.done;
+    expect(info.state).toBe("failed");
+    expect(info.error).toContain("native ratsnest transport unavailable");
+    expect(fixture.calls.filter((call) => call === "undo")).toHaveLength(1);
+    expect(fixture.calls.filter((call) => call === "save")).toHaveLength(1);
+    expect(info.summary).toBeUndefined();
+    if (!undo) expect(fixture.copper()).toEqual(fixture.original);
+    else expect(info.error).toContain("rollback failed");
+  });
+}

@@ -20,7 +20,7 @@
  * `applyRouteResult` (one commit, message "Autoroute (<router>): <n> connections"), refills again,
  * then saves and re-measures the routed board. The post-apply refill is best-effort: its outcome
  * is reported in `zoneRefill`, but a failure does not discard the applied route or prevent the
- * final save. A failed native DRC query during fab_router's tentative cleanup undoes that route
+ * final save. A failed native DRC or tentative ratsnest query during fab_router's cleanup undoes that route
  * commit before failing the job; a failed undo is reported explicitly. The browser only has to
  * pick up the `DocumentChanged` event as usual. Cancelling
  * before the apply leaves the board untouched; a failed router run (a fab_router error, a
@@ -222,6 +222,25 @@ async function undoTentativeRoute(board: NonNullable<Awaited<ReturnType<KiCad["c
     throw new Error("tentative route commit is not at the top of the undo stack; tentative route may remain in KiCad memory");
   const undone = await board.undo(1);
   if (undone.applied !== 1) throw new Error(`expected one undone commit, got ${undone.applied}`);
+}
+
+async function rejectTentativeValidation(
+  board: NonNullable<Awaited<ReturnType<KiCad["currentBoard"]>>>,
+  commitId: string,
+  query: string,
+  validationError: unknown,
+): Promise<never> {
+  const detail = validationError instanceof Error ? validationError.message : String(validationError);
+  try {
+    await undoTentativeRoute(board, commitId);
+  } catch (rollbackError) {
+    const rollbackDetail = rollbackError instanceof Error ? rollbackError.message : String(rollbackError);
+    throw new Error(
+      `${query} validation failed: ${detail}; rollback failed: ${rollbackDetail}; tentative route may remain in KiCad memory`,
+      { cause: validationError },
+    );
+  }
+  throw new Error(`${query} validation failed: ${detail}; tentative route commit undone`, { cause: validationError });
 }
 
 /** Remove created tracks/vias named by a DRC marker after undoing their tentative commit. */
@@ -448,17 +467,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
             try {
               drc = await board.drc.run({ refillZones: false });
             } catch (validationError) {
-              const detail = validationError instanceof Error ? validationError.message : String(validationError);
-              try {
-                await undoTentativeRoute(board, committed.commitId);
-              } catch (rollbackError) {
-                const rollbackDetail = rollbackError instanceof Error ? rollbackError.message : String(rollbackError);
-                throw new Error(
-                  `native DRC validation failed: ${detail}; rollback failed: ${rollbackDetail}; tentative route may remain in KiCad memory`,
-                  { cause: validationError },
-                );
-              }
-              throw new Error(`native DRC validation failed: ${detail}; tentative route commit undone`, { cause: validationError });
+              return await rejectTentativeValidation(board, committed.commitId, "native DRC", validationError);
             }
             const danglingIds = new Set(
               drc.markers
@@ -480,7 +489,12 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
                 );
               }
               if (!request.message) {
-                const nativeOpen = (await board.ratsnest(request.options?.nets ?? [])).edges.length;
+                let nativeOpen: number;
+                try {
+                  nativeOpen = (await board.ratsnest(request.options?.nets ?? [])).edges.length;
+                } catch (validationError) {
+                  return await rejectTentativeValidation(board, committed.commitId, "native ratsnest", validationError);
+                }
                 const nativeMessage = autorouteMessage(request.router, Math.max(0, result.totalConnections - nativeOpen));
                 if (nativeMessage !== message) {
                   await undoTentativeRoute(board, committed.commitId);

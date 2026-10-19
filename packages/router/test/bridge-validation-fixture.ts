@@ -8,7 +8,7 @@ import { collisionBoard } from "./collision-fixture";
 // Stateful commit/undo stand-in: deletion during a later cleanup pass must be
 // restored along with removal of the route when native validation is unavailable.
 export function validationFixture(
-  options: { cleanupFirst?: boolean; undo?: "zero" | "throws"; valid?: boolean; foreignEdit?: boolean } = {},
+  options: { cleanupFirst?: boolean; undo?: "zero" | "throws"; valid?: boolean; foreignEdit?: boolean; ratsnestFailure?: boolean } = {},
 ) {
   const original = [
     new Track(create(TrackSchema, { id: { value: "stub" }, net: { name: "A" } })),
@@ -28,6 +28,7 @@ export function validationFixture(
     getTracks: async () => copper,
     ratsnest: async () => {
       calls.push("ratsnest");
+      if (options.ratsnestFailure) throw new Error("native ratsnest transport unavailable");
       return { edges: [] };
     },
     undoStack: async () => {
@@ -45,7 +46,7 @@ export function validationFixture(
       run: async () => {
         calls.push("drc");
         checks++;
-        if (options.valid) return { markers: [] };
+        if (options.valid || options.ratsnestFailure) return { markers: [] };
         if (options.cleanupFirst && checks === 1)
           return {
             markers: [{ errorType: DrcErrorType.DRCET_DANGLING_TRACK, items: [{ value: "stub" }] }],
@@ -85,7 +86,7 @@ export function validationFixture(
       {
         router: "js",
         refillZones: false,
-        message: "validation regression",
+        ...(options.ratsnestFailure ? {} : { message: "validation regression" }),
         options: { nets: ["A"] },
       },
     ).id,
