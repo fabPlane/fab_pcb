@@ -34,6 +34,8 @@ def geometry(source, spec):
     tier = spec['tier']
     board = pcbnew.LoadBoard(str(source / tier / f'{tier}.kicad_pcb'))
     srj = json.loads((source / tier / 'unrouted.srj.json').read_text())
+    require(set(srj) == {'layerCount', 'minTraceWidth', 'obstacles', 'connections', 'bounds'},
+            'unexpected SRJ fields: routing and unvalidated constraints are not allowed')
     require(board.GetCopperLayerCount() == 4, 'expected four copper layers')
     require(not list(board.GetTracks()) and board.GetAreaCount() == 0, 'input must be unrouted and have no zones')
     pads = {}

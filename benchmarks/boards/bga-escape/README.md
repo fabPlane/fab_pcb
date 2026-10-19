@@ -65,3 +65,8 @@ To reproduce the controlled before/after audit using the fresh native reports:
 This replays the previous count-only predicate and the stricter audit on the same
 reports, plus 17 malformed variants of each report. It requires every genuine
 report to pass and every malformed variant to fail the stricter audit.
+
+The SRJ input validator accepts only the five top-level fields emitted by this
+fixture generator. Added traces, vias, keepouts or rule fields fail validation
+because this fixture audit does not validate their semantics. Extending the
+fixture format requires extending the audit explicitly.
