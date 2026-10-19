@@ -101,3 +101,42 @@ test.skipIf(process.platform === "win32")("detached pipe holders cannot extend a
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("invalid termination signals reject before spawning", async () => {
+  for (const killSignal of [0, -1, 1.5, NaN, Infinity, 9999]) {
+    await expect(runOwnedCommand(["/nonexistent"], { killSignal })).rejects.toThrow(RangeError);
+  }
+});
+
+test.skipIf(process.platform === "win32")("selected signal reaches the child before forced cleanup", async () => {
+  const dir = mkdtempSync("/tmp/owned-grace-");
+  const marker = join(dir, "handled");
+  try {
+    const result = await runOwnedCommand([process.execPath, "--eval", `
+      process.on("SIGTERM", () => {
+        require("node:fs").writeFileSync(${JSON.stringify(marker)}, "handled"); process.exit(7);
+      });
+      console.log("ready"); setTimeout(() => {}, 3000);
+    `], { timeoutMs: 300, killSignal: 15 });
+    expect(result).toMatchObject({ code: 124, exitCode: 7, timedOut: true });
+    expect(existsSync(marker)).toBe(true);
+    expect(result.wallMs).toBeLessThan(900);
+    // A cleared escalation timer must not keep the invocation alive.
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test.skipIf(process.platform === "win32")("ignored selected signal escalates and removes descendants", async () => {
+  const dir = mkdtempSync("/tmp/owned-escalate-");
+  const marker = join(dir, "child-survived");
+  try {
+    const result = await runOwnedCommand([process.execPath, "--eval", `
+      process.on("SIGTERM", () => {});
+      Bun.spawn([process.execPath, "--eval", ${JSON.stringify(`process.on("SIGTERM", () => {}); setTimeout(() => require("node:fs").writeFileSync(${JSON.stringify(marker)}, "alive"), 900)`)}], { stdout: "inherit", stderr: "inherit" });
+      console.log("ready"); setTimeout(() => {}, 3000);
+    `], { timeoutMs: 300, killSignal: 15 });
+    expect(result).toMatchObject({ code: 124, timedOut: true });
+    expect(result.wallMs).toBeLessThan(900);
+    await Bun.sleep(1000);
+    expect(existsSync(marker)).toBe(false);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});

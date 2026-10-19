@@ -1,3 +1,5 @@
+import { constants } from "node:os";
+
 /** Own a command and its POSIX process group until its direct child exits. */
 export interface OwnedCommandResult {
   code: number;
@@ -14,15 +16,23 @@ export async function runOwnedCommand(
   opts: {
     cwd?: string | undefined;
     timeoutMs?: number | undefined;
+    killSignal?: number | undefined;
     env?: Record<string, string> | undefined;
     signal?: AbortSignal | undefined;
     onStdout?: ((chunk: string) => void) | undefined;
     onStderr?: ((chunk: string) => void) | undefined;
   } = {},
 ): Promise<OwnedCommandResult> {
-  if (opts.timeoutMs !== undefined && (!Number.isFinite(opts.timeoutMs) ||
-      opts.timeoutMs < 0 || opts.timeoutMs > 2_147_483_647)) {
-    throw new RangeError("timeoutMs must be between 0 and 2147483647");
+  if (opts.timeoutMs !== undefined && (!Number.isFinite(opts.timeoutMs) || opts.timeoutMs < 0)) {
+    throw new RangeError("timeoutMs must be a finite nonnegative number");
+  }
+  if (opts.timeoutMs !== undefined && opts.timeoutMs > 2_147_483_647) {
+    throw new RangeError("timeoutMs must not exceed 2147483647");
+  }
+  if (opts.killSignal !== undefined &&
+      (!Number.isInteger(opts.killSignal) || opts.killSignal <= 0 ||
+       !Object.values(constants.signals).includes(opts.killSignal))) {
+    throw new RangeError("killSignal must be a supported nonzero signal number");
   }
   const started = performance.now();
   if (opts.signal?.aborted) return {
@@ -34,20 +44,27 @@ export async function runOwnedCommand(
     detached: grouped, stdout: "pipe", stderr: "pipe",
     env: opts.env ?? process.env, ...(opts.cwd ? { cwd: opts.cwd } : {}),
   });
-  const stop = () => {
+  const stop = (signal: number = 9) => {
     try {
-      if (grouped) process.kill(-proc.pid, "SIGKILL");
-      else if (proc.exitCode === null && proc.signalCode === null) proc.kill("SIGKILL");
+      if (grouped) process.kill(-proc.pid, signal);
+      else if (proc.exitCode === null && proc.signalCode === null) proc.kill(signal);
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "ESRCH") throw error;
     }
   };
   const outputAbort = new AbortController();
+  let escalation: ReturnType<typeof setTimeout> | undefined;
   let timedOut = false, cancelled = false;
   const onAbort = () => { cancelled = true; stop(); outputAbort.abort(); };
   opts.signal?.addEventListener("abort", onAbort, { once: true });
   const timer = opts.timeoutMs && opts.timeoutMs > 0 ? setTimeout(() => {
-    timedOut = true; stop(); outputAbort.abort();
+    timedOut = true;
+    const signal = opts.killSignal ?? 9;
+    stop(signal);
+    // Caller-selected signals get a bounded grace period. Direct-child exit
+    // clears this timer before final group cleanup, avoiding a delayed kill.
+    if (signal !== 9) escalation = setTimeout(() => stop(), 100);
+    outputAbort.abort();
   }, opts.timeoutMs) : undefined;
   // Start draining before waiting for exit so a full pipe cannot block the child.
   const stdout = consume(proc.stdout, outputAbort.signal, opts.onStdout);
@@ -57,6 +74,7 @@ export async function runOwnedCommand(
   let drainTimer: ReturnType<typeof setTimeout> | undefined;
   const exited = proc.exited.then((code) => {
     if (timer) clearTimeout(timer);
+    if (escalation) clearTimeout(escalation);
     opts.signal?.removeEventListener("abort", onAbort);
     stop();
     // A deliberately detached child can retain pipes outside our group. Bound
@@ -71,6 +89,7 @@ export async function runOwnedCommand(
   } finally {
     if (drainTimer) clearTimeout(drainTimer);
     if (timer) clearTimeout(timer);
+    if (escalation) clearTimeout(escalation);
     opts.signal?.removeEventListener("abort", onAbort);
     stop();
     outputAbort.abort();
