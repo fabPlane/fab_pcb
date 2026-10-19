@@ -13,6 +13,8 @@ ROOT = Path(__file__).resolve().parent
 
 
 def validate(source, hashes):
+    if (source / 'dense6-bga324.kicad_dru').exists():
+        raise ValueError('unexpected custom rule sidecar')
     for name, expected in hashes.items():
         if hashlib.sha256((source / name).read_bytes()).hexdigest() != expected:
             raise ValueError(f'fixture identity mismatch: {name}')

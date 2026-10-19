@@ -12,6 +12,8 @@ if __name__ == '__main__':
     parser.add_argument('out', type=Path)
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
+    if (args.out / 'dense6-bga324.kicad_dru').exists():
+        raise ValueError('output contains an unexpected custom rule sidecar')
     fps, nets, uid = build(6406)
     write_pcb(args.out / 'dense6-bga324.kicad_pcb', fps, nets, uid)
     shutil.copyfile(ROOT / 'dense6-bga324.kicad_pro', args.out / 'dense6-bga324.kicad_pro')
