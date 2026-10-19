@@ -289,3 +289,21 @@ for (const refill of [false, true]) {
     });
   }
 }
+
+// An inactive baseline finding must not hide a new active error at identical geometry.
+for (const refill of [false, true]) {
+  for (const baselineStatus of ["warning", "excluded"] as const) {
+    test(`rejects native ${baselineStatus} becoming an error with refill=${refill}`, async () => {
+      const fixture = validationFixture({ valid: true, filledMarkers: "existing", baselineStatus,
+        ...(refill ? { refill: "valid" as const } : { unfilledErrors: true }),
+      });
+      const info = await fixture.done;
+      expect(info.state).toBe("failed");
+      expect(info.error).toContain("native DRC error(s)");
+      expect(info.summary).toBeUndefined();
+      expect(fixture.calls.filter(call => call === "save")).toHaveLength(1);
+      expect(fixture.calls.filter(call => call === "undo")).toHaveLength(1);
+      expect(fixture.copper()).toEqual(fixture.original);
+    });
+  }
+}

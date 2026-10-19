@@ -12,6 +12,7 @@ export function validationFixture(
     refill?: "valid" | "throws" | "commit-then-throws" | "commit-valid";
     filledMarkers?: "new" | "existing" | "duplicate" | "replacement" | "excluded";
     markerChange?: "position" | "layer" | "item-order";
+    baselineStatus?: "warning" | "excluded";
     unfilledErrors?: boolean;
     danglingSeverity?: RuleSeverity;
     excludedDangling?: "existing" | "generated";
@@ -83,8 +84,11 @@ export function validationFixture(
           id: { value: id }, excluded,
         });
         if (!copper.includes(generated)) {
+          const baselineMarker = marker("pad", "before-id");
+          if (options.baselineStatus === "warning") baselineMarker.severity = RuleSeverity.RS_WARNING;
+          if (options.baselineStatus === "excluded") baselineMarker.excluded = true;
           return { markers: options.filledMarkers && options.filledMarkers !== "new" && options.filledMarkers !== "excluded"
-            ? [marker("pad", "before-id")] : [] };
+            ? [baselineMarker] : [] };
         }
         if ((fills === 2 || options.unfilledErrors) && options.filledMarkers) {
           const kind = options.filledMarkers;
