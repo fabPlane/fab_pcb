@@ -31,55 +31,55 @@
       "repeat": 1,
       "version": "before",
       "engine_exit": 0,
-      "wall_ms": 3571.1243140000006,
+      "wall_ms": 3468.3697619999984,
       "ses_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
-      "board_sha256": "c39794a8cee4c958c17c3136a559237e4d4407ae2d3b61223e2a8acb3edda410",
-      "report_sha256": "29c60719c67b430bc34bf54ef800e7913a28dd7aa1b38e33d45b1ef8640919d4"
+      "board_sha256": "6d420cda7e3c05907ed7afd89b2c4b77e6a54f2bd5cbf71cd0ed8fd8ae687ae6",
+      "report_sha256": "2a5293f2e62e42d0fc85619da8c1e9b6c6ea93459057c1a9fee9363cdf86031a"
     },
     {
       "repeat": 1,
       "version": "after",
       "engine_exit": 0,
-      "wall_ms": 3704.2078139999976,
+      "wall_ms": 3465.2518350000028,
       "ses_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
-      "board_sha256": "eb6340ff8f38ad978eaf064c26bc9b1eb61b079b0524f00aa1ace4599916dd99",
-      "report_sha256": "ad5303a3df4769a6505a3f801012a2012a72e2b1c86aa07aa61f913f347fb033"
+      "board_sha256": "71798a7aaaad26a5a6b6d6ca042a3c8b4e27a2fd29d109a8391d550894bf24fd",
+      "report_sha256": "57eef648fce601599ee160e0d2deabfe3514b8d22ddeeb44071ce6bd5aa7f0d4"
     },
     {
       "repeat": 2,
       "version": "before",
       "engine_exit": 0,
-      "wall_ms": 3745.222004999996,
+      "wall_ms": 3486.180780999999,
       "ses_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
-      "board_sha256": "fffaa30988b091335bae372c4f4fafd394b3d4e6a37cdaafa1551d2674d98dc3",
-      "report_sha256": "ecec9e7282502abd172e8b1c96db0917496d6c528ded57b1b750467f1a6a167d"
+      "board_sha256": "23a47c9f6785d3b9e84fbe3ba9d4a15a3c9e80d64c3bd91e4c73eb10b45fd57b",
+      "report_sha256": "a8233b09b64b2c5b77bd3179ffc23fe7432bdfd3288de05b50d21b64e863f757"
     },
     {
       "repeat": 2,
       "version": "after",
       "engine_exit": 0,
-      "wall_ms": 3566.6456580000013,
+      "wall_ms": 3480.5409380000056,
       "ses_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
-      "board_sha256": "43724e7c401e745fdb60e2f8b38bd10f9a83cbb2b514819f6acde8ca53ee2756",
-      "report_sha256": "855425170992e1647858d33e3c770ba45c75d5298450520c4e96ec895199633d"
+      "board_sha256": "e5e6acac62dffa058c0975745aeefb2659283e7f2d72b76284f76b3025c4603c",
+      "report_sha256": "a446edcd7e39b6ec477703b969e29ef6257998d4f4402073619c08e589370073"
     },
     {
       "repeat": 3,
       "version": "before",
       "engine_exit": 0,
-      "wall_ms": 3576.9907280000043,
+      "wall_ms": 3481.1118659999993,
       "ses_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
-      "board_sha256": "5a6526527fa829255388b2682498c41bfe89dbb68b8e53895fde5af0e42f4aff",
-      "report_sha256": "8857da4096f21899b50b8beaba74f859df30b8be86a802be770f8a2e62eccb0f"
+      "board_sha256": "b237caf12c1e8964bf242153c06807f7b21796a49cb82809cd68849f0d4c6615",
+      "report_sha256": "b21ee8cf750a60784dc7ba39d963f25f069f2156ec7af988969fc20c1c3d4aad"
     },
     {
       "repeat": 3,
       "version": "after",
       "engine_exit": 0,
-      "wall_ms": 3647.367164000003,
+      "wall_ms": 3632.953462999998,
       "ses_sha256": "e22b73da34226658c6c337977e02628fe26d2c4017e66d214ad522f8a2e54c06",
-      "board_sha256": "600c62ebb6df4c1c68679aeb0c601ce0c808e89acd572a0c03883372f76ffd86",
-      "report_sha256": "11dd35c1588c331c6f64220ef246b63e6c762d56cb670ad5cedb55070e06373b"
+      "board_sha256": "104dec96d8faf13982458b86ed52628c3e1d9b188a7a5c09be551c5fa0b88174",
+      "report_sha256": "f2150c4fba5a0bde68ad96740912ebdad3ebe0cf0d864e75085cebb8cef873fa"
     }
   ],
   "limitations": [
@@ -87,5 +87,17 @@
     "Native runs are a one-net canary; no general routing-speed claim.",
     "Detached descendants are outside group cleanup; their output reader is bounded.",
     "Runtime observation is mid-run, not an independent startup snapshot."
-  ]
+  ],
+  "after_commit": "31a384e",
+  "helper_sha256": {
+    "packages/router/src/owned-command.ts": "820f898c0ce65dcaca1512a60e72c6e4f2ceb3a974913eae0aaea596a3be7a35",
+    "packages/router/src/freerouting.ts": "b43a7628df96eb3880acdddf47374f74a5ecf5a0b6688380ca71a69742bec48d"
+  },
+  "retained_measurements": {
+    "initial_real_runs": 6,
+    "precommit_real_runs": 6,
+    "committed_real_runs": 6,
+    "fresh_native_checks": 21,
+    "quality_csvs_identical": true
+  }
 }
