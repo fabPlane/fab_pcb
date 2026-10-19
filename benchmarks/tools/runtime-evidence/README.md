@@ -30,3 +30,22 @@ are outside the explicit inventory. This is not an atomic snapshot or a cache ke
 The local replay in the companion corpus repository uses an EXIT trap to verify
 after either success or failure. This utility intentionally leaves that policy
 to each caller.
+
+## Repeat identity guard
+
+`repeat_identity.single_identity(values, label)` requires a nonempty collection
+of JSON identities to contain exactly one identity. Call it separately on each
+repeat group before comparing batches. Comparing sets alone accepts two batches
+that contain the same mixture of inputs or machine identities. Object key order
+is ignored; invalid JSON numbers are rejected. This utility does not replace
+the frozen autorouter checker, score results, or enable native baseline adoption.
+
+```sh
+python3 -m unittest discover -s benchmarks/tools/runtime-evidence -p 'test_*.py' -v
+python3 benchmarks/tools/runtime-evidence/measure_repeat_identity.py /tmp/repeat-identity-controls
+```
+
+The constructed comparison has three repeats for each of three mixed-identity
+controls and three unchanged controls. Equal-set comparison accepts all nine
+mixed controls; the guard rejects all nine and retains all three unchanged
+controls. These are deliberate counterexamples, not observed router failures.
