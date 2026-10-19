@@ -1,7 +1,7 @@
 {
   "job": "J1",
   "tier": "hard",
-  "role": "scored",
+  "role": "tuning",
   "scope": null,
   "target_nets": [],
   "target_footprint": null,

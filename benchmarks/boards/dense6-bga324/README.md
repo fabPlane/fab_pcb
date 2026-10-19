@@ -66,8 +66,9 @@ python3 gen_dense6.py /tmp/d6/gen --seed 6406
 /usr/bin/python3 make_case.py /tmp/d6/gen/dense6-bga324.kicad_pcb /tmp/d6/out dense6-bga324 6406
 ```
 
-Output matches the committed files except for UUIDs that KiCad assigns to default footprint fields when saving and
-the DRC report date; geometry, nets, rules and the DSN are identical.
+Geometry, nets, rules and the DSN match the committed files. Expect `job.json` `utc` and the sha256 of
+`board.kicad_pcb` / `baseline-drc.json` to differ (UUIDs KiCad assigns to default footprint fields when saving, and
+the DRC report date). `job.json` uses `role: "tuning"` until the promotion gate above is met.
 
 ## Run it in the harness (private copy; the frozen suite stays untouched)
 

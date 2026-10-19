@@ -1,7 +1,8 @@
 #!/usr/bin/python3
+# SPDX-License-Identifier: MIT
 """Turn a generated board into: normalized .kicad_pcb + .kicad_pro, DSN, native DRC report,
 and a fab_pcb-benchmark-style case dir (board.*, baseline-drc.json, job.json)."""
-import json, subprocess, sys, hashlib, shutil, datetime
+import collections, datetime, hashlib, json, shutil, subprocess, sys
 from pathlib import Path
 import pcbnew
 src, out, name = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3]
@@ -32,12 +33,11 @@ b = pcbnew.LoadBoard(str(pcb))
 print('copper layers', b.GetCopperLayerCount(), 'footprints', len(b.GetFootprints()), 'pads', len(b.GetPads()),
       'nets', b.GetNetCount())
 # DSN in a fresh process so the project rules written above are picked up
-subprocess.run(['/usr/bin/python3', str(Path(__file__).with_name('export_dsn.py')), str(pcb), str(out / f'{name}.dsn')], check=True)
+subprocess.run([sys.executable, str(Path(__file__).with_name('export_dsn.py')), str(pcb), str(out / f'{name}.dsn')], check=True)
 drc = out / f'{name}.drc.json'
 subprocess.run(['kicad-cli', 'pcb', 'drc', '--format', 'json', '--severity-all', '--units', 'mm', '-o', str(drc), str(pcb)], check=True, capture_output=True)
 d = json.loads(drc.read_text())
-viol = [v for v in d.get('violations', [])]
-import collections
+viol = d.get('violations', [])
 print('drc violations', collections.Counter((v['type'], v['severity']) for v in viol), 'unconnected', len(d.get('unconnected_items', [])))
 # fab_pcb-style case dir
 case = out / 'case'
@@ -48,7 +48,7 @@ shutil.copy(HERE / 'LICENSE', case / 'LICENSE')
 shutil.copy(drc, case / 'baseline-drc.json')
 errs = [v for v in viol if v['severity'] == 'error']; warns = [v for v in viol if v['severity'] == 'warning']
 nets = sorted(str(n) for n in b.GetNetsByName().keys() if str(n))
-job = {"job": "J1", "tier": "hard", "role": "scored", "scope": None, "target_nets": [], "target_footprint": None,
+job = {"job": "J1", "tier": "hard", "role": "tuning", "scope": None, "target_nets": [], "target_footprint": None,
        "power_nets": [], "pairs": [], "kept_zones": [],
        "rules": {"classes": [{"name": "Default", "clearance": RULES['clearance'], "track_width": RULES['track'],
                   "via_diameter": RULES['via'], "via_drill": RULES['drill'], "diff_pair_width": 0.1, "diff_pair_gap": 0.15,
