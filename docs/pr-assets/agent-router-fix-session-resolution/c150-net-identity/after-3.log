@@ -1,0 +1,13 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+(pass) session net identity > rejects unknown wire net before assigning unconnected copper [4.00ms]
+(pass) session net identity > preserves known wire net code [0.12ms]
+(pass) session net identity > rejects unknown via net before assigning unconnected copper [0.04ms]
+(pass) session net identity > preserves known via net code [0.09ms]
+
+ 4 pass
+ 72 filtered out
+ 0 fail
+ 6 expect() calls
+Ran 4 tests across 1 file. [117.00ms]

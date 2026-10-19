@@ -197,6 +197,11 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
   const tracks: NewTrack[] = [];
   const vias: NewVia[] = [];
   const routedNets = new Set<string>();
+  const codeFor = (net: string): number => {
+    const code = codes.get(net);
+    if (code === undefined) throw new SyntaxError(`unknown session net: ${net}`);
+    return code;
+  };
   const rulesFor = (net: string) => input.rules.perNet.get(net) ?? input.rules.default;
   const echoed = { tracks: 0, vias: 0 };
   const near = (a: { x: number; y: number }, b: { x: number; y: number }) =>
@@ -238,7 +243,7 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
       warnOnce(`unknown layer "${w.layer}"`);
       continue;
     }
-    const netCode = codes.get(w.net) ?? 0;
+    const netCode = codeFor(w.net);
     const width = w.width || rulesFor(w.net).trackWidth;
     for (let i = 1; i < w.points.length; i++) {
       const start = w.points[i - 1]!;
@@ -254,6 +259,7 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
   }
   const allLayers = input.copperLayers.map((l) => l.id);
   for (const v of session.vias) {
+    const netCode = codeFor(v.net);
     const ps = session.padstacks.get(v.padstack);
     const rules = rulesFor(v.net);
     const m = /_(\d+):(\d+)_um$/.exec(v.padstack);
@@ -276,7 +282,7 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
       continue;
     }
     if (!ps) warnOnce(`via padstack "${v.padstack}" is not in library_out; using its name and the net class`);
-    vias.push({ net: v.net, netCode: codes.get(v.net) ?? 0, position: { x: v.x, y: v.y }, diameter, drill, layers });
+    vias.push({ net: v.net, netCode, position: { x: v.x, y: v.y }, diameter, drill, layers });
     routedNets.add(v.net);
   }
   if (echoed.tracks || echoed.vias)

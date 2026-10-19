@@ -412,3 +412,24 @@ test("session via sizes retain valid name fallback", () => {
   const parsed = parseSes(`(session sample (routes (network_out (net A (via V_600:300_um 10 20)))))`);
   expect(sesToItems(parsed, twoNetBoard()).vias[0]).toMatchObject({diameter: 600000, drill: 300000});
 });
+
+
+describe("session net identity", () => {
+  for (const [kind, copper] of [
+    ["wire", "(wire (path F.Cu 250 1000 -1000 2000 -1000))"],
+    ["via", "(via Via_800:400_um 1000 -1000)"],
+  ]) {
+    test(`rejects unknown ${kind} net before assigning unconnected copper`, () => {
+      const session = parseSes(`(session s (routes (resolution um 1) (network_out (net MISSING ${copper}))))`);
+      expect(() => sesToItems(session, twoNetBoard())).toThrow(SyntaxError);
+    });
+    test(`preserves known ${kind} net code`, () => {
+      const input = twoNetBoard();
+      const session = parseSes(`(session s (routes (resolution um 1) (network_out (net A ${copper}))))`);
+      const items = sesToItems(session, input);
+      const item = kind === "wire" ? items.tracks[0]! : items.vias[0]!;
+      expect(item.net).toBe("A");
+      expect(item.netCode).toBe(input.nets.find(n => n.name === "A")!.code);
+    });
+  }
+});

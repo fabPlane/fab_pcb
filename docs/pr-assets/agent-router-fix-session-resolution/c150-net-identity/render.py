@@ -1,0 +1,10 @@
+from pathlib import Path
+out = Path(__file__).parent
+(out / "comparison.svg").write_text('''<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="360" viewBox="0 0 1000 360">
+<rect width="1000" height="360" fill="#f7f9fc"/>
+<g font-family="sans-serif" fill="#172b4d"><text x="35" y="48" font-size="26">Session net identity: 4 regression cases × 3 repeats</text>
+<text x="35" y="90" font-size="18">Same cases and host • passing cases per repeat</text>
+<text x="35" y="155" font-size="22">Before</text><rect x="180" y="122" width="340" height="48" fill="#d9822b"/><text x="540" y="154" font-size="22">2 / 4</text>
+<text x="35" y="235" font-size="22">After</text><rect x="180" y="202" width="680" height="48" fill="#23856d"/><text x="880" y="234" font-size="22">4 / 4</text>
+<text x="35" y="300" font-size="18">Unknown wire and via nets reject; known net codes preserved.</text>
+<text x="35" y="330" font-size="16">Import diagnostics only; native thermal errors remain unresolved.</text></g></svg>''')
