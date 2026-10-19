@@ -1,0 +1,20 @@
+{
+  "before_commit": "8ff33dd0efc053d2883e3d8a375b2f3863f5dbe4",
+  "files": {
+    "packages/router/src/specctra/ses.ts": "dbfca7bb13acfed19a6210c190d8a815bf78e79cf06cf1a98277b0fdfba1c492",
+    "packages/router/test/specctra.test.ts": "96d5aeed0609d495741eef753453ec4104a86cf480078da1ffe351055193c1b2",
+    "docs/pr-assets/agent-router-fix-session-resolution/c162-shape-geometries/after-1.log": "dda3510ea3b6a9e49525a41eac1c1fcb83287f9a5639d83d4c0d759cb524d919",
+    "docs/pr-assets/agent-router-fix-session-resolution/c162-shape-geometries/after-2.log": "50c5e28859c230a4b48f7d42462bb8a970319537ea98933bcb4c9691779a47c4",
+    "docs/pr-assets/agent-router-fix-session-resolution/c162-shape-geometries/after-3.log": "25ba0eb4e6029f7033dd9b8b8778f5fd8413ecda153c9f94ff0783afe047f9bf",
+    "docs/pr-assets/agent-router-fix-session-resolution/c162-shape-geometries/before-1.log": "f3c7ca0bbad45f96946e59253585b5d601492825357957820893d69ce5ea5436",
+    "docs/pr-assets/agent-router-fix-session-resolution/c162-shape-geometries/before-2.log": "408f217a7dff0a784b10fefabd860509371b67db48aedf4a2e92f3453b01afe2",
+    "docs/pr-assets/agent-router-fix-session-resolution/c162-shape-geometries/before-3.log": "536ec86231216cef76879894155917be41c31e875e5c9d938070319cc8cd4b08",
+    "docs/pr-assets/agent-router-fix-session-resolution/c162-shape-geometries/comparison.png": "b9f94be237a46f8af10018f19b2af9bd249c28c786eadc3b0a5f1eec5b62961c",
+    "docs/pr-assets/agent-router-fix-session-resolution/c162-shape-geometries/comparison.svg": "4c41b8ce19c582006fc0bc9b090e5cdd1fb4bfe01230d9fefc9c848c3e1889d0",
+    "docs/pr-assets/agent-router-fix-session-resolution/c162-shape-geometries/engine-checks.log": "d6c87466cc9d69e2ba2af19ddee46baaed4bd71af809a726e61708509b2f0433",
+    "docs/pr-assets/agent-router-fix-session-resolution/c162-shape-geometries/package-tests.log": "7c2900b465d9dc949eedc4f54173d3b47e729cddee18a074956740e1a1202a82",
+    "docs/pr-assets/agent-router-fix-session-resolution/c162-shape-geometries/render.py": "4e1b61d898ddb0666b26a85916f565e9b7b64142db56f9f13e1d253c0a0990d3",
+    "docs/pr-assets/agent-router-fix-session-resolution/c162-shape-geometries/repro.md": "32c6984ca8b9917ade8a87465ed3e87cb4241c5d4bf7be5b73658ce340e7c989",
+    "docs/pr-assets/agent-router-fix-session-resolution/c162-shape-geometries/typecheck.log": "fe89e10caa3908a764784066d877bbc05895eb09e7524630f19a906babdf3809"
+  }
+}

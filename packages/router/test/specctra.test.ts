@@ -644,3 +644,25 @@ describe("session resolution operand structure", () => {
     expect(resolutionToNm(["resolution", "um", "10"])).toBe(100);
   });
 });
+
+
+describe("session shape geometry multiplicity", () => {
+  for (const extra of ["(circle B.Cu 1200)", "(rect B.Cu -600 -600 600 600)"]) {
+    test(`rejects discarded second shape geometry ${extra}`, () => {
+      const text = `(session s (routes (library_out (padstack V_800:300_um
+        (shape (circle F.Cu 800) ${extra}) (shape (circle B.Cu 800))))
+        (network_out (net A (via V_800:300_um 1000 -1000)))))`;
+      expect(() => sesToItems(parseSes(text), twoNetBoard())).toThrow(SyntaxError);
+    });
+  }
+  for (const attribute of ["", "(connect off)"]) {
+    test(`preserves single geometry with attribute '${attribute}'`, () => {
+      const text = `(session s (routes (library_out (padstack V_800:300_um
+        (shape (circle F.Cu 800) ${attribute}) (shape (circle B.Cu 800))))
+        (network_out (net A (via V_800:300_um 1000 -1000)))))`;
+      const via = sesToItems(parseSes(text), twoNetBoard()).vias[0]!;
+      expect(via.diameter).toBe(800000);
+      expect(via.layers).toEqual(twoNetBoard().copperLayers.map(l => l.id));
+    });
+  }
+});

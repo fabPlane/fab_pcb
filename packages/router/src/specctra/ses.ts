@@ -101,6 +101,10 @@ export function parseSes(text: string): Session {
     const layers: string[] = [];
     let diameter = 0;
     for (const shape of children(ps, "shape")) {
+      // Shape attributes may follow its geometry, but another geometry cannot
+      // be discarded: NewVia represents one circular pad per layer.
+      if (shape.slice(2).some((value) => ["circle", "rect", "polygon", "path", "qarc"].includes(head(value) ?? "")))
+        throw new SyntaxError("multiple session shape geometries");
       const geom = shape[1];
       // NewVia has circular copper on every layer. Falling back to a name or
       // another layer's circle for explicit noncircular geometry changes copper.
