@@ -1,0 +1,92 @@
+{
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-10-20T06:40:45",
+    "ignored_checks": [
+        {
+            "description": "Footprint has no courtyard defined",
+            "key": "missing_courtyard"
+        },
+        {
+            "description": "Track endpoint not centered on via",
+            "key": "track_not_centered_on_via"
+        },
+        {
+            "description": "Tuning profile track geometries",
+            "key": "tuning_profile_track_geometries"
+        },
+        {
+            "description": "Footprint doesn't match symbol's footprint filters",
+            "key": "footprint_filters_mismatch"
+        },
+        {
+            "description": "Footprint component type doesn't match footprint pads",
+            "key": "footprint_type_mismatch"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning",
+        "exclusion"
+    ],
+    "kicad_version": "10.0.6",
+    "schematic_parity": [],
+    "source": "missing-via-1.kicad_pcb",
+    "unconnected_items": [
+        {
+            "description": "Missing connection between items",
+            "items": [
+                {
+                    "description": "Track [NET1] on F.Cu, length 6.4000 mm",
+                    "pos": {
+                        "x": 2.6,
+                        "y": 4.5
+                    },
+                    "uuid": "385eb284-4c86-41b3-a33c-8386e1ee41f8"
+                },
+                {
+                    "description": "Track [NET1] on In2.Cu, length 8.4000 mm",
+                    "pos": {
+                        "x": 9.0,
+                        "y": 4.5
+                    },
+                    "uuid": "295a2509-6411-40d1-b7b2-25b6c704ec5c"
+                }
+            ],
+            "severity": "error",
+            "type": "unconnected_items"
+        }
+    ],
+    "violations": [
+        {
+            "description": "Track has unconnected end",
+            "items": [
+                {
+                    "description": "Track [NET1] on F.Cu, length 6.4000 mm",
+                    "pos": {
+                        "x": 2.6,
+                        "y": 4.5
+                    },
+                    "uuid": "385eb284-4c86-41b3-a33c-8386e1ee41f8"
+                }
+            ],
+            "severity": "warning",
+            "type": "track_dangling"
+        },
+        {
+            "description": "Track has unconnected end",
+            "items": [
+                {
+                    "description": "Track [NET1] on In2.Cu, length 8.4000 mm",
+                    "pos": {
+                        "x": 9.0,
+                        "y": 4.5
+                    },
+                    "uuid": "295a2509-6411-40d1-b7b2-25b6c704ec5c"
+                }
+            ],
+            "severity": "warning",
+            "type": "track_dangling"
+        }
+    ]
+}
