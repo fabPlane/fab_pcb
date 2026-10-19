@@ -8,7 +8,15 @@ import { collisionBoard } from "./collision-fixture";
 // Stateful commit/undo stand-in: deletion during a later cleanup pass must be
 // restored along with removal of the route when native validation is unavailable.
 export function validationFixture(
-  options: { cleanupFirst?: boolean; undo?: "zero" | "throws"; valid?: boolean; foreignEdit?: boolean; ratsnestFailure?: boolean } = {},
+  options: {
+    cleanupFirst?: boolean;
+    undo?: "zero" | "throws";
+    valid?: boolean;
+    foreignEdit?: boolean;
+    ratsnestFailure?: boolean;
+    relabel?: boolean;
+    oscillatingCount?: boolean;
+  } = {},
 ) {
   const original = [
     new Track(create(TrackSchema, { id: { value: "stub" }, net: { name: "A" } })),
@@ -29,7 +37,11 @@ export function validationFixture(
     ratsnest: async () => {
       calls.push("ratsnest");
       if (options.ratsnestFailure) throw new Error("native ratsnest transport unavailable");
-      return { edges: [] };
+      const open = options.relabel && (!options.oscillatingCount || checks % 2 === 1);
+      return { edges: open ? [{
+        net: "A", netCode: 1, source: "endpoint", target: "target",
+        sourcePosition: { x: 0, y: 0 }, targetPosition: { x: 10e6, y: 0 }, length: 10e6,
+      }] : [] };
     },
     undoStack: async () => {
       calls.push("undoStack");
@@ -46,7 +58,7 @@ export function validationFixture(
       run: async () => {
         calls.push("drc");
         checks++;
-        if (options.valid || options.ratsnestFailure) return { markers: [] };
+        if (options.valid || options.ratsnestFailure || (options.relabel && checks === 1)) return { markers: [] };
         if (options.cleanupFirst && checks === 1)
           return {
             markers: [{ errorType: DrcErrorType.DRCET_DANGLING_TRACK, items: [{ value: "stub" }] }],
@@ -86,7 +98,7 @@ export function validationFixture(
       {
         router: "js",
         refillZones: false,
-        ...(options.ratsnestFailure ? {} : { message: "validation regression" }),
+        ...(options.ratsnestFailure || options.relabel ? {} : { message: "validation regression" }),
         options: { nets: ["A"] },
       },
     ).id,

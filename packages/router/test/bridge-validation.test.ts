@@ -60,3 +60,36 @@ for (const undo of [undefined, "zero", "throws"] as const) {
     else expect(info.error).toContain("rollback failed");
   });
 }
+
+test("relabelled route is validated and restored before a failed job", async () => {
+  const fixture = validationFixture({ relabel: true });
+  const info = await fixture.done;
+  expect(info.state).toBe("failed");
+  expect(info.error).toContain("native DRC transport unavailable");
+  expect(info.summary).toBeUndefined();
+  expect(fixture.calls.filter((call) => call === "drc")).toHaveLength(2);
+  expect(fixture.calls.filter((call) => call === "save")).toHaveLength(1);
+  expect(fixture.copper()).toEqual(fixture.original);
+  expect(fixture.calls.filter((call) => call === "undo")).toHaveLength(2);
+});
+
+test("relabelled route with successful validation is saved", async () => {
+  const fixture = validationFixture({ relabel: true, valid: true });
+  const info = await fixture.done;
+  expect(info.state).toBe("done");
+  expect(fixture.calls.filter((call) => call === "drc")).toHaveLength(2);
+  expect(fixture.calls.filter((call) => call === "apply")).toHaveLength(2);
+  expect(fixture.calls.filter((call) => call === "save")).toHaveLength(2);
+  expect(fixture.copper().map((item) => item.id)).toEqual(["stub", "protected", "other-net", "new-route"]);
+});
+
+test("unstable native connection counts stop without saving a replacement", async () => {
+  const fixture = validationFixture({ relabel: true, valid: true, oscillatingCount: true });
+  const info = await fixture.done;
+  expect(info.state).toBe("failed");
+  expect(info.error).toContain("did not converge");
+  expect(info.summary).toBeUndefined();
+  expect(fixture.copper()).toEqual(fixture.original);
+  expect(fixture.calls.filter((call) => call === "save")).toHaveLength(1);
+  expect(fixture.calls.filter((call) => call === "apply").length).toBeLessThanOrEqual(4);
+});

@@ -451,8 +451,8 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           originalCopper.filter((item) => !item.locked && item.net && repairNets.has(item.net)).map((item) => [item.id, item.net!]),
         );
         if (!alreadyApplied(result) && (result.tracks.length || result.vias.length || result.claimedVias?.length)) {
-          // Each pass must remove at least one item; this finite bound handles long dangling chains.
-          const maxCleanupPasses = result.tracks.length + result.vias.length + removableExisting.size + 1;
+          // Each cleanup pass removes an item; allow one extra pass to validate a relabelled commit.
+          const maxCleanupPasses = result.tracks.length + result.vias.length + removableExisting.size + 2;
           for (let cleanupPass = 0; cleanupPass < maxCleanupPasses; cleanupPass++) {
             const committed = await (deps.apply ?? applyRouteResult)(board, result, {
               message,
@@ -499,7 +499,11 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
                 if (nativeMessage !== message) {
                   await undoTentativeRoute(board, committed.commitId);
                   message = nativeMessage;
-                  await (deps.apply ?? applyRouteResult)(board, result, { message, removeCopperIds: [...removedExistingCopper.keys()] });
+                  // Re-enter the same validation path for the replacement commit. Native
+                  // checks describe the previous commit, including its created item IDs.
+                  if (cleanupPass + 1 === maxCleanupPasses)
+                    throw new Error("fab_router native connection count did not converge while relabelling the route");
+                  continue;
                 }
               }
               applied = true;
