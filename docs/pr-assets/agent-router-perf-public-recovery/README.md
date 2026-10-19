@@ -1,6 +1,6 @@
 # Optional local recovery pin
 
-The router pin advances to `5be94a06` (see the complete revision in
+The router pin advances to `790256b1` (see the complete revision in
 `packages/router/FAB_ROUTER_COMMIT`), dependent on the engine change in
 https://github.com/fabPlane/fab_router/pull/37. The adapter accepts explicit
 `extra: { localRecovery: true }` and rejects non-boolean values. Omitted and false
@@ -31,3 +31,5 @@ FAB_ROUTER_MODULE=/home/hyper/bench/wt/fr-perf/src/api.ts bun test $(rg --files 
 The engine setting is experimental and off by default. Existing 27 native
 thermal errors remain unresolved. Large-input and full slow acceptance evidence
 is tracked on the engine PR; enabling recovery by default needs further review.
+
+The latest cache pin increment and fresh 26×3 speed/quality evidence are documented in [quilt-front/README.md](quilt-front/README.md). Its dense single observation is slower, while frozen-suite route time improves; full limitations are retained there.
