@@ -1,1 +1,3 @@
 Original MIT three-terminal SRJ fixture for physical copper-item export. The middle terminal joins two routed tracks. Before the serializer repair, the exported corner sequence invents a third segment between the runs. This fixture is outside the frozen native autorouter suite. It is exercised by the engine regression; it is not a native DRC fixture.
+
+The original two-layer `layer-transition.srj.json` fixture specifies a 0.6 mm via pad and 0.3 mm drill. Actual routed outputs from both serializer revisions complete with one through via. The companion cycle478 diagnostic imports explicit vias independently from adjacent same-layer wire segments and checks native connectivity; dropping the via leaves one open. This remains outside the frozen suite.
