@@ -10,6 +10,7 @@ import { collisionBoard } from "./collision-fixture";
 export function validationFixture(
   options: {
     baselineGate?: () => Promise<void>;
+    validationGate?: () => Promise<void>;
     refill?: "valid" | "throws" | "commit-then-throws" | "commit-valid";
     filledMarkers?: "new" | "existing" | "duplicate" | "replacement" | "excluded";
     markerChange?: "position" | "layer" | "item-order";
@@ -108,6 +109,7 @@ export function validationFixture(
           return { markers: kind === "duplicate" ? [marker("pad", "after-1"), marker("pad", "after-2")]
             : [marker(kind === "replacement" ? "other-pad" : "pad", "after-id", kind === "excluded")] };
         }
+        await options.validationGate?.();
         checks++;
         if (options.finalDrcFailure && fills === 2) {
           if (options.finalForeignEdit) {

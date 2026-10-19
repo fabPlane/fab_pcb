@@ -348,3 +348,26 @@ for (const refill of [false, true]) {
     expect(fixture.calls.filter(call => call === "save")).toHaveLength(1);
   });
 }
+
+for (const refill of [false, true]) {
+  test(`cancellation during tentative DRC restores copper (refill=${refill})`, async () => {
+    let entered!: () => void;
+    let release!: () => void;
+    const waiting = new Promise<void>(resolve => { entered = resolve; });
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const fixture = validationFixture({ valid: true, ...(refill ? { refill: "valid" as const } : {}),
+      validationGate: async () => { entered(); await gate; },
+    });
+    await waiting;
+    expect(fixture.cancel()).toBe(true);
+    release();
+    const info = await fixture.done;
+    expect(info.state).toBe("cancelled");
+    expect(info.summary).toBeUndefined();
+    expect(fixture.calls.filter(call => call === "apply")).toHaveLength(1);
+    expect(fixture.calls.filter(call => call === "undo")).toHaveLength(1);
+    expect(fixture.copper()).toEqual(fixture.original);
+    expect(fixture.calls.filter(call => call === "refill")).toHaveLength(refill ? 1 : 0);
+    expect(fixture.calls.filter(call => call === "save")).toHaveLength(1);
+  });
+}

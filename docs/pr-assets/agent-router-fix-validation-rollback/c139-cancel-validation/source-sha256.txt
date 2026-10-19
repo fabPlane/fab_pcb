@@ -1,0 +1,3 @@
+5de1e33ccd9b53197912d55d31d3b77528b5bdf920a9b2809aaa1b44bee24fda  packages/router/src/bridge-job.ts
+ab59d126e23df520424bd1e1fcbaa9f13b7076b86d0fb3dad6608898097679a3  packages/router/test/bridge-validation-fixture.ts
+22ccf4d39929ed5305278e257de7118eca50bc9f8c665b4a3344969efebe7a43  packages/router/test/bridge-validation.test.ts

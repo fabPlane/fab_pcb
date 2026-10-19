@@ -485,6 +485,9 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
             let drc;
             try {
               drc = await board.drc.run({ refillZones: false, reportAllTrackErrors: true });
+              // A cancellation received while validation was in flight must undo
+              // this tentative commit before refill or durable save.
+              checkCancelled();
             } catch (validationError) {
               return await rejectTentativeValidation(board, committed.commitId, "native DRC", validationError);
             }
