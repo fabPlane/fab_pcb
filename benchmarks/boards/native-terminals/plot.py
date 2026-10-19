@@ -8,13 +8,15 @@ import subprocess
 
 def plot(source, output):
     rows = list(csv.DictReader(source.open()))
+    command_report = 'after_state' in rows[0]
     edge_report = 'valid' in rows[0]
     valid = lambda r: r['valid'] == 'True' if edge_report else r['case'] in {
         'unchanged', 'partial-route', 'complete-route', 'reserialized'}
     groups = [('Valid controls', [r for r in rows if valid(r)]),
-              ('Invalid edge reports' if edge_report else 'Changed terminals',
+              ('Invalid command outputs' if command_report else 'Invalid edge reports' if edge_report else 'Changed terminals',
                [r for r in rows if not valid(r)])]
-    title = ('Native scoring: reject duplicate and self edges' if edge_report else
+    title = ('Offline native command: require fresh, preserved output' if command_report else
+             'Native scoring: reject duplicate and self edges' if edge_report else
              'Native scoring: preserve terminals before counting opens')
     svg = ['<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="480" viewBox="0 0 1100 480">',
            '<rect width="1100" height="480" fill="#fafafa"/>',
@@ -31,7 +33,9 @@ def plot(source, output):
             svg.append(f'<text x="70" y="{yy+21}" font-size="18">{label}</text>')
             svg.append(f'<rect x="160" y="{yy}" width="{650*count/len(cohort)}" height="27" fill="{color}"/>')
             svg.append(f'<text x="{175+650*count/len(cohort)}" y="{yy+21}" font-size="18">{count}/{len(cohort)}</text>')
-    svg.append('<text x="50" y="450" font-size="16">Standalone guard measurement; no routing or speed improvement claimed.</text></g></svg>')
+    footer = ('Deterministic command controls; before is an explicit unguarded consumer.' if command_report else
+              'Standalone guard measurement; no routing or speed improvement claimed.')
+    svg.append(f'<text x="50" y="450" font-size="16">{footer}</text></g></svg>')
     svg_path = output.with_suffix('.svg')
     svg_path.parent.mkdir(parents=True, exist_ok=True)
     svg_path.write_text('\n'.join(svg) + '\n')

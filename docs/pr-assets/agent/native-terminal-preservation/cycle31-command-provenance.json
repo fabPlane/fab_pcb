@@ -1,0 +1,36 @@
+{
+  "machine": "hyper-ms-lin",
+  "cores": "0-5",
+  "nice": 10,
+  "repeats": 3,
+  "command_pairs": 24,
+  "valid": 9,
+  "invalid": 15,
+  "invalid_accepted": 0,
+  "command_summary_sha256": "ecdd05c744eebed676391ecc83acd9521436d433020f02ae20b9bb2e290dfb84",
+  "session_summary_sha256": "254401039cee6facd744c59611979d528883d74a2fac68975b8dffda9c45807c",
+  "native_version": "10.0.6",
+  "native_checker_sha256": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402",
+  "archive_sha256": "f6f51bb02245e8e717f9359bd260cc9c5c0b1bc0acc8b7cb2cd5b8ffeb5de3c7",
+  "java_version": "openjdk version \"25.0.4.1\" 2026-08-18\nOpenJDK Runtime Environment (build 25.0.4.1+1-1-24.04.4-Ubuntu)\nOpenJDK 64-Bit Server VM (build 25.0.4.1+1-1-24.04.4-Ubuntu, mixed mode, sharing)\n",
+  "source_sha256": {
+    "audit.py": "4eb1ecbe17d02c839c394a17542a4730193d5e900409996a949c70042017f46a",
+    "baseline.py": "9d87d97a79eeca5647c334d32fa40a0bba708d597fa685183f096e27bf234039",
+    "terminals.py": "a887975db277ae2ba8c790ad8d66a8d371c383d1666c89e24ddcc3d179981e04",
+    "route.py": "1751d66b267d66e540b8ead740d5c57954c397c79a24d367dccbceccdbeb5fd4",
+    "session_command.py": "eb2d691163dface1c8f10ca7d4b1d774132552a092214f5a2c907b82f290b8bd",
+    "measure_route.py": "ff92009d81969225b26d63f989c228193b3381e3e0054bda44098268d9cee9b0",
+    "measure_session.py": "d7a011dd8a0de1984cae6c8333ac7c65034df84dc6b7f03f4c6b31b7244e1733",
+    "test_route.py": "bbc1b96d879a41ec07724e989e75698ef8451dfb422c2250ddb0a429cab50e6a"
+  },
+  "session_pairs": 3,
+  "session_input_edges": 2,
+  "session_output_opens": 0,
+  "session_geometric_errors": 0,
+  "limitations": [
+    "Opt-in offline command path; ranked adapters and caches unchanged.",
+    "Command-control before is an explicit unguarded consumer, not an observed router bug.",
+    "Session pairs exercise one three-terminal fixture and one reference engine; no speed/gain claim.",
+    "Terminal correspondence does not prove arbitrary native board preservation."
+  ]
+}
