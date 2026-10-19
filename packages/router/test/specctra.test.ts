@@ -545,3 +545,24 @@ describe("session via circle centers", () => {
     });
   }
 });
+
+describe("session circle layer operands", () => {
+  for (const shapes of [
+    "(shape (circle (F.Cu) 800)) (shape (circle (B.Cu) 800))",
+    "(shape (circle F.Cu 800)) (shape (circle B.Cu 800)) (shape (circle (In1.Cu) 800))",
+  ]) {
+    test(`rejects nested circle layer operands ${shapes}`, () => {
+      const session = `(session s (routes (library_out (padstack V_800:300_um ${shapes}))
+        (network_out (net A (via V_800:300_um 1000 -1000)))))`;
+      expect(() => sesToItems(parseSes(session), twoNetBoard())).toThrow(SyntaxError);
+    });
+  }
+  for (const layers of [["F.Cu", "B.Cu"], ['"F.Cu"', '"B.Cu"']]) {
+    test(`preserves atomic circle layer operands ${layers.join("/")}`, () => {
+      const shapes = layers.map(layer => `(shape (circle ${layer} 800))`).join(" ");
+      const session = parseSes(`(session s (routes (library_out (padstack V_800:300_um ${shapes}))
+        (network_out (net A (via V_800:300_um 1000 -1000)))))`);
+      expect(sesToItems(session, twoNetBoard()).vias[0]!.layers).toEqual(twoNetBoard().copperLayers.map(l => l.id));
+    });
+  }
+});

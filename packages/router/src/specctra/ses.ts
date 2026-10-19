@@ -98,7 +98,11 @@ export function parseSes(text: string): Session {
       if (!isList(geom) || geom[0] !== "circle")
         throw new SyntaxError("unsupported session via shape");
       const layer = geom[1];
-      if (typeof layer === "string") layers.push(layer);
+      // An explicit malformed layer is not absent metadata: dropping it can
+      // trigger the all-layer fallback or silently discard part of the padstack.
+      if (typeof layer !== "string" || !layer)
+        throw new SyntaxError("invalid session circle layer");
+      layers.push(layer);
       if (geom[0] === "circle") {
         // A malformed explicit circle must never become an invalid via size or
         // silently select the name/net-class fallback reserved for absent circles.
