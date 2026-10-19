@@ -1,0 +1,90 @@
+{
+  "after": {
+    "runs": [
+      {
+        "case": "nextbusclock-nextbusclockv1-j2-small",
+        "seed": 1,
+        "passed": true,
+        "seconds": 0.717861867,
+        "vias": 2,
+        "length_mm": 1498.272560544747,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "nextbusclock-nextbusclockv1-j2-small",
+        "seed": 3,
+        "passed": true,
+        "seconds": 0.720758381,
+        "vias": 2,
+        "length_mm": 1498.272560544747,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "nextbusclock-nextbusclockv1-j2-small",
+        "seed": 2,
+        "passed": true,
+        "seconds": 0.7261934409999999,
+        "vias": 2,
+        "length_mm": 1498.272560544747,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      }
+    ],
+    "candidate_commit": "5c893d824b1a2ea649536980d18e2b48a30cafbd",
+    "evidence_sha256": {
+      "controls.json": "cef38b6ec672a2106c6a6ab02b09d5462e12f527ac3e7cc49bfc2af3928edb15",
+      "results.json": "c9d486689d6b7199a6b73b3b0119c645e34e0b3b80d449587131d97d0a2f073a",
+      "summary.json": "dafbfbba5649f19fc34e92f2883d6cba356d394a5ce3b1df1977e90a3d36bd49"
+    },
+    "median_seconds": 0.720758381
+  },
+  "before": {
+    "runs": [
+      {
+        "case": "nextbusclock-nextbusclockv1-j2-small",
+        "seed": 1,
+        "passed": true,
+        "seconds": 0.721191879,
+        "vias": 2,
+        "length_mm": 1498.272560544747,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "nextbusclock-nextbusclockv1-j2-small",
+        "seed": 3,
+        "passed": true,
+        "seconds": 0.718168605,
+        "vias": 2,
+        "length_mm": 1498.272560544747,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "nextbusclock-nextbusclockv1-j2-small",
+        "seed": 2,
+        "passed": true,
+        "seconds": 0.7261119269999999,
+        "vias": 2,
+        "length_mm": 1498.272560544747,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      }
+    ],
+    "candidate_commit": "69cf598db98c136bff16bbe02bccdded95674b18",
+    "evidence_sha256": {
+      "controls.json": "98da75a375918d5412ece823a1054775d2156807f268caa84532e8a8ccdb0fff",
+      "results.json": "d8327bfac870c31c96a91cf304bc129629f2ce2aecb2ffd54132c7425f4db3c8",
+      "summary.json": "d18c4f35c35117bdcd8ddb67de475fe1eca0b550a8505b5305e4626e54c8f41f"
+    },
+    "median_seconds": 0.721191879
+  }
+}
