@@ -73,3 +73,13 @@ The CPU field is a model/name string, not a physical-host identifier. Matching
 names cannot establish that runs used the same physical machine. Run provenance
 records the host separately; these constructed controls only exercise the stored
 fixture and CPU fields.
+
+The opt-in `quality_values(run)` guard validates completed `native-drc` and
+`srj-scored` numeric evidence before a caller aggregates it. Completion must be a
+finite number in [0, 1]; opens and errors must be nonnegative integers. Booleans
+reject. Failed/unavailable quality is diagnostic and remains excluded by the
+caller. This utility is outside the frozen benchmark and does not change its
+scoring, caches, router adapters or ranking. Use
+`python3 benchmarks/tools/runtime-evidence/measure_quality_values.py NEW_OUTPUT`
+for three-repeat constructed controls and a PNG. This measures numeric admission,
+not routing performance.

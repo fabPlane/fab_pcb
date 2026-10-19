@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 import unittest
-from repeat_identity import single_identity, batch_identities
+from repeat_identity import single_identity, batch_identities, quality_values
 
 
 class RepeatIdentityTests(unittest.TestCase):
@@ -26,6 +26,27 @@ class RepeatIdentityTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             batch_identities([{'fixture': {'id': str(i)}, 'system': {'cpu_name': str(i)}}
                               for i in range(2)])
+
+    def test_quality_numeric_boundary(self):
+        for field, values in {
+            'completion_rate': [-1, 1.1, True, float('nan'), float('inf'), '1', None],
+            'unrouted_connections': [-1, 0.5, True, '0', None],
+            'drc_errors': [-1, 0.5, True, '0', None],
+        }.items():
+            for value in values:
+                run = dict(exit={'state': 'completed'}, quality_validation='native-drc',
+                           quality=dict(completion_rate=1, unrouted_connections=0, drc_errors=0))
+                run['quality'][field] = value
+                with self.subTest(field=field, value=value), self.assertRaises(ValueError):
+                    quality_values(run)
+
+    def test_quality_valid_and_diagnostic_controls(self):
+        for tag in ('native-drc', 'srj-scored'):
+            for rate in (0, 0.5, 1):
+                quality_values(dict(exit={'state': 'completed'}, quality_validation=tag,
+                    quality=dict(completion_rate=rate, unrouted_connections=2, drc_errors=3)))
+        for state, tag in [('timeout', 'native-drc'), ('completed', 'unavailable')]:
+            quality_values(dict(exit={'state': state}, quality_validation=tag, quality=None))
 
     def test_empty_batch_rejected(self):
         with self.assertRaises(ValueError):

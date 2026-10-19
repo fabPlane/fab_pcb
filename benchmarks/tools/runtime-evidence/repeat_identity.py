@@ -23,3 +23,21 @@ def batch_identities(runs):
         fixtures.setdefault(run['fixture']['id'], []).append(run['fixture'])
     for fixture_id, values in fixtures.items():
         single_identity(values, f'Batch fixture identity {fixture_id}')
+
+
+def quality_values(run):
+    """Reject malformed published quality before computing a corpus summary.
+
+    Unavailable quality is diagnostic and is excluded by the caller. This is
+    numeric evidence validation, not a new routing validity or ranking rule.
+    """
+    if run['exit']['state'] != 'completed' or run.get('quality_validation') not in {'native-drc', 'srj-scored'}:
+        return
+    quality = run['quality']
+    rate = quality['completion_rate']
+    if type(rate) not in (int, float) or not 0 <= rate <= 1:
+        raise ValueError('Validated completion must be a finite number in [0, 1]')
+    for field in ('unrouted_connections', 'drc_errors'):
+        value = quality[field]
+        if type(value) is not int or value < 0:
+            raise ValueError(f'Validated {field} must be a nonnegative integer')
