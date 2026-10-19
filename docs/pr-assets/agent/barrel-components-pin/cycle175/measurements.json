@@ -1,0 +1,320 @@
+{
+  "before": {
+    "native_checks": [
+      {
+        "case": "fan-controller-fan-controller-j1",
+        "seed": 1,
+        "native_version": "10.0.6",
+        "integrity_pass": true,
+        "new_warnings": 13,
+        "new_warning_types": {
+          "copper_sliver": 1,
+          "hole_to_hole": 2,
+          "track_dangling": 10
+        }
+      },
+      {
+        "case": "hellscribe-hellscribe-j1",
+        "seed": 2,
+        "native_version": "10.0.6",
+        "integrity_pass": true,
+        "new_warnings": 0,
+        "new_warning_types": {}
+      },
+      {
+        "case": "hellscribe-hellscribe-j1",
+        "seed": 3,
+        "native_version": "10.0.6",
+        "integrity_pass": true,
+        "new_warnings": 0,
+        "new_warning_types": {}
+      },
+      {
+        "case": "fan-controller-fan-controller-j1",
+        "seed": 2,
+        "native_version": "10.0.6",
+        "integrity_pass": true,
+        "new_warnings": 13,
+        "new_warning_types": {
+          "copper_sliver": 1,
+          "hole_to_hole": 2,
+          "track_dangling": 10
+        }
+      },
+      {
+        "case": "hellscribe-hellscribe-j1",
+        "seed": 1,
+        "native_version": "10.0.6",
+        "integrity_pass": true,
+        "new_warnings": 0,
+        "new_warning_types": {}
+      },
+      {
+        "case": "fan-controller-fan-controller-j1",
+        "seed": 3,
+        "native_version": "10.0.6",
+        "integrity_pass": true,
+        "new_warnings": 13,
+        "new_warning_types": {
+          "copper_sliver": 1,
+          "hole_to_hole": 2,
+          "track_dangling": 10
+        }
+      }
+    ],
+    "allowed_cpus": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "inputs_sha256": "c36936fd81f6af0e9efd11990ad976127b01f6e03d7db889ebc5e876af06c9a1",
+    "harness_sha256": {
+      "dsn-path.py": "0c03ef2edc81b6d806f59486d82a9be1531e74933e2009abbdb06629ddb6aee3",
+      "dsn-engine-scoring-c2-v1.py": "cf305ececb1065d1a22110940d6802aa2deedcfe2ef84fb806d6de9077ecab43",
+      "native-router-format-v2.py": "de484d5beba50be5bc5d48cbb2be44de0e72da7195b01e7f185782d92ce29a0d",
+      "runner-scoring-v2.py": "d177864e1d6ab965556609fca3376daaee99fbc206c66edc02ef237ceb0cdaab",
+      "native-check-v4.3.py": "1ced7295253415bf7cc9d4d4c27c9bb4f0053d132e212fccbbc28a5a17f3e57e",
+      "native-router-path-scoring-v3.py": "ed2ef80f62095dcadd6a8b300afb20a49cb117ab7f48d647eaffeb187b2539aa",
+      "dsn-engine-scoring-v1.py": "45cf0877b49cfd133f08c08ac2ad14213313522fe5f290f8bf01972e06a480c0",
+      "native-check-v3.py": "370a1b84f2208f63244d17fc55be8940ef3c611626074b1bff3993cc3141b1a8",
+      "fab-route-c2.ts": "36a05f4393a49060f93572c890847b8ff068402d4380bbb0c9d33715c8d6e3de",
+      "scoring_telemetry_v1.py": "02469e99b4f12a071c7aba9bee62e94a91168aea11bd94174dc3fab3ddd0df7d"
+    },
+    "candidate_commit": "69cf598db98c136bff16bbe02bccdded95674b18",
+    "evidence_sha256": {
+      "controls.json": "b306216aa7a1f8178326230d085571eb694cce16f4b3fd687b121ba6556acd0f",
+      "results.json": "6c65b495fa5e7f767787a91e24ebc4f7c5c77f67cb5bd014c7391dc03bce1dd6",
+      "summary.json": "ce19d4e41b3658f3bbb985e21c00d3a5f668008b83125abc279c9fe89c3ee847"
+    },
+    "runs": [
+      {
+        "case": "fan-controller-fan-controller-j1",
+        "seed": 1,
+        "passed": false,
+        "seconds": 3.607893103,
+        "vias": 102,
+        "length_mm": 909.0220346102054,
+        "opens": 5,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "fan-controller-fan-controller-j1",
+        "seed": 2,
+        "passed": false,
+        "seconds": 3.70793389,
+        "vias": 102,
+        "length_mm": 909.0220346102054,
+        "opens": 5,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "fan-controller-fan-controller-j1",
+        "seed": 3,
+        "passed": false,
+        "seconds": 3.990540114,
+        "vias": 102,
+        "length_mm": 909.0220346102054,
+        "opens": 5,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "hellscribe-hellscribe-j1",
+        "seed": 1,
+        "passed": false,
+        "seconds": 2.030977754,
+        "vias": 100,
+        "length_mm": 1315.7860560230656,
+        "opens": 3,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "hellscribe-hellscribe-j1",
+        "seed": 2,
+        "passed": false,
+        "seconds": 2.032836646,
+        "vias": 100,
+        "length_mm": 1315.7860560230656,
+        "opens": 3,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "hellscribe-hellscribe-j1",
+        "seed": 3,
+        "passed": false,
+        "seconds": 2.038839929,
+        "vias": 100,
+        "length_mm": 1315.7860560230656,
+        "opens": 3,
+        "new_errors": 0,
+        "failed_fidelity": []
+      }
+    ]
+  },
+  "after": {
+    "native_checks": [
+      {
+        "case": "fan-controller-fan-controller-j1",
+        "seed": 1,
+        "native_version": "10.0.6",
+        "integrity_pass": true,
+        "new_warnings": 12,
+        "new_warning_types": {
+          "copper_sliver": 1,
+          "hole_to_hole": 2,
+          "track_dangling": 9
+        }
+      },
+      {
+        "case": "hellscribe-hellscribe-j1",
+        "seed": 2,
+        "native_version": "10.0.6",
+        "integrity_pass": true,
+        "new_warnings": 0,
+        "new_warning_types": {}
+      },
+      {
+        "case": "hellscribe-hellscribe-j1",
+        "seed": 3,
+        "native_version": "10.0.6",
+        "integrity_pass": true,
+        "new_warnings": 0,
+        "new_warning_types": {}
+      },
+      {
+        "case": "fan-controller-fan-controller-j1",
+        "seed": 2,
+        "native_version": "10.0.6",
+        "integrity_pass": true,
+        "new_warnings": 12,
+        "new_warning_types": {
+          "copper_sliver": 1,
+          "hole_to_hole": 2,
+          "track_dangling": 9
+        }
+      },
+      {
+        "case": "hellscribe-hellscribe-j1",
+        "seed": 1,
+        "native_version": "10.0.6",
+        "integrity_pass": true,
+        "new_warnings": 0,
+        "new_warning_types": {}
+      },
+      {
+        "case": "fan-controller-fan-controller-j1",
+        "seed": 3,
+        "native_version": "10.0.6",
+        "integrity_pass": true,
+        "new_warnings": 12,
+        "new_warning_types": {
+          "copper_sliver": 1,
+          "hole_to_hole": 2,
+          "track_dangling": 9
+        }
+      }
+    ],
+    "allowed_cpus": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "inputs_sha256": "c36936fd81f6af0e9efd11990ad976127b01f6e03d7db889ebc5e876af06c9a1",
+    "harness_sha256": {
+      "dsn-path.py": "0c03ef2edc81b6d806f59486d82a9be1531e74933e2009abbdb06629ddb6aee3",
+      "dsn-engine-scoring-c2-v1.py": "cf305ececb1065d1a22110940d6802aa2deedcfe2ef84fb806d6de9077ecab43",
+      "native-router-format-v2.py": "de484d5beba50be5bc5d48cbb2be44de0e72da7195b01e7f185782d92ce29a0d",
+      "runner-scoring-v2.py": "d177864e1d6ab965556609fca3376daaee99fbc206c66edc02ef237ceb0cdaab",
+      "native-check-v4.3.py": "1ced7295253415bf7cc9d4d4c27c9bb4f0053d132e212fccbbc28a5a17f3e57e",
+      "native-router-path-scoring-v3.py": "ed2ef80f62095dcadd6a8b300afb20a49cb117ab7f48d647eaffeb187b2539aa",
+      "dsn-engine-scoring-v1.py": "45cf0877b49cfd133f08c08ac2ad14213313522fe5f290f8bf01972e06a480c0",
+      "native-check-v3.py": "370a1b84f2208f63244d17fc55be8940ef3c611626074b1bff3993cc3141b1a8",
+      "fab-route-c2.ts": "36a05f4393a49060f93572c890847b8ff068402d4380bbb0c9d33715c8d6e3de",
+      "scoring_telemetry_v1.py": "02469e99b4f12a071c7aba9bee62e94a91168aea11bd94174dc3fab3ddd0df7d"
+    },
+    "candidate_commit": "5c893d824b1a2ea649536980d18e2b48a30cafbd",
+    "evidence_sha256": {
+      "controls.json": "1ff970368da2025bd28853b578259833e86e377152c225075d11494d1aae03bb",
+      "results.json": "a37e46d2fac2da4250af4b30c9e05b0394cbe65d7fff5b533b6e33ea0115f3d2",
+      "summary.json": "1262a2a57349c81929cc47f2aa152f5de6f817063c4347c660b750515636affb"
+    },
+    "runs": [
+      {
+        "case": "fan-controller-fan-controller-j1",
+        "seed": 1,
+        "passed": false,
+        "seconds": 4.224556316999999,
+        "vias": 104,
+        "length_mm": 909.0220346102054,
+        "opens": 3,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "fan-controller-fan-controller-j1",
+        "seed": 2,
+        "passed": false,
+        "seconds": 3.721530635,
+        "vias": 104,
+        "length_mm": 909.0220346102054,
+        "opens": 3,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "fan-controller-fan-controller-j1",
+        "seed": 3,
+        "passed": false,
+        "seconds": 3.992332012,
+        "vias": 104,
+        "length_mm": 909.0220346102054,
+        "opens": 3,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "hellscribe-hellscribe-j1",
+        "seed": 1,
+        "passed": false,
+        "seconds": 2.296248221,
+        "vias": 100,
+        "length_mm": 1315.7860560230656,
+        "opens": 3,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "hellscribe-hellscribe-j1",
+        "seed": 2,
+        "passed": false,
+        "seconds": 2.320998169,
+        "vias": 100,
+        "length_mm": 1315.7860560230656,
+        "opens": 3,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "hellscribe-hellscribe-j1",
+        "seed": 3,
+        "passed": false,
+        "seconds": 2.1448661700000002,
+        "vias": 100,
+        "length_mm": 1315.7860560230656,
+        "opens": 3,
+        "new_errors": 0,
+        "failed_fidelity": []
+      }
+    ]
+  }
+}
