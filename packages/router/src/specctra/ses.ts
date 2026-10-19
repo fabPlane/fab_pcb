@@ -63,13 +63,18 @@ function pathOf(list: SExpr[], nmPerUnit: number): { layer: string; width: numbe
   // (path <layer> <aperture_width> x0 y0 x1 y1 ...)
   const layer = list[1];
   if (typeof layer !== "string") return undefined;
-  const nums = list
-    .slice(2)
-    .filter((c): c is string => typeof c === "string")
-    .map(Number);
-  const width = nums.shift() ?? 0;
+  const values = list.slice(2);
+  // A path requires a width and at least two complete coordinate pairs.
+  // Never drop nested values or a trailing coordinate: that silently changes copper.
+  if (values.length < 5 || values.length % 2 !== 1 || values.some((v) => typeof v !== "string"))
+    throw new SyntaxError("invalid session path coordinates");
+  const nums = values.map(Number);
+  const scaled = nums.map((v) => Math.round(v * nmPerUnit));
+  if (nums.some((v) => !Number.isFinite(v)) || scaled.some((v) => !Number.isSafeInteger(v)) || scaled[0]! <= 0)
+    throw new SyntaxError("invalid session path dimensions");
+  const width = nums.shift()!;
   const points: { x: number; y: number }[] = [];
-  for (let i = 0; i + 1 < nums.length; i += 2)
+  for (let i = 0; i < nums.length; i += 2)
     points.push({ x: Math.round(nums[i]! * nmPerUnit), y: Math.round(-nums[i + 1]! * nmPerUnit) });
   return { layer, width: Math.round(width * nmPerUnit), points };
 }

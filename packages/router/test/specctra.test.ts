@@ -345,3 +345,22 @@ for (const [unit, scale] of [["um", 100], ["mm", 100000], ["cm", 1000000], ["inc
 test("session resolution preserves omitted resolution defaults", () => {
   expect(parseSes("(session sample (routes))").nmPerUnit).toBe(1000);
 });
+
+for (const path of [
+  "F.Cu 2 0 0 NaN 20", "F.Cu 2 0 0 Infinity 20",
+  "F.Cu 2 0 0 1e308 20", "F.Cu NaN 0 0 10 20",
+  "F.Cu -2 0 0 10 20", "F.Cu 0 0 0 10 20",
+  "F.Cu 2 0 0 10", "F.Cu 2 0 0 (unexpected 10) 20",
+  "F.Cu 2 0 0", "F.Cu 0.0001 0 0 10 20",
+]) {
+  test(`session path rejects malformed geometry: ${path}`, () => {
+    expect(() => parseSes(`(session sample (routes (resolution um 10)
+      (network_out (net A (wire (path ${path}))))))`)).toThrow(SyntaxError);
+  });
+}
+
+test("session path retains signed fractional coordinates and positive widths", () => {
+  const parsed = parseSes(`(session sample (routes (resolution um 10)
+    (network_out (net A (wire (path F.Cu 2.5 -1.5 2.5 3.5 -4.5))))))`);
+  expect(parsed.wires[0]).toMatchObject({width: 250, points: [{x: -150, y: -250}, {x: 350, y: 450}]});
+});
