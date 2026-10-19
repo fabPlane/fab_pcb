@@ -1,92 +1,356 @@
 [
   {
-    "label": "source",
+    "label": "reference",
     "repeat": 1,
     "exit": 0,
-    "seconds": 3.1816267740214244
+    "summary": {
+      "seed": 6406,
+      "stats": {
+        "nets": 263,
+        "pads": 702,
+        "connections": 439,
+        "two_pin_nets": 260,
+        "power_pins": {
+          "GND": 102,
+          "VCC_CORE": 26,
+          "VCCIO": 54
+        },
+        "footprints": 30,
+        "seed": 6406,
+        "layers": 6,
+        "board_mm": [
+          70,
+          56
+        ]
+      },
+      "generator_sha256": "b65758714fa0a1f45255d8c43e857437014df905d98086a062dda7261fa6e584",
+      "dsn_sha256": "1dbf3cd5a55dfd8c64f643ad06e136c87431ffa28447235bb9a84fbb3796eea7",
+      "deterministic": true,
+      "geometry_equal": true,
+      "dsn_semantically_equal": true,
+      "reports": [
+        {
+          "board": "generated",
+          "errors": 0,
+          "opens": 439,
+          "warnings": {
+            "lib_footprint_issues": 30
+          }
+        },
+        {
+          "board": "bundled",
+          "errors": 0,
+          "opens": 439,
+          "warnings": {
+            "lib_footprint_issues": 30
+          }
+        }
+      ],
+      "limitation": "Unrouted candidate only; feasibility is unproven."
+    }
   },
   {
-    "label": "bundled",
+    "label": "candidate",
     "repeat": 1,
     "exit": 0,
-    "seconds": 3.841619579005055
+    "summary": {
+      "seed": 6406,
+      "stats": {
+        "nets": 263,
+        "pads": 702,
+        "connections": 439,
+        "two_pin_nets": 260,
+        "power_pins": {
+          "GND": 102,
+          "VCC_CORE": 26,
+          "VCCIO": 54
+        },
+        "footprints": 30,
+        "seed": 6406,
+        "layers": 6,
+        "board_mm": [
+          70,
+          56
+        ]
+      },
+      "generator_sha256": "b65758714fa0a1f45255d8c43e857437014df905d98086a062dda7261fa6e584",
+      "dsn_sha256": "1dbf3cd5a55dfd8c64f643ad06e136c87431ffa28447235bb9a84fbb3796eea7",
+      "deterministic": true,
+      "geometry_equal": true,
+      "dsn_semantically_equal": true,
+      "reports": [
+        {
+          "board": "generated",
+          "errors": 0,
+          "opens": 439,
+          "warnings": {
+            "lib_footprint_issues": 30
+          }
+        },
+        {
+          "board": "bundled",
+          "errors": 0,
+          "opens": 439,
+          "warnings": {
+            "lib_footprint_issues": 30
+          }
+        }
+      ],
+      "limitation": "Unrouted candidate only; feasibility is unproven."
+    }
   },
   {
     "label": "rules",
     "repeat": 1,
     "exit": 1,
-    "seconds": null
+    "reason": "wrong default rules"
   },
   {
     "label": "geometry",
     "repeat": 1,
     "exit": 1,
-    "seconds": null
+    "reason": "generated geometry differs"
   },
   {
     "label": "dsn",
     "repeat": 1,
     "exit": 1,
-    "seconds": null
+    "reason": "exported DSN differs"
   },
   {
-    "label": "source",
+    "label": "reference",
     "repeat": 2,
     "exit": 0,
-    "seconds": 3.1901202769950032
+    "summary": {
+      "seed": 6406,
+      "stats": {
+        "nets": 263,
+        "pads": 702,
+        "connections": 439,
+        "two_pin_nets": 260,
+        "power_pins": {
+          "GND": 102,
+          "VCC_CORE": 26,
+          "VCCIO": 54
+        },
+        "footprints": 30,
+        "seed": 6406,
+        "layers": 6,
+        "board_mm": [
+          70,
+          56
+        ]
+      },
+      "generator_sha256": "b65758714fa0a1f45255d8c43e857437014df905d98086a062dda7261fa6e584",
+      "dsn_sha256": "1dbf3cd5a55dfd8c64f643ad06e136c87431ffa28447235bb9a84fbb3796eea7",
+      "deterministic": true,
+      "geometry_equal": true,
+      "dsn_semantically_equal": true,
+      "reports": [
+        {
+          "board": "generated",
+          "errors": 0,
+          "opens": 439,
+          "warnings": {
+            "lib_footprint_issues": 30
+          }
+        },
+        {
+          "board": "bundled",
+          "errors": 0,
+          "opens": 439,
+          "warnings": {
+            "lib_footprint_issues": 30
+          }
+        }
+      ],
+      "limitation": "Unrouted candidate only; feasibility is unproven."
+    }
   },
   {
-    "label": "bundled",
+    "label": "candidate",
     "repeat": 2,
     "exit": 0,
-    "seconds": 3.2187381359981373
+    "summary": {
+      "seed": 6406,
+      "stats": {
+        "nets": 263,
+        "pads": 702,
+        "connections": 439,
+        "two_pin_nets": 260,
+        "power_pins": {
+          "GND": 102,
+          "VCC_CORE": 26,
+          "VCCIO": 54
+        },
+        "footprints": 30,
+        "seed": 6406,
+        "layers": 6,
+        "board_mm": [
+          70,
+          56
+        ]
+      },
+      "generator_sha256": "b65758714fa0a1f45255d8c43e857437014df905d98086a062dda7261fa6e584",
+      "dsn_sha256": "1dbf3cd5a55dfd8c64f643ad06e136c87431ffa28447235bb9a84fbb3796eea7",
+      "deterministic": true,
+      "geometry_equal": true,
+      "dsn_semantically_equal": true,
+      "reports": [
+        {
+          "board": "generated",
+          "errors": 0,
+          "opens": 439,
+          "warnings": {
+            "lib_footprint_issues": 30
+          }
+        },
+        {
+          "board": "bundled",
+          "errors": 0,
+          "opens": 439,
+          "warnings": {
+            "lib_footprint_issues": 30
+          }
+        }
+      ],
+      "limitation": "Unrouted candidate only; feasibility is unproven."
+    }
   },
   {
     "label": "rules",
     "repeat": 2,
     "exit": 1,
-    "seconds": null
+    "reason": "wrong default rules"
   },
   {
     "label": "geometry",
     "repeat": 2,
     "exit": 1,
-    "seconds": null
+    "reason": "generated geometry differs"
   },
   {
     "label": "dsn",
     "repeat": 2,
     "exit": 1,
-    "seconds": null
+    "reason": "exported DSN differs"
   },
   {
-    "label": "source",
+    "label": "reference",
     "repeat": 3,
     "exit": 0,
-    "seconds": 3.265334462048486
+    "summary": {
+      "seed": 6406,
+      "stats": {
+        "nets": 263,
+        "pads": 702,
+        "connections": 439,
+        "two_pin_nets": 260,
+        "power_pins": {
+          "GND": 102,
+          "VCC_CORE": 26,
+          "VCCIO": 54
+        },
+        "footprints": 30,
+        "seed": 6406,
+        "layers": 6,
+        "board_mm": [
+          70,
+          56
+        ]
+      },
+      "generator_sha256": "b65758714fa0a1f45255d8c43e857437014df905d98086a062dda7261fa6e584",
+      "dsn_sha256": "1dbf3cd5a55dfd8c64f643ad06e136c87431ffa28447235bb9a84fbb3796eea7",
+      "deterministic": true,
+      "geometry_equal": true,
+      "dsn_semantically_equal": true,
+      "reports": [
+        {
+          "board": "generated",
+          "errors": 0,
+          "opens": 439,
+          "warnings": {
+            "lib_footprint_issues": 30
+          }
+        },
+        {
+          "board": "bundled",
+          "errors": 0,
+          "opens": 439,
+          "warnings": {
+            "lib_footprint_issues": 30
+          }
+        }
+      ],
+      "limitation": "Unrouted candidate only; feasibility is unproven."
+    }
   },
   {
-    "label": "bundled",
+    "label": "candidate",
     "repeat": 3,
     "exit": 0,
-    "seconds": 3.2265719750430435
+    "summary": {
+      "seed": 6406,
+      "stats": {
+        "nets": 263,
+        "pads": 702,
+        "connections": 439,
+        "two_pin_nets": 260,
+        "power_pins": {
+          "GND": 102,
+          "VCC_CORE": 26,
+          "VCCIO": 54
+        },
+        "footprints": 30,
+        "seed": 6406,
+        "layers": 6,
+        "board_mm": [
+          70,
+          56
+        ]
+      },
+      "generator_sha256": "b65758714fa0a1f45255d8c43e857437014df905d98086a062dda7261fa6e584",
+      "dsn_sha256": "1dbf3cd5a55dfd8c64f643ad06e136c87431ffa28447235bb9a84fbb3796eea7",
+      "deterministic": true,
+      "geometry_equal": true,
+      "dsn_semantically_equal": true,
+      "reports": [
+        {
+          "board": "generated",
+          "errors": 0,
+          "opens": 439,
+          "warnings": {
+            "lib_footprint_issues": 30
+          }
+        },
+        {
+          "board": "bundled",
+          "errors": 0,
+          "opens": 439,
+          "warnings": {
+            "lib_footprint_issues": 30
+          }
+        }
+      ],
+      "limitation": "Unrouted candidate only; feasibility is unproven."
+    }
   },
   {
     "label": "rules",
     "repeat": 3,
     "exit": 1,
-    "seconds": null
+    "reason": "wrong default rules"
   },
   {
     "label": "geometry",
     "repeat": 3,
     "exit": 1,
-    "seconds": null
+    "reason": "generated geometry differs"
   },
   {
     "label": "dsn",
     "repeat": 3,
     "exit": 1,
-    "seconds": null
+    "reason": "exported DSN differs"
   }
 ]
