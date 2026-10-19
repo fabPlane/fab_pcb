@@ -494,3 +494,25 @@ describe("session via layer diameters", () => {
     });
   }
 });
+
+
+describe("session via circle centers", () => {
+  for (const center of ["100 0", "0 -100", "100", "NaN 0", "0 (bad)"]) {
+    test(`rejects unsupported session circle center ${center}`, () => {
+      const session = `(session s (routes (library_out (padstack V
+        (shape (circle F.Cu 800 ${center})) (shape (circle B.Cu 800))))
+        (network_out (net A (via V 1000 -1000)))))`;
+      expect(() => sesToItems(parseSes(session), twoNetBoard())).toThrow(SyntaxError);
+    });
+  }
+  for (const center of ["", "0 0"]) {
+    test(`preserves concentric session circle center '${center}'`, () => {
+      const session = parseSes(`(session s (routes (library_out (padstack V
+        (shape (circle F.Cu 800 ${center})) (shape (circle B.Cu 800 ${center}))))
+        (network_out (net A (via V 1000 -1000)))))`);
+      const via = sesToItems(session, twoNetBoard()).vias[0]!;
+      expect(via.position).toEqual({ x: 1000000, y: 1000000 });
+      expect(via.diameter).toBe(800000);
+    });
+  }
+});

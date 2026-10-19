@@ -99,6 +99,11 @@ export function parseSes(text: string): Session {
       if (geom[0] === "circle") {
         // A malformed explicit circle must never become an invalid via size or
         // silently select the name/net-class fallback reserved for absent circles.
+        // Optional circle centers describe copper relative to the barrel. NewVia
+        // cannot represent eccentric pads; moving the barrel would move its drill.
+        const center = geom.slice(3);
+        if (center.length !== 0 && (center.length !== 2 || center.some((v) => typeof v !== "string" || Number(v) !== 0)))
+          throw new SyntaxError("unsupported session circle center");
         const value = typeof geom[2] === "string" ? Number(geom[2]) : NaN;
         const scaled = Math.round(value * nmPerUnit);
         if (!Number.isFinite(value) || !Number.isSafeInteger(scaled) || scaled <= 0)
