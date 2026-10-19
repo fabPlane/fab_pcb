@@ -36,10 +36,10 @@ join its two actual fixture pads, matching reference, pad number, net and positi
 UUIDs must be unique within the report; they are not compared across loads because
 the source files omit UUIDs and KiCad assigns them when loading.
 
-Run the report-audit regression tests without KiCad:
+Run the regression tests (geometry tests require KiCad’s Python module):
 
 ```sh
-python3 -m unittest discover -s benchmarks/boards/bga-escape -p 'test_*.py'
+/usr/bin/python3 -m unittest discover -s benchmarks/boards/bga-escape -p 'test_*.py'
 ```
 
 The audit rejects duplicated/missing nets, unknown/repeated pads, mixed endpoints,
@@ -70,3 +70,10 @@ The SRJ input validator accepts only the five top-level fields emitted by this
 fixture generator. Added traces, vias, keepouts or rule fields fail validation
 because this fixture audit does not validate their semantics. Extending the
 fixture format requires extending the audit explicitly.
+
+Nested connections, terminals, obstacles and obstacle centers also accept exactly
+the fields emitted by the generator. Extra width, via, layer, port, clearance or
+keepout metadata is rejected. The fixture audit does not interpret those added
+constraints. `measure_nested_schema.py --before PREVIOUS_VALIDATE_PY --out CSV`
+replays genuine inputs and 16 nested-field additions per tier (first and last
+array entries), three times each, against both validator versions.

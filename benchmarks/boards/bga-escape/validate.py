@@ -54,11 +54,17 @@ def geometry(source, spec):
     require(len(srj['connections']) == 100 and {c['name'] for c in srj['connections']} == names, 'unexpected connections')
     require(len(srj['obstacles']) == 200, 'expected 200 obstacles')
     for obstacle in srj['obstacles']:
+        require(set(obstacle) == {'type', 'layers', 'center', 'width', 'height', 'connectedTo'},
+                'unexpected SRJ obstacle fields')
+        require(set(obstacle['center']) == {'x', 'y'}, 'unexpected SRJ center fields')
         require(obstacle['layers'] == ['top'] and obstacle['type'] == 'rect', 'unexpected obstacle')
         require(len(obstacle['connectedTo']) == 1 and obstacle['connectedTo'][0] in names, 'unexpected pad ownership')
     for connection in srj['connections']:
+        require(set(connection) == {'name', 'pointsToConnect'}, 'unexpected SRJ connection fields')
         name = connection['name']
         points = connection['pointsToConnect']
+        require(all(set(point) == {'x', 'y', 'layer'} for point in points),
+                'unexpected SRJ terminal fields')
         require(len(points) == 2 and all(p['layer'] == 'top' for p in points), 'expected two top-side terminals')
         require(sorted((p['x'], p['y']) for p in points) == sorted(v[:2] for v in pads[name]), f'{name}: native/SRJ positions differ')
         obstacles = sorted((o['center']['x'], o['center']['y'], o['width'], o['height']) for o in srj['obstacles'] if name in o['connectedTo'])

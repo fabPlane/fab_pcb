@@ -8,9 +8,28 @@ import tempfile
 import unittest
 
 from validate import ROOT, geometry
+from schema_variants import nested_variants
 
 
 class GeometryTest(unittest.TestCase):
+    def test_unchecked_nested_fields(self):
+        specs = json.loads((ROOT / 'manifest.json').read_text())['boards']
+        for spec in specs:
+            tier = spec['tier']
+            with tempfile.TemporaryDirectory(prefix='bga-nested-schema-') as temp:
+                source = Path(temp)
+                shutil.copytree(ROOT / tier, source / tier)
+                target = source / tier / 'unrouted.srj.json'
+                original = json.loads(target.read_text())
+                self.assertEqual(geometry(source, spec)[:2], (100, 200))
+                for variant, changed in nested_variants(original):
+                    with self.subTest(tier=tier, variant=variant):
+                        target.write_text(json.dumps(changed))
+                        with self.assertRaisesRegex(ValueError, 'unexpected SRJ .* fields'):
+                            geometry(source, spec)
+                target.write_text(json.dumps(original))
+                self.assertEqual(geometry(source, spec)[:2], (100, 200))
+
     def test_unchecked_top_level_fields(self):
         specs = json.loads((ROOT / 'manifest.json').read_text())['boards']
         for spec in specs:
