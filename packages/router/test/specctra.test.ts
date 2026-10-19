@@ -433,3 +433,24 @@ describe("session net identity", () => {
     });
   }
 });
+
+describe("session via layer identity", () => {
+  for (const layers of [["F.Cu", "MISSING"], ["MISSING", "ALSO_MISSING"]]) {
+    test(`rejects unknown via layers: ${layers.join(",")}`, () => {
+      const shapes = layers.map(layer => `(shape (circle ${layer} 800))`).join(" ");
+      const session = parseSes(`(session s (routes (library_out (padstack V ${shapes}))
+        (network_out (net A (via V 1000 -1000)))))`);
+      expect(() => sesToItems(session, twoNetBoard())).toThrow(SyntaxError);
+    });
+  }
+  test("preserves supported via layer aliases", () => {
+    const session = parseSes(`(session s (routes (library_out (padstack V
+      (shape (circle BL_F_Cu 800)) (shape (circle BL_B_Cu 800))))
+      (network_out (net A (via V 1000 -1000)))))`);
+    expect(sesToItems(session, twoNetBoard()).vias[0]!.layers).toEqual(twoNetBoard().copperLayers.map(l => l.id));
+  });
+  test("retains absent padstack through via fallback", () => {
+    const session = parseSes(`(session s (routes (network_out (net A (via V 1000 -1000)))))`);
+    expect(sesToItems(session, twoNetBoard()).vias[0]!.layers).toEqual(twoNetBoard().copperLayers.map(l => l.id));
+  });
+});

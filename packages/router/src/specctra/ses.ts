@@ -269,7 +269,11 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
     // before echo matching or creation can accept physically impossible barrels.
     if (!Number.isSafeInteger(diameter) || !Number.isSafeInteger(drill) || drill <= 0 || diameter <= drill)
       throw new SyntaxError("invalid session via diameter or drill");
-    let layers = (ps?.layers ?? []).map((n) => layerByName.get(n)).filter((l): l is BoardLayer => l !== undefined);
+    // Never discard a declared layer and then broaden the barrel to all layers.
+    // Missing padstack metadata may use the legacy fallback; unsupported metadata cannot.
+    if (ps?.layers.some((name) => !layerByName.has(name)))
+      throw new SyntaxError("unknown session via layer");
+    let layers = (ps?.layers ?? []).map((name) => layerByName.get(name)!);
     if (layers.length < 2) layers = allLayers;
     // Padstack names carry whole micrometres (`viaPadstackName`), so a size read from the name can
     // be up to 500 nm off the native via (e.g. a 0.3048 mm drill is named 305 um).
