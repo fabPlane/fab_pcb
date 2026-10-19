@@ -93,3 +93,42 @@ test("unstable native connection counts stop without saving a replacement", asyn
   expect(fixture.calls.filter((call) => call === "save")).toHaveLength(1);
   expect(fixture.calls.filter((call) => call === "apply").length).toBeLessThanOrEqual(4);
 });
+
+for (const undo of [undefined, "zero", "throws"] as const) {
+  test(`failed post-apply refill rejects without saving (${undo ?? "owned"})`, async () => {
+    const fixture = validationFixture({ valid: true, refill: "throws", ...(undo ? { undo } : {}) });
+    const info = await fixture.done;
+    expect(info.state).toBe("failed");
+    expect(info.error).toContain("native refill unavailable");
+    expect(info.summary).toBeUndefined();
+    expect(info.zoneRefill).toEqual({ before: true, after: false, error: "native refill unavailable" });
+    expect(fixture.calls.filter((call) => call === "save")).toHaveLength(1);
+    if (!undo) expect(fixture.copper()).toEqual(fixture.original);
+    else {
+      expect(info.error).toContain("rollback failed");
+      expect(info.error).toContain("KiCad memory");
+    }
+  });
+}
+
+test("failed refill with its own newer commit refuses a one-entry route rollback", async () => {
+  const fixture = validationFixture({ valid: true, refill: "commit-then-throws" });
+  const info = await fixture.done;
+  expect(info.state).toBe("failed");
+  expect(info.error).toContain("native refill unavailable");
+  expect(info.error).toContain("not at the top of the undo stack");
+  expect(info.error).toContain("KiCad memory");
+  expect(info.summary).toBeUndefined();
+  expect(fixture.calls).not.toContain("undo");
+  expect(fixture.calls.filter((call) => call === "save")).toHaveLength(1);
+  expect(fixture.copper().some((item) => item.id === "new-route")).toBe(true);
+});
+
+test("successful post-apply refill keeps the route and saves", async () => {
+  const fixture = validationFixture({ valid: true, refill: "valid" });
+  const info = await fixture.done;
+  expect(info.state).toBe("done");
+  expect(info.zoneRefill).toEqual({ before: true, after: true });
+  expect(fixture.calls).toEqual(["refill", "save", "apply", "drc", "refill", "save", "ratsnest"]);
+  expect(fixture.copper().some((item) => item.id === "new-route")).toBe(true);
+});

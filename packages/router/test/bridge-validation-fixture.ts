@@ -9,6 +9,7 @@ import { collisionBoard } from "./collision-fixture";
 // restored along with removal of the route when native validation is unavailable.
 export function validationFixture(
   options: {
+    refill?: "valid" | "throws" | "commit-then-throws";
     cleanupFirst?: boolean;
     undo?: "zero" | "throws";
     valid?: boolean;
@@ -29,7 +30,14 @@ export function validationFixture(
   const calls: string[] = [];
   let checks = 0;
   let topCommitId = "route-commit";
+  let fills = 0;
   const board = {
+    refillZones: async () => {
+      calls.push("refill");
+      if (++fills === 1 || options.refill === "valid") return;
+      if (options.refill === "commit-then-throws") topCommitId = "refill-commit";
+      throw new Error("native refill unavailable");
+    },
     save: async () => {
       calls.push("save");
     },
@@ -97,7 +105,7 @@ export function validationFixture(
       { id: "validation", transport: null },
       {
         router: "js",
-        refillZones: false,
+        refillZones: !!options.refill,
         ...(options.ratsnestFailure || options.relabel ? {} : { message: "validation regression" }),
         options: { nets: ["A"] },
       },

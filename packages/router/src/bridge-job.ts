@@ -18,9 +18,9 @@
  * The job refills the zones (unless `refillZones: false`), saves the board (`SaveDocument`, so
  * KiCad's exporter reads the current state), runs `extractRouteInput` -> router.route ->
  * `applyRouteResult` (one commit, message "Autoroute (<router>): <n> connections"), refills again,
- * then saves and re-measures the routed board. The post-apply refill is best-effort: its outcome
- * is reported in `zoneRefill`, but a failure does not discard the applied route or prevent the
- * final save. A failed native DRC or tentative ratsnest query during fab_router's cleanup undoes that route
+ * then saves and re-measures the routed board. A failed post-apply refill for fab_router
+ * fails without a final save and attempts an ownership-checked undo of the route commit.
+ * Other engines retain best-effort refill behavior. A failed native DRC or tentative ratsnest query during fab_router's cleanup undoes that route
  * commit before failing the job; a failed undo is reported explicitly. The browser only has to
  * pick up the `DocumentChanged` event as usual. Cancelling
  * before the apply leaves the board untouched; a failed router run (a fab_router error, a
@@ -61,7 +61,7 @@ export interface RouteJobZoneRefill {
   before: boolean;
   /** The post-apply refill completed successfully. */
   after: boolean;
-  /** A non-fatal post-apply refill failure. */
+  /** A post-apply refill failure (fatal for fab_router). */
   error?: string;
 }
 
@@ -443,6 +443,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         let message = request.message ?? autorouteMessage(request.router, routed);
         setState("applying");
         let applied = false;
+        let acceptedCommitId: string | undefined;
         const removedExistingCopper = new Map<string, string>();
         const retainedDanglingCopper: Array<{ id: string; net: string; reason: "locked" }> = [];
         // Without an explicit scope, repair only nets with input connections.
@@ -506,6 +507,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
                   continue;
                 }
               }
+              acceptedCommitId = committed.commitId;
               applied = true;
               break;
             }
@@ -536,6 +538,11 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
             } catch (e) {
               const detail = e instanceof Error ? e.message : String(e);
               info.zoneRefill.error = detail;
+              if (result.router === "fab-router" && acceptedCommitId) {
+                // A failed refill may itself have committed. Never assume undo(1)
+                // still targets the route; refuse if a newer native entry exists.
+                return await rejectTentativeValidation(board, acceptedCommitId, "post-apply zone refill", e);
+              }
               result.log.push(`RefillZones after the apply failed: ${detail}; saving the applied route without a fresh fill`);
             }
           }
