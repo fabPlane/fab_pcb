@@ -316,3 +316,32 @@ describe("parseSes / sesToItems", () => {
     expect(() => parseSes("(pcb x)")).toThrow(SyntaxError);
   });
 });
+
+
+function session(resolution: string, placement = false): string {
+  return `(session sample
+    ${placement ? `(placement (resolution ${resolution}))` : ""}
+    (routes ${placement ? "" : `(resolution ${resolution})`}
+      (network_out (net A (wire (path F.Cu 2 0 0 10 20))))))`;
+}
+
+for (const resolution of ["unknown 10", "toString 10", "um 0", "um -10", "um NaN", "um Infinity", "um 1e-320"]) {
+  for (const placement of [false, true]) {
+    test(`session resolution rejects ${resolution} in ${placement ? "placement fallback" : "routes"}`, () => {
+      expect(() => parseSes(session(resolution, placement))).toThrow(SyntaxError);
+    });
+  }
+}
+
+for (const [unit, scale] of [["um", 100], ["mm", 100000], ["cm", 1000000], ["inch", 2540000], ["mil", 2540]] as const) {
+  test(`session resolution preserves ${unit} geometry`, () => {
+    const parsed = parseSes(session(`${unit} 10`));
+    expect(parsed.nmPerUnit).toBe(scale);
+    expect(parsed.wires[0]?.width).toBe(2 * scale);
+    expect(parsed.wires[0]?.points).toEqual([{ x: 0, y: -0 }, { x: 10 * scale, y: -20 * scale }]);
+  });
+}
+
+test("session resolution preserves omitted resolution defaults", () => {
+  expect(parseSes("(session sample (routes))").nmPerUnit).toBe(1000);
+});

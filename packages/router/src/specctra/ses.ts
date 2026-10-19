@@ -48,9 +48,15 @@ const UNIT_NM: Record<string, number> = { um: 1_000, mm: 1_000_000, cm: 10_000_0
 /** `(resolution um 10)` -> 100 nm per unit. */
 export function resolutionToNm(res: SExpr[] | undefined): number {
   const [unit, count] = atoms(res);
-  const perUnit = UNIT_NM[unit ?? "um"] ?? 1_000;
-  const n = Number(count ?? "1") || 1;
-  return perUnit / n;
+  const name = unit ?? "um";
+  if (!Object.hasOwn(UNIT_NM, name)) throw new SyntaxError(`unsupported session resolution unit: ${name}`);
+  const n = Number(count ?? "1");
+  const scale = UNIT_NM[name]! / n;
+  // Invalid scales can mirror, collapse or mis-scale every imported copper item.
+  // Keep the historical defaults only for omitted values, never malformed ones.
+  if (!Number.isFinite(n) || n <= 0 || !Number.isFinite(scale) || scale <= 0)
+    throw new SyntaxError(`invalid session resolution count: ${count}`);
+  return scale;
 }
 
 function pathOf(list: SExpr[], nmPerUnit: number): { layer: string; width: number; points: { x: number; y: number }[] } | undefined {
