@@ -1,0 +1,81 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-validation.test.ts:
+(pass) failed native validation restores tentative copper [3.58ms]
+(pass) failed native validation restores tentative copper after a cleanup retry [0.31ms]
+(pass) failed validation reports an unsuccessful rollback (zero) without claiming restoration [0.20ms]
+(pass) failed validation reports an unsuccessful rollback (throws) without claiming restoration [0.08ms]
+(pass) successful native validation keeps and saves the applied route without undo [0.56ms]
+(pass) failed validation preserves an unrelated edit above the route commit [0.18ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (owned) [0.31ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (zero) [0.08ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (throws) [0.13ms]
+(pass) relabelled route is validated and restored before a failed job [0.16ms]
+(pass) relabelled route with successful validation is saved [0.40ms]
+(pass) unstable native connection counts stop without saving a replacement [0.17ms]
+(pass) failed post-apply refill rejects without saving (owned) [0.32ms]
+(pass) failed post-apply refill rejects without saving (zero) [0.16ms]
+(pass) failed post-apply refill rejects without saving (throws) [0.09ms]
+(pass) failed refill with its own newer commit refuses a one-entry route rollback [0.17ms]
+(pass) successful post-apply refill keeps the route and saves [0.16ms]
+135 | 
+136 | for (const undo of [undefined, "zero", "throws"] as const) {
+137 |   test(`failed filled native DRC query rejects before saving (${undo ?? "owned"})`, async () => {
+138 |     const fixture = validationFixture({ valid: true, refill: "valid", finalDrcFailure: true, ...(undo ? { undo } : {}) });
+139 |     const info = await fixture.done;
+140 |     expect(info.state).toBe("failed");
+                             ^
+error: expect(received).toBe(expected)
+
+Expected: "failed"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:140:24)
+(fail) failed filled native DRC query rejects before saving (owned) [0.31ms]
+135 | 
+136 | for (const undo of [undefined, "zero", "throws"] as const) {
+137 |   test(`failed filled native DRC query rejects before saving (${undo ?? "owned"})`, async () => {
+138 |     const fixture = validationFixture({ valid: true, refill: "valid", finalDrcFailure: true, ...(undo ? { undo } : {}) });
+139 |     const info = await fixture.done;
+140 |     expect(info.state).toBe("failed");
+                             ^
+error: expect(received).toBe(expected)
+
+Expected: "failed"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:140:24)
+(fail) failed filled native DRC query rejects before saving (zero) [0.10ms]
+135 | 
+136 | for (const undo of [undefined, "zero", "throws"] as const) {
+137 |   test(`failed filled native DRC query rejects before saving (${undo ?? "owned"})`, async () => {
+138 |     const fixture = validationFixture({ valid: true, refill: "valid", finalDrcFailure: true, ...(undo ? { undo } : {}) });
+139 |     const info = await fixture.done;
+140 |     expect(info.state).toBe("failed");
+                             ^
+error: expect(received).toBe(expected)
+
+Expected: "failed"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:140:24)
+(fail) failed filled native DRC query rejects before saving (throws) [0.07ms]
+148 | }
+149 | 
+150 | test("failed filled DRC query preserves a newer unrelated edit", async () => {
+151 |   const fixture = validationFixture({ valid: true, refill: "valid", finalDrcFailure: true, finalForeignEdit: true });
+152 |   const info = await fixture.done;
+153 |   expect(info.state).toBe("failed");
+                           ^
+error: expect(received).toBe(expected)
+
+Expected: "failed"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:153:22)
+(fail) failed filled DRC query preserves a newer unrelated edit [0.15ms]
+
+ 17 pass
+ 4 fail
+ 103 expect() calls
+Ran 21 tests across 1 file. [151.00ms]
