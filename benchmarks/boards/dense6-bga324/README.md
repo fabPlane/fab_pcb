@@ -81,7 +81,7 @@ Licence: MIT (see `LICENSE`), covering the generator, scripts and generated boar
 ## Verify a regenerated candidate
 
 The opt-in verifier checks two byte-identical generator runs at seed 6406, native
-pad/footprint/outline geometry, default netclass dimensions, DSN content, and
+pad/footprint/outline geometry, default netclass dimensions and native rule minima, DSN content, and
 native DRC on generated and bundled boards. It works on copies in a fresh evidence
 directory. It does not change the frozen suite, routing inputs or promotion gate.
 
