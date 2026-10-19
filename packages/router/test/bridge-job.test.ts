@@ -540,6 +540,6 @@ test("native cleanup keeps a useful connection behind a dangling chain longer th
   );
   expect(info.state).toBe("done");
   expect(info.summary!.tracks).toBe(1);
-  expect(checks).toBe(27);
+  expect(checks).toBe(28); // One pre-apply baseline plus 27 cleanup validations.
   expect(info.summary!.routed).toBe(1);
 });

@@ -10,7 +10,7 @@ for (const cleanupFirst of [false, true]) {
     expect(info.summary).toBeUndefined();
     expect(fixture.copper()).toEqual(fixture.original);
     expect(fixture.calls).toEqual(
-      cleanupFirst ? ["save", "apply", "drc", "undoStack", "undo", "apply", "drc", "undoStack", "undo"] : ["save", "apply", "drc", "undoStack", "undo"],
+      cleanupFirst ? ["save", "drc", "apply", "drc", "undoStack", "undo", "apply", "drc", "undoStack", "undo"] : ["save", "drc", "apply", "drc", "undoStack", "undo"],
     );
   });
 }
@@ -23,7 +23,7 @@ for (const undo of ["zero", "throws"] as const) {
     expect(info.error).toContain("native DRC transport unavailable");
     expect(info.error).toContain("rollback failed");
     expect(info.error).toContain("KiCad memory");
-    expect(fixture.calls).toEqual(["save", "apply", "drc", "undoStack", "undo"]);
+    expect(fixture.calls).toEqual(["save", "drc", "apply", "drc", "undoStack", "undo"]);
     expect(fixture.copper().some((item) => item.id === "new-route")).toBe(true);
   });
 }
@@ -33,7 +33,7 @@ test("successful native validation keeps and saves the applied route without und
   const info = await fixture.done;
   expect(info.state).toBe("done");
   expect(fixture.copper().map((item) => item.id)).toEqual(["stub", "protected", "other-net", "new-route"]);
-  expect(fixture.calls).toEqual(["save", "apply", "drc", "save", "ratsnest"]);
+  expect(fixture.calls).toEqual(["save", "drc", "apply", "drc", "save", "ratsnest"]);
 });
 
 test("failed validation preserves an unrelated edit above the route commit", async () => {
@@ -43,7 +43,7 @@ test("failed validation preserves an unrelated edit above the route commit", asy
   expect(info.error).toContain("native DRC transport unavailable");
   expect(info.error).toContain("rollback failed");
   expect(info.error).toContain("not at the top of the undo stack");
-  expect(fixture.calls).toEqual(["save", "apply", "drc", "undoStack"]);
+  expect(fixture.calls).toEqual(["save", "drc", "apply", "drc", "undoStack"]);
   expect(fixture.copper().map((item) => item.id)).toEqual(["stub", "protected", "other-net", "new-route", "unrelated-edit"]);
 });
 
@@ -67,7 +67,7 @@ test("relabelled route is validated and restored before a failed job", async () 
   expect(info.state).toBe("failed");
   expect(info.error).toContain("native DRC transport unavailable");
   expect(info.summary).toBeUndefined();
-  expect(fixture.calls.filter((call) => call === "drc")).toHaveLength(2);
+  expect(fixture.calls.filter((call) => call === "drc")).toHaveLength(3);
   expect(fixture.calls.filter((call) => call === "save")).toHaveLength(1);
   expect(fixture.copper()).toEqual(fixture.original);
   expect(fixture.calls.filter((call) => call === "undo")).toHaveLength(2);
@@ -77,7 +77,7 @@ test("relabelled route with successful validation is saved", async () => {
   const fixture = validationFixture({ relabel: true, valid: true });
   const info = await fixture.done;
   expect(info.state).toBe("done");
-  expect(fixture.calls.filter((call) => call === "drc")).toHaveLength(2);
+  expect(fixture.calls.filter((call) => call === "drc")).toHaveLength(3);
   expect(fixture.calls.filter((call) => call === "apply")).toHaveLength(2);
   expect(fixture.calls.filter((call) => call === "save")).toHaveLength(2);
   expect(fixture.copper().map((item) => item.id)).toEqual(["stub", "protected", "other-net", "new-route"]);
@@ -173,6 +173,27 @@ for (const filledMarkers of ["new", "duplicate", "replacement"] as const) {
 for (const filledMarkers of ["existing", "excluded"] as const) {
   test(`allows unchanged or excluded filled markers (${filledMarkers})`, async () => {
     const fixture = validationFixture({ valid: true, refill: "valid", filledMarkers });
+    const info = await fixture.done;
+    expect(info.state).toBe("done");
+    expect(fixture.calls.filter((call) => call === "save")).toHaveLength(2);
+    expect(fixture.calls).not.toContain("undo");
+  });
+}
+
+for (const filledMarkers of ["new", "duplicate", "replacement"] as const) {
+  test(`rejects new native errors with zone refill disabled (${filledMarkers})`, async () => {
+    const fixture = validationFixture({ valid: true, unfilledErrors: true, filledMarkers });
+    const info = await fixture.done;
+    expect(info.state).toBe("failed");
+    expect(info.error).toContain("new native DRC error(s)");
+    expect(info.summary).toBeUndefined();
+    expect(fixture.calls.filter((call) => call === "save")).toHaveLength(1);
+    expect(fixture.copper()).toEqual(fixture.original);
+  });
+}
+for (const filledMarkers of ["existing", "excluded"] as const) {
+  test(`allows existing or excluded errors with zone refill disabled (${filledMarkers})`, async () => {
+    const fixture = validationFixture({ valid: true, unfilledErrors: true, filledMarkers });
     const info = await fixture.done;
     expect(info.state).toBe("done");
     expect(fixture.calls.filter((call) => call === "save")).toHaveLength(2);

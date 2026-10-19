@@ -20,6 +20,7 @@
  * `applyRouteResult` (one commit, message "Autoroute (<router>): <n> connections"), refills again,
  * then saves and re-measures the routed board. A failed post-apply refill for fab_router
  * fails without a final save and attempts an ownership-checked undo of the route commit.
+ * Disabling refill still compares native DRC errors before and after tentative application.
  * Other engines retain best-effort refill behavior. A failed native DRC or tentative ratsnest query during fab_router's cleanup undoes that route
  * commit before failing the job; a failed undo is reported explicitly. The browser only has to
  * pick up the `DocumentChanged` event as usual. Cancelling
@@ -451,12 +452,12 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         const removableExisting = new Map(
           originalCopper.filter((item) => !item.locked && item.net && repairNets.has(item.net)).map((item) => [item.id, item.net!]),
         );
-        // Compare two filled states, never stale post-apply fills. Marker UUIDs
+        // Compare matching states: filled when requested, otherwise unfilled. Marker UUIDs
         // change on each native check; retain multiplicity of stable identities.
-        let filledBaseline: DrcMarker[] | undefined;
-        if (result.router === "fab-router" && info.zoneRefill.before && !alreadyApplied(result) &&
+        let nativeBaseline: DrcMarker[] | undefined;
+        if (result.router === "fab-router" && !alreadyApplied(result) &&
             (result.tracks.length || result.vias.length || result.claimedVias?.length)) {
-          filledBaseline = (await board.drc.run({ refillZones: false })).markers;
+          nativeBaseline = (await board.drc.run({ refillZones: false })).markers;
         }
         if (!alreadyApplied(result) && (result.tracks.length || result.vias.length || result.claimedVias?.length)) {
           // Each cleanup pass removes an item; allow one extra pass to validate a relabelled commit.
@@ -488,6 +489,15 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
             const rejectedIds = new Set([...danglingIds].filter((id) => createdIds.has(id)));
             const existingIds = [...danglingIds].filter((id) => removableExisting.has(id) && !removedExistingCopper.has(id));
             if (!rejectedIds.size && !existingIds.length) {
+              // Disabling refill skips zone recomputation, not native DRC safety.
+              // Compare matching unfilled states before accepting tentative copper.
+              if (!(request.refillZones ?? true)) {
+                const added = newNativeErrors(nativeBaseline ?? [], drc.markers);
+                if (added) return await rejectTentativeValidation(
+                  board, committed.commitId, "native DRC", new Error(`${added} new native DRC error(s)`),
+                );
+              }
+
               for (const item of originalCopper.filter(
                 (item) => item.locked && item.net && repairNets.has(item.net) && danglingIds.has(item.id),
               )) {
@@ -556,7 +566,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
           if (result.router === "fab-router" && acceptedCommitId && info.zoneRefill.after) {
             try {
               const filled = await board.drc.run({ refillZones: false });
-              const added = newFilledErrors(filledBaseline ?? [], filled.markers);
+              const added = newNativeErrors(nativeBaseline ?? [], filled.markers);
               if (added) throw new Error(`${added} new filled native DRC error(s)`);
             } catch (validationError) {
               return await rejectTentativeValidation(board, acceptedCommitId, "post-refill native DRC", validationError);
@@ -792,7 +802,7 @@ export function matchRouteJobPath(pathname: string): { sessionId: string; jobId?
 }
 
 /** Stable marker identity excludes regenerated marker UUIDs and human descriptions. */
-function newFilledErrors(before: readonly DrcMarker[], after: readonly DrcMarker[]): number {
+function newNativeErrors(before: readonly DrcMarker[], after: readonly DrcMarker[]): number {
   const key = (m: DrcMarker) => JSON.stringify([
     m.errorType, m.layer, m.position ? [String(m.position.xNm), String(m.position.yNm)] : null,
     m.items.map((item) => item.value).sort(),
