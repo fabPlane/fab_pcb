@@ -1,0 +1,196 @@
+{
+  "before": {
+    "allowed_cpus": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "inputs_sha256": "c36936fd81f6af0e9efd11990ad976127b01f6e03d7db889ebc5e876af06c9a1",
+    "harness_sha256": {
+      "dsn-path.py": "0c03ef2edc81b6d806f59486d82a9be1531e74933e2009abbdb06629ddb6aee3",
+      "dsn-engine-scoring-c2-v1.py": "cf305ececb1065d1a22110940d6802aa2deedcfe2ef84fb806d6de9077ecab43",
+      "native-router-format-v2.py": "de484d5beba50be5bc5d48cbb2be44de0e72da7195b01e7f185782d92ce29a0d",
+      "runner-scoring-v2.py": "d177864e1d6ab965556609fca3376daaee99fbc206c66edc02ef237ceb0cdaab",
+      "native-check-v4.3.py": "1ced7295253415bf7cc9d4d4c27c9bb4f0053d132e212fccbbc28a5a17f3e57e",
+      "native-router-path-scoring-v3.py": "ed2ef80f62095dcadd6a8b300afb20a49cb117ab7f48d647eaffeb187b2539aa",
+      "dsn-engine-scoring-v1.py": "45cf0877b49cfd133f08c08ac2ad14213313522fe5f290f8bf01972e06a480c0",
+      "native-check-v3.py": "370a1b84f2208f63244d17fc55be8940ef3c611626074b1bff3993cc3141b1a8",
+      "fab-route-c2.ts": "36a05f4393a49060f93572c890847b8ff068402d4380bbb0c9d33715c8d6e3de",
+      "scoring_telemetry_v1.py": "02469e99b4f12a071c7aba9bee62e94a91168aea11bd94174dc3fab3ddd0df7d"
+    },
+    "candidate_commit": "69cf598db98c136bff16bbe02bccdded95674b18",
+    "evidence_sha256": {
+      "controls.json": "80a64f1ac4f526f0bba2b6c8afd7a97ab2967c30cfc7e5ccb4cdfc3fafbf23df",
+      "results.json": "eb878f1337e76ff4ce467c83941b2dfea8f2aa5a7074052f9115fc9e40ed2545",
+      "summary.json": "ecd3cc42600d05b9700f2a50c08869d3ab0e04cf492c684b7a8848874f9d23a3"
+    },
+    "runs": [
+      {
+        "case": "kitspace-lcr-addon-j3",
+        "seed": 1,
+        "passed": true,
+        "seconds": 2.000893444,
+        "vias": 40,
+        "length_mm": 845.4859970828462,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "kitspace-lcr-addon-j3",
+        "seed": 2,
+        "passed": true,
+        "seconds": 2.1641915750000003,
+        "vias": 40,
+        "length_mm": 845.4859970828462,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "kitspace-lcr-addon-j3",
+        "seed": 3,
+        "passed": true,
+        "seconds": 2.15053366,
+        "vias": 40,
+        "length_mm": 845.4859970828462,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "nextbusclock-nextbusclockv1-j2-medium",
+        "seed": 1,
+        "passed": true,
+        "seconds": 0.9692210490000001,
+        "vias": 1,
+        "length_mm": 1484.1054119012779,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "nextbusclock-nextbusclockv1-j2-medium",
+        "seed": 2,
+        "passed": true,
+        "seconds": 0.978533801,
+        "vias": 1,
+        "length_mm": 1484.1054119012779,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "nextbusclock-nextbusclockv1-j2-medium",
+        "seed": 3,
+        "passed": true,
+        "seconds": 0.9788917939999999,
+        "vias": 1,
+        "length_mm": 1484.1054119012779,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      }
+    ]
+  },
+  "after": {
+    "allowed_cpus": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "inputs_sha256": "c36936fd81f6af0e9efd11990ad976127b01f6e03d7db889ebc5e876af06c9a1",
+    "harness_sha256": {
+      "dsn-path.py": "0c03ef2edc81b6d806f59486d82a9be1531e74933e2009abbdb06629ddb6aee3",
+      "dsn-engine-scoring-c2-v1.py": "cf305ececb1065d1a22110940d6802aa2deedcfe2ef84fb806d6de9077ecab43",
+      "native-router-format-v2.py": "de484d5beba50be5bc5d48cbb2be44de0e72da7195b01e7f185782d92ce29a0d",
+      "runner-scoring-v2.py": "d177864e1d6ab965556609fca3376daaee99fbc206c66edc02ef237ceb0cdaab",
+      "native-check-v4.3.py": "1ced7295253415bf7cc9d4d4c27c9bb4f0053d132e212fccbbc28a5a17f3e57e",
+      "native-router-path-scoring-v3.py": "ed2ef80f62095dcadd6a8b300afb20a49cb117ab7f48d647eaffeb187b2539aa",
+      "dsn-engine-scoring-v1.py": "45cf0877b49cfd133f08c08ac2ad14213313522fe5f290f8bf01972e06a480c0",
+      "native-check-v3.py": "370a1b84f2208f63244d17fc55be8940ef3c611626074b1bff3993cc3141b1a8",
+      "fab-route-c2.ts": "36a05f4393a49060f93572c890847b8ff068402d4380bbb0c9d33715c8d6e3de",
+      "scoring_telemetry_v1.py": "02469e99b4f12a071c7aba9bee62e94a91168aea11bd94174dc3fab3ddd0df7d"
+    },
+    "candidate_commit": "5c893d824b1a2ea649536980d18e2b48a30cafbd",
+    "evidence_sha256": {
+      "controls.json": "4c0651befbb68b7f8f2dba03e14c99fbc7b361b29374cc1159731968349a0ad6",
+      "results.json": "9e5bdc360769cc67ae1d39fcdd7b3ef93ed3a7b3e1e086efdc1568db270ddccb",
+      "summary.json": "5bea7a9067348ae9f2052049d77f3fc4853998b7da5bffd6d88dfa348487af89"
+    },
+    "runs": [
+      {
+        "case": "kitspace-lcr-addon-j3",
+        "seed": 1,
+        "passed": true,
+        "seconds": 2.153118616,
+        "vias": 40,
+        "length_mm": 845.4859970828462,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "kitspace-lcr-addon-j3",
+        "seed": 2,
+        "passed": true,
+        "seconds": 2.129880452,
+        "vias": 40,
+        "length_mm": 845.4859970828462,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "kitspace-lcr-addon-j3",
+        "seed": 3,
+        "passed": true,
+        "seconds": 2.008746815,
+        "vias": 40,
+        "length_mm": 845.4859970828462,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "nextbusclock-nextbusclockv1-j2-medium",
+        "seed": 1,
+        "passed": true,
+        "seconds": 0.975758151,
+        "vias": 1,
+        "length_mm": 1484.1054119012779,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "nextbusclock-nextbusclockv1-j2-medium",
+        "seed": 2,
+        "passed": true,
+        "seconds": 1.013649599,
+        "vias": 1,
+        "length_mm": 1484.1054119012779,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "nextbusclock-nextbusclockv1-j2-medium",
+        "seed": 3,
+        "passed": true,
+        "seconds": 0.985627019,
+        "vias": 1,
+        "length_mm": 1484.1054119012779,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      }
+    ]
+  }
+}
