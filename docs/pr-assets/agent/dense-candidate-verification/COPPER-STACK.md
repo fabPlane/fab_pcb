@@ -30,3 +30,5 @@ FAB_ROUTER_MODULE=$HOME/bench/repos/fab_router/src/api.ts \
 ```
 
 Validation: typecheck, all eleven unit packages, fifteen optimized Python tests. No layer-check script is defined. Initial unit invocations omitted the required local engine module selector and failed the corpus worker import; the configured command above passes. No frozen benchmark, checker, scoring, engine or runtime changes.
+
+Additional native export probe: after ignoring only the DSN root export filename, the renamed and power-layer mutations change the exported DSN; the mixed-layer mutation retains the same DSN payload. All three change the persisted native stack contract. This establishes export sensitivity for two controls, without claiming a routing effect for any control.
