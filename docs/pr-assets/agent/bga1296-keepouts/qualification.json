@@ -1,0 +1,124 @@
+{
+  "repeats": 3,
+  "checker": "10.0.6",
+  "parameters": {
+    "seed": 6596,
+    "layers": 8,
+    "balls": 1296,
+    "nets": 1296,
+    "pads": 2592,
+    "pitch_mm": 0.5,
+    "ball_mm": 0.2,
+    "target_mm": 0.4,
+    "target_pitch_mm": 0.8,
+    "board_mm": [
+      90,
+      90
+    ],
+    "clearance_mm": 0.1,
+    "track_mm": 0.1,
+    "via_mm": 0.3,
+    "drill_mm": 0.1,
+    "keepouts_mm": [
+      [
+        29,
+        31,
+        32,
+        59
+      ],
+      [
+        58,
+        31,
+        61,
+        59
+      ]
+    ]
+  },
+  "rows": [
+    {
+      "repeat": 0,
+      "variant": "before",
+      "native_opens": 1296,
+      "native_errors": 0,
+      "native_warnings": 0,
+      "reported_opens": 499,
+      "rule_areas": 0,
+      "dsn_keepout_polygons": 0,
+      "terminal_signature": "ba999e27a7ede0793d44e2b5ea6c97aa6414323bdfc593cfcf051e71aad98ce1",
+      "project_sha256": "b24440576799edca784d2486abd463eccb3084b190b4e9e9c12ef27c4540f76d",
+      "board_sha256": "961b02b0804cff5ca79bc7fa298bbe554779c07a5caf045324717852f04c3364",
+      "dsn_sha256": "cacaf97254137e70c8a2a18db807167cb17e59b48bf0f3a48964c713310df22b"
+    },
+    {
+      "repeat": 0,
+      "variant": "after",
+      "native_opens": 1296,
+      "native_errors": 0,
+      "native_warnings": 0,
+      "reported_opens": 499,
+      "rule_areas": 2,
+      "dsn_keepout_polygons": 16,
+      "terminal_signature": "ba999e27a7ede0793d44e2b5ea6c97aa6414323bdfc593cfcf051e71aad98ce1",
+      "project_sha256": "b24440576799edca784d2486abd463eccb3084b190b4e9e9c12ef27c4540f76d",
+      "board_sha256": "77ca2652fb5ca3a066abb6267fcbaebda2b354e8f157e7fcc17a970736d87687",
+      "dsn_sha256": "ee3697be0333e3aa4bc45d206dc966254afb8fbb77c0f0c1f92693e23411e7aa"
+    },
+    {
+      "repeat": 1,
+      "variant": "before",
+      "native_opens": 1296,
+      "native_errors": 0,
+      "native_warnings": 0,
+      "reported_opens": 499,
+      "rule_areas": 0,
+      "dsn_keepout_polygons": 0,
+      "terminal_signature": "ba999e27a7ede0793d44e2b5ea6c97aa6414323bdfc593cfcf051e71aad98ce1",
+      "project_sha256": "b24440576799edca784d2486abd463eccb3084b190b4e9e9c12ef27c4540f76d",
+      "board_sha256": "961b02b0804cff5ca79bc7fa298bbe554779c07a5caf045324717852f04c3364",
+      "dsn_sha256": "cacaf97254137e70c8a2a18db807167cb17e59b48bf0f3a48964c713310df22b"
+    },
+    {
+      "repeat": 1,
+      "variant": "after",
+      "native_opens": 1296,
+      "native_errors": 0,
+      "native_warnings": 0,
+      "reported_opens": 499,
+      "rule_areas": 2,
+      "dsn_keepout_polygons": 16,
+      "terminal_signature": "ba999e27a7ede0793d44e2b5ea6c97aa6414323bdfc593cfcf051e71aad98ce1",
+      "project_sha256": "b24440576799edca784d2486abd463eccb3084b190b4e9e9c12ef27c4540f76d",
+      "board_sha256": "77ca2652fb5ca3a066abb6267fcbaebda2b354e8f157e7fcc17a970736d87687",
+      "dsn_sha256": "ee3697be0333e3aa4bc45d206dc966254afb8fbb77c0f0c1f92693e23411e7aa"
+    },
+    {
+      "repeat": 2,
+      "variant": "before",
+      "native_opens": 1296,
+      "native_errors": 0,
+      "native_warnings": 0,
+      "reported_opens": 499,
+      "rule_areas": 0,
+      "dsn_keepout_polygons": 0,
+      "terminal_signature": "ba999e27a7ede0793d44e2b5ea6c97aa6414323bdfc593cfcf051e71aad98ce1",
+      "project_sha256": "b24440576799edca784d2486abd463eccb3084b190b4e9e9c12ef27c4540f76d",
+      "board_sha256": "961b02b0804cff5ca79bc7fa298bbe554779c07a5caf045324717852f04c3364",
+      "dsn_sha256": "cacaf97254137e70c8a2a18db807167cb17e59b48bf0f3a48964c713310df22b"
+    },
+    {
+      "repeat": 2,
+      "variant": "after",
+      "native_opens": 1296,
+      "native_errors": 0,
+      "native_warnings": 0,
+      "reported_opens": 499,
+      "rule_areas": 2,
+      "dsn_keepout_polygons": 16,
+      "terminal_signature": "ba999e27a7ede0793d44e2b5ea6c97aa6414323bdfc593cfcf051e71aad98ce1",
+      "project_sha256": "b24440576799edca784d2486abd463eccb3084b190b4e9e9c12ef27c4540f76d",
+      "board_sha256": "77ca2652fb5ca3a066abb6267fcbaebda2b354e8f157e7fcc17a970736d87687",
+      "dsn_sha256": "ee3697be0333e3aa4bc45d206dc966254afb8fbb77c0f0c1f92693e23411e7aa"
+    }
+  ],
+  "limitation": "Input qualification only; capped report does not prove exact routed opens or feasibility."
+}
