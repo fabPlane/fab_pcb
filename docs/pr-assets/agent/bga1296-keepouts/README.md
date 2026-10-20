@@ -18,7 +18,7 @@ Only the two routing keepouts differ. Native geometry checks pass in every run.
 The JSON DRC lists 499 opens in each variant because of the checker limit.
 It is not used as the exact native denominator. Qualification does not establish
 routed feasibility, router gain or native baseline adoption. Full routing
-measurement is recorded separately when the cohort finishes.
+measurement is retained in [MEASUREMENT.md](MEASUREMENT.md).
 
 ```sh
 nice -n 10 taskset -c 0-5 timeout 180 /usr/bin/python3 -O docs/pr-assets/agent/bga1296-keepouts/qualify.py /tmp/bga1296-qualification

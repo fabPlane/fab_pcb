@@ -1,0 +1,38 @@
+[
+  {
+    "case": "bga1296-without-keepouts-control",
+    "nets": 1296,
+    "layers": 8,
+    "native_opens": 1296,
+    "rule_areas": 0,
+    "dsn_keepout_polygons": 0,
+    "effective_rules": [
+      0.1,
+      0.1,
+      0.3,
+      0.1
+    ],
+    "terminal_signature": "ba999e27a7ede0793d44e2b5ea6c97aa6414323bdfc593cfcf051e71aad98ce1",
+    "project_sha256": "b24440576799edca784d2486abd463eccb3084b190b4e9e9c12ef27c4540f76d",
+    "dsn_sha256": "a9d3293504c0b3e6e2c2524973862cd76df17d8b4df84cf1f13879e0561f6f90",
+    "board_sha256": "961b02b0804cff5ca79bc7fa298bbe554779c07a5caf045324717852f04c3364"
+  },
+  {
+    "case": "bga1296-eight-layer-keepouts",
+    "nets": 1296,
+    "layers": 8,
+    "native_opens": 1296,
+    "rule_areas": 2,
+    "dsn_keepout_polygons": 16,
+    "effective_rules": [
+      0.1,
+      0.1,
+      0.3,
+      0.1
+    ],
+    "terminal_signature": "ba999e27a7ede0793d44e2b5ea6c97aa6414323bdfc593cfcf051e71aad98ce1",
+    "project_sha256": "b24440576799edca784d2486abd463eccb3084b190b4e9e9c12ef27c4540f76d",
+    "dsn_sha256": "b23852b76adb38fcd2e34303e5db9037a7e80edd3b013451873208c5163600e0",
+    "board_sha256": "77ca2652fb5ca3a066abb6267fcbaebda2b354e8f157e7fcc17a970736d87687"
+  }
+]
