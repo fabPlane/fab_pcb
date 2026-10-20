@@ -1,0 +1,57 @@
+{
+  "base": "a6da80a124dcf28861a85448ce85c1c5c054ae74",
+  "branch": "agent/fab-router-native-drc-gate",
+  "machine": "hyper-ms-lin",
+  "cores": [
+    20,
+    21,
+    22,
+    23,
+    24,
+    25
+  ],
+  "fixture": "Complete retained power net after stage0; not scored or fully routed",
+  "sourceExecutableChanges": [
+    "tools/native-thermal-proposals.py"
+  ],
+  "defaultSourceUnchanged": true,
+  "integrationPinBefore": "a8f7762467b97863032a55e3b924dfd199456dac",
+  "integrationPinAndBeforeControlExecutableIdentical": true,
+  "oldGeneratorSha256": "8a587de2ccb42b5ea51fff9943a593620ab52e8d2f8307e2fd13a35e2b4d0913",
+  "implementationCommit": "7e56b09f221dff426670547c6e0390891be4c1d8",
+  "engineChecks": {
+    "exitCode": 0,
+    "tests": 933,
+    "failed": 0,
+    "assertions": 398983,
+    "seconds": 1222.56,
+    "layerFiles": 65,
+    "layerViolations": 0
+  },
+  "fixtureSha256": {
+    "LICENSE": "35a32c03673f0e64629e72d90c7822f7c982101963a3ba4f7d5bf25f591f8360",
+    "input.kicad_pcb.gz": "4879c6ddd9aa80dc4c1636acc9df391e456f12b759601a316a34e538095d78ad",
+    "power-stage0-added.sexpr.gz": "18422387d634fed690aa17b9e3bb8a2384f3c0bc78a2c85df23a20d19d6d6ea7",
+    "board.kicad_pro": "58729c9ab3ed262b908bb02eb8689ab76c5d128b44d32f63ff891e609e97a6a8",
+    "board.kicad_dru": "bbef6e119424cbf626d6fec0697069e203a9bde1d54f30517b179a0375f28b6b"
+  },
+  "nativeSearchExitCode": 0,
+  "nativeSearchProposalChecks": 169,
+  "nativeSearchStages": 1,
+  "nativeSearchGeneratedProposals": 200,
+  "nativeSearchUnselectedProposals": 31,
+  "nativeSearchSnapshotToResultSeconds": 2144.1724841594696,
+  "nativeSearchWithin600s": false,
+  "packageChecks": {
+    "exitCode": 0,
+    "passed": 109,
+    "skippedExistingAvailability": 6,
+    "failed": 0,
+    "assertions": 416,
+    "seconds": 25.14
+  },
+  "freshCorpusBeforeAndAfterExitCodes": [
+    0,
+    0
+  ]
+}

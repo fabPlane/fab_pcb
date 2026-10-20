@@ -1,0 +1,13 @@
+{
+  "repeats": 3,
+  "nativeAccepted": 3,
+  "opens": 95,
+  "lostSourcePairs": 0,
+  "lostCurrentPairs": 0,
+  "candidateHashes": [
+    "0384bb4bba31003d2229c9ec473d9d1bbb9232243d29040d71c55ff8fc854978",
+    "0384bb4bba31003d2229c9ec473d9d1bbb9232243d29040d71c55ff8fc854978",
+    "0384bb4bba31003d2229c9ec473d9d1bbb9232243d29040d71c55ff8fc854978"
+  ],
+  "priorPrefixByteExact": true
+}
