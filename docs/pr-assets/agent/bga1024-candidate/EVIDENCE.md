@@ -323,3 +323,105 @@ A public unit invocation initially lacked the runtime module and one retry used
 an incorrect entrypoint; the configured `src/api.ts` run passed. No failed
 routing invocation was discarded. An initial reproduction lacked its parent
 directory; preparation now creates it and replays successfully.
+
+## Cycle 71: required runner source roots
+
+Qualification of the separate benchmark runner found that a source root replaced
+by a regular file or FIFO was silently omitted from its content observation.
+The runner now requires both source roots to be directories before traversal.
+This public update records fixture qualification evidence; the runner fix is in
+the separate benchmark contribution. Native fixture, adapter and scoring code
+are unchanged. Native baseline adoption and routed feasibility remain pending.
+
+Same host, cores 0–5, three fresh processes per revision; both required roots
+are checked in each process. These are deterministic admission controls.
+
+|Condition|Before accepted|After accepted|Checks each|
+|---|---:|---:|---:|
+|Intact source trees|3|3|3|
+|Regular-file roots|6|0|6|
+|FIFO roots|6|0|6|
+
+Reproduce from the separate benchmark checkout:
+
+```sh
+nice -n 10 taskset -c 0-5 timeout 60 bun docs/pr-assets/agent/scoring-source-cache/root-audit.ts /tmp/root-controls.json
+```
+
+The public fixture verification commands remain:
+
+```sh
+nice -n 10 taskset -c 0-5 timeout 180 bun run typecheck
+FAB_ROUTER_MODULE=$HOME/bench/repos/fab_router/src/api.ts nice -n 10 taskset -c 0-5 timeout 180 bun run test:unit
+nice -n 10 taskset -c 0-5 timeout 180 /usr/bin/python3 -O -m unittest discover -s benchmarks/boards/bga1024 -p 'test_*.py'
+```
+
+![Required source roots](https://github.com/fabPlane/fab_pcb/blob/agent/bga1024-candidate/docs/pr-assets/agent/bga1024-candidate/roots.png?raw=true)
+
+## Cycle 71 complete routing comparison
+
+Same machine, normalized fixtures and backend identities as cycle 70. Cores 0–5,
+nice 10, ten-second routing budgets, three fresh repeats: four ready backends,
+five bundled suites, 54 compatible groups, 162 attempts per cohort. All attempts
+are retained without retries or discards. Only the source-root guard differs
+across measured source/script/corpus files. Source observations match at the end;
+runtime startup/end observations match the control. These observations do not
+establish continuous execution or external dependency identity.
+
+|Metric|Before (cycle 70)|After (cycle 71)|
+|---|---:|---:|
+|Attempts|162|162|
+|Engine completed|57|56|
+|Timeouts|105|106|
+|Validated passes|33|33|
+
+|Suite|Router|Before completed|After completed|Before passes|After passes|Attempts each|
+|---|---|---:|---:|---:|---:|---:|
+|canary|fab_router|12|12|9|9|12|
+|canary|reference engine|9|9|6|6|9|
+|canary|capacity-mesh router|3|3|3|3|3|
+|canary|in-repo router|12|12|3|3|12|
+|bga|fab_router|0|0|0|0|12|
+|bga|reference engine|0|0|0|0|6|
+|bga|capacity-mesh router|0|0|0|0|6|
+|bga|in-repo router|0|0|0|0|12|
+|ladder|fab_router|4|4|3|3|18|
+|ladder|reference engine|3|3|3|3|9|
+|ladder|capacity-mesh router|6|6|6|6|9|
+|ladder|in-repo router|8|7|0|0|18|
+|dense-source|fab_router|0|0|0|0|3|
+|dense-source|reference engine|0|0|0|0|3|
+|dense-source|in-repo router|0|0|0|0|3|
+|dense-candidate|fab_router|0|0|0|0|9|
+|dense-candidate|reference engine|0|0|0|0|9|
+|dense-candidate|in-repo router|0|0|0|0|9|
+
+
+Unknown quality does not count as validity. Completion is separate from native
+connectivity and DRC. No routing gain or native baseline adoption is claimed. The
+sole outcome shift is the in-repo router's native 50-net ladder case: two
+completed / one timeout became one completed / two timeouts. All those outputs
+have unavailable quality. Quality totals are identical across cohorts: 125
+unavailable, 19 SRJ-scored, 18 native-DRC. Every per-case pass count is unchanged.
+All five compare commands and runtime endpoint verification exited successfully.
+Sequential cohorts and host contention limit timing comparisons.
+
+Reproduce the full integration from the separate benchmark checkout:
+
+```sh
+bash docs/pr-assets/agent/scoring-source-cache/prepare.sh "$HOME/bench/agents/codex-bench-boards/scratch/source-roots-reproduce/run"
+cd "$HOME/bench/agents/codex-bench-boards/scratch/source-roots-reproduce/run"
+nice -n 10 taskset -c 0-5 timeout 2400 bash ../run-integration.sh
+```
+
+The prepared scratch integration must never be pushed. Raw artifacts remain in
+owned scratch; committed evidence contains summaries. Exactly 18 suite/backend
+rows were appended once to each history log. The recorded duration is the
+median wall time over all attempts, including timeouts.
+
+Validation: standalone typecheck and 18 tests / 75 assertions; integrated
+typecheck and 316 passing tests / 28 skipped / 7,455 assertions; public fixture
+typecheck, all 11 unit packages, and four optimized native tests. No layer-check
+script exists in these harnesses. An initial documentation append used the wrong
+working directory, then the evidence filename was corrected; both failed before
+writing that documentation. No routing attempt was dropped or retried.

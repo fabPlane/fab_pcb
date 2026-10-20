@@ -1,0 +1,186 @@
+{
+  "baselineRef": "3be82d6",
+  "repeats": 3,
+  "rows": [
+    {
+      "variant": "before",
+      "repeat": 1,
+      "controls": [
+        {
+          "condition": "intact",
+          "accepted": true
+        },
+        {
+          "condition": "src-file",
+          "accepted": true,
+          "error": ""
+        },
+        {
+          "condition": "src-fifo",
+          "accepted": true,
+          "error": ""
+        },
+        {
+          "condition": "scripts-file",
+          "accepted": true,
+          "error": ""
+        },
+        {
+          "condition": "scripts-fifo",
+          "accepted": true,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "variant": "before",
+      "repeat": 2,
+      "controls": [
+        {
+          "condition": "intact",
+          "accepted": true
+        },
+        {
+          "condition": "src-file",
+          "accepted": true,
+          "error": ""
+        },
+        {
+          "condition": "src-fifo",
+          "accepted": true,
+          "error": ""
+        },
+        {
+          "condition": "scripts-file",
+          "accepted": true,
+          "error": ""
+        },
+        {
+          "condition": "scripts-fifo",
+          "accepted": true,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "variant": "before",
+      "repeat": 3,
+      "controls": [
+        {
+          "condition": "intact",
+          "accepted": true
+        },
+        {
+          "condition": "src-file",
+          "accepted": true,
+          "error": ""
+        },
+        {
+          "condition": "src-fifo",
+          "accepted": true,
+          "error": ""
+        },
+        {
+          "condition": "scripts-file",
+          "accepted": true,
+          "error": ""
+        },
+        {
+          "condition": "scripts-fifo",
+          "accepted": true,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "variant": "after",
+      "repeat": 1,
+      "controls": [
+        {
+          "condition": "intact",
+          "accepted": true
+        },
+        {
+          "condition": "src-file",
+          "accepted": false,
+          "error": "Error: Scoring source root must be a directory: src"
+        },
+        {
+          "condition": "src-fifo",
+          "accepted": false,
+          "error": "Error: Scoring source root must be a directory: src"
+        },
+        {
+          "condition": "scripts-file",
+          "accepted": false,
+          "error": "Error: Scoring source root must be a directory: scripts"
+        },
+        {
+          "condition": "scripts-fifo",
+          "accepted": false,
+          "error": "Error: Scoring source root must be a directory: scripts"
+        }
+      ]
+    },
+    {
+      "variant": "after",
+      "repeat": 2,
+      "controls": [
+        {
+          "condition": "intact",
+          "accepted": true
+        },
+        {
+          "condition": "src-file",
+          "accepted": false,
+          "error": "Error: Scoring source root must be a directory: src"
+        },
+        {
+          "condition": "src-fifo",
+          "accepted": false,
+          "error": "Error: Scoring source root must be a directory: src"
+        },
+        {
+          "condition": "scripts-file",
+          "accepted": false,
+          "error": "Error: Scoring source root must be a directory: scripts"
+        },
+        {
+          "condition": "scripts-fifo",
+          "accepted": false,
+          "error": "Error: Scoring source root must be a directory: scripts"
+        }
+      ]
+    },
+    {
+      "variant": "after",
+      "repeat": 3,
+      "controls": [
+        {
+          "condition": "intact",
+          "accepted": true
+        },
+        {
+          "condition": "src-file",
+          "accepted": false,
+          "error": "Error: Scoring source root must be a directory: src"
+        },
+        {
+          "condition": "src-fifo",
+          "accepted": false,
+          "error": "Error: Scoring source root must be a directory: src"
+        },
+        {
+          "condition": "scripts-file",
+          "accepted": false,
+          "error": "Error: Scoring source root must be a directory: scripts"
+        },
+        {
+          "condition": "scripts-fifo",
+          "accepted": false,
+          "error": "Error: Scoring source root must be a directory: scripts"
+        }
+      ]
+    }
+  ]
+}
