@@ -1,0 +1,19 @@
+{
+  "machine": "hyper-ms-lin",
+  "cores": "0-5",
+  "repeats": 3,
+  "budget_s": 10,
+  "existing_attempts_each": 144,
+  "existing_passes_each": 33,
+  "default_rule_control": {
+    "attempts": 9,
+    "timeouts": 9
+  },
+  "intended_rule_candidate": {
+    "attempts": 9,
+    "timeouts": 9
+  },
+  "native_fixture": "bga400",
+  "native_opens": 400,
+  "limitation": "No routing gain or routed feasibility established; external harness fetch fix changes new-case rule identity."
+}
