@@ -12,7 +12,9 @@ The companion project is required. No planes, differential pairs, matched
 lengths, footprint libraries or external board sources are used. The generator
 loads the board, checks net ownership, stack, effective rules, rule-area masks,
 and native connectivity, then runs a fresh native DRC. It also requires all 16
-keepout polygons in the exported DSN. Board, project and DSN are deterministic
+keepout polygons in the exported DSN, with exact micrometre coordinates,
+layer multiplicity, zero aperture, and closed rectangular vertex sequences.
+This fixture-specific check intentionally rejects alternate export grammars. Board, project and DSN are deterministic
 across output directories.
 
 KiCad 10.0.6 reports 1,296 native connectivity opens but caps the DRC JSON at

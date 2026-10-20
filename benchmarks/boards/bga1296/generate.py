@@ -11,6 +11,9 @@ import hashlib
 import json
 from pathlib import Path
 import random
+import re
+from collections import Counter
+from decimal import Decimal, InvalidOperation
 import subprocess
 import uuid
 
@@ -46,6 +49,41 @@ def validate_report(data, native_opens, board_name):
     if any(not isinstance(item, dict) or item.get('type') != 'unconnected_items'
            or item.get('severity') != 'error' for item in findings):
         raise RuntimeError('unexpected native DRC open finding')
+
+
+def validate_keepouts(exported, layers):
+    """Require the exact generated rectangular keepouts in micrometre coordinates.
+
+    This deliberately admits only this fixture's exporter grammar, not arbitrary DSN.
+    Counts alone cannot detect moved, resized or duplicated obstacles.
+    """
+    if len(layers) != 8 or len(set(layers)) != 8:
+        raise RuntimeError('unexpected keepout copper stack')
+    if re.findall(r'\(unit\s+([^()]*)\)', exported) != ['um']:
+        raise RuntimeError('unexpected DSN coordinate unit')
+    polygons = re.findall(r'\(keepout\s+""\s+\(polygon\s+([^()]*)\)\s*\)', exported)
+    if len(polygons) != 16 or len(re.findall(r'\(keepout\b', exported)) != 16:
+        raise RuntimeError('unexpected DSN keepout grammar/count')
+    expected = Counter()
+    for x1, y1, x2, y2 in PARAMETERS['keepouts_mm']:
+        coordinates = tuple(Decimal(v * 1000) for v in
+                            (x1, -y1, x2, -y1, x2, -y2, x1, -y2, x1, -y1))
+        for layer in layers:
+            expected[layer, coordinates] += 1
+    actual = Counter()
+    for polygon in polygons:
+        fields = polygon.split()
+        if len(fields) != 12:
+            raise RuntimeError('unexpected DSN keepout vertex count')
+        try:
+            values = tuple(Decimal(v) for v in fields[1:])
+        except InvalidOperation as error:
+            raise RuntimeError('invalid DSN keepout coordinates') from error
+        if any(not value.is_finite() for value in values) or values[0] != 0:
+            raise RuntimeError('unexpected DSN keepout aperture/coordinates')
+        actual[fields[0], values[1:]] += 1
+    if actual != expected:
+        raise RuntimeError('DSN keepout geometry differs from fixture parameters')
 
 
 def generate(out, seed=6596):
@@ -114,11 +152,7 @@ def generate(out, seed=6596):
     _, tail = dsn.read_text().split('\n', 1)
     dsn.write_text('(pcb "bga1296.dsn"\n'+tail)
     exported = dsn.read_text()
-    if exported.count('(keepout ') != 16:
-        raise RuntimeError('DSN lost all-copper routing keepouts')
-    for layer in [name for _, name in stack]:
-        if exported.count(f'(polygon {layer} 0 ') != 2:
-            raise RuntimeError(f'DSN lost keepout polygons on {layer}')
+    validate_keepouts(exported, [name for _, name in stack])
     native_opens = b.GetConnectivity().GetUnconnectedCount(False)
     if native_opens != 1296:
         raise RuntimeError(f'unexpected native connectivity count: {native_opens}')

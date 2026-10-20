@@ -1,0 +1,370 @@
+{
+  "repeats": 3,
+  "rows": [
+    {
+      "repeat": 0,
+      "case": "valid",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 0,
+      "case": "valid",
+      "implementation": "after",
+      "accepted": true
+    },
+    {
+      "repeat": 0,
+      "case": "shifted",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 0,
+      "case": "shifted",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 0,
+      "case": "resized",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 0,
+      "case": "resized",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 0,
+      "case": "duplicate",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 0,
+      "case": "duplicate",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 0,
+      "case": "wrong-layer",
+      "implementation": "before",
+      "accepted": false
+    },
+    {
+      "repeat": 0,
+      "case": "wrong-layer",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 0,
+      "case": "aperture",
+      "implementation": "before",
+      "accepted": false
+    },
+    {
+      "repeat": 0,
+      "case": "aperture",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 0,
+      "case": "wrong-unit",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 0,
+      "case": "wrong-unit",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 0,
+      "case": "nonfinite",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 0,
+      "case": "nonfinite",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 0,
+      "case": "open-polygon",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 0,
+      "case": "open-polygon",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 0,
+      "case": "extra-vertex",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 0,
+      "case": "extra-vertex",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 1,
+      "case": "valid",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 1,
+      "case": "valid",
+      "implementation": "after",
+      "accepted": true
+    },
+    {
+      "repeat": 1,
+      "case": "shifted",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 1,
+      "case": "shifted",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 1,
+      "case": "resized",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 1,
+      "case": "resized",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 1,
+      "case": "duplicate",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 1,
+      "case": "duplicate",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 1,
+      "case": "wrong-layer",
+      "implementation": "before",
+      "accepted": false
+    },
+    {
+      "repeat": 1,
+      "case": "wrong-layer",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 1,
+      "case": "aperture",
+      "implementation": "before",
+      "accepted": false
+    },
+    {
+      "repeat": 1,
+      "case": "aperture",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 1,
+      "case": "wrong-unit",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 1,
+      "case": "wrong-unit",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 1,
+      "case": "nonfinite",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 1,
+      "case": "nonfinite",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 1,
+      "case": "open-polygon",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 1,
+      "case": "open-polygon",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 1,
+      "case": "extra-vertex",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 1,
+      "case": "extra-vertex",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 2,
+      "case": "valid",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 2,
+      "case": "valid",
+      "implementation": "after",
+      "accepted": true
+    },
+    {
+      "repeat": 2,
+      "case": "shifted",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 2,
+      "case": "shifted",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 2,
+      "case": "resized",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 2,
+      "case": "resized",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 2,
+      "case": "duplicate",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 2,
+      "case": "duplicate",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 2,
+      "case": "wrong-layer",
+      "implementation": "before",
+      "accepted": false
+    },
+    {
+      "repeat": 2,
+      "case": "wrong-layer",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 2,
+      "case": "aperture",
+      "implementation": "before",
+      "accepted": false
+    },
+    {
+      "repeat": 2,
+      "case": "aperture",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 2,
+      "case": "wrong-unit",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 2,
+      "case": "wrong-unit",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 2,
+      "case": "nonfinite",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 2,
+      "case": "nonfinite",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 2,
+      "case": "open-polygon",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 2,
+      "case": "open-polygon",
+      "implementation": "after",
+      "accepted": false
+    },
+    {
+      "repeat": 2,
+      "case": "extra-vertex",
+      "implementation": "before",
+      "accepted": true
+    },
+    {
+      "repeat": 2,
+      "case": "extra-vertex",
+      "implementation": "after",
+      "accepted": false
+    }
+  ],
+  "artifact_sha256": {
+    "bga1296.kicad_pcb": "77ca2652fb5ca3a066abb6267fcbaebda2b354e8f157e7fcc17a970736d87687",
+    "bga1296.kicad_pro": "b24440576799edca784d2486abd463eccb3084b190b4e9e9c12ef27c4540f76d",
+    "bga1296.dsn": "ee3697be0333e3aa4bc45d206dc966254afb8fbb77c0f0c1f92693e23411e7aa"
+  }
+}
