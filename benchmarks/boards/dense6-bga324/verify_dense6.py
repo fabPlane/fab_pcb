@@ -63,6 +63,17 @@ def project_policy_digest(project):
                                      allow_nan=False).encode()).hexdigest()
 
 
+def require_no_custom_rules(board):
+    """This fixture's contract has no external rules; never silently drop them.
+
+    lexists semantics also reject directories and dangling symlinks rather than
+    treating an unreadable companion as an intentionally absent rule file.
+    """
+    rules = board.with_suffix('.kicad_dru')
+    require(not (rules.exists() or rules.is_symlink()),
+            f'unsupported custom rule sidecar: {rules.name}')
+
+
 def geometry(board):
     def point(p):
         return [p.x, p.y]
@@ -90,6 +101,8 @@ def verify(generator, fixture, out):
                        check=True, timeout=30, capture_output=True)
     filename = 'dense6-bga324.kicad_pcb'
     first, second = out / 'first' / filename, out / 'second' / filename
+    for board in (fixture / filename, first, second):
+        require_no_custom_rules(board)
     require(first.read_bytes() == second.read_bytes(), 'generator is not byte deterministic')
     stats = json.loads((out / 'first/stats.json').read_text())
     require({k: stats[k] for k in ('nets', 'pads', 'connections', 'layers', 'footprints')} == dict(

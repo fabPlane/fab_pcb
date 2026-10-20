@@ -1,0 +1,181 @@
+{
+  "cycle": 56,
+  "before_commit": "03fee44",
+  "machine": "hyper-ms-lin",
+  "cores": "0-5",
+  "nice": 10,
+  "repeats_per_case": 3,
+  "python_optimized": true,
+  "records": [
+    {
+      "repeat": 1,
+      "case": "valid",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 5.035467035952024
+    },
+    {
+      "repeat": 1,
+      "case": "valid",
+      "version": "after",
+      "accepted": true,
+      "wall_s": 4.883021997986361
+    },
+    {
+      "repeat": 1,
+      "case": "empty-rules",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.722481310018338
+    },
+    {
+      "repeat": 1,
+      "case": "empty-rules",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5713300190400332
+    },
+    {
+      "repeat": 1,
+      "case": "active-rules",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.403882610029541
+    },
+    {
+      "repeat": 1,
+      "case": "active-rules",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5189598150318488
+    },
+    {
+      "repeat": 1,
+      "case": "dangling-rules",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.399256064090878
+    },
+    {
+      "repeat": 1,
+      "case": "dangling-rules",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 1.129868914023973
+    },
+    {
+      "repeat": 2,
+      "case": "valid",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.194832360954024
+    },
+    {
+      "repeat": 2,
+      "case": "valid",
+      "version": "after",
+      "accepted": true,
+      "wall_s": 4.604683788958937
+    },
+    {
+      "repeat": 2,
+      "case": "empty-rules",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 3.9079655159730464
+    },
+    {
+      "repeat": 2,
+      "case": "empty-rules",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.8159195530461147
+    },
+    {
+      "repeat": 2,
+      "case": "active-rules",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.137179829995148
+    },
+    {
+      "repeat": 2,
+      "case": "active-rules",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.9994789670454338
+    },
+    {
+      "repeat": 2,
+      "case": "dangling-rules",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 3.712940491968766
+    },
+    {
+      "repeat": 2,
+      "case": "dangling-rules",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.528093955013901
+    },
+    {
+      "repeat": 3,
+      "case": "valid",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 3.323344331001863
+    },
+    {
+      "repeat": 3,
+      "case": "valid",
+      "version": "after",
+      "accepted": true,
+      "wall_s": 3.15531474200543
+    },
+    {
+      "repeat": 3,
+      "case": "empty-rules",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 3.3099588769255206
+    },
+    {
+      "repeat": 3,
+      "case": "empty-rules",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5197001369670033
+    },
+    {
+      "repeat": 3,
+      "case": "active-rules",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 3.172080682008527
+    },
+    {
+      "repeat": 3,
+      "case": "active-rules",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5288702199468389
+    },
+    {
+      "repeat": 3,
+      "case": "dangling-rules",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 3.015488074044697
+    },
+    {
+      "repeat": 3,
+      "case": "dangling-rules",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.4879648929927498
+    }
+  ],
+  "after_verifier_sha256": "db7a68d43c95b45082307f59ffaedcb0b18bb7804a890d679d87a397944baa60",
+  "limitation": "Constructed admission controls only. External rule files are unsupported for this fixed candidate and now reject. No routing or feasibility claim; production native baseline adoption remains pending."
+}

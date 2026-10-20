@@ -113,5 +113,9 @@ The candidate verifier independently pins the `rules`, `rule_severities`,
 `drc_exclusions` and `net_settings` project sections. Intentional changes require
 reviewing the fixture, updating the digest contract and rerunning the policy
 controls. JSON formatting and UI state do not affect this contract. Other native
-properties and external custom-rule files remain outside this selected signature.
+properties remain outside this selected signature. External `.kicad_dru` files
+are unsupported by this fixed candidate and reject before verification can drop
+them, including empty files, directories and dangling links.
 See committed `policy-controls.json` and `policy-controls.png` in the PR assets.
+
+[External rule controls and reproduction](../../../docs/pr-assets/agent/dense-candidate-verification/CUSTOM-RULES.md).

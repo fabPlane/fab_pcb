@@ -4,8 +4,9 @@ import json
 import unittest
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
-from verify_dense6 import canonical_dsn, geometry, project_policy_digest, EXPECTED_POLICY_SHA256
+from verify_dense6 import canonical_dsn, geometry, project_policy_digest, EXPECTED_POLICY_SHA256, require_no_custom_rules
 
 
 class CanonicalDsnTests(unittest.TestCase):
@@ -60,6 +61,24 @@ for operation in (lambda: require(False, 'evidence rejected'),
 
 
 class ProjectPolicyTests(unittest.TestCase):
+    def test_external_rules_cannot_be_silently_discarded(self):
+        with tempfile.TemporaryDirectory() as directory:
+            board = Path(directory) / 'candidate.kicad_pcb'
+            rules = board.with_suffix('.kicad_dru')
+            require_no_custom_rules(board)
+            for data in ('', '(version 1)\n(rule "relaxed" (constraint clearance (min 0.01mm)))\n'):
+                rules.write_text(data)
+                with self.assertRaisesRegex(AssertionError, 'unsupported custom rule sidecar'):
+                    require_no_custom_rules(board)
+                rules.unlink()
+            rules.symlink_to(Path(directory) / 'absent')
+            with self.assertRaisesRegex(AssertionError, 'unsupported custom rule sidecar'):
+                require_no_custom_rules(board)
+            rules.unlink()
+            rules.mkdir()
+            with self.assertRaisesRegex(AssertionError, 'unsupported custom rule sidecar'):
+                require_no_custom_rules(board)
+
     def test_project_policy_pins_every_native_checking_field(self):
         fixture = Path(__file__).resolve().parents[2] / 'corpus/dense-candidate/dense6-bga324.kicad_pro'
         if not fixture.exists():
