@@ -52,11 +52,11 @@ Timeout output can be truncated as before, including shutdown diagnostics.
 
 On the same host, three paired constructed cases per mode give:
 
-| Case | Before | After |
-|---|---:|---:|
-| Requested handler ran | 0/3 | 3/3 |
-| Ignored signal left a descendant alive | 0/3 | 0/3 |
-| Invalid signal launched a command | 3/3 | 0/3 |
+| Case                                   | Before | After |
+| -------------------------------------- | -----: | ----: |
+| Requested handler ran                  |    0/3 |   3/3 |
+| Ignored signal left a descendant alive |    0/3 |   0/3 |
+| Invalid signal launched a command      |    3/3 |   0/3 |
 
 These were constructed API counterexamples, not observed routing failures.
 The existing integration API already handles the three modes correctly; the

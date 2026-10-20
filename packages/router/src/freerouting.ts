@@ -347,15 +347,22 @@ export async function runFreerouting(
           lineReceived(line);
         }
       },
-      finish() { if (buffer.trim()) log.push(buffer.trimEnd()); },
+      finish() {
+        if (buffer.trim()) log.push(buffer.trimEnd());
+      },
     };
   };
-  const out = streamLines(), err = streamLines();
+  const out = streamLines(),
+    err = streamLines();
   const { exitCode, timedOut, cancelled } = await runOwnedCommand([opts.java, ...args], {
-    cwd: dirname(dsnPath), timeoutMs: opts.maxTimeMs, signal: opts.signal,
-    onStdout: out.chunk, onStderr: err.chunk,
+    cwd: dirname(dsnPath),
+    timeoutMs: opts.maxTimeMs,
+    signal: opts.signal,
+    onStdout: out.chunk,
+    onStderr: err.chunk,
   });
-  out.finish(); err.finish();
+  out.finish();
+  err.finish();
   let ses = "";
   if (!cancelled && existsSync(sesPath)) ses = await readFile(sesPath, "utf8");
   return { ses, log, exitCode, timedOut, cancelled, lastEvent };

@@ -29,20 +29,30 @@ export async function runOwnedCommand(
   if (opts.timeoutMs !== undefined && opts.timeoutMs > 2_147_483_647) {
     throw new RangeError("timeoutMs must not exceed 2147483647");
   }
-  if (opts.killSignal !== undefined &&
-      (!Number.isInteger(opts.killSignal) || opts.killSignal <= 0 ||
-       !Object.values(constants.signals).includes(opts.killSignal))) {
+  if (
+    opts.killSignal !== undefined &&
+    (!Number.isInteger(opts.killSignal) || opts.killSignal <= 0 || !Object.values(constants.signals).includes(opts.killSignal))
+  ) {
     throw new RangeError("killSignal must be a supported nonzero signal number");
   }
   const started = performance.now();
-  if (opts.signal?.aborted) return {
-    code: 124, exitCode: 124, stdout: "", stderr: "", timedOut: false, cancelled: true,
-    wallMs: performance.now() - started,
-  };
+  if (opts.signal?.aborted)
+    return {
+      code: 124,
+      exitCode: 124,
+      stdout: "",
+      stderr: "",
+      timedOut: false,
+      cancelled: true,
+      wallMs: performance.now() - started,
+    };
   const grouped = process.platform !== "win32";
   const proc = Bun.spawn(cmd, {
-    detached: grouped, stdout: "pipe", stderr: "pipe",
-    env: opts.env ?? process.env, ...(opts.cwd ? { cwd: opts.cwd } : {}),
+    detached: grouped,
+    stdout: "pipe",
+    stderr: "pipe",
+    env: opts.env ?? process.env,
+    ...(opts.cwd ? { cwd: opts.cwd } : {}),
   });
   const stop = (signal: number = 9) => {
     try {
@@ -54,18 +64,26 @@ export async function runOwnedCommand(
   };
   const outputAbort = new AbortController();
   let escalation: ReturnType<typeof setTimeout> | undefined;
-  let timedOut = false, cancelled = false;
-  const onAbort = () => { cancelled = true; stop(); outputAbort.abort(); };
-  opts.signal?.addEventListener("abort", onAbort, { once: true });
-  const timer = opts.timeoutMs && opts.timeoutMs > 0 ? setTimeout(() => {
-    timedOut = true;
-    const signal = opts.killSignal ?? 9;
-    stop(signal);
-    // Caller-selected signals get a bounded grace period. Direct-child exit
-    // clears this timer before final group cleanup, avoiding a delayed kill.
-    if (signal !== 9) escalation = setTimeout(() => stop(), 100);
+  let timedOut = false,
+    cancelled = false;
+  const onAbort = () => {
+    cancelled = true;
+    stop();
     outputAbort.abort();
-  }, opts.timeoutMs) : undefined;
+  };
+  opts.signal?.addEventListener("abort", onAbort, { once: true });
+  const timer =
+    opts.timeoutMs && opts.timeoutMs > 0
+      ? setTimeout(() => {
+          timedOut = true;
+          const signal = opts.killSignal ?? 9;
+          stop(signal);
+          // Caller-selected signals get a bounded grace period. Direct-child exit
+          // clears this timer before final group cleanup, avoiding a delayed kill.
+          if (signal !== 9) escalation = setTimeout(() => stop(), 100);
+          outputAbort.abort();
+        }, opts.timeoutMs)
+      : undefined;
   // Start draining before waiting for exit so a full pipe cannot block the child.
   const stdout = consume(proc.stdout, outputAbort.signal, opts.onStdout);
   const stderr = consume(proc.stderr, outputAbort.signal, opts.onStderr);
@@ -84,8 +102,15 @@ export async function runOwnedCommand(
   });
   try {
     const [out, err, code] = await Promise.all([stdout, stderr, exited]);
-    return { code: timedOut || cancelled ? 124 : code, exitCode: code, stdout: out, stderr: err,
-      timedOut, cancelled, wallMs: performance.now() - started };
+    return {
+      code: timedOut || cancelled ? 124 : code,
+      exitCode: code,
+      stdout: out,
+      stderr: err,
+      timedOut,
+      cancelled,
+      wallMs: performance.now() - started,
+    };
   } finally {
     if (drainTimer) clearTimeout(drainTimer);
     if (timer) clearTimeout(timer);
@@ -98,13 +123,13 @@ export async function runOwnedCommand(
   }
 }
 
-async function consume(
-  stream: ReadableStream<Uint8Array>, signal: AbortSignal,
-  callback?: (chunk: string) => void,
-): Promise<string> {
-  const reader = stream.getReader(), decoder = new TextDecoder();
+async function consume(stream: ReadableStream<Uint8Array>, signal: AbortSignal, callback?: (chunk: string) => void): Promise<string> {
+  const reader = stream.getReader(),
+    decoder = new TextDecoder();
   let text = "";
-  const cancel = () => { void reader.cancel().catch(() => {}); };
+  const cancel = () => {
+    void reader.cancel().catch(() => {});
+  };
   signal.addEventListener("abort", cancel, { once: true });
   try {
     if (signal.aborted) cancel();
