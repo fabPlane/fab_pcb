@@ -529,3 +529,40 @@ Validation: standalone typecheck and 19 tests / 97 assertions; integrated
 typecheck and 317 passing tests / 28 skipped / 7,477 assertions; public fixture
 typecheck, all 11 unit packages, and four optimized native tests. No layer-check
 script exists in these harnesses. No routing attempt was dropped or retried.
+
+This update adds fixture qualification evidence only. The actual runner change is in the separate benchmark checkout; production code and the frozen suite are unchanged.
+
+## Cycle 73: optional repository runtime configuration
+
+The benchmark runner now records `bunfig.toml` as either explicitly absent or a
+regular file with a content digest before cache lookup and around successful
+routing. A newly added, edited, or deleted file changes identity. Directories,
+symlinks (including dangling links), and FIFOs reject before a cached result is
+skipped. Other filesystem errors propagate. Relative records preserve checkout
+relocation. File observations are not an atomic snapshot of executed code.
+User-level configuration, environment preloads, installed dependencies and
+transitive configuration remain outside this bounded observation.
+
+Same machine, three fresh processes per revision, actual runner boundary with a
+deterministic route stub; baseline `0c0921e`, candidate helper `b8352e1`:
+
+|Control|Before|After|Checks each|
+|---|---:|---:|---:|
+|Unchanged inputs resume|3|3|3|
+|Add/edit/delete incorrectly skips|9|0|9|
+|Mid-route add/edit/delete accepted|9|0|9|
+|Malformed optional config rejects|0|9|9|
+
+The same outcomes reproduce at the prepared primary runner boundary. These
+controls exercise cache admission, not routing quality or native denominator
+adoption. No ranking or router change is claimed.
+
+From the separate benchmark checkout on `agent/scoring-source-cache`:
+
+```sh
+nice -n 10 taskset -c 0-5 timeout 120 bun docs/pr-assets/agent/scoring-source-cache/optional-config-audit.ts /tmp/optional-config-controls.json
+nice -n 10 taskset -c 0-5 timeout 180 bun run typecheck
+nice -n 10 taskset -c 0-5 timeout 180 bun test
+```
+
+![Optional configuration controls](https://github.com/fabPlane/fab_pcb/blob/agent/bga1024-candidate/docs/pr-assets/agent/bga1024-candidate/optional-config.png?raw=true)
