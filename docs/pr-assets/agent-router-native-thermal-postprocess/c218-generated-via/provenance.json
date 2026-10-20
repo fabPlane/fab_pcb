@@ -2,18 +2,9 @@
   "base": "a6da80a124dcf28861a85448ce85c1c5c054ae74",
   "branch": "agent/fab-router-native-drc-gate",
   "machine": "hyper-ms-lin",
-  "cores": [
-    20,
-    21,
-    22,
-    23,
-    24,
-    25
-  ],
+  "cores": [20, 21, 22, 23, 24, 25],
   "fixture": "Complete retained power net after stage0; not scored or fully routed",
-  "sourceExecutableChanges": [
-    "tools/native-thermal-proposals.py"
-  ],
+  "sourceExecutableChanges": ["tools/native-thermal-proposals.py"],
   "defaultSourceUnchanged": true,
   "integrationPinBefore": "a8f7762467b97863032a55e3b924dfd199456dac",
   "integrationPinAndBeforeControlExecutableIdentical": true,
@@ -50,8 +41,5 @@
     "assertions": 416,
     "seconds": 25.14
   },
-  "freshCorpusBeforeAndAfterExitCodes": [
-    0,
-    0
-  ]
+  "freshCorpusBeforeAndAfterExitCodes": [0, 0]
 }

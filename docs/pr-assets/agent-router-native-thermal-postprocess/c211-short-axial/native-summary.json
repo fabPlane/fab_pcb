@@ -11,9 +11,7 @@
       "role": "routed",
       "inventoryMatches": true,
       "items": 9,
-      "errors": [
-        "starved_thermal"
-      ],
+      "errors": ["starved_thermal"],
       "opens": 109
     },
     {

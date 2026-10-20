@@ -3,17 +3,11 @@
     "label": "before",
     "repeat": 0,
     "accepted": false,
-    "errors": [
-      "starved_thermal"
-    ],
+    "errors": ["starved_thermal"],
     "opens": 109,
     "lostSource": 0,
     "lostRouted": 0,
-    "owned": [
-      true,
-      true,
-      true
-    ]
+    "owned": [true, true, true]
   },
   {
     "label": "after",
@@ -23,27 +17,17 @@
     "opens": 109,
     "lostSource": 0,
     "lostRouted": 0,
-    "owned": [
-      true,
-      true,
-      true
-    ]
+    "owned": [true, true, true]
   },
   {
     "label": "before",
     "repeat": 1,
     "accepted": false,
-    "errors": [
-      "starved_thermal"
-    ],
+    "errors": ["starved_thermal"],
     "opens": 109,
     "lostSource": 0,
     "lostRouted": 0,
-    "owned": [
-      true,
-      true,
-      true
-    ]
+    "owned": [true, true, true]
   },
   {
     "label": "after",
@@ -53,27 +37,17 @@
     "opens": 109,
     "lostSource": 0,
     "lostRouted": 0,
-    "owned": [
-      true,
-      true,
-      true
-    ]
+    "owned": [true, true, true]
   },
   {
     "label": "before",
     "repeat": 2,
     "accepted": false,
-    "errors": [
-      "starved_thermal"
-    ],
+    "errors": ["starved_thermal"],
     "opens": 109,
     "lostSource": 0,
     "lostRouted": 0,
-    "owned": [
-      true,
-      true,
-      true
-    ]
+    "owned": [true, true, true]
   },
   {
     "label": "after",
@@ -83,10 +57,6 @@
     "opens": 109,
     "lostSource": 0,
     "lostRouted": 0,
-    "owned": [
-      true,
-      true,
-      true
-    ]
+    "owned": [true, true, true]
   }
 ]

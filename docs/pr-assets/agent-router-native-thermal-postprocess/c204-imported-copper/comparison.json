@@ -84,30 +84,12 @@
     "rejected": 3
   },
   "changed_boards": [
-    [
-      "qrpcard-qrpcard-j4",
-      3
-    ],
-    [
-      "qrpcard-qrpcard-j4",
-      1
-    ],
-    [
-      "qrpcard-qrpcard-j2-small",
-      2
-    ],
-    [
-      "qrpcard-qrpcard-j2-small",
-      1
-    ],
-    [
-      "qrpcard-qrpcard-j4",
-      2
-    ],
-    [
-      "qrpcard-qrpcard-j2-small",
-      3
-    ]
+    ["qrpcard-qrpcard-j4", 3],
+    ["qrpcard-qrpcard-j4", 1],
+    ["qrpcard-qrpcard-j2-small", 2],
+    ["qrpcard-qrpcard-j2-small", 1],
+    ["qrpcard-qrpcard-j4", 2],
+    ["qrpcard-qrpcard-j2-small", 3]
   ],
   "groups": {
     "J2small": {

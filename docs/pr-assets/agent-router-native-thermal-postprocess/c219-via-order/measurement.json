@@ -8,11 +8,7 @@
     "opens": 95,
     "lostSource": 0,
     "lostCurrent": 0,
-    "ownership": [
-      true,
-      true,
-      true
-    ]
+    "ownership": [true, true, true]
   },
   {
     "repeat": 1,
@@ -23,11 +19,7 @@
     "opens": 95,
     "lostSource": 0,
     "lostCurrent": 0,
-    "ownership": [
-      true,
-      true,
-      true
-    ]
+    "ownership": [true, true, true]
   },
   {
     "repeat": 2,
@@ -38,10 +30,6 @@
     "opens": 95,
     "lostSource": 0,
     "lostCurrent": 0,
-    "ownership": [
-      true,
-      true,
-      true
-    ]
+    "ownership": [true, true, true]
   }
 ]

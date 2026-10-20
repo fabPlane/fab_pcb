@@ -1,12 +1,11 @@
 # Cycle 203 native post-import evidence
 
-| Scope | Before passes | After passes | Before new errors | After new errors | Opens before → after |
-|---|---:|---:|---:|---:|---:|
-| All 26 cases | 39/78 | 42/78 | 27 | 24 | 120 → 120 |
-| J2small | 0/3 | 0/3 | 6 | 6 | 0 → 0 |
-| J4 | 0/3 | 3/3 | 3 | 0 | 0 → 0 |
-| Aquarius | 0/3 | 0/3 | 18 | 18 | 45 → 45 |
-
+| Scope        | Before passes | After passes | Before new errors | After new errors | Opens before → after |
+| ------------ | ------------: | -----------: | ----------------: | ---------------: | -------------------: |
+| All 26 cases |         39/78 |        42/78 |                27 |               24 |            120 → 120 |
+| J2small      |           0/3 |          0/3 |                 6 |                6 |                0 → 0 |
+| J4           |           0/3 |          3/3 |                 3 |                0 |                0 → 0 |
+| Aquarius     |           0/3 |          0/3 |                18 |               18 |              45 → 45 |
 
 This is the complete 26-case single-engine subset, three seeds per phase, not a five-engine comparison. Candidate and control completed with exit 0 and preserved controls. Implementation: `9a780d2`; engine/tools: `9ce6f1368e1b4308c71f76d2a42e578df409c3f7`. Candidate ran before control. Required tests overlapped initial candidate attempts; observed time is not an engine-speed comparison.
 

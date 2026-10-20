@@ -21,15 +21,15 @@ matched benchmark results, before/after image and independent replay are in
 
 ## Measurements and reproduction
 
-| Scope | Before | After |
-|---|---:|---:|
-| Passing runs (26 cases × 3 seeds) | 45/78 | 45/78 |
-| Cases valid 3/3 | 15 | 15 |
-| Opens | 120 | 120 |
-| New native thermal errors | 18 | 18 |
-| Reduced witness repairs (same board × 3) | 0/3 | 3/3 |
-| Reduced witness errors per repeat | 1 | 0 |
-| Reduced witness opens per repeat | 111 | 110 |
+| Scope                                    | Before | After |
+| ---------------------------------------- | -----: | ----: |
+| Passing runs (26 cases × 3 seeds)        |  45/78 | 45/78 |
+| Cases valid 3/3                          |     15 |    15 |
+| Opens                                    |    120 |   120 |
+| New native thermal errors                |     18 |    18 |
+| Reduced witness repairs (same board × 3) |    0/3 |   3/3 |
+| Reduced witness errors per repeat        |      1 |     0 |
+| Reduced witness opens per repeat         |    111 |   110 |
 
 ```sh
 cd /home/hyper/bench/wt/fr-bugs

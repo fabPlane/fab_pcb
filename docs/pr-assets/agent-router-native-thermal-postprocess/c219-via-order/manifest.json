@@ -1,9 +1,9 @@
 {
-  "README.md": "858257fb308076c4ad32d54295bcd47fbe0137b3bf26149a8fd7c9eb38af23dd",
+  "README.md": "5a0e44da9662962d69e644e33b5f0f30487dd4e426fce65ef3ce936093f80e10",
   "adapter-measurement.json": "cf76098fe38ae01335a5a546b6f3c06f036ddfa8d2dac3e7cfa9a37096db9034",
   "adapter-verification.json": "6ada5766ab24252e205eec0097c265750fc9f37a6220a36595f6505d1d1fc858",
-  "comparison.json": "0d4fc60ca2bfff08f20e72640be8333fb2c032f5d03a4152adcc552bd57dbad8",
+  "comparison.json": "c394410da6423bf56a1566100f6ee672a848607450dbee45c11faa29528cb90a",
   "comparison.png": "e69356097b34eaeb239a761133f3e6691c30e4c7c3751abef53e50ce9262cdff",
-  "measurement.json": "da8961453acb603cb10822ed79780d903768ffa7177c88a9af4f2a3d0e02c9ad",
+  "measurement.json": "681fb561e6be87ab7b909b43386319daf3950e9af09461e46401639cf14fd31a",
   "package-checks.log": "f08bf83cae230cd8f76be6962ba2f40a39db911dc795a186ddc40a56a055d3c9"
 }

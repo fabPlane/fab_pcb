@@ -5,11 +5,11 @@ This update selects engine commit `7e56b09f221dff426670547c6e0390891be4c1d8` fro
 Three fresh comparisons on the retained complete-power control produce the same safe generated repair: one thermal error becomes zero, with 95 opens and zero lost source/current pairs. The complete standalone automatic search checks 169 proposals and publishes the exact accepted bundle. This partial control is not a completed route. Its standalone snapshot-to-result interval was 2144.2 seconds under concurrent verification, exceeding the adapter's unchanged 600-second cap; no within-cap recovery is claimed. The full Aquarius board still fails the frozen benchmark; its automatic search stops at the existing source-pad precision preflight failure. Separate retained diagnostics also show source-connectivity losses, which must be fixed without weakening either guard.
 
 | Same host, cases, rules, 26 cases × 3 seeds per version | Previous pin | New pin |
-| --- | --- | --- |
-| Passing runs | 45/78 | 45/78 |
-| Cases passing 3/3 | 15/26 | 15/26 |
-| Total opens | 120 | 120 |
-| New native thermal errors | 18 | 18 |
+| ------------------------------------------------------- | ------------ | ------- |
+| Passing runs                                            | 45/78        | 45/78   |
+| Cases passing 3/3                                       | 15/26        | 15/26   |
+| Total opens                                             | 120          | 120     |
+| New native thermal errors                               | 18           | 18      |
 
 Both opt-in corpus runs are fresh on hyper-ms-lin, cores 20–25, with the frozen native 10.0.6 checker, identical inputs/runtime/settings/order/seeds and configurations differing only by engine checkout. The before engine's executable src/tools exactly match previous pin `a8f7762467b97863032a55e3b924dfd199456dac`. All 78 outcomes/fidelity/physical copper/DSN/session comparisons and postprocess dispositions match. The six prior optional repairs retain their successful check sequences and checkpoint geometry. No speed or scored routing gain is claimed. The latest retained default run remains 39/78 passing, 13/26 valid, 120 opens and 27 thermals; default routing was not rerun for this update.
 

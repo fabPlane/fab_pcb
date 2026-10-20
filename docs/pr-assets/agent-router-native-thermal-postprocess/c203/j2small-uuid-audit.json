@@ -657,10 +657,7 @@
   ],
   "first_failing_proposal": {
     "name": "006.kicad_pcb",
-    "label": [
-      "segment",
-      "61c0738b-72d3-4c21-bcbb-58a5ab584fe7"
-    ]
+    "label": ["segment", "61c0738b-72d3-4c21-bcbb-58a5ab584fe7"]
   },
   "missing_source_segments": 1,
   "cause": "Native scoped import duplicates retained objects, generating fresh UUIDs; UUID-only generator exclusion mistakes an authored segment for generated copper. Strict source inventory rejects this proposal; search exits 2 and postprocessor leaves original board for scoring."

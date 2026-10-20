@@ -11,13 +11,13 @@ success/158 candidates. A fail-first regression and all native guards pass.
 Same host `hyper-ms-lin`, cores 20–25, native 10.0.6, 26 frozen cases × three seeds
 in EACH fresh complete single-engine opt-in run:
 
-| Measure | Before | Selected pin |
-|---|---:|---:|
-| Passed attempts | 45/78 | 45/78 |
-| Cases passing 3/3 | 15/26 | 15/26 |
-| Opens | 120 | 120 |
-| New native thermal errors | 18 | 18 |
-| Observed median route-path seconds | 9.178637 | 9.448480 |
+| Measure                            |   Before | Selected pin |
+| ---------------------------------- | -------: | -----------: |
+| Passed attempts                    |    45/78 |        45/78 |
+| Cases passing 3/3                  |    15/26 |        15/26 |
+| Opens                              |      120 |          120 |
+| New native thermal errors          |       18 |           18 |
+| Observed median route-path seconds | 9.178637 |     9.448480 |
 
 All 156 attempts completed and were checked. All 78 outcome/fidelity/integrity/
 warning/policy results, physical copper, DSNs/sessions and six successful repair

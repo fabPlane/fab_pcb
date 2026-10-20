@@ -10,11 +10,11 @@ The same guard explicitly rejects the unsafe complete-board detour discovered in
 
 Measured on hyper-ms-lin, affinity20–25, native10.0.6. Same outlined fixtures, three fresh repeats per version and fixture (12 synthetic gate checks plus six three-board checks of the retained axial candidate):
 
-| Native regression | Before | After | Errors / opens in every check |
-|---|---:|---:|---:|
-| Unsafe track accepted | 3/3 | 0/3 | 0 / 0 |
-| Matching-net control accepted | 3/3 | 3/3 | 0 / 0 |
-| Previously published axial detour accepted | 3/3 | 0/3 | 0 / 110 |
+| Native regression                          | Before | After | Errors / opens in every check |
+| ------------------------------------------ | -----: | ----: | ----------------------------: |
+| Unsafe track accepted                      |    3/3 |   0/3 |                         0 / 0 |
+| Matching-net control accepted              |    3/3 |   3/3 |                         0 / 0 |
+| Previously published axial detour accepted |    3/3 |   0/3 |                       0 / 110 |
 
 The previously published reduced axial candidate is also unsafe: native loading changes all three detour tracks from the C1 net to the R1 net. The earlier report-only repair interpretation is withdrawn. Its old test expected publication and failed against the stronger guard; it now requires rejection, no intermediate progress, no bundle, and explicit ownership-change evidence despite clean reports and preserved source/routed pairs. No acceptance rule is relaxed. All six bounded proposals are refused: three change native ownership despite clean reports; three preserve ownership but retain the thermal.
 
@@ -22,20 +22,20 @@ A separate fresh native-save audit checks the SAME retained complete optional-pi
 
 Fresh re-execution of all six previously successful repair searches uses the same retained source/routed snapshots (two affected cases × three seeds). All six publish byte-identical candidates, with the same proposal counts: 38 for each two-thermal case and one for each single-thermal case. Every accepted intermediate preserves native ownership; all final boards have zero errors, zero opens and zero lost source/routed pairs. This measures native postprocessing without rerouting the corpus.
 
-| Retained valid repairs, same inputs | Before | After guard |
-|---|---:|---:|
-| Successful complete-board searches | 6/6 | 6/6 |
-| Candidate hashes matching prior outputs | 6/6 | 6/6 |
-| Added ownership mismatches in accepted checkpoints | 0 | 0 |
+| Retained valid repairs, same inputs                | Before | After guard |
+| -------------------------------------------------- | -----: | ----------: |
+| Successful complete-board searches                 |    6/6 |         6/6 |
+| Candidate hashes matching prior outputs            |    6/6 |         6/6 |
+| Added ownership mismatches in accepted checkpoints |      0 |           0 |
 
 Latest complete paired fab_router benchmark (retained cycle206,26cases×seeds1/2/3 per version, same machine/settings):
 
 | Complete optional pipeline | Before axial proposals | After axial proposals |
-|---|---:|---:|
-| Passed runs | 45/78 | 45/78 |
-| Cases passing3/3 | 15/26 | 15/26 |
-| Opens | 120 | 120 |
-| New thermal errors | 18 | 18 |
+| -------------------------- | ---------------------: | --------------------: |
+| Passed runs                |                  45/78 |                 45/78 |
+| Cases passing3/3           |                  15/26 |                 15/26 |
+| Opens                      |                    120 |                   120 |
+| New thermal errors         |                     18 |                    18 |
 
 The default pipeline's last fresh result remains39/78 passes,13/26 cases,120opens,27new errors. Neither full result is fresh for this guard change. Complete Aquarius remains unresolved (six thermals and348lost source pairs per seed). The optional repairs have measurable cost: the earlier imported-copper fix raised the J2small median route path from23.11s to112.91s; no speed gain is claimed. Engine source under src/ is unchanged by the optional tools. This opt-in adapter depends on engine PR44; placement precision is separately reviewed in PR45/48.
 

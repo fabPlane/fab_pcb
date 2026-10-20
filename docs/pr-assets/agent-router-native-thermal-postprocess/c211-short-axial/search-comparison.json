@@ -6,10 +6,7 @@
     "attempts": [
       {
         "name": "000.kicad_pcb",
-        "label": [
-          "segment",
-          "794a2604-9522-44cc-839f-633ff46983e6"
-        ],
+        "label": ["segment", "794a2604-9522-44cc-839f-633ff46983e6"],
         "progress": false,
         "errors": [
           "solder_mask_bridge",
@@ -23,1378 +20,642 @@
         ],
         "opens": 108,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "001.kicad_pcb",
-        "label": [
-          "segment",
-          "794a2604-9522-44cc-839f-633ff46983e6"
-        ],
+        "label": ["segment", "794a2604-9522-44cc-839f-633ff46983e6"],
         "progress": false,
-        "errors": [
-          "solder_mask_bridge",
-          "solder_mask_bridge",
-          "starved_thermal",
-          "clearance",
-          "shorting_items"
-        ],
+        "errors": ["solder_mask_bridge", "solder_mask_bridge", "starved_thermal", "clearance", "shorting_items"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "002.kicad_pcb",
-        "label": [
-          "segment",
-          "794a2604-9522-44cc-839f-633ff46983e6"
-        ],
+        "label": ["segment", "794a2604-9522-44cc-839f-633ff46983e6"],
         "progress": false,
-        "errors": [
-          "solder_mask_bridge",
-          "solder_mask_bridge",
-          "starved_thermal",
-          "clearance",
-          "clearance"
-        ],
+        "errors": ["solder_mask_bridge", "solder_mask_bridge", "starved_thermal", "clearance", "clearance"],
         "opens": 108,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "003.kicad_pcb",
-        "label": [
-          "segment",
-          "794a2604-9522-44cc-839f-633ff46983e6"
-        ],
+        "label": ["segment", "794a2604-9522-44cc-839f-633ff46983e6"],
         "progress": false,
-        "errors": [
-          "solder_mask_bridge",
-          "solder_mask_bridge",
-          "solder_mask_bridge",
-          "starved_thermal",
-          "clearance",
-          "shorting_items"
-        ],
+        "errors": ["solder_mask_bridge", "solder_mask_bridge", "solder_mask_bridge", "starved_thermal", "clearance", "shorting_items"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "004.kicad_pcb",
-        "label": [
-          "segment",
-          "794a2604-9522-44cc-839f-633ff46983e6"
-        ],
+        "label": ["segment", "794a2604-9522-44cc-839f-633ff46983e6"],
         "progress": false,
-        "errors": [
-          "solder_mask_bridge",
-          "solder_mask_bridge",
-          "starved_thermal",
-          "shorting_items",
-          "shorting_items"
-        ],
+        "errors": ["solder_mask_bridge", "solder_mask_bridge", "starved_thermal", "shorting_items", "shorting_items"],
         "opens": 108,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "005.kicad_pcb",
-        "label": [
-          "segment",
-          "794a2604-9522-44cc-839f-633ff46983e6"
-        ],
+        "label": ["segment", "794a2604-9522-44cc-839f-633ff46983e6"],
         "progress": false,
-        "errors": [
-          "solder_mask_bridge",
-          "solder_mask_bridge",
-          "starved_thermal",
-          "clearance",
-          "clearance"
-        ],
+        "errors": ["solder_mask_bridge", "solder_mask_bridge", "starved_thermal", "clearance", "clearance"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "006.kicad_pcb",
-        "label": [
-          "segment",
-          "32a95b6f-6b50-4141-a43c-8235969c3adc"
-        ],
+        "label": ["segment", "32a95b6f-6b50-4141-a43c-8235969c3adc"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "007.kicad_pcb",
-        "label": [
-          "segment",
-          "32a95b6f-6b50-4141-a43c-8235969c3adc"
-        ],
+        "label": ["segment", "32a95b6f-6b50-4141-a43c-8235969c3adc"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "008.kicad_pcb",
-        "label": [
-          "segment",
-          "32a95b6f-6b50-4141-a43c-8235969c3adc"
-        ],
+        "label": ["segment", "32a95b6f-6b50-4141-a43c-8235969c3adc"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "009.kicad_pcb",
-        "label": [
-          "segment",
-          "32a95b6f-6b50-4141-a43c-8235969c3adc"
-        ],
+        "label": ["segment", "32a95b6f-6b50-4141-a43c-8235969c3adc"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "010.kicad_pcb",
-        "label": [
-          "segment",
-          "32a95b6f-6b50-4141-a43c-8235969c3adc"
-        ],
+        "label": ["segment", "32a95b6f-6b50-4141-a43c-8235969c3adc"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "011.kicad_pcb",
-        "label": [
-          "segment",
-          "32a95b6f-6b50-4141-a43c-8235969c3adc"
-        ],
+        "label": ["segment", "32a95b6f-6b50-4141-a43c-8235969c3adc"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "012.kicad_pcb",
-        "label": [
-          "segment",
-          "7e19fdd0-2212-4228-b61c-f813512925d1"
-        ],
+        "label": ["segment", "7e19fdd0-2212-4228-b61c-f813512925d1"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "013.kicad_pcb",
-        "label": [
-          "segment",
-          "7e19fdd0-2212-4228-b61c-f813512925d1"
-        ],
+        "label": ["segment", "7e19fdd0-2212-4228-b61c-f813512925d1"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "014.kicad_pcb",
-        "label": [
-          "segment",
-          "7e19fdd0-2212-4228-b61c-f813512925d1"
-        ],
+        "label": ["segment", "7e19fdd0-2212-4228-b61c-f813512925d1"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "015.kicad_pcb",
-        "label": [
-          "segment",
-          "7e19fdd0-2212-4228-b61c-f813512925d1"
-        ],
+        "label": ["segment", "7e19fdd0-2212-4228-b61c-f813512925d1"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "016.kicad_pcb",
-        "label": [
-          "segment",
-          "7e19fdd0-2212-4228-b61c-f813512925d1"
-        ],
+        "label": ["segment", "7e19fdd0-2212-4228-b61c-f813512925d1"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "017.kicad_pcb",
-        "label": [
-          "segment",
-          "7e19fdd0-2212-4228-b61c-f813512925d1"
-        ],
+        "label": ["segment", "7e19fdd0-2212-4228-b61c-f813512925d1"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "018.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "019.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "020.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "021.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "022.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "023.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "024.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "025.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "026.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "027.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "028.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "029.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "030.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "031.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "032.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "033.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "034.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "035.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "036.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "037.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "038.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "039.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "040.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "041.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "042.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "043.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "044.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "045.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "046.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "047.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "048.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "049.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "050.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "051.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "052.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "053.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "054.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "055.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "056.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "057.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "058.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "059.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "060.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "061.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "062.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "063.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "064.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
         "errors": [
           "solder_mask_bridge",
@@ -1407,502 +668,264 @@
         ],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "065.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "066.kicad_pcb",
-        "label": [
-          "segment",
-          "608ae4f9-9ced-4b57-a58b-85232ab93387"
-        ],
+        "label": ["segment", "608ae4f9-9ced-4b57-a58b-85232ab93387"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "067.kicad_pcb",
-        "label": [
-          "segment",
-          "608ae4f9-9ced-4b57-a58b-85232ab93387"
-        ],
+        "label": ["segment", "608ae4f9-9ced-4b57-a58b-85232ab93387"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "068.kicad_pcb",
-        "label": [
-          "segment",
-          "608ae4f9-9ced-4b57-a58b-85232ab93387"
-        ],
+        "label": ["segment", "608ae4f9-9ced-4b57-a58b-85232ab93387"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "069.kicad_pcb",
-        "label": [
-          "segment",
-          "608ae4f9-9ced-4b57-a58b-85232ab93387"
-        ],
+        "label": ["segment", "608ae4f9-9ced-4b57-a58b-85232ab93387"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "070.kicad_pcb",
-        "label": [
-          "segment",
-          "608ae4f9-9ced-4b57-a58b-85232ab93387"
-        ],
+        "label": ["segment", "608ae4f9-9ced-4b57-a58b-85232ab93387"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "071.kicad_pcb",
-        "label": [
-          "segment",
-          "608ae4f9-9ced-4b57-a58b-85232ab93387"
-        ],
+        "label": ["segment", "608ae4f9-9ced-4b57-a58b-85232ab93387"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "072.kicad_pcb",
-        "label": [
-          "segment",
-          "9d2e32dc-507a-41da-b2b4-a62b38b96fca"
-        ],
+        "label": ["segment", "9d2e32dc-507a-41da-b2b4-a62b38b96fca"],
         "progress": false,
-        "errors": [
-          "clearance"
-        ],
+        "errors": ["clearance"],
         "opens": 108,
         "lost": 0,
-        "owned": [
-          true,
-          false,
-          true
-        ],
+        "owned": [true, false, true],
         "routedAccepted": false
       },
       {
         "name": "073.kicad_pcb",
-        "label": [
-          "segment",
-          "9d2e32dc-507a-41da-b2b4-a62b38b96fca"
-        ],
+        "label": ["segment", "9d2e32dc-507a-41da-b2b4-a62b38b96fca"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "074.kicad_pcb",
-        "label": [
-          "segment",
-          "9d2e32dc-507a-41da-b2b4-a62b38b96fca"
-        ],
+        "label": ["segment", "9d2e32dc-507a-41da-b2b4-a62b38b96fca"],
         "progress": false,
-        "errors": [
-          "clearance"
-        ],
+        "errors": ["clearance"],
         "opens": 108,
         "lost": 0,
-        "owned": [
-          true,
-          false,
-          true
-        ],
+        "owned": [true, false, true],
         "routedAccepted": false
       },
       {
         "name": "075.kicad_pcb",
-        "label": [
-          "segment",
-          "9d2e32dc-507a-41da-b2b4-a62b38b96fca"
-        ],
+        "label": ["segment", "9d2e32dc-507a-41da-b2b4-a62b38b96fca"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "076.kicad_pcb",
-        "label": [
-          "segment",
-          "9d2e32dc-507a-41da-b2b4-a62b38b96fca"
-        ],
+        "label": ["segment", "9d2e32dc-507a-41da-b2b4-a62b38b96fca"],
         "progress": false,
-        "errors": [
-          "clearance"
-        ],
+        "errors": ["clearance"],
         "opens": 108,
         "lost": 0,
-        "owned": [
-          true,
-          false,
-          true
-        ],
+        "owned": [true, false, true],
         "routedAccepted": false
       },
       {
         "name": "077.kicad_pcb",
-        "label": [
-          "segment",
-          "9d2e32dc-507a-41da-b2b4-a62b38b96fca"
-        ],
+        "label": ["segment", "9d2e32dc-507a-41da-b2b4-a62b38b96fca"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "078.kicad_pcb",
-        "label": [
-          "segment",
-          "a94d7301-9348-4334-8467-90e038060344"
-        ],
+        "label": ["segment", "a94d7301-9348-4334-8467-90e038060344"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "079.kicad_pcb",
-        "label": [
-          "segment",
-          "a94d7301-9348-4334-8467-90e038060344"
-        ],
+        "label": ["segment", "a94d7301-9348-4334-8467-90e038060344"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "080.kicad_pcb",
-        "label": [
-          "segment",
-          "a94d7301-9348-4334-8467-90e038060344"
-        ],
+        "label": ["segment", "a94d7301-9348-4334-8467-90e038060344"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "081.kicad_pcb",
-        "label": [
-          "segment",
-          "a94d7301-9348-4334-8467-90e038060344"
-        ],
+        "label": ["segment", "a94d7301-9348-4334-8467-90e038060344"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "082.kicad_pcb",
-        "label": [
-          "segment",
-          "a94d7301-9348-4334-8467-90e038060344"
-        ],
+        "label": ["segment", "a94d7301-9348-4334-8467-90e038060344"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "083.kicad_pcb",
-        "label": [
-          "segment",
-          "a94d7301-9348-4334-8467-90e038060344"
-        ],
+        "label": ["segment", "a94d7301-9348-4334-8467-90e038060344"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "084.kicad_pcb",
-        "label": [
-          "segment",
-          "2cff87db-3ada-4c21-9fb8-522fad1471f5"
-        ],
+        "label": ["segment", "2cff87db-3ada-4c21-9fb8-522fad1471f5"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "085.kicad_pcb",
-        "label": [
-          "segment",
-          "2cff87db-3ada-4c21-9fb8-522fad1471f5"
-        ],
+        "label": ["segment", "2cff87db-3ada-4c21-9fb8-522fad1471f5"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "086.kicad_pcb",
-        "label": [
-          "segment",
-          "2cff87db-3ada-4c21-9fb8-522fad1471f5"
-        ],
+        "label": ["segment", "2cff87db-3ada-4c21-9fb8-522fad1471f5"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "087.kicad_pcb",
-        "label": [
-          "segment",
-          "2cff87db-3ada-4c21-9fb8-522fad1471f5"
-        ],
+        "label": ["segment", "2cff87db-3ada-4c21-9fb8-522fad1471f5"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "088.kicad_pcb",
-        "label": [
-          "segment",
-          "2cff87db-3ada-4c21-9fb8-522fad1471f5"
-        ],
+        "label": ["segment", "2cff87db-3ada-4c21-9fb8-522fad1471f5"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "089.kicad_pcb",
-        "label": [
-          "segment",
-          "2cff87db-3ada-4c21-9fb8-522fad1471f5"
-        ],
+        "label": ["segment", "2cff87db-3ada-4c21-9fb8-522fad1471f5"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       }
     ],
-    "errors": [
-      "starved_thermal"
-    ],
+    "errors": ["starved_thermal"],
     "opens": 109,
     "lost": 0,
-    "owned": [
-      true,
-      true,
-      true
-    ]
+    "owned": [true, true, true]
   },
   "after": {
     "published": true,
@@ -1911,10 +934,7 @@
     "attempts": [
       {
         "name": "000.kicad_pcb",
-        "label": [
-          "segment",
-          "794a2604-9522-44cc-839f-633ff46983e6"
-        ],
+        "label": ["segment", "794a2604-9522-44cc-839f-633ff46983e6"],
         "progress": false,
         "errors": [
           "solder_mask_bridge",
@@ -1928,1378 +948,642 @@
         ],
         "opens": 108,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "001.kicad_pcb",
-        "label": [
-          "segment",
-          "794a2604-9522-44cc-839f-633ff46983e6"
-        ],
+        "label": ["segment", "794a2604-9522-44cc-839f-633ff46983e6"],
         "progress": false,
-        "errors": [
-          "solder_mask_bridge",
-          "solder_mask_bridge",
-          "starved_thermal",
-          "shorting_items",
-          "clearance"
-        ],
+        "errors": ["solder_mask_bridge", "solder_mask_bridge", "starved_thermal", "shorting_items", "clearance"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "002.kicad_pcb",
-        "label": [
-          "segment",
-          "794a2604-9522-44cc-839f-633ff46983e6"
-        ],
+        "label": ["segment", "794a2604-9522-44cc-839f-633ff46983e6"],
         "progress": false,
-        "errors": [
-          "solder_mask_bridge",
-          "solder_mask_bridge",
-          "starved_thermal",
-          "clearance",
-          "clearance"
-        ],
+        "errors": ["solder_mask_bridge", "solder_mask_bridge", "starved_thermal", "clearance", "clearance"],
         "opens": 108,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "003.kicad_pcb",
-        "label": [
-          "segment",
-          "794a2604-9522-44cc-839f-633ff46983e6"
-        ],
+        "label": ["segment", "794a2604-9522-44cc-839f-633ff46983e6"],
         "progress": false,
-        "errors": [
-          "solder_mask_bridge",
-          "solder_mask_bridge",
-          "solder_mask_bridge",
-          "starved_thermal",
-          "shorting_items",
-          "clearance"
-        ],
+        "errors": ["solder_mask_bridge", "solder_mask_bridge", "solder_mask_bridge", "starved_thermal", "shorting_items", "clearance"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "004.kicad_pcb",
-        "label": [
-          "segment",
-          "794a2604-9522-44cc-839f-633ff46983e6"
-        ],
+        "label": ["segment", "794a2604-9522-44cc-839f-633ff46983e6"],
         "progress": false,
-        "errors": [
-          "solder_mask_bridge",
-          "solder_mask_bridge",
-          "starved_thermal",
-          "shorting_items",
-          "shorting_items"
-        ],
+        "errors": ["solder_mask_bridge", "solder_mask_bridge", "starved_thermal", "shorting_items", "shorting_items"],
         "opens": 108,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "005.kicad_pcb",
-        "label": [
-          "segment",
-          "794a2604-9522-44cc-839f-633ff46983e6"
-        ],
+        "label": ["segment", "794a2604-9522-44cc-839f-633ff46983e6"],
         "progress": false,
-        "errors": [
-          "solder_mask_bridge",
-          "solder_mask_bridge",
-          "starved_thermal",
-          "clearance",
-          "clearance"
-        ],
+        "errors": ["solder_mask_bridge", "solder_mask_bridge", "starved_thermal", "clearance", "clearance"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "006.kicad_pcb",
-        "label": [
-          "segment",
-          "32a95b6f-6b50-4141-a43c-8235969c3adc"
-        ],
+        "label": ["segment", "32a95b6f-6b50-4141-a43c-8235969c3adc"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "007.kicad_pcb",
-        "label": [
-          "segment",
-          "32a95b6f-6b50-4141-a43c-8235969c3adc"
-        ],
+        "label": ["segment", "32a95b6f-6b50-4141-a43c-8235969c3adc"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "008.kicad_pcb",
-        "label": [
-          "segment",
-          "32a95b6f-6b50-4141-a43c-8235969c3adc"
-        ],
+        "label": ["segment", "32a95b6f-6b50-4141-a43c-8235969c3adc"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "009.kicad_pcb",
-        "label": [
-          "segment",
-          "32a95b6f-6b50-4141-a43c-8235969c3adc"
-        ],
+        "label": ["segment", "32a95b6f-6b50-4141-a43c-8235969c3adc"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "010.kicad_pcb",
-        "label": [
-          "segment",
-          "32a95b6f-6b50-4141-a43c-8235969c3adc"
-        ],
+        "label": ["segment", "32a95b6f-6b50-4141-a43c-8235969c3adc"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "011.kicad_pcb",
-        "label": [
-          "segment",
-          "32a95b6f-6b50-4141-a43c-8235969c3adc"
-        ],
+        "label": ["segment", "32a95b6f-6b50-4141-a43c-8235969c3adc"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "012.kicad_pcb",
-        "label": [
-          "segment",
-          "7e19fdd0-2212-4228-b61c-f813512925d1"
-        ],
+        "label": ["segment", "7e19fdd0-2212-4228-b61c-f813512925d1"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "013.kicad_pcb",
-        "label": [
-          "segment",
-          "7e19fdd0-2212-4228-b61c-f813512925d1"
-        ],
+        "label": ["segment", "7e19fdd0-2212-4228-b61c-f813512925d1"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "014.kicad_pcb",
-        "label": [
-          "segment",
-          "7e19fdd0-2212-4228-b61c-f813512925d1"
-        ],
+        "label": ["segment", "7e19fdd0-2212-4228-b61c-f813512925d1"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "015.kicad_pcb",
-        "label": [
-          "segment",
-          "7e19fdd0-2212-4228-b61c-f813512925d1"
-        ],
+        "label": ["segment", "7e19fdd0-2212-4228-b61c-f813512925d1"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "016.kicad_pcb",
-        "label": [
-          "segment",
-          "7e19fdd0-2212-4228-b61c-f813512925d1"
-        ],
+        "label": ["segment", "7e19fdd0-2212-4228-b61c-f813512925d1"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "017.kicad_pcb",
-        "label": [
-          "segment",
-          "7e19fdd0-2212-4228-b61c-f813512925d1"
-        ],
+        "label": ["segment", "7e19fdd0-2212-4228-b61c-f813512925d1"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "018.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "019.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "020.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "021.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "022.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "023.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "024.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "025.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "026.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "027.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "028.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "029.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "030.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "031.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "032.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "033.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "608ae4f9-9ced-4b57-a58b-85232ab93387"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "608ae4f9-9ced-4b57-a58b-85232ab93387"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "034.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "035.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "036.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "037.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "038.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "039.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "040.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "041.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "042.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "043.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "044.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "045.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "046.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "047.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "048.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "049.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "32a95b6f-6b50-4141-a43c-8235969c3adc",
-            "a94d7301-9348-4334-8467-90e038060344"
-          ]
-        ],
+        "label": ["pair", ["32a95b6f-6b50-4141-a43c-8235969c3adc", "a94d7301-9348-4334-8467-90e038060344"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "050.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "051.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "052.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "053.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "054.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "055.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "056.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "057.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "058.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "059.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "060.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "061.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "062.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "063.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "064.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
         "errors": [
           "solder_mask_bridge",
@@ -3312,631 +1596,334 @@
         ],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "065.kicad_pcb",
-        "label": [
-          "pair",
-          [
-            "2cff87db-3ada-4c21-9fb8-522fad1471f5",
-            "7e19fdd0-2212-4228-b61c-f813512925d1"
-          ]
-        ],
+        "label": ["pair", ["2cff87db-3ada-4c21-9fb8-522fad1471f5", "7e19fdd0-2212-4228-b61c-f813512925d1"]],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 110,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": false
       },
       {
         "name": "066.kicad_pcb",
-        "label": [
-          "segment",
-          "608ae4f9-9ced-4b57-a58b-85232ab93387"
-        ],
+        "label": ["segment", "608ae4f9-9ced-4b57-a58b-85232ab93387"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "067.kicad_pcb",
-        "label": [
-          "segment",
-          "608ae4f9-9ced-4b57-a58b-85232ab93387"
-        ],
+        "label": ["segment", "608ae4f9-9ced-4b57-a58b-85232ab93387"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "068.kicad_pcb",
-        "label": [
-          "segment",
-          "608ae4f9-9ced-4b57-a58b-85232ab93387"
-        ],
+        "label": ["segment", "608ae4f9-9ced-4b57-a58b-85232ab93387"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "069.kicad_pcb",
-        "label": [
-          "segment",
-          "608ae4f9-9ced-4b57-a58b-85232ab93387"
-        ],
+        "label": ["segment", "608ae4f9-9ced-4b57-a58b-85232ab93387"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "070.kicad_pcb",
-        "label": [
-          "segment",
-          "608ae4f9-9ced-4b57-a58b-85232ab93387"
-        ],
+        "label": ["segment", "608ae4f9-9ced-4b57-a58b-85232ab93387"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "071.kicad_pcb",
-        "label": [
-          "segment",
-          "608ae4f9-9ced-4b57-a58b-85232ab93387"
-        ],
+        "label": ["segment", "608ae4f9-9ced-4b57-a58b-85232ab93387"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "072.kicad_pcb",
-        "label": [
-          "segment",
-          "9d2e32dc-507a-41da-b2b4-a62b38b96fca"
-        ],
+        "label": ["segment", "9d2e32dc-507a-41da-b2b4-a62b38b96fca"],
         "progress": false,
-        "errors": [
-          "clearance"
-        ],
+        "errors": ["clearance"],
         "opens": 108,
         "lost": 0,
-        "owned": [
-          true,
-          false,
-          true
-        ],
+        "owned": [true, false, true],
         "routedAccepted": false
       },
       {
         "name": "073.kicad_pcb",
-        "label": [
-          "segment",
-          "9d2e32dc-507a-41da-b2b4-a62b38b96fca"
-        ],
+        "label": ["segment", "9d2e32dc-507a-41da-b2b4-a62b38b96fca"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "074.kicad_pcb",
-        "label": [
-          "segment",
-          "9d2e32dc-507a-41da-b2b4-a62b38b96fca"
-        ],
+        "label": ["segment", "9d2e32dc-507a-41da-b2b4-a62b38b96fca"],
         "progress": false,
-        "errors": [
-          "clearance"
-        ],
+        "errors": ["clearance"],
         "opens": 108,
         "lost": 0,
-        "owned": [
-          true,
-          false,
-          true
-        ],
+        "owned": [true, false, true],
         "routedAccepted": false
       },
       {
         "name": "075.kicad_pcb",
-        "label": [
-          "segment",
-          "9d2e32dc-507a-41da-b2b4-a62b38b96fca"
-        ],
+        "label": ["segment", "9d2e32dc-507a-41da-b2b4-a62b38b96fca"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "076.kicad_pcb",
-        "label": [
-          "segment",
-          "9d2e32dc-507a-41da-b2b4-a62b38b96fca"
-        ],
+        "label": ["segment", "9d2e32dc-507a-41da-b2b4-a62b38b96fca"],
         "progress": false,
-        "errors": [
-          "clearance"
-        ],
+        "errors": ["clearance"],
         "opens": 108,
         "lost": 0,
-        "owned": [
-          true,
-          false,
-          true
-        ],
+        "owned": [true, false, true],
         "routedAccepted": false
       },
       {
         "name": "077.kicad_pcb",
-        "label": [
-          "segment",
-          "9d2e32dc-507a-41da-b2b4-a62b38b96fca"
-        ],
+        "label": ["segment", "9d2e32dc-507a-41da-b2b4-a62b38b96fca"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "078.kicad_pcb",
-        "label": [
-          "segment",
-          "a94d7301-9348-4334-8467-90e038060344"
-        ],
+        "label": ["segment", "a94d7301-9348-4334-8467-90e038060344"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "079.kicad_pcb",
-        "label": [
-          "segment",
-          "a94d7301-9348-4334-8467-90e038060344"
-        ],
+        "label": ["segment", "a94d7301-9348-4334-8467-90e038060344"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "080.kicad_pcb",
-        "label": [
-          "segment",
-          "a94d7301-9348-4334-8467-90e038060344"
-        ],
+        "label": ["segment", "a94d7301-9348-4334-8467-90e038060344"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "081.kicad_pcb",
-        "label": [
-          "segment",
-          "a94d7301-9348-4334-8467-90e038060344"
-        ],
+        "label": ["segment", "a94d7301-9348-4334-8467-90e038060344"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "082.kicad_pcb",
-        "label": [
-          "segment",
-          "a94d7301-9348-4334-8467-90e038060344"
-        ],
+        "label": ["segment", "a94d7301-9348-4334-8467-90e038060344"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "083.kicad_pcb",
-        "label": [
-          "segment",
-          "a94d7301-9348-4334-8467-90e038060344"
-        ],
+        "label": ["segment", "a94d7301-9348-4334-8467-90e038060344"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "084.kicad_pcb",
-        "label": [
-          "segment",
-          "2cff87db-3ada-4c21-9fb8-522fad1471f5"
-        ],
+        "label": ["segment", "2cff87db-3ada-4c21-9fb8-522fad1471f5"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "085.kicad_pcb",
-        "label": [
-          "segment",
-          "2cff87db-3ada-4c21-9fb8-522fad1471f5"
-        ],
+        "label": ["segment", "2cff87db-3ada-4c21-9fb8-522fad1471f5"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "086.kicad_pcb",
-        "label": [
-          "segment",
-          "2cff87db-3ada-4c21-9fb8-522fad1471f5"
-        ],
+        "label": ["segment", "2cff87db-3ada-4c21-9fb8-522fad1471f5"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "087.kicad_pcb",
-        "label": [
-          "segment",
-          "2cff87db-3ada-4c21-9fb8-522fad1471f5"
-        ],
+        "label": ["segment", "2cff87db-3ada-4c21-9fb8-522fad1471f5"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "088.kicad_pcb",
-        "label": [
-          "segment",
-          "2cff87db-3ada-4c21-9fb8-522fad1471f5"
-        ],
+        "label": ["segment", "2cff87db-3ada-4c21-9fb8-522fad1471f5"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "089.kicad_pcb",
-        "label": [
-          "segment",
-          "2cff87db-3ada-4c21-9fb8-522fad1471f5"
-        ],
+        "label": ["segment", "2cff87db-3ada-4c21-9fb8-522fad1471f5"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "090.kicad_pcb",
-        "label": [
-          "short-axial",
-          "608ae4f9-9ced-4b57-a58b-85232ab93387"
-        ],
+        "label": ["short-axial", "608ae4f9-9ced-4b57-a58b-85232ab93387"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "091.kicad_pcb",
-        "label": [
-          "short-axial",
-          "608ae4f9-9ced-4b57-a58b-85232ab93387"
-        ],
+        "label": ["short-axial", "608ae4f9-9ced-4b57-a58b-85232ab93387"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "092.kicad_pcb",
-        "label": [
-          "short-axial",
-          "608ae4f9-9ced-4b57-a58b-85232ab93387"
-        ],
+        "label": ["short-axial", "608ae4f9-9ced-4b57-a58b-85232ab93387"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "093.kicad_pcb",
-        "label": [
-          "short-axial",
-          "608ae4f9-9ced-4b57-a58b-85232ab93387"
-        ],
+        "label": ["short-axial", "608ae4f9-9ced-4b57-a58b-85232ab93387"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "094.kicad_pcb",
-        "label": [
-          "short-axial",
-          "608ae4f9-9ced-4b57-a58b-85232ab93387"
-        ],
+        "label": ["short-axial", "608ae4f9-9ced-4b57-a58b-85232ab93387"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "095.kicad_pcb",
-        "label": [
-          "short-axial",
-          "608ae4f9-9ced-4b57-a58b-85232ab93387"
-        ],
+        "label": ["short-axial", "608ae4f9-9ced-4b57-a58b-85232ab93387"],
         "progress": false,
-        "errors": [
-          "starved_thermal"
-        ],
+        "errors": ["starved_thermal"],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       },
       {
         "name": "096.kicad_pcb",
-        "label": [
-          "short-axial",
-          "9d2e32dc-507a-41da-b2b4-a62b38b96fca"
-        ],
+        "label": ["short-axial", "9d2e32dc-507a-41da-b2b4-a62b38b96fca"],
         "progress": true,
         "errors": [],
         "opens": 109,
         "lost": 0,
-        "owned": [
-          true,
-          true,
-          true
-        ],
+        "owned": [true, true, true],
         "routedAccepted": true
       }
     ],
     "errors": [],
     "opens": 109,
     "lost": 0,
-    "owned": [
-      true,
-      true,
-      true
-    ]
+    "owned": [true, true, true]
   },
   "prefixIdentical": 90,
   "bundleCandidateSha256": "6a831b3da8a35fe2691cb46292a36d297490a7202594bced7bf4596a1b4d8b8b"

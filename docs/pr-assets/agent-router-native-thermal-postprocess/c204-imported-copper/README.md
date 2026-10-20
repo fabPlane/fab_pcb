@@ -4,12 +4,12 @@ Pin: `69cf598db98c136bff16bbe02bccdded95674b18` → `e411a8ae7612bce9b20a0d65b89
 
 Fresh matched runs on `hyper-ms-lin`, cores 20–25, all 26 cases × seeds 1/2/3 per phase, native version 10.0.6. Both use the optional post-import adapter from [integration PR #50](https://github.com/fabPlane/fab_pcb/pull/50). Before selects tools from `9ce6f136`; after selects `e411a8ae`. Only the proposal-generator implementation differs. All routing source, frozen inputs/settings/checker/runtime, and all 78 DSN/SES outputs match byte-for-byte. Candidate ran first, then the fresh control.
 
-| Scope | Before passes | After passes | Before new errors | After new errors | Opens before → after |
-|---|---:|---:|---:|---:|---:|
-| All 26 cases | 42/78 | 45/78 | 24 | 18 | 120 → 120 |
-| J2small | 0/3 | 3/3 | 6 | 0 | 0 → 0 |
-| J4 | 3/3 | 3/3 | 0 | 0 | 0 → 0 |
-| Aquarius | 0/3 | 0/3 | 18 | 18 | 45 → 45 |
+| Scope        | Before passes | After passes | Before new errors | After new errors | Opens before → after |
+| ------------ | ------------: | -----------: | ----------------: | ---------------: | -------------------: |
+| All 26 cases |         42/78 |        45/78 |                24 |               18 |            120 → 120 |
+| J2small      |           0/3 |          3/3 |                 6 |                0 |                0 → 0 |
+| J4           |           3/3 |          3/3 |                 0 |                0 |                0 → 0 |
+| Aquarius     |           0/3 |          0/3 |                18 |               18 |              45 → 45 |
 
 Valid cases (3/3): **14 → 15**. The three J2-small seeds each remove two thermal errors with zero opens and zero lost source or routed terminal pairs. Existing J4 repairs remain successful. No other case outcome, fidelity check, warning or native policy regresses.
 

@@ -2,9 +2,7 @@
   "utc": "2026-10-19T23:53:18.449197+00:00",
   "engine_parent": "9ce6f1368e1b4308c71f76d2a42e578df409c3f7",
   "integration_head": "6dfcd62d1a0f0aa1cdda2a44f2712f05e05055a8",
-  "production_diff": [
-    "tools/native-thermal-proposals.py"
-  ],
+  "production_diff": ["tools/native-thermal-proposals.py"],
   "initial_attempts": {
     "checks_exit": 143,
     "benchmark_exit": 143,
@@ -96,9 +94,7 @@
   },
   "baseline_tools_commit": "9ce6f1368e1b4308c71f76d2a42e578df409c3f7",
   "candidate_control_parent_note": "Candidate started with dirty parent 9ce6f136; all measured executable hashes match e411a8ae. Commit during run changed no measured bytes. Fresh control records e411a8ae but routing src is byte-identical; old tools selected explicitly from archived 9ce6f136 snapshot.",
-  "audited_executable_differences": [
-    "tools/native-thermal-proposals.py"
-  ],
+  "audited_executable_differences": ["tools/native-thermal-proposals.py"],
   "source_hashes_match_commit": "e411a8ae7612bce9b20a0d65b89da4b3204d70d2",
   "pin_before": "69cf598db98c136bff16bbe02bccdded95674b18",
   "pin_after": "e411a8ae7612bce9b20a0d65b89da4b3204d70d2",

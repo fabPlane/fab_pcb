@@ -1,9 +1,7 @@
 {
   "parent": "80fc5b776b0f719c76ff65b1ad945e9bb5517084",
   "integration": "dbea5a2e39297ea1c063694812b3cacca9b6fcde",
-  "measured_executable_differences": [
-    "tools/native-thermal-proposals.py"
-  ],
+  "measured_executable_differences": ["tools/native-thermal-proposals.py"],
   "scope": "Optional offline search; fresh paired full pipeline and three repeated reduced witnesses. No default routing gain claimed.",
   "initial_native_regression_failure": "Legacy duplicated outline UUIDs rejected before proposal generation. A separate fixture reidentifies only two duplicate outline graphics; original retained unchanged.",
   "tests_changed_after_suite_start": "Only sys.dont_write_bytecode=True in proposal regression; final focused regression and static checks repeated.",

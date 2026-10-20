@@ -3,27 +3,15 @@
   "baselineCommit": "124b7bd8808dd425cd3d0e42dec86fb1f4b0bd58",
   "integrationCommit": "c4cc306f51c4c859819a4e704cd2f10d04168697",
   "wrapperSha256": "43d803e49d9528cbb4e44727255a08c46d87e30149cc52dfbe7a151a93b981a5",
-  "cpus": [
-    20,
-    21,
-    22,
-    23,
-    24,
-    25
-  ],
+  "cpus": [20, 21, 22, 23, 24, 25],
   "searchStages": 1,
   "standaloneSearchOuterTimeoutSeconds": 3600,
   "adapterOuterTimeoutSeconds": 600,
   "productionChange": "tools/native-thermal-proposals.py only; src and native safety gate unchanged",
-  "setupFailures": [
-    "initial-benchmark-setup-failed.log",
-    "initial-benchmark-git-failed.log"
-  ],
+  "setupFailures": ["initial-benchmark-setup-failed.log", "initial-benchmark-git-failed.log"],
   "scoredAttemptsInSetupFailures": 0,
   "timingClaim": false,
-  "changedToolFiles": [
-    "tools/native-thermal-proposals.py"
-  ],
+  "changedToolFiles": ["tools/native-thermal-proposals.py"],
   "srcUnchanged": true,
   "initialRequiredChecks": {
     "passed": 924,

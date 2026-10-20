@@ -1,14 +1,14 @@
 Keep native thermal recovery opt-in and pin its engine to `0cfcfce2d601561a731a7102317f490aa8c5bf73`. The previous offline search evaluated 168 track candidates before its first connected via move; its retained 2144.2-second search exceeded the postprocessor's unchanged 600-second limit. The selected engine now probes one connected via move after six track detours. All candidate board bytes and every other candidate's relative order remain unchanged. Native DRC, source/current connectivity, ownership, fidelity and atomic checked-bundle application gates are unchanged.
 
-| Same host, cases and rules | Before | After |
-| --- | --- | --- |
-| Partial power-net control: checked candidates | 169 (1 retained run) | 7 in each of 3 fresh repeats |
-| Partial control: search seconds | 2144.2 (retained) | 153.1, 163.8, 186.7 |
-| Partial control: new thermals / opens / lost source and current pairs | 0 / 95 / 0 and 0 after eventual repair | 0 / 95 / 0 and 0 in all repeats |
-| Actual postprocessor, partial control | Prior search exceeds cap; no prior adapter run claimed | Applied, exit 0, 183.5s (1 fresh run) |
-| Full opt-in corpus, 26 cases × 3 seeds: passes | 45/78 | 45/78 |
-| Full opt-in corpus: cases passing 3/3 | 15/26 | 15/26 |
-| Full opt-in corpus: opens / new errors | 120 / 18 | 120 / 18 |
+| Same host, cases and rules                                            | Before                                                 | After                                 |
+| --------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------- |
+| Partial power-net control: checked candidates                         | 169 (1 retained run)                                   | 7 in each of 3 fresh repeats          |
+| Partial control: search seconds                                       | 2144.2 (retained)                                      | 153.1, 163.8, 186.7                   |
+| Partial control: new thermals / opens / lost source and current pairs | 0 / 95 / 0 and 0 after eventual repair                 | 0 / 95 / 0 and 0 in all repeats       |
+| Actual postprocessor, partial control                                 | Prior search exceeds cap; no prior adapter run claimed | Applied, exit 0, 183.5s (1 fresh run) |
+| Full opt-in corpus, 26 cases × 3 seeds: passes                        | 45/78                                                  | 45/78                                 |
+| Full opt-in corpus: cases passing 3/3                                 | 15/26                                                  | 15/26                                 |
+| Full opt-in corpus: opens / new errors                                | 120 / 18                                               | 120 / 18                              |
 
 Before corpus is retained cycle 218 at `7e56b09f`; after is fresh this cycle. Same machine, cores 20–25, seeds/settings/order/inputs/runtime/native checker. All 78 outcomes and physical copper match; all six optional repairs retain the same accepted checkpoints. Corpus median time increased from 8.331 to 9.459 seconds under concurrent verification on a shared host; no general routing speed gain is claimed. The partial control still has 95 opens: this is within-cap recovery evidence, not a completed task or a corpus score gain. Full Aquarius still fails; source-pad precision and full-board source connectivity remain blockers. Default routing is unchanged and was not rerun; latest retained default full result is 39/78 passes, 13/26 valid, 120 opens and 27 thermal errors.
 
