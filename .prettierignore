@@ -19,3 +19,6 @@ packages/router/bench/results/*.svg
 
 # Frozen comparison captures and checksum-controlled harness/configuration.
 benchmarks/autorouter/
+
+# Immutable native reports, measurements, and historical checksum evidence.
+docs/pr-assets/agent-router-fix-validation-rollback/**/*.json

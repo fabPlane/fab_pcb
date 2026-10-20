@@ -1,14 +1,15 @@
 The adapter now captures native DRC markers from the filled board immediately before tentative apply, then compares the final refilled board before saving. New active errors reject the job and invoke the existing ownership-checked rollback. Marker identities use error type, layer, exact native position and sorted involved item IDs; regenerated marker UUIDs and descriptions are excluded. Counts are retained per identity, so duplicate findings and same-total replacement errors cannot disappear into a total-count comparison. Excluded findings are ignored. Existing errors with new marker UUIDs remain allowed.
 
-| Identical stateful scenarios, host hyper-ms-lin, cores 20–25, three repeats per version | Before 0aad64e | After |
-| --- | ---: | ---: |
-| New thermal, duplicate thermal, same-count replacement | 0/9 pass | 9/9 pass |
-| Unchanged markers and excluded markers | 6/6 pass | 6/6 pass |
-| Existing validation controls | 63/63 pass | 63/63 pass |
+| Identical stateful scenarios, host hyper-ms-lin, cores 20–25, three repeats per version | Before 0aad64e |      After |
+| --------------------------------------------------------------------------------------- | -------------: | ---------: |
+| New thermal, duplicate thermal, same-count replacement                                  |       0/9 pass |   9/9 pass |
+| Unchanged markers and excluded markers                                                  |       6/6 pass |   6/6 pass |
+| Existing validation controls                                                            |     63/63 pass | 63/63 pass |
 
 Package typecheck and unit runner: 126 pass, one existing jar-dependent skip, zero failures. Unchanged engine checks also pass: typecheck, layer checks (65 files, zero violations), and 859 tests with zero failures. These are adapter unit diagnostics with a stateful copper/undo stand-in. Live native undo and restoration across separately committed fills are unverified. A newer undo entry refuses rollback, fails the job and reports that tentative copper may remain. This does not establish a native thermal benchmark improvement. No scored benchmark was run because the standalone engine harness bypasses the adapter. Historical full-engine evidence remains in ../native.json.
 
 From repository root:
+
 ```sh
 for run in 1 2 3; do
   timeout 60 taskset -c 20-25 nice -n 10 bun test packages/router/test/bridge-validation.test.ts

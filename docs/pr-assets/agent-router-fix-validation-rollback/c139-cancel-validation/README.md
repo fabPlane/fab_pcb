@@ -7,10 +7,10 @@ Stateful stand-ins only; live editor atomicity and thermal safety remain unverif
 
 Same host, cores 20–25, same cases, three repeats per revision:
 
-| Case | Before 333551e | After |
-|---|---:|---:|
-| Cancel during tentative DRC, no refill | 0/3 | 3/3 |
-| Cancel during tentative DRC, refill requested | 0/3 | 3/3 |
+| Case                                          | Before 333551e | After |
+| --------------------------------------------- | -------------: | ----: |
+| Cancel during tentative DRC, no refill        |            0/3 |   3/3 |
+| Cancel during tentative DRC, refill requested |            0/3 |   3/3 |
 
 Exact reproduction from repository root:
 

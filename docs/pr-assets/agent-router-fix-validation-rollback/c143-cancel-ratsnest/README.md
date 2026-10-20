@@ -5,10 +5,10 @@ owned tentative copper is undone before relabel, refill, or save.
 
 Same host, cores 20–25, two stateful cases, three repeats per revision:
 
-| Case | Before 74bf7b4 | After |
-|---|---:|---:|
-| Cancellation during tentative ratsnest, refill disabled | 0/3 | 3/3 |
-| Cancellation during tentative ratsnest, refill enabled | 0/3 | 3/3 |
+| Case                                                    | Before 74bf7b4 | After |
+| ------------------------------------------------------- | -------------: | ----: |
+| Cancellation during tentative ratsnest, refill disabled |            0/3 |   3/3 |
+| Cancellation during tentative ratsnest, refill enabled  |            0/3 |   3/3 |
 
 Each case checks cancellation, no summary, exact original copper restoration,
 one apply/undo, no post-apply refill, and no final save. These are stateful

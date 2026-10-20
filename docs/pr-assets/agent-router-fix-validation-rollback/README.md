@@ -66,7 +66,6 @@ per frozen case. The candidate engine checkout is the evidence branch at 08f5fdf
 source is identical. `summarize-native.py` requires complete sweeps, compares source and frozen
 control hashes, and verifies every outcome, via count and track length before producing JSON.
 
-
 Follow-up ownership coverage: [ownership/README.md](ownership/README.md) records a separate
 three-repeat comparison against c332543 for dangling-copper cleanup and commit-message
 relabeling. Both now share the validation-error path's commit-ID check. The earlier audit

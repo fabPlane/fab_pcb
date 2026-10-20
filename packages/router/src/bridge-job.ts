@@ -220,8 +220,7 @@ export function trackLength(result: Pick<RouteResult, "tracks">): number {
 async function undoTentativeRoute(board: NonNullable<Awaited<ReturnType<KiCad["currentBoard"]>>>, commitId: string): Promise<void> {
   try {
     const top = (await board.undoStack()).undo.at(-1);
-    if (!commitId || top?.commitId?.value !== commitId)
-      throw new Error("tentative route commit is not at the top of the undo stack");
+    if (!commitId || top?.commitId?.value !== commitId) throw new Error("tentative route commit is not at the top of the undo stack");
     const undone = await board.undo(1);
     if (undone.applied !== 1) throw new Error(`expected one undone commit, got ${undone.applied}`);
   } catch (error) {
@@ -462,12 +461,15 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         // Report every track finding so an existing clearance error cannot mask
         // a new violation on the same track. Use the same mode in every check.
         let nativeBaseline: DrcMarker[] | undefined;
-        if (result.router === "fab-router" && !alreadyApplied(result) &&
-            (result.tracks.length || result.vias.length || result.claimedVias?.length)) {
+        if (
+          result.router === "fab-router" &&
+          !alreadyApplied(result) &&
+          (result.tracks.length || result.vias.length || result.claimedVias?.length)
+        ) {
           // Validation can reject tentative copper only through server undo.
           // Refuse before applying when that primitive is unavailable; discovering
           // this during rollback would leave an unsafe route in editor memory.
-          if (!await board.supportsServerUndo())
+          if (!(await board.supportsServerUndo()))
             throw new Error("fab_router native validation requires server undo before applying tentative copper");
           nativeBaseline = (await board.drc.run({ refillZones: false, reportAllTrackErrors: true })).markers;
         }
@@ -513,9 +515,13 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
               // Compare matching unfilled states before accepting tentative copper.
               if (!(request.refillZones ?? true)) {
                 const added = newNativeErrors(nativeBaseline ?? [], drc.markers);
-                if (added) return await rejectTentativeValidation(
-                  board, committed.commitId, "native DRC", new Error(`${added} new native DRC error(s)`),
-                );
+                if (added)
+                  return await rejectTentativeValidation(
+                    board,
+                    committed.commitId,
+                    "native DRC",
+                    new Error(`${added} new native DRC error(s)`),
+                  );
               }
 
               for (const item of originalCopper.filter(
@@ -829,10 +835,13 @@ export function matchRouteJobPath(pathname: string): { sessionId: string; jobId?
 
 /** Stable marker identity excludes regenerated marker UUIDs and human descriptions. */
 function newNativeErrors(before: readonly DrcMarker[], after: readonly DrcMarker[]): number {
-  const key = (m: DrcMarker) => JSON.stringify([
-    m.errorType, m.layer, m.position ? [String(m.position.xNm), String(m.position.yNm)] : null,
-    m.items.map((item) => item.value).sort(),
-  ]);
+  const key = (m: DrcMarker) =>
+    JSON.stringify([
+      m.errorType,
+      m.layer,
+      m.position ? [String(m.position.xNm), String(m.position.yNm)] : null,
+      m.items.map((item) => item.value).sort(),
+    ]);
   const active = (m: DrcMarker) => !m.excluded && m.severity === RuleSeverity.RS_ERROR;
   const remaining = new Map<string, number>();
   for (const marker of before.filter(active)) {

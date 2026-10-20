@@ -66,10 +66,21 @@ export function validationFixture(
       await options.ratsnestGate?.();
       if (options.ratsnestFailure) throw new Error("native ratsnest transport unavailable");
       const open = options.relabel && (!options.oscillatingCount || checks % 2 === 1);
-      return { edges: open ? [{
-        net: "A", netCode: 1, source: "endpoint", target: "target",
-        sourcePosition: { x: 0, y: 0 }, targetPosition: { x: 10e6, y: 0 }, length: 10e6,
-      }] : [] };
+      return {
+        edges: open
+          ? [
+              {
+                net: "A",
+                netCode: 1,
+                source: "endpoint",
+                target: "target",
+                sourcePosition: { x: 0, y: 0 },
+                targetPosition: { x: 10e6, y: 0 },
+                length: 10e6,
+              },
+            ]
+          : [],
+      };
     },
     undoStack: async () => {
       calls.push("undoStack");
@@ -86,36 +97,53 @@ export function validationFixture(
       run: async (opts?: { reportAllTrackErrors?: boolean }) => {
         calls.push("drc");
         if (options.maskedTrackError) {
-          const clearance = (id: string) => create(DrcMarkerSchema, {
-            errorType: DrcErrorType.DRCET_CLEARANCE, severity: RuleSeverity.RS_ERROR,
-            items: [{ value: "existing-track" }, { value: id }],
-          });
+          const clearance = (id: string) =>
+            create(DrcMarkerSchema, {
+              errorType: DrcErrorType.DRCET_CLEARANCE,
+              severity: RuleSeverity.RS_ERROR,
+              items: [{ value: "existing-track" }, { value: id }],
+            });
           // Native default reports only the first clearance finding per track.
-          return { markers: [clearance("old-neighbour"),
-            ...(opts?.reportAllTrackErrors && (options.maskedTrackError === "existing" || copper.includes(generated))
-              ? [clearance(options.maskedTrackError === "existing" ? "second-old-neighbour" : "new-route")] : [])] };
+          return {
+            markers: [
+              clearance("old-neighbour"),
+              ...(opts?.reportAllTrackErrors && (options.maskedTrackError === "existing" || copper.includes(generated))
+                ? [clearance(options.maskedTrackError === "existing" ? "second-old-neighbour" : "new-route")]
+                : []),
+            ],
+          };
         }
-        const marker = (item: string, id: string, excluded = false) => create(DrcMarkerSchema, {
-          errorType: DrcErrorType.DRCET_STARVED_THERMAL, severity: RuleSeverity.RS_ERROR,
-          items: options.markerChange === "item-order"
-            ? (id === "before-id" ? ["pad", "track"] : ["track", "pad"]).map(value => ({ value }))
-            : [{ value: item }],
-          position: { xNm: options.markerChange === "position" && id !== "before-id" ? 1n : 0n, yNm: 0n },
-          layer: options.markerChange === "layer" && id !== "before-id" ? BoardLayer.BL_B_Cu : BoardLayer.BL_F_Cu,
-          id: { value: id }, excluded,
-        });
+        const marker = (item: string, id: string, excluded = false) =>
+          create(DrcMarkerSchema, {
+            errorType: DrcErrorType.DRCET_STARVED_THERMAL,
+            severity: RuleSeverity.RS_ERROR,
+            items:
+              options.markerChange === "item-order"
+                ? (id === "before-id" ? ["pad", "track"] : ["track", "pad"]).map((value) => ({ value }))
+                : [{ value: item }],
+            position: { xNm: options.markerChange === "position" && id !== "before-id" ? 1n : 0n, yNm: 0n },
+            layer: options.markerChange === "layer" && id !== "before-id" ? BoardLayer.BL_B_Cu : BoardLayer.BL_F_Cu,
+            id: { value: id },
+            excluded,
+          });
         if (!copper.includes(generated)) {
           await options.baselineGate?.();
           const baselineMarker = marker("pad", "before-id");
           if (options.baselineStatus === "warning") baselineMarker.severity = RuleSeverity.RS_WARNING;
           if (options.baselineStatus === "excluded") baselineMarker.excluded = true;
-          return { markers: options.filledMarkers && options.filledMarkers !== "new" && options.filledMarkers !== "excluded"
-            ? [baselineMarker] : [] };
+          return {
+            markers:
+              options.filledMarkers && options.filledMarkers !== "new" && options.filledMarkers !== "excluded" ? [baselineMarker] : [],
+          };
         }
         if ((fills === 2 || options.unfilledErrors) && options.filledMarkers) {
           const kind = options.filledMarkers;
-          return { markers: kind === "duplicate" ? [marker("pad", "after-1"), marker("pad", "after-2")]
-            : [marker(kind === "replacement" ? "other-pad" : "pad", "after-id", kind === "excluded")] };
+          return {
+            markers:
+              kind === "duplicate"
+                ? [marker("pad", "after-1"), marker("pad", "after-2")]
+                : [marker(kind === "replacement" ? "other-pad" : "pad", "after-id", kind === "excluded")],
+          };
         }
         if (fills === 2) await options.filledValidationGate?.();
         await options.validationGate?.();
@@ -127,14 +155,29 @@ export function validationFixture(
           }
           throw new Error("filled DRC unavailable");
         }
-        if (options.danglingSeverity !== undefined) return { markers: copper.some((item) => item.id === "stub") ? [create(DrcMarkerSchema, {
-          errorType: DrcErrorType.DRCET_DANGLING_TRACK, severity: options.danglingSeverity,
-          items: [{ value: "stub" }],
-        })] : [] };
-        if (options.excludedDangling) return { markers: [create(DrcMarkerSchema, {
-          errorType: DrcErrorType.DRCET_DANGLING_TRACK, severity: RuleSeverity.RS_WARNING, excluded: true,
-          items: [{ value: options.excludedDangling === "existing" ? "stub" : generated.id }],
-        })] };
+        if (options.danglingSeverity !== undefined)
+          return {
+            markers: copper.some((item) => item.id === "stub")
+              ? [
+                  create(DrcMarkerSchema, {
+                    errorType: DrcErrorType.DRCET_DANGLING_TRACK,
+                    severity: options.danglingSeverity,
+                    items: [{ value: "stub" }],
+                  }),
+                ]
+              : [],
+          };
+        if (options.excludedDangling)
+          return {
+            markers: [
+              create(DrcMarkerSchema, {
+                errorType: DrcErrorType.DRCET_DANGLING_TRACK,
+                severity: RuleSeverity.RS_WARNING,
+                excluded: true,
+                items: [{ value: options.excludedDangling === "existing" ? "stub" : generated.id }],
+              }),
+            ],
+          };
         if (options.valid || options.ratsnestFailure || (options.relabel && checks === 1)) return { markers: [] };
         if (options.cleanupFirst && checks === 1)
           return {

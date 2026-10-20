@@ -513,7 +513,16 @@ test("native cleanup keeps a useful connection behind a dangling chain longer th
       run: async () => {
         checks++;
         return {
-          markers: created.length > 1 ? [{ errorType: DrcErrorType.DRCET_DANGLING_TRACK, severity: RuleSeverity.RS_WARNING, items: [{ value: created.at(-1)!.id }] }] : [],
+          markers:
+            created.length > 1
+              ? [
+                  {
+                    errorType: DrcErrorType.DRCET_DANGLING_TRACK,
+                    severity: RuleSeverity.RS_WARNING,
+                    items: [{ value: created.at(-1)!.id }],
+                  },
+                ]
+              : [],
         };
       },
     },

@@ -7,12 +7,12 @@ Identity/multiplicity checks and ownership-checked rollback remain unchanged.
 
 Same stateful job cases, host hyper-ms-lin, cores 20–25, three repeats per revision:
 
-| Scenario | Before fd25e1a | After |
-|---|---:|---:|
-| New masked clearance, no refill | 0/3 | 3/3 |
-| New masked clearance, refill | 0/3 | 3/3 |
-| Existing clearances, no refill | 3/3 | 3/3 |
-| Existing clearances, refill | 3/3 | 3/3 |
+| Scenario                        | Before fd25e1a | After |
+| ------------------------------- | -------------: | ----: |
+| New masked clearance, no refill |            0/3 |   3/3 |
+| New masked clearance, refill    |            0/3 |   3/3 |
+| Existing clearances, no refill  |            3/3 |   3/3 |
+| Existing clearances, refill     |            3/3 |   3/3 |
 
 New findings reject before final save, undo the owned route and restore original
 copper. Existing-only controls accept. This models native first-error suppression;

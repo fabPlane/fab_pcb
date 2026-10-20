@@ -4,12 +4,12 @@ A successful native refill may push an undo entry after the tentative route. Exi
 
 Three repeats per source on the same host, cores 20–25. Before source: `c03e9cd`; after: current source. Production bytes are identical. This extends test coverage; it does not improve native routing or restoration.
 
-| Stateful outcome | Before | After |
-| --- | ---: | ---: |
-| Existing validation controls | 114/114 | 114/114 |
-| Failed validation after committed refill: explicit refusal | 6/6 | 6/6 |
-| Failed validation after committed refill: copper restored | 0/6 | 0/6 |
-| Clean committed refill: route saved | 3/3 | 3/3 |
+| Stateful outcome                                           |  Before |   After |
+| ---------------------------------------------------------- | ------: | ------: |
+| Existing validation controls                               | 114/114 | 114/114 |
+| Failed validation after committed refill: explicit refusal |     6/6 |     6/6 |
+| Failed validation after committed refill: copper restored  |     0/6 |     0/6 |
+| Clean committed refill: route saved                        |     3/3 |     3/3 |
 
 Reproduce from repository root:
 

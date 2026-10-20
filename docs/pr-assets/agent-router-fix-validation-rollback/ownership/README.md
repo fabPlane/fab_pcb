@@ -8,10 +8,10 @@ All three paths now share the same commit-ID check and undo-count validation.
 
 The same four regressions run on the same host, cores 20–25, three repeats per version:
 
-| Version | Tests passing per repeat | Newer edits preserved | Owned controls passing |
-| --- | ---: | ---: | ---: |
-| Previous PR c332543 | 2/4 | 0/2 | 2/2 |
-| Candidate | 4/4 | 2/2 | 2/2 |
+| Version             | Tests passing per repeat | Newer edits preserved | Owned controls passing |
+| ------------------- | -----------------------: | --------------------: | ---------------------: |
+| Previous PR c332543 |                      2/4 |                   0/2 |                    2/2 |
+| Candidate           |                      4/4 |                   2/2 |                    2/2 |
 
 The two newer-edit cases must fail the job without undo, reapply, success summary or final
 save. The owned controls still clean up or relabel with one undo. Existing tests now expose

@@ -5,10 +5,10 @@ They do not establish live editor atomicity or thermal safety.
 
 Same host, cores 20–25, same cases, three repeats per revision:
 
-| Case | Before 4617942 | After |
-|---|---:|---:|
-| Cancel during baseline, no refill | 0/3 | 3/3 |
-| Cancel during baseline, refill | 0/3 | 3/3 |
+| Case                              | Before 4617942 | After |
+| --------------------------------- | -------------: | ----: |
+| Cancel during baseline, no refill |            0/3 |   3/3 |
+| Cancel during baseline, refill    |            0/3 |   3/3 |
 
 Exact reproduction from repository root:
 

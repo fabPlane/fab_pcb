@@ -11,7 +11,9 @@ for (const cleanupFirst of [false, true]) {
     expect(info.summary).toBeUndefined();
     expect(fixture.copper()).toEqual(fixture.original);
     expect(fixture.calls).toEqual(
-      cleanupFirst ? ["save", "drc", "apply", "drc", "undoStack", "undo", "apply", "drc", "undoStack", "undo"] : ["save", "drc", "apply", "drc", "undoStack", "undo"],
+      cleanupFirst
+        ? ["save", "drc", "apply", "drc", "undoStack", "undo", "apply", "drc", "undoStack", "undo"]
+        : ["save", "drc", "apply", "drc", "undoStack", "undo"],
     );
   });
 }
@@ -241,7 +243,9 @@ for (const danglingSeverity of [RuleSeverity.RS_WARNING, RuleSeverity.RS_ERROR])
 // actual thermal rejection must both refuse to undo an unowned newer entry.
 for (const failure of ["query", "thermal"] as const) {
   test(`successful committed refill followed by ${failure} failure reports unrestored copper`, async () => {
-    const fixture = validationFixture({ valid: true, refill: "commit-valid",
+    const fixture = validationFixture({
+      valid: true,
+      refill: "commit-valid",
       ...(failure === "query" ? { finalDrcFailure: true } : { filledMarkers: "new" as const }),
     });
     const info = await fixture.done;
@@ -268,19 +272,21 @@ test("successful committed refill and clean final DRC saves without undoing nati
   expect(fixture.copper().map((item) => item.id)).toEqual(["stub", "protected", "other-net", "new-route"]);
 });
 
-
 for (const refill of [false, true]) {
   for (const markerChange of ["position", "layer", "item-order"] as const) {
     test(`native marker identity ${markerChange} with refill=${refill}`, async () => {
-      const fixture = validationFixture({ valid: true, filledMarkers: "existing", markerChange,
+      const fixture = validationFixture({
+        valid: true,
+        filledMarkers: "existing",
+        markerChange,
         ...(refill ? { refill: "valid" as const } : { unfilledErrors: true }),
       });
       const info = await fixture.done;
       const sameFinding = markerChange === "item-order";
       expect(info.state).toBe(sameFinding ? "done" : "failed");
-      expect(fixture.calls.filter(call => call === "save")).toHaveLength(sameFinding ? 2 : 1);
-      expect(fixture.calls.filter(call => call === "undo")).toHaveLength(sameFinding ? 0 : 1);
-      if (sameFinding) expect(fixture.copper().map(item => item.id)).toContain("new-route");
+      expect(fixture.calls.filter((call) => call === "save")).toHaveLength(sameFinding ? 2 : 1);
+      expect(fixture.calls.filter((call) => call === "undo")).toHaveLength(sameFinding ? 0 : 1);
+      if (sameFinding) expect(fixture.copper().map((item) => item.id)).toContain("new-route");
       else {
         expect(info.error).toContain("native DRC error(s)");
         expect(fixture.copper()).toEqual(fixture.original);
@@ -294,15 +300,18 @@ for (const refill of [false, true]) {
 for (const refill of [false, true]) {
   for (const baselineStatus of ["warning", "excluded"] as const) {
     test(`rejects native ${baselineStatus} becoming an error with refill=${refill}`, async () => {
-      const fixture = validationFixture({ valid: true, filledMarkers: "existing", baselineStatus,
+      const fixture = validationFixture({
+        valid: true,
+        filledMarkers: "existing",
+        baselineStatus,
         ...(refill ? { refill: "valid" as const } : { unfilledErrors: true }),
       });
       const info = await fixture.done;
       expect(info.state).toBe("failed");
       expect(info.error).toContain("native DRC error(s)");
       expect(info.summary).toBeUndefined();
-      expect(fixture.calls.filter(call => call === "save")).toHaveLength(1);
-      expect(fixture.calls.filter(call => call === "undo")).toHaveLength(1);
+      expect(fixture.calls.filter((call) => call === "save")).toHaveLength(1);
+      expect(fixture.calls.filter((call) => call === "undo")).toHaveLength(1);
       expect(fixture.copper()).toEqual(fixture.original);
     });
   }
@@ -311,19 +320,17 @@ for (const refill of [false, true]) {
 for (const refill of [false, true]) {
   for (const maskedTrackError of ["new", "existing"] as const) {
     test(`checks every track clearance finding (${maskedTrackError}, refill=${refill})`, async () => {
-      const fixture = validationFixture({ maskedTrackError,
-        ...(refill ? { refill: "valid" as const } : {}),
-      });
+      const fixture = validationFixture({ maskedTrackError, ...(refill ? { refill: "valid" as const } : {}) });
       const info = await fixture.done;
       const rejected = maskedTrackError === "new";
       expect(info.state).toBe(rejected ? "failed" : "done");
-      expect(fixture.calls.filter(call => call === "save")).toHaveLength(rejected ? 1 : 2);
-      expect(fixture.calls.filter(call => call === "undo")).toHaveLength(rejected ? 1 : 0);
+      expect(fixture.calls.filter((call) => call === "save")).toHaveLength(rejected ? 1 : 2);
+      expect(fixture.calls.filter((call) => call === "undo")).toHaveLength(rejected ? 1 : 0);
       if (rejected) {
         expect(info.error).toContain("1 new");
         expect(info.summary).toBeUndefined();
         expect(fixture.copper()).toEqual(fixture.original);
-      } else expect(fixture.copper().map(item => item.id)).toContain("new-route");
+      } else expect(fixture.copper().map((item) => item.id)).toContain("new-route");
     });
   }
 }
@@ -332,10 +339,19 @@ for (const refill of [false, true]) {
   test(`cancellation during baseline DRC prevents applying copper (refill=${refill})`, async () => {
     let entered!: () => void;
     let release!: () => void;
-    const waiting = new Promise<void>(resolve => { entered = resolve; });
-    const gate = new Promise<void>(resolve => { release = resolve; });
-    const fixture = validationFixture({ valid: true, ...(refill ? { refill: "valid" as const } : {}),
-      baselineGate: async () => { entered(); await gate; },
+    const waiting = new Promise<void>((resolve) => {
+      entered = resolve;
+    });
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const fixture = validationFixture({
+      valid: true,
+      ...(refill ? { refill: "valid" as const } : {}),
+      baselineGate: async () => {
+        entered();
+        await gate;
+      },
     });
     await waiting;
     expect(fixture.cancel()).toBe(true);
@@ -345,7 +361,7 @@ for (const refill of [false, true]) {
     expect(info.summary).toBeUndefined();
     expect(fixture.calls).not.toContain("apply");
     expect(fixture.copper()).toEqual(fixture.original);
-    expect(fixture.calls.filter(call => call === "save")).toHaveLength(1);
+    expect(fixture.calls.filter((call) => call === "save")).toHaveLength(1);
   });
 }
 
@@ -353,10 +369,19 @@ for (const refill of [false, true]) {
   test(`cancellation during tentative DRC restores copper (refill=${refill})`, async () => {
     let entered!: () => void;
     let release!: () => void;
-    const waiting = new Promise<void>(resolve => { entered = resolve; });
-    const gate = new Promise<void>(resolve => { release = resolve; });
-    const fixture = validationFixture({ valid: true, ...(refill ? { refill: "valid" as const } : {}),
-      validationGate: async () => { entered(); await gate; },
+    const waiting = new Promise<void>((resolve) => {
+      entered = resolve;
+    });
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const fixture = validationFixture({
+      valid: true,
+      ...(refill ? { refill: "valid" as const } : {}),
+      validationGate: async () => {
+        entered();
+        await gate;
+      },
     });
     await waiting;
     expect(fixture.cancel()).toBe(true);
@@ -364,11 +389,11 @@ for (const refill of [false, true]) {
     const info = await fixture.done;
     expect(info.state).toBe("cancelled");
     expect(info.summary).toBeUndefined();
-    expect(fixture.calls.filter(call => call === "apply")).toHaveLength(1);
-    expect(fixture.calls.filter(call => call === "undo")).toHaveLength(1);
+    expect(fixture.calls.filter((call) => call === "apply")).toHaveLength(1);
+    expect(fixture.calls.filter((call) => call === "undo")).toHaveLength(1);
     expect(fixture.copper()).toEqual(fixture.original);
-    expect(fixture.calls.filter(call => call === "refill")).toHaveLength(refill ? 1 : 0);
-    expect(fixture.calls.filter(call => call === "save")).toHaveLength(1);
+    expect(fixture.calls.filter((call) => call === "refill")).toHaveLength(refill ? 1 : 0);
+    expect(fixture.calls.filter((call) => call === "save")).toHaveLength(1);
   });
 }
 
@@ -376,10 +401,19 @@ for (const refill of ["valid", "commit-valid"] as const) {
   test(`cancellation during filled DRC rejects without saving (refill=${refill})`, async () => {
     let entered!: () => void;
     let release!: () => void;
-    const waiting = new Promise<void>(resolve => { entered = resolve; });
-    const gate = new Promise<void>(resolve => { release = resolve; });
-    const fixture = validationFixture({ valid: true, refill,
-      filledValidationGate: async () => { entered(); await gate; },
+    const waiting = new Promise<void>((resolve) => {
+      entered = resolve;
+    });
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const fixture = validationFixture({
+      valid: true,
+      refill,
+      filledValidationGate: async () => {
+        entered();
+        await gate;
+      },
     });
     await waiting;
     expect(fixture.cancel()).toBe(true);
@@ -388,15 +422,15 @@ for (const refill of ["valid", "commit-valid"] as const) {
     expect(info.state).toBe("cancelled");
     expect(info.summary).toBeUndefined();
     expect(info.error).toContain("post-refill native DRC validation failed");
-    expect(fixture.calls.filter(call => call === "save")).toHaveLength(1);
+    expect(fixture.calls.filter((call) => call === "save")).toHaveLength(1);
     if (refill === "valid") {
-      expect(fixture.calls.filter(call => call === "undo")).toHaveLength(1);
+      expect(fixture.calls.filter((call) => call === "undo")).toHaveLength(1);
       expect(fixture.copper()).toEqual(fixture.original);
     } else {
       expect(fixture.calls).not.toContain("undo");
       expect(info.error).toContain("not at the top of the undo stack");
       expect(info.error).toContain("tentative route may remain");
-      expect(fixture.copper().some(item => item.id === "new-route")).toBe(true);
+      expect(fixture.copper().some((item) => item.id === "new-route")).toBe(true);
     }
   });
 }
@@ -405,10 +439,19 @@ for (const refill of [false, true]) {
   test(`cancellation during tentative ratsnest restores copper (refill=${refill})`, async () => {
     let entered!: () => void;
     let release!: () => void;
-    const waiting = new Promise<void>(resolve => { entered = resolve; });
-    const gate = new Promise<void>(resolve => { release = resolve; });
-    const fixture = validationFixture({ valid: true, ...(refill ? { refill: "valid" as const } : {}),
-      ratsnestGate: async () => { entered(); await gate; },
+    const waiting = new Promise<void>((resolve) => {
+      entered = resolve;
+    });
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const fixture = validationFixture({
+      valid: true,
+      ...(refill ? { refill: "valid" as const } : {}),
+      ratsnestGate: async () => {
+        entered();
+        await gate;
+      },
     });
     await waiting;
     expect(fixture.cancel()).toBe(true);
@@ -417,11 +460,11 @@ for (const refill of [false, true]) {
     expect(info.state).toBe("cancelled");
     expect(info.summary).toBeUndefined();
     expect(info.error).toContain("native ratsnest validation failed");
-    expect(fixture.calls.filter(call => call === "apply")).toHaveLength(1);
-    expect(fixture.calls.filter(call => call === "undo")).toHaveLength(1);
+    expect(fixture.calls.filter((call) => call === "apply")).toHaveLength(1);
+    expect(fixture.calls.filter((call) => call === "undo")).toHaveLength(1);
     expect(fixture.copper()).toEqual(fixture.original);
-    expect(fixture.calls.filter(call => call === "refill")).toHaveLength(refill ? 1 : 0);
-    expect(fixture.calls.filter(call => call === "save")).toHaveLength(1);
+    expect(fixture.calls.filter((call) => call === "refill")).toHaveLength(refill ? 1 : 0);
+    expect(fixture.calls.filter((call) => call === "save")).toHaveLength(1);
   });
 }
 
@@ -435,6 +478,6 @@ for (const serverUndo of ["unsupported", "throws"] as const) {
     expect(fixture.calls).not.toContain("apply");
     expect(fixture.calls).not.toContain("drc");
     expect(fixture.copper()).toEqual(fixture.original);
-    expect(fixture.calls.filter(call => call === "save")).toHaveLength(1);
+    expect(fixture.calls.filter((call) => call === "save")).toHaveLength(1);
   });
 }

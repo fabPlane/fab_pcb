@@ -2,10 +2,10 @@
 
 Before tentative application, require the editor's server undo capability. Unsupported capability and a failed capability query previously allowed a successful apply; both now fail before native baseline checking or applying copper. This uses the existing client capability API. Successful supported-editor controls are retained in the full suite. The initial save remains unchanged.
 
-| Same cases on same host, 3 repeats | Before | After |
-| --- | ---: | ---: |
-| Correct rejection before application / repeat | 0/2 | 2/2 |
-| Incorrectly applied / repeat | 2/2 | 0/2 |
+| Same cases on same host, 3 repeats            | Before | After |
+| --------------------------------------------- | -----: | ----: |
+| Correct rejection before application / repeat |    0/2 |   2/2 |
+| Incorrectly applied / repeat                  |    2/2 |   0/2 |
 
 Stateful fixtures, not a live editor. This does not establish availability of undo at a later time, atomic rollback, or ownership across zone refill. Shared native reference remains 39/78 passed, 13/26 valid, 120 opens, 27 new thermal errors; no native router run completed this cycle. The standalone benchmark bypasses the changed adapter.
 

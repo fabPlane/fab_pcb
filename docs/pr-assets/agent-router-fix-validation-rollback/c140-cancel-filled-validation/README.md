@@ -5,10 +5,10 @@ a newer refill entry still prevents rollback and reports copper may remain.
 
 Same host, cores 20–25, same two cases, three repeats per revision:
 
-| Stateful case | Before 7bc4961 | After |
-|---|---:|---:|
-| Cancel during filled DRC, route still newest | 0/3 | 3/3 |
-| Cancel during filled DRC, newer refill entry | 0/3 | 3/3 |
+| Stateful case                                | Before 7bc4961 | After |
+| -------------------------------------------- | -------------: | ----: |
+| Cancel during filled DRC, route still newest |            0/3 |   3/3 |
+| Cancel during filled DRC, newer refill entry |            0/3 |   3/3 |
 
 The first case checks original copper restoration and one undo. The second checks
 no undo and an explicit ownership refusal. Both check no final save or summary.

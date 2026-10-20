@@ -11,12 +11,12 @@ a foreign edit, history transport failure, and undo transport failure. The last
 four cases fail the new reporting assertion on base 59d5893; no unsafe undo or
 routing improvement is claimed. Three repeats/source on hyper-ms-lin, cores20–25:
 
-| Measurement | Before | After |
-| --- | ---: | ---: |
-| Ownership/context scenarios passing each repeat | 4/8 | 8/8 |
-| Full engine native passes (26 cases × 3) | 39/78 | 39/78 |
-| Cases passing all three native repeats | 13/26 | 13/26 |
-| Native opens / new errors | 120 / 27 | 120 / 27 |
+| Measurement                                     |   Before |    After |
+| ----------------------------------------------- | -------: | -------: |
+| Ownership/context scenarios passing each repeat |      4/8 |      8/8 |
+| Full engine native passes (26 cases × 3)        |    39/78 |    39/78 |
+| Cases passing all three native repeats          |    13/26 |    13/26 |
+| Native opens / new errors                       | 120 / 27 | 120 / 27 |
 
 The native comparison uses c133 and c136 engine runs, both on cores20–25. All
 78 outcome, DRC type, fidelity, via and length fields match. The standalone
