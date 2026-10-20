@@ -38,13 +38,8 @@
     "qualification": "Four documentation/license differences and one unused diagnostic DSN root-name difference; normalized routing fixture identities match separately.",
     "diagnostic_dsn_root_only": true
   },
-  "source_changed": [
-    "src/bench.ts"
-  ],
-  "source_added": [
-    "src/hosts/kicad-before67.ts",
-    "src/scoring-source.ts"
-  ],
+  "source_changed": ["src/bench.ts"],
+  "source_added": ["src/hosts/kicad-before67.ts", "src/scoring-source.ts"],
   "source_start": [
     {
       "path": "src/adapters/fab-router.ts",

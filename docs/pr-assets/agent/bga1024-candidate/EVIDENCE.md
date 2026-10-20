@@ -4,9 +4,9 @@ The larger input exposes a native reporting boundary: native connectivity report
 
 Same candidate and machine (hyper-ms-lin, cores 0–5, checker 10.0.6), three independent generations/fresh native DRCs. Before/after describes report-only interpretation versus the explicit connectivity/report evidence added by this fixture, not a change to production scoring:
 
-| Input | Before: report-only count | After: native connectivity count | After: reported count | Geometry violations | Repeats |
-|---|---:|---:|---:|---:|---:|
-| 1,024-net candidate |499|1024|499 (limited)|0|3|
+| Input               | Before: report-only count | After: native connectivity count | After: reported count | Geometry violations | Repeats |
+| ------------------- | ------------------------: | -------------------------------: | --------------------: | ------------------: | ------: |
+| 1,024-net candidate |                       499 |                             1024 |         499 (limited) |                   0 |       3 |
 
 A separate benchmark-harness experiment on the same boards measured exact-report admission: 400-net control 3/3 → 3/3, new candidate 3/3 → 0/3, three fresh checks per implementation per board. That guard is not a production change in this PR.
 
@@ -26,10 +26,10 @@ Validation: typecheck, 11/11 unit packages, two optimized native tests (three re
 
 Completed routing context from the separate benchmark harness (three repeats, same machine and route budgets). Existing cases are matched; the candidate is a new cohort:
 
-| Cohort | Before completed | After completed | Before validated passes | After validated passes | Attempts each |
-|---|---:|---:|---:|---:|---:|
-| Existing cases | 59 | 60 | 33 | 33 | 153 |
-| New candidate | — | 0 | — | 0 | 9 after only |
+| Cohort         | Before completed | After completed | Before validated passes | After validated passes | Attempts each |
+| -------------- | ---------------: | --------------: | ----------------------: | ---------------------: | ------------: |
+| Existing cases |               59 |              60 |                      33 |                     33 |           153 |
+| New candidate  |                — |               0 |                       — |                      0 |  9 after only |
 
 This is context for the new fixture, not a public engine or scoring change. The bundled generator/native tests above reproduce the fixture's admission and report-limit observations; the separate harness cohort uses its pinned native-aware integration. No routed-feasibility or engine-gain claim is made.
 
@@ -47,13 +47,13 @@ opens an exact connectivity count or establish production baseline adoption.
 
 Same machine/checker and same inputs, three repeats per implementation:
 
-| Admission control | Before accepted | After accepted | Repeats per case |
-|---|---:|---:|---:|
-| Direct parser: 400-open report |3/3|3/3|3|
-| Direct parser: 1,024-open / 499-reported input |3/3|0/3|3|
-| Candidate diagnostic: valid report |3/3|3/3|3|
-| Nine malformed diagnostic variants |27/27|0/27|3|
-| Two already-rejected missing-list variants |0/6|0/6|3|
+| Admission control                              | Before accepted | After accepted | Repeats per case |
+| ---------------------------------------------- | --------------: | -------------: | ---------------: |
+| Direct parser: 400-open report                 |             3/3 |            3/3 |                3 |
+| Direct parser: 1,024-open / 499-reported input |             3/3 |            0/3 |                3 |
+| Candidate diagnostic: valid report             |             3/3 |            3/3 |                3 |
+| Nine malformed diagnostic variants             |           27/27 |           0/27 |                3 |
+| Two already-rejected missing-list variants     |             0/6 |            0/6 |                3 |
 
 Direct-parser controls use six fresh native reports. The diagnostic controls use
 three fresh independent generations and 72 admissions over the same reports;
@@ -95,26 +95,26 @@ All five comparisons and the outer wrapper exit zero; runtime endpoint checks
 match. Endpoint equality does not establish continuous execution or imported
 dependency identity. No engine gain is claimed.
 
-| Suite | Router | Before completed | After completed | Before passes | After passes | Attempts each |
-|---|---|---:|---:|---:|---:|---:|
-|canary|fab_router|12|12|9|9|12|
-|canary|reference engine|9|9|6|6|9|
-|canary|capacity-mesh router|3|3|3|3|3|
-|canary|in-repo router|12|12|3|3|12|
-|bga|fab_router|0|0|0|0|12|
-|bga|reference engine|0|0|0|0|6|
-|bga|capacity-mesh router|0|0|0|0|6|
-|bga|in-repo router|0|0|0|0|12|
-|ladder|fab_router|6|5|3|3|18|
-|ladder|reference engine|3|3|3|3|9|
-|ladder|capacity-mesh router|6|6|6|6|9|
-|ladder|in-repo router|9|7|0|0|18|
-|dense-source|fab_router|0|0|0|0|3|
-|dense-source|reference engine|0|0|0|0|3|
-|dense-source|in-repo router|0|0|0|0|3|
-|dense-candidate|fab_router|0|0|0|0|9|
-|dense-candidate|reference engine|0|0|0|0|9|
-|dense-candidate|in-repo router|0|0|0|0|9|
+| Suite           | Router               | Before completed | After completed | Before passes | After passes | Attempts each |
+| --------------- | -------------------- | ---------------: | --------------: | ------------: | -----------: | ------------: |
+| canary          | fab_router           |               12 |              12 |             9 |            9 |            12 |
+| canary          | reference engine     |                9 |               9 |             6 |            6 |             9 |
+| canary          | capacity-mesh router |                3 |               3 |             3 |            3 |             3 |
+| canary          | in-repo router       |               12 |              12 |             3 |            3 |            12 |
+| bga             | fab_router           |                0 |               0 |             0 |            0 |            12 |
+| bga             | reference engine     |                0 |               0 |             0 |            0 |             6 |
+| bga             | capacity-mesh router |                0 |               0 |             0 |            0 |             6 |
+| bga             | in-repo router       |                0 |               0 |             0 |            0 |            12 |
+| ladder          | fab_router           |                6 |               5 |             3 |            3 |            18 |
+| ladder          | reference engine     |                3 |               3 |             3 |            3 |             9 |
+| ladder          | capacity-mesh router |                6 |               6 |             6 |            6 |             9 |
+| ladder          | in-repo router       |                9 |               7 |             0 |            0 |            18 |
+| dense-source    | fab_router           |                0 |               0 |             0 |            0 |             3 |
+| dense-source    | reference engine     |                0 |               0 |             0 |            0 |             3 |
+| dense-source    | in-repo router       |                0 |               0 |             0 |            0 |             3 |
+| dense-candidate | fab_router           |                0 |               0 |             0 |            0 |             9 |
+| dense-candidate | reference engine     |                0 |               0 |             0 |            0 |             9 |
+| dense-candidate | in-repo router       |                0 |               0 |             0 |            0 |             9 |
 
 Typecheck and native admission checks pass in both contributions. Benchmark
 integration: 312 passing tests, 28 skipped. Contribution checkout: 29 passing
@@ -141,34 +141,33 @@ endpoint observations also match both cohorts. This checks observed files, not
 continuous execution or imported dependency identity. Cohorts were sequential,
 not interleaved; machine contention and nondeterminism can affect outcomes.
 
-| Metric | Ten-second budget | Thirty-second budget |
-|---|---:|---:|
-| Attempts |162|162|
-| Engine completed |57|66|
-| Timeout |105|96|
-| Validated passes |33|33|
+| Metric           | Ten-second budget | Thirty-second budget |
+| ---------------- | ----------------: | -------------------: |
+| Attempts         |               162 |                  162 |
+| Engine completed |                57 |                   66 |
+| Timeout          |               105 |                   96 |
+| Validated passes |                33 |                   33 |
 
-|Suite|Router|10s completed|30s completed|10s passes|30s passes|Attempts each|
-|---|---|---:|---:|---:|---:|---:|
-|canary|fab_router|12|12|9|9|12|
-|canary|reference engine|9|9|6|6|9|
-|canary|capacity-mesh router|3|3|3|3|3|
-|canary|in-repo router|12|12|3|3|12|
-|bga|fab_router|0|0|0|0|12|
-|bga|reference engine|0|0|0|0|6|
-|bga|capacity-mesh router|0|0|0|0|6|
-|bga|in-repo router|0|0|0|0|12|
-|ladder|fab_router|5|6|3|3|18|
-|ladder|reference engine|3|6|3|3|9|
-|ladder|capacity-mesh router|6|6|6|6|9|
-|ladder|in-repo router|7|12|0|0|18|
-|dense-source|fab_router|0|0|0|0|3|
-|dense-source|reference engine|0|0|0|0|3|
-|dense-source|in-repo router|0|0|0|0|3|
-|dense-candidate|fab_router|0|0|0|0|9|
-|dense-candidate|reference engine|0|0|0|0|9|
-|dense-candidate|in-repo router|0|0|0|0|9|
-
+| Suite           | Router               | 10s completed | 30s completed | 10s passes | 30s passes | Attempts each |
+| --------------- | -------------------- | ------------: | ------------: | ---------: | ---------: | ------------: |
+| canary          | fab_router           |            12 |            12 |          9 |          9 |            12 |
+| canary          | reference engine     |             9 |             9 |          6 |          6 |             9 |
+| canary          | capacity-mesh router |             3 |             3 |          3 |          3 |             3 |
+| canary          | in-repo router       |            12 |            12 |          3 |          3 |            12 |
+| bga             | fab_router           |             0 |             0 |          0 |          0 |            12 |
+| bga             | reference engine     |             0 |             0 |          0 |          0 |             6 |
+| bga             | capacity-mesh router |             0 |             0 |          0 |          0 |             6 |
+| bga             | in-repo router       |             0 |             0 |          0 |          0 |            12 |
+| ladder          | fab_router           |             5 |             6 |          3 |          3 |            18 |
+| ladder          | reference engine     |             3 |             6 |          3 |          3 |             9 |
+| ladder          | capacity-mesh router |             6 |             6 |          6 |          6 |             9 |
+| ladder          | in-repo router       |             7 |            12 |          0 |          0 |            18 |
+| dense-source    | fab_router           |             0 |             0 |          0 |          0 |             3 |
+| dense-source    | reference engine     |             0 |             0 |          0 |          0 |             3 |
+| dense-source    | in-repo router       |             0 |             0 |          0 |          0 |             3 |
+| dense-candidate | fab_router           |             0 |             0 |          0 |          0 |             9 |
+| dense-candidate | reference engine     |             0 |             0 |          0 |          0 |             9 |
+| dense-candidate | in-repo router       |             0 |             0 |          0 |          0 |             9 |
 
 The added time produces nine additional ladder completions, with zero additional
 validated passes. In particular, the reference engine's native L2 case changes
@@ -219,11 +218,11 @@ successful adapter invocation also reject its result. This public update adds
 fixture qualification evidence only; the runner implementation is offered in
 the separate benchmark contribution. No adapter or frozen-suite scoring changes.
 
-|Deterministic runner control|Before|After|Repeats each|
-|---|---:|---:|---:|
-|Unchanged sources reuse result|3|3|3|
-|Helper edit incorrectly reuses result|3|0|3|
-|Source edit during routing incorrectly accepted|3|0|3|
+| Deterministic runner control                    | Before | After | Repeats each |
+| ----------------------------------------------- | -----: | ----: | -----------: |
+| Unchanged sources reuse result                  |      3 |     3 |            3 |
+| Helper edit incorrectly reuses result           |      3 |     0 |            3 |
+| Source edit during routing incorrectly accepted |      3 |     0 |            3 |
 
 These are cache admission controls, not routing runs. The observed identity
 covers first-party TypeScript/Python source contents and paths; it does not
@@ -257,34 +256,33 @@ All four ready backends and five bundled suites: 54 compatible groups and
 No remote corpus was fetched. All five compare commands and runtime endpoint
 verification exited successfully.
 
-|Metric|Before (cycle 68)|After (cycle 70)|
-|---|---:|---:|
-|Attempts|162|162|
-|Engine completed|57|57|
-|Timeouts|105|105|
-|Validated passes|33|33|
+| Metric           | Before (cycle 68) | After (cycle 70) |
+| ---------------- | ----------------: | ---------------: |
+| Attempts         |               162 |              162 |
+| Engine completed |                57 |               57 |
+| Timeouts         |               105 |              105 |
+| Validated passes |                33 |               33 |
 
-|Suite|Router|Before completed|After completed|Before passes|After passes|Attempts each|
-|---|---|---:|---:|---:|---:|---:|
-|canary|fab_router|12|12|9|9|12|
-|canary|reference engine|9|9|6|6|9|
-|canary|capacity-mesh router|3|3|3|3|3|
-|canary|in-repo router|12|12|3|3|12|
-|bga|fab_router|0|0|0|0|12|
-|bga|reference engine|0|0|0|0|6|
-|bga|capacity-mesh router|0|0|0|0|6|
-|bga|in-repo router|0|0|0|0|12|
-|ladder|fab_router|5|4|3|3|18|
-|ladder|reference engine|3|3|3|3|9|
-|ladder|capacity-mesh router|6|6|6|6|9|
-|ladder|in-repo router|7|8|0|0|18|
-|dense-source|fab_router|0|0|0|0|3|
-|dense-source|reference engine|0|0|0|0|3|
-|dense-source|in-repo router|0|0|0|0|3|
-|dense-candidate|fab_router|0|0|0|0|9|
-|dense-candidate|reference engine|0|0|0|0|9|
-|dense-candidate|in-repo router|0|0|0|0|9|
-
+| Suite           | Router               | Before completed | After completed | Before passes | After passes | Attempts each |
+| --------------- | -------------------- | ---------------: | --------------: | ------------: | -----------: | ------------: |
+| canary          | fab_router           |               12 |              12 |             9 |            9 |            12 |
+| canary          | reference engine     |                9 |               9 |             6 |            6 |             9 |
+| canary          | capacity-mesh router |                3 |               3 |             3 |            3 |             3 |
+| canary          | in-repo router       |               12 |              12 |             3 |            3 |            12 |
+| bga             | fab_router           |                0 |               0 |             0 |            0 |            12 |
+| bga             | reference engine     |                0 |               0 |             0 |            0 |             6 |
+| bga             | capacity-mesh router |                0 |               0 |             0 |            0 |             6 |
+| bga             | in-repo router       |                0 |               0 |             0 |            0 |            12 |
+| ladder          | fab_router           |                5 |               4 |             3 |            3 |            18 |
+| ladder          | reference engine     |                3 |               3 |             3 |            3 |             9 |
+| ladder          | capacity-mesh router |                6 |               6 |             6 |            6 |             9 |
+| ladder          | in-repo router       |                7 |               8 |             0 |            0 |            18 |
+| dense-source    | fab_router           |                0 |               0 |             0 |            0 |             3 |
+| dense-source    | reference engine     |                0 |               0 |             0 |            0 |             3 |
+| dense-source    | in-repo router       |                0 |               0 |             0 |            0 |             3 |
+| dense-candidate | fab_router           |                0 |               0 |             0 |            0 |             9 |
+| dense-candidate | reference engine     |                0 |               0 |             0 |            0 |             9 |
+| dense-candidate | in-repo router       |                0 |               0 |             0 |            0 |             9 |
 
 Unknown quality never counts as a pass. Engine completion is separate from
 validated connectivity and DRC. Total completions match, while ladder completions shift from 5 to 4 for
@@ -336,11 +334,11 @@ are unchanged. Native baseline adoption and routed feasibility remain pending.
 Same host, cores 0–5, three fresh processes per revision; both required roots
 are checked in each process. These are deterministic admission controls.
 
-|Condition|Before accepted|After accepted|Checks each|
-|---|---:|---:|---:|
-|Intact source trees|3|3|3|
-|Regular-file roots|6|0|6|
-|FIFO roots|6|0|6|
+| Condition           | Before accepted | After accepted | Checks each |
+| ------------------- | --------------: | -------------: | ----------: |
+| Intact source trees |               3 |              3 |           3 |
+| Regular-file roots  |               6 |              0 |           6 |
+| FIFO roots          |               6 |              0 |           6 |
 
 Reproduce from the separate benchmark checkout:
 
@@ -368,34 +366,33 @@ across measured source/script/corpus files. Source observations match at the end
 runtime startup/end observations match the control. These observations do not
 establish continuous execution or external dependency identity.
 
-|Metric|Before (cycle 70)|After (cycle 71)|
-|---|---:|---:|
-|Attempts|162|162|
-|Engine completed|57|56|
-|Timeouts|105|106|
-|Validated passes|33|33|
+| Metric           | Before (cycle 70) | After (cycle 71) |
+| ---------------- | ----------------: | ---------------: |
+| Attempts         |               162 |              162 |
+| Engine completed |                57 |               56 |
+| Timeouts         |               105 |              106 |
+| Validated passes |                33 |               33 |
 
-|Suite|Router|Before completed|After completed|Before passes|After passes|Attempts each|
-|---|---|---:|---:|---:|---:|---:|
-|canary|fab_router|12|12|9|9|12|
-|canary|reference engine|9|9|6|6|9|
-|canary|capacity-mesh router|3|3|3|3|3|
-|canary|in-repo router|12|12|3|3|12|
-|bga|fab_router|0|0|0|0|12|
-|bga|reference engine|0|0|0|0|6|
-|bga|capacity-mesh router|0|0|0|0|6|
-|bga|in-repo router|0|0|0|0|12|
-|ladder|fab_router|4|4|3|3|18|
-|ladder|reference engine|3|3|3|3|9|
-|ladder|capacity-mesh router|6|6|6|6|9|
-|ladder|in-repo router|8|7|0|0|18|
-|dense-source|fab_router|0|0|0|0|3|
-|dense-source|reference engine|0|0|0|0|3|
-|dense-source|in-repo router|0|0|0|0|3|
-|dense-candidate|fab_router|0|0|0|0|9|
-|dense-candidate|reference engine|0|0|0|0|9|
-|dense-candidate|in-repo router|0|0|0|0|9|
-
+| Suite           | Router               | Before completed | After completed | Before passes | After passes | Attempts each |
+| --------------- | -------------------- | ---------------: | --------------: | ------------: | -----------: | ------------: |
+| canary          | fab_router           |               12 |              12 |             9 |            9 |            12 |
+| canary          | reference engine     |                9 |               9 |             6 |            6 |             9 |
+| canary          | capacity-mesh router |                3 |               3 |             3 |            3 |             3 |
+| canary          | in-repo router       |               12 |              12 |             3 |            3 |            12 |
+| bga             | fab_router           |                0 |               0 |             0 |            0 |            12 |
+| bga             | reference engine     |                0 |               0 |             0 |            0 |             6 |
+| bga             | capacity-mesh router |                0 |               0 |             0 |            0 |             6 |
+| bga             | in-repo router       |                0 |               0 |             0 |            0 |            12 |
+| ladder          | fab_router           |                4 |               4 |             3 |            3 |            18 |
+| ladder          | reference engine     |                3 |               3 |             3 |            3 |             9 |
+| ladder          | capacity-mesh router |                6 |               6 |             6 |            6 |             9 |
+| ladder          | in-repo router       |                8 |               7 |             0 |            0 |            18 |
+| dense-source    | fab_router           |                0 |               0 |             0 |            0 |             3 |
+| dense-source    | reference engine     |                0 |               0 |             0 |            0 |             3 |
+| dense-source    | in-repo router       |                0 |               0 |             0 |            0 |             3 |
+| dense-candidate | fab_router           |                0 |               0 |             0 |            0 |             9 |
+| dense-candidate | reference engine     |                0 |               0 |             0 |            0 |             9 |
+| dense-candidate | in-repo router       |                0 |               0 |             0 |            0 |             9 |
 
 Unknown quality does not count as validity. Completion is separate from native
 connectivity and DRC. No routing gain or native baseline adoption is claimed. The
@@ -444,12 +441,12 @@ Same machine, cores 0–5, three fresh processes per revision, prior helper pinn
 to `2666bc3`. Each process tests all three configuration files at the real runner
 boundary with a deterministic adapter. Counts are admission controls, not routing.
 
-|Control|Before|After|Checks each|
-|---|---:|---:|---:|
-|Unchanged input resumes|3|3|3|
-|Edited configuration incorrectly skips|9|0|9|
-|Mid-route configuration edit accepted|9|0|9|
-|Missing configuration rejects before skip|0|9|9|
+| Control                                   | Before | After | Checks each |
+| ----------------------------------------- | -----: | ----: | ----------: |
+| Unchanged input resumes                   |      3 |     3 |           3 |
+| Edited configuration incorrectly skips    |      9 |     0 |           9 |
+| Mid-route configuration edit accepted     |      9 |     0 |           9 |
+| Missing configuration rejects before skip |      0 |     9 |           9 |
 
 ```sh
 nice -n 10 taskset -c 0-5 timeout 60 bun docs/pr-assets/agent/scoring-source-cache/config-audit.ts /tmp/config-controls.json
@@ -469,34 +466,33 @@ corpus and configuration files; it adds the three runtime configuration records.
 runtime startup/end observations match the control. These observations do not
 establish continuous execution or external dependency identity.
 
-|Metric|Before (cycle 71)|After (cycle 72)|
-|---|---:|---:|
-|Attempts|162|162|
-|Engine completed|56|54|
-|Timeouts|106|108|
-|Validated passes|33|33|
+| Metric           | Before (cycle 71) | After (cycle 72) |
+| ---------------- | ----------------: | ---------------: |
+| Attempts         |               162 |              162 |
+| Engine completed |                56 |               54 |
+| Timeouts         |               106 |              108 |
+| Validated passes |                33 |               33 |
 
-|Suite|Router|Before completed|After completed|Before passes|After passes|Attempts each|
-|---|---|---:|---:|---:|---:|---:|
-|canary|fab_router|12|12|9|9|12|
-|canary|reference engine|9|9|6|6|9|
-|canary|capacity-mesh router|3|3|3|3|3|
-|canary|in-repo router|12|12|3|3|12|
-|bga|fab_router|0|0|0|0|12|
-|bga|reference engine|0|0|0|0|6|
-|bga|capacity-mesh router|0|0|0|0|6|
-|bga|in-repo router|0|0|0|0|12|
-|ladder|fab_router|4|3|3|3|18|
-|ladder|reference engine|3|3|3|3|9|
-|ladder|capacity-mesh router|6|6|6|6|9|
-|ladder|in-repo router|7|6|0|0|18|
-|dense-source|fab_router|0|0|0|0|3|
-|dense-source|reference engine|0|0|0|0|3|
-|dense-source|in-repo router|0|0|0|0|3|
-|dense-candidate|fab_router|0|0|0|0|9|
-|dense-candidate|reference engine|0|0|0|0|9|
-|dense-candidate|in-repo router|0|0|0|0|9|
-
+| Suite           | Router               | Before completed | After completed | Before passes | After passes | Attempts each |
+| --------------- | -------------------- | ---------------: | --------------: | ------------: | -----------: | ------------: |
+| canary          | fab_router           |               12 |              12 |             9 |            9 |            12 |
+| canary          | reference engine     |                9 |               9 |             6 |            6 |             9 |
+| canary          | capacity-mesh router |                3 |               3 |             3 |            3 |             3 |
+| canary          | in-repo router       |               12 |              12 |             3 |            3 |            12 |
+| bga             | fab_router           |                0 |               0 |             0 |            0 |            12 |
+| bga             | reference engine     |                0 |               0 |             0 |            0 |             6 |
+| bga             | capacity-mesh router |                0 |               0 |             0 |            0 |             6 |
+| bga             | in-repo router       |                0 |               0 |             0 |            0 |            12 |
+| ladder          | fab_router           |                4 |               3 |             3 |            3 |            18 |
+| ladder          | reference engine     |                3 |               3 |             3 |            3 |             9 |
+| ladder          | capacity-mesh router |                6 |               6 |             6 |            6 |             9 |
+| ladder          | in-repo router       |                7 |               6 |             0 |            0 |            18 |
+| dense-source    | fab_router           |                0 |               0 |             0 |            0 |             3 |
+| dense-source    | reference engine     |                0 |               0 |             0 |            0 |             3 |
+| dense-source    | in-repo router       |                0 |               0 |             0 |            0 |             3 |
+| dense-candidate | fab_router           |                0 |               0 |             0 |            0 |             9 |
+| dense-candidate | reference engine     |                0 |               0 |             0 |            0 |             9 |
+| dense-candidate | in-repo router       |                0 |               0 |             0 |            0 |             9 |
 
 Unknown quality does not count as validity. Completion is separate from native
 connectivity and DRC. No routing gain or native baseline adoption is claimed.
@@ -546,12 +542,12 @@ transitive configuration remain outside this bounded observation.
 Same machine, three fresh processes per revision, actual runner boundary with a
 deterministic route stub; baseline `0c0921e`, candidate helper `b8352e1`:
 
-|Control|Before|After|Checks each|
-|---|---:|---:|---:|
-|Unchanged inputs resume|3|3|3|
-|Add/edit/delete incorrectly skips|9|0|9|
-|Mid-route add/edit/delete accepted|9|0|9|
-|Malformed optional config rejects|0|9|9|
+| Control                            | Before | After | Checks each |
+| ---------------------------------- | -----: | ----: | ----------: |
+| Unchanged inputs resume            |      3 |     3 |           3 |
+| Add/edit/delete incorrectly skips  |      9 |     0 |           9 |
+| Mid-route add/edit/delete accepted |      9 |     0 |           9 |
+| Malformed optional config rejects  |      0 |     9 |           9 |
 
 The same outcomes reproduce at the prepared primary runner boundary. These
 controls exercise cache admission, not routing quality or native denominator
@@ -578,33 +574,33 @@ observation was taken during integrated tests, before routing, and matches the
 final files. Runtime startup/end observations match the preceding cohort.
 These observations do not establish continuous execution or dependency identity.
 
-|Metric|Before (cycle 72)|After (cycle 73)|
-|---|---:|---:|
-|Attempts|162|162|
-|Engine completed|54|55|
-|Timeouts|108|107|
-|Validated passes|33|33|
+| Metric           | Before (cycle 72) | After (cycle 73) |
+| ---------------- | ----------------: | ---------------: |
+| Attempts         |               162 |              162 |
+| Engine completed |                54 |               55 |
+| Timeouts         |               108 |              107 |
+| Validated passes |                33 |               33 |
 
-|Suite|Router|Before completed|After completed|Before passes|After passes|Attempts each|
-|---|---|---:|---:|---:|---:|---:|
-|canary|fab_router|12|12|9|9|12|
-|canary|reference engine|9|9|6|6|9|
-|canary|capacity-mesh router|3|3|3|3|3|
-|canary|in-repo router|12|12|3|3|12|
-|bga|fab_router|0|0|0|0|12|
-|bga|reference engine|0|0|0|0|6|
-|bga|capacity-mesh router|0|0|0|0|6|
-|bga|in-repo router|0|0|0|0|12|
-|ladder|fab_router|3|3|3|3|18|
-|ladder|reference engine|3|3|3|3|9|
-|ladder|capacity-mesh router|6|6|6|6|9|
-|ladder|in-repo router|6|7|0|0|18|
-|dense-source|fab_router|0|0|0|0|3|
-|dense-source|reference engine|0|0|0|0|3|
-|dense-source|in-repo router|0|0|0|0|3|
-|dense-candidate|fab_router|0|0|0|0|9|
-|dense-candidate|reference engine|0|0|0|0|9|
-|dense-candidate|in-repo router|0|0|0|0|9|
+| Suite           | Router               | Before completed | After completed | Before passes | After passes | Attempts each |
+| --------------- | -------------------- | ---------------: | --------------: | ------------: | -----------: | ------------: |
+| canary          | fab_router           |               12 |              12 |             9 |            9 |            12 |
+| canary          | reference engine     |                9 |               9 |             6 |            6 |             9 |
+| canary          | capacity-mesh router |                3 |               3 |             3 |            3 |             3 |
+| canary          | in-repo router       |               12 |              12 |             3 |            3 |            12 |
+| bga             | fab_router           |                0 |               0 |             0 |            0 |            12 |
+| bga             | reference engine     |                0 |               0 |             0 |            0 |             6 |
+| bga             | capacity-mesh router |                0 |               0 |             0 |            0 |             6 |
+| bga             | in-repo router       |                0 |               0 |             0 |            0 |            12 |
+| ladder          | fab_router           |                3 |               3 |             3 |            3 |            18 |
+| ladder          | reference engine     |                3 |               3 |             3 |            3 |             9 |
+| ladder          | capacity-mesh router |                6 |               6 |             6 |            6 |             9 |
+| ladder          | in-repo router       |                6 |               7 |             0 |            0 |            18 |
+| dense-source    | fab_router           |                0 |               0 |             0 |            0 |             3 |
+| dense-source    | reference engine     |                0 |               0 |             0 |            0 |             3 |
+| dense-source    | in-repo router       |                0 |               0 |             0 |            0 |             3 |
+| dense-candidate | fab_router           |                0 |               0 |             0 |            0 |             9 |
+| dense-candidate | reference engine     |                0 |               0 |             0 |            0 |             9 |
+| dense-candidate | in-repo router       |                0 |               0 |             0 |            0 |             9 |
 
 Unknown quality never establishes validity. Completion is separate from native
 connectivity and DRC. No routing gain, routed feasibility, candidate promotion
@@ -657,11 +653,11 @@ an asset on each invocation. Each revision ran three fresh processes with one
 payloads; this tests byte observation, not language or WebAssembly execution.
 The engine reports one via before an edit and two after a fresh invocation.
 
-| Runner control | Before | After | Observations per revision |
-|---|---:|---:|---:|
-| Unchanged results resume | 9 | 9 | 9 |
-| Edited assets reuse stale results | 9 | 0 | 9 |
-| Asset edits during routing accepted | 9 | 0 | 9 |
+| Runner control                      | Before | After | Observations per revision |
+| ----------------------------------- | -----: | ----: | ------------------------: |
+| Unchanged results resume            |      9 |     9 |                         9 |
+| Edited assets reuse stale results   |      9 |     0 |                         9 |
+| Asset edits during routing accepted |      9 |     0 |                         9 |
 
 The same controls pass against the prepared primary integration. These are
 cache admission measurements, not routing gains. Native denominator adoption
@@ -688,33 +684,33 @@ observation was taken during integrated tests, before routing, and matches the
 final files. Runtime startup/end observations match the preceding cohort.
 These observations do not establish continuous execution or dependency identity.
 
-|Metric|Before (cycle 73)|After (cycle 74)|
-|---|---:|---:|
-|Attempts|162|162|
-|Engine completed|55|59|
-|Timeouts|107|103|
-|Validated passes|33|33|
+| Metric           | Before (cycle 73) | After (cycle 74) |
+| ---------------- | ----------------: | ---------------: |
+| Attempts         |               162 |              162 |
+| Engine completed |                55 |               59 |
+| Timeouts         |               107 |              103 |
+| Validated passes |                33 |               33 |
 
-|Suite|Router|Before completed|After completed|Before passes|After passes|Attempts each|
-|---|---|---:|---:|---:|---:|---:|
-|canary|fab_router|12|12|9|9|12|
-|canary|reference engine|9|9|6|6|9|
-|canary|capacity-mesh router|3|3|3|3|3|
-|canary|in-repo router|12|12|3|3|12|
-|bga|fab_router|0|0|0|0|12|
-|bga|reference engine|0|0|0|0|6|
-|bga|capacity-mesh router|0|0|0|0|6|
-|bga|in-repo router|0|0|0|0|12|
-|ladder|fab_router|3|5|3|3|18|
-|ladder|reference engine|3|3|3|3|9|
-|ladder|capacity-mesh router|6|6|6|6|9|
-|ladder|in-repo router|7|9|0|0|18|
-|dense-source|fab_router|0|0|0|0|3|
-|dense-source|reference engine|0|0|0|0|3|
-|dense-source|in-repo router|0|0|0|0|3|
-|dense-candidate|fab_router|0|0|0|0|9|
-|dense-candidate|reference engine|0|0|0|0|9|
-|dense-candidate|in-repo router|0|0|0|0|9|
+| Suite           | Router               | Before completed | After completed | Before passes | After passes | Attempts each |
+| --------------- | -------------------- | ---------------: | --------------: | ------------: | -----------: | ------------: |
+| canary          | fab_router           |               12 |              12 |             9 |            9 |            12 |
+| canary          | reference engine     |                9 |               9 |             6 |            6 |             9 |
+| canary          | capacity-mesh router |                3 |               3 |             3 |            3 |             3 |
+| canary          | in-repo router       |               12 |              12 |             3 |            3 |            12 |
+| bga             | fab_router           |                0 |               0 |             0 |            0 |            12 |
+| bga             | reference engine     |                0 |               0 |             0 |            0 |             6 |
+| bga             | capacity-mesh router |                0 |               0 |             0 |            0 |             6 |
+| bga             | in-repo router       |                0 |               0 |             0 |            0 |            12 |
+| ladder          | fab_router           |                3 |               5 |             3 |            3 |            18 |
+| ladder          | reference engine     |                3 |               3 |             3 |            3 |             9 |
+| ladder          | capacity-mesh router |                6 |               6 |             6 |            6 |             9 |
+| ladder          | in-repo router       |                7 |               9 |             0 |            0 |            18 |
+| dense-source    | fab_router           |                0 |               0 |             0 |            0 |             3 |
+| dense-source    | reference engine     |                0 |               0 |             0 |            0 |             3 |
+| dense-source    | in-repo router       |                0 |               0 |             0 |            0 |             3 |
+| dense-candidate | fab_router           |                0 |               0 |             0 |            0 |             9 |
+| dense-candidate | reference engine     |                0 |               0 |             0 |            0 |             9 |
+| dense-candidate | in-repo router       |                0 |               0 |             0 |            0 |             9 |
 
 Unknown quality never establishes validity. Completion is separate from native
 connectivity and DRC. No routing gain, routed feasibility, candidate promotion

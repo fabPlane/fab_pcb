@@ -22,9 +22,7 @@
     "native-drc": 18
   },
   "runtime_endpoints_equal": true,
-  "source_changed": [
-    "src/scoring-source.ts"
-  ],
+  "source_changed": ["src/scoring-source.ts"],
   "source_added": [],
   "source_start": [
     {
