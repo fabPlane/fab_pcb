@@ -425,3 +425,36 @@ typecheck, all 11 unit packages, and four optimized native tests. No layer-check
 script exists in these harnesses. An initial documentation append used the wrong
 working directory, then the evidence filename was corrected; both failed before
 writing that documentation. No routing attempt was dropped or retried.
+
+## Cycle 72: runtime configuration identity
+
+This update records qualification evidence for the separate benchmark runner.
+The runtime configuration fix is in that separate contribution; this public
+fixture and native scoring code are unchanged. The runner now includes required regular files `package.json`, `bun.lockb`, and
+`tsconfig.json` in the same content observation used before resume and around
+routing. Their bytes affect dependency declarations and module resolution but
+were omitted from the previous TS/Python traversal. Missing files, directories,
+symlinks and FIFOs reject. Relative record paths preserve relocation behavior.
+Every existing key changes because the observed record set changes. This does
+not hash installed dependencies, transitive configuration or shared libraries,
+and does not make observation/execution atomic. Native baseline adoption remains
+pending. No scoring formula, ranking policy or router implementation changed.
+
+Same machine, cores 0–5, three fresh processes per revision, prior helper pinned
+to `2666bc3`. Each process tests all three configuration files at the real runner
+boundary with a deterministic adapter. Counts are admission controls, not routing.
+
+|Control|Before|After|Checks each|
+|---|---:|---:|---:|
+|Unchanged input resumes|3|3|3|
+|Edited configuration incorrectly skips|9|0|9|
+|Mid-route configuration edit accepted|9|0|9|
+|Missing configuration rejects before skip|0|9|9|
+
+```sh
+nice -n 10 taskset -c 0-5 timeout 60 bun docs/pr-assets/agent/scoring-source-cache/config-audit.ts /tmp/config-controls.json
+nice -n 10 taskset -c 0-5 timeout 180 bun run typecheck
+nice -n 10 taskset -c 0-5 timeout 180 bun test
+```
+
+![Runtime configuration controls](https://github.com/fabPlane/fab_pcb/blob/agent/bga1024-candidate/docs/pr-assets/agent/bga1024-candidate/config.png?raw=true)
