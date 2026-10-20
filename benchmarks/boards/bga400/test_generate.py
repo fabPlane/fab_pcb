@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: MIT
+import hashlib
 import importlib.util
 import json
 import tempfile
@@ -11,6 +12,14 @@ generator = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(generator)
 
 class NativeCandidate(unittest.TestCase):
+    def test_committed_artifact_digests(self):
+        summary = json.loads((ROOT/"summary.json").read_text())
+        expected = {"bga400.kicad_pcb", "bga400.kicad_pro", "bga400.dsn"}
+        self.assertEqual(set(summary["sha256"]), expected)
+        for name in sorted(expected):
+            with self.subTest(artifact=name):
+                self.assertEqual(hashlib.sha256((ROOT/name).read_bytes()).hexdigest(), summary["sha256"][name])
+
     def test_repeated_native_admission_and_exact_artifacts(self):
         with tempfile.TemporaryDirectory() as parent:
             for i in range(3):
