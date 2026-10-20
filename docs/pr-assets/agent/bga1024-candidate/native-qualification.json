@@ -1,209 +1,746 @@
-[
-  {
-    "repeat": 0,
-    "schema": 1,
-    "parameters": {
-      "seed": 6512,
-      "layers": 8,
-      "balls": 1024,
-      "nets": 1024,
-      "pads": 2048,
-      "pitch_mm": 0.5,
-      "ball_mm": 0.2,
-      "target_mm": 0.4,
-      "target_pitch_mm": 0.8,
-      "board_mm": [
-        90,
-        90
+{
+  "cycle67": [
+    {
+      "repeat": 0,
+      "schema": 1,
+      "parameters": {
+        "seed": 6512,
+        "layers": 8,
+        "balls": 1024,
+        "nets": 1024,
+        "pads": 2048,
+        "pitch_mm": 0.5,
+        "ball_mm": 0.2,
+        "target_mm": 0.4,
+        "target_pitch_mm": 0.8,
+        "board_mm": [
+          90,
+          90
+        ],
+        "clearance_mm": 0.1,
+        "track_mm": 0.1,
+        "via_mm": 0.3,
+        "drill_mm": 0.1
+      },
+      "copper_stack": [
+        [
+          0,
+          "F.Cu"
+        ],
+        [
+          4,
+          "In1.Cu"
+        ],
+        [
+          6,
+          "In2.Cu"
+        ],
+        [
+          8,
+          "In3.Cu"
+        ],
+        [
+          10,
+          "In4.Cu"
+        ],
+        [
+          12,
+          "In5.Cu"
+        ],
+        [
+          14,
+          "In6.Cu"
+        ],
+        [
+          2,
+          "B.Cu"
+        ]
       ],
-      "clearance_mm": 0.1,
-      "track_mm": 0.1,
-      "via_mm": 0.3,
-      "drill_mm": 0.1
+      "native_errors": 0,
+      "native_warnings": 0,
+      "native_connectivity_opens": 1024,
+      "reported_opens": 499,
+      "report_limit_reached": true,
+      "checker": "10.0.6",
+      "sha256": {
+        "bga1024.kicad_pcb": "9092606375a100a526ca347f8d435c861559103a36b699f3cc9e04fc41c61feb",
+        "bga1024.kicad_pro": "c317b3fd52bb5bbd5d287cee2d18ef0ce7bc1ac770a6b119d8fa7ffb720324c1",
+        "bga1024.dsn": "df2e0481423d6bff14c6d1d30053ff68c29836c147cc17457f893c566933bce6"
+      },
+      "report_sha256": "fa293ee9aa86bfc65296e5a9b9cd598025ed5a46c95998209c2819630615da1d"
     },
-    "copper_stack": [
-      [
-        0,
-        "F.Cu"
+    {
+      "repeat": 1,
+      "schema": 1,
+      "parameters": {
+        "seed": 6512,
+        "layers": 8,
+        "balls": 1024,
+        "nets": 1024,
+        "pads": 2048,
+        "pitch_mm": 0.5,
+        "ball_mm": 0.2,
+        "target_mm": 0.4,
+        "target_pitch_mm": 0.8,
+        "board_mm": [
+          90,
+          90
+        ],
+        "clearance_mm": 0.1,
+        "track_mm": 0.1,
+        "via_mm": 0.3,
+        "drill_mm": 0.1
+      },
+      "copper_stack": [
+        [
+          0,
+          "F.Cu"
+        ],
+        [
+          4,
+          "In1.Cu"
+        ],
+        [
+          6,
+          "In2.Cu"
+        ],
+        [
+          8,
+          "In3.Cu"
+        ],
+        [
+          10,
+          "In4.Cu"
+        ],
+        [
+          12,
+          "In5.Cu"
+        ],
+        [
+          14,
+          "In6.Cu"
+        ],
+        [
+          2,
+          "B.Cu"
+        ]
       ],
-      [
-        4,
-        "In1.Cu"
+      "native_errors": 0,
+      "native_warnings": 0,
+      "native_connectivity_opens": 1024,
+      "reported_opens": 499,
+      "report_limit_reached": true,
+      "checker": "10.0.6",
+      "sha256": {
+        "bga1024.kicad_pcb": "9092606375a100a526ca347f8d435c861559103a36b699f3cc9e04fc41c61feb",
+        "bga1024.kicad_pro": "c317b3fd52bb5bbd5d287cee2d18ef0ce7bc1ac770a6b119d8fa7ffb720324c1",
+        "bga1024.dsn": "df2e0481423d6bff14c6d1d30053ff68c29836c147cc17457f893c566933bce6"
+      },
+      "report_sha256": "6ac6207169afbf62db582f19d480afa26af6801774cccd409dda347d3c12ec8f"
+    },
+    {
+      "repeat": 2,
+      "schema": 1,
+      "parameters": {
+        "seed": 6512,
+        "layers": 8,
+        "balls": 1024,
+        "nets": 1024,
+        "pads": 2048,
+        "pitch_mm": 0.5,
+        "ball_mm": 0.2,
+        "target_mm": 0.4,
+        "target_pitch_mm": 0.8,
+        "board_mm": [
+          90,
+          90
+        ],
+        "clearance_mm": 0.1,
+        "track_mm": 0.1,
+        "via_mm": 0.3,
+        "drill_mm": 0.1
+      },
+      "copper_stack": [
+        [
+          0,
+          "F.Cu"
+        ],
+        [
+          4,
+          "In1.Cu"
+        ],
+        [
+          6,
+          "In2.Cu"
+        ],
+        [
+          8,
+          "In3.Cu"
+        ],
+        [
+          10,
+          "In4.Cu"
+        ],
+        [
+          12,
+          "In5.Cu"
+        ],
+        [
+          14,
+          "In6.Cu"
+        ],
+        [
+          2,
+          "B.Cu"
+        ]
       ],
-      [
-        6,
-        "In2.Cu"
-      ],
-      [
-        8,
-        "In3.Cu"
-      ],
-      [
-        10,
-        "In4.Cu"
-      ],
-      [
-        12,
-        "In5.Cu"
-      ],
-      [
-        14,
-        "In6.Cu"
-      ],
-      [
-        2,
-        "B.Cu"
+      "native_errors": 0,
+      "native_warnings": 0,
+      "native_connectivity_opens": 1024,
+      "reported_opens": 499,
+      "report_limit_reached": true,
+      "checker": "10.0.6",
+      "sha256": {
+        "bga1024.kicad_pcb": "9092606375a100a526ca347f8d435c861559103a36b699f3cc9e04fc41c61feb",
+        "bga1024.kicad_pro": "c317b3fd52bb5bbd5d287cee2d18ef0ce7bc1ac770a6b119d8fa7ffb720324c1",
+        "bga1024.dsn": "df2e0481423d6bff14c6d1d30053ff68c29836c147cc17457f893c566933bce6"
+      },
+      "report_sha256": "f6b5932dcf269598a42c5e6498a2f3386cc4503b7e77fbe0cccf898c8060133e"
+    }
+  ],
+  "cycle68": {
+    "diagnostic_controls": {
+      "repeats": 3,
+      "fresh_drc_reports": 3,
+      "control_executions": 72,
+      "artifact_sha256": {
+        "bga1024.kicad_pcb": "9092606375a100a526ca347f8d435c861559103a36b699f3cc9e04fc41c61feb",
+        "bga1024.kicad_pro": "c317b3fd52bb5bbd5d287cee2d18ef0ce7bc1ac770a6b119d8fa7ffb720324c1",
+        "bga1024.dsn": "df2e0481423d6bff14c6d1d30053ff68c29836c147cc17457f893c566933bce6"
+      },
+      "rows": [
+        {
+          "repeat": 0,
+          "case": "valid",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 0,
+          "case": "valid",
+          "implementation": "after",
+          "accepted": true
+        },
+        {
+          "repeat": 0,
+          "case": "missing-violations",
+          "implementation": "before",
+          "accepted": false
+        },
+        {
+          "repeat": 0,
+          "case": "missing-violations",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 0,
+          "case": "missing-schematic_parity",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 0,
+          "case": "missing-schematic_parity",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 0,
+          "case": "missing-unconnected_items",
+          "implementation": "before",
+          "accepted": false
+        },
+        {
+          "repeat": 0,
+          "case": "missing-unconnected_items",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 0,
+          "case": "parity",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 0,
+          "case": "parity",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 0,
+          "case": "wrong-board",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 0,
+          "case": "wrong-board",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 0,
+          "case": "wrong-schema",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 0,
+          "case": "wrong-schema",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 0,
+          "case": "no-version",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 0,
+          "case": "no-version",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 0,
+          "case": "error-only",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 0,
+          "case": "error-only",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 0,
+          "case": "null-opens",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 0,
+          "case": "null-opens",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 0,
+          "case": "wrong-type",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 0,
+          "case": "wrong-type",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 0,
+          "case": "excluded-opens",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 0,
+          "case": "excluded-opens",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 1,
+          "case": "valid",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 1,
+          "case": "valid",
+          "implementation": "after",
+          "accepted": true
+        },
+        {
+          "repeat": 1,
+          "case": "missing-violations",
+          "implementation": "before",
+          "accepted": false
+        },
+        {
+          "repeat": 1,
+          "case": "missing-violations",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 1,
+          "case": "missing-schematic_parity",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 1,
+          "case": "missing-schematic_parity",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 1,
+          "case": "missing-unconnected_items",
+          "implementation": "before",
+          "accepted": false
+        },
+        {
+          "repeat": 1,
+          "case": "missing-unconnected_items",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 1,
+          "case": "parity",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 1,
+          "case": "parity",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 1,
+          "case": "wrong-board",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 1,
+          "case": "wrong-board",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 1,
+          "case": "wrong-schema",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 1,
+          "case": "wrong-schema",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 1,
+          "case": "no-version",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 1,
+          "case": "no-version",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 1,
+          "case": "error-only",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 1,
+          "case": "error-only",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 1,
+          "case": "null-opens",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 1,
+          "case": "null-opens",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 1,
+          "case": "wrong-type",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 1,
+          "case": "wrong-type",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 1,
+          "case": "excluded-opens",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 1,
+          "case": "excluded-opens",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 2,
+          "case": "valid",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 2,
+          "case": "valid",
+          "implementation": "after",
+          "accepted": true
+        },
+        {
+          "repeat": 2,
+          "case": "missing-violations",
+          "implementation": "before",
+          "accepted": false
+        },
+        {
+          "repeat": 2,
+          "case": "missing-violations",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 2,
+          "case": "missing-schematic_parity",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 2,
+          "case": "missing-schematic_parity",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 2,
+          "case": "missing-unconnected_items",
+          "implementation": "before",
+          "accepted": false
+        },
+        {
+          "repeat": 2,
+          "case": "missing-unconnected_items",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 2,
+          "case": "parity",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 2,
+          "case": "parity",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 2,
+          "case": "wrong-board",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 2,
+          "case": "wrong-board",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 2,
+          "case": "wrong-schema",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 2,
+          "case": "wrong-schema",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 2,
+          "case": "no-version",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 2,
+          "case": "no-version",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 2,
+          "case": "error-only",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 2,
+          "case": "error-only",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 2,
+          "case": "null-opens",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 2,
+          "case": "null-opens",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 2,
+          "case": "wrong-type",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 2,
+          "case": "wrong-type",
+          "implementation": "after",
+          "accepted": false
+        },
+        {
+          "repeat": 2,
+          "case": "excluded-opens",
+          "implementation": "before",
+          "accepted": true
+        },
+        {
+          "repeat": 2,
+          "case": "excluded-opens",
+          "implementation": "after",
+          "accepted": false
+        }
       ]
-    ],
-    "native_errors": 0,
-    "native_warnings": 0,
-    "native_connectivity_opens": 1024,
-    "reported_opens": 499,
-    "report_limit_reached": true,
-    "checker": "10.0.6",
-    "sha256": {
-      "bga1024.kicad_pcb": "9092606375a100a526ca347f8d435c861559103a36b699f3cc9e04fc41c61feb",
-      "bga1024.kicad_pro": "c317b3fd52bb5bbd5d287cee2d18ef0ce7bc1ac770a6b119d8fa7ffb720324c1",
-      "bga1024.dsn": "df2e0481423d6bff14c6d1d30053ff68c29836c147cc17457f893c566933bce6"
     },
-    "report_sha256": "fa293ee9aa86bfc65296e5a9b9cd598025ed5a46c95998209c2819630615da1d"
-  },
-  {
-    "repeat": 1,
-    "schema": 1,
-    "parameters": {
-      "seed": 6512,
-      "layers": 8,
-      "balls": 1024,
-      "nets": 1024,
-      "pads": 2048,
-      "pitch_mm": 0.5,
-      "ball_mm": 0.2,
-      "target_mm": 0.4,
-      "target_pitch_mm": 0.8,
-      "board_mm": [
-        90,
-        90
-      ],
-      "clearance_mm": 0.1,
-      "track_mm": 0.1,
-      "via_mm": 0.3,
-      "drill_mm": 0.1
-    },
-    "copper_stack": [
-      [
-        0,
-        "F.Cu"
-      ],
-      [
-        4,
-        "In1.Cu"
-      ],
-      [
-        6,
-        "In2.Cu"
-      ],
-      [
-        8,
-        "In3.Cu"
-      ],
-      [
-        10,
-        "In4.Cu"
-      ],
-      [
-        12,
-        "In5.Cu"
-      ],
-      [
-        14,
-        "In6.Cu"
-      ],
-      [
-        2,
-        "B.Cu"
+    "direct_parser_controls": {
+      "fresh_drc_reports": 6,
+      "rows": [
+        {
+          "implementation": "before",
+          "id": "bga400",
+          "repeat": 0,
+          "accepted": true,
+          "reason": ""
+        },
+        {
+          "implementation": "after",
+          "id": "bga400",
+          "repeat": 0,
+          "accepted": true,
+          "reason": ""
+        },
+        {
+          "implementation": "before",
+          "id": "bga400",
+          "repeat": 1,
+          "accepted": true,
+          "reason": ""
+        },
+        {
+          "implementation": "after",
+          "id": "bga400",
+          "repeat": 1,
+          "accepted": true,
+          "reason": ""
+        },
+        {
+          "implementation": "before",
+          "id": "bga400",
+          "repeat": 2,
+          "accepted": true,
+          "reason": ""
+        },
+        {
+          "implementation": "after",
+          "id": "bga400",
+          "repeat": 2,
+          "accepted": true,
+          "reason": ""
+        },
+        {
+          "implementation": "before",
+          "id": "bga1024",
+          "repeat": 0,
+          "accepted": true,
+          "reason": ""
+        },
+        {
+          "implementation": "after",
+          "id": "bga1024",
+          "repeat": 0,
+          "accepted": false,
+          "reason": "Error: KiCad DRC report reached finding limit: unconnected_items (499 >= 499); exact native quality unavailable"
+        },
+        {
+          "implementation": "before",
+          "id": "bga1024",
+          "repeat": 1,
+          "accepted": true,
+          "reason": ""
+        },
+        {
+          "implementation": "after",
+          "id": "bga1024",
+          "repeat": 1,
+          "accepted": false,
+          "reason": "Error: KiCad DRC report reached finding limit: unconnected_items (499 >= 499); exact native quality unavailable"
+        },
+        {
+          "implementation": "before",
+          "id": "bga1024",
+          "repeat": 2,
+          "accepted": true,
+          "reason": ""
+        },
+        {
+          "implementation": "after",
+          "id": "bga1024",
+          "repeat": 2,
+          "accepted": false,
+          "reason": "Error: KiCad DRC report reached finding limit: unconnected_items (499 >= 499); exact native quality unavailable"
+        }
       ]
-    ],
-    "native_errors": 0,
-    "native_warnings": 0,
-    "native_connectivity_opens": 1024,
-    "reported_opens": 499,
-    "report_limit_reached": true,
-    "checker": "10.0.6",
-    "sha256": {
-      "bga1024.kicad_pcb": "9092606375a100a526ca347f8d435c861559103a36b699f3cc9e04fc41c61feb",
-      "bga1024.kicad_pro": "c317b3fd52bb5bbd5d287cee2d18ef0ce7bc1ac770a6b119d8fa7ffb720324c1",
-      "bga1024.dsn": "df2e0481423d6bff14c6d1d30053ff68c29836c147cc17457f893c566933bce6"
-    },
-    "report_sha256": "6ac6207169afbf62db582f19d480afa26af6801774cccd409dda347d3c12ec8f"
-  },
-  {
-    "repeat": 2,
-    "schema": 1,
-    "parameters": {
-      "seed": 6512,
-      "layers": 8,
-      "balls": 1024,
-      "nets": 1024,
-      "pads": 2048,
-      "pitch_mm": 0.5,
-      "ball_mm": 0.2,
-      "target_mm": 0.4,
-      "target_pitch_mm": 0.8,
-      "board_mm": [
-        90,
-        90
-      ],
-      "clearance_mm": 0.1,
-      "track_mm": 0.1,
-      "via_mm": 0.3,
-      "drill_mm": 0.1
-    },
-    "copper_stack": [
-      [
-        0,
-        "F.Cu"
-      ],
-      [
-        4,
-        "In1.Cu"
-      ],
-      [
-        6,
-        "In2.Cu"
-      ],
-      [
-        8,
-        "In3.Cu"
-      ],
-      [
-        10,
-        "In4.Cu"
-      ],
-      [
-        12,
-        "In5.Cu"
-      ],
-      [
-        14,
-        "In6.Cu"
-      ],
-      [
-        2,
-        "B.Cu"
-      ]
-    ],
-    "native_errors": 0,
-    "native_warnings": 0,
-    "native_connectivity_opens": 1024,
-    "reported_opens": 499,
-    "report_limit_reached": true,
-    "checker": "10.0.6",
-    "sha256": {
-      "bga1024.kicad_pcb": "9092606375a100a526ca347f8d435c861559103a36b699f3cc9e04fc41c61feb",
-      "bga1024.kicad_pro": "c317b3fd52bb5bbd5d287cee2d18ef0ce7bc1ac770a6b119d8fa7ffb720324c1",
-      "bga1024.dsn": "df2e0481423d6bff14c6d1d30053ff68c29836c147cc17457f893c566933bce6"
-    },
-    "report_sha256": "f6b5932dcf269598a42c5e6498a2f3386cc4503b7e77fbe0cccf898c8060133e"
+    }
   }
-]
+}

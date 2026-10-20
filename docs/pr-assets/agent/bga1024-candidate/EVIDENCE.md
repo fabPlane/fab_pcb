@@ -32,3 +32,46 @@ Completed routing context from the separate benchmark harness (three repeats, sa
 | New candidate | — | 0 | — | 0 | 9 after only |
 
 This is context for the new fixture, not a public engine or scoring change. The bundled generator/native tests above reproduce the fixture's admission and report-limit observations; the separate harness cohort uses its pinned native-aware integration. No routed-feasibility or engine-gain claim is made.
+
+## Cycle 68: close report-admission bypasses
+
+Move the text finding-limit guard into the exported parser so direct callers share
+its policy. The native command wrapper still passes through that parser. Change
+cache identity for the stricter entry-point contract.
+
+The candidate generator now checks report schema, board identity, checker version,
+included severities, all three finding-section lists, empty schematic parity and
+per-open finding type/severity before declaring a clean input diagnostic. This
+rejects incomplete or inconsistent evidence; it does not make the 499 reported
+opens an exact connectivity count or establish production baseline adoption.
+
+Same machine/checker and same inputs, three repeats per implementation:
+
+| Admission control | Before accepted | After accepted | Repeats per case |
+|---|---:|---:|---:|
+| Direct parser: 400-open report |3/3|3/3|3|
+| Direct parser: 1,024-open / 499-reported input |3/3|0/3|3|
+| Candidate diagnostic: valid report |3/3|3/3|3|
+| Nine malformed diagnostic variants |27/27|0/27|3|
+| Two already-rejected missing-list variants |0/6|0/6|3|
+
+Direct-parser controls use six fresh native reports. The diagnostic controls use
+three fresh independent generations and 72 admissions over the same reports;
+mutated reports are negative controls, not checker outputs. All three generated
+board/project/DSN digests match the bundled artifacts. Missing parity, nonempty
+parity, wrong board/schema, blank version, omitted severities, null/wrong-type/
+excluded opens are the nine newly rejected variants. No routing gain is claimed.
+
+Reproduce from this contribution checkout (new output directory required):
+
+```sh
+nice -n 10 taskset -c 0-5 timeout 120 /usr/bin/python3 -O benchmarks/boards/bga1024/test_report.py --measure /tmp/bga1024-report-controls-68
+nice -n 10 taskset -c 0-5 timeout 180 /usr/bin/python3 -O -m unittest discover -s benchmarks/boards/bga1024 -p 'test_*.py'
+nice -n 10 taskset -c 0-5 timeout 180 bun run typecheck
+FAB_ROUTER_MODULE="$HOME/bench/repos/fab_router/src/api.ts" nice -n 10 taskset -c 0-5 timeout 240 bun run test:unit
+```
+
+The direct text-parser measurements belong to the companion benchmark-harness
+change; this public change only hardens the bundled candidate generator. The
+frozen suite, production adapter and scoring are unchanged here. Generator
+controls preserve valid admission while rejecting unqualified native evidence.

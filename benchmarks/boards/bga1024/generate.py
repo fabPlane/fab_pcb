@@ -20,6 +20,33 @@ PARAMETERS = dict(seed=6512, layers=8, balls=1024, nets=1024, pads=2048,
                   track_mm=0.1, via_mm=0.3, drill_mm=0.1)
 
 
+def validate_report(data, native_opens, board_name):
+    """Admit the expected diagnostic, never treat its limited opens as exact quality."""
+    if not isinstance(data, dict):
+        raise RuntimeError('native DRC report must be an object')
+    if (data.get('$schema') != 'https://schemas.kicad.org/drc.v1.json'
+            or data.get('source') != board_name
+            or not isinstance(data.get('kicad_version'), str)
+            or not data['kicad_version'].strip()):
+        raise RuntimeError('native DRC report identity/schema mismatch')
+    severities = data.get('included_severities')
+    if (not isinstance(severities, list)
+            or any(not isinstance(item, str) for item in severities)
+            or not {'error', 'warning', 'exclusion'}.issubset(severities)):
+        raise RuntimeError('native DRC report omitted severities')
+    for section in ('violations', 'schematic_parity', 'unconnected_items'):
+        if not isinstance(data.get(section), list):
+            raise RuntimeError(f'native DRC report missing list: {section}')
+    if data['violations'] or data['schematic_parity']:
+        raise RuntimeError('unexpected native DRC violations or schematic parity findings')
+    findings = data['unconnected_items']
+    if len(findings) != min(native_opens, 499):
+        raise RuntimeError('unexpected native DRC open count')
+    if any(not isinstance(item, dict) or item.get('type') != 'unconnected_items'
+           or item.get('severity') != 'error' for item in findings):
+        raise RuntimeError('unexpected native DRC open finding')
+
+
 def generate(out, seed=6512):
     import pcbnew as p
     out.mkdir(parents=True, exist_ok=False)
@@ -85,8 +112,7 @@ def generate(out, seed=6512):
     subprocess.run(['kicad-cli','pcb','drc','--format','json','--severity-all','-o',str(report),str(board)],
                    check=True, capture_output=True, timeout=90)
     data = json.loads(report.read_text())
-    if data['violations'] or len(data['unconnected_items']) != min(native_opens, 499):
-        raise RuntimeError(f'unexpected native DRC: {len(data["violations"])} violations, {len(data["unconnected_items"])} opens')
+    validate_report(data, native_opens, board.name)
     summary = dict(schema=1, parameters={**PARAMETERS, 'seed': seed}, copper_stack=stack,
                    native_errors=0, native_warnings=0, native_connectivity_opens=native_opens,
                    reported_opens=len(data['unconnected_items']), report_limit_reached=True,
