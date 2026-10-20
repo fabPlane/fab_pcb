@@ -1,0 +1,48 @@
+{
+  "cycle": 211,
+  "baselineCommit": "124b7bd8808dd425cd3d0e42dec86fb1f4b0bd58",
+  "integrationCommit": "c4cc306f51c4c859819a4e704cd2f10d04168697",
+  "wrapperSha256": "43d803e49d9528cbb4e44727255a08c46d87e30149cc52dfbe7a151a93b981a5",
+  "cpus": [
+    20,
+    21,
+    22,
+    23,
+    24,
+    25
+  ],
+  "searchStages": 1,
+  "standaloneSearchOuterTimeoutSeconds": 3600,
+  "adapterOuterTimeoutSeconds": 600,
+  "productionChange": "tools/native-thermal-proposals.py only; src and native safety gate unchanged",
+  "setupFailures": [
+    "initial-benchmark-setup-failed.log",
+    "initial-benchmark-git-failed.log"
+  ],
+  "scoredAttemptsInSetupFailures": 0,
+  "timingClaim": false,
+  "changedToolFiles": [
+    "tools/native-thermal-proposals.py"
+  ],
+  "srcUnchanged": true,
+  "initialRequiredChecks": {
+    "passed": 924,
+    "failed": 1,
+    "errors": 1,
+    "reason": "isolated search expanded from 6 to 12 proposals and exceeded old 180-second test timeout; test now allows 600 seconds; all rejection assertions retained",
+    "log": "initial-checks-timeout.log",
+    "danglingChild": "Bun reported killing one dangling child; completed failed test process has no remaining children"
+  },
+  "candidateMeasurementStartedFromParentCommit": "124b7bd8808dd425cd3d0e42dec86fb1f4b0bd58",
+  "candidateMeasurementSourceIdentity": "Dirty proposal generator with after-source-hashes.json; production bytes remain frozen and will be matched to the final implementation commit; no src change",
+  "implementationCommit": "34f33a19c1121a2594e32147dd1ba2e2d759a78b",
+  "allMeasuredToolHashesMatchImplementationCommit": true,
+  "gitCommitDuringCandidateRunChangedNoExecutableBytes": true,
+  "oldIntegrationPin": "4ae389a2a83dc612ef471d8d83c9630ba352c7c2",
+  "baselineExecutableToolsMatchOldIntegrationPin": true,
+  "fullBeforeExitCode": 0,
+  "fullAfterExitCode": 0,
+  "fullComparisonExitCode": 0,
+  "all78OutcomesPhysicalCopperDsnSessionMatch": true,
+  "allSixRepairSequencesAndCheckpointGeometryMatch": true
+}

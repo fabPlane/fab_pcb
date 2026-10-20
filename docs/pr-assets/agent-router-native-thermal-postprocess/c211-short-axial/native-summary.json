@@ -1,0 +1,35 @@
+{
+  "rows": [
+    {
+      "role": "input",
+      "inventoryMatches": true,
+      "items": 0,
+      "errors": [],
+      "opens": 110
+    },
+    {
+      "role": "routed",
+      "inventoryMatches": true,
+      "items": 9,
+      "errors": [
+        "starved_thermal"
+      ],
+      "opens": 109
+    },
+    {
+      "role": "candidate",
+      "inventoryMatches": true,
+      "items": 11,
+      "errors": [],
+      "opens": 109
+    }
+  ],
+  "removed": [
+    "('segment', '\"Net-(C1-Pad1)\"', [('endpoint', '174.03', '49.5902'), ('endpoint', '176.1396', '49.5902'), ('layer', '\"B.Cu\"'), ('width', '0.2032')])"
+  ],
+  "added": [
+    "('segment', '\"Net-(C1-Pad1)\"', [('endpoint', '176.07864', '49.65116'), ('endpoint', '176.1396', '49.5902'), ('layer', '\"B.Cu\"'), ('width', '0.2032')])",
+    "('segment', '\"Net-(C1-Pad1)\"', [('endpoint', '174.09096', '49.65116'), ('endpoint', '176.07864', '49.65116'), ('layer', '\"B.Cu\"'), ('width', '0.2032')])",
+    "('segment', '\"Net-(C1-Pad1)\"', [('endpoint', '174.03', '49.5902'), ('endpoint', '174.09096', '49.65116'), ('layer', '\"B.Cu\"'), ('width', '0.2032')])"
+  ]
+}
