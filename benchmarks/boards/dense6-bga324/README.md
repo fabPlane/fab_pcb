@@ -123,3 +123,5 @@ See committed `policy-controls.json` and `policy-controls.png` in the PR assets.
 The fixed candidate also rejects footprint net-tie groups: these alter native short exemptions even with unchanged pad geometry. Three-repeat controls and exact reproduction are in `docs/pr-assets/agent/dense-candidate-verification/REPRODUCE.md`.
 
 Footprint-owned zones are unsupported and reject before export/checking. KiCad keeps these separately from board-owned zones; a footprint rule area can prohibit future tracks or vias while leaving the board-level zone count and unrouted DRC unchanged. See the committed `footprint-zone-controls.json` evidence and PR reproduction notes.
+
+Footprint graphical items are unsupported by this fixed candidate and reject before export/checking. The generated fixture has none. Native board drawing iteration omits these items, including graphics on copper layers. The guard rejects graphical items on every layer rather than attempting a partial graphical signature; regression controls cover front/back copper and silkscreen. See `footprint-graphic-controls.json` in the PR assets for three-repeat copper-graphic admission measurements.

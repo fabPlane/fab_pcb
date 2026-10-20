@@ -81,6 +81,9 @@ def geometry(board):
     # Footprint rule areas are absent from board.Zones() but constrain routing.
     require(not any(len(f.Zones()) for f in board.GetFootprints()),
             "unsupported native footprint zones")
+    # Native footprint graphics may carry copper but are absent from board drawings.
+    require(not any(len(f.GraphicalItems()) for f in board.GetFootprints()),
+            "unsupported native footprint graphics")
     def point(p):
         return [p.x, p.y]
     pads = sorted((f.GetReference(), p.GetNumber(), p.GetNetname(),

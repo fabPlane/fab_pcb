@@ -114,6 +114,30 @@ class ProjectPolicyTests(unittest.TestCase):
 
 
 class NativeClearanceTests(unittest.TestCase):
+    def test_footprint_copper_graphics_cannot_bypass_candidate_signature(self):
+        try:
+            import pcbnew
+        except ImportError:
+            self.skipTest("requires KiCad pcbnew")
+        board = pcbnew.BOARD()
+        footprint = pcbnew.FOOTPRINT(board)
+        footprint.SetReference("J1")
+        board.Add(footprint)
+        original = geometry(board)
+        for layer in (pcbnew.F_Cu, pcbnew.B_Cu, pcbnew.F_SilkS):
+            graphic = pcbnew.PCB_SHAPE(footprint)
+            graphic.SetShape(pcbnew.SHAPE_T_SEGMENT)
+            graphic.SetLayer(layer)
+            graphic.SetStart(pcbnew.VECTOR2I(1000000, 1000000))
+            graphic.SetEnd(pcbnew.VECTOR2I(2000000, 1000000))
+            graphic.SetWidth(100000)
+            footprint.Add(graphic)
+            self.assertEqual(len(board.GetDrawings()), 0)
+            with self.assertRaisesRegex(AssertionError, 'unsupported native footprint graphics'):
+                geometry(board)
+            footprint.Remove(graphic)
+            self.assertEqual(original, geometry(board))
+
     def test_footprint_rule_areas_cannot_bypass_candidate_signature(self):
         try:
             import pcbnew

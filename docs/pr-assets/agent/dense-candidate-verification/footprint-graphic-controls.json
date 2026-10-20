@@ -1,0 +1,180 @@
+{
+  "cycle": 59,
+  "machine": "hyper-ms-lin",
+  "cores": "0-5",
+  "nice": 10,
+  "repeats": 3,
+  "before_commit": "c3d3dcc",
+  "after_sha256": "832f674cefd9f1a631647659ea6bb61a06330bb862ee71391b0bee8945f6f158",
+  "records": [
+    {
+      "repeat": 1,
+      "case": "valid",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.793780797976069
+    },
+    {
+      "repeat": 1,
+      "case": "valid",
+      "version": "after",
+      "accepted": true,
+      "wall_s": 4.677582879900001
+    },
+    {
+      "repeat": 1,
+      "case": "footprint-graphic-J1",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.025073154014535
+    },
+    {
+      "repeat": 1,
+      "case": "footprint-graphic-J1",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.6376649970188737
+    },
+    {
+      "repeat": 1,
+      "case": "footprint-graphic-J2",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.911795870983042
+    },
+    {
+      "repeat": 1,
+      "case": "footprint-graphic-J2",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.583112423075363
+    },
+    {
+      "repeat": 1,
+      "case": "footprint-graphic-U1",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.619468507007696
+    },
+    {
+      "repeat": 1,
+      "case": "footprint-graphic-U1",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5703268370125443
+    },
+    {
+      "repeat": 2,
+      "case": "valid",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.594313872978091
+    },
+    {
+      "repeat": 2,
+      "case": "valid",
+      "version": "after",
+      "accepted": true,
+      "wall_s": 4.269238393986598
+    },
+    {
+      "repeat": 2,
+      "case": "footprint-graphic-J1",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.017676274990663
+    },
+    {
+      "repeat": 2,
+      "case": "footprint-graphic-J1",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 1.149691971950233
+    },
+    {
+      "repeat": 2,
+      "case": "footprint-graphic-J2",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.344735485035926
+    },
+    {
+      "repeat": 2,
+      "case": "footprint-graphic-J2",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5698199979960918
+    },
+    {
+      "repeat": 2,
+      "case": "footprint-graphic-U1",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.251759818987921
+    },
+    {
+      "repeat": 2,
+      "case": "footprint-graphic-U1",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5296743160579354
+    },
+    {
+      "repeat": 3,
+      "case": "valid",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.765003907959908
+    },
+    {
+      "repeat": 3,
+      "case": "valid",
+      "version": "after",
+      "accepted": true,
+      "wall_s": 5.359193195938133
+    },
+    {
+      "repeat": 3,
+      "case": "footprint-graphic-J1",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 3.475124996039085
+    },
+    {
+      "repeat": 3,
+      "case": "footprint-graphic-J1",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5779146860586479
+    },
+    {
+      "repeat": 3,
+      "case": "footprint-graphic-J2",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 3.3492751891026273
+    },
+    {
+      "repeat": 3,
+      "case": "footprint-graphic-J2",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5240093390457332
+    },
+    {
+      "repeat": 3,
+      "case": "footprint-graphic-U1",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 3.2005822859937325
+    },
+    {
+      "repeat": 3,
+      "case": "footprint-graphic-U1",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5432465790072456
+    }
+  ],
+  "limitation": "Fixed-candidate admission only. Footprint-owned graphics are unsupported. No routing gain or native baseline adoption."
+}
