@@ -20,9 +20,7 @@
     },
     "identical_route_scopes": 78,
     "all_outcomes_identical": true,
-    "source_hash_differences": [
-      "src/ses/write.ts"
-    ]
+    "source_hash_differences": ["src/ses/write.ts"]
   },
   "rows": [
     {
