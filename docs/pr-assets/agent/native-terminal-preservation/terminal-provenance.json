@@ -1,0 +1,50 @@
+{
+  "machine": "hyper-ms-lin",
+  "cores": "0-5",
+  "nice": 10,
+  "repeats": 3,
+  "cases": 11,
+  "pairs": 33,
+  "fresh_native_checks_per_cohort": 48,
+  "baseline_helper_source": "routing_bench:9fb72ef:scripts/native-connectivity",
+  "invalid_accepted_before": 21,
+  "invalid_accepted_after": 0,
+  "valid_accepted_before": 12,
+  "valid_accepted_after": 12,
+  "kicad_version": "10.0.6",
+  "checker": {
+    "/usr/bin/kicad-cli": "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402"
+  },
+  "code_sha256": {
+    "audit.py": "ea69ce93e77b04bcd3a4fdadbf386d153977e05a2d309f265bf06db0c6995060",
+    "baseline.py": "9d87d97a79eeca5647c334d32fa40a0bba708d597fa685183f096e27bf234039",
+    "generate_probes.py": "29215f54c14c85cee200f751068f0a2fe5d9863cb4666b82c4e3e07a18fda5cf",
+    "measure.py": "fb8c7082ef95ccabccec9edf6a5b41f53877e6f8049b25ceb9f19c7acdfbbead",
+    "measure_pair.py": "1d2a40a00c205dc61a67ff208344be07eebb37a1f9799d332c4263c07cd92022",
+    "plot.py": "ec91ddf8232e39013622756b777ce9e1e024416e43afc564a0624e82eb9a0711",
+    "terminals.py": "a887975db277ae2ba8c790ad8d66a8d371c383d1666c89e24ddcc3d179981e04",
+    "test_audit.py": "b3504a8f7e198cf4bddad4157e35d5efac06acb7d0a8b5ab04592d7714d425c1",
+    "test_baseline.py": "d7d7a86c78afd8a784368caff543020fcb0bb6847059d288fc2122d0524aa63a",
+    "test_terminals.py": "09a3cb9c3b0f3e560eeb5451136fc96275b3ba2a87185f6d32b3bc5ed80d90e6"
+  },
+  "case_sha256": {
+    "unchanged": "bf9699f0add4d50fa961e5c90c005cb6d4e5bcc7a837bc6634a62015e56f7866",
+    "partial-route": "113a410d8a58c1014f70b3955684c5a626d5b663318a5d77870df4568d186007",
+    "complete-route": "a16b2528e6938e0cc5fbc16f466e109e8ec644a1a9e6c6bc09ff733afe8b961f",
+    "remove-terminal": "5187c653bee828c14e99b98f43e78f23ae85286b9f016b877ed43e983997582f",
+    "disconnect-terminal": "6b3db21526b08ab53c2809ca86c7607c895bc1ab5a0a5c25c6fe1846307a1762",
+    "move-terminal": "71ae23cb0b87252ecc44418c585bff682651171e31d0ab84c8cb91958eaf0eb7",
+    "resize-terminal": "c8ab11aa5d9a832163e0a256b0bba952a013c6d462cbd86f43717a10cc88e254",
+    "rename-terminal": "bb25e8194e4df14a3a2751d5edcdf4d8416bea3a4e7a9837324336eb749d037a",
+    "duplicate-terminal": "3694f0e2ce08b3d234e6f94a6009ababf72ed5d37c5881a22a745a1e4e7f3bbf",
+    "change-layer": "2b61dc35402175d48b43e4aae027d215b2b371bae31c87c50f08e523551ee0f8",
+    "reserialized": "0a1ad8737bea4e22270ab820aae13dd1c5d49007ceafc13f5d1231b5837d9de7"
+  },
+  "summary_sha256": "6b327efa7165b4ed2f6b97161fd1e9b17b9c68823b2f26119337125a721fbcdb",
+  "limitations": [
+    "Standalone guard only; ranked adapters and caches unchanged.",
+    "Checks terminals, net table and copper stack; not full board/outline/zone/keepout preservation.",
+    "Custom pads and nonuniform pad stacks unsupported and rejected.",
+    "No routing or speed improvement claimed."
+  ]
+}

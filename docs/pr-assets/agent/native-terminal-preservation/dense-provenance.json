@@ -1,0 +1,15 @@
+{
+  "repeats": 3,
+  "machine": "hyper-ms-lin",
+  "cores": "0-5",
+  "nice": 10,
+  "fresh_checks_per_repository": 9,
+  "source_original_sha256": "f5841d12f854d2ae538bf9ae2996c72718028ba9702f627f726c1ccfc67a4635",
+  "generated_candidate_sha256": "2ef0e891062c8006d94e521e1e150261adff09af409c9a21b26512aa2610b4e4",
+  "source_generator_commit": "ee94eba",
+  "source_fixture_pr": "https://github.com/fabPlane/fab_pcb/pull/39",
+  "generator_sha256": "7a01aa5537e7bf9a09db7d542f5ff4603d555e12b82bba67e9d16f7fd5c244d9",
+  "generator_seed": 6406,
+  "terminal_signature_sha256": "33506e8f68988455736dbd4f2f6a41f8cc980055e831624e73bcf6cc0ec5aeff",
+  "caveat": "Geometry/terminal equality; board bytes differ between editor and generated serializations. No routing gain."
+}
