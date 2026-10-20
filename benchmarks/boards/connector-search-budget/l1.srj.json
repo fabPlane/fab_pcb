@@ -4,303 +4,223 @@
   "obstacles": [
     {
       "type": "rect",
-      "layers": [
-        "top"
-      ],
+      "layers": ["top"],
       "center": {
         "x": 6,
         "y": 6.0
       },
       "width": 1,
       "height": 0.8,
-      "connectedTo": [
-        "N1"
-      ]
+      "connectedTo": ["N1"]
     },
     {
       "type": "rect",
-      "layers": [
-        "top"
-      ],
+      "layers": ["top"],
       "center": {
         "x": 6,
         "y": 9.0
       },
       "width": 1,
       "height": 0.8,
-      "connectedTo": [
-        "N2"
-      ]
+      "connectedTo": ["N2"]
     },
     {
       "type": "rect",
-      "layers": [
-        "top"
-      ],
+      "layers": ["top"],
       "center": {
         "x": 6,
         "y": 12.0
       },
       "width": 1,
       "height": 0.8,
-      "connectedTo": [
-        "N3"
-      ]
+      "connectedTo": ["N3"]
     },
     {
       "type": "rect",
-      "layers": [
-        "top"
-      ],
+      "layers": ["top"],
       "center": {
         "x": 6,
         "y": 15.0
       },
       "width": 1,
       "height": 0.8,
-      "connectedTo": [
-        "N4"
-      ]
+      "connectedTo": ["N4"]
     },
     {
       "type": "rect",
-      "layers": [
-        "top"
-      ],
+      "layers": ["top"],
       "center": {
         "x": 6,
         "y": 18.0
       },
       "width": 1,
       "height": 0.8,
-      "connectedTo": [
-        "N5"
-      ]
+      "connectedTo": ["N5"]
     },
     {
       "type": "rect",
-      "layers": [
-        "top"
-      ],
+      "layers": ["top"],
       "center": {
         "x": 6,
         "y": 21.0
       },
       "width": 1,
       "height": 0.8,
-      "connectedTo": [
-        "N6"
-      ]
+      "connectedTo": ["N6"]
     },
     {
       "type": "rect",
-      "layers": [
-        "top"
-      ],
+      "layers": ["top"],
       "center": {
         "x": 6,
         "y": 24.0
       },
       "width": 1,
       "height": 0.8,
-      "connectedTo": [
-        "N7"
-      ]
+      "connectedTo": ["N7"]
     },
     {
       "type": "rect",
-      "layers": [
-        "top"
-      ],
+      "layers": ["top"],
       "center": {
         "x": 6,
         "y": 27.0
       },
       "width": 1,
       "height": 0.8,
-      "connectedTo": [
-        "N8"
-      ]
+      "connectedTo": ["N8"]
     },
     {
       "type": "rect",
-      "layers": [
-        "top"
-      ],
+      "layers": ["top"],
       "center": {
         "x": 6,
         "y": 30.0
       },
       "width": 1,
       "height": 0.8,
-      "connectedTo": [
-        "N9"
-      ]
+      "connectedTo": ["N9"]
     },
     {
       "type": "rect",
-      "layers": [
-        "top"
-      ],
+      "layers": ["top"],
       "center": {
         "x": 6,
         "y": 33.0
       },
       "width": 1,
       "height": 0.8,
-      "connectedTo": [
-        "N10"
-      ]
+      "connectedTo": ["N10"]
     },
     {
       "type": "rect",
-      "layers": [
-        "top"
-      ],
+      "layers": ["top"],
       "center": {
         "x": 34,
         "y": 6.0
       },
       "width": 1,
       "height": 0.8,
-      "connectedTo": [
-        "N1"
-      ]
+      "connectedTo": ["N1"]
     },
     {
       "type": "rect",
-      "layers": [
-        "top"
-      ],
+      "layers": ["top"],
       "center": {
         "x": 34,
         "y": 9.0
       },
       "width": 1,
       "height": 0.8,
-      "connectedTo": [
-        "N5"
-      ]
+      "connectedTo": ["N5"]
     },
     {
       "type": "rect",
-      "layers": [
-        "top"
-      ],
+      "layers": ["top"],
       "center": {
         "x": 34,
         "y": 12.0
       },
       "width": 1,
       "height": 0.8,
-      "connectedTo": [
-        "N7"
-      ]
+      "connectedTo": ["N7"]
     },
     {
       "type": "rect",
-      "layers": [
-        "top"
-      ],
+      "layers": ["top"],
       "center": {
         "x": 34,
         "y": 15.0
       },
       "width": 1,
       "height": 0.8,
-      "connectedTo": [
-        "N4"
-      ]
+      "connectedTo": ["N4"]
     },
     {
       "type": "rect",
-      "layers": [
-        "top"
-      ],
+      "layers": ["top"],
       "center": {
         "x": 34,
         "y": 18.0
       },
       "width": 1,
       "height": 0.8,
-      "connectedTo": [
-        "N6"
-      ]
+      "connectedTo": ["N6"]
     },
     {
       "type": "rect",
-      "layers": [
-        "top"
-      ],
+      "layers": ["top"],
       "center": {
         "x": 34,
         "y": 21.0
       },
       "width": 1,
       "height": 0.8,
-      "connectedTo": [
-        "N9"
-      ]
+      "connectedTo": ["N9"]
     },
     {
       "type": "rect",
-      "layers": [
-        "top"
-      ],
+      "layers": ["top"],
       "center": {
         "x": 34,
         "y": 24.0
       },
       "width": 1,
       "height": 0.8,
-      "connectedTo": [
-        "N10"
-      ]
+      "connectedTo": ["N10"]
     },
     {
       "type": "rect",
-      "layers": [
-        "top"
-      ],
+      "layers": ["top"],
       "center": {
         "x": 34,
         "y": 27.0
       },
       "width": 1,
       "height": 0.8,
-      "connectedTo": [
-        "N8"
-      ]
+      "connectedTo": ["N8"]
     },
     {
       "type": "rect",
-      "layers": [
-        "top"
-      ],
+      "layers": ["top"],
       "center": {
         "x": 34,
         "y": 30.0
       },
       "width": 1,
       "height": 0.8,
-      "connectedTo": [
-        "N2"
-      ]
+      "connectedTo": ["N2"]
     },
     {
       "type": "rect",
-      "layers": [
-        "top"
-      ],
+      "layers": ["top"],
       "center": {
         "x": 34,
         "y": 33.0
       },
       "width": 1,
       "height": 0.8,
-      "connectedTo": [
-        "N3"
-      ]
+      "connectedTo": ["N3"]
     }
   ],
   "connections": [

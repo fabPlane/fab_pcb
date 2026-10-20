@@ -9,13 +9,13 @@ frozen suite. Engine regression and adapter contracts cover the option.
 
 Same machine, six assigned cores, same inputs, three repeats per configuration:
 
-| Frozen native solenoid J1 | Baseline 69cf598 | Candidate default | Candidate extended |
-| --- | ---: | ---: | ---: |
-| Valid repeats | 3/3 | 3/3 | 3/3 |
-| Opens / new native errors, each run | 0 / 0 | 0 / 0 | 0 / 0 |
-| Vias, each run | 12 | 12 | 12 |
-| Wire length mm, each run | 352.691 | 352.691 | 358.771 |
-| Median route seconds | 0.823 | 0.850 | 0.792 |
+| Frozen native solenoid J1           | Baseline 69cf598 | Candidate default | Candidate extended |
+| ----------------------------------- | ---------------: | ----------------: | -----------------: |
+| Valid repeats                       |              3/3 |               3/3 |                3/3 |
+| Opens / new native errors, each run |            0 / 0 |             0 / 0 |              0 / 0 |
+| Vias, each run                      |               12 |                12 |                 12 |
+| Wire length mm, each run            |          352.691 |           352.691 |            358.771 |
+| Median route seconds                |            0.823 |             0.850 |              0.792 |
 
 Separate L1 SRJ engine measurement: baseline five opens each vs extended two each,
 zero internal spacing violations, three repeats each; median 12.893s vs 14.556s.

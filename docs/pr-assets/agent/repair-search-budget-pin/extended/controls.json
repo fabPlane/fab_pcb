@@ -18,9 +18,7 @@
       "seed": 2
     }
   ],
-  "routers": [
-    "fab-router"
-  ],
+  "routers": ["fab-router"],
   "cases": [
     {
       "id": "kitspace-solenoid-driver-j1",
@@ -41,11 +39,7 @@
       }
     }
   ],
-  "seeds": [
-    1,
-    2,
-    3
-  ],
+  "seeds": [1, 2, 3],
   "smoke": false,
   "full_suite": false,
   "inputs_sha256": "c36936fd81f6af0e9efd11990ad976127b01f6e03d7db889ebc5e876af06c9a1",
@@ -1671,19 +1665,8 @@
     "--out",
     "/home/hyper/bench/agents/codex-new-routers/scratch/cycle401-native-opt-extended"
   ],
-  "allowed_cpus": [
-    6,
-    7,
-    8,
-    9,
-    10,
-    11
-  ],
-  "load_before": [
-    5.7412109375,
-    7.53271484375,
-    6.60693359375
-  ],
+  "allowed_cpus": [6, 7, 8, 9, 10, 11],
+  "load_before": [5.7412109375, 7.53271484375, 6.60693359375],
   "safety_stop_seconds": 3600,
   "candidate": {
     "path": "/home/hyper/bench/agents/codex-new-routers/scratch/cycle401-public-router",
@@ -1768,10 +1751,6 @@
   "controls_preserved": true,
   "utc_end": "2026-10-19T18:06:35.927649+00:00",
   "interrupted": false,
-  "load_after": [
-    5.76220703125,
-    7.5068359375,
-    6.603515625
-  ],
+  "load_after": [5.76220703125, 7.5068359375, 6.603515625],
   "complete": true
 }
