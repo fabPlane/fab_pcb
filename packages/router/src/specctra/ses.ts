@@ -67,8 +67,7 @@ export function resolutionToNm(res: SExpr[] | undefined): number {
 function pathOf(list: SExpr[], nmPerUnit: number): { layer: string; width: number; points: { x: number; y: number }[] } | undefined {
   // (path <layer> <aperture_width> x0 y0 x1 y1 ...)
   const layer = list[1];
-  if (typeof layer !== "string" || !layer)
-    throw new SyntaxError("invalid session path layer");
+  if (typeof layer !== "string" || !layer) throw new SyntaxError("invalid session path layer");
   const values = list.slice(2);
   // A path requires a width and at least two complete coordinate pairs.
   // Never drop nested values or a trailing coordinate: that silently changes copper.
@@ -80,8 +79,7 @@ function pathOf(list: SExpr[], nmPerUnit: number): { layer: string; width: numbe
     throw new SyntaxError("invalid session path dimensions");
   const width = nums.shift()!;
   const points: { x: number; y: number }[] = [];
-  for (let i = 0; i < nums.length; i += 2)
-    points.push({ x: Math.round(nums[i]! * nmPerUnit), y: Math.round(-nums[i + 1]! * nmPerUnit) });
+  for (let i = 0; i < nums.length; i += 2) points.push({ x: Math.round(nums[i]! * nmPerUnit), y: Math.round(-nums[i + 1]! * nmPerUnit) });
   return { layer, width: Math.round(width * nmPerUnit), points };
 }
 
@@ -94,8 +92,7 @@ export function parseSes(text: string): Session {
   // A section has one scale. Selecting its first declaration silently makes
   // imported copper dimensions depend on the order of conflicting metadata.
   for (const section of [routes, placement]) {
-    if (children(section, "resolution").length > 1)
-      throw new SyntaxError("multiple session resolutions in one section");
+    if (children(section, "resolution").length > 1) throw new SyntaxError("multiple session resolutions in one section");
   }
   const nmPerUnit = resolutionToNm(child(routes, "resolution") ?? child(placement, "resolution"));
 
@@ -115,13 +112,11 @@ export function parseSes(text: string): Session {
       const geom = shape[1];
       // NewVia has circular copper on every layer. Falling back to a name or
       // another layer's circle for explicit noncircular geometry changes copper.
-      if (!isList(geom) || geom[0] !== "circle")
-        throw new SyntaxError("unsupported session via shape");
+      if (!isList(geom) || geom[0] !== "circle") throw new SyntaxError("unsupported session via shape");
       const layer = geom[1];
       // An explicit malformed layer is not absent metadata: dropping it can
       // trigger the all-layer fallback or silently discard part of the padstack.
-      if (typeof layer !== "string" || !layer)
-        throw new SyntaxError("invalid session circle layer");
+      if (typeof layer !== "string" || !layer) throw new SyntaxError("invalid session circle layer");
       layers.push(layer);
       if (geom[0] === "circle") {
         // A malformed explicit circle must never become an invalid via size or
@@ -137,8 +132,7 @@ export function parseSes(text: string): Session {
           throw new SyntaxError("invalid session circle diameter");
         // NewVia has one diameter for the entire barrel. Taking the last
         // layer shape would silently enlarge or shrink copper on other layers.
-        if (diameter !== 0 && diameter !== scaled)
-          throw new SyntaxError("unsupported session via layer diameters");
+        if (diameter !== 0 && diameter !== scaled) throw new SyntaxError("unsupported session via layer diameters");
         diameter = scaled;
       }
     }
@@ -169,8 +163,7 @@ export function parseSes(text: string): Session {
         throw new SyntaxError("invalid session via coordinates");
       const px = Math.round(Number(x) * nmPerUnit);
       const py = Math.round(-Number(y) * nmPerUnit);
-      if (!Number.isSafeInteger(px) || !Number.isSafeInteger(py))
-        throw new SyntaxError("invalid session via dimensions");
+      if (!Number.isSafeInteger(px) || !Number.isSafeInteger(py)) throw new SyntaxError("invalid session via dimensions");
       vias.push({ net: netName, padstack, x: px, y: py });
     }
   }
@@ -310,8 +303,7 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
       throw new SyntaxError("invalid session via diameter or drill");
     // Never discard a declared layer and then broaden the barrel to all layers.
     // Missing padstack metadata may use the legacy fallback; unsupported metadata cannot.
-    if (ps?.layers.some((name) => !layerByName.has(name)))
-      throw new SyntaxError("unknown session via layer");
+    if (ps?.layers.some((name) => !layerByName.has(name))) throw new SyntaxError("unknown session via layer");
     let layers = [...new Set((ps?.layers ?? []).map((name) => layerByName.get(name)!))];
     // Repeated shapes and aliases do not create a barrel between distinct layers.
     // A declared single-layer padstack must not become a through via.

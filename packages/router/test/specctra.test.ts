@@ -318,7 +318,6 @@ describe("parseSes / sesToItems", () => {
   });
 });
 
-
 function session(resolution: string, placement = false): string {
   return `(session sample
     ${placement ? `(placement (resolution ${resolution}))` : ""}
@@ -334,12 +333,21 @@ for (const resolution of ["unknown 10", "toString 10", "um 0", "um -10", "um NaN
   }
 }
 
-for (const [unit, scale] of [["um", 100], ["mm", 100000], ["cm", 1000000], ["inch", 2540000], ["mil", 2540]] as const) {
+for (const [unit, scale] of [
+  ["um", 100],
+  ["mm", 100000],
+  ["cm", 1000000],
+  ["inch", 2540000],
+  ["mil", 2540],
+] as const) {
   test(`session resolution preserves ${unit} geometry`, () => {
     const parsed = parseSes(session(`${unit} 10`));
     expect(parsed.nmPerUnit).toBe(scale);
     expect(parsed.wires[0]?.width).toBe(2 * scale);
-    expect(parsed.wires[0]?.points).toEqual([{ x: 0, y: -0 }, { x: 10 * scale, y: -20 * scale }]);
+    expect(parsed.wires[0]?.points).toEqual([
+      { x: 0, y: -0 },
+      { x: 10 * scale, y: -20 * scale },
+    ]);
   });
 }
 
@@ -348,42 +356,59 @@ test("session resolution preserves omitted resolution defaults", () => {
 });
 
 for (const path of [
-  "F.Cu 2 0 0 NaN 20", "F.Cu 2 0 0 Infinity 20",
-  "F.Cu 2 0 0 1e308 20", "F.Cu NaN 0 0 10 20",
-  "F.Cu -2 0 0 10 20", "F.Cu 0 0 0 10 20",
-  "F.Cu 2 0 0 10", "F.Cu 2 0 0 (unexpected 10) 20",
-  "F.Cu 2 0 0", "F.Cu 0.0001 0 0 10 20",
+  "F.Cu 2 0 0 NaN 20",
+  "F.Cu 2 0 0 Infinity 20",
+  "F.Cu 2 0 0 1e308 20",
+  "F.Cu NaN 0 0 10 20",
+  "F.Cu -2 0 0 10 20",
+  "F.Cu 0 0 0 10 20",
+  "F.Cu 2 0 0 10",
+  "F.Cu 2 0 0 (unexpected 10) 20",
+  "F.Cu 2 0 0",
+  "F.Cu 0.0001 0 0 10 20",
 ]) {
   test(`session path rejects malformed geometry: ${path}`, () => {
-    expect(() => parseSes(`(session sample (routes (resolution um 10)
-      (network_out (net A (wire (path ${path}))))))`)).toThrow(SyntaxError);
+    expect(() =>
+      parseSes(`(session sample (routes (resolution um 10)
+      (network_out (net A (wire (path ${path}))))))`),
+    ).toThrow(SyntaxError);
   });
 }
 
 test("session path retains signed fractional coordinates and positive widths", () => {
   const parsed = parseSes(`(session sample (routes (resolution um 10)
     (network_out (net A (wire (path F.Cu 2.5 -1.5 2.5 3.5 -4.5))))))`);
-  expect(parsed.wires[0]).toMatchObject({width: 250, points: [{x: -150, y: -250}, {x: 350, y: 450}]});
+  expect(parsed.wires[0]).toMatchObject({
+    width: 250,
+    points: [
+      { x: -150, y: -250 },
+      { x: 350, y: 450 },
+    ],
+  });
 });
 
 for (const via of ["V NaN 20", "V 10 Infinity", "V 1e308 20", "V 10", "V (unexpected 10) 20", "(unexpected V) 10 20"]) {
   test(`session via rejects malformed coordinates: ${via}`, () => {
-    expect(() => parseSes(`(session sample (routes (resolution um 10)
-      (network_out (net A (via ${via})))))`)).toThrow(SyntaxError);
+    expect(() =>
+      parseSes(`(session sample (routes (resolution um 10)
+      (network_out (net A (via ${via})))))`),
+    ).toThrow(SyntaxError);
   });
 }
 
 test("session via preserves signed fractional coordinates and trailing attributes", () => {
   const parsed = parseSes(`(session sample (routes (resolution um 10)
     (network_out (net A (via V -1.5 2.5 (type normal))))))`);
-  expect(parsed.vias).toEqual([{net: "A", padstack: "V", x: -150, y: -250}]);
+  expect(parsed.vias).toEqual([{ net: "A", padstack: "V", x: -150, y: -250 }]);
 });
 
 for (const diameter of ["NaN", "Infinity", "1e308", "-2", "0", "0.0001", "(unexpected 2)", ""]) {
   test(`session circle rejects malformed diameter: ${diameter || "missing"}`, () => {
-    expect(() => parseSes(`(session sample (routes (resolution um 10)
+    expect(() =>
+      parseSes(`(session sample (routes (resolution um 10)
       (library_out (padstack V (shape (circle F.Cu ${diameter}))))
-      (network_out (net A (via V 10 20)))))`)).toThrow(SyntaxError);
+      (network_out (net A (via V 10 20)))))`),
+    ).toThrow(SyntaxError);
   });
 }
 
@@ -391,11 +416,18 @@ test("session circle preserves fractional diameters on both copper layers", () =
   const parsed = parseSes(`(session sample (routes (resolution um 10)
     (library_out (padstack V (shape (circle F.Cu 6000.5)) (shape (circle B.Cu 6000.5))))
     (network_out (net A (via V 10 20)))))`);
-  expect(parsed.padstacks.get("V")).toEqual({name: "V", layers: ["F.Cu", "B.Cu"], diameter: 600050});
+  expect(parsed.padstacks.get("V")).toEqual({ name: "V", layers: ["F.Cu", "B.Cu"], diameter: 600050 });
   expect(sesToItems(parsed, twoNetBoard()).vias[0]?.diameter).toBe(600050);
 });
 
-for (const name of ["V_0:300_um", "V_600:0_um", "V_600:600_um", "V_600:700_um", "V_99999999999999999999:300_um", "V_600:99999999999999999999_um"]) {
+for (const name of [
+  "V_0:300_um",
+  "V_600:0_um",
+  "V_600:600_um",
+  "V_600:700_um",
+  "V_99999999999999999999:300_um",
+  "V_600:99999999999999999999_um",
+]) {
   test(`session via sizes reject invalid name dimensions: ${name}`, () => {
     const parsed = parseSes(`(session sample (routes (network_out (net A (via ${name} 10 20)))))`);
     expect(() => sesToItems(parsed, twoNetBoard())).toThrow(SyntaxError);
@@ -411,9 +443,8 @@ test("session via sizes validate explicit circle against name drill", () => {
 
 test("session via sizes retain valid name fallback", () => {
   const parsed = parseSes(`(session sample (routes (network_out (net A (via V_600:300_um 10 20)))))`);
-  expect(sesToItems(parsed, twoNetBoard()).vias[0]).toMatchObject({diameter: 600000, drill: 300000});
+  expect(sesToItems(parsed, twoNetBoard()).vias[0]).toMatchObject({ diameter: 600000, drill: 300000 });
 });
-
 
 describe("session net identity", () => {
   for (const [kind, copper] of [
@@ -430,15 +461,18 @@ describe("session net identity", () => {
       const items = sesToItems(session, input);
       const item = kind === "wire" ? items.tracks[0]! : items.vias[0]!;
       expect(item.net).toBe("A");
-      expect(item.netCode).toBe(input.nets.find(n => n.name === "A")!.code);
+      expect(item.netCode).toBe(input.nets.find((n) => n.name === "A")!.code);
     });
   }
 });
 
 describe("session via layer identity", () => {
-  for (const layers of [["F.Cu", "MISSING"], ["MISSING", "ALSO_MISSING"]]) {
+  for (const layers of [
+    ["F.Cu", "MISSING"],
+    ["MISSING", "ALSO_MISSING"],
+  ]) {
     test(`rejects unknown via layers: ${layers.join(",")}`, () => {
-      const shapes = layers.map(layer => `(shape (circle ${layer} 800))`).join(" ");
+      const shapes = layers.map((layer) => `(shape (circle ${layer} 800))`).join(" ");
       const session = parseSes(`(session s (routes (library_out (padstack V ${shapes}))
         (network_out (net A (via V 1000 -1000)))))`);
       expect(() => sesToItems(session, twoNetBoard())).toThrow(SyntaxError);
@@ -448,18 +482,18 @@ describe("session via layer identity", () => {
     const session = parseSes(`(session s (routes (library_out (padstack V
       (shape (circle BL_F_Cu 800)) (shape (circle BL_B_Cu 800))))
       (network_out (net A (via V 1000 -1000)))))`);
-    expect(sesToItems(session, twoNetBoard()).vias[0]!.layers).toEqual(twoNetBoard().copperLayers.map(l => l.id));
+    expect(sesToItems(session, twoNetBoard()).vias[0]!.layers).toEqual(twoNetBoard().copperLayers.map((l) => l.id));
   });
   test("retains absent padstack through via fallback", () => {
     const session = parseSes(`(session s (routes (network_out (net A (via V 1000 -1000)))))`);
-    expect(sesToItems(session, twoNetBoard()).vias[0]!.layers).toEqual(twoNetBoard().copperLayers.map(l => l.id));
+    expect(sesToItems(session, twoNetBoard()).vias[0]!.layers).toEqual(twoNetBoard().copperLayers.map((l) => l.id));
   });
 });
 
 describe("session via distinct layer span", () => {
   for (const layers of [["F.Cu"], ["F.Cu", "F.Cu"], ["F.Cu", "BL_F_Cu"]]) {
     test(`rejects one distinct via layer: ${layers.join(",")}`, () => {
-      const shapes = layers.map(layer => `(shape (circle ${layer} 800))`).join(" ");
+      const shapes = layers.map((layer) => `(shape (circle ${layer} 800))`).join(" ");
       const session = parseSes(`(session s (routes (library_out (padstack V ${shapes}))
         (network_out (net A (via V 1000 -1000)))))`);
       expect(() => sesToItems(session, twoNetBoard())).toThrow(SyntaxError);
@@ -469,16 +503,19 @@ describe("session via distinct layer span", () => {
     const session = parseSes(`(session s (routes (library_out (padstack V
       (shape (circle F.Cu 800)) (shape (circle BL_F_Cu 800)) (shape (circle B.Cu 800))))
       (network_out (net A (via V 1000 -1000)))))`);
-    expect(sesToItems(session, twoNetBoard()).vias[0]!.layers).toEqual(twoNetBoard().copperLayers.map(l => l.id));
+    expect(sesToItems(session, twoNetBoard()).vias[0]!.layers).toEqual(twoNetBoard().copperLayers.map((l) => l.id));
   });
   test("retains via fallback when layer metadata is absent", () => {
     const session = parseSes(`(session s (routes (network_out (net A (via V 1000 -1000)))))`);
-    expect(sesToItems(session, twoNetBoard()).vias[0]!.layers).toEqual(twoNetBoard().copperLayers.map(l => l.id));
+    expect(sesToItems(session, twoNetBoard()).vias[0]!.layers).toEqual(twoNetBoard().copperLayers.map((l) => l.id));
   });
 });
 
 describe("session via layer diameters", () => {
-  for (const diameters of [[600, 800], [800, 600]]) {
+  for (const diameters of [
+    [600, 800],
+    [800, 600],
+  ]) {
     test(`rejects nonuniform session via layer diameters ${diameters.join("/")}`, () => {
       const session = `(session s (routes (library_out (padstack V
         (shape (circle F.Cu ${diameters[0]})) (shape (circle B.Cu ${diameters[1]}))))
@@ -495,7 +532,6 @@ describe("session via layer diameters", () => {
     });
   }
 });
-
 
 describe("session via shape representability", () => {
   for (const shapes of [
@@ -558,28 +594,35 @@ describe("session circle layer operands", () => {
       expect(() => sesToItems(parseSes(session), twoNetBoard())).toThrow(SyntaxError);
     });
   }
-  for (const layers of [["F.Cu", "B.Cu"], ['"F.Cu"', '"B.Cu"']]) {
+  for (const layers of [
+    ["F.Cu", "B.Cu"],
+    ['"F.Cu"', '"B.Cu"'],
+  ]) {
     test(`preserves atomic circle layer operands ${layers.join("/")}`, () => {
-      const shapes = layers.map(layer => `(shape (circle ${layer} 800))`).join(" ");
+      const shapes = layers.map((layer) => `(shape (circle ${layer} 800))`).join(" ");
       const session = parseSes(`(session s (routes (library_out (padstack V_800:300_um ${shapes}))
         (network_out (net A (via V_800:300_um 1000 -1000)))))`);
-      expect(sesToItems(session, twoNetBoard()).vias[0]!.layers).toEqual(twoNetBoard().copperLayers.map(l => l.id));
+      expect(sesToItems(session, twoNetBoard()).vias[0]!.layers).toEqual(twoNetBoard().copperLayers.map((l) => l.id));
     });
   }
 });
 
-
 describe("session path layer operands", () => {
   for (const layer of ["(F.Cu)", '\"\"']) {
     test(`rejects invalid path layer ${layer}`, () => {
-      expect(() => parseSes(`(session s (routes (network_out (net A
-        (wire (path ${layer} 250 0 0 1000 1000))))))`)).toThrow(SyntaxError);
+      expect(() =>
+        parseSes(`(session s (routes (network_out (net A
+        (wire (path ${layer} 250 0 0 1000 1000))))))`),
+      ).toThrow(SyntaxError);
     });
   }
   for (const layer of ["F.Cu", '\"F.Cu\"']) {
     test(`preserves valid path layer ${layer}`, () => {
-      const result = sesToItems(parseSes(`(session s (routes (network_out (net A
-        (wire (path ${layer} 250 0 0 1000 1000))))))`), twoNetBoard());
+      const result = sesToItems(
+        parseSes(`(session s (routes (network_out (net A
+        (wire (path ${layer} 250 0 0 1000 1000))))))`),
+        twoNetBoard(),
+      );
       expect(result.tracks).toHaveLength(1);
       expect(result.tracks[0]!.width).toBe(250000);
       expect(result.tracks[0]!.end).toEqual({ x: 1000000, y: -1000000 });
@@ -587,11 +630,13 @@ describe("session path layer operands", () => {
   }
 });
 
-
 describe("session duplicate padstack definitions", () => {
   const shape = (name: string, diameter: number) =>
     `(padstack ${name} (shape (circle F.Cu ${diameter})) (shape (circle B.Cu ${diameter})))`;
-  for (const [first, second] of [[800, 600], [600, 800]] as const) {
+  for (const [first, second] of [
+    [800, 600],
+    [600, 800],
+  ] as const) {
     test(`rejects ambiguous via diameter ${first} then ${second}`, () => {
       const text = `(session s (routes (library_out ${shape("V", first)} ${shape("V", second)})
         (network_out (net A (via V 1000 -1000)))))`;
@@ -599,15 +644,19 @@ describe("session duplicate padstack definitions", () => {
     });
   }
   test("rejects duplicate identifiers across quoting forms", () => {
-    expect(() => parseSes(`(session s (routes (library_out ${shape("V", 800)} ${shape('"V"', 800)})))`))
-      .toThrow("duplicate session padstack");
+    expect(() => parseSes(`(session s (routes (library_out ${shape("V", 800)} ${shape('"V"', 800)})))`)).toThrow(
+      "duplicate session padstack",
+    );
   });
   test("preserves distinct padstack identities and their via sizes", () => {
     const session = parseSes(`(session s (routes (library_out ${shape("V", 800)} ${shape("W", 900)})
       (network_out (net A (via V 1000 -1000) (via W 2000 -1000)))))`);
     const result = sesToItems(session, twoNetBoard());
-    expect(result.vias.map(v => v.diameter)).toEqual([800000, 900000]);
-    expect(result.vias.map(v => v.position)).toEqual([{ x: 1000000, y: 1000000 }, { x: 2000000, y: 1000000 }]);
+    expect(result.vias.map((v) => v.diameter)).toEqual([800000, 900000]);
+    expect(result.vias.map((v) => v.position)).toEqual([
+      { x: 1000000, y: 1000000 },
+      { x: 2000000, y: 1000000 },
+    ]);
   });
 });
 
@@ -615,16 +664,21 @@ describe("session wire path multiplicity", () => {
   const paths = ["(path F.Cu 250 0 0 1000 1000)", "(path B.Cu 300 1000 1000 2000 1000)"];
   for (const order of [paths, [...paths].reverse()]) {
     test(`rejects multiple paths instead of dropping copper: ${order[0]}`, () => {
-      expect(() => parseSes(`(session s (routes (network_out (net A (wire ${order.join(" ")})))))`))
-        .toThrow("multiple session wire paths");
+      expect(() => parseSes(`(session s (routes (network_out (net A (wire ${order.join(" ")})))))`)).toThrow("multiple session wire paths");
     });
   }
   test("preserves both paths when represented by separate wires", () => {
-    const result = sesToItems(parseSes(`(session s (routes (network_out (net A
-      ${paths.map(p => `(wire ${p})`).join(" ")}))))`), twoNetBoard());
+    const result = sesToItems(
+      parseSes(`(session s (routes (network_out (net A
+      ${paths.map((p) => `(wire ${p})`).join(" ")}))))`),
+      twoNetBoard(),
+    );
     expect(result.tracks).toHaveLength(2);
-    expect(result.tracks.map(t => t.width)).toEqual([250000, 300000]);
-    expect(result.tracks.map(t => t.end)).toEqual([{ x: 1000000, y: -1000000 }, { x: 2000000, y: -1000000 }]);
+    expect(result.tracks.map((t) => t.width)).toEqual([250000, 300000]);
+    expect(result.tracks.map((t) => t.end)).toEqual([
+      { x: 1000000, y: -1000000 },
+      { x: 2000000, y: -1000000 },
+    ]);
   });
   test("preserves a polygon-only plane echo", () => {
     const session = parseSes("(session s (routes (network_out (net A (wire (polygon F.Cu 0 0 0 1000 0 1000 1000))))))");
@@ -635,8 +689,10 @@ describe("session wire path multiplicity", () => {
 describe("session resolution operand structure", () => {
   for (const resolution of ["(resolution um (count 10))", "(resolution (unit um) 10)", "(resolution um 10 100)"]) {
     test(`rejects malformed resolution operands: ${resolution}`, () => {
-      expect(() => parseSes(`(session s (routes ${resolution} (network_out (net A
-        (wire (path F.Cu 250 0 0 1000 0))))))`)).toThrow(SyntaxError);
+      expect(() =>
+        parseSes(`(session s (routes ${resolution} (network_out (net A
+        (wire (path F.Cu 250 0 0 1000 0))))))`),
+      ).toThrow(SyntaxError);
     });
   }
   test("preserves omitted resolution defaults and explicit positional scales", () => {
@@ -645,7 +701,6 @@ describe("session resolution operand structure", () => {
     expect(resolutionToNm(["resolution", "um", "10"])).toBe(100);
   });
 });
-
 
 describe("session shape geometry multiplicity", () => {
   for (const extra of ["(circle B.Cu 1200)", "(rect B.Cu -600 -600 600 600)"]) {
@@ -663,7 +718,7 @@ describe("session shape geometry multiplicity", () => {
         (network_out (net A (via V_800:300_um 1000 -1000)))))`;
       const via = sesToItems(parseSes(text), twoNetBoard()).vias[0]!;
       expect(via.diameter).toBe(800000);
-      expect(via.layers).toEqual(twoNetBoard().copperLayers.map(l => l.id));
+      expect(via.layers).toEqual(twoNetBoard().copperLayers.map((l) => l.id));
     });
   }
 });
@@ -671,8 +726,10 @@ describe("session shape geometry multiplicity", () => {
 describe("session resolution multiplicity", () => {
   for (const section of ["routes", "placement"]) {
     test(`rejects conflicting resolutions within ${section}`, () => {
-      expect(() => parseSes(`(session s (${section}
-        (resolution um 10) (resolution mm 1)))`)).toThrow(SyntaxError);
+      expect(() =>
+        parseSes(`(session s (${section}
+        (resolution um 10) (resolution mm 1)))`),
+      ).toThrow(SyntaxError);
     });
   }
   test("preserves separate routing and placement scales", () => {
@@ -702,7 +759,7 @@ describe("session via stack order", () => {
         const expected = blind ? [F, inner.id] : [F, inner.id, B];
         const names = blind ? ["F.Cu", "In1.Cu"] : ["F.Cu", "In1.Cu", "B.Cu"];
         if (reverse) names.reverse();
-        const shapes = names.map(layer => `(shape (circle ${layer} 800))`).join(" ");
+        const shapes = names.map((layer) => `(shape (circle ${layer} 800))`).join(" ");
         const session = parseSes(`(session s (routes (library_out (padstack V ${shapes}))
           (network_out (net A (via V 1000 -1000)))))`);
         const via = sesToItems(session, input).vias[0]!;
