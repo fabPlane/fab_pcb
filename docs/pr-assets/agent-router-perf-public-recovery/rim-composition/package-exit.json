@@ -1,0 +1,31 @@
+{
+  "returncode": 0,
+  "commands": [
+    [
+      "bun",
+      "run",
+      "typecheck"
+    ],
+    [
+      "bun",
+      "test",
+      "test/freerouting.test.ts",
+      "test/request-rules.test.ts",
+      "test/endpoint-collisions.test.ts",
+      "test/bridge-job.test.ts",
+      "test/corpus.test.ts",
+      "test/fab-router.test.ts",
+      "test/freerouting-runtime.test.ts",
+      "test/board-rule-floors.test.ts",
+      "test/pairs.test.ts",
+      "test/specctra.test.ts",
+      "test/extract.test.ts",
+      "test/session-filter.test.ts"
+    ]
+  ],
+  "previous_pin": "b65bcf03945ca2aa9704b2e196e089f0aaa60a8d",
+  "pin": "a3a2d38ddea104e4dff4fec8551d27260710a718",
+  "environment": {
+    "FAB_ROUTER_MODULE": "/home/hyper/bench/wt/fr-perf/src/api.ts"
+  }
+}

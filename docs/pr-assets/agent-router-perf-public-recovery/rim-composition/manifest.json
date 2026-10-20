@@ -1,0 +1,15 @@
+{
+  "README.md": "2ff1c57d71ee75d08e6b0b902cd89e248dcec669f1d1c463c0fa4240f0a71188",
+  "aggregate-table.md": "1e582bdf2b563eab0b6e10eee65a5260520e4eaabd5d0b59900355e98d7e3c0f",
+  "check-package.py": "5725f26a12a37b2c9b06d041f39c32ce680c2fe5417165725ad1a9f50b1898d1",
+  "consumer-control-source-parity.txt": "0c9c1ebc37fcf5172d1bc6393288168506826c3748dea3236c52e9387289a37d",
+  "dense-comparison.json": "91c7f59eb13929c7fb9d41961e50d45200a61ba07e8d9a52a012ff3e9010f403",
+  "initial-package-checks.log.gz": "0695d03e9c0f816784c21932eb006dfb27fa8b0933cf9d5dd36d7c67c543baac",
+  "ladder-summary.json": "64e769deeb992f2f772c21dade62a81caab4337f8afc4e42c461998c93ff8614",
+  "package-checks.log.gz": "3cb56381fc1e58d2e875663607f48c37366097d6d7d4b1590a6af8ceef005876",
+  "package-exit.json": "cf0324797f6ff2b126cbb2b596bc00ae3bd3c9098e483531049e45e2d5af7376",
+  "source.json": "1086ae8dbec2b38f2e32efbb02599424d6a32c734a43bd168f2b6bc61a9a077a",
+  "summary.json": "d3ba107ea7494767014eb4524c95e19a2991eb4067f1f18ac97c84d429e9d0d6",
+  "table.md": "fc2d71278920a5694aa8fffcb7157236c8cab1f026cc1becf856159117518cba",
+  "timings.png": "0c86406a94a5a4dbcd0d22eafed68601239480b8e94410027faa57c424e4c525"
+}
