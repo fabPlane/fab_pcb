@@ -1,0 +1,19 @@
+{
+  "changed_only_two_outline_graphical_uuids": true,
+  "changes": [
+    {
+      "index": 106,
+      "kind": "gr_circle",
+      "old_uuid": "00000000-0000-0000-0000-00005da2afe7",
+      "new_uuid": "9acdd477-7ec2-56db-9893-8e93f64d5fcd"
+    },
+    {
+      "index": 107,
+      "kind": "gr_circle",
+      "old_uuid": "00000000-0000-0000-0000-00005da2afe7",
+      "new_uuid": "b4a90350-69db-583f-acb7-35508fc84169"
+    }
+  ],
+  "original_source_sha256": "18aa9f053078d6e1ed6d955c07597f790474d82ca6f22e2d2d80d02b6b2daadc",
+  "axial_source_sha256": "95e8ef22cacc533052aac8df81cc54750e80111f078fae63f74a778d01a5544d"
+}
