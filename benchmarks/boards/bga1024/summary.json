@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "parameters": {
+    "seed": 6512,
+    "layers": 8,
+    "balls": 1024,
+    "nets": 1024,
+    "pads": 2048,
+    "pitch_mm": 0.5,
+    "ball_mm": 0.2,
+    "target_mm": 0.4,
+    "target_pitch_mm": 0.8,
+    "board_mm": [
+      90,
+      90
+    ],
+    "clearance_mm": 0.1,
+    "track_mm": 0.1,
+    "via_mm": 0.3,
+    "drill_mm": 0.1
+  },
+  "copper_stack": [
+    [
+      0,
+      "F.Cu"
+    ],
+    [
+      4,
+      "In1.Cu"
+    ],
+    [
+      6,
+      "In2.Cu"
+    ],
+    [
+      8,
+      "In3.Cu"
+    ],
+    [
+      10,
+      "In4.Cu"
+    ],
+    [
+      12,
+      "In5.Cu"
+    ],
+    [
+      14,
+      "In6.Cu"
+    ],
+    [
+      2,
+      "B.Cu"
+    ]
+  ],
+  "native_errors": 0,
+  "native_warnings": 0,
+  "native_connectivity_opens": 1024,
+  "reported_opens": 499,
+  "report_limit_reached": true,
+  "checker": "10.0.6",
+  "sha256": {
+    "bga1024.kicad_pcb": "9092606375a100a526ca347f8d435c861559103a36b699f3cc9e04fc41c61feb",
+    "bga1024.kicad_pro": "c317b3fd52bb5bbd5d287cee2d18ef0ce7bc1ac770a6b119d8fa7ffb720324c1",
+    "bga1024.dsn": "df2e0481423d6bff14c6d1d30053ff68c29836c147cc17457f893c566933bce6"
+  }
+}

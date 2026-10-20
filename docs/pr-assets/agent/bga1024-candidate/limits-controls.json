@@ -1,0 +1,98 @@
+[
+  {
+    "state": "before",
+    "id": "bga400",
+    "repeat": 0,
+    "accepted": true,
+    "unconnected": 400,
+    "reason": ""
+  },
+  {
+    "state": "before",
+    "id": "bga400",
+    "repeat": 1,
+    "accepted": true,
+    "unconnected": 400,
+    "reason": ""
+  },
+  {
+    "state": "before",
+    "id": "bga400",
+    "repeat": 2,
+    "accepted": true,
+    "unconnected": 400,
+    "reason": ""
+  },
+  {
+    "state": "before",
+    "id": "bga1024",
+    "repeat": 0,
+    "accepted": true,
+    "unconnected": 499,
+    "reason": ""
+  },
+  {
+    "state": "before",
+    "id": "bga1024",
+    "repeat": 1,
+    "accepted": true,
+    "unconnected": 499,
+    "reason": ""
+  },
+  {
+    "state": "before",
+    "id": "bga1024",
+    "repeat": 2,
+    "accepted": true,
+    "unconnected": 499,
+    "reason": ""
+  },
+  {
+    "state": "after",
+    "id": "bga400",
+    "repeat": 0,
+    "accepted": true,
+    "unconnected": 400,
+    "reason": ""
+  },
+  {
+    "state": "after",
+    "id": "bga400",
+    "repeat": 1,
+    "accepted": true,
+    "unconnected": 400,
+    "reason": ""
+  },
+  {
+    "state": "after",
+    "id": "bga400",
+    "repeat": 2,
+    "accepted": true,
+    "unconnected": 400,
+    "reason": ""
+  },
+  {
+    "state": "after",
+    "id": "bga1024",
+    "repeat": 0,
+    "accepted": false,
+    "unconnected": null,
+    "reason": "Error: KiCad DRC report reached finding limit: unconnected_items (499 >= 499); exact native quality unavailable"
+  },
+  {
+    "state": "after",
+    "id": "bga1024",
+    "repeat": 1,
+    "accepted": false,
+    "unconnected": null,
+    "reason": "Error: KiCad DRC report reached finding limit: unconnected_items (499 >= 499); exact native quality unavailable"
+  },
+  {
+    "state": "after",
+    "id": "bga1024",
+    "repeat": 2,
+    "accepted": false,
+    "unconnected": null,
+    "reason": "Error: KiCad DRC report reached finding limit: unconnected_items (499 >= 499); exact native quality unavailable"
+  }
+]
