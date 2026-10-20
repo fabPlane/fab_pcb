@@ -121,3 +121,5 @@ See committed `policy-controls.json` and `policy-controls.png` in the PR assets.
 [External rule controls and reproduction](../../../docs/pr-assets/agent/dense-candidate-verification/CUSTOM-RULES.md).
 
 The fixed candidate also rejects footprint net-tie groups: these alter native short exemptions even with unchanged pad geometry. Three-repeat controls and exact reproduction are in `docs/pr-assets/agent/dense-candidate-verification/REPRODUCE.md`.
+
+Footprint-owned zones are unsupported and reject before export/checking. KiCad keeps these separately from board-owned zones; a footprint rule area can prohibit future tracks or vias while leaving the board-level zone count and unrouted DRC unchanged. See the committed `footprint-zone-controls.json` evidence and PR reproduction notes.

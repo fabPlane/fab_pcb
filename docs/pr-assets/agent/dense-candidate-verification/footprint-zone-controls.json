@@ -1,0 +1,180 @@
+{
+  "cycle": 58,
+  "machine": "hyper-ms-lin",
+  "cores": "0-5",
+  "nice": 10,
+  "repeats": 3,
+  "before_commit": "b43b521",
+  "after_sha256": "22e2f64a4aa03653b978215bf0b1eadf69bb87abf49cca152eded93c207870a3",
+  "records": [
+    {
+      "repeat": 1,
+      "case": "valid",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 5.241438822005875
+    },
+    {
+      "repeat": 1,
+      "case": "valid",
+      "version": "after",
+      "accepted": true,
+      "wall_s": 4.930282612913288
+    },
+    {
+      "repeat": 1,
+      "case": "footprint-zone-J1",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.776627869927324
+    },
+    {
+      "repeat": 1,
+      "case": "footprint-zone-J1",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.6196924629621208
+    },
+    {
+      "repeat": 1,
+      "case": "footprint-zone-J2",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.725599274970591
+    },
+    {
+      "repeat": 1,
+      "case": "footprint-zone-J2",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.6966144710313529
+    },
+    {
+      "repeat": 1,
+      "case": "footprint-zone-U1",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.946175375021994
+    },
+    {
+      "repeat": 1,
+      "case": "footprint-zone-U1",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.6051342289429158
+    },
+    {
+      "repeat": 2,
+      "case": "valid",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 5.021411148016341
+    },
+    {
+      "repeat": 2,
+      "case": "valid",
+      "version": "after",
+      "accepted": true,
+      "wall_s": 5.1418016739189625
+    },
+    {
+      "repeat": 2,
+      "case": "footprint-zone-J1",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.216626143897884
+    },
+    {
+      "repeat": 2,
+      "case": "footprint-zone-J1",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.8352967289974913
+    },
+    {
+      "repeat": 2,
+      "case": "footprint-zone-J2",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.807699940982275
+    },
+    {
+      "repeat": 2,
+      "case": "footprint-zone-J2",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.6314575630240142
+    },
+    {
+      "repeat": 2,
+      "case": "footprint-zone-U1",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.813357828068547
+    },
+    {
+      "repeat": 2,
+      "case": "footprint-zone-U1",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 2.108299402985722
+    },
+    {
+      "repeat": 3,
+      "case": "valid",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.338489240966737
+    },
+    {
+      "repeat": 3,
+      "case": "valid",
+      "version": "after",
+      "accepted": true,
+      "wall_s": 5.105663315975107
+    },
+    {
+      "repeat": 3,
+      "case": "footprint-zone-J1",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 5.210259511019103
+    },
+    {
+      "repeat": 3,
+      "case": "footprint-zone-J1",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.6285863560624421
+    },
+    {
+      "repeat": 3,
+      "case": "footprint-zone-J2",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 3.6228273489978164
+    },
+    {
+      "repeat": 3,
+      "case": "footprint-zone-J2",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5847802759381011
+    },
+    {
+      "repeat": 3,
+      "case": "footprint-zone-U1",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 3.5719725189264864
+    },
+    {
+      "repeat": 3,
+      "case": "footprint-zone-U1",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5977182219503447
+    }
+  ],
+  "limitation": "Fixed-candidate admission only. Footprint-owned zones are unsupported. No routing gain or native baseline adoption."
+}

@@ -114,6 +114,25 @@ class ProjectPolicyTests(unittest.TestCase):
 
 
 class NativeClearanceTests(unittest.TestCase):
+    def test_footprint_rule_areas_cannot_bypass_candidate_signature(self):
+        try:
+            import pcbnew
+        except ImportError:
+            self.skipTest("requires KiCad pcbnew")
+        board = pcbnew.BOARD()
+        footprint = pcbnew.FOOTPRINT(board)
+        footprint.SetReference("J1")
+        board.Add(footprint)
+        geometry(board)
+        zone = pcbnew.ZONE(footprint)
+        zone.SetIsRuleArea(True)
+        zone.SetDoNotAllowTracks(True)
+        footprint.Add(zone)
+        self.assertEqual(len(board.Zones()), 0)
+        self.assertEqual(len(footprint.Zones()), 1)
+        with self.assertRaisesRegex(AssertionError, 'unsupported native footprint zones'):
+            geometry(board)
+
     def test_net_tie_exemptions_cannot_change_candidate_rules(self):
         try:
             import pcbnew

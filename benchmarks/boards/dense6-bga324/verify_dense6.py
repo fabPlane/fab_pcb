@@ -78,6 +78,9 @@ def geometry(board):
     # Net ties alter which copper shorts native DRC permits without changing pads.
     require(not any(f.IsNetTie() for f in board.GetFootprints()),
             "unsupported native net-tie groups")
+    # Footprint rule areas are absent from board.Zones() but constrain routing.
+    require(not any(len(f.Zones()) for f in board.GetFootprints()),
+            "unsupported native footprint zones")
     def point(p):
         return [p.x, p.y]
     pads = sorted((f.GetReference(), p.GetNumber(), p.GetNetname(),
