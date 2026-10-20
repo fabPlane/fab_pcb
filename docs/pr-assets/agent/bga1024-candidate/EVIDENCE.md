@@ -208,3 +208,42 @@ the ten-second control. Preparation pins the same integration and preserves
 native project sidecars. The scratch integration must never be pushed.
 
 ![Budget sensitivity](https://github.com/fabPlane/fab_pcb/blob/agent/bga1024-candidate/docs/pr-assets/agent/bga1024-candidate/budget.png?raw=true)
+
+## Cycle 70: first-party source cache admission
+
+The separate benchmark runner previously reused a completed result after its
+report helper changed. Three fresh-process controls per revision on the same
+machine now demonstrate that helper changes invalidate resume before a cache
+skip, while unchanged sources still reuse results. Changes observed during a
+successful adapter invocation also reject its result. This public update adds
+fixture qualification evidence only; the runner implementation is offered in
+the separate benchmark contribution. No adapter or frozen-suite scoring changes.
+
+|Deterministic runner control|Before|After|Repeats each|
+|---|---:|---:|---:|
+|Unchanged sources reuse result|3|3|3|
+|Helper edit incorrectly reuses result|3|0|3|
+|Source edit during routing incorrectly accepted|3|0|3|
+
+These are cache admission controls, not routing runs. The observed identity
+covers first-party TypeScript/Python source contents and paths; it does not
+establish atomic execution or external module/shared-library provenance.
+Native baseline adoption and routed feasibility of this fixture remain pending.
+The native 1024-open baseline must never be replaced with the checker's capped
+499-item report. All committed fixture board/project/DSN bytes remain identical.
+
+Reproduce native fixture verification from this public checkout:
+
+```sh
+nice -n 10 taskset -c 0-5 timeout 180 bun run typecheck
+FAB_ROUTER_MODULE=/home/hyper/bench/repos/fab_router/src/api.ts nice -n 10 taskset -c 0-5 timeout 180 bun run test:unit
+nice -n 10 taskset -c 0-5 timeout 180 /usr/bin/python3 -O -m unittest discover -s benchmarks/boards/bga1024 -p 'test_*.py'
+```
+
+Runner controls require the separate private benchmark checkout:
+
+```sh
+nice -n 10 taskset -c 0-5 timeout 60 bun docs/pr-assets/agent/scoring-source-cache/audit.ts /tmp/source-cache-audit.json
+```
+
+![Source cache controls](https://github.com/fabPlane/fab_pcb/blob/agent/bga1024-candidate/docs/pr-assets/agent/bga1024-candidate/cache.png?raw=true)
