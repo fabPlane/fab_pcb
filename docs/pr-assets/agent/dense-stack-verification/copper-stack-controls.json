@@ -1,0 +1,170 @@
+[
+  {
+    "repeat": 1,
+    "case": "valid",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 4.664642859017476
+  },
+  {
+    "repeat": 1,
+    "case": "valid",
+    "version": "after",
+    "accepted": true,
+    "wall_s": 5.837580105988309
+  },
+  {
+    "repeat": 1,
+    "case": "copper-stack-name",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 4.980459911050275
+  },
+  {
+    "repeat": 1,
+    "case": "copper-stack-name",
+    "version": "after",
+    "accepted": false,
+    "wall_s": 0.7011310689849779
+  },
+  {
+    "repeat": 1,
+    "case": "copper-stack-power",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 4.625592380994931
+  },
+  {
+    "repeat": 1,
+    "case": "copper-stack-power",
+    "version": "after",
+    "accepted": false,
+    "wall_s": 0.605158863007091
+  },
+  {
+    "repeat": 1,
+    "case": "copper-stack-mixed",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 4.723985648946837
+  },
+  {
+    "repeat": 1,
+    "case": "copper-stack-mixed",
+    "version": "after",
+    "accepted": false,
+    "wall_s": 0.7924901050282642
+  },
+  {
+    "repeat": 2,
+    "case": "valid",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 3.965112312929705
+  },
+  {
+    "repeat": 2,
+    "case": "valid",
+    "version": "after",
+    "accepted": true,
+    "wall_s": 3.713736669975333
+  },
+  {
+    "repeat": 2,
+    "case": "copper-stack-name",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 3.592516503063962
+  },
+  {
+    "repeat": 2,
+    "case": "copper-stack-name",
+    "version": "after",
+    "accepted": false,
+    "wall_s": 0.6622937719803303
+  },
+  {
+    "repeat": 2,
+    "case": "copper-stack-power",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 4.07139484398067
+  },
+  {
+    "repeat": 2,
+    "case": "copper-stack-power",
+    "version": "after",
+    "accepted": false,
+    "wall_s": 0.6782340200152248
+  },
+  {
+    "repeat": 2,
+    "case": "copper-stack-mixed",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 3.7880487650400028
+  },
+  {
+    "repeat": 2,
+    "case": "copper-stack-mixed",
+    "version": "after",
+    "accepted": false,
+    "wall_s": 0.6124306638957933
+  },
+  {
+    "repeat": 3,
+    "case": "valid",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 3.7842412929749116
+  },
+  {
+    "repeat": 3,
+    "case": "valid",
+    "version": "after",
+    "accepted": true,
+    "wall_s": 3.7809098589932546
+  },
+  {
+    "repeat": 3,
+    "case": "copper-stack-name",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 3.514431156916544
+  },
+  {
+    "repeat": 3,
+    "case": "copper-stack-name",
+    "version": "after",
+    "accepted": false,
+    "wall_s": 0.6509319350589067
+  },
+  {
+    "repeat": 3,
+    "case": "copper-stack-power",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 4.099899674998596
+  },
+  {
+    "repeat": 3,
+    "case": "copper-stack-power",
+    "version": "after",
+    "accepted": false,
+    "wall_s": 0.5777070540934801
+  },
+  {
+    "repeat": 3,
+    "case": "copper-stack-mixed",
+    "version": "before",
+    "accepted": true,
+    "wall_s": 3.703623072942719
+  },
+  {
+    "repeat": 3,
+    "case": "copper-stack-mixed",
+    "version": "after",
+    "accepted": false,
+    "wall_s": 1.1442235650029033
+  }
+]
