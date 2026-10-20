@@ -2,11 +2,11 @@ Three terminals share one net on a 30 × 10 mm two-layer board. Only the unroute
 
 Native checker 10.0.6 on hyper-ms-lin, cores 0–5, nice 10: three independent generations per state, one fresh DRC per generation, using Python optimization. All board bytes match across repeats.
 
-| Control | Before native opens (unrouted) | After native opens | Before / after errors | Before / after warnings | Repeats |
-|---|---:|---:|---|---|---:|
-| Unrouted | 2 | 2 | 0 / 0 | 0 / 0 | 3 |
-| One manual segment | 2 | 1 | 0 / 0 | 0 / 0 | 3 |
-| Two manual segments | 2 | 0 | 0 / 0 | 0 / 0 | 3 |
+| Control             | Before native opens (unrouted) | After native opens | Before / after errors | Before / after warnings | Repeats |
+| ------------------- | -----------------------------: | -----------------: | --------------------- | ----------------------- | ------: |
+| Unrouted            |                              2 |                  2 | 0 / 0                 | 0 / 0                   |       3 |
+| One manual segment  |                              2 |                  1 | 0 / 0                 | 0 / 0                   |       3 |
+| Two manual segments |                              2 |                  0 | 0 / 0                 | 0 / 0                   |       3 |
 
 The partial state distinguishes net-count completion (0%) from the proposed initial-native-open denominator (50%). This fixture does not adopt that scoring change, alter ranking, prove pairwise repaired-edge identity, or measure an engine improvement. Production adoption still requires the combined archive, dependency, bounded-helper, both-adapter, direct-caller and cache changes.
 
