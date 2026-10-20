@@ -72,10 +72,12 @@ describe("FabRouter", () => {
 
   test("local recovery requires an explicit boolean and preserves opt-out", async () => {
     const received: Array<boolean | undefined> = [];
-    const router = new FabRouter({ routeDsn: (_text, settings) => {
-      received.push(settings?.localRecovery);
-      return success();
-    } });
+    const router = new FabRouter({
+      routeDsn: (_text, settings) => {
+        received.push(settings?.localRecovery);
+        return success();
+      },
+    });
     await router.route(twoNetBoard());
     await router.route(twoNetBoard(), { extra: { localRecovery: false } });
     await router.route(twoNetBoard(), { extra: { localRecovery: true } });

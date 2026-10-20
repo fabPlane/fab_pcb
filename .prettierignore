@@ -19,3 +19,7 @@ packages/router/bench/results/*.svg
 
 # Frozen comparison captures and checksum-controlled harness/configuration.
 benchmarks/autorouter/
+
+# Checksum-controlled benchmark captures: preserve original serialized bytes.
+/docs/pr-assets/agent-router-perf-public-recovery/**/*.json
+/benchmarks/boards/dense6-local-recovery/native-case/baseline-drc.json

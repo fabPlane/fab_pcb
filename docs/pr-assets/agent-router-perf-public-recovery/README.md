@@ -33,3 +33,22 @@ thermal errors remain unresolved. Large-input and full slow acceptance evidence
 is tracked on the engine PR; enabling recovery by default needs further review.
 
 The latest cache pin increment and fresh 26×3 speed/quality evidence are documented in [quilt-front/README.md](quilt-front/README.md). Its dense single observation is slower, while frozen-suite route time improves; full limitations are retained there.
+
+## Formatting maintenance (cycle 104)
+
+The unit CI job stopped at `format:check` on this branch. Markdown tables and the
+adapter regression test now follow repository formatting. Generated JSON captures
+and the frozen native baseline retain their serialized bytes through scoped
+`.prettierignore` entries. Manifests reflect the formatted Markdown; benchmark
+values, source pin, copper, rules and chart images are unchanged.
+
+Validation on the same host: full repository `bun run format:check` passes;
+consumer typecheck and the focused suite pass (97 tests, one optional runtime
+skip, 379 assertions). No routing measurement was run for this formatting change,
+so the existing before/after table and its limitations still apply.
+
+```bash
+bun run format:check
+python3 docs/pr-assets/agent-router-perf-public-recovery/verify-manifests.py
+python3 docs/pr-assets/agent-router-perf-public-recovery/rim-composition/check-package.py --engine-source /home/hyper/bench/wt/fr-perf
+```

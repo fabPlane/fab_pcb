@@ -19,14 +19,14 @@ counts directly. Nets are not an appropriate denominator for edge completion.
 Three repeats per mode, two normal passes, 600-second cooperative route budget,
 optimisation/fanout disabled, strict exact DRC, same host and cores 12–19:
 
-| Prepared native case metric | Recovery off | Recovery on |
-|---|---:|---:|
-| Passed | 0/3 | 0/3 |
-| Opens each | 183, 183, 183 | 182, 182, 182 |
-| New native errors each | 0, 0, 0 | 0, 0, 0 |
-| Median / p95 seconds | 190.456 / 190.666 | 188.064 / 197.163 |
-| Vias each | 315 | 315 |
-| Length mm each | 2300.008 | 2305.476 |
+| Prepared native case metric |      Recovery off |       Recovery on |
+| --------------------------- | ----------------: | ----------------: |
+| Passed                      |               0/3 |               0/3 |
+| Opens each                  |     183, 183, 183 |     182, 182, 182 |
+| New native errors each      |           0, 0, 0 |           0, 0, 0 |
+| Median / p95 seconds        | 190.456 / 190.666 | 188.064 / 197.163 |
+| Vias each                   |               315 |               315 |
+| Length mm each              |          2300.008 |          2305.476 |
 
 No introduced error or warning geometry, fidelity loss or timeout. This remains
 an incomplete board, with no speed claim. See the complete paired records in

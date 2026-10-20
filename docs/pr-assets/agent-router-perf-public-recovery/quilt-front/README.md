@@ -6,20 +6,20 @@ This increment advances the proposed engine pin from `8e53e7d64d78485ee54beba0bf
 
 Fresh original then candidate sweeps use the same 26 frozen cases × three repeats on the same host, cores 12–19, nice 10, without overlapping own heavy jobs. Summed route time falls 11.56%, aggregate median 9.50%, and p95 9.05%. All 78 paired sessions and final engine statistics are identical. Passes, opens, native findings, vias and length do not regress. Known 27 native thermal errors remain unresolved. The sequential shared-host observations do not prove a causal speed effect and are not an every-case gain: one median and two p95 values increase.
 
-| Full native metric (26 cases × 3 repeats) | Original | Front cache |
-|---|---:|---:|
-| Passed / 78 | 48 | 48 |
-| Valid cases / 26 | 16 | 16 |
-| Opens | 90 | 90 |
-| New native errors (known, unresolved) | 27 | 27 |
-| Median route seconds | 1.167854 | 1.056879 |
-| p95 route seconds | 19.679421 | 17.899242 |
-| Sum route seconds | 468.916279 | 414.710726 |
-| Sweep wall seconds | 587.954642 | 528.184038 |
-| Sum case medians seconds | 156.709248 | 135.894560 |
-| Sum case p95 seconds | 161.892035 | 145.235971 |
-| Sum vias | 2826 | 2826 |
-| Sum length mm | 60450.378202 | 60450.378202 |
+| Full native metric (26 cases × 3 repeats) |     Original |  Front cache |
+| ----------------------------------------- | -----------: | -----------: |
+| Passed / 78                               |           48 |           48 |
+| Valid cases / 26                          |           16 |           16 |
+| Opens                                     |           90 |           90 |
+| New native errors (known, unresolved)     |           27 |           27 |
+| Median route seconds                      |     1.167854 |     1.056879 |
+| p95 route seconds                         |    19.679421 |    17.899242 |
+| Sum route seconds                         |   468.916279 |   414.710726 |
+| Sweep wall seconds                        |   587.954642 |   528.184038 |
+| Sum case medians seconds                  |   156.709248 |   135.894560 |
+| Sum case p95 seconds                      |   161.892035 |   145.235971 |
+| Sum vias                                  |         2826 |         2826 |
+| Sum length mm                             | 60450.378202 | 60450.378202 |
 
 [All case timings and native results](table.md), [summary](summary.json), and [paired comparison](comparison.json) retain the data. Lossless raw checks, settings, sessions, source inventories, licenses, supervisor exits and archive verifiers are committed with the [engine evidence](https://github.com/fabPlane/fab_router/tree/790256b1358406c2c2e9c16788f7586cd7ad4808/docs/pr-assets/agent-fab-router-perf-local-rescue/quilt-front-native).
 

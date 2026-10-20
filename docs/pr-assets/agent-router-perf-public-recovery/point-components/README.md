@@ -4,10 +4,10 @@ Updates the proposed engine pin from `c9f946dca2b9126dd5d17ccf6d8a93b64c44dd11` 
 
 Fresh full native measurements use the same 26 frozen cases × three repeats/source, checker 10.0.6, host, cores 12–19 and public recovery flag enabled in both modes. The measured before snapshot's 98 runtime/type/tool/package files match the previous pin exactly; all 99 after files match the new pin. See [source identity](source-audit.json) and [pin metadata](pin.json).
 
-| Enabled source | Passed /78 | Valid /26 | Opens | Known new errors | Median / p95 s | Total s | Vias | Length sum mm |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Prior proposed pin | 42 | 14 | 96 | 27 | 1.329552 / 19.184059 | 458.374824 | 2826 | 60129.943370 |
-| Updated pin | 48 | 16 | 90 | 27 | 1.386415 / 21.092039 | 484.539243 | 2826 | 60450.378202 |
+| Enabled source     | Passed /78 | Valid /26 | Opens | Known new errors |       Median / p95 s |    Total s | Vias | Length sum mm |
+| ------------------ | ---------: | --------: | ----: | ---------------: | -------------------: | ---------: | ---: | ------------: |
+| Prior proposed pin |         42 |        14 |    96 |               27 | 1.329552 / 19.184059 | 458.374824 | 2826 |  60129.943370 |
+| Updated pin        |         48 |        16 |    90 |               27 | 1.386415 / 21.092039 | 484.539243 | 2826 |  60450.378202 |
 
 Only the two sprinkler tasks change, each from 0/3 to 3/3 passes. Each changed run closes its last native open with six 0.25 mm segments, +53.405805 mm and no vias. All existing native segments/vias remain; 72/78 session files are unchanged. Zero introduced structured error/warning geometry, fidelity or completion regressions. The 27 known errors remain unresolved. Aggregate observed time rises 5.7%; sequential sweeps overlap other test/stress jobs. No causal speed gain or default promotion is claimed.
 

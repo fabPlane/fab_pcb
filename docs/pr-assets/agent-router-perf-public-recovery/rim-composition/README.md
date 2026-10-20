@@ -5,19 +5,19 @@ This latest measurement compares the previous proposed pin `b65bcf03945ca2aa9704
 Same frozen **26 cases × 3 repeats**, same host, cores 12–19/nice 10, candidate sweep then control sweep, identical enabled recovery settings, no overlapping own heavy jobs. All 78 paired sessions, statistics and reports except wall time match. Quality does not regress: **48/78 pass, 90 opens and 27 known native thermal errors in both**. Those errors remain unresolved. Observed total route time falls **10.44%**, overall median 1.63%, p95 1.58% and sweep wall 8.77%. Only 12/26 case medians and 18/26 case p95 improve. Shared-host timing is observational, not a universal or causal speed guarantee.
 
 | Full native metric (26 cases × 3 repeats) | Current control | Allocation-free rim traversal |
-|---|---:|---:|
-| Passed / 78 | 48 | 48 |
-| Valid cases / 26 | 16 | 16 |
-| Opens | 90 | 90 |
-| New native errors (known, unresolved) | 27 | 27 |
-| Median route seconds | 1.220020 | 1.200097 |
-| p95 route seconds | 16.129187 | 15.875130 |
-| Sum route seconds | 427.290283 | 382.683507 |
-| Sweep wall seconds | 544.211810 | 496.500959 |
-| Sum case medians seconds | 140.071084 | 127.479959 |
-| Sum case p95 seconds | 151.150245 | 135.065826 |
-| Sum vias | 2826 | 2826 |
-| Sum length mm | 60450.378202 | 60450.378202 |
+| ----------------------------------------- | --------------: | ----------------------------: |
+| Passed / 78                               |              48 |                            48 |
+| Valid cases / 26                          |              16 |                            16 |
+| Opens                                     |              90 |                            90 |
+| New native errors (known, unresolved)     |              27 |                            27 |
+| Median route seconds                      |        1.220020 |                      1.200097 |
+| p95 route seconds                         |       16.129187 |                     15.875130 |
+| Sum route seconds                         |      427.290283 |                    382.683507 |
+| Sweep wall seconds                        |      544.211810 |                    496.500959 |
+| Sum case medians seconds                  |      140.071084 |                    127.479959 |
+| Sum case p95 seconds                      |      151.150245 |                    135.065826 |
+| Sum vias                                  |            2826 |                          2826 |
+| Sum length mm                             |    60450.378202 |                  60450.378202 |
 
 ![Per-case timing, including regressions](https://github.com/fabPlane/fab_pcb/blob/agent/router-perf-public-recovery/docs/pr-assets/agent-router-perf-public-recovery/rim-composition/timings.png?raw=true)
 
