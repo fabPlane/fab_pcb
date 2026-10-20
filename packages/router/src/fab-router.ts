@@ -15,6 +15,8 @@ export interface FabRouterSettings {
   /** Native floors, in micrometres; RouteOptions.extra can override these explicitly. */
   copperToEdgeClearanceUm?: number;
   holeClearanceUm?: number;
+  /** Opt-in larger bounded search budget; leaves the default route unchanged. */
+  extendedSearchBudget?: boolean;
   maxPasses?: number;
   timeBudgetMs?: number;
   viaCost?: number;
@@ -168,11 +170,16 @@ export class FabRouter implements Autorouter {
       if (typeof value !== "number" || !Number.isFinite(value) || value < 0) throw new Error(`invalid fab_router ${key}`);
       return value;
     };
+    const extendedSearchBudget = opts.extra?.extendedSearchBudget;
+    if (extendedSearchBudget !== undefined && typeof extendedSearchBudget !== "boolean") {
+      throw new Error("invalid fab_router extendedSearchBudget");
+    }
     const result = routeDsn(
       dsn,
       {
         copperToEdgeClearanceUm: clearanceSetting("copperToEdgeClearanceUm", input.rules.edgeClearance),
         holeClearanceUm: clearanceSetting("holeClearanceUm", input.rules.holeClearance ?? 0),
+        ...(extendedSearchBudget !== undefined ? { extendedSearchBudget } : {}),
         ...(opts.effort !== undefined ? { maxPasses: Math.max(1, Math.round(opts.effort)) } : {}),
         ...(opts.maxTimeMs !== undefined ? { timeBudgetMs: opts.maxTimeMs } : {}),
         ...(opts.viaCost !== undefined ? { viaCost: opts.viaCost } : {}),

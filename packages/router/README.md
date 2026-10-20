@@ -40,6 +40,11 @@ the normal one-commit path. `effort`, `maxTimeMs`, `viaCost`, and `seed` map to 
 `timeBudgetMs`, `viaCost`, and `seed`. Targeted-net execution is handled by input extraction, with
 all existing copper exported as protected wiring.
 
+Set `extra: { extendedSearchBudget: true }` to opt into doubled bounded planar
+and layered search budgets. The option defaults to disabled, accepts booleans
+only, and may improve congested routing at a runtime and wire-length cost.
+Clearance predicates and cancellation/deadline checks still apply.
+
 Best-so-far output needs one product policy beyond the router API: new copper on a net still marked
 incomplete is discarded before application. This prevents partial stubs from becoming KiCad
 `track_dangling` warnings and leaves that net visibly in the ratsnest for later repair.
