@@ -127,3 +127,84 @@ matches diagnostic outcomes, generated artifacts and direct-parser controls.
 Native connectivity remains 1,024 opens versus the report's 499 limited findings.
 The guard and diagnostic validation do not implement production native baseline
 adoption. The frozen suite, checker rules and scoring denominator are unchanged.
+
+## Cycle 69: routing budget sensitivity
+
+Compare the previous ten-second cohort with a fresh thirty-second cohort on
+exactly the same 54 compatible case/backend groups and three repeats each
+(162 attempts per cohort). Machine hyper-ms-lin, cores 0–5, nice 10. Primary
+integration remains `374ace23d34ef4b685e6a90a010877246b4fcc6e` plus the same corpus,
+source/companion prerequisites, parser guard and cache token. The 82-file
+source/input audit finds only the measurement script's `timeoutMs` literal
+changed, 10,000 → 30,000. Fixture, backend and machine identities match; runtime
+endpoint observations also match both cohorts. This checks observed files, not
+continuous execution or imported dependency identity. Cohorts were sequential,
+not interleaved; machine contention and nondeterminism can affect outcomes.
+
+| Metric | Ten-second budget | Thirty-second budget |
+|---|---:|---:|
+| Attempts |162|162|
+| Engine completed |57|66|
+| Timeout |105|96|
+| Validated passes |33|33|
+
+|Suite|Router|10s completed|30s completed|10s passes|30s passes|Attempts each|
+|---|---|---:|---:|---:|---:|---:|
+|canary|fab_router|12|12|9|9|12|
+|canary|reference engine|9|9|6|6|9|
+|canary|capacity-mesh router|3|3|3|3|3|
+|canary|in-repo router|12|12|3|3|12|
+|bga|fab_router|0|0|0|0|12|
+|bga|reference engine|0|0|0|0|6|
+|bga|capacity-mesh router|0|0|0|0|6|
+|bga|in-repo router|0|0|0|0|12|
+|ladder|fab_router|5|6|3|3|18|
+|ladder|reference engine|3|6|3|3|9|
+|ladder|capacity-mesh router|6|6|6|6|9|
+|ladder|in-repo router|7|12|0|0|18|
+|dense-source|fab_router|0|0|0|0|3|
+|dense-source|reference engine|0|0|0|0|3|
+|dense-source|in-repo router|0|0|0|0|3|
+|dense-candidate|fab_router|0|0|0|0|9|
+|dense-candidate|reference engine|0|0|0|0|9|
+|dense-candidate|in-repo router|0|0|0|0|9|
+
+
+The added time produces nine additional ladder completions, with zero additional
+validated passes. In particular, the reference engine's native L2 case changes
+from three timeouts to three completed outputs, each with zero opens and nine
+native DRC errors. Both dense suites still time out on all 36 attempts, as does
+the BGA suite on all 36 attempts. These measurements do not justify increasing
+the routine ten-second budget to improve validated pass counts; thirty seconds
+can be used separately to inspect diagnostic outputs.
+
+Checks: contribution typecheck and 29 tests / 116 assertions pass; pinned
+benchmark integration typecheck and 312 tests / 7,427 assertions pass (28
+skipped), doctor and all five comparisons pass. Public fixture typecheck,
+11/11 unit packages and four optimized native fixture tests pass. No separate
+layer-check script is defined. No routing/scoring source changed in this cycle.
+
+Completion of an engine invocation is distinct from native or SRJ validity.
+Unknown quality never counts as a validated pass. Native scoring still uses
+its current denominator; baseline adoption remains pending. No engine change,
+routing gain, candidate promotion or routed feasibility is established by this
+budget experiment. All attempts are retained without retries or discards;
+all cache keys are unique with no overlap with the ten-second cohort. No remote
+corpus was fetched. Raw output digests, per-case outcomes, validation categories
+and the source audit are preserved in `native-qualification.json` under
+`cycle69`. Summary history contains 18 rows, one per compatible suite/backend.
+
+This public PR changes only fixture evidence. Reproduce the separate routing cohort from the private benchmark contribution checkout with a new destination:
+
+```sh
+bash docs/pr-assets/agent/bga1024-candidate/prepare-integration.sh "$HOME/bench/agents/codex-bench-boards/scratch/cycle69-reproduce/run"
+cd "$HOME/bench/agents/codex-bench-boards/scratch/cycle69-reproduce/run"
+sed -i 's/timeoutMs: 10_000/timeoutMs: 30_000/' scripts/measure-current.ts
+nice -n 10 taskset -c 0-5 timeout 7200 bash /home/hyper/bench/wt/rb-boards/docs/pr-assets/agent/bga1024-candidate/run-integration.sh
+```
+
+Keep separate result destinations for each budget; omit the `sed` command for
+the ten-second control. Preparation pins the same integration and preserves
+native project sidecars. The scratch integration must never be pushed.
+
+![Budget sensitivity](https://github.com/fabPlane/fab_pcb/blob/agent/bga1024-candidate/docs/pr-assets/agent/bga1024-candidate/budget.png?raw=true)

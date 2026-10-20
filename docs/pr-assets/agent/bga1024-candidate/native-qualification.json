@@ -931,5 +931,2866 @@
       ],
       "run_sha256": "fc144586e8a5dea2d3f64e059d36bd10a0920ff7455230ca92fa077da8c8a19c"
     }
+  },
+  "cycle69": {
+    "cycle": 69,
+    "integration": "374ace23d34ef4b685e6a90a010877246b4fcc6e",
+    "repeats": 3,
+    "attempts_each": 162,
+    "groups": 54,
+    "before_budget_ms": 10000,
+    "after_budget_ms": 30000,
+    "before_outcomes": {
+      "completed": 57,
+      "timeout": 105
+    },
+    "after_outcomes": {
+      "completed": 66,
+      "timeout": 96
+    },
+    "before_passed": 33,
+    "after_passed": 33,
+    "before_quality": {
+      "unavailable": 124,
+      "srj-scored": 20,
+      "native-drc": 18
+    },
+    "after_quality": {
+      "unavailable": 117,
+      "srj-scored": 24,
+      "native-drc": 21
+    },
+    "summary": [
+      {
+        "suite": "canary",
+        "router": "fab_router",
+        "attempts_each": 12,
+        "before_completed": 12,
+        "after_completed": 12,
+        "before_passed": 9,
+        "after_passed": 9,
+        "before_median_wall_s": 0.9963986279999955,
+        "after_median_wall_s": 0.9547983630000016
+      },
+      {
+        "suite": "canary",
+        "router": "reference engine",
+        "attempts_each": 9,
+        "before_completed": 9,
+        "after_completed": 9,
+        "before_passed": 6,
+        "after_passed": 6,
+        "before_median_wall_s": 11.245128826999993,
+        "after_median_wall_s": 11.040680854999998
+      },
+      {
+        "suite": "canary",
+        "router": "capacity-mesh router",
+        "attempts_each": 3,
+        "before_completed": 3,
+        "after_completed": 3,
+        "before_passed": 3,
+        "after_passed": 3,
+        "before_median_wall_s": 0.2070361419999972,
+        "after_median_wall_s": 0.19272837799999978
+      },
+      {
+        "suite": "canary",
+        "router": "in-repo router",
+        "attempts_each": 12,
+        "before_completed": 12,
+        "after_completed": 12,
+        "before_passed": 3,
+        "after_passed": 3,
+        "before_median_wall_s": 0.10382415749999928,
+        "after_median_wall_s": 0.09556131449998793
+      },
+      {
+        "suite": "bga",
+        "router": "fab_router",
+        "attempts_each": 12,
+        "before_completed": 0,
+        "after_completed": 0,
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_median_wall_s": 10.093632442000006,
+        "after_median_wall_s": 30.09611855250002
+      },
+      {
+        "suite": "bga",
+        "router": "reference engine",
+        "attempts_each": 6,
+        "before_completed": 0,
+        "after_completed": 0,
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_median_wall_s": 14.193856846000013,
+        "after_median_wall_s": 34.22983362050005
+      },
+      {
+        "suite": "bga",
+        "router": "capacity-mesh router",
+        "attempts_each": 6,
+        "before_completed": 0,
+        "after_completed": 0,
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_median_wall_s": 10.053079019499993,
+        "after_median_wall_s": 30.065545943499995
+      },
+      {
+        "suite": "bga",
+        "router": "in-repo router",
+        "attempts_each": 12,
+        "before_completed": 0,
+        "after_completed": 0,
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_median_wall_s": 10.022902702499996,
+        "after_median_wall_s": 30.02587079199997
+      },
+      {
+        "suite": "ladder",
+        "router": "fab_router",
+        "attempts_each": 18,
+        "before_completed": 5,
+        "after_completed": 6,
+        "before_passed": 3,
+        "after_passed": 3,
+        "before_median_wall_s": 10.090412780000014,
+        "after_median_wall_s": 30.089618277000003
+      },
+      {
+        "suite": "ladder",
+        "router": "reference engine",
+        "attempts_each": 9,
+        "before_completed": 3,
+        "after_completed": 6,
+        "before_passed": 3,
+        "after_passed": 3,
+        "before_median_wall_s": 14.138414736999984,
+        "after_median_wall_s": 26.741269184999982
+      },
+      {
+        "suite": "ladder",
+        "router": "capacity-mesh router",
+        "attempts_each": 9,
+        "before_completed": 6,
+        "after_completed": 6,
+        "before_passed": 6,
+        "after_passed": 6,
+        "before_median_wall_s": 5.609295755999978,
+        "after_median_wall_s": 4.934491683
+      },
+      {
+        "suite": "ladder",
+        "router": "in-repo router",
+        "attempts_each": 18,
+        "before_completed": 7,
+        "after_completed": 12,
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_median_wall_s": 10.018553128499995,
+        "after_median_wall_s": 14.496969661499955
+      },
+      {
+        "suite": "dense-source",
+        "router": "fab_router",
+        "attempts_each": 3,
+        "before_completed": 0,
+        "after_completed": 0,
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_median_wall_s": 10.097834967999999,
+        "after_median_wall_s": 30.098396277000006
+      },
+      {
+        "suite": "dense-source",
+        "router": "reference engine",
+        "attempts_each": 3,
+        "before_completed": 0,
+        "after_completed": 0,
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_median_wall_s": 14.171813195999999,
+        "after_median_wall_s": 34.19190099000002
+      },
+      {
+        "suite": "dense-source",
+        "router": "in-repo router",
+        "attempts_each": 3,
+        "before_completed": 0,
+        "after_completed": 0,
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_median_wall_s": 10.028070774000007,
+        "after_median_wall_s": 30.04353956099998
+      },
+      {
+        "suite": "dense-candidate",
+        "router": "fab_router",
+        "attempts_each": 9,
+        "before_completed": 0,
+        "after_completed": 0,
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_median_wall_s": 10.101165016999992,
+        "after_median_wall_s": 30.105008617999996
+      },
+      {
+        "suite": "dense-candidate",
+        "router": "reference engine",
+        "attempts_each": 9,
+        "before_completed": 0,
+        "after_completed": 0,
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_median_wall_s": 14.194475970999978,
+        "after_median_wall_s": 34.23614898300002
+      },
+      {
+        "suite": "dense-candidate",
+        "router": "in-repo router",
+        "attempts_each": 9,
+        "before_completed": 0,
+        "after_completed": 0,
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_median_wall_s": 10.035953203000012,
+        "after_median_wall_s": 30.054866550000035
+      }
+    ],
+    "cases": [
+      {
+        "suite": "canary",
+        "router": "fab_router",
+        "case": "canary-two-pad-dsn",
+        "before_outcomes": {
+          "completed": 3
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 0.1872437379999901,
+        "after_median_wall_s": 0.1838338369999983
+      },
+      {
+        "suite": "canary",
+        "router": "fab_router",
+        "case": "canary-two-pad-srj",
+        "before_outcomes": {
+          "completed": 3
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 3,
+        "after_passed": 3,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "srj-scored",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "srj-scored",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 0.17740394200000445,
+        "after_median_wall_s": 0.16738040600000004
+      },
+      {
+        "suite": "canary",
+        "router": "fab_router",
+        "case": "canary-two-resistor",
+        "before_outcomes": {
+          "completed": 3
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 3,
+        "after_passed": 3,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 2,
+            "opens": 0,
+            "state": "completed",
+            "validation": "native-drc",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 2,
+            "opens": 0,
+            "state": "completed",
+            "validation": "native-drc",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 1.8915477200000024,
+        "after_median_wall_s": 1.735853946
+      },
+      {
+        "suite": "canary",
+        "router": "fab_router",
+        "case": "canary-three-terminal",
+        "before_outcomes": {
+          "completed": 3
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 3,
+        "after_passed": 3,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "native-drc",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "native-drc",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 1.8481944920000002,
+        "after_median_wall_s": 1.82060081
+      },
+      {
+        "suite": "canary",
+        "router": "reference engine",
+        "case": "canary-two-pad-dsn",
+        "before_outcomes": {
+          "completed": 3
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 9.918019713,
+        "after_median_wall_s": 9.580685683000004
+      },
+      {
+        "suite": "canary",
+        "router": "reference engine",
+        "case": "canary-two-resistor",
+        "before_outcomes": {
+          "completed": 3
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 3,
+        "after_passed": 3,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 2,
+            "opens": 0,
+            "state": "completed",
+            "validation": "native-drc",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 2,
+            "opens": 0,
+            "state": "completed",
+            "validation": "native-drc",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 11.815254294999999,
+        "after_median_wall_s": 11.097156934
+      },
+      {
+        "suite": "canary",
+        "router": "reference engine",
+        "case": "canary-three-terminal",
+        "before_outcomes": {
+          "completed": 3
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 3,
+        "after_passed": 3,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "native-drc",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "native-drc",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 11.245128826999993,
+        "after_median_wall_s": 11.040680854999998
+      },
+      {
+        "suite": "canary",
+        "router": "capacity-mesh router",
+        "case": "canary-two-pad-srj",
+        "before_outcomes": {
+          "completed": 3
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 3,
+        "after_passed": 3,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "srj-scored",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "srj-scored",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 0.2070361419999972,
+        "after_median_wall_s": 0.19272837799999978
+      },
+      {
+        "suite": "canary",
+        "router": "in-repo router",
+        "case": "canary-two-pad-dsn",
+        "before_outcomes": {
+          "completed": 3
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 0.10339673500000209,
+        "after_median_wall_s": 0.09682229299999016
+      },
+      {
+        "suite": "canary",
+        "router": "in-repo router",
+        "case": "canary-two-pad-srj",
+        "before_outcomes": {
+          "completed": 3
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 3,
+        "after_passed": 3,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "srj-scored",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "srj-scored",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 0.09339357300000847,
+        "after_median_wall_s": 0.09286070399999152
+      },
+      {
+        "suite": "canary",
+        "router": "in-repo router",
+        "case": "canary-two-resistor",
+        "before_outcomes": {
+          "completed": 3
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 0.13686868600000163,
+        "after_median_wall_s": 0.132106746999998
+      },
+      {
+        "suite": "canary",
+        "router": "in-repo router",
+        "case": "canary-three-terminal",
+        "before_outcomes": {
+          "completed": 3
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 0.10425157999999647,
+        "after_median_wall_s": 0.09360590899999079
+      },
+      {
+        "suite": "bga",
+        "router": "fab_router",
+        "case": "bga-b1-kicad_pcb",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.093927301999996,
+        "after_median_wall_s": 30.096738896999998
+      },
+      {
+        "suite": "bga",
+        "router": "fab_router",
+        "case": "bga-b1-srj",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.089119205,
+        "after_median_wall_s": 30.089394789000043
+      },
+      {
+        "suite": "bga",
+        "router": "fab_router",
+        "case": "bga-b2-kicad_pcb",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.099368515999988,
+        "after_median_wall_s": 30.100449585000003
+      },
+      {
+        "suite": "bga",
+        "router": "fab_router",
+        "case": "bga-b2-srj",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.084325510000024,
+        "after_median_wall_s": 30.093910305999916
+      },
+      {
+        "suite": "bga",
+        "router": "reference engine",
+        "case": "bga-b1-kicad_pcb",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 14.232917243000003,
+        "after_median_wall_s": 34.23306993300002
+      },
+      {
+        "suite": "bga",
+        "router": "reference engine",
+        "case": "bga-b2-kicad_pcb",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 14.180301717000024,
+        "after_median_wall_s": 34.22659730800008
+      },
+      {
+        "suite": "bga",
+        "router": "capacity-mesh router",
+        "case": "bga-b1-srj",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.058105257999996,
+        "after_median_wall_s": 30.069439463000016
+      },
+      {
+        "suite": "bga",
+        "router": "capacity-mesh router",
+        "case": "bga-b2-srj",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.048803812000028,
+        "after_median_wall_s": 30.06165242399997
+      },
+      {
+        "suite": "bga",
+        "router": "in-repo router",
+        "case": "bga-b1-kicad_pcb",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.024122319000002,
+        "after_median_wall_s": 30.02762206600001
+      },
+      {
+        "suite": "bga",
+        "router": "in-repo router",
+        "case": "bga-b1-srj",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.016849480000005,
+        "after_median_wall_s": 30.01984465599997
+      },
+      {
+        "suite": "bga",
+        "router": "in-repo router",
+        "case": "bga-b2-kicad_pcb",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.023631556000007,
+        "after_median_wall_s": 30.028477059999947
+      },
+      {
+        "suite": "bga",
+        "router": "in-repo router",
+        "case": "bga-b2-srj",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.019593831999984,
+        "after_median_wall_s": 30.02622477199999
+      },
+      {
+        "suite": "ladder",
+        "router": "fab_router",
+        "case": "ladder-l1-kicad_pcb",
+        "before_outcomes": {
+          "completed": 3
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 3,
+        "after_passed": 3,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "native-drc",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "native-drc",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 2.049913310000033,
+        "after_median_wall_s": 1.9994858769999118
+      },
+      {
+        "suite": "ladder",
+        "router": "fab_router",
+        "case": "ladder-l1-srj",
+        "before_outcomes": {
+          "completed": 2,
+          "timeout": 1
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 1
+          },
+          {
+            "clearance": 0,
+            "completion": 0.5,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 5,
+            "state": "completed",
+            "validation": "srj-scored",
+            "repeats": 2
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0.5,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 5,
+            "state": "completed",
+            "validation": "srj-scored",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.08465797900001,
+        "after_median_wall_s": 10.482152038
+      },
+      {
+        "suite": "ladder",
+        "router": "fab_router",
+        "case": "ladder-l2-kicad_pcb",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.096826208000014,
+        "after_median_wall_s": 30.099492377
+      },
+      {
+        "suite": "ladder",
+        "router": "fab_router",
+        "case": "ladder-l2-srj",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.088810292000009,
+        "after_median_wall_s": 30.090254455999997
+      },
+      {
+        "suite": "ladder",
+        "router": "fab_router",
+        "case": "ladder-l3-kicad_pcb",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.103482856999996,
+        "after_median_wall_s": 30.10168834500003
+      },
+      {
+        "suite": "ladder",
+        "router": "fab_router",
+        "case": "ladder-l3-srj",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.086118544999975,
+        "after_median_wall_s": 30.087799843999992
+      },
+      {
+        "suite": "ladder",
+        "router": "reference engine",
+        "case": "ladder-l1-kicad_pcb",
+        "before_outcomes": {
+          "completed": 3
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 3,
+        "after_passed": 3,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "native-drc",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "native-drc",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 11.394795201000008,
+        "after_median_wall_s": 11.123412685999996
+      },
+      {
+        "suite": "ladder",
+        "router": "reference engine",
+        "case": "ladder-l2-kicad_pcb",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 9,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "native-drc",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 14.138414736999984,
+        "after_median_wall_s": 26.741269184999982
+      },
+      {
+        "suite": "ladder",
+        "router": "reference engine",
+        "case": "ladder-l3-kicad_pcb",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 14.193297322,
+        "after_median_wall_s": 34.15561490099999
+      },
+      {
+        "suite": "ladder",
+        "router": "capacity-mesh router",
+        "case": "ladder-l1-srj",
+        "before_outcomes": {
+          "completed": 3
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 3,
+        "after_passed": 3,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "srj-scored",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "srj-scored",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 1.0559194009999628,
+        "after_median_wall_s": 0.9521980949999997
+      },
+      {
+        "suite": "ladder",
+        "router": "capacity-mesh router",
+        "case": "ladder-l2-srj",
+        "before_outcomes": {
+          "completed": 3
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 3,
+        "after_passed": 3,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "srj-scored",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "srj-scored",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 5.609295755999978,
+        "after_median_wall_s": 4.934491683
+      },
+      {
+        "suite": "ladder",
+        "router": "capacity-mesh router",
+        "case": "ladder-l3-srj",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.032044498000003,
+        "after_median_wall_s": 30.062380808999993
+      },
+      {
+        "suite": "ladder",
+        "router": "in-repo router",
+        "case": "ladder-l1-kicad_pcb",
+        "before_outcomes": {
+          "completed": 3
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 0.7826497789999703,
+        "after_median_wall_s": 0.6150619289999886
+      },
+      {
+        "suite": "ladder",
+        "router": "in-repo router",
+        "case": "ladder-l1-srj",
+        "before_outcomes": {
+          "completed": 3
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 12,
+            "completion": 1,
+            "drc_errors": 12,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "srj-scored",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 12,
+            "completion": 1,
+            "drc_errors": 12,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "srj-scored",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 0.8930027410000039,
+        "after_median_wall_s": 0.7639282530000201
+      },
+      {
+        "suite": "ladder",
+        "router": "in-repo router",
+        "case": "ladder-l2-kicad_pcb",
+        "before_outcomes": {
+          "timeout": 2,
+          "completed": 1
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "unavailable",
+            "repeats": 1
+          },
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 2
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "completed",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.021051595999976,
+        "after_median_wall_s": 9.583923341000016
+      },
+      {
+        "suite": "ladder",
+        "router": "in-repo router",
+        "case": "ladder-l2-srj",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "completed": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 33,
+            "completion": 0.96,
+            "drc_errors": 33,
+            "drc_warnings": 0,
+            "opens": 2,
+            "state": "completed",
+            "validation": "srj-scored",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.016965335,
+        "after_median_wall_s": 22.274416190999997
+      },
+      {
+        "suite": "ladder",
+        "router": "in-repo router",
+        "case": "ladder-l3-kicad_pcb",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.030490594000032,
+        "after_median_wall_s": 30.033603388000046
+      },
+      {
+        "suite": "ladder",
+        "router": "in-repo router",
+        "case": "ladder-l3-srj",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.034209201999998,
+        "after_median_wall_s": 30.034336904000025
+      },
+      {
+        "suite": "dense-source",
+        "router": "fab_router",
+        "case": "dense6-source-dsn",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.097834967999999,
+        "after_median_wall_s": 30.098396277000006
+      },
+      {
+        "suite": "dense-source",
+        "router": "reference engine",
+        "case": "dense6-source-dsn",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 14.171813195999999,
+        "after_median_wall_s": 34.19190099000002
+      },
+      {
+        "suite": "dense-source",
+        "router": "in-repo router",
+        "case": "dense6-source-dsn",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.028070774000007,
+        "after_median_wall_s": 30.04353956099998
+      },
+      {
+        "suite": "dense-candidate",
+        "router": "fab_router",
+        "case": "dense6-bga324-dsn",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.099070676999997,
+        "after_median_wall_s": 30.100954313000024
+      },
+      {
+        "suite": "dense-candidate",
+        "router": "fab_router",
+        "case": "bga400-eight-layer",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.101642208999984,
+        "after_median_wall_s": 30.108352245999967
+      },
+      {
+        "suite": "dense-candidate",
+        "router": "fab_router",
+        "case": "bga1024-eight-layer",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.102009051000001,
+        "after_median_wall_s": 30.102320248000005
+      },
+      {
+        "suite": "dense-candidate",
+        "router": "reference engine",
+        "case": "dense6-bga324-dsn",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 14.194475970999978,
+        "after_median_wall_s": 34.17949252
+      },
+      {
+        "suite": "dense-candidate",
+        "router": "reference engine",
+        "case": "bga400-eight-layer",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 14.240422415000001,
+        "after_median_wall_s": 34.25878683500004
+      },
+      {
+        "suite": "dense-candidate",
+        "router": "reference engine",
+        "case": "bga1024-eight-layer",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 14.191835884999993,
+        "after_median_wall_s": 34.23614898300002
+      },
+      {
+        "suite": "dense-candidate",
+        "router": "in-repo router",
+        "case": "dense6-bga324-dsn",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.031023512999992,
+        "after_median_wall_s": 30.048894107999978
+      },
+      {
+        "suite": "dense-candidate",
+        "router": "in-repo router",
+        "case": "bga400-eight-layer",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.035501388999982,
+        "after_median_wall_s": 30.054866550000035
+      },
+      {
+        "suite": "dense-candidate",
+        "router": "in-repo router",
+        "case": "bga1024-eight-layer",
+        "before_outcomes": {
+          "timeout": 3
+        },
+        "after_outcomes": {
+          "timeout": 3
+        },
+        "before_passed": 0,
+        "after_passed": 0,
+        "before_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "after_metrics": [
+          {
+            "clearance": 0,
+            "completion": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "opens": 0,
+            "state": "timeout",
+            "validation": "unavailable",
+            "repeats": 3
+          }
+        ],
+        "before_median_wall_s": 10.045786412999995,
+        "after_median_wall_s": 30.11782415000003
+      }
+    ],
+    "source_audit": {
+      "files": 82,
+      "differences": [
+        "scripts/measure-current.ts"
+      ],
+      "rows": [
+        {
+          "path": "src/adapters/fab-router.ts",
+          "before": "e5c5025a8d5e3930a723543dce21bc4af337d6b3dccb4625fed57e2e7e525f33",
+          "after": "e5c5025a8d5e3930a723543dce21bc4af337d6b3dccb4625fed57e2e7e525f33",
+          "equal": true
+        },
+        {
+          "path": "src/adapters/freerouting.ts",
+          "before": "0cc718e30a2a8078df903397ac49f4eb74bf99c2d9bde3611e053386e7f8626c",
+          "after": "0cc718e30a2a8078df903397ac49f4eb74bf99c2d9bde3611e053386e7f8626c",
+          "equal": true
+        },
+        {
+          "path": "src/adapters/index.ts",
+          "before": "f8d3d8952e4f71be8b02e93a43ee44514ad80e892713e2a5e1206866a7a60bd3",
+          "after": "f8d3d8952e4f71be8b02e93a43ee44514ad80e892713e2a5e1206866a7a60bd3",
+          "equal": true
+        },
+        {
+          "path": "src/adapters/js-autorouter.ts",
+          "before": "5f0e257e6a0d55e1b383cb7d5d27e208309befde90756acd2c3de9015989b4ad",
+          "after": "5f0e257e6a0d55e1b383cb7d5d27e208309befde90756acd2c3de9015989b4ad",
+          "equal": true
+        },
+        {
+          "path": "src/adapters/tscircuit.ts",
+          "before": "5e8153890e200dff0c44e669133296db10e61afbb05dea5f9eb0e7b793745a72",
+          "after": "5e8153890e200dff0c44e669133296db10e61afbb05dea5f9eb0e7b793745a72",
+          "equal": true
+        },
+        {
+          "path": "src/bench.ts",
+          "before": "532d1e449c1b450f6cdaee6186e4aa3566a07a4c4548b184b96b64e8a48823ba",
+          "after": "532d1e449c1b450f6cdaee6186e4aa3566a07a4c4548b184b96b64e8a48823ba",
+          "equal": true
+        },
+        {
+          "path": "src/cli.ts",
+          "before": "26ea63a55310bb944a497d638c0057bd647d67b005e3dfa389d0dac059747249",
+          "after": "26ea63a55310bb944a497d638c0057bd647d67b005e3dfa389d0dac059747249",
+          "equal": true
+        },
+        {
+          "path": "src/config.ts",
+          "before": "0c4b65790db21fe90980ab84acc6b321e8afc2953436d0c8b7bfdd0ed7f70f8d",
+          "after": "0c4b65790db21fe90980ab84acc6b321e8afc2953436d0c8b7bfdd0ed7f70f8d",
+          "equal": true
+        },
+        {
+          "path": "src/corpus/fetch.ts",
+          "before": "0717fd4b1305a253fd510b927867de83fd1a9222b6adcac437b49b24caf07637",
+          "after": "0717fd4b1305a253fd510b927867de83fd1a9222b6adcac437b49b24caf07637",
+          "equal": true
+        },
+        {
+          "path": "src/corpus/import-pcb.ts",
+          "before": "841e1598cd0c2926710d0b8d48ba11bcd685c149c1a17d6fbf9f39aee1d5502f",
+          "after": "841e1598cd0c2926710d0b8d48ba11bcd685c149c1a17d6fbf9f39aee1d5502f",
+          "equal": true
+        },
+        {
+          "path": "src/corpus/manifest.ts",
+          "before": "998f70c715a63acaad65ff0c99b32adf73a84e40176bd9be26fe59891ec71470",
+          "after": "998f70c715a63acaad65ff0c99b32adf73a84e40176bd9be26fe59891ec71470",
+          "equal": true
+        },
+        {
+          "path": "src/corpus/normalize.ts",
+          "before": "ecad5e1bc23f2c985ebbc4e6a626743e369b018815b4143582db1ba233e23b57",
+          "after": "ecad5e1bc23f2c985ebbc4e6a626743e369b018815b4143582db1ba233e23b57",
+          "equal": true
+        },
+        {
+          "path": "src/corpus/strip-routing.ts",
+          "before": "a6328e409858159845e7d33fcc5853bf85d884395c78dbff369f40e6c69d7ed7",
+          "after": "a6328e409858159845e7d33fcc5853bf85d884395c78dbff369f40e6c69d7ed7",
+          "equal": true
+        },
+        {
+          "path": "src/doctor.ts",
+          "before": "1a98444d1f9c00de0de51ef31e4d9b2313ecf4c2c670e44ff43abd9d19828696",
+          "after": "1a98444d1f9c00de0de51ef31e4d9b2313ecf4c2c670e44ff43abd9d19828696",
+          "equal": true
+        },
+        {
+          "path": "src/dsn.ts",
+          "before": "460ac6d753394384d856d3a81189d91b943d61ccd7638d01e3e95e111c44abe5",
+          "after": "460ac6d753394384d856d3a81189d91b943d61ccd7638d01e3e95e111c44abe5",
+          "equal": true
+        },
+        {
+          "path": "src/hosts/drc-report-limits.ts",
+          "before": "e838507a950c4f9d1626aea13fc38e892b959546b06873a7b06515a159ce09dc",
+          "after": "e838507a950c4f9d1626aea13fc38e892b959546b06873a7b06515a159ce09dc",
+          "equal": true
+        },
+        {
+          "path": "src/hosts/kicad.ts",
+          "before": "b8dc850301663a0cd0417a99d276b04460e9333de0d9cc39af28ff43fa4f0063",
+          "after": "b8dc850301663a0cd0417a99d276b04460e9333de0d9cc39af28ff43fa4f0063",
+          "equal": true
+        },
+        {
+          "path": "src/hosts/tscircuit.ts",
+          "before": "248aabcfc0e3dcf70309da17d48a349f5e283b9f25b60530f236526b638c458a",
+          "after": "248aabcfc0e3dcf70309da17d48a349f5e283b9f25b60530f236526b638c458a",
+          "equal": true
+        },
+        {
+          "path": "src/java.ts",
+          "before": "2b1c2c932b2ec9b0075085ed8aee0b9379ea2d73c8fe829d2ef4195553dc133e",
+          "after": "2b1c2c932b2ec9b0075085ed8aee0b9379ea2d73c8fe829d2ef4195553dc133e",
+          "equal": true
+        },
+        {
+          "path": "src/metrics/compare.ts",
+          "before": "a3b5bbb8a91979766ca061610fc4b66f9d6f11585eb5dd0252b88f082f009481",
+          "after": "a3b5bbb8a91979766ca061610fc4b66f9d6f11585eb5dd0252b88f082f009481",
+          "equal": true
+        },
+        {
+          "path": "src/metrics/score.ts",
+          "before": "737948d607e204a9492e4ca380bf4c0625a2ba4bc35464365579cd76d54e015b",
+          "after": "737948d607e204a9492e4ca380bf4c0625a2ba4bc35464365579cd76d54e015b",
+          "equal": true
+        },
+        {
+          "path": "src/native-project.ts",
+          "before": "25eebffd6d223bd5a12ff86bfb3fb8e0a4d785179011b4d9e47fa074e8cc0302",
+          "after": "25eebffd6d223bd5a12ff86bfb3fb8e0a4d785179011b4d9e47fa074e8cc0302",
+          "equal": true
+        },
+        {
+          "path": "src/paths.ts",
+          "before": "0170f714eee3460e644deca24068b66265126e6691851eb2cf5d82217f383f55",
+          "after": "0170f714eee3460e644deca24068b66265126e6691851eb2cf5d82217f383f55",
+          "equal": true
+        },
+        {
+          "path": "src/process.ts",
+          "before": "906c8a4d5a02aaaf9852c6c0fc09e83f989a54b0f0bcc39a63ca3b2286bf22d8",
+          "after": "906c8a4d5a02aaaf9852c6c0fc09e83f989a54b0f0bcc39a63ca3b2286bf22d8",
+          "equal": true
+        },
+        {
+          "path": "src/report/json.ts",
+          "before": "fa350690d7ce7d87d953eef98badba2262cba14d83f7df3844dcd66a54545bc7",
+          "after": "fa350690d7ce7d87d953eef98badba2262cba14d83f7df3844dcd66a54545bc7",
+          "equal": true
+        },
+        {
+          "path": "src/report/markdown.ts",
+          "before": "441e7f242870318eff5490511c9ceac41b553f5957d5c9ffae7901917f3f5fe6",
+          "after": "441e7f242870318eff5490511c9ceac41b553f5957d5c9ffae7901917f3f5fe6",
+          "equal": true
+        },
+        {
+          "path": "src/report/quality.ts",
+          "before": "64f82fbd5eb5046b520878b8273eb8088bc1d034d19e7d4b4fd5fc117d405052",
+          "after": "64f82fbd5eb5046b520878b8273eb8088bc1d034d19e7d4b4fd5fc117d405052",
+          "equal": true
+        },
+        {
+          "path": "src/session-container.ts",
+          "before": "599cf6d5b4eff5a2f36630973b4f3f5fad8cbbded3473bc04db15da9aa3a8789",
+          "after": "599cf6d5b4eff5a2f36630973b4f3f5fad8cbbded3473bc04db15da9aa3a8789",
+          "equal": true
+        },
+        {
+          "path": "src/system.ts",
+          "before": "d482505b63adbf8b9646d7f2f3551eb94cbc8c9a3c01eb89179c65325a8d07b6",
+          "after": "d482505b63adbf8b9646d7f2f3551eb94cbc8c9a3c01eb89179c65325a8d07b6",
+          "equal": true
+        },
+        {
+          "path": "src/types.ts",
+          "before": "a056c929999011c022430f67a9641ac70824b7bd092d19008a8b9b2513decd88",
+          "after": "a056c929999011c022430f67a9641ac70824b7bd092d19008a8b9b2513decd88",
+          "equal": true
+        },
+        {
+          "path": "scripts/fab-router-worker.ts",
+          "before": "191388a583c60eb6f8d5e15681e063338568e9e5fa92787f92ad726dc370b95a",
+          "after": "191388a583c60eb6f8d5e15681e063338568e9e5fa92787f92ad726dc370b95a",
+          "equal": true
+        },
+        {
+          "path": "scripts/gen/bga.py",
+          "before": "51970e3a0c5d6cda60266e81924458e1397344f5c34c492007c26d11c3a3223d",
+          "after": "51970e3a0c5d6cda60266e81924458e1397344f5c34c492007c26d11c3a3223d",
+          "equal": true
+        },
+        {
+          "path": "scripts/gen/bga1024.py",
+          "before": "e1e6e56613242336611fa5cc2b8657d46de79327edc468afceb2198446e5ae34",
+          "after": "e1e6e56613242336611fa5cc2b8657d46de79327edc468afceb2198446e5ae34",
+          "equal": true
+        },
+        {
+          "path": "scripts/gen/ladder.py",
+          "before": "e36a7a0be1ffddaf86b7e44411072d36d4025665e1c80397f857e3aaae697c7f",
+          "after": "e36a7a0be1ffddaf86b7e44411072d36d4025665e1c80397f857e3aaae697c7f",
+          "equal": true
+        },
+        {
+          "path": "scripts/kicad/export_specctra_dsn.py",
+          "before": "b4e21af420cbd3c7cbdd0b016118f1c88857b4289ab30f6e9c6894892ee2e292",
+          "after": "b4e21af420cbd3c7cbdd0b016118f1c88857b4289ab30f6e9c6894892ee2e292",
+          "equal": true
+        },
+        {
+          "path": "scripts/kicad/import_specctra_ses.py",
+          "before": "54a9d3243e1be69c3f9216afaa18c769604ce89b73840a68702a1e46c4208ef0",
+          "after": "54a9d3243e1be69c3f9216afaa18c769604ce89b73840a68702a1e46c4208ef0",
+          "equal": true
+        },
+        {
+          "path": "scripts/measure-current.ts",
+          "before": "ba016519cd6fd840995e1450a6bb5b1e5f4bf51129298f412a538210469ec4ca",
+          "after": "2f1c6b92dd0190b9832d6eb89daba47797fcc57503c58639a1bb8869a1493f5c",
+          "equal": false
+        },
+        {
+          "path": "scripts/setup-routers.sh",
+          "before": "b8c0a7fd420d5f0992e157a419cf1f4f4744ed5210ad46687f1f74976d3c08e7",
+          "after": "b8c0a7fd420d5f0992e157a419cf1f4f4744ed5210ad46687f1f74976d3c08e7",
+          "equal": true
+        },
+        {
+          "path": "scripts/source_snapshot.py",
+          "before": "d7bf3e7921276035b20f84f27f9ac90bf9231a0200d8b6d6d0ba466234abab42",
+          "after": "d7bf3e7921276035b20f84f27f9ac90bf9231a0200d8b6d6d0ba466234abab42",
+          "equal": true
+        },
+        {
+          "path": "scripts/validate-export-compatibility.ts",
+          "before": "594f25766685a8dc6f28eed6ea790243395a76502392c1d6642bcdcd227ed6c2",
+          "after": "594f25766685a8dc6f28eed6ea790243395a76502392c1d6642bcdcd227ed6c2",
+          "equal": true
+        },
+        {
+          "path": "scripts/validate-fab-router.ts",
+          "before": "a806b59e4fe6689a4ddd813a7a5ce11f950c2b31504e67c10e8ac8e1b8183caa",
+          "after": "a806b59e4fe6689a4ddd813a7a5ce11f950c2b31504e67c10e8ac8e1b8183caa",
+          "equal": true
+        },
+        {
+          "path": "scripts/validate-routers.ts",
+          "before": "3ba5187b97527ad7902f6b03680f7f92e133421772648793c7a4d6edb9129894",
+          "after": "3ba5187b97527ad7902f6b03680f7f92e133421772648793c7a4d6edb9129894",
+          "equal": true
+        },
+        {
+          "path": "corpus/bga/B1/B1.kicad_pcb",
+          "before": "50cba7c4095778bc12d761be293c8bab379b83db651affc665fce58ddba18591",
+          "after": "50cba7c4095778bc12d761be293c8bab379b83db651affc665fce58ddba18591",
+          "equal": true
+        },
+        {
+          "path": "corpus/bga/B1/unrouted.srj.json",
+          "before": "630f2d1faee64351dae97c5dd62e89a8c82f74040c69f9d5612461c6b0942d24",
+          "after": "630f2d1faee64351dae97c5dd62e89a8c82f74040c69f9d5612461c6b0942d24",
+          "equal": true
+        },
+        {
+          "path": "corpus/bga/B2/B2.kicad_pcb",
+          "before": "f2dc56d83939c5ad3653bb5d4a3935173d242c53c7d9e20710fdc5b12077551b",
+          "after": "f2dc56d83939c5ad3653bb5d4a3935173d242c53c7d9e20710fdc5b12077551b",
+          "equal": true
+        },
+        {
+          "path": "corpus/bga/B2/unrouted.srj.json",
+          "before": "3df4490ebd64364e4ad5e66d6bd78a0c98e9da31fc57d70e25cf3cf9f824e76c",
+          "after": "3df4490ebd64364e4ad5e66d6bd78a0c98e9da31fc57d70e25cf3cf9f824e76c",
+          "equal": true
+        },
+        {
+          "path": "corpus/bga/LICENSE",
+          "before": "1640316a67b83fc85d68a333f2384390acc8b6cdf982a94ee527e6422f1c905c",
+          "after": "1640316a67b83fc85d68a333f2384390acc8b6cdf982a94ee527e6422f1c905c",
+          "equal": true
+        },
+        {
+          "path": "corpus/bga/README.md",
+          "before": "d7df12717cef930df9040974b934f441ce9379e111fec0ae6b8e9f4a461ff2b1",
+          "after": "d7df12717cef930df9040974b934f441ce9379e111fec0ae6b8e9f4a461ff2b1",
+          "equal": true
+        },
+        {
+          "path": "corpus/bga1024/LICENSE",
+          "before": "8bf2f14cad39ed6241ca31c7ee275de9fa3a7695980d52a8fc3cd3812a796987",
+          "after": "8bf2f14cad39ed6241ca31c7ee275de9fa3a7695980d52a8fc3cd3812a796987",
+          "equal": true
+        },
+        {
+          "path": "corpus/bga1024/bga1024.dsn",
+          "before": "df2e0481423d6bff14c6d1d30053ff68c29836c147cc17457f893c566933bce6",
+          "after": "df2e0481423d6bff14c6d1d30053ff68c29836c147cc17457f893c566933bce6",
+          "equal": true
+        },
+        {
+          "path": "corpus/bga1024/bga1024.kicad_pcb",
+          "before": "9092606375a100a526ca347f8d435c861559103a36b699f3cc9e04fc41c61feb",
+          "after": "9092606375a100a526ca347f8d435c861559103a36b699f3cc9e04fc41c61feb",
+          "equal": true
+        },
+        {
+          "path": "corpus/bga1024/bga1024.kicad_prl",
+          "before": "c96b19ce88029f90e9c2cf8be451de6e5f43fa5a74636f78365928ab229d19e4",
+          "after": "c96b19ce88029f90e9c2cf8be451de6e5f43fa5a74636f78365928ab229d19e4",
+          "equal": true
+        },
+        {
+          "path": "corpus/bga1024/bga1024.kicad_pro",
+          "before": "c317b3fd52bb5bbd5d287cee2d18ef0ce7bc1ac770a6b119d8fa7ffb720324c1",
+          "after": "c317b3fd52bb5bbd5d287cee2d18ef0ce7bc1ac770a6b119d8fa7ffb720324c1",
+          "equal": true
+        },
+        {
+          "path": "corpus/bga1024/summary.json",
+          "before": "3191b54e6c5a76bc2951684051a6f079649db5ef72e74e450cd07b53000d9c25",
+          "after": "3191b54e6c5a76bc2951684051a6f079649db5ef72e74e450cd07b53000d9c25",
+          "equal": true
+        },
+        {
+          "path": "corpus/bga400/LICENSE",
+          "before": "8bf2f14cad39ed6241ca31c7ee275de9fa3a7695980d52a8fc3cd3812a796987",
+          "after": "8bf2f14cad39ed6241ca31c7ee275de9fa3a7695980d52a8fc3cd3812a796987",
+          "equal": true
+        },
+        {
+          "path": "corpus/bga400/bga400.dsn",
+          "before": "1d3b6d1fc89f780adae751ad3e8c4fccee59e6cc0684b5c7b03131b6a7143c87",
+          "after": "1d3b6d1fc89f780adae751ad3e8c4fccee59e6cc0684b5c7b03131b6a7143c87",
+          "equal": true
+        },
+        {
+          "path": "corpus/bga400/bga400.kicad_pcb",
+          "before": "f97898ad936cf6d7339a080c7c8e9a4f0f7f35ad97d2f5e23ad05f07dba74396",
+          "after": "f97898ad936cf6d7339a080c7c8e9a4f0f7f35ad97d2f5e23ad05f07dba74396",
+          "equal": true
+        },
+        {
+          "path": "corpus/bga400/bga400.kicad_prl",
+          "before": "1988cda7c4b30d49b9a2be8af47d68a0e4d80a28d0c995ad2eaf4a8070de35a0",
+          "after": "1988cda7c4b30d49b9a2be8af47d68a0e4d80a28d0c995ad2eaf4a8070de35a0",
+          "equal": true
+        },
+        {
+          "path": "corpus/bga400/bga400.kicad_pro",
+          "before": "681c7b9428f074ab569c2f3820cd9886bc7cdc5c57cad1c83cac764fd90311e7",
+          "after": "681c7b9428f074ab569c2f3820cd9886bc7cdc5c57cad1c83cac764fd90311e7",
+          "equal": true
+        },
+        {
+          "path": "corpus/bga400/summary.json",
+          "before": "70fbb472b34c29cfbb6ee5b660aaea6e7de5a35768ad312620120ffdbadfdd31",
+          "after": "70fbb472b34c29cfbb6ee5b660aaea6e7de5a35768ad312620120ffdbadfdd31",
+          "equal": true
+        },
+        {
+          "path": "corpus/canary/two-pad.dsn",
+          "before": "26dd33719ca4a331424bdec592619278897c7c6813d6bd534ce0e2db0a9d0484",
+          "after": "26dd33719ca4a331424bdec592619278897c7c6813d6bd534ce0e2db0a9d0484",
+          "equal": true
+        },
+        {
+          "path": "corpus/canary/two-pad.srj.json",
+          "before": "9231280f2a8c8ba4a9425d52ef0f06d8d0ce55a4a8c80547d919a1478bd9bbd3",
+          "after": "9231280f2a8c8ba4a9425d52ef0f06d8d0ce55a4a8c80547d919a1478bd9bbd3",
+          "equal": true
+        },
+        {
+          "path": "corpus/canary/two-resistor.kicad_pcb",
+          "before": "3e607e35d705315319bc3cb3356e7125c35d807585912e13bb2edb30a2923d66",
+          "after": "3e607e35d705315319bc3cb3356e7125c35d807585912e13bb2edb30a2923d66",
+          "equal": true
+        },
+        {
+          "path": "corpus/dense-candidate/LICENSE",
+          "before": "22b49357327911d213f8ce1166dbaf2e06176ed175f716a557fe16a5410248d9",
+          "after": "22b49357327911d213f8ce1166dbaf2e06176ed175f716a557fe16a5410248d9",
+          "equal": true
+        },
+        {
+          "path": "corpus/dense-candidate/README.md",
+          "before": "cbbae7b6387a097b6377c64fc9dee9f34e10a208d9a3b801c257bab96861ebbe",
+          "after": "cbbae7b6387a097b6377c64fc9dee9f34e10a208d9a3b801c257bab96861ebbe",
+          "equal": true
+        },
+        {
+          "path": "corpus/dense-candidate/dense6-bga324.dsn",
+          "before": "1dbf3cd5a55dfd8c64f643ad06e136c87431ffa28447235bb9a84fbb3796eea7",
+          "after": "1dbf3cd5a55dfd8c64f643ad06e136c87431ffa28447235bb9a84fbb3796eea7",
+          "equal": true
+        },
+        {
+          "path": "corpus/dense-candidate/dense6-bga324.kicad_pcb",
+          "before": "25f18cc6d5d0c4901620c5262708073908ad1b9c5bb786f8c8903966287d7f54",
+          "after": "25f18cc6d5d0c4901620c5262708073908ad1b9c5bb786f8c8903966287d7f54",
+          "equal": true
+        },
+        {
+          "path": "corpus/dense-candidate/dense6-bga324.kicad_pro",
+          "before": "346003c12025d81e04dcdfc1c0e64e54845aa74405df6a57b84876471d0ef902",
+          "after": "346003c12025d81e04dcdfc1c0e64e54845aa74405df6a57b84876471d0ef902",
+          "equal": true
+        },
+        {
+          "path": "corpus/dense-candidate/source.dsn",
+          "before": "1dbf3cd5a55dfd8c64f643ad06e136c87431ffa28447235bb9a84fbb3796eea7",
+          "after": "1dbf3cd5a55dfd8c64f643ad06e136c87431ffa28447235bb9a84fbb3796eea7",
+          "equal": true
+        },
+        {
+          "path": "corpus/ladder/LICENSE",
+          "before": "1640316a67b83fc85d68a333f2384390acc8b6cdf982a94ee527e6422f1c905c",
+          "after": "1640316a67b83fc85d68a333f2384390acc8b6cdf982a94ee527e6422f1c905c",
+          "equal": true
+        },
+        {
+          "path": "corpus/ladder/l1.kicad_pcb",
+          "before": "f361a2ae0b4d066ff86ef86673b2a9abce02fe8eba0a2ae73ff924ea01648f82",
+          "after": "f361a2ae0b4d066ff86ef86673b2a9abce02fe8eba0a2ae73ff924ea01648f82",
+          "equal": true
+        },
+        {
+          "path": "corpus/ladder/l1.srj.json",
+          "before": "7d78278ddd9abcdc02e5628de77ebf09ebbdc84928a1c3a07015e877395f7b37",
+          "after": "7d78278ddd9abcdc02e5628de77ebf09ebbdc84928a1c3a07015e877395f7b37",
+          "equal": true
+        },
+        {
+          "path": "corpus/ladder/l2.kicad_pcb",
+          "before": "f1544949da110692d4527fb6c66aec67b3ce52cc9457350134eb074d3d0c43b0",
+          "after": "f1544949da110692d4527fb6c66aec67b3ce52cc9457350134eb074d3d0c43b0",
+          "equal": true
+        },
+        {
+          "path": "corpus/ladder/l2.srj.json",
+          "before": "c8f3930d1c887e4cd72916db42926ba19c6ff581f33e5970a7f73f0b8ec7d758",
+          "after": "c8f3930d1c887e4cd72916db42926ba19c6ff581f33e5970a7f73f0b8ec7d758",
+          "equal": true
+        },
+        {
+          "path": "corpus/ladder/l3.kicad_pcb",
+          "before": "092fff6d6769efb2b0625ee4c1dd50c0ae34b6d8a2fec40d854a1da8ec25b9e2",
+          "after": "092fff6d6769efb2b0625ee4c1dd50c0ae34b6d8a2fec40d854a1da8ec25b9e2",
+          "equal": true
+        },
+        {
+          "path": "corpus/ladder/l3.srj.json",
+          "before": "1f2b68b10b5f12688438acc71c3dca19eac4f62a7e6eb1ff1e0d3ff557c04c6f",
+          "after": "1f2b68b10b5f12688438acc71c3dca19eac4f62a7e6eb1ff1e0d3ff557c04c6f",
+          "equal": true
+        },
+        {
+          "path": "corpus/licenses/ATTRIBUTION.md",
+          "before": "2d10d93a30ff6f2a3616455bfbd124b2137a1b637fb4cce67ed39bde1c9f2a91",
+          "after": "2d10d93a30ff6f2a3616455bfbd124b2137a1b637fb4cce67ed39bde1c9f2a91",
+          "equal": true
+        },
+        {
+          "path": "corpus/manifest.json",
+          "before": "72055a6a18466986259ebd36fe6f238ac55319a6e9d1d5a679f81fb58ff19f69",
+          "after": "72055a6a18466986259ebd36fe6f238ac55319a6e9d1d5a679f81fb58ff19f69",
+          "equal": true
+        },
+        {
+          "path": "corpus/native-multiterminal/complete.kicad_pcb",
+          "before": "8605bdd8d11d5dccdcedc86876cfcb387ce650b7486521b379401062b3db3da8",
+          "after": "8605bdd8d11d5dccdcedc86876cfcb387ce650b7486521b379401062b3db3da8",
+          "equal": true
+        },
+        {
+          "path": "corpus/native-multiterminal/partial.kicad_pcb",
+          "before": "641d9da609908c669b2ecd8f768e3e6b8c2f78d19f973478c3bba818aaa93c49",
+          "after": "641d9da609908c669b2ecd8f768e3e6b8c2f78d19f973478c3bba818aaa93c49",
+          "equal": true
+        },
+        {
+          "path": "corpus/native-multiterminal/unrouted.dsn",
+          "before": "6b2d91ef0f2c5ea63c33076a9b3932d32fee7441e5f43af94da8ca9c7031f223",
+          "after": "6b2d91ef0f2c5ea63c33076a9b3932d32fee7441e5f43af94da8ca9c7031f223",
+          "equal": true
+        },
+        {
+          "path": "corpus/native-multiterminal/unrouted.kicad_pcb",
+          "before": "331f8e354cff35417c2a4a6a56498576a47d3fe87848d3d7a2ff5f76138cfb44",
+          "after": "331f8e354cff35417c2a4a6a56498576a47d3fe87848d3d7a2ff5f76138cfb44",
+          "equal": true
+        }
+      ]
+    },
+    "run_sha256": "c6bafb0a09bea48a0b8ba9bf35fc7f23ef3d878088358492c1880fb09eb1fde2",
+    "before_run_sha256": "fc144586e8a5dea2d3f64e059d36bd10a0920ff7455230ca92fa077da8c8a19c"
   }
 }
