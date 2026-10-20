@@ -23,3 +23,6 @@ benchmarks/autorouter/
 # Checksum-controlled benchmark captures: preserve original serialized bytes.
 /docs/pr-assets/agent-router-perf-public-recovery/**/*.json
 /benchmarks/boards/dense6-local-recovery/native-case/baseline-drc.json
+
+# Generated, checksum-controlled board fixtures (job.json records their sha256).
+benchmarks/boards/*/case/
