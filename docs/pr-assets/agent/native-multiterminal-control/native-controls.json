@@ -1,0 +1,218 @@
+[
+  {
+    "schema": 1,
+    "terminals": 3,
+    "nets": 1,
+    "initial_opens": 2,
+    "results": [
+      {
+        "board": "unrouted",
+        "native_errors": 0,
+        "native_opens": 2,
+        "native_warnings": 0,
+        "candidate_completion": 0.0,
+        "legacy_net_denominator_completion": 0,
+        "board_sha256": "331f8e354cff35417c2a4a6a56498576a47d3fe87848d3d7a2ff5f76138cfb44"
+      },
+      {
+        "board": "partial",
+        "native_errors": 0,
+        "native_opens": 1,
+        "native_warnings": 0,
+        "candidate_completion": 0.5,
+        "legacy_net_denominator_completion": 0,
+        "board_sha256": "641d9da609908c669b2ecd8f768e3e6b8c2f78d19f973478c3bba818aaa93c49"
+      },
+      {
+        "board": "complete",
+        "native_errors": 0,
+        "native_opens": 0,
+        "native_warnings": 0,
+        "candidate_completion": 1.0,
+        "legacy_net_denominator_completion": 1,
+        "board_sha256": "8605bdd8d11d5dccdcedc86876cfcb387ce650b7486521b379401062b3db3da8"
+      }
+    ],
+    "terminal_signature": [
+      [
+        "J1",
+        "1",
+        "SIGNAL",
+        10000000,
+        10000000,
+        1000000,
+        1000000,
+        0,
+        "00000000_00000000_00000000_00000003"
+      ],
+      [
+        "J2",
+        "1",
+        "SIGNAL",
+        20000000,
+        10000000,
+        1000000,
+        1000000,
+        0,
+        "00000000_00000000_00000000_00000003"
+      ],
+      [
+        "J3",
+        "1",
+        "SIGNAL",
+        30000000,
+        10000000,
+        1000000,
+        1000000,
+        0,
+        "00000000_00000000_00000000_00000003"
+      ]
+    ],
+    "checker": "10.0.6",
+    "limitation": "Diagnostic scalar native-open control; production scoring unchanged."
+  },
+  {
+    "schema": 1,
+    "terminals": 3,
+    "nets": 1,
+    "initial_opens": 2,
+    "results": [
+      {
+        "board": "unrouted",
+        "native_errors": 0,
+        "native_opens": 2,
+        "native_warnings": 0,
+        "candidate_completion": 0.0,
+        "legacy_net_denominator_completion": 0,
+        "board_sha256": "331f8e354cff35417c2a4a6a56498576a47d3fe87848d3d7a2ff5f76138cfb44"
+      },
+      {
+        "board": "partial",
+        "native_errors": 0,
+        "native_opens": 1,
+        "native_warnings": 0,
+        "candidate_completion": 0.5,
+        "legacy_net_denominator_completion": 0,
+        "board_sha256": "641d9da609908c669b2ecd8f768e3e6b8c2f78d19f973478c3bba818aaa93c49"
+      },
+      {
+        "board": "complete",
+        "native_errors": 0,
+        "native_opens": 0,
+        "native_warnings": 0,
+        "candidate_completion": 1.0,
+        "legacy_net_denominator_completion": 1,
+        "board_sha256": "8605bdd8d11d5dccdcedc86876cfcb387ce650b7486521b379401062b3db3da8"
+      }
+    ],
+    "terminal_signature": [
+      [
+        "J1",
+        "1",
+        "SIGNAL",
+        10000000,
+        10000000,
+        1000000,
+        1000000,
+        0,
+        "00000000_00000000_00000000_00000003"
+      ],
+      [
+        "J2",
+        "1",
+        "SIGNAL",
+        20000000,
+        10000000,
+        1000000,
+        1000000,
+        0,
+        "00000000_00000000_00000000_00000003"
+      ],
+      [
+        "J3",
+        "1",
+        "SIGNAL",
+        30000000,
+        10000000,
+        1000000,
+        1000000,
+        0,
+        "00000000_00000000_00000000_00000003"
+      ]
+    ],
+    "checker": "10.0.6",
+    "limitation": "Diagnostic scalar native-open control; production scoring unchanged."
+  },
+  {
+    "schema": 1,
+    "terminals": 3,
+    "nets": 1,
+    "initial_opens": 2,
+    "results": [
+      {
+        "board": "unrouted",
+        "native_errors": 0,
+        "native_opens": 2,
+        "native_warnings": 0,
+        "candidate_completion": 0.0,
+        "legacy_net_denominator_completion": 0,
+        "board_sha256": "331f8e354cff35417c2a4a6a56498576a47d3fe87848d3d7a2ff5f76138cfb44"
+      },
+      {
+        "board": "partial",
+        "native_errors": 0,
+        "native_opens": 1,
+        "native_warnings": 0,
+        "candidate_completion": 0.5,
+        "legacy_net_denominator_completion": 0,
+        "board_sha256": "641d9da609908c669b2ecd8f768e3e6b8c2f78d19f973478c3bba818aaa93c49"
+      },
+      {
+        "board": "complete",
+        "native_errors": 0,
+        "native_opens": 0,
+        "native_warnings": 0,
+        "candidate_completion": 1.0,
+        "legacy_net_denominator_completion": 1,
+        "board_sha256": "8605bdd8d11d5dccdcedc86876cfcb387ce650b7486521b379401062b3db3da8"
+      }
+    ],
+    "terminal_signature": [
+      [
+        "J1",
+        "1",
+        "SIGNAL",
+        10000000,
+        10000000,
+        1000000,
+        1000000,
+        0,
+        "00000000_00000000_00000000_00000003"
+      ],
+      [
+        "J2",
+        "1",
+        "SIGNAL",
+        20000000,
+        10000000,
+        1000000,
+        1000000,
+        0,
+        "00000000_00000000_00000000_00000003"
+      ],
+      [
+        "J3",
+        "1",
+        "SIGNAL",
+        30000000,
+        10000000,
+        1000000,
+        1000000,
+        0,
+        "00000000_00000000_00000000_00000003"
+      ]
+    ],
+    "checker": "10.0.6",
+    "limitation": "Diagnostic scalar native-open control; production scoring unchanged."
+  }
+]
