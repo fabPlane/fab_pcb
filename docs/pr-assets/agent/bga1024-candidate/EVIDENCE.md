@@ -637,3 +637,40 @@ Validation: standalone typecheck and 20 tests / 104 assertions; integrated
 typecheck and 318 passing tests / 28 skipped; public fixture typecheck, all 11
 unit packages, and four optimized native tests. No layer-check script exists
 in these harnesses. No routing attempt was dropped or retried.
+
+Public update: candidate qualification evidence only. The runner change is in
+the separate benchmark checkout; this fixture update does not enable it.
+
+## Cycle 74: runtime module and data asset identity
+
+The runner previously observed only `.ts` and `.py` files under `src/` and
+`scripts/`. An edited JavaScript helper or JSON data table could therefore reuse
+a result produced from different bytes. Observe JavaScript/TypeScript module
+variants, JSON, TOML and WebAssembly assets in those same source trees before
+resume and around successful routing. Python bytecode remains excluded because
+execution can create it. This extends source observation; it does not establish
+installed dependency identity, arbitrary file access or atomic execution.
+
+Paired deterministic controls used the same runner and a fake engine that reads
+an asset on each invocation. Each revision ran three fresh processes with one
+`.mjs`, `.json` and `.wasm`-named asset per process. All assets contain JSON test
+payloads; this tests byte observation, not language or WebAssembly execution.
+The engine reports one via before an edit and two after a fresh invocation.
+
+| Runner control | Before | After | Observations per revision |
+|---|---:|---:|---:|
+| Unchanged results resume | 9 | 9 | 9 |
+| Edited assets reuse stale results | 9 | 0 | 9 |
+| Asset edits during routing accepted | 9 | 0 | 9 |
+
+The same controls pass against the prepared primary integration. These are
+cache admission measurements, not routing gains. Native denominator adoption
+remains pending and the scoring formula is unchanged.
+
+```sh
+nice -n 10 taskset -c 0-5 timeout 180 bun run typecheck
+nice -n 10 taskset -c 0-5 timeout 180 bun test
+nice -n 10 taskset -c 0-5 timeout 180 bun docs/pr-assets/agent/scoring-source-cache/asset-audit.ts /tmp/asset-controls.json
+```
+
+![Runtime asset admission](https://github.com/fabPlane/fab_pcb/blob/agent/bga1024-candidate/docs/pr-assets/agent/bga1024-candidate/assets.png?raw=true)
