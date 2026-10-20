@@ -8,12 +8,12 @@ Paired input qualification on the same host, three fresh native checks per
 variant; seed, terminal placement, ownership and project rules are identical.
 Only the two routing keepouts differ. Native geometry checks pass in every run.
 
-| Measurement | Before: no keepouts | After: two keepouts | Repeats each |
-|---|---:|---:|---:|
-| Native connectivity opens | 1296 | 1296 | 3 |
-| Native geometry errors / warnings | 0 / 0 | 0 / 0 | 3 |
-| DSN keepout polygons | 0 | 16 | 3 |
-| Identical terminal signature / project digest | yes | yes | 3 |
+| Measurement                                   | Before: no keepouts | After: two keepouts | Repeats each |
+| --------------------------------------------- | ------------------: | ------------------: | -----------: |
+| Native connectivity opens                     |                1296 |                1296 |            3 |
+| Native geometry errors / warnings             |               0 / 0 |               0 / 0 |            3 |
+| DSN keepout polygons                          |                   0 |                  16 |            3 |
+| Identical terminal signature / project digest |                 yes |                 yes |            3 |
 
 The JSON DRC lists 499 opens in each variant because of the checker limit.
 It is not used as the exact native denominator. Qualification does not establish

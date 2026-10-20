@@ -32,12 +32,8 @@
   "runtime_endpoints_equal": true,
   "source_observed_during_corpus_run": true,
   "source_matches_final": true,
-  "source_changed": [
-    "src/types.ts"
-  ],
-  "source_added": [
-    "scripts/gen/bga1296.py"
-  ],
+  "source_changed": ["src/types.ts"],
+  "source_added": ["scripts/gen/bga1296.py"],
   "summary": [
     {
       "suite": "keepout-control",

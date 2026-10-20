@@ -11,27 +11,14 @@
     "ball_mm": 0.2,
     "target_mm": 0.4,
     "target_pitch_mm": 0.8,
-    "board_mm": [
-      90,
-      90
-    ],
+    "board_mm": [90, 90],
     "clearance_mm": 0.1,
     "track_mm": 0.1,
     "via_mm": 0.3,
     "drill_mm": 0.1,
     "keepouts_mm": [
-      [
-        29,
-        31,
-        32,
-        59
-      ],
-      [
-        58,
-        31,
-        61,
-        59
-      ]
+      [29, 31, 32, 59],
+      [58, 31, 61, 59]
     ]
   },
   "rows": [
