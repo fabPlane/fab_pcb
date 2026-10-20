@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT
 import importlib.util
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -15,6 +16,7 @@ class NativeCandidate(unittest.TestCase):
             for i in range(3):
                 out = Path(parent)/str(i)
                 summary = generator.generate(out)
+                self.assertEqual(summary['parameters'], json.loads((ROOT/'summary.json').read_text())['parameters'])
                 self.assertEqual((summary['native_errors'],summary['native_warnings'],summary['native_opens']),(0,0,400))
                 self.assertEqual(len(summary['copper_stack']),8)
                 for name in ('bga400.kicad_pcb','bga400.kicad_pro','bga400.dsn'):
