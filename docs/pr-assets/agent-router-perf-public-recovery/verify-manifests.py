@@ -18,11 +18,14 @@ def verify(directory, records):
         digest = record.get("sha256") if isinstance(record, dict) else record
         if not isinstance(digest, str) or len(digest) != 64:
             continue
-        assert path.is_file(), f"Missing manifest member: {path}"
+        if not path.is_file():
+            raise ValueError(f"Missing manifest member: {path}")
         data = path.read_bytes()
-        assert hashlib.sha256(data).hexdigest() == digest, f"Checksum: {path}"
+        if hashlib.sha256(data).hexdigest() != digest:
+            raise ValueError(f"Checksum: {path}")
         if isinstance(record, dict) and "bytes" in record:
-            assert len(data) == record["bytes"], f"Size: {path}"
+            if len(data) != record["bytes"]:
+                raise ValueError(f"Size: {path}")
         checked += 1
 
 
