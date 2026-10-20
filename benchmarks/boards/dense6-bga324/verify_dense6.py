@@ -75,6 +75,9 @@ def require_no_custom_rules(board):
 
 
 def geometry(board):
+    # Net ties alter which copper shorts native DRC permits without changing pads.
+    require(not any(f.IsNetTie() for f in board.GetFootprints()),
+            "unsupported native net-tie groups")
     def point(p):
         return [p.x, p.y]
     pads = sorted((f.GetReference(), p.GetNumber(), p.GetNetname(),

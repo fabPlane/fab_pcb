@@ -1,0 +1,180 @@
+{
+  "cycle": 57,
+  "machine": "hyper-ms-lin",
+  "cores": "0-5",
+  "nice": 10,
+  "repeats": 3,
+  "before_commit": "a1909c1",
+  "after_sha256": "b6d8ef750a7621448d0ea5931a80daa3e79afd54a17835bb8f1813ec3dab8dbe",
+  "records": [
+    {
+      "repeat": 1,
+      "case": "valid",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.3432726609753445
+    },
+    {
+      "repeat": 1,
+      "case": "valid",
+      "version": "after",
+      "accepted": true,
+      "wall_s": 4.762848926940933
+    },
+    {
+      "repeat": 1,
+      "case": "net-tie-J1",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.667452989961021
+    },
+    {
+      "repeat": 1,
+      "case": "net-tie-J1",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5570160619681701
+    },
+    {
+      "repeat": 1,
+      "case": "net-tie-J2",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.58631924900692
+    },
+    {
+      "repeat": 1,
+      "case": "net-tie-J2",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5675021440256387
+    },
+    {
+      "repeat": 1,
+      "case": "net-tie-U1",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 5.030577778001316
+    },
+    {
+      "repeat": 1,
+      "case": "net-tie-U1",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5871279679704458
+    },
+    {
+      "repeat": 2,
+      "case": "valid",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.6741480299970135
+    },
+    {
+      "repeat": 2,
+      "case": "valid",
+      "version": "after",
+      "accepted": true,
+      "wall_s": 3.7035479100886732
+    },
+    {
+      "repeat": 2,
+      "case": "net-tie-J1",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.131391223985702
+    },
+    {
+      "repeat": 2,
+      "case": "net-tie-J1",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5415930810850114
+    },
+    {
+      "repeat": 2,
+      "case": "net-tie-J2",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.63709856197238
+    },
+    {
+      "repeat": 2,
+      "case": "net-tie-J2",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5715035959146917
+    },
+    {
+      "repeat": 2,
+      "case": "net-tie-U1",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.33944315998815
+    },
+    {
+      "repeat": 2,
+      "case": "net-tie-U1",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 1.0016087009571493
+    },
+    {
+      "repeat": 3,
+      "case": "valid",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 3.652023355010897
+    },
+    {
+      "repeat": 3,
+      "case": "valid",
+      "version": "after",
+      "accepted": true,
+      "wall_s": 4.297943982994184
+    },
+    {
+      "repeat": 3,
+      "case": "net-tie-J1",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 4.999467634013854
+    },
+    {
+      "repeat": 3,
+      "case": "net-tie-J1",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.54889852902852
+    },
+    {
+      "repeat": 3,
+      "case": "net-tie-J2",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 3.126718465005979
+    },
+    {
+      "repeat": 3,
+      "case": "net-tie-J2",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5520226469961926
+    },
+    {
+      "repeat": 3,
+      "case": "net-tie-U1",
+      "version": "before",
+      "accepted": true,
+      "wall_s": 3.2179844059282914
+    },
+    {
+      "repeat": 3,
+      "case": "net-tie-U1",
+      "version": "after",
+      "accepted": false,
+      "wall_s": 0.5726971179246902
+    }
+  ],
+  "limitation": "Fixed-candidate admission only. Net-tie exemptions are unsupported. No routing gain or native baseline adoption."
+}

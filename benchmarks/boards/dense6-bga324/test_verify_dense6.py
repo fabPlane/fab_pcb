@@ -114,6 +114,27 @@ class ProjectPolicyTests(unittest.TestCase):
 
 
 class NativeClearanceTests(unittest.TestCase):
+    def test_net_tie_exemptions_cannot_change_candidate_rules(self):
+        try:
+            import pcbnew
+        except ImportError:
+            self.skipTest("requires KiCad pcbnew")
+        board = pcbnew.BOARD()
+        footprint = pcbnew.FOOTPRINT(board)
+        footprint.SetReference("J1")
+        for number in ("1", "2"):
+            pad = pcbnew.PAD(footprint)
+            pad.SetNumber(number)
+            footprint.Add(pad)
+        board.Add(footprint)
+        original = geometry(board)
+        footprint.AddNetTiePadGroup("1,2")
+        with self.assertRaisesRegex(AssertionError, 'unsupported native net-tie groups'):
+            geometry(board)
+        footprint.ClearNetTiePadGroups()
+        self.assertEqual(original, geometry(board))
+
+
     def test_local_clearance_overrides_change_native_signature(self):
         try:
             import pcbnew

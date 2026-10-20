@@ -119,3 +119,5 @@ them, including empty files, directories and dangling links.
 See committed `policy-controls.json` and `policy-controls.png` in the PR assets.
 
 [External rule controls and reproduction](../../../docs/pr-assets/agent/dense-candidate-verification/CUSTOM-RULES.md).
+
+The fixed candidate also rejects footprint net-tie groups: these alter native short exemptions even with unchanged pad geometry. Three-repeat controls and exact reproduction are in `docs/pr-assets/agent/dense-candidate-verification/REPRODUCE.md`.
