@@ -2,14 +2,14 @@ Original MIT four-layer plated-terminal fixture with matched outer-layer copper 
 
 Same input and hyper-ms-lin, cores 6–11, nice 10, three fresh routing repeats per serializer. Before is 69cf598db98c136bff16bbe02bccdded95674b18; after is b9fb8c8f3ac11c0db161fa81ff23982304ec3be0. Native 10.0.6 save/reload/refill/DRC uses unchanged default rules.
 
-| Measurement | Before serializer | Repaired serializer |
-| --- | --- | --- |
-| Engine opens | 0 each | 0 each |
-| Native clean repeats | 3/3 | 3/3 |
-| Native opens / errors / warnings | 0 / 0 / 0 each | 0 / 0 / 0 each |
-| Top + inner2 segments / through vias | 2 / 1 each | 2 / 1 each |
-| Planar length | 14.8 mm each | 14.8 mm each |
-| Export records | 1 each | 3 each |
+| Measurement                          | Before serializer | Repaired serializer |
+| ------------------------------------ | ----------------- | ------------------- |
+| Engine opens                         | 0 each            | 0 each              |
+| Native clean repeats                 | 3/3               | 3/3                 |
+| Native opens / errors / warnings     | 0 / 0 / 0 each    | 0 / 0 / 0 each      |
+| Top + inner2 segments / through vias | 2 / 1 each        | 2 / 1 each          |
+| Planar length                        | 14.8 mm each      | 14.8 mm each        |
+| Export records                       | 1 each            | 3 each              |
 
 The two serializers preserve identical physical copper across every repeat. This expands native consumer qualification to physically valid four-layer terminals and inner-layer copper; it does not show a routing, completion or runtime improvement. Timings are retained observations only. This narrow consumer is not a production importer, full corpus qualification, blind/buried-via or zone qualification. Exported via steps lack dimensions; the consumer takes them from the source fixture (0.6 mm pad, 0.3 mm drill).
 

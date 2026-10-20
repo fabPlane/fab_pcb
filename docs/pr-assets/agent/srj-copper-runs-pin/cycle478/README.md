@@ -2,14 +2,14 @@ Native qualification of actual two-layer SRJ routing with explicit via dimension
 
 Same fixture, hyper-ms-lin, cores 6–11, nice 10, three routing repeats per serializer followed by native 10.0.6 save/reload/DRC with unchanged default rules:
 
-| Measurement | Before serializer | Repaired serializer |
-| --- | --- | --- |
-| Engine reported opens | 0 each | 0 each |
-| Native valid repeats | 3/3 | 3/3 |
-| Native opens / errors / warnings | 0 / 0 / 0 each | 0 / 0 / 0 each |
-| Imported planar segments / vias | 2 / 1 | 2 / 1 |
-| Imported planar length | 14.8 mm | 14.8 mm |
-| Export records | 1 | 3 |
+| Measurement                      | Before serializer | Repaired serializer |
+| -------------------------------- | ----------------- | ------------------- |
+| Engine reported opens            | 0 each            | 0 each              |
+| Native valid repeats             | 3/3               | 3/3                 |
+| Native opens / errors / warnings | 0 / 0 / 0 each    | 0 / 0 / 0 each      |
+| Imported planar segments / vias  | 2 / 1             | 2 / 1               |
+| Imported planar length           | 14.8 mm           | 14.8 mm             |
+| Export records                   | 1                 | 3                   |
 
 Both revisions generate the same physical copper. The repaired serializer emits two wire records and a standalone via record. The diagnostic consumer imports explicit via steps independently and only adjacent same-layer wire pairs as segments; it never infers copper between records or from a wire to a via step. Dimensions come from the original SRJ fixture because exported via steps omit them. Reloaded via pad/drill, net ownership, segment count and total length are asserted. Dropping the via leaves one open and two dangling-track warnings; the unrouted control has one open and no other findings. Initial zero-warning expectation for the missing-via control was corrected to assert those two native warnings explicitly; checker/rules were unchanged.
 

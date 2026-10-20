@@ -1,61 +1,57 @@
 {
-    "$schema": "https://schemas.kicad.org/drc.v1.json",
-    "coordinate_units": "mm",
-    "date": "2026-10-20T06:21:50",
-    "ignored_checks": [
+  "$schema": "https://schemas.kicad.org/drc.v1.json",
+  "coordinate_units": "mm",
+  "date": "2026-10-20T06:21:50",
+  "ignored_checks": [
+    {
+      "description": "Footprint has no courtyard defined",
+      "key": "missing_courtyard"
+    },
+    {
+      "description": "Track endpoint not centered on via",
+      "key": "track_not_centered_on_via"
+    },
+    {
+      "description": "Tuning profile track geometries",
+      "key": "tuning_profile_track_geometries"
+    },
+    {
+      "description": "Footprint doesn't match symbol's footprint filters",
+      "key": "footprint_filters_mismatch"
+    },
+    {
+      "description": "Footprint component type doesn't match footprint pads",
+      "key": "footprint_type_mismatch"
+    }
+  ],
+  "included_severities": ["error", "warning", "exclusion"],
+  "kicad_version": "10.0.6",
+  "schematic_parity": [],
+  "source": "missing-run-1.kicad_pcb",
+  "unconnected_items": [
+    {
+      "description": "Missing connection between items",
+      "items": [
         {
-            "description": "Footprint has no courtyard defined",
-            "key": "missing_courtyard"
+          "description": "Pad 1 [NET1] of J3 on F.Cu",
+          "pos": {
+            "x": 10.0,
+            "y": 9.0
+          },
+          "uuid": "060a5502-d3cf-4bad-9a61-a4038e780570"
         },
         {
-            "description": "Track endpoint not centered on via",
-            "key": "track_not_centered_on_via"
-        },
-        {
-            "description": "Tuning profile track geometries",
-            "key": "tuning_profile_track_geometries"
-        },
-        {
-            "description": "Footprint doesn't match symbol's footprint filters",
-            "key": "footprint_filters_mismatch"
-        },
-        {
-            "description": "Footprint component type doesn't match footprint pads",
-            "key": "footprint_type_mismatch"
+          "description": "Pad 1 [NET1] of J2 on F.Cu",
+          "pos": {
+            "x": 18.0,
+            "y": 5.0
+          },
+          "uuid": "d944d8a9-41fc-4f67-8776-488f9bdd0524"
         }
-    ],
-    "included_severities": [
-        "error",
-        "warning",
-        "exclusion"
-    ],
-    "kicad_version": "10.0.6",
-    "schematic_parity": [],
-    "source": "missing-run-1.kicad_pcb",
-    "unconnected_items": [
-        {
-            "description": "Missing connection between items",
-            "items": [
-                {
-                    "description": "Pad 1 [NET1] of J3 on F.Cu",
-                    "pos": {
-                        "x": 10.0,
-                        "y": 9.0
-                    },
-                    "uuid": "060a5502-d3cf-4bad-9a61-a4038e780570"
-                },
-                {
-                    "description": "Pad 1 [NET1] of J2 on F.Cu",
-                    "pos": {
-                        "x": 18.0,
-                        "y": 5.0
-                    },
-                    "uuid": "d944d8a9-41fc-4f67-8776-488f9bdd0524"
-                }
-            ],
-            "severity": "error",
-            "type": "unconnected_items"
-        }
-    ],
-    "violations": []
+      ],
+      "severity": "error",
+      "type": "unconnected_items"
+    }
+  ],
+  "violations": []
 }

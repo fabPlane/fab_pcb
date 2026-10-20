@@ -81,10 +81,7 @@
       "length_mm": 14.799999999999999,
       "unconnected": 1,
       "errors": [],
-      "warnings": [
-        "track_dangling",
-        "track_dangling"
-      ]
+      "warnings": ["track_dangling", "track_dangling"]
     }
   ]
 }

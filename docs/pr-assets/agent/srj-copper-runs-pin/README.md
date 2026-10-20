@@ -4,14 +4,14 @@ When a connection has multiple tracks, concatenating their corners invents segme
 
 Measured on hyper-ms-lin, cores 6–11, nice 10, three repeats per mode, baseline 69cf598 versus the source change in this branch:
 
-| Case | Before | After |
-| --- | --- | --- |
-| Three-terminal SRJ: exported length | 23.408727 mm | 14.864723 mm |
-| Three-terminal SRJ: output records / reported opens | 1 / 0 | 2 / 0 |
-| Native solenoid J1: valid repeats | 3/3 | 3/3 |
-| Native solenoid J1: opens / new errors | 0 / 0 | 0 / 0 |
-| Native solenoid J1: vias / copper length | 12 / 352.690597 mm | 12 / 352.690597 mm |
-| Native solenoid J1: median route seconds | 0.897248 | 0.738679 |
+| Case                                                | Before             | After              |
+| --------------------------------------------------- | ------------------ | ------------------ |
+| Three-terminal SRJ: exported length                 | 23.408727 mm       | 14.864723 mm       |
+| Three-terminal SRJ: output records / reported opens | 1 / 0              | 2 / 0              |
+| Native solenoid J1: valid repeats                   | 3/3                | 3/3                |
+| Native solenoid J1: opens / new errors              | 0 / 0              | 0 / 0              |
+| Native solenoid J1: vias / copper length            | 12 / 352.690597 mm | 12 / 352.690597 mm |
+| Native solenoid J1: median route seconds            | 0.897248           | 0.738679           |
 
 The SRJ length difference removes an artificial 8.544004 mm export segment. Routed copper and routing completion are unchanged. Native solenoid checks exercise the separate DSN/session path; they do not prove native import or physical validity of SRJ output. Timings overlapped other validation; no speed claim. This is a subset qualification, not a full-suite improvement. The original diagnostic fixture is MIT; engine code retains the repository GPL-3.0 license.
 

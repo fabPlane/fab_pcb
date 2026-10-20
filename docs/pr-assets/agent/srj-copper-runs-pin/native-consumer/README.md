@@ -2,12 +2,12 @@ Qualify native consumption of the retained three-terminal SRJ routing outputs. T
 
 Same fixture and machine (hyper-ms-lin, cores 6–11, nice 10), three independently retained route outputs per mode from cycle476; this cycle performs fresh native imports/checks, without new engine routing:
 
-| Native check | Before serializer | Repaired serializer |
-| --- | --- | --- |
-| Imported segments | 3 | 2 |
-| Imported length (mm) | 23.408727 | 14.864723 |
-| Zero-unconnected repeats | 3/3 | 3/3 |
-| DRC errors / warnings, each repeat | 0 / 0 | 0 / 0 |
+| Native check                       | Before serializer | Repaired serializer |
+| ---------------------------------- | ----------------- | ------------------- |
+| Imported segments                  | 3                 | 2                   |
+| Imported length (mm)               | 23.408727         | 14.864723           |
+| Zero-unconnected repeats           | 3/3               | 3/3                 |
+| DRC errors / warnings, each repeat | 0 / 0             | 0 / 0               |
 
 Unrouted control has two unconnected items; removing one repaired run has one. Both controls have zero other errors/warnings. All pads/tracks retain NET1 after save/reload. Summary hashes lock the exact fixture and six retained samples. Re-running the checker reproduced the summary. The before output contains the previously measured artificial segment; native checking does not reject redundant same-net copper.
 
