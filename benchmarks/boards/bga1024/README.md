@@ -47,3 +47,17 @@ This public contribution contains only the original board, deterministic generat
 native admission test and measurement evidence outside the frozen suite. It does
 not change any production router, native checker, scoring or ranked cache policy.
 The report-limit rejection was measured in the separate benchmark harness.
+
+Report admission also requires the expected report schema and board name, a
+nonempty checker version, error/warning/exclusion coverage, all finding lists,
+empty schematic parity and correctly typed error opens. Missing or inconsistent
+evidence cannot support the generator's zero-violation diagnostic. Three paired
+controls preserve valid admission3/3 while reducing acceptance of nine malformed
+variants27/27 to0/27. The mutations apply to fresh reports, not native boards.
+
+```sh
+nice -n 10 taskset -c 0-5 timeout 120 /usr/bin/python3 -O benchmarks/boards/bga1024/test_report.py --measure /tmp/bga1024-admission-controls
+```
+
+Use a new output directory. The full evidence and limits are retained under
+`docs/pr-assets/agent/bga1024-candidate/`.

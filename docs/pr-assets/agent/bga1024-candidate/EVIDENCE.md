@@ -75,3 +75,55 @@ The direct text-parser measurements belong to the companion benchmark-harness
 change; this public change only hardens the bundled candidate generator. The
 frozen suite, production adapter and scoring are unchanged here. Generator
 controls preserve valid admission while rejecting unqualified native evidence.
+
+## Completed cycle 68 routing cohort
+
+Four ready backends, five bundled suites, 54 compatible groups × three fresh
+repeats = 162 attempts per cohort, same cases and machine (hyper-ms-lin), cores
+0–5, nice 10, ten-second routing budgets, 2400-second outer bound. Before is
+cycle67; after is cycle68 on primary `374ace23d34ef4b685e6a90a010877246b4fcc6e` plus the published
+fetch prerequisites, exported-parser guard and cache identity change. Primary
+also changed adapter validation/cache schema between these cohorts, so timing
+or completion differences cannot be attributed solely to this contribution.
+
+Completed 60 → 57; validated passes
+33 → 33. After outcomes: `{'completed': 57, 'timeout': 105}`.
+Fixture and CPU identities match; backend identity equality is
+`True`. All 162 cache keys are unique, with no prior
+cohort overlap. No routing attempts retried/discarded; no datasets fetched.
+All five comparisons and the outer wrapper exit zero; runtime endpoint checks
+match. Endpoint equality does not establish continuous execution or imported
+dependency identity. No engine gain is claimed.
+
+| Suite | Router | Before completed | After completed | Before passes | After passes | Attempts each |
+|---|---|---:|---:|---:|---:|---:|
+|canary|fab_router|12|12|9|9|12|
+|canary|reference engine|9|9|6|6|9|
+|canary|capacity-mesh router|3|3|3|3|3|
+|canary|in-repo router|12|12|3|3|12|
+|bga|fab_router|0|0|0|0|12|
+|bga|reference engine|0|0|0|0|6|
+|bga|capacity-mesh router|0|0|0|0|6|
+|bga|in-repo router|0|0|0|0|12|
+|ladder|fab_router|6|5|3|3|18|
+|ladder|reference engine|3|3|3|3|9|
+|ladder|capacity-mesh router|6|6|6|6|9|
+|ladder|in-repo router|9|7|0|0|18|
+|dense-source|fab_router|0|0|0|0|3|
+|dense-source|reference engine|0|0|0|0|3|
+|dense-source|in-repo router|0|0|0|0|3|
+|dense-candidate|fab_router|0|0|0|0|9|
+|dense-candidate|reference engine|0|0|0|0|9|
+|dense-candidate|in-repo router|0|0|0|0|9|
+
+Typecheck and native admission checks pass in both contributions. Benchmark
+integration: 312 passing tests, 28 skipped. Contribution checkout: 29 passing
+tests; one concurrent doctor run hit its unchanged five-second test deadline,
+then the unchanged default suite passed on retry. Public unit checks pass in
+all 11 packages; optimized native tests pass (four tests, three regenerations).
+Neither package defines a separate layer-check script. Independent reproduction
+matches diagnostic outcomes, generated artifacts and direct-parser controls.
+
+Native connectivity remains 1,024 opens versus the report's 499 limited findings.
+The guard and diagnostic validation do not implement production native baseline
+adoption. The frozen suite, checker rules and scoring denominator are unchanged.

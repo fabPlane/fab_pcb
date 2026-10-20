@@ -741,6 +741,195 @@
           "reason": "Error: KiCad DRC report reached finding limit: unconnected_items (499 >= 499); exact native quality unavailable"
         }
       ]
+    },
+    "routing_cohort": {
+      "cycle": 68,
+      "integration": "374ace23d34ef4b685e6a90a010877246b4fcc6e",
+      "attempts": 162,
+      "repeats": 3,
+      "groups": 54,
+      "outcomes": {
+        "completed": 57,
+        "timeout": 105
+      },
+      "quality": {
+        "unavailable": 124,
+        "srj-scored": 20,
+        "native-drc": 18
+      },
+      "passed": 33,
+      "before_passed": 33,
+      "before_completed": 60,
+      "after_completed": 57,
+      "identities": {
+        "fixture": true,
+        "backend": true
+      },
+      "summary": [
+        {
+          "suite": "canary",
+          "router": "fab_router",
+          "attempts": 12,
+          "before_completed": 12,
+          "after_completed": 12,
+          "before_passed": 9,
+          "after_passed": 9
+        },
+        {
+          "suite": "canary",
+          "router": "FreeRouting",
+          "attempts": 9,
+          "before_completed": 9,
+          "after_completed": 9,
+          "before_passed": 6,
+          "after_passed": 6
+        },
+        {
+          "suite": "canary",
+          "router": "capacity-mesh router",
+          "attempts": 3,
+          "before_completed": 3,
+          "after_completed": 3,
+          "before_passed": 3,
+          "after_passed": 3
+        },
+        {
+          "suite": "canary",
+          "router": "in-repo router",
+          "attempts": 12,
+          "before_completed": 12,
+          "after_completed": 12,
+          "before_passed": 3,
+          "after_passed": 3
+        },
+        {
+          "suite": "bga",
+          "router": "fab_router",
+          "attempts": 12,
+          "before_completed": 0,
+          "after_completed": 0,
+          "before_passed": 0,
+          "after_passed": 0
+        },
+        {
+          "suite": "bga",
+          "router": "FreeRouting",
+          "attempts": 6,
+          "before_completed": 0,
+          "after_completed": 0,
+          "before_passed": 0,
+          "after_passed": 0
+        },
+        {
+          "suite": "bga",
+          "router": "capacity-mesh router",
+          "attempts": 6,
+          "before_completed": 0,
+          "after_completed": 0,
+          "before_passed": 0,
+          "after_passed": 0
+        },
+        {
+          "suite": "bga",
+          "router": "in-repo router",
+          "attempts": 12,
+          "before_completed": 0,
+          "after_completed": 0,
+          "before_passed": 0,
+          "after_passed": 0
+        },
+        {
+          "suite": "ladder",
+          "router": "fab_router",
+          "attempts": 18,
+          "before_completed": 6,
+          "after_completed": 5,
+          "before_passed": 3,
+          "after_passed": 3
+        },
+        {
+          "suite": "ladder",
+          "router": "FreeRouting",
+          "attempts": 9,
+          "before_completed": 3,
+          "after_completed": 3,
+          "before_passed": 3,
+          "after_passed": 3
+        },
+        {
+          "suite": "ladder",
+          "router": "capacity-mesh router",
+          "attempts": 9,
+          "before_completed": 6,
+          "after_completed": 6,
+          "before_passed": 6,
+          "after_passed": 6
+        },
+        {
+          "suite": "ladder",
+          "router": "in-repo router",
+          "attempts": 18,
+          "before_completed": 9,
+          "after_completed": 7,
+          "before_passed": 0,
+          "after_passed": 0
+        },
+        {
+          "suite": "dense-source",
+          "router": "fab_router",
+          "attempts": 3,
+          "before_completed": 0,
+          "after_completed": 0,
+          "before_passed": 0,
+          "after_passed": 0
+        },
+        {
+          "suite": "dense-source",
+          "router": "FreeRouting",
+          "attempts": 3,
+          "before_completed": 0,
+          "after_completed": 0,
+          "before_passed": 0,
+          "after_passed": 0
+        },
+        {
+          "suite": "dense-source",
+          "router": "in-repo router",
+          "attempts": 3,
+          "before_completed": 0,
+          "after_completed": 0,
+          "before_passed": 0,
+          "after_passed": 0
+        },
+        {
+          "suite": "dense-candidate",
+          "router": "fab_router",
+          "attempts": 9,
+          "before_completed": 0,
+          "after_completed": 0,
+          "before_passed": 0,
+          "after_passed": 0
+        },
+        {
+          "suite": "dense-candidate",
+          "router": "FreeRouting",
+          "attempts": 9,
+          "before_completed": 0,
+          "after_completed": 0,
+          "before_passed": 0,
+          "after_passed": 0
+        },
+        {
+          "suite": "dense-candidate",
+          "router": "in-repo router",
+          "attempts": 9,
+          "before_completed": 0,
+          "after_completed": 0,
+          "before_passed": 0,
+          "after_passed": 0
+        }
+      ],
+      "run_sha256": "fc144586e8a5dea2d3f64e059d36bd10a0920ff7455230ca92fa077da8c8a19c"
     }
   }
 }
