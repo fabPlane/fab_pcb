@@ -1,0 +1,248 @@
+{
+  "before": {
+    "allowed_cpus": [6, 7, 8, 9, 10, 11],
+    "inputs_sha256": "c36936fd81f6af0e9efd11990ad976127b01f6e03d7db889ebc5e876af06c9a1",
+    "harness_sha256": {
+      "dsn-path.py": "0c03ef2edc81b6d806f59486d82a9be1531e74933e2009abbdb06629ddb6aee3",
+      "dsn-engine-scoring-c2-v1.py": "cf305ececb1065d1a22110940d6802aa2deedcfe2ef84fb806d6de9077ecab43",
+      "native-router-format-v2.py": "de484d5beba50be5bc5d48cbb2be44de0e72da7195b01e7f185782d92ce29a0d",
+      "runner-scoring-v2.py": "d177864e1d6ab965556609fca3376daaee99fbc206c66edc02ef237ceb0cdaab",
+      "native-check-v4.3.py": "1ced7295253415bf7cc9d4d4c27c9bb4f0053d132e212fccbbc28a5a17f3e57e",
+      "native-router-path-scoring-v3.py": "ed2ef80f62095dcadd6a8b300afb20a49cb117ab7f48d647eaffeb187b2539aa",
+      "dsn-engine-scoring-v1.py": "45cf0877b49cfd133f08c08ac2ad14213313522fe5f290f8bf01972e06a480c0",
+      "native-check-v3.py": "370a1b84f2208f63244d17fc55be8940ef3c611626074b1bff3993cc3141b1a8",
+      "fab-route-c2.ts": "36a05f4393a49060f93572c890847b8ff068402d4380bbb0c9d33715c8d6e3de",
+      "scoring_telemetry_v1.py": "02469e99b4f12a071c7aba9bee62e94a91168aea11bd94174dc3fab3ddd0df7d"
+    },
+    "candidate_commit": "69cf598db98c136bff16bbe02bccdded95674b18",
+    "evidence_sha256": {
+      "controls.json": "1e983aa814ee134bfb2b2ebb33a67b76df0314207cdd30709616929f92a053c2",
+      "results.json": "818ff9f18a56a1d704fa01826f9df5bd7ab71e0e624e5e1c60be69a01485c044",
+      "summary.json": "898b728514ae4cac961de0acc5aacf752727dc1738a5f5fb224cb16065073605"
+    },
+    "runs": [
+      {
+        "case": "kitspace-solenoid-driver-j3",
+        "seed": 1,
+        "passed": true,
+        "seconds": 0.718121102,
+        "vias": 12,
+        "length_mm": 354.1762670743417,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "kitspace-solenoid-driver-j3",
+        "seed": 2,
+        "passed": true,
+        "seconds": 0.724080208,
+        "vias": 12,
+        "length_mm": 354.1762670743417,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "kitspace-solenoid-driver-j3",
+        "seed": 3,
+        "passed": true,
+        "seconds": 0.757530145,
+        "vias": 12,
+        "length_mm": 354.1762670743417,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "kitspace-solenoid-driver-j4",
+        "seed": 1,
+        "passed": true,
+        "seconds": 0.878745692,
+        "vias": 9,
+        "length_mm": 239.6847421348615,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "kitspace-solenoid-driver-j4",
+        "seed": 2,
+        "passed": true,
+        "seconds": 0.7333876890000001,
+        "vias": 9,
+        "length_mm": 239.6847421348615,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "kitspace-solenoid-driver-j4",
+        "seed": 3,
+        "passed": true,
+        "seconds": 0.732477021,
+        "vias": 9,
+        "length_mm": 239.6847421348615,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "nextbusclock-nextbusclockv1-j2-small",
+        "seed": 1,
+        "passed": true,
+        "seconds": 0.726635452,
+        "vias": 2,
+        "length_mm": 1498.272560544747,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "nextbusclock-nextbusclockv1-j2-small",
+        "seed": 2,
+        "passed": true,
+        "seconds": 0.744722666,
+        "vias": 2,
+        "length_mm": 1498.272560544747,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "nextbusclock-nextbusclockv1-j2-small",
+        "seed": 3,
+        "passed": true,
+        "seconds": 0.726903435,
+        "vias": 2,
+        "length_mm": 1498.272560544747,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      }
+    ]
+  },
+  "after": {
+    "allowed_cpus": [6, 7, 8, 9, 10, 11],
+    "inputs_sha256": "c36936fd81f6af0e9efd11990ad976127b01f6e03d7db889ebc5e876af06c9a1",
+    "harness_sha256": {
+      "dsn-path.py": "0c03ef2edc81b6d806f59486d82a9be1531e74933e2009abbdb06629ddb6aee3",
+      "dsn-engine-scoring-c2-v1.py": "cf305ececb1065d1a22110940d6802aa2deedcfe2ef84fb806d6de9077ecab43",
+      "native-router-format-v2.py": "de484d5beba50be5bc5d48cbb2be44de0e72da7195b01e7f185782d92ce29a0d",
+      "runner-scoring-v2.py": "d177864e1d6ab965556609fca3376daaee99fbc206c66edc02ef237ceb0cdaab",
+      "native-check-v4.3.py": "1ced7295253415bf7cc9d4d4c27c9bb4f0053d132e212fccbbc28a5a17f3e57e",
+      "native-router-path-scoring-v3.py": "ed2ef80f62095dcadd6a8b300afb20a49cb117ab7f48d647eaffeb187b2539aa",
+      "dsn-engine-scoring-v1.py": "45cf0877b49cfd133f08c08ac2ad14213313522fe5f290f8bf01972e06a480c0",
+      "native-check-v3.py": "370a1b84f2208f63244d17fc55be8940ef3c611626074b1bff3993cc3141b1a8",
+      "fab-route-c2.ts": "36a05f4393a49060f93572c890847b8ff068402d4380bbb0c9d33715c8d6e3de",
+      "scoring_telemetry_v1.py": "02469e99b4f12a071c7aba9bee62e94a91168aea11bd94174dc3fab3ddd0df7d"
+    },
+    "candidate_commit": "5c893d824b1a2ea649536980d18e2b48a30cafbd",
+    "evidence_sha256": {
+      "controls.json": "36c7d236145d7b4a59748eb0204b6e9a55004b0c5c82d657c7833d11f4ac9f94",
+      "results.json": "78f0e705064f24ce1d50f20a00defee42043c6717c79cdeb949cc0e067133d87",
+      "summary.json": "9c59083185d5d4c4ed61de53849757b8898b61c0c33428e14f852b94b81a2656"
+    },
+    "runs": [
+      {
+        "case": "kitspace-solenoid-driver-j3",
+        "seed": 1,
+        "passed": true,
+        "seconds": 0.717869827,
+        "vias": 12,
+        "length_mm": 354.1762670743417,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "kitspace-solenoid-driver-j3",
+        "seed": 2,
+        "passed": true,
+        "seconds": 0.722928994,
+        "vias": 12,
+        "length_mm": 354.1762670743417,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "kitspace-solenoid-driver-j3",
+        "seed": 3,
+        "passed": true,
+        "seconds": 0.723454463,
+        "vias": 12,
+        "length_mm": 354.1762670743417,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "kitspace-solenoid-driver-j4",
+        "seed": 1,
+        "passed": true,
+        "seconds": 0.725859832,
+        "vias": 9,
+        "length_mm": 239.6847421348615,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "kitspace-solenoid-driver-j4",
+        "seed": 2,
+        "passed": true,
+        "seconds": 0.717360685,
+        "vias": 9,
+        "length_mm": 239.6847421348615,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "kitspace-solenoid-driver-j4",
+        "seed": 3,
+        "passed": true,
+        "seconds": 0.746301485,
+        "vias": 9,
+        "length_mm": 239.6847421348615,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "nextbusclock-nextbusclockv1-j2-small",
+        "seed": 1,
+        "passed": true,
+        "seconds": 0.8571960750000001,
+        "vias": 2,
+        "length_mm": 1498.272560544747,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "nextbusclock-nextbusclockv1-j2-small",
+        "seed": 2,
+        "passed": true,
+        "seconds": 0.733766998,
+        "vias": 2,
+        "length_mm": 1498.272560544747,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      },
+      {
+        "case": "nextbusclock-nextbusclockv1-j2-small",
+        "seed": 3,
+        "passed": true,
+        "seconds": 0.87123939,
+        "vias": 2,
+        "length_mm": 1498.272560544747,
+        "opens": 0,
+        "new_errors": 0,
+        "failed_fidelity": []
+      }
+    ]
+  }
+}
