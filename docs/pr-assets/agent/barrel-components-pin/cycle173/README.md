@@ -7,11 +7,11 @@ All 18 initial attempts passed native acceptance, fidelity and task-specific che
 Each had zero opens and zero new DRC errors. Via counts and lengths were identical.
 This is a subset, not a full-suite score or a speed improvement claim.
 
-| Case | Valid before / after | Median seconds before / after | Vias before / after | Length mm before / after |
-|---|---|---|---|---|
-| Solenoid J3 power widths | 3/3 / 3/3 | 0.724 / 0.723 | 12 / 12 | 354.176 / 354.176 |
-| Solenoid J4 ground pour | 3/3 / 3/3 | 0.733 / 0.726 | 9 / 9 | 239.685 / 239.685 |
-| Clock J2 small retained copper | 3/3 / 3/3 | 0.727 / 0.857 | 2 / 2 | 1498.273 / 1498.273 |
+| Case                           | Valid before / after | Median seconds before / after | Vias before / after | Length mm before / after |
+| ------------------------------ | -------------------- | ----------------------------- | ------------------- | ------------------------ |
+| Solenoid J3 power widths       | 3/3 / 3/3            | 0.724 / 0.723                 | 12 / 12             | 354.176 / 354.176        |
+| Solenoid J4 ground pour        | 3/3 / 3/3            | 0.733 / 0.726                 | 9 / 9               | 239.685 / 239.685        |
+| Clock J2 small retained copper | 3/3 / 3/3            | 0.727 / 0.857                 | 2 / 2               | 1498.273 / 1498.273      |
 
 The initial clock measurement is 18% slower. These short wall-time samples include
 export/import overhead and shared-host load. A reversed-order confirmation is

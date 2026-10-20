@@ -6,10 +6,10 @@ stock KiCad 10.0.6, three repeats per case per revision. All 12 attempts passed.
 Zero native opens/new errors; fidelity and frozen controls preserved throughout.
 This is a subset measurement, not a full-suite result or speed gain claim.
 
-| Case | Valid before / after | Median seconds before / after | Vias before / after | Length mm before / after |
-|---|---|---|---|---|
-| LCR power widths J3 | 3/3 / 3/3 | 2.150534 / 2.129880 | 40 / 40 | 845.486 / 845.486 |
-| Clock retained copper J2 medium | 3/3 / 3/3 | 0.978534 / 0.985627 | 1 / 1 | 1484.105 / 1484.105 |
+| Case                            | Valid before / after | Median seconds before / after | Vias before / after | Length mm before / after |
+| ------------------------------- | -------------------- | ----------------------------- | ------------------- | ------------------------ |
+| LCR power widths J3             | 3/3 / 3/3            | 2.150534 / 2.129880           | 40 / 40             | 845.486 / 845.486        |
+| Clock retained copper J2 medium | 3/3 / 3/3            | 0.978534 / 0.985627           | 1 / 1               | 1484.105 / 1484.105      |
 
 No engine, adapter, frozen inputs, checker or scoring edits. measurements.json
 retains every attempt and input/harness/raw evidence identities. The summary

@@ -10,11 +10,11 @@ Track shortening still uses its existing acceptance rule.
 Frozen standalone benchmark, hyper-ms-lin cores 6–11, stock KiCad 10.0.6,
 solenoid-driver J1, three repeats each (subset, not a full-suite score):
 
-| Metric | Before | After |
-|---|---:|---:|
-| Valid runs | 3/3 | 3/3 |
-| Opens / new DRC errors, each repeat | 0 / 0 | 0 / 0 |
-| Median routing seconds | 0.718 | 0.713 |
+| Metric                              | Before | After |
+| ----------------------------------- | -----: | ----: |
+| Valid runs                          |    3/3 |   3/3 |
+| Opens / new DRC errors, each repeat |  0 / 0 | 0 / 0 |
+| Median routing seconds              |  0.718 | 0.713 |
 
 No speed improvement is claimed. Inputs, checker and frozen scoring are unchanged.
 Benchmark source override uses the exact pinned candidate; a local copied runtime

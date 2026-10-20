@@ -5,10 +5,10 @@ Unchanged baseline 69cf598db98c136bff16bbe02bccdded95674b18 versus candidate
 stock KiCad 10.0.6. Three repeats per case per revision; all 12 attempts checked.
 Both tasks remain invalid in every repeat. No full-suite or speed improvement claim.
 
-| Case | Valid before / after | Opens before / after, each repeat | New errors before / after | Median seconds before / after | Vias before / after |
-|---|---|---|---|---|---|
-| Fan controller J1 | 0/3 / 0/3 | 5 / 3 | 0 / 0 | 3.707934 / 3.992332 | 102 / 104 |
-| Second whole board J1 | 0/3 / 0/3 | 3 / 3 | 0 / 0 | 2.032837 / 2.296248 | 100 / 100 |
+| Case                  | Valid before / after | Opens before / after, each repeat | New errors before / after | Median seconds before / after | Vias before / after |
+| --------------------- | -------------------- | --------------------------------- | ------------------------- | ----------------------------- | ------------------- |
+| Fan controller J1     | 0/3 / 0/3            | 5 / 3                             | 0 / 0                     | 3.707934 / 3.992332           | 102 / 104           |
+| Second whole board J1 | 0/3 / 0/3            | 3 / 3                             | 0 / 0                     | 2.032837 / 2.296248           | 100 / 100           |
 
 Fan-controller length remains 909.022035 mm; second-board length remains
 1315.786056 mm. Candidate times are approximately 8% and 13% higher in this

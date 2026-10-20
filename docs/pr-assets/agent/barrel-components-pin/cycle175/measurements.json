@@ -62,14 +62,7 @@
         }
       }
     ],
-    "allowed_cpus": [
-      6,
-      7,
-      8,
-      9,
-      10,
-      11
-    ],
+    "allowed_cpus": [6, 7, 8, 9, 10, 11],
     "inputs_sha256": "c36936fd81f6af0e9efd11990ad976127b01f6e03d7db889ebc5e876af06c9a1",
     "harness_sha256": {
       "dsn-path.py": "0c03ef2edc81b6d806f59486d82a9be1531e74933e2009abbdb06629ddb6aee3",
@@ -221,14 +214,7 @@
         }
       }
     ],
-    "allowed_cpus": [
-      6,
-      7,
-      8,
-      9,
-      10,
-      11
-    ],
+    "allowed_cpus": [6, 7, 8, 9, 10, 11],
     "inputs_sha256": "c36936fd81f6af0e9efd11990ad976127b01f6e03d7db889ebc5e876af06c9a1",
     "harness_sha256": {
       "dsn-path.py": "0c03ef2edc81b6d806f59486d82a9be1531e74933e2009abbdb06629ddb6aee3",
