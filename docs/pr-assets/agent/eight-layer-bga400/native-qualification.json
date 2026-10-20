@@ -24,48 +24,21 @@
           "ball_mm": 0.3,
           "target_mm": 0.4,
           "target_pitch_mm": 0.8,
-          "board_mm": [
-            60,
-            60
-          ],
+          "board_mm": [60, 60],
           "clearance_mm": 0.1,
           "track_mm": 0.1,
           "via_mm": 0.3,
           "drill_mm": 0.1
         },
         "copper_stack": [
-          [
-            0,
-            "F.Cu"
-          ],
-          [
-            4,
-            "In1.Cu"
-          ],
-          [
-            6,
-            "In2.Cu"
-          ],
-          [
-            8,
-            "In3.Cu"
-          ],
-          [
-            10,
-            "In4.Cu"
-          ],
-          [
-            12,
-            "In5.Cu"
-          ],
-          [
-            14,
-            "In6.Cu"
-          ],
-          [
-            2,
-            "B.Cu"
-          ]
+          [0, "F.Cu"],
+          [4, "In1.Cu"],
+          [6, "In2.Cu"],
+          [8, "In3.Cu"],
+          [10, "In4.Cu"],
+          [12, "In5.Cu"],
+          [14, "In6.Cu"],
+          [2, "B.Cu"]
         ],
         "native_errors": 0,
         "native_warnings": 0,
@@ -98,48 +71,21 @@
           "ball_mm": 0.3,
           "target_mm": 0.4,
           "target_pitch_mm": 0.8,
-          "board_mm": [
-            60,
-            60
-          ],
+          "board_mm": [60, 60],
           "clearance_mm": 0.1,
           "track_mm": 0.1,
           "via_mm": 0.3,
           "drill_mm": 0.1
         },
         "copper_stack": [
-          [
-            0,
-            "F.Cu"
-          ],
-          [
-            4,
-            "In1.Cu"
-          ],
-          [
-            6,
-            "In2.Cu"
-          ],
-          [
-            8,
-            "In3.Cu"
-          ],
-          [
-            10,
-            "In4.Cu"
-          ],
-          [
-            12,
-            "In5.Cu"
-          ],
-          [
-            14,
-            "In6.Cu"
-          ],
-          [
-            2,
-            "B.Cu"
-          ]
+          [0, "F.Cu"],
+          [4, "In1.Cu"],
+          [6, "In2.Cu"],
+          [8, "In3.Cu"],
+          [10, "In4.Cu"],
+          [12, "In5.Cu"],
+          [14, "In6.Cu"],
+          [2, "B.Cu"]
         ],
         "native_errors": 0,
         "native_warnings": 0,
@@ -172,48 +118,21 @@
           "ball_mm": 0.3,
           "target_mm": 0.4,
           "target_pitch_mm": 0.8,
-          "board_mm": [
-            60,
-            60
-          ],
+          "board_mm": [60, 60],
           "clearance_mm": 0.1,
           "track_mm": 0.1,
           "via_mm": 0.3,
           "drill_mm": 0.1
         },
         "copper_stack": [
-          [
-            0,
-            "F.Cu"
-          ],
-          [
-            4,
-            "In1.Cu"
-          ],
-          [
-            6,
-            "In2.Cu"
-          ],
-          [
-            8,
-            "In3.Cu"
-          ],
-          [
-            10,
-            "In4.Cu"
-          ],
-          [
-            12,
-            "In5.Cu"
-          ],
-          [
-            14,
-            "In6.Cu"
-          ],
-          [
-            2,
-            "B.Cu"
-          ]
+          [0, "F.Cu"],
+          [4, "In1.Cu"],
+          [6, "In2.Cu"],
+          [8, "In3.Cu"],
+          [10, "In4.Cu"],
+          [12, "In5.Cu"],
+          [14, "In6.Cu"],
+          [2, "B.Cu"]
         ],
         "native_errors": 0,
         "native_warnings": 0,

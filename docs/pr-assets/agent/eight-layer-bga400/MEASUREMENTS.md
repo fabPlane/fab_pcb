@@ -4,12 +4,12 @@ This adds geometry and layer-count coverage beyond the six-layer candidate. Nati
 
 Native before/after qualification on hyper-ms-lin, cores 0–5, nice 10, checker 10.0.6; the same candidate and rules, three independent fresh DRCs per column:
 
-| Check | Before: committed input, 3 repeats | After: regenerated input, 3 repeats |
-|---|---:|---:|
-| Native errors | 0 / 0 / 0 | 0 / 0 / 0 |
-| Native warnings | 0 / 0 / 0 | 0 / 0 / 0 |
-| Native opens | 400 / 400 / 400 | 400 / 400 / 400 |
-| Board/project/DSN identity | Reference bytes | 3/3 exact matches |
+| Check                      | Before: committed input, 3 repeats | After: regenerated input, 3 repeats |
+| -------------------------- | ---------------------------------: | ----------------------------------: |
+| Native errors              |                          0 / 0 / 0 |                           0 / 0 / 0 |
+| Native warnings            |                          0 / 0 / 0 |                           0 / 0 / 0 |
+| Native opens               |                    400 / 400 / 400 |                     400 / 400 / 400 |
+| Board/project/DSN identity |                    Reference bytes |                   3/3 exact matches |
 
 The generator checks native topology, stack and loaded project rules before export and fresh DRC. Checks use explicit exceptions under optimized Python. Source is original and MIT licensed; all generation parameters and seed 6408 are recorded.
 
@@ -33,10 +33,10 @@ Additional retained corpus qualification on the same machine, three routing
 repeats per compatible case, ten-second route budget, unchanged routing/scoring
 code. Existing cases and the added candidate are separated:
 
-| Cohort | Before | After |
-|---|---:|---:|
-| Existing corpus attempts | 144 | 144 |
-| Existing validated passes | 33 | 33 |
+| Cohort                        |                        Before |                         After |
+| ----------------------------- | ----------------------------: | ----------------------------: |
+| Existing corpus attempts      |                           144 |                           144 |
+| Existing validated passes     |                            33 |                            33 |
 | New board timeouts / attempts | 9 / 9, implicit default rules | 9 / 9, intended project rules |
 
 The external harness initially dropped the bundled project. That cohort is

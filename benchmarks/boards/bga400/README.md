@@ -15,16 +15,16 @@ stack, two terminals per net, absence of tracks/zones, and fresh native DRC.
 It exports DSN and normalizes only the DSN root filename. Board, companion
 project and DSN bytes reproduce across destination directories.
 
-| Parameter | Value |
-|---|---:|
-| Board | 60 × 60 mm |
-| Signal copper layers | 8 |
-| BGA | 20 × 20, 0.65 mm pitch, 0.30 mm round pads |
-| Destination terminals | 400, shuffled by seed, 0.40 mm pads |
-| Nets / pads / native opens | 400 / 800 / 400 |
-| Track / clearance | 0.10 / 0.10 mm |
-| Through via diameter / drill | 0.30 / 0.10 mm |
-| Native input DRC errors / warnings | 0 / 0 |
+| Parameter                          |                                      Value |
+| ---------------------------------- | -----------------------------------------: |
+| Board                              |                                 60 × 60 mm |
+| Signal copper layers               |                                          8 |
+| BGA                                | 20 × 20, 0.65 mm pitch, 0.30 mm round pads |
+| Destination terminals              |        400, shuffled by seed, 0.40 mm pads |
+| Nets / pads / native opens         |                            400 / 800 / 400 |
+| Track / clearance                  |                             0.10 / 0.10 mm |
+| Through via diameter / drill       |                             0.30 / 0.10 mm |
+| Native input DRC errors / warnings |                                      0 / 0 |
 
 The companion `.kicad_pro` is part of the fixture and must travel with the board.
 All copper layers are signal layers. There are no planes, pair constraints,
