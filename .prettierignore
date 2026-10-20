@@ -22,3 +22,6 @@ benchmarks/autorouter/
 
 # Immutable native reports, measurements, and historical checksum evidence.
 docs/pr-assets/agent-router-fix-validation-rollback/**/*.json
+
+# Generated, checksum-controlled board fixtures (job.json records their sha256).
+benchmarks/boards/*/case/
