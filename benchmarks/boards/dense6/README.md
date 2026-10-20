@@ -71,7 +71,6 @@ The evidence CSV records both script digests. Failed board loads retain old DSNs
 3/3 before and 0/3 after. The exporter also rejects a source/destination alias
 while preserving the input, covered by its regression test.
 
-
 Report destination safety (cycle 27): the native checker rejects direct,
 symlink and hard-link aliases of the board, project/custom rules or checker
 executable before deleting stale output or launching the checker. In 36
@@ -90,7 +89,6 @@ python3 benchmarks/boards/dense6/tools/plot_output_safety.py /tmp/native-output-
 
 Absent rule-sidecar destinations and dangling sidecar symlink targets are also
 rejected before report creation; regressions preserve the sidecar absence.
-
 
 Reusable baseline evidence (cycle 28): `baseline.capture(board, report)` runs
 fresh input DRC and returns a JSON-serializable record binding the original edge

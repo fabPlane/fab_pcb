@@ -7,11 +7,7 @@
   "comparisons": 30,
   "fresh_native_checks": 60,
   "source_commit": "b9a2a7ee95a42e80ee84f3688130a11b2507ae9d",
-  "native_checker": [
-    "/usr/bin/kicad-cli",
-    "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402",
-    "10.0.6"
-  ],
+  "native_checker": ["/usr/bin/kicad-cli", "03d0a691514fa384d4e4a81331c2ba5a872c8493fa78f54032aec011eeb22402", "10.0.6"],
   "raw_provenance_sha256": "69d621a3da469de5c88899b201d6e66157ab3c5643304289a3f4b1b23902bc0a",
   "summary_sha256": "61f2afbbba14b7e15d6370c346a966ad487d879384a1a2cda636acfb2ad8a20e",
   "baselines": [

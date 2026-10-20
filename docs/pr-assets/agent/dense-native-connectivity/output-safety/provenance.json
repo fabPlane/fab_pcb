@@ -3,17 +3,8 @@
   "machine": "hyper-ms-lin",
   "repeats": 3,
   "cases": 12,
-  "protected_paths": [
-    "board",
-    "project rules",
-    "custom rules",
-    "checker executable"
-  ],
-  "aliases": [
-    "direct",
-    "symlink",
-    "hardlink"
-  ],
+  "protected_paths": ["board", "project rules", "custom rules", "checker executable"],
+  "aliases": ["direct", "symlink", "hardlink"],
   "before_commit": "76b4637",
   "after_audit_sha256": "ea69ce93e77b04bcd3a4fdadbf386d153977e05a2d309f265bf06db0c6995060",
   "before_audit_sha256": "4afcc32748f4abc63a4f4b009c8ffcf0821df99dc67095a80272f3308599203f",
