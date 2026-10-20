@@ -247,3 +247,79 @@ nice -n 10 taskset -c 0-5 timeout 60 bun docs/pr-assets/agent/scoring-source-cac
 ```
 
 ![Source cache controls](https://github.com/fabPlane/fab_pcb/blob/agent/bga1024-candidate/docs/pr-assets/agent/bga1024-candidate/cache.png?raw=true)
+
+## Complete five-suite routing measurement
+
+Cycle 70 versus cycle 68: same normalized fixtures, same backend and machine
+identities, cores 0–5, nice 10, three fresh repeats, ten-second routing budgets.
+All four ready backends and five bundled suites: 54 compatible groups and
+162 attempts per cohort. Every attempt is retained, without retries or discards.
+No remote corpus was fetched. All five compare commands and runtime endpoint
+verification exited successfully.
+
+|Metric|Before (cycle 68)|After (cycle 70)|
+|---|---:|---:|
+|Attempts|162|162|
+|Engine completed|57|57|
+|Timeouts|105|105|
+|Validated passes|33|33|
+
+|Suite|Router|Before completed|After completed|Before passes|After passes|Attempts each|
+|---|---|---:|---:|---:|---:|---:|
+|canary|fab_router|12|12|9|9|12|
+|canary|reference engine|9|9|6|6|9|
+|canary|capacity-mesh router|3|3|3|3|3|
+|canary|in-repo router|12|12|3|3|12|
+|bga|fab_router|0|0|0|0|12|
+|bga|reference engine|0|0|0|0|6|
+|bga|capacity-mesh router|0|0|0|0|6|
+|bga|in-repo router|0|0|0|0|12|
+|ladder|fab_router|5|4|3|3|18|
+|ladder|reference engine|3|3|3|3|9|
+|ladder|capacity-mesh router|6|6|6|6|9|
+|ladder|in-repo router|7|8|0|0|18|
+|dense-source|fab_router|0|0|0|0|3|
+|dense-source|reference engine|0|0|0|0|3|
+|dense-source|in-repo router|0|0|0|0|3|
+|dense-candidate|fab_router|0|0|0|0|9|
+|dense-candidate|reference engine|0|0|0|0|9|
+|dense-candidate|in-repo router|0|0|0|0|9|
+
+
+Unknown quality never counts as a pass. Engine completion is separate from
+validated connectivity and DRC. Total completions match, while ladder completions shift from 5 to 4 for
+fab_router and from 7 to 8 for the in-repo router; their pass counts stay fixed.
+No engine change or routing gain is claimed.
+Native completion scoring and candidate admission status remain unchanged.
+The routine ten-second budget is preserved; the prior thirty-second cohort
+is not used as the control for this change.
+
+The measured integration changes two active source files relative to the control:
+the runner identity hook/cache token and the new first-party source helper.
+Preparation also includes an unused saved host module, `src/hosts/kicad-before67.ts`;
+it is not imported by the runner or adapters and its bytes are also observed.
+All 43 source/script files match the independent preparation replay; final
+observations match the start. Corpus differences are four documentation/license
+files and an unused diagnostic DSN's root filename, with the remaining DSN bytes
+identical. Native source board/project bytes and normalized routing fixture
+identities match. The fetched primary head has no source/script/corpus changes
+relative to the pinned `374ace2` integration. Runtime startup/end observations
+match the control; this is not continuous execution or imported dependency proof.
+Sequential cohorts and machine contention limit timing comparisons.
+
+Separate benchmark summaries contain per-case outcome/quality aggregates and source
+observations; raw logs and artifacts stay in owned scratch. The benchmark contribution appends exactly 18 new
+suite/backend rows once to its private and shared history logs. The history timing
+column records median all-attempt wall time, as stated in each row's notes.
+
+Standalone validation: typecheck, 17 tests / 67 assertions. Integration:
+typecheck, 315 passing tests / 28 skipped / 7,445 assertions before the final
+additional timeout-precedence assertions; the updated targeted runner tests
+pass 3/3 with 20 assertions. Public fixture: typecheck, 11/11 unit packages,
+4/4 optimized native tests. No layers-check script exists in these harnesses.
+Initial integration placement interfered with three descriptor mock controls;
+the hook was moved to the runner boundary and all checks passed before routing.
+A public unit invocation initially lacked the runtime module and one retry used
+an incorrect entrypoint; the configured `src/api.ts` run passed. No failed
+routing invocation was discarded. An initial reproduction lacked its parent
+directory; preparation now creates it and replays successfully.
