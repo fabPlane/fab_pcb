@@ -1,6 +1,8 @@
 {
   "baselineRef": "2666bc3",
   "repeats": 3,
+  "runnerBenchSha256": "71f15a0e58135a433fdfbaacd9e36f7a0f80f91372966beb6cfbdc31fc00190d",
+  "helperSha256": "25678bbdee5805af7c08dc15ce2eb3d504a62625aa131e79f016da0cb1d3ab4b",
   "rows": [
     {
       "variant": "before",

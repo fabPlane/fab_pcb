@@ -458,3 +458,74 @@ nice -n 10 taskset -c 0-5 timeout 180 bun test
 ```
 
 ![Runtime configuration controls](https://github.com/fabPlane/fab_pcb/blob/agent/bga1024-candidate/docs/pr-assets/agent/bga1024-candidate/config.png?raw=true)
+
+## Cycle 72 complete routing comparison
+
+Same machine, normalized fixtures and backend identities as cycle 71. Cores 0–5,
+nice 10, ten-second routing budgets, three fresh repeats: four ready backends,
+five bundled suites, 54 compatible groups, 162 attempts per cohort. All attempts
+are retained without retries or discards. Only `src/scoring-source.ts` differs across the 88 measured source, script,
+corpus and configuration files; it adds the three runtime configuration records. Source observations match at the end;
+runtime startup/end observations match the control. These observations do not
+establish continuous execution or external dependency identity.
+
+|Metric|Before (cycle 71)|After (cycle 72)|
+|---|---:|---:|
+|Attempts|162|162|
+|Engine completed|56|54|
+|Timeouts|106|108|
+|Validated passes|33|33|
+
+|Suite|Router|Before completed|After completed|Before passes|After passes|Attempts each|
+|---|---|---:|---:|---:|---:|---:|
+|canary|fab_router|12|12|9|9|12|
+|canary|reference engine|9|9|6|6|9|
+|canary|capacity-mesh router|3|3|3|3|3|
+|canary|in-repo router|12|12|3|3|12|
+|bga|fab_router|0|0|0|0|12|
+|bga|reference engine|0|0|0|0|6|
+|bga|capacity-mesh router|0|0|0|0|6|
+|bga|in-repo router|0|0|0|0|12|
+|ladder|fab_router|4|3|3|3|18|
+|ladder|reference engine|3|3|3|3|9|
+|ladder|capacity-mesh router|6|6|6|6|9|
+|ladder|in-repo router|7|6|0|0|18|
+|dense-source|fab_router|0|0|0|0|3|
+|dense-source|reference engine|0|0|0|0|3|
+|dense-source|in-repo router|0|0|0|0|3|
+|dense-candidate|fab_router|0|0|0|0|9|
+|dense-candidate|reference engine|0|0|0|0|9|
+|dense-candidate|in-repo router|0|0|0|0|9|
+
+
+Unknown quality does not count as validity. Completion is separate from native
+connectivity and DRC. No routing gain or native baseline adoption is claimed.
+The same configuration controls pass at the prepared primary runner boundary
+(three fresh processes per revision; nine edits each).
+All five compare commands and runtime endpoint verification exited successfully.
+Sequential cohorts and host contention limit timing comparisons.
+Every per-case pass count is unchanged. The two lost completions are the
+in-repo router's native 50-net ladder case (one completion becomes zero;
+unavailable quality) and fab_router's 10-net SRJ ladder case (one partial
+50%-complete output becomes zero completions). These are adverse execution
+observations, not a claimed effect of the cache fix. Validated passes stay
+33/162. Quality totals change from 125 unavailable / 19 SRJ / 18 native to
+126 unavailable / 18 SRJ / 18 native; all 36 dense attempts time out.
+
+Reproduce the full integration from the separate benchmark checkout:
+
+```sh
+bash docs/pr-assets/agent/scoring-source-cache/prepare.sh "$HOME/bench/agents/codex-bench-boards/scratch/source-config-reproduce/run"
+cd "$HOME/bench/agents/codex-bench-boards/scratch/source-config-reproduce/run"
+nice -n 10 taskset -c 0-5 timeout 2400 bash ../run-integration.sh
+```
+
+The prepared scratch integration must never be pushed. Raw artifacts remain in
+owned scratch; committed evidence contains summaries. Exactly 18 suite/backend
+rows were appended once to each history log. The recorded duration is the
+median wall time over all attempts, including timeouts.
+
+Validation: standalone typecheck and 19 tests / 97 assertions; integrated
+typecheck and 317 passing tests / 28 skipped / 7,477 assertions; public fixture
+typecheck, all 11 unit packages, and four optimized native tests. No layer-check
+script exists in these harnesses. No routing attempt was dropped or retried.
