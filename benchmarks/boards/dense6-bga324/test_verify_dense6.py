@@ -114,6 +114,29 @@ class ProjectPolicyTests(unittest.TestCase):
 
 
 class NativeClearanceTests(unittest.TestCase):
+    def test_copper_stack_names_and_types_change_candidate_signature(self):
+        try:
+            import pcbnew
+        except ImportError:
+            self.skipTest("requires KiCad pcbnew")
+        board = pcbnew.BOARD()
+        board.SetCopperLayerCount(6)
+        original = geometry(board)
+        layer = pcbnew.In1_Cu
+        name = board.GetLayerName(layer)
+        for renamed in ("Plane1", "Signal1"):
+            board.SetLayerName(layer, renamed)
+            self.assertEqual(board.GetCopperLayerCount(), 6)
+            self.assertNotEqual(original, geometry(board))
+        board.SetLayerName(layer, name)
+        self.assertEqual(original, geometry(board))
+        for layer_type in (pcbnew.LT_POWER, pcbnew.LT_MIXED):
+            board.SetLayerType(layer, layer_type)
+            self.assertEqual(board.GetCopperLayerCount(), 6)
+            self.assertNotEqual(original, geometry(board))
+        board.SetLayerType(layer, pcbnew.LT_SIGNAL)
+        self.assertEqual(original, geometry(board))
+
     def test_footprint_copper_graphics_cannot_bypass_candidate_signature(self):
         try:
             import pcbnew

@@ -97,7 +97,9 @@ def geometry(board):
                         for f in board.GetFootprints())
     outline = sorted((int(d.GetShape()), int(d.GetLayer()), point(d.GetStart()), point(d.GetEnd()), d.GetWidth())
                      for d in board.GetDrawings())
-    return dict(layers=board.GetCopperLayerCount(), footprints=footprints,
+    copper_stack = [(int(layer), board.GetLayerName(layer), int(board.GetLayerType(layer)))
+                    for layer in board.GetEnabledLayers().CuStack()]
+    return dict(layers=board.GetCopperLayerCount(), copper_stack=copper_stack, footprints=footprints,
                 pads=pads, outline=outline, tracks=len(board.GetTracks()),
                 zones=len(board.Zones()))
 
