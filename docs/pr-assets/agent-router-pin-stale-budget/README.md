@@ -4,15 +4,15 @@ Advance the engine pin from `69cf598` to `76534d6`, the implementation commit re
 
 The full standalone native suite measured precisely these old/new engine bytes on the same host and cores 20–25, 26 cases × three repeats, identical input/config/checker/runtime/order/seeds. `native-comparison.json` includes all candidate attempts, matched-control flags and raw-evidence hashes; `candidate-source.json` identifies all 74 measured candidate files. This is the engine comparison for this pin change, not a separate rerun or live adapter transaction test.
 
-| Measurement | Old pin | New pin |
-| --- | ---: | ---: |
-| Synthetic single-layer detour found, three repeats | 0/3 | 3/3 |
-| Synthetic layered detour found, three repeats | 0/3 | 3/3 |
-| Native passes | 39/78 | 39/78 |
-| Native cases passing 3/3 | 13/26 | 13/26 |
-| Opens | 120 | 120 |
-| New thermal errors | 27 | 27 |
-| Median route seconds | 1.172079 | 1.326766 |
+| Measurement                                        |  Old pin |  New pin |
+| -------------------------------------------------- | -------: | -------: |
+| Synthetic single-layer detour found, three repeats |      0/3 |      3/3 |
+| Synthetic layered detour found, three repeats      |      0/3 |      3/3 |
+| Native passes                                      |    39/78 |    39/78 |
+| Native cases passing 3/3                           |    13/26 |    13/26 |
+| Opens                                              |      120 |      120 |
+| New thermal errors                                 |       27 |       27 |
+| Median route seconds                               | 1.172079 | 1.326766 |
 
 Every native attempt's outcome, error types, fidelity, vias and track length matches. Shared-host timing is descriptive; overlapping engine tests make an isolated speed comparison unavailable. Observed median is 13.2% higher; no speed gain or timing nonregression claim. Native thermal starvation remains unresolved. The standalone harness bypasses the job adapter; this PR does not incorporate the separate native-validation work.
 
