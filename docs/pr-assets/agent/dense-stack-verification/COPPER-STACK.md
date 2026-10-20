@@ -4,12 +4,12 @@ The existing candidate includes reproducibility, geometry, project-rule and fres
 
 Admission benchmark on hyper-ms-lin, cores 0–5, nice 10, seed 6406, native checker 10.0.6, Python `-O`. Before `27b3944`, after this branch; identical input cases and three independent repeats per case, 24 verifier executions. These controls perform no routing.
 
-| Candidate control | Before accepted | After accepted | Repeats |
-|---|---:|---:|---:|
-| Unchanged | 3/3 | 3/3 | 3 |
-| Renamed inner layer | 3/3 | 0/3 | 3 |
-| Power inner layer | 3/3 | 0/3 | 3 |
-| Mixed inner layer | 3/3 | 0/3 | 3 |
+| Candidate control   | Before accepted | After accepted | Repeats |
+| ------------------- | --------------: | -------------: | ------: |
+| Unchanged           |             3/3 |            3/3 |       3 |
+| Renamed inner layer |             3/3 |            0/3 |       3 |
+| Power inner layer   |             3/3 |            0/3 |       3 |
+| Mixed inner layer   |             3/3 |            0/3 |       3 |
 
 All 15 accepted executions reach fresh native DRC for both generated and bundled boards: 0 errors, 439 opens, 30 library warnings. All altered candidates reject before export/checking with the revised verifier. Persisted mutations are reloaded to confirm the name/type changes survive saving and retain six layers. No routing improvement or routed feasibility is claimed.
 
