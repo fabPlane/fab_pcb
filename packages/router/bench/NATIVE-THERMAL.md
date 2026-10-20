@@ -37,9 +37,10 @@ and its directory throughout the run. It provides no live-editor transaction,
 concurrent-writer protection, signed attestation or power-loss durability guarantee.
 The benchmark's independent checks remain authoritative.
 
-Current search limitation: scoped native import can assign fresh UUIDs to retained
-tracks. A UUID-only proposal exclusion can then select authored copper; the strict
-source-copper validator refuses the proposal and the search is recorded as failed.
-The postprocessor keeps the original board for independent scoring. A search tool
-revision that identifies retained copper by physical inventory is needed to remove
-this blocker; do not weaken the source-copper check.
+Scoped native import can assign fresh UUIDs to retained tracks. Use an engine tools
+checkout containing commit `e411a8ae` or its descendant: proposal generation excludes
+both source UUIDs and exact physical source-track matches, including duplicate
+instances, reversed endpoints and equivalent numeric formatting. Older UUID-only
+search revisions can select retained copper and stop at the strict source-copper
+validator. Keep that validator enabled; this fix changes proposal eligibility.
+The default engine pin and configuration do not invoke this optional pipeline.
