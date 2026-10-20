@@ -1,0 +1,47 @@
+[
+  {
+    "repeat": 0,
+    "seconds": 153.07211249700003,
+    "attempts": 7,
+    "published": true,
+    "thermals": 0,
+    "opens": 95,
+    "lostSource": 0,
+    "lostCurrent": 0,
+    "ownership": [
+      true,
+      true,
+      true
+    ]
+  },
+  {
+    "repeat": 1,
+    "seconds": 163.78348423300002,
+    "attempts": 7,
+    "published": true,
+    "thermals": 0,
+    "opens": 95,
+    "lostSource": 0,
+    "lostCurrent": 0,
+    "ownership": [
+      true,
+      true,
+      true
+    ]
+  },
+  {
+    "repeat": 2,
+    "seconds": 186.68050520699995,
+    "attempts": 7,
+    "published": true,
+    "thermals": 0,
+    "opens": 95,
+    "lostSource": 0,
+    "lostCurrent": 0,
+    "ownership": [
+      true,
+      true,
+      true
+    ]
+  }
+]
