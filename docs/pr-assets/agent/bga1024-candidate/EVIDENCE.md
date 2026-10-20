@@ -674,3 +674,77 @@ nice -n 10 taskset -c 0-5 timeout 180 bun docs/pr-assets/agent/scoring-source-ca
 ```
 
 ![Runtime asset admission](https://github.com/fabPlane/fab_pcb/blob/agent/bga1024-candidate/docs/pr-assets/agent/bga1024-candidate/assets.png?raw=true)
+
+## Cycle 74 complete routing comparison
+
+Pinned primary `374ace2` plus recorded corpus/cache prerequisites; the newer
+primary branch is not measured by this cohort. Same machine, normalized fixtures
+and backend identities as cycle 73. Cores 0–5,
+nice 10, ten-second routing budgets, three fresh repeats: four ready backends,
+five bundled suites, 54 compatible groups, 162 attempts per cohort. All attempts
+are retained without retries or discards. Only `src/scoring-source.ts` differs
+across the 88 observed source, script, corpus and configuration files. The source
+observation was taken during integrated tests, before routing, and matches the
+final files. Runtime startup/end observations match the preceding cohort.
+These observations do not establish continuous execution or dependency identity.
+
+|Metric|Before (cycle 73)|After (cycle 74)|
+|---|---:|---:|
+|Attempts|162|162|
+|Engine completed|55|59|
+|Timeouts|107|103|
+|Validated passes|33|33|
+
+|Suite|Router|Before completed|After completed|Before passes|After passes|Attempts each|
+|---|---|---:|---:|---:|---:|---:|
+|canary|fab_router|12|12|9|9|12|
+|canary|reference engine|9|9|6|6|9|
+|canary|capacity-mesh router|3|3|3|3|3|
+|canary|in-repo router|12|12|3|3|12|
+|bga|fab_router|0|0|0|0|12|
+|bga|reference engine|0|0|0|0|6|
+|bga|capacity-mesh router|0|0|0|0|6|
+|bga|in-repo router|0|0|0|0|12|
+|ladder|fab_router|3|5|3|3|18|
+|ladder|reference engine|3|3|3|3|9|
+|ladder|capacity-mesh router|6|6|6|6|9|
+|ladder|in-repo router|7|9|0|0|18|
+|dense-source|fab_router|0|0|0|0|3|
+|dense-source|reference engine|0|0|0|0|3|
+|dense-source|in-repo router|0|0|0|0|3|
+|dense-candidate|fab_router|0|0|0|0|9|
+|dense-candidate|reference engine|0|0|0|0|9|
+|dense-candidate|in-repo router|0|0|0|0|9|
+
+Unknown quality never establishes validity. Completion is separate from native
+connectivity and DRC. No routing gain, routed feasibility, candidate promotion
+or native baseline adoption is claimed. Sequential cohorts and host contention
+limit causal timing claims. All five compare commands and runtime endpoint
+verification exit successfully.
+
+Every per-case pass count is unchanged.
+
+Execution outcome changes:
+
+- fab_router, ladder-l1-srj: {'timeout': 3} → {'timeout': 1, 'completed': 2}.
+- in-repo router, ladder-l2-kicad_pcb: {'completed': 1, 'timeout': 2} → {'completed': 3}.
+
+Quality observations: before {'unavailable': 126, 'srj-scored': 18, 'native-drc': 18}; after {'unavailable': 124, 'srj-scored': 20, 'native-drc': 18}.
+
+Reproduce the full integration from the separate benchmark checkout:
+
+```sh
+bash docs/pr-assets/agent/scoring-source-cache/prepare.sh "$HOME/bench/agents/codex-bench-boards/scratch/runtime-assets-reproduce/run"
+cd "$HOME/bench/agents/codex-bench-boards/scratch/runtime-assets-reproduce/run"
+nice -n 10 taskset -c 0-5 timeout 2400 bash ../run-integration.sh
+```
+
+The prepared scratch integration must never be pushed. Raw artifacts remain in
+owned scratch; committed evidence contains summaries. Exactly 18 suite/backend
+rows were appended once to each history log. The recorded duration is the
+median wall time over all attempts, including timeouts.
+
+Validation: standalone typecheck and 21 tests / 135 assertions; integrated
+typecheck and 319 passing tests / 28 skipped; public fixture typecheck, all 11
+unit packages, and four optimized native tests. No layer-check script exists
+in these harnesses. No routing attempt was dropped or retried.
