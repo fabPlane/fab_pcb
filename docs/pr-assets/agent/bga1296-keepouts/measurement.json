@@ -1,0 +1,2141 @@
+{
+  "cycle": 75,
+  "repeats": 3,
+  "budget_ms": 10000,
+  "attempts": 180,
+  "existing_attempts_each": 162,
+  "primary_start": "c67fea4",
+  "primary_final": "b496737",
+  "primary_advance": "docs only; no executed source/config/corpus changes",
+  "before_cycle": 74,
+  "before_outcomes": {
+    "completed": 59,
+    "timeout": 103
+  },
+  "after_existing_outcomes": {
+    "completed": 55,
+    "timeout": 107
+  },
+  "after_all_outcomes": {
+    "timeout": 125,
+    "completed": 55
+  },
+  "before_passed": 33,
+  "after_existing_passed": 33,
+  "after_all_passed": 33,
+  "after_quality": {
+    "unavailable": 144,
+    "srj-scored": 18,
+    "native-drc": 18
+  },
+  "changed_pass_groups": [],
+  "runtime_endpoints_equal": true,
+  "source_observed_during_corpus_run": true,
+  "source_matches_final": true,
+  "source_changed": ["src/types.ts"],
+  "source_added": ["scripts/gen/bga1296.py"],
+  "summary": [
+    {
+      "suite": "keepout-control",
+      "router": "fab_router",
+      "attempts": 3,
+      "completed": 0,
+      "passed": 0,
+      "median_wall_s": 10.099970925000001
+    },
+    {
+      "suite": "keepout-control",
+      "router": "reference engine",
+      "attempts": 3,
+      "completed": 0,
+      "passed": 0,
+      "median_wall_s": 14.172783561999998
+    },
+    {
+      "suite": "keepout-control",
+      "router": "in-repo router",
+      "attempts": 3,
+      "completed": 0,
+      "passed": 0,
+      "median_wall_s": 10.038742446999997
+    },
+    {
+      "suite": "keepout-candidate",
+      "router": "fab_router",
+      "attempts": 3,
+      "completed": 0,
+      "passed": 0,
+      "median_wall_s": 10.098618471
+    },
+    {
+      "suite": "keepout-candidate",
+      "router": "reference engine",
+      "attempts": 3,
+      "completed": 0,
+      "passed": 0,
+      "median_wall_s": 14.188250763000003
+    },
+    {
+      "suite": "keepout-candidate",
+      "router": "in-repo router",
+      "attempts": 3,
+      "completed": 0,
+      "passed": 0,
+      "median_wall_s": 10.037229575999998
+    },
+    {
+      "suite": "canary",
+      "router": "fab_router",
+      "attempts": 12,
+      "completed": 12,
+      "passed": 9,
+      "median_wall_s": 0.95281204,
+      "before_completed": 12,
+      "before_passed": 9
+    },
+    {
+      "suite": "canary",
+      "router": "reference engine",
+      "attempts": 9,
+      "completed": 9,
+      "passed": 6,
+      "median_wall_s": 11.08435234,
+      "before_completed": 9,
+      "before_passed": 6
+    },
+    {
+      "suite": "canary",
+      "router": "capacity-mesh router",
+      "attempts": 3,
+      "completed": 3,
+      "passed": 3,
+      "median_wall_s": 0.20803469500000937,
+      "before_completed": 3,
+      "before_passed": 3
+    },
+    {
+      "suite": "canary",
+      "router": "in-repo router",
+      "attempts": 12,
+      "completed": 12,
+      "passed": 3,
+      "median_wall_s": 0.10468884300000354,
+      "before_completed": 12,
+      "before_passed": 3
+    },
+    {
+      "suite": "bga",
+      "router": "fab_router",
+      "attempts": 12,
+      "completed": 0,
+      "passed": 0,
+      "median_wall_s": 10.106433368500001,
+      "before_completed": 0,
+      "before_passed": 0
+    },
+    {
+      "suite": "bga",
+      "router": "reference engine",
+      "attempts": 6,
+      "completed": 0,
+      "passed": 0,
+      "median_wall_s": 14.322696297000002,
+      "before_completed": 0,
+      "before_passed": 0
+    },
+    {
+      "suite": "bga",
+      "router": "capacity-mesh router",
+      "attempts": 6,
+      "completed": 0,
+      "passed": 0,
+      "median_wall_s": 10.04901874150001,
+      "before_completed": 0,
+      "before_passed": 0
+    },
+    {
+      "suite": "bga",
+      "router": "in-repo router",
+      "attempts": 12,
+      "completed": 0,
+      "passed": 0,
+      "median_wall_s": 10.026152829500003,
+      "before_completed": 0,
+      "before_passed": 0
+    },
+    {
+      "suite": "ladder",
+      "router": "fab_router",
+      "attempts": 18,
+      "completed": 3,
+      "passed": 3,
+      "median_wall_s": 10.096376823500018,
+      "before_completed": 5,
+      "before_passed": 3
+    },
+    {
+      "suite": "ladder",
+      "router": "reference engine",
+      "attempts": 9,
+      "completed": 3,
+      "passed": 3,
+      "median_wall_s": 14.232173141000006,
+      "before_completed": 3,
+      "before_passed": 3
+    },
+    {
+      "suite": "ladder",
+      "router": "capacity-mesh router",
+      "attempts": 9,
+      "completed": 6,
+      "passed": 6,
+      "median_wall_s": 5.53216333499999,
+      "before_completed": 6,
+      "before_passed": 6
+    },
+    {
+      "suite": "ladder",
+      "router": "in-repo router",
+      "attempts": 18,
+      "completed": 7,
+      "passed": 0,
+      "median_wall_s": 10.025755185999994,
+      "before_completed": 9,
+      "before_passed": 0
+    },
+    {
+      "suite": "dense-source",
+      "router": "fab_router",
+      "attempts": 3,
+      "completed": 0,
+      "passed": 0,
+      "median_wall_s": 10.097118455000004,
+      "before_completed": 0,
+      "before_passed": 0
+    },
+    {
+      "suite": "dense-source",
+      "router": "reference engine",
+      "attempts": 3,
+      "completed": 0,
+      "passed": 0,
+      "median_wall_s": 14.292310463,
+      "before_completed": 0,
+      "before_passed": 0
+    },
+    {
+      "suite": "dense-source",
+      "router": "in-repo router",
+      "attempts": 3,
+      "completed": 0,
+      "passed": 0,
+      "median_wall_s": 10.033422679999996,
+      "before_completed": 0,
+      "before_passed": 0
+    },
+    {
+      "suite": "dense-candidate",
+      "router": "fab_router",
+      "attempts": 9,
+      "completed": 0,
+      "passed": 0,
+      "median_wall_s": 10.109038457,
+      "before_completed": 0,
+      "before_passed": 0
+    },
+    {
+      "suite": "dense-candidate",
+      "router": "reference engine",
+      "attempts": 9,
+      "completed": 0,
+      "passed": 0,
+      "median_wall_s": 14.200472467000013,
+      "before_completed": 0,
+      "before_passed": 0
+    },
+    {
+      "suite": "dense-candidate",
+      "router": "in-repo router",
+      "attempts": 9,
+      "completed": 0,
+      "passed": 0,
+      "median_wall_s": 10.034768932000036,
+      "before_completed": 0,
+      "before_passed": 0
+    }
+  ],
+  "cases": [
+    {
+      "suite": "keepout-control",
+      "router": "fab_router",
+      "case": "bga1296-without-keepouts-control",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.099970925000001,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "keepout-control",
+      "router": "reference engine",
+      "case": "bga1296-without-keepouts-control",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 14.172783561999998,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "keepout-control",
+      "router": "in-repo router",
+      "case": "bga1296-without-keepouts-control",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.038742446999997,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "keepout-candidate",
+      "router": "fab_router",
+      "case": "bga1296-eight-layer-keepouts",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.098618471,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "keepout-candidate",
+      "router": "reference engine",
+      "case": "bga1296-eight-layer-keepouts",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 14.188250763000003,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "keepout-candidate",
+      "router": "in-repo router",
+      "case": "bga1296-eight-layer-keepouts",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.037229575999998,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "canary",
+      "router": "fab_router",
+      "case": "canary-two-pad-dsn",
+      "outcomes": {
+        "completed": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 0.1790850650000066,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 1,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "completed",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "canary",
+      "router": "fab_router",
+      "case": "canary-two-pad-srj",
+      "outcomes": {
+        "completed": 3
+      },
+      "quality": {
+        "srj-scored": 3
+      },
+      "passed": 3,
+      "median_wall_s": 0.16485652700000356,
+      "before_passed": 3,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 2,
+            "track_length_mm": 14.799999999999999,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "completed",
+          "validation": "srj-scored",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "canary",
+      "router": "fab_router",
+      "case": "canary-two-resistor",
+      "outcomes": {
+        "completed": 3
+      },
+      "quality": {
+        "native-drc": 3
+      },
+      "passed": 3,
+      "median_wall_s": 1.8002770880000025,
+      "before_passed": 3,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 1,
+            "drc_errors": 0,
+            "drc_warnings": 2,
+            "segment_count": 3,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 2
+          },
+          "state": "completed",
+          "validation": "native-drc",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "canary",
+      "router": "fab_router",
+      "case": "canary-three-terminal",
+      "outcomes": {
+        "completed": 3
+      },
+      "quality": {
+        "native-drc": 3
+      },
+      "passed": 3,
+      "median_wall_s": 1.7460729649999993,
+      "before_passed": 3,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 2,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "completed",
+          "validation": "native-drc",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "canary",
+      "router": "reference engine",
+      "case": "canary-two-pad-dsn",
+      "outcomes": {
+        "completed": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 9.594014309999999,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 1,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "completed",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "canary",
+      "router": "reference engine",
+      "case": "canary-two-resistor",
+      "outcomes": {
+        "completed": 3
+      },
+      "quality": {
+        "native-drc": 3
+      },
+      "passed": 3,
+      "median_wall_s": 11.279706951999993,
+      "before_passed": 3,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 1,
+            "drc_errors": 0,
+            "drc_warnings": 2,
+            "segment_count": 3,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "completed",
+          "validation": "native-drc",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "canary",
+      "router": "reference engine",
+      "case": "canary-three-terminal",
+      "outcomes": {
+        "completed": 3
+      },
+      "quality": {
+        "native-drc": 3
+      },
+      "passed": 3,
+      "median_wall_s": 11.249456323000006,
+      "before_passed": 3,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 2,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "completed",
+          "validation": "native-drc",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "canary",
+      "router": "capacity-mesh router",
+      "case": "canary-two-pad-srj",
+      "outcomes": {
+        "completed": 3
+      },
+      "quality": {
+        "srj-scored": 3
+      },
+      "passed": 3,
+      "median_wall_s": 0.20803469500000937,
+      "before_passed": 3,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 2,
+            "track_length_mm": 16,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "completed",
+          "validation": "srj-scored",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "canary",
+      "router": "in-repo router",
+      "case": "canary-two-pad-dsn",
+      "outcomes": {
+        "completed": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 0.10383780399999523,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "completed",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "canary",
+      "router": "in-repo router",
+      "case": "canary-two-pad-srj",
+      "outcomes": {
+        "completed": 3
+      },
+      "quality": {
+        "srj-scored": 3
+      },
+      "passed": 3,
+      "median_wall_s": 0.101750366999986,
+      "before_passed": 3,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 3,
+            "track_length_mm": 16.118175129345044,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "completed",
+          "validation": "srj-scored",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "canary",
+      "router": "in-repo router",
+      "case": "canary-two-resistor",
+      "outcomes": {
+        "completed": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 0.14133825900000374,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "completed",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "canary",
+      "router": "in-repo router",
+      "case": "canary-three-terminal",
+      "outcomes": {
+        "completed": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 0.0971001099999994,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "completed",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "bga",
+      "router": "fab_router",
+      "case": "bga-b1-kicad_pcb",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.106001769000024,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "bga",
+      "router": "fab_router",
+      "case": "bga-b1-srj",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.105630083999998,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "bga",
+      "router": "fab_router",
+      "case": "bga-b2-kicad_pcb",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.110596479,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "bga",
+      "router": "fab_router",
+      "case": "bga-b2-srj",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.103934113000003,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "bga",
+      "router": "reference engine",
+      "case": "bga-b1-kicad_pcb",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 14.32554626100001,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "bga",
+      "router": "reference engine",
+      "case": "bga-b2-kicad_pcb",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 14.319846332999994,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "bga",
+      "router": "capacity-mesh router",
+      "case": "bga-b1-srj",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.055825415000028,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "bga",
+      "router": "capacity-mesh router",
+      "case": "bga-b2-srj",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.043137778999983,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "bga",
+      "router": "in-repo router",
+      "case": "bga-b1-kicad_pcb",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.029297261999993,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "bga",
+      "router": "in-repo router",
+      "case": "bga-b1-srj",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.021288434999995,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "bga",
+      "router": "in-repo router",
+      "case": "bga-b2-kicad_pcb",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.033948789999995,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "bga",
+      "router": "in-repo router",
+      "case": "bga-b2-srj",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.020191587999987,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "ladder",
+      "router": "fab_router",
+      "case": "ladder-l1-kicad_pcb",
+      "outcomes": {
+        "completed": 3
+      },
+      "quality": {
+        "native-drc": 3
+      },
+      "passed": 3,
+      "median_wall_s": 2.073601546999998,
+      "before_passed": 3,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 34,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 24
+          },
+          "state": "completed",
+          "validation": "native-drc",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "ladder",
+      "router": "fab_router",
+      "case": "ladder-l1-srj",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.098024988999997,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "ladder",
+      "router": "fab_router",
+      "case": "ladder-l2-kicad_pcb",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.103929854000016,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "ladder",
+      "router": "fab_router",
+      "case": "ladder-l2-srj",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.095551145000005,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "ladder",
+      "router": "fab_router",
+      "case": "ladder-l3-kicad_pcb",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.103277380999993,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "ladder",
+      "router": "fab_router",
+      "case": "ladder-l3-srj",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.095585078000033,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "ladder",
+      "router": "reference engine",
+      "case": "ladder-l1-kicad_pcb",
+      "outcomes": {
+        "completed": 3
+      },
+      "quality": {
+        "native-drc": 3
+      },
+      "passed": 3,
+      "median_wall_s": 11.64326572700002,
+      "before_passed": 3,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 27,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 4
+          },
+          "state": "completed",
+          "validation": "native-drc",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "ladder",
+      "router": "reference engine",
+      "case": "ladder-l2-kicad_pcb",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 14.240077235999998,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "ladder",
+      "router": "reference engine",
+      "case": "ladder-l3-kicad_pcb",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 14.269837402000034,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "ladder",
+      "router": "capacity-mesh router",
+      "case": "ladder-l1-srj",
+      "outcomes": {
+        "completed": 3
+      },
+      "quality": {
+        "srj-scored": 3
+      },
+      "passed": 3,
+      "median_wall_s": 1.0911435370000109,
+      "before_passed": 3,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 98,
+            "track_length_mm": 325.401284489599,
+            "unrouted_connections": 0,
+            "via_count": 14
+          },
+          "state": "completed",
+          "validation": "srj-scored",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "ladder",
+      "router": "capacity-mesh router",
+      "case": "ladder-l2-srj",
+      "outcomes": {
+        "completed": 3
+      },
+      "quality": {
+        "srj-scored": 3
+      },
+      "passed": 3,
+      "median_wall_s": 5.53216333499999,
+      "before_passed": 3,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 1,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 1225,
+            "track_length_mm": 2208.704273356824,
+            "unrouted_connections": 0,
+            "via_count": 192
+          },
+          "state": "completed",
+          "validation": "srj-scored",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "ladder",
+      "router": "capacity-mesh router",
+      "case": "ladder-l3-srj",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.030353449999994,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "ladder",
+      "router": "in-repo router",
+      "case": "ladder-l1-kicad_pcb",
+      "outcomes": {
+        "completed": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 0.7183317830000014,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "completed",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "ladder",
+      "router": "in-repo router",
+      "case": "ladder-l1-srj",
+      "outcomes": {
+        "completed": 3
+      },
+      "quality": {
+        "srj-scored": 3
+      },
+      "passed": 0,
+      "median_wall_s": 0.9010908690000069,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 12,
+            "completion_rate": 1,
+            "drc_errors": 12,
+            "drc_warnings": 0,
+            "segment_count": 64,
+            "track_length_mm": 406.48576572022733,
+            "unrouted_connections": 0,
+            "via_count": 4
+          },
+          "state": "completed",
+          "validation": "srj-scored",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "ladder",
+      "router": "in-repo router",
+      "case": "ladder-l2-kicad_pcb",
+      "outcomes": {
+        "completed": 1,
+        "timeout": 2
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.028158020000031,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "completed",
+          "validation": "unavailable",
+          "repeats": 1
+        },
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 2
+        }
+      ]
+    },
+    {
+      "suite": "ladder",
+      "router": "in-repo router",
+      "case": "ladder-l2-srj",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.025461106000002,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "ladder",
+      "router": "in-repo router",
+      "case": "ladder-l3-kicad_pcb",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.036001277000002,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "ladder",
+      "router": "in-repo router",
+      "case": "ladder-l3-srj",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.035821342999988,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "dense-source",
+      "router": "fab_router",
+      "case": "dense6-source-dsn",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.097118455000004,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "dense-source",
+      "router": "reference engine",
+      "case": "dense6-source-dsn",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 14.292310463,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "dense-source",
+      "router": "in-repo router",
+      "case": "dense6-source-dsn",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.033422679999996,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "dense-candidate",
+      "router": "fab_router",
+      "case": "dense6-bga324-dsn",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.107793401000002,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "dense-candidate",
+      "router": "fab_router",
+      "case": "bga400-eight-layer",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.109038457,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "dense-candidate",
+      "router": "fab_router",
+      "case": "bga1024-eight-layer",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.109900532,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "dense-candidate",
+      "router": "reference engine",
+      "case": "dense6-bga324-dsn",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 14.200472467000013,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "dense-candidate",
+      "router": "reference engine",
+      "case": "bga400-eight-layer",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 14.189671200999998,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "dense-candidate",
+      "router": "reference engine",
+      "case": "bga1024-eight-layer",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 14.204931291999994,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "dense-candidate",
+      "router": "in-repo router",
+      "case": "dense6-bga324-dsn",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.031403198,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "dense-candidate",
+      "router": "in-repo router",
+      "case": "bga400-eight-layer",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.034768932000036,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    },
+    {
+      "suite": "dense-candidate",
+      "router": "in-repo router",
+      "case": "bga1024-eight-layer",
+      "outcomes": {
+        "timeout": 3
+      },
+      "quality": {
+        "unavailable": 3
+      },
+      "passed": 0,
+      "median_wall_s": 10.052048459000012,
+      "before_passed": 0,
+      "quality_observations": [
+        {
+          "quality": {
+            "clearance_violations": 0,
+            "completion_rate": 0,
+            "drc_errors": 0,
+            "drc_warnings": 0,
+            "segment_count": 0,
+            "track_length_mm": 0,
+            "unrouted_connections": 0,
+            "via_count": 0
+          },
+          "state": "timeout",
+          "validation": "unavailable",
+          "repeats": 3
+        }
+      ]
+    }
+  ],
+  "raw_results_sha256": "f83ad961e140dbbbb0fd20980c99e20b225750b18f7434e57422d096b5f7f0f4",
+  "before_raw_results_sha256": "78e2697f2926a6b56a81fb0de6ee59ba6a925fb9a19709978bf2c3e9f71cca94"
+}
