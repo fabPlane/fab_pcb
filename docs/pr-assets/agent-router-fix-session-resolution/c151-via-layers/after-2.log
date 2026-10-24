@@ -1,0 +1,13 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+(pass) session via layer identity > rejects unknown via layers: F.Cu,MISSING [0.53ms]
+(pass) session via layer identity > rejects unknown via layers: MISSING,ALSO_MISSING [0.05ms]
+(pass) session via layer identity > preserves supported via layer aliases [0.09ms]
+(pass) session via layer identity > retains absent padstack through via fallback [0.05ms]
+
+ 4 pass
+ 76 filtered out
+ 0 fail
+ 4 expect() calls
+Ran 4 tests across 1 file. [135.00ms]

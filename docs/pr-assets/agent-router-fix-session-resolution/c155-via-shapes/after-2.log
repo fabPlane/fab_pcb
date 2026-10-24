@@ -1,0 +1,14 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+(pass) session via shape representability > rejects unrepresentable session via shape (shape (rect F.Cu -400 -300 400 300)) (shape (rect B.Cu -400 -300 400 300)) [0.40ms]
+(pass) session via shape representability > rejects unrepresentable session via shape (shape (circle F.Cu 800)) (shape (rect B.Cu -400 -300 400 300)) [0.02ms]
+(pass) session via shape representability > rejects unrepresentable session via shape (shape (polygon F.Cu 0 -400 -300 400 -300 400 300)) (shape (circle B.Cu 800)) [0.03ms]
+(pass) session via shape representability > preserves representable circular session via shapes [0.27ms]
+(pass) session via shape representability > preserves missing session via shape fallback [0.07ms]
+
+ 5 pass
+ 96 filtered out
+ 0 fail
+ 7 expect() calls
+Ran 5 tests across 1 file. [140.00ms]

@@ -1,0 +1,13 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+(pass) session path layer operands > rejects invalid path layer (F.Cu) [0.54ms]
+(pass) session path layer operands > rejects invalid path layer "" [0.02ms]
+(pass) session path layer operands > preserves valid path layer F.Cu [0.30ms]
+(pass) session path layer operands > preserves valid path layer "F.Cu" [0.06ms]
+
+ 4 pass
+ 105 filtered out
+ 0 fail
+ 8 expect() calls
+Ran 4 tests across 1 file. [118.00ms]

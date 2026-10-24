@@ -1,0 +1,298 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+380 | 
+381 | for (const diameter of ["NaN", "Infinity", "1e308", "-2", "0", "0.0001", "(unexpected 2)", ""]) {
+382 |   test(`session circle rejects malformed diameter: ${diameter || "missing"}`, () => {
+383 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+384 |       (library_out (padstack V (shape (circle F.Cu ${diameter}))))
+385 |       (network_out (net A (via V 10 20)))))`)).toThrow(SyntaxError);
+                                                     ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map(1) {
+    "V": {
+      name: "V",
+      layers: [ "F.Cu" ],
+      diameter: 0,
+    },
+  },
+  wires: [],
+  vias: [
+    {
+      net: "A",
+      padstack: "V",
+      x: 1000,
+      y: -2000,
+    }
+  ],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:385:48)
+(fail) session circle rejects malformed diameter: NaN [0.61ms]
+380 | 
+381 | for (const diameter of ["NaN", "Infinity", "1e308", "-2", "0", "0.0001", "(unexpected 2)", ""]) {
+382 |   test(`session circle rejects malformed diameter: ${diameter || "missing"}`, () => {
+383 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+384 |       (library_out (padstack V (shape (circle F.Cu ${diameter}))))
+385 |       (network_out (net A (via V 10 20)))))`)).toThrow(SyntaxError);
+                                                     ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map(1) {
+    "V": {
+      name: "V",
+      layers: [ "F.Cu" ],
+      diameter: Infinity,
+    },
+  },
+  wires: [],
+  vias: [
+    {
+      net: "A",
+      padstack: "V",
+      x: 1000,
+      y: -2000,
+    }
+  ],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:385:48)
+(fail) session circle rejects malformed diameter: Infinity [0.14ms]
+380 | 
+381 | for (const diameter of ["NaN", "Infinity", "1e308", "-2", "0", "0.0001", "(unexpected 2)", ""]) {
+382 |   test(`session circle rejects malformed diameter: ${diameter || "missing"}`, () => {
+383 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+384 |       (library_out (padstack V (shape (circle F.Cu ${diameter}))))
+385 |       (network_out (net A (via V 10 20)))))`)).toThrow(SyntaxError);
+                                                     ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map(1) {
+    "V": {
+      name: "V",
+      layers: [ "F.Cu" ],
+      diameter: Infinity,
+    },
+  },
+  wires: [],
+  vias: [
+    {
+      net: "A",
+      padstack: "V",
+      x: 1000,
+      y: -2000,
+    }
+  ],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:385:48)
+(fail) session circle rejects malformed diameter: 1e308 [0.08ms]
+380 | 
+381 | for (const diameter of ["NaN", "Infinity", "1e308", "-2", "0", "0.0001", "(unexpected 2)", ""]) {
+382 |   test(`session circle rejects malformed diameter: ${diameter || "missing"}`, () => {
+383 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+384 |       (library_out (padstack V (shape (circle F.Cu ${diameter}))))
+385 |       (network_out (net A (via V 10 20)))))`)).toThrow(SyntaxError);
+                                                     ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map(1) {
+    "V": {
+      name: "V",
+      layers: [ "F.Cu" ],
+      diameter: -200,
+    },
+  },
+  wires: [],
+  vias: [
+    {
+      net: "A",
+      padstack: "V",
+      x: 1000,
+      y: -2000,
+    }
+  ],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:385:48)
+(fail) session circle rejects malformed diameter: -2 [0.07ms]
+380 | 
+381 | for (const diameter of ["NaN", "Infinity", "1e308", "-2", "0", "0.0001", "(unexpected 2)", ""]) {
+382 |   test(`session circle rejects malformed diameter: ${diameter || "missing"}`, () => {
+383 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+384 |       (library_out (padstack V (shape (circle F.Cu ${diameter}))))
+385 |       (network_out (net A (via V 10 20)))))`)).toThrow(SyntaxError);
+                                                     ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map(1) {
+    "V": {
+      name: "V",
+      layers: [ "F.Cu" ],
+      diameter: 0,
+    },
+  },
+  wires: [],
+  vias: [
+    {
+      net: "A",
+      padstack: "V",
+      x: 1000,
+      y: -2000,
+    }
+  ],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:385:48)
+(fail) session circle rejects malformed diameter: 0 [0.08ms]
+380 | 
+381 | for (const diameter of ["NaN", "Infinity", "1e308", "-2", "0", "0.0001", "(unexpected 2)", ""]) {
+382 |   test(`session circle rejects malformed diameter: ${diameter || "missing"}`, () => {
+383 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+384 |       (library_out (padstack V (shape (circle F.Cu ${diameter}))))
+385 |       (network_out (net A (via V 10 20)))))`)).toThrow(SyntaxError);
+                                                     ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map(1) {
+    "V": {
+      name: "V",
+      layers: [ "F.Cu" ],
+      diameter: 0,
+    },
+  },
+  wires: [],
+  vias: [
+    {
+      net: "A",
+      padstack: "V",
+      x: 1000,
+      y: -2000,
+    }
+  ],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:385:48)
+(fail) session circle rejects malformed diameter: 0.0001 [0.04ms]
+380 | 
+381 | for (const diameter of ["NaN", "Infinity", "1e308", "-2", "0", "0.0001", "(unexpected 2)", ""]) {
+382 |   test(`session circle rejects malformed diameter: ${diameter || "missing"}`, () => {
+383 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+384 |       (library_out (padstack V (shape (circle F.Cu ${diameter}))))
+385 |       (network_out (net A (via V 10 20)))))`)).toThrow(SyntaxError);
+                                                     ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map(1) {
+    "V": {
+      name: "V",
+      layers: [ "F.Cu" ],
+      diameter: 0,
+    },
+  },
+  wires: [],
+  vias: [
+    {
+      net: "A",
+      padstack: "V",
+      x: 1000,
+      y: -2000,
+    }
+  ],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:385:48)
+(fail) session circle rejects malformed diameter: (unexpected 2) [0.05ms]
+380 | 
+381 | for (const diameter of ["NaN", "Infinity", "1e308", "-2", "0", "0.0001", "(unexpected 2)", ""]) {
+382 |   test(`session circle rejects malformed diameter: ${diameter || "missing"}`, () => {
+383 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+384 |       (library_out (padstack V (shape (circle F.Cu ${diameter}))))
+385 |       (network_out (net A (via V 10 20)))))`)).toThrow(SyntaxError);
+                                                     ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map(1) {
+    "V": {
+      name: "V",
+      layers: [ "F.Cu" ],
+      diameter: 0,
+    },
+  },
+  wires: [],
+  vias: [
+    {
+      net: "A",
+      padstack: "V",
+      x: 1000,
+      y: -2000,
+    }
+  ],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:385:48)
+(fail) session circle rejects malformed diameter: missing [0.05ms]
+(pass) session circle preserves fractional diameters on both copper layers [0.41ms]
+
+ 1 pass
+ 55 filtered out
+ 8 fail
+ 10 expect() calls
+Ran 9 tests across 1 file. [126.00ms]

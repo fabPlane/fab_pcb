@@ -1,0 +1,29 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+(pass) session resolution rejects unknown 10 in routes [0.22ms]
+(pass) session resolution rejects unknown 10 in placement fallback [0.01ms]
+(pass) session resolution rejects toString 10 in routes
+(pass) session resolution rejects toString 10 in placement fallback
+(pass) session resolution rejects um 0 in routes [0.02ms]
+(pass) session resolution rejects um 0 in placement fallback
+(pass) session resolution rejects um -10 in routes
+(pass) session resolution rejects um -10 in placement fallback
+(pass) session resolution rejects um NaN in routes [0.01ms]
+(pass) session resolution rejects um NaN in placement fallback
+(pass) session resolution rejects um Infinity in routes
+(pass) session resolution rejects um Infinity in placement fallback
+(pass) session resolution rejects um 1e-320 in routes
+(pass) session resolution rejects um 1e-320 in placement fallback [0.01ms]
+(pass) session resolution preserves um geometry [0.09ms]
+(pass) session resolution preserves mm geometry [0.02ms]
+(pass) session resolution preserves cm geometry [0.01ms]
+(pass) session resolution preserves inch geometry
+(pass) session resolution preserves mil geometry [0.01ms]
+(pass) session resolution preserves omitted resolution defaults [0.01ms]
+
+ 20 pass
+ 17 filtered out
+ 0 fail
+ 30 expect() calls
+Ran 20 tests across 1 file. [139.00ms]

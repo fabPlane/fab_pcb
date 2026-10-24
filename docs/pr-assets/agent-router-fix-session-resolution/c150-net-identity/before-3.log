@@ -1,0 +1,92 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+419 |     ["wire", "(wire (path F.Cu 250 1000 -1000 2000 -1000))"],
+420 |     ["via", "(via Via_800:400_um 1000 -1000)"],
+421 |   ]) {
+422 |     test(`rejects unknown ${kind} net before assigning unconnected copper`, () => {
+423 |       const session = parseSes(`(session s (routes (resolution um 1) (network_out (net MISSING ${copper}))))`);
+424 |       expect(() => sesToItems(session, twoNetBoard())).toThrow(SyntaxError);
+                                                             ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [
+    {
+      net: "MISSING",
+      netCode: 0,
+      start: {
+        x: 1000000,
+        y: 1000000,
+      },
+      end: {
+        x: 2000000,
+        y: 1000000,
+      },
+      width: 250000,
+      layer: 3,
+    }
+  ],
+  vias: [],
+  warnings: [],
+  routedNets: Set(1) {
+    "MISSING",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:424:56)
+(fail) session net identity > rejects unknown wire net before assigning unconnected copper [0.92ms]
+(pass) session net identity > preserves known wire net code [0.13ms]
+419 |     ["wire", "(wire (path F.Cu 250 1000 -1000 2000 -1000))"],
+420 |     ["via", "(via Via_800:400_um 1000 -1000)"],
+421 |   ]) {
+422 |     test(`rejects unknown ${kind} net before assigning unconnected copper`, () => {
+423 |       const session = parseSes(`(session s (routes (resolution um 1) (network_out (net MISSING ${copper}))))`);
+424 |       expect(() => sesToItems(session, twoNetBoard())).toThrow(SyntaxError);
+                                                             ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "MISSING",
+      netCode: 0,
+      position: {
+        x: 1000000,
+        y: 1000000,
+      },
+      diameter: 800000,
+      drill: 400000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [ "via padstack \"Via_800:400_um\" is not in library_out; using its name and the net class" ],
+  routedNets: Set(1) {
+    "MISSING",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:424:56)
+(fail) session net identity > rejects unknown via net before assigning unconnected copper [0.21ms]
+(pass) session net identity > preserves known via net code [0.05ms]
+
+ 2 pass
+ 72 filtered out
+ 2 fail
+ 6 expect() calls
+Ran 4 tests across 1 file. [150.00ms]

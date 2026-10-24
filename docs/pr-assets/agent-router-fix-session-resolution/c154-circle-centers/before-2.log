@@ -1,0 +1,206 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+500 |   for (const center of ["100 0", "0 -100", "100", "NaN 0", "0 (bad)"]) {
+501 |     test(`rejects unsupported session circle center ${center}`, () => {
+502 |       const session = `(session s (routes (library_out (padstack V
+503 |         (shape (circle F.Cu 800 ${center})) (shape (circle B.Cu 800))))
+504 |         (network_out (net A (via V 1000 -1000)))))`;
+505 |       expect(() => sesToItems(parseSes(session), twoNetBoard())).toThrow(SyntaxError);
+                                                                       ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 1000000,
+        y: 1000000,
+      },
+      diameter: 800000,
+      drill: 400000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:505:66)
+(fail) session via circle centers > rejects unsupported session circle center 100 0 [0.62ms]
+500 |   for (const center of ["100 0", "0 -100", "100", "NaN 0", "0 (bad)"]) {
+501 |     test(`rejects unsupported session circle center ${center}`, () => {
+502 |       const session = `(session s (routes (library_out (padstack V
+503 |         (shape (circle F.Cu 800 ${center})) (shape (circle B.Cu 800))))
+504 |         (network_out (net A (via V 1000 -1000)))))`;
+505 |       expect(() => sesToItems(parseSes(session), twoNetBoard())).toThrow(SyntaxError);
+                                                                       ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 1000000,
+        y: 1000000,
+      },
+      diameter: 800000,
+      drill: 400000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:505:66)
+(fail) session via circle centers > rejects unsupported session circle center 0 -100 [0.11ms]
+500 |   for (const center of ["100 0", "0 -100", "100", "NaN 0", "0 (bad)"]) {
+501 |     test(`rejects unsupported session circle center ${center}`, () => {
+502 |       const session = `(session s (routes (library_out (padstack V
+503 |         (shape (circle F.Cu 800 ${center})) (shape (circle B.Cu 800))))
+504 |         (network_out (net A (via V 1000 -1000)))))`;
+505 |       expect(() => sesToItems(parseSes(session), twoNetBoard())).toThrow(SyntaxError);
+                                                                       ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 1000000,
+        y: 1000000,
+      },
+      diameter: 800000,
+      drill: 400000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:505:66)
+(fail) session via circle centers > rejects unsupported session circle center 100 [0.06ms]
+500 |   for (const center of ["100 0", "0 -100", "100", "NaN 0", "0 (bad)"]) {
+501 |     test(`rejects unsupported session circle center ${center}`, () => {
+502 |       const session = `(session s (routes (library_out (padstack V
+503 |         (shape (circle F.Cu 800 ${center})) (shape (circle B.Cu 800))))
+504 |         (network_out (net A (via V 1000 -1000)))))`;
+505 |       expect(() => sesToItems(parseSes(session), twoNetBoard())).toThrow(SyntaxError);
+                                                                       ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 1000000,
+        y: 1000000,
+      },
+      diameter: 800000,
+      drill: 400000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:505:66)
+(fail) session via circle centers > rejects unsupported session circle center NaN 0 [0.05ms]
+500 |   for (const center of ["100 0", "0 -100", "100", "NaN 0", "0 (bad)"]) {
+501 |     test(`rejects unsupported session circle center ${center}`, () => {
+502 |       const session = `(session s (routes (library_out (padstack V
+503 |         (shape (circle F.Cu 800 ${center})) (shape (circle B.Cu 800))))
+504 |         (network_out (net A (via V 1000 -1000)))))`;
+505 |       expect(() => sesToItems(parseSes(session), twoNetBoard())).toThrow(SyntaxError);
+                                                                       ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 1000000,
+        y: 1000000,
+      },
+      diameter: 800000,
+      drill: 400000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:505:66)
+(fail) session via circle centers > rejects unsupported session circle center 0 (bad) [0.04ms]
+(pass) session via circle centers > preserves concentric session circle center '' [0.05ms]
+(pass) session via circle centers > preserves concentric session circle center '0 0' [0.03ms]
+
+ 2 pass
+ 89 filtered out
+ 5 fail
+ 9 expect() calls
+Ran 7 tests across 1 file. [144.00ms]
