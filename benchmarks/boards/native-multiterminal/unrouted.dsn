@@ -1,0 +1,70 @@
+(pcb "unrouted.dsn"
+  (parser
+    (string_quote ")
+    (space_in_quoted_tokens on)
+    (host_cad "KiCad's Pcbnew")
+    (host_version "10.0.6-10.0.6~ubuntu24.04.1")
+  )
+  (resolution um 10)
+  (unit um)
+  (structure
+    (layer F.Cu
+      (type signal)
+      (property
+        (index 0)
+      )
+    )
+    (layer B.Cu
+      (type signal)
+      (property
+        (index 1)
+      )
+    )
+    (boundary
+      (path pcb 0  35000 -15000  5000 -15000  5000 -5000  35000 -5000  35000 -15000)
+    )
+    (via "Via[0-1]_600:300_um")
+    (rule
+      (width 200)
+      (clearance 200)
+      (clearance 50 (type smd_smd))
+    )
+  )
+  (placement
+    (component terminal
+      (place J1 10000 -10000 front 0 (PN terminal))
+      (place J2 20000 -10000 front 0 (PN terminal))
+      (place J3 30000 -10000 front 0 (PN terminal))
+    )
+  )
+  (library
+    (image terminal
+      (pin Round[T]Pad_1000.000000_um 1 0 0)
+    )
+    (padstack Round[T]Pad_1000.000000_um
+      (shape (circle F.Cu 1000))
+      (attach off)
+    )
+    (padstack "Via[0-1]_600:300_um"
+      (shape (circle F.Cu 600))
+      (shape (circle B.Cu 600))
+      (attach off)
+    )
+  )
+  (network
+    (net SIGNAL
+      (pins J1-1 J2-1 J3-1)
+    )
+    (class kicad_default SIGNAL
+      (circuit
+        (use_via "Via[0-1]_600:300_um")
+      )
+      (rule
+        (width 200)
+        (clearance 200)
+      )
+    )
+  )
+  (wiring
+  )
+)
