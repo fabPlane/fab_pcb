@@ -1,0 +1,9 @@
+{
+  "tools/native-drc-gate.ts": "3e18c7677cff3c9a5dd951d80115b5386ee8d50af24898f4a71ad11297543567",
+  "tools/kicad-board-rules.ts": "eb5d7fe89bb00afff5e40ee45565512595e33d28a3dfe8ba83a8d4944a1a4c18",
+  "tools/native-terminal-groups.py": "11cc3b6f8566391589737087d05131612a69b904860370b68bc70a20d12a9355",
+  "test/native-copper-inventory.test.ts": "abc132e918e808c0dca066dcad127aa09a012df120dd2cf0e09c234a9a2680d0",
+  "test/native-saved-copper.test.ts": "a1c658f0e941104fbcd35d328e07d8c4c2b1be2ab453c4d11da8cddfda616ec5",
+  "test/native-aquarius-connectivity.test.ts": "04b311c53e403986e80d5ef94c65546b311fb271a714b5ede73e90e1bef71023",
+  "test/native-aquarius-thermal.test.ts": "cad6c7032370ce1857bcaf85caa9b3e208d7f716ffd41006a91dd29c91ed97da"
+}

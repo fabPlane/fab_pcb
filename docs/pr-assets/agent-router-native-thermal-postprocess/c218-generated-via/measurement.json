@@ -1,0 +1,56 @@
+[
+  {
+    "repeat": 0,
+    "oldProposals": 168,
+    "newProposals": 200,
+    "priorPrefixByteExact": true,
+    "proposal": {
+      "name": "168.kicad_pcb",
+      "label": ["via", "e57c15b7-d609-442a-9cca-2c520d20bbab"]
+    },
+    "thermalsBefore": 1,
+    "thermalsAfter": 0,
+    "opensBefore": 95,
+    "opensAfter": 95,
+    "lostSource": 0,
+    "lostCurrent": 0,
+    "accepted": true,
+    "ownership": [true, true, true]
+  },
+  {
+    "repeat": 1,
+    "oldProposals": 168,
+    "newProposals": 200,
+    "priorPrefixByteExact": true,
+    "proposal": {
+      "name": "168.kicad_pcb",
+      "label": ["via", "e57c15b7-d609-442a-9cca-2c520d20bbab"]
+    },
+    "thermalsBefore": 1,
+    "thermalsAfter": 0,
+    "opensBefore": 95,
+    "opensAfter": 95,
+    "lostSource": 0,
+    "lostCurrent": 0,
+    "accepted": true,
+    "ownership": [true, true, true]
+  },
+  {
+    "repeat": 2,
+    "oldProposals": 168,
+    "newProposals": 200,
+    "priorPrefixByteExact": true,
+    "proposal": {
+      "name": "168.kicad_pcb",
+      "label": ["via", "e57c15b7-d609-442a-9cca-2c520d20bbab"]
+    },
+    "thermalsBefore": 1,
+    "thermalsAfter": 0,
+    "opensBefore": 95,
+    "opensAfter": 95,
+    "lostSource": 0,
+    "lostCurrent": 0,
+    "accepted": true,
+    "ownership": [true, true, true]
+  }
+]

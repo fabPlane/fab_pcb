@@ -1,0 +1,8 @@
+{
+  "pin": "a8f7762467b97863032a55e3b924dfd199456dac",
+  "oldPin": "34f33a19c1121a2594e32147dd1ba2e2d759a78b",
+  "beforeSource": "926485d2c38dc6d64e87b32e452857b6a94961f0",
+  "engineEvidence": "https://github.com/fabPlane/fab_router/tree/agent/fab-router-native-drc-gate/docs/pr-assets/agent-fab-router-native-drc-gate/c216-legacy-drawing-ids",
+  "benchmarkQualityUnchanged": true,
+  "sourceRoutingUnchanged": true
+}

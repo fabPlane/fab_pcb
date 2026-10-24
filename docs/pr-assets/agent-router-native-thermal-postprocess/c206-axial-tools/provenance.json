@@ -1,0 +1,42 @@
+{
+  "parent": "80fc5b776b0f719c76ff65b1ad945e9bb5517084",
+  "integration": "dbea5a2e39297ea1c063694812b3cacca9b6fcde",
+  "measured_executable_differences": ["tools/native-thermal-proposals.py"],
+  "scope": "Optional offline search; fresh paired full pipeline and three repeated reduced witnesses. No default routing gain claimed.",
+  "initial_native_regression_failure": "Legacy duplicated outline UUIDs rejected before proposal generation. A separate fixture reidentifies only two duplicate outline graphics; original retained unchanged.",
+  "tests_changed_after_suite_start": "Only sys.dont_write_bytecode=True in proposal regression; final focused regression and static checks repeated.",
+  "initial_engine_check_exit": 143,
+  "initial_engine_check_stop_reason": "Append axial proposals after the complete existing prefix to avoid extra checks on previously repairable boards; final suite restarted.",
+  "prototype_native_measurements": "prototype-native/ retains the first complete paired three-repeat diagnostic. Final identical diagnostic repeated after proposal-order refinement.",
+  "ordering_regression_setup": "First expected 16 pair paths; corrected to 15 because one displacement equals an outer endpoint and is intentionally excluded. Production pair generator unchanged.",
+  "final_executable_hash": "17c5b01361ebbbb1c71968d59dd30d9c1bc13cabcff0e72740c0f12108e5bf76",
+  "implementation_commit": "cc1bc212c7d9e7470a36ef3bc10a7003fdbd8532",
+  "measured_executable_hashes_match_commit": true,
+  "engine_checks": {
+    "exit_code": 0,
+    "passed": 915,
+    "failed": 0,
+    "assertions": 398751,
+    "seconds": 688.96
+  },
+  "integration_checks": {
+    "exit_code": 0,
+    "passed": 109,
+    "skipped": 6,
+    "failed": 0,
+    "assertions": 416
+  },
+  "candidate_metadata_note": "Baseline and early diagnostic start on dirty parent80fc5b77; all routing src and frozen baseline-tools bytes unchanged throughout. Final generator and measured executable hashes exactly match cc1bc212. Commit changes no measured bytes.",
+  "pin_before": "e411a8ae7612bce9b20a0d65b89da4b3204d70d2",
+  "pin_after": "cc1bc212c7d9e7470a36ef3bc10a7003fdbd8532",
+  "pin_src_diff_empty": true,
+  "physical_comparator_setup": "Initial exact comparison treated segment endpoint direction as physical geometry; J2small pair orientation reversed under regenerated UUID ordering. Corrected to exact Decimal unordered endpoints (no coordinate tolerance); all other physical attributes remain strict.",
+  "before_tools_equivalent_to_prior_pin": true,
+  "before_tools_equivalence_scope": "git diff e411a8ae 80fc5b77 -- src tools is empty; baseline executable snapshot exactly represents prior pin despite later test/evidence commits.",
+  "history_timestamp": "2026-10-20T01:37:29.016299Z",
+  "full_before_exit": 0,
+  "full_after_exit": 0,
+  "all_78_paired_outcomes_and_physical_copper_unchanged": true,
+  "all_measured_executables_unchanged": true,
+  "benchmark_order": "fresh baseline first; fresh candidate after baseline process exit; tests overlapped baseline only; no speed gain claimed"
+}

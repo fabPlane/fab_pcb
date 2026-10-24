@@ -1,0 +1,8 @@
+{
+  "commit": "4ae389a2a83dc612ef471d8d83c9630ba352c7c2",
+  "before": "dbb20f0e0a2fd8873e3e51f8efef2c8476c8520b",
+  "previous_pin": "cc1bc212c7d9e7470a36ef3bc10a7003fdbd8532",
+  "src_unchanged": true,
+  "guard_implementation_commit": "bb55c8321bc4005faedcff1640a03abe38fcd00d",
+  "correction": "Prior axial publication expectation was unsafe; stronger ownership guard correctly rejects it. Final revision changes only regression expectations and documentation."
+}
