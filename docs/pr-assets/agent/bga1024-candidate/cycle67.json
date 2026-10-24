@@ -1,0 +1,23 @@
+{
+  "cycle": 67,
+  "attempts": 162,
+  "repeats": 3,
+  "groups": 54,
+  "outcomes": {
+    "completed": 60,
+    "timeout": 102
+  },
+  "passed": 33,
+  "matched_attempts": 153,
+  "matched_passed": 33,
+  "before_passed": 33,
+  "before_completed": 59,
+  "matched_completed": 60,
+  "new_candidate": {
+    "attempts": 9,
+    "outcomes": {
+      "timeout": 9
+    },
+    "passed": 0
+  }
+}
