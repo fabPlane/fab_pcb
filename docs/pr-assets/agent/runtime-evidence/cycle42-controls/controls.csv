@@ -1,0 +1,13 @@
+control,changed_backend,accepted_before,accepted_after
+fixture hash,0,1,0
+fixture hash,1,1,0
+fixture hash,2,1,0
+fixture tier,0,1,0
+fixture tier,1,1,0
+fixture tier,2,1,0
+CPU,0,1,0
+CPU,1,1,0
+CPU,2,1,0
+unchanged,0,1,1
+unchanged,1,1,1
+unchanged,2,1,1

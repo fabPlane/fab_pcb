@@ -1,0 +1,16 @@
+case,repeat,mid_end_accepted,startup_end_accepted,verification_ms
+unchanged,1,1,1,2.65
+unchanged,2,1,1,2.965
+unchanged,3,1,1,2.613
+binary_bytes,1,1,0,2.877
+binary_bytes,2,1,0,2.851
+binary_bytes,3,1,0,2.806
+binary_mode,1,1,0,2.796
+binary_mode,2,1,0,2.63
+binary_mode,3,1,0,2.924
+launcher_target,1,1,0,2.771
+launcher_target,2,1,0,2.812
+launcher_target,3,1,0,2.63
+tracked_source,1,1,0,2.509
+tracked_source,2,1,0,2.941
+tracked_source,3,1,0,2.73
