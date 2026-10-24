@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "boards": [
+    {
+      "id": "bga-b1-kicad_pcb",
+      "format": "kicad_pcb",
+      "tier": "B1",
+      "license": "MIT",
+      "bundled_path": "B1/B1.kicad_pcb",
+      "layers": 4,
+      "nets": 100,
+      "generation": {
+        "script": "generate.py",
+        "seed": 19,
+        "pitch_mm": 0.8,
+        "pad_mm": 0.35,
+        "balls": 100,
+        "board_mm": [50, 50]
+      },
+      "notes": "100 front-side BGA balls to 100 perimeter pads; all four layers signal. No pre-routed fanout, planes, pairs or length constraints. Native default rules differ from SRJ minTraceWidth=0.15 mm."
+    },
+    {
+      "id": "bga-b2-kicad_pcb",
+      "format": "kicad_pcb",
+      "tier": "B2",
+      "license": "MIT",
+      "bundled_path": "B2/B2.kicad_pcb",
+      "layers": 4,
+      "nets": 100,
+      "generation": {
+        "script": "generate.py",
+        "seed": 19,
+        "pitch_mm": 0.65,
+        "pad_mm": 0.25,
+        "balls": 100,
+        "board_mm": [50, 50]
+      },
+      "notes": "100 front-side BGA balls to 100 perimeter pads; all four layers signal. No pre-routed fanout, planes, pairs or length constraints. Native default rules differ from SRJ minTraceWidth=0.15 mm."
+    }
+  ]
+}
