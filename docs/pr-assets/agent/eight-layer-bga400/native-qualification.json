@@ -1,0 +1,150 @@
+{
+  "machine": "hyper-ms-lin",
+  "cores": "0-5",
+  "repeats": 3,
+  "checker": "10.0.6",
+  "records": [
+    {
+      "repeat": 1,
+      "committed": {
+        "errors": 0,
+        "warnings": 0,
+        "opens": 400,
+        "report_sha256": "d7ca84e35dd8e4931fa699cb10910a892d987f892c2143e673d179d69d0df679"
+      },
+      "regenerated": {
+        "schema": 1,
+        "parameters": {
+          "seed": 6408,
+          "layers": 8,
+          "balls": 400,
+          "nets": 400,
+          "pads": 800,
+          "pitch_mm": 0.65,
+          "ball_mm": 0.3,
+          "target_mm": 0.4,
+          "target_pitch_mm": 0.8,
+          "board_mm": [60, 60],
+          "clearance_mm": 0.1,
+          "track_mm": 0.1,
+          "via_mm": 0.3,
+          "drill_mm": 0.1
+        },
+        "copper_stack": [
+          [0, "F.Cu"],
+          [4, "In1.Cu"],
+          [6, "In2.Cu"],
+          [8, "In3.Cu"],
+          [10, "In4.Cu"],
+          [12, "In5.Cu"],
+          [14, "In6.Cu"],
+          [2, "B.Cu"]
+        ],
+        "native_errors": 0,
+        "native_warnings": 0,
+        "native_opens": 400,
+        "checker": "10.0.6",
+        "sha256": {
+          "bga400.kicad_pcb": "f97898ad936cf6d7339a080c7c8e9a4f0f7f35ad97d2f5e23ad05f07dba74396",
+          "bga400.kicad_pro": "681c7b9428f074ab569c2f3820cd9886bc7cdc5c57cad1c83cac764fd90311e7",
+          "bga400.dsn": "1d3b6d1fc89f780adae751ad3e8c4fccee59e6cc0684b5c7b03131b6a7143c87"
+        }
+      }
+    },
+    {
+      "repeat": 2,
+      "committed": {
+        "errors": 0,
+        "warnings": 0,
+        "opens": 400,
+        "report_sha256": "8afae0c0d92e7fe6e876956076eab26387ec960688510da0d759102d090c64aa"
+      },
+      "regenerated": {
+        "schema": 1,
+        "parameters": {
+          "seed": 6408,
+          "layers": 8,
+          "balls": 400,
+          "nets": 400,
+          "pads": 800,
+          "pitch_mm": 0.65,
+          "ball_mm": 0.3,
+          "target_mm": 0.4,
+          "target_pitch_mm": 0.8,
+          "board_mm": [60, 60],
+          "clearance_mm": 0.1,
+          "track_mm": 0.1,
+          "via_mm": 0.3,
+          "drill_mm": 0.1
+        },
+        "copper_stack": [
+          [0, "F.Cu"],
+          [4, "In1.Cu"],
+          [6, "In2.Cu"],
+          [8, "In3.Cu"],
+          [10, "In4.Cu"],
+          [12, "In5.Cu"],
+          [14, "In6.Cu"],
+          [2, "B.Cu"]
+        ],
+        "native_errors": 0,
+        "native_warnings": 0,
+        "native_opens": 400,
+        "checker": "10.0.6",
+        "sha256": {
+          "bga400.kicad_pcb": "f97898ad936cf6d7339a080c7c8e9a4f0f7f35ad97d2f5e23ad05f07dba74396",
+          "bga400.kicad_pro": "681c7b9428f074ab569c2f3820cd9886bc7cdc5c57cad1c83cac764fd90311e7",
+          "bga400.dsn": "1d3b6d1fc89f780adae751ad3e8c4fccee59e6cc0684b5c7b03131b6a7143c87"
+        }
+      }
+    },
+    {
+      "repeat": 3,
+      "committed": {
+        "errors": 0,
+        "warnings": 0,
+        "opens": 400,
+        "report_sha256": "b42edd27d275827887f631ec55c62b2ae243dff72e60976a5d3a58326eac1446"
+      },
+      "regenerated": {
+        "schema": 1,
+        "parameters": {
+          "seed": 6408,
+          "layers": 8,
+          "balls": 400,
+          "nets": 400,
+          "pads": 800,
+          "pitch_mm": 0.65,
+          "ball_mm": 0.3,
+          "target_mm": 0.4,
+          "target_pitch_mm": 0.8,
+          "board_mm": [60, 60],
+          "clearance_mm": 0.1,
+          "track_mm": 0.1,
+          "via_mm": 0.3,
+          "drill_mm": 0.1
+        },
+        "copper_stack": [
+          [0, "F.Cu"],
+          [4, "In1.Cu"],
+          [6, "In2.Cu"],
+          [8, "In3.Cu"],
+          [10, "In4.Cu"],
+          [12, "In5.Cu"],
+          [14, "In6.Cu"],
+          [2, "B.Cu"]
+        ],
+        "native_errors": 0,
+        "native_warnings": 0,
+        "native_opens": 400,
+        "checker": "10.0.6",
+        "sha256": {
+          "bga400.kicad_pcb": "f97898ad936cf6d7339a080c7c8e9a4f0f7f35ad97d2f5e23ad05f07dba74396",
+          "bga400.kicad_pro": "681c7b9428f074ab569c2f3820cd9886bc7cdc5c57cad1c83cac764fd90311e7",
+          "bga400.dsn": "1d3b6d1fc89f780adae751ad3e8c4fccee59e6cc0684b5c7b03131b6a7143c87"
+        }
+      }
+    }
+  ],
+  "limitation": "Fresh native input admission only; no routing or production scoring change."
+}
