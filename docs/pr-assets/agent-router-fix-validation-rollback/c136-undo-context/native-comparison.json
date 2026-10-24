@@ -1,0 +1,799 @@
+{
+  "adapter_fix_exercised": false,
+  "before": {
+    "runs": 78,
+    "passed": 39,
+    "valid_cases": 13,
+    "opens": 120,
+    "new_errors": 27,
+    "median_seconds": 1.2711263565
+  },
+  "after": {
+    "runs": 78,
+    "passed": 39,
+    "valid_cases": 13,
+    "opens": 120,
+    "new_errors": 27,
+    "median_seconds": 1.1649824240000002
+  },
+  "changed": [],
+  "cases": [
+    {
+      "case": "fan-controller-fan-controller-j1",
+      "passed": 0,
+      "opens": [
+        5,
+        5,
+        5
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "fan-controller-fan-controller-j2-large",
+      "passed": 3,
+      "opens": [
+        0,
+        0,
+        0
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "fan-controller-fan-controller-j2-medium",
+      "passed": 3,
+      "opens": [
+        0,
+        0,
+        0
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "fan-controller-fan-controller-j2-small",
+      "passed": 0,
+      "opens": [
+        1,
+        1,
+        1
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "hellscribe-hellscribe-j1",
+      "passed": 0,
+      "opens": [
+        3,
+        3,
+        3
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "hellscribe-hellscribe-j2-large",
+      "passed": 0,
+      "opens": [
+        1,
+        1,
+        1
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "kitspace-aquarius-j4",
+      "passed": 0,
+      "opens": [
+        15,
+        15,
+        15
+      ],
+      "new_errors": [
+        6,
+        6,
+        6
+      ],
+      "error_types": [
+        {
+          "starved_thermal": 6
+        },
+        {
+          "starved_thermal": 6
+        },
+        {
+          "starved_thermal": 6
+        }
+      ],
+      "thermal_items": [
+        {
+          "description": "Thermal relief connection to zone incomplete (layer B.Cu; zone min spoke count 2; actual 1)",
+          "items": [
+            {
+              "description": "Zone [GNDD] on B.Cu, priority 0",
+              "pos": {
+                "x": 189.23,
+                "y": 153.67
+              },
+              "uuid": "cbaef996-a5ad-5073-a292-fe94da38fab6"
+            },
+            {
+              "description": "Pad 2 [GNDD] of C1 on B.Cu",
+              "pos": {
+                "x": 178.659647,
+                "y": 49.297447
+              },
+              "uuid": "0058b9c6-73af-4ba8-a061-fb00a457a84f"
+            }
+          ],
+          "severity": "error",
+          "type": "starved_thermal"
+        },
+        {
+          "description": "Thermal relief connection to zone incomplete (layer B.Cu; zone min spoke count 2; actual 1)",
+          "items": [
+            {
+              "description": "Zone [GNDD] on B.Cu, priority 0",
+              "pos": {
+                "x": 189.23,
+                "y": 153.67
+              },
+              "uuid": "cbaef996-a5ad-5073-a292-fe94da38fab6"
+            },
+            {
+              "description": "Pad 1 [GNDD] of R20 on B.Cu",
+              "pos": {
+                "x": 175.082,
+                "y": 58.3565
+              },
+              "uuid": "d145de36-3889-4a3d-8c61-71242d4e107c"
+            }
+          ],
+          "severity": "error",
+          "type": "starved_thermal"
+        },
+        {
+          "description": "Thermal relief connection to zone incomplete (layer B.Cu; zone min spoke count 2; actual 1)",
+          "items": [
+            {
+              "description": "Zone [GNDD] on B.Cu, priority 0",
+              "pos": {
+                "x": 189.23,
+                "y": 153.67
+              },
+              "uuid": "cbaef996-a5ad-5073-a292-fe94da38fab6"
+            },
+            {
+              "description": "Pad 39 [GNDD] of U1 on B.Cu",
+              "pos": {
+                "x": 173.200561,
+                "y": 48.414401
+              },
+              "uuid": "40448888-06d6-474b-a038-09dfd03ed49c"
+            }
+          ],
+          "severity": "error",
+          "type": "starved_thermal"
+        },
+        {
+          "description": "Thermal relief connection to zone incomplete (layer B.Cu; zone min spoke count 2; actual 1)",
+          "items": [
+            {
+              "description": "Zone [GNDD] on B.Cu, priority 0",
+              "pos": {
+                "x": 189.23,
+                "y": 153.67
+              },
+              "uuid": "cbaef996-a5ad-5073-a292-fe94da38fab6"
+            },
+            {
+              "description": "Pad 46 [GNDD] of U1 on B.Cu",
+              "pos": {
+                "x": 170.725687,
+                "y": 50.889275
+              },
+              "uuid": "8a9de701-0636-4fb8-8016-870d25898f6d"
+            }
+          ],
+          "severity": "error",
+          "type": "starved_thermal"
+        },
+        {
+          "description": "Thermal relief connection to zone incomplete (layer B.Cu; zone min spoke count 2; actual 1)",
+          "items": [
+            {
+              "description": "Zone [GNDD] on B.Cu, priority 0",
+              "pos": {
+                "x": 189.23,
+                "y": 153.67
+              },
+              "uuid": "cbaef996-a5ad-5073-a292-fe94da38fab6"
+            },
+            {
+              "description": "Pad 48 [GNDD] of U1 on B.Cu",
+              "pos": {
+                "x": 170.018581,
+                "y": 51.596381
+              },
+              "uuid": "af425661-704d-45af-ac80-3e8e4d16dab8"
+            }
+          ],
+          "severity": "error",
+          "type": "starved_thermal"
+        },
+        {
+          "description": "Thermal relief connection to zone incomplete (layer B.Cu; zone min spoke count 2; actual 1)",
+          "items": [
+            {
+              "description": "Zone [GNDD] on B.Cu, priority 0",
+              "pos": {
+                "x": 189.23,
+                "y": 153.67
+              },
+              "uuid": "cbaef996-a5ad-5073-a292-fe94da38fab6"
+            },
+            {
+              "description": "Pad 53 [GNDD] of U1 on B.Cu",
+              "pos": {
+                "x": 165.882006,
+                "y": 50.182168
+              },
+              "uuid": "12cbe2ed-3861-4e0e-89f1-6c66f25e5228"
+            }
+          ],
+          "severity": "error",
+          "type": "starved_thermal"
+        }
+      ]
+    },
+    {
+      "case": "kitspace-lcr-addon-j3",
+      "passed": 3,
+      "opens": [
+        0,
+        0,
+        0
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "kitspace-solenoid-driver-j1",
+      "passed": 3,
+      "opens": [
+        0,
+        0,
+        0
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "kitspace-solenoid-driver-j3",
+      "passed": 3,
+      "opens": [
+        0,
+        0,
+        0
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "kitspace-solenoid-driver-j4",
+      "passed": 3,
+      "opens": [
+        0,
+        0,
+        0
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "nextbusclock-nextbusclockv1-j2-large",
+      "passed": 3,
+      "opens": [
+        0,
+        0,
+        0
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "nextbusclock-nextbusclockv1-j2-medium",
+      "passed": 3,
+      "opens": [
+        0,
+        0,
+        0
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "nextbusclock-nextbusclockv1-j2-small",
+      "passed": 3,
+      "opens": [
+        0,
+        0,
+        0
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "nextbusclock-nextbusclockv1-j3",
+      "passed": 0,
+      "opens": [
+        3,
+        3,
+        3
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "paperino-hw-paperino-shield-j4",
+      "passed": 0,
+      "opens": [
+        6,
+        6,
+        6
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "photon-sprinkler-sprinkler-j1",
+      "passed": 0,
+      "opens": [
+        2,
+        2,
+        2
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "photon-sprinkler-sprinkler-j3",
+      "passed": 0,
+      "opens": [
+        2,
+        2,
+        2
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "qrpcard-qrpcard-j1",
+      "passed": 3,
+      "opens": [
+        0,
+        0,
+        0
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "qrpcard-qrpcard-j2-medium",
+      "passed": 3,
+      "opens": [
+        0,
+        0,
+        0
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "qrpcard-qrpcard-j2-small",
+      "passed": 0,
+      "opens": [
+        0,
+        0,
+        0
+      ],
+      "new_errors": [
+        2,
+        2,
+        2
+      ],
+      "error_types": [
+        {
+          "starved_thermal": 2
+        },
+        {
+          "starved_thermal": 2
+        },
+        {
+          "starved_thermal": 2
+        }
+      ],
+      "thermal_items": [
+        {
+          "description": "Thermal relief connection to zone incomplete (layer F.Cu; zone min spoke count 2; actual 1)",
+          "items": [
+            {
+              "description": "Zone [GND] on F.Cu, priority 0",
+              "pos": {
+                "x": 128.27,
+                "y": 171.45
+              },
+              "uuid": "00000000-0000-0000-0000-000057c65453"
+            },
+            {
+              "description": "Pad 7 [GND] of U1 on F.Cu",
+              "pos": {
+                "x": 80.264,
+                "y": 131.318
+              },
+              "uuid": "b3f02100-400b-4899-9892-82a97b074b91"
+            }
+          ],
+          "severity": "error",
+          "type": "starved_thermal"
+        },
+        {
+          "description": "Thermal relief connection to zone incomplete (layer F.Cu; zone min spoke count 2; actual 1)",
+          "items": [
+            {
+              "description": "Zone [GND] on F.Cu, priority 0",
+              "pos": {
+                "x": 128.27,
+                "y": 171.45
+              },
+              "uuid": "00000000-0000-0000-0000-000057c65453"
+            },
+            {
+              "description": "Pad 15 [GND] of U2 on F.Cu",
+              "pos": {
+                "x": 76.073,
+                "y": 111.125
+              },
+              "uuid": "8384d0cb-a9eb-4cd0-9fed-a2e4e224b8fa"
+            }
+          ],
+          "severity": "error",
+          "type": "starved_thermal"
+        }
+      ]
+    },
+    {
+      "case": "qrpcard-qrpcard-j4",
+      "passed": 0,
+      "opens": [
+        0,
+        0,
+        0
+      ],
+      "new_errors": [
+        1,
+        1,
+        1
+      ],
+      "error_types": [
+        {
+          "starved_thermal": 1
+        },
+        {
+          "starved_thermal": 1
+        },
+        {
+          "starved_thermal": 1
+        }
+      ],
+      "thermal_items": [
+        {
+          "description": "Thermal relief connection to zone incomplete (layer F.Cu; zone min spoke count 2; actual 1)",
+          "items": [
+            {
+              "description": "Zone [GND] on F.Cu, priority 0",
+              "pos": {
+                "x": 128.27,
+                "y": 171.45
+              },
+              "uuid": "00000000-0000-0000-0000-000057c65453"
+            },
+            {
+              "description": "Pad 15 [GND] of U2 on F.Cu",
+              "pos": {
+                "x": 76.073,
+                "y": 111.125
+              },
+              "uuid": "d77f2098-e7f4-4d9b-a0ff-0f4972d0cb00"
+            }
+          ],
+          "severity": "error",
+          "type": "starved_thermal"
+        }
+      ]
+    },
+    {
+      "case": "rufs-smart-psu-j1",
+      "passed": 3,
+      "opens": [
+        0,
+        0,
+        0
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "rufs-smart-psu-j3",
+      "passed": 0,
+      "opens": [
+        1,
+        1,
+        1
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "rufs-smart-psu-j4",
+      "passed": 0,
+      "opens": [
+        1,
+        1,
+        1
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    },
+    {
+      "case": "sv650sds-sds-tool-j4",
+      "passed": 3,
+      "opens": [
+        0,
+        0,
+        0
+      ],
+      "new_errors": [
+        0,
+        0,
+        0
+      ],
+      "error_types": [
+        {},
+        {},
+        {}
+      ],
+      "thermal_items": []
+    }
+  ],
+  "evidence_sha256": {
+    "before": {
+      "controls.json": "6125e508a7618a469b5ae8689040f59be3efc9bf765f7efe766dc1b2330f031e",
+      "results.json": "5e2c37bacdaac7da41b0e86e79a1931e24971cff97a30596ac8adf144d61df21",
+      "summary.json": "98b50d1e2fca5558562ce4c9d173ea3c18148aab30d5d18eb4a9bab2e8b682d9"
+    },
+    "after": {
+      "controls.json": "d694a328cc704374039bf02fd82882f8ea9abc5aaf3f0dadb01479cd57f29871",
+      "results.json": "acefaae18922d1196dba2201feb494d79ed5a34eb6c05c33dde7e183f04de704",
+      "summary.json": "418c52c19539224748333abc2c073fabf927ec191252ee05a22e447fcc412c3b"
+    }
+  },
+  "before_cpus": [
+    20,
+    21,
+    22,
+    23,
+    24,
+    25
+  ],
+  "after_cpus": [
+    20,
+    21,
+    22,
+    23,
+    24,
+    25
+  ],
+  "candidate_commit": "258a1ce4d36b4e6d73c8fc87d991cf4d4117cbb6"
+}

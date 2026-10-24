@@ -18,16 +18,19 @@
  * The job refills the zones (unless `refillZones: false`), saves the board (`SaveDocument`, so
  * KiCad's exporter reads the current state), runs `extractRouteInput` -> router.route ->
  * `applyRouteResult` (one commit, message "Autoroute (<router>): <n> connections"), refills again,
- * then saves and re-measures the routed board. The post-apply refill is best-effort: its outcome
- * is reported in `zoneRefill`, but a failure does not discard the applied route or prevent the
- * final save. The browser only has to pick up the `DocumentChanged` event as usual. Cancelling
+ * then saves and re-measures the routed board. A failed post-apply refill for fab_router
+ * fails without a final save and attempts an ownership-checked undo of the route commit.
+ * Disabling refill still compares native DRC errors before and after tentative application.
+ * Other engines retain best-effort refill behavior. A failed native DRC or tentative ratsnest query during fab_router's cleanup undoes that route
+ * commit before failing the job; a failed undo is reported explicitly. The browser only has to
+ * pick up the `DocumentChanged` event as usual. Cancelling
  * before the apply leaves the board untouched; a failed router run (a fab_router error, a
  * Freerouting crash) applies nothing and reports the error. A failure of the final save reports
  * the job as failed but leaves the applied route in KiCad memory, where the caller can retry
  * saving it.
  */
 import { Arc, KiCad, KiCadClient, Track, Via, type Transport } from "@fp-pcb/client";
-import { DrcErrorType } from "@fp-pcb/proto";
+import { DrcErrorType, RuleSeverity, type DrcMarker } from "@fp-pcb/proto";
 import { applyRouteResult } from "./apply";
 import { extractRouteInput } from "./extract";
 import { endpointCollisions } from "./endpoint-collisions";
@@ -59,7 +62,7 @@ export interface RouteJobZoneRefill {
   before: boolean;
   /** The post-apply refill completed successfully. */
   after: boolean;
-  /** A non-fatal post-apply refill failure. */
+  /** A post-apply refill failure (fatal for fab_router). */
   error?: string;
 }
 
@@ -210,6 +213,39 @@ export function trackLength(result: Pick<RouteResult, "tracks">): number {
   let sum = 0;
   for (const t of result.tracks) sum += Math.hypot(t.end.x - t.start.x, t.end.y - t.start.y);
   return Math.round(sum);
+}
+
+// Every tentative-commit undo must verify ownership after asynchronous native
+// queries. Refuse to undo a newer edit, even if that leaves tentative copper.
+async function undoTentativeRoute(board: NonNullable<Awaited<ReturnType<KiCad["currentBoard"]>>>, commitId: string): Promise<void> {
+  try {
+    const top = (await board.undoStack()).undo.at(-1);
+    if (!commitId || top?.commitId?.value !== commitId) throw new Error("tentative route commit is not at the top of the undo stack");
+    const undone = await board.undo(1);
+    if (undone.applied !== 1) throw new Error(`expected one undone commit, got ${undone.applied}`);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(`could not undo tentative route: ${detail}; tentative route may remain in KiCad memory`, { cause: error });
+  }
+}
+
+async function rejectTentativeValidation(
+  board: NonNullable<Awaited<ReturnType<KiCad["currentBoard"]>>>,
+  commitId: string,
+  query: string,
+  validationError: unknown,
+): Promise<never> {
+  const detail = validationError instanceof Error ? validationError.message : String(validationError);
+  try {
+    await undoTentativeRoute(board, commitId);
+  } catch (rollbackError) {
+    const rollbackDetail = rollbackError instanceof Error ? rollbackError.message : String(rollbackError);
+    throw new Error(
+      `${query} validation failed: ${detail}; rollback failed: ${rollbackDetail}; tentative route may remain in KiCad memory`,
+      { cause: validationError },
+    );
+  }
+  throw new Error(`${query} validation failed: ${detail}; tentative route commit undone`, { cause: validationError });
 }
 
 /** Remove created tracks/vias named by a DRC marker after undoing their tentative commit. */
@@ -412,6 +448,7 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         let message = request.message ?? autorouteMessage(request.router, routed);
         setState("applying");
         let applied = false;
+        let acceptedCommitId: string | undefined;
         const removedExistingCopper = new Map<string, string>();
         const retainedDanglingCopper: Array<{ id: string; net: string; reason: "locked" }> = [];
         // Without an explicit scope, repair only nets with input connections.
@@ -419,10 +456,30 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
         const removableExisting = new Map(
           originalCopper.filter((item) => !item.locked && item.net && repairNets.has(item.net)).map((item) => [item.id, item.net!]),
         );
+        // Compare matching states: filled when requested, otherwise unfilled. Marker UUIDs
+        // change on each native check; retain multiplicity of stable identities.
+        // Report every track finding so an existing clearance error cannot mask
+        // a new violation on the same track. Use the same mode in every check.
+        let nativeBaseline: DrcMarker[] | undefined;
+        if (
+          result.router === "fab-router" &&
+          !alreadyApplied(result) &&
+          (result.tracks.length || result.vias.length || result.claimedVias?.length)
+        ) {
+          // Validation can reject tentative copper only through server undo.
+          // Refuse before applying when that primitive is unavailable; discovering
+          // this during rollback would leave an unsafe route in editor memory.
+          if (!(await board.supportsServerUndo()))
+            throw new Error("fab_router native validation requires server undo before applying tentative copper");
+          nativeBaseline = (await board.drc.run({ refillZones: false, reportAllTrackErrors: true })).markers;
+        }
         if (!alreadyApplied(result) && (result.tracks.length || result.vias.length || result.claimedVias?.length)) {
-          // Each pass must remove at least one item; this finite bound handles long dangling chains.
-          const maxCleanupPasses = result.tracks.length + result.vias.length + removableExisting.size + 1;
+          // Each cleanup pass removes an item; allow one extra pass to validate a relabelled commit.
+          const maxCleanupPasses = result.tracks.length + result.vias.length + removableExisting.size + 2;
           for (let cleanupPass = 0; cleanupPass < maxCleanupPasses; cleanupPass++) {
+            // Cancellation may arrive during the baseline query or a cleanup undo.
+            // Stop before creating the next tentative commit.
+            checkCancelled();
             const committed = await (deps.apply ?? applyRouteResult)(board, result, {
               message,
               removeCopperIds: [...removedExistingCopper.keys()],
@@ -432,18 +489,41 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
               break;
             }
             const createdIds = new Set(committed.created.map((item) => item.id));
-            const drc = await board.drc.run({ refillZones: false });
+            let drc;
+            try {
+              drc = await board.drc.run({ refillZones: false, reportAllTrackErrors: true });
+              // A cancellation received while validation was in flight must undo
+              // this tentative commit before refill or durable save.
+              checkCancelled();
+            } catch (validationError) {
+              return await rejectTentativeValidation(board, committed.commitId, "native DRC", validationError);
+            }
             const danglingIds = new Set(
               drc.markers
                 .filter(
                   (marker) =>
-                    marker.errorType === DrcErrorType.DRCET_DANGLING_TRACK || marker.errorType === DrcErrorType.DRCET_DANGLING_VIA,
+                    !marker.excluded &&
+                    (marker.severity === RuleSeverity.RS_ERROR || marker.severity === RuleSeverity.RS_WARNING) &&
+                    (marker.errorType === DrcErrorType.DRCET_DANGLING_TRACK || marker.errorType === DrcErrorType.DRCET_DANGLING_VIA),
                 )
                 .flatMap((marker) => marker.items.map((item) => item.value)),
             );
             const rejectedIds = new Set([...danglingIds].filter((id) => createdIds.has(id)));
             const existingIds = [...danglingIds].filter((id) => removableExisting.has(id) && !removedExistingCopper.has(id));
             if (!rejectedIds.size && !existingIds.length) {
+              // Disabling refill skips zone recomputation, not native DRC safety.
+              // Compare matching unfilled states before accepting tentative copper.
+              if (!(request.refillZones ?? true)) {
+                const added = newNativeErrors(nativeBaseline ?? [], drc.markers);
+                if (added)
+                  return await rejectTentativeValidation(
+                    board,
+                    committed.commitId,
+                    "native DRC",
+                    new Error(`${added} new native DRC error(s)`),
+                  );
+              }
+
               for (const item of originalCopper.filter(
                 (item) => item.locked && item.net && repairNets.has(item.net) && danglingIds.has(item.id),
               )) {
@@ -453,20 +533,31 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
                 );
               }
               if (!request.message) {
-                const nativeOpen = (await board.ratsnest(request.options?.nets ?? [])).edges.length;
+                let nativeOpen: number;
+                try {
+                  nativeOpen = (await board.ratsnest(request.options?.nets ?? [])).edges.length;
+                  // This query still belongs to the tentative commit. Cancellation
+                  // must reject it before relabelling, refill, or durable save.
+                  checkCancelled();
+                } catch (validationError) {
+                  return await rejectTentativeValidation(board, committed.commitId, "native ratsnest", validationError);
+                }
                 const nativeMessage = autorouteMessage(request.router, Math.max(0, result.totalConnections - nativeOpen));
                 if (nativeMessage !== message) {
-                  const undone = await board.undo(1);
-                  if (undone.applied !== 1) throw new Error("could not relabel fab_router's tentative route commit");
+                  await undoTentativeRoute(board, committed.commitId);
                   message = nativeMessage;
-                  await (deps.apply ?? applyRouteResult)(board, result, { message, removeCopperIds: [...removedExistingCopper.keys()] });
+                  // Re-enter the same validation path for the replacement commit. Native
+                  // checks describe the previous commit, including its created item IDs.
+                  if (cleanupPass + 1 === maxCleanupPasses)
+                    throw new Error("fab_router native connection count did not converge while relabelling the route");
+                  continue;
                 }
               }
+              acceptedCommitId = committed.commitId;
               applied = true;
               break;
             }
-            const undone = await board.undo(1);
-            if (undone.applied !== 1) throw new Error("could not undo fab_router's tentative dangling-copper commit");
+            await undoTentativeRoute(board, committed.commitId);
             for (const id of existingIds) {
               removedExistingCopper.set(id, removableExisting.get(id)!);
               result.log.push(`Removed pre-existing dangling copper on requested net ${removableExisting.get(id)}: ${id}`);
@@ -493,7 +584,24 @@ export function createRouteJobs(deps: RouteJobDeps = {}): RouteJobs {
             } catch (e) {
               const detail = e instanceof Error ? e.message : String(e);
               info.zoneRefill.error = detail;
+              if (result.router === "fab-router" && acceptedCommitId) {
+                // A failed refill may itself have committed. Never assume undo(1)
+                // still targets the route; refuse if a newer native entry exists.
+                return await rejectTentativeValidation(board, acceptedCommitId, "post-apply zone refill", e);
+              }
               result.log.push(`RefillZones after the apply failed: ${detail}; saving the applied route without a fresh fill`);
+            }
+          }
+          if (result.router === "fab-router" && acceptedCommitId && info.zoneRefill.after) {
+            try {
+              const filled = await board.drc.run({ refillZones: false, reportAllTrackErrors: true });
+              // Refill validation can outlive cancellation just like the initial
+              // tentative check. Reject before saving, respecting undo ownership.
+              checkCancelled();
+              const added = newNativeErrors(nativeBaseline ?? [], filled.markers);
+              if (added) throw new Error(`${added} new filled native DRC error(s)`);
+            } catch (validationError) {
+              return await rejectTentativeValidation(board, acceptedCommitId, "post-refill native DRC", validationError);
             }
           }
           setState("saving");
@@ -723,4 +831,29 @@ export function matchRouteJobPath(pathname: string): { sessionId: string; jobId?
   const m = /^\/sessions\/([^/]+)\/route(?:\/([^/]+))?$/.exec(pathname);
   if (!m) return undefined;
   return { sessionId: decodeURIComponent(m[1]!), jobId: m[2] ? decodeURIComponent(m[2]) : undefined };
+}
+
+/** Stable marker identity excludes regenerated marker UUIDs and human descriptions. */
+function newNativeErrors(before: readonly DrcMarker[], after: readonly DrcMarker[]): number {
+  const key = (m: DrcMarker) =>
+    JSON.stringify([
+      m.errorType,
+      m.layer,
+      m.position ? [String(m.position.xNm), String(m.position.yNm)] : null,
+      m.items.map((item) => item.value).sort(),
+    ]);
+  const active = (m: DrcMarker) => !m.excluded && m.severity === RuleSeverity.RS_ERROR;
+  const remaining = new Map<string, number>();
+  for (const marker of before.filter(active)) {
+    const id = key(marker);
+    remaining.set(id, (remaining.get(id) ?? 0) + 1);
+  }
+  let added = 0;
+  for (const marker of after.filter(active)) {
+    const id = key(marker);
+    const count = remaining.get(id) ?? 0;
+    if (count) remaining.set(id, count - 1);
+    else added++;
+  }
+  return added;
 }

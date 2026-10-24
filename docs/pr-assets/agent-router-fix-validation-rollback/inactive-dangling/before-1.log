@@ -1,0 +1,111 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-validation.test.ts:
+(pass) failed native validation restores tentative copper [3.89ms]
+(pass) failed native validation restores tentative copper after a cleanup retry [0.30ms]
+(pass) failed validation reports an unsuccessful rollback (zero) without claiming restoration [0.19ms]
+(pass) failed validation reports an unsuccessful rollback (throws) without claiming restoration [0.07ms]
+(pass) successful native validation keeps and saves the applied route without undo [0.60ms]
+(pass) failed validation preserves an unrelated edit above the route commit [0.96ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (owned) [1.32ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (zero) [0.08ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (throws) [0.12ms]
+(pass) relabelled route is validated and restored before a failed job [0.20ms]
+(pass) relabelled route with successful validation is saved [0.41ms]
+(pass) unstable native connection counts stop without saving a replacement [0.18ms]
+(pass) failed post-apply refill rejects without saving (owned) [0.21ms]
+(pass) failed post-apply refill rejects without saving (zero) [0.08ms]
+(pass) failed post-apply refill rejects without saving (throws) [0.06ms]
+(pass) failed refill with its own newer commit refuses a one-entry route rollback [0.13ms]
+(pass) successful post-apply refill keeps the route and saves [0.16ms]
+(pass) failed filled native DRC query rejects before saving (owned) [0.13ms]
+(pass) failed filled native DRC query rejects before saving (zero) [0.06ms]
+(pass) failed filled native DRC query rejects before saving (throws) [0.05ms]
+(pass) failed filled DRC query preserves a newer unrelated edit [0.13ms]
+(pass) rejects newly introduced filled native errors (new) [0.21ms]
+(pass) rejects newly introduced filled native errors (duplicate) [0.08ms]
+(pass) rejects newly introduced filled native errors (replacement) [0.05ms]
+(pass) allows unchanged or excluded filled markers (existing) [0.14ms]
+(pass) allows unchanged or excluded filled markers (excluded) [0.06ms]
+(pass) rejects new native errors with zone refill disabled (new) [0.10ms]
+(pass) rejects new native errors with zone refill disabled (duplicate) [0.06ms]
+(pass) rejects new native errors with zone refill disabled (replacement) [0.03ms]
+(pass) allows existing or excluded errors with zone refill disabled (existing) [0.15ms]
+(pass) allows existing or excluded errors with zone refill disabled (excluded) [0.05ms]
+(pass) excluded dangling finding preserves existing copper [0.14ms]
+(pass) excluded dangling finding preserves generated copper [0.07ms]
+218 | for (const danglingSeverity of [RuleSeverity.RS_IGNORE, RuleSeverity.RS_EXCLUSION, RuleSeverity.RS_INFO]) {
+219 |   test(`inactive dangling severity preserves existing copper (${danglingSeverity})`, async () => {
+220 |     const fixture = validationFixture({ valid: true, danglingSeverity });
+221 |     const info = await fixture.done;
+222 |     expect(info.state).toBe("done");
+223 |     expect(fixture.copper().map((item) => item.id)).toEqual(["stub", "protected", "other-net", "new-route"]);
+                                                          ^
+error: expect(received).toEqual(expected)
+
+  [
+-   "stub",
+    "protected",
+    "other-net",
+    "new-route",
+  ]
+
+- Expected  - 1
++ Received  + 0
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:223:53)
+(fail) inactive dangling severity preserves existing copper (4) [0.47ms]
+218 | for (const danglingSeverity of [RuleSeverity.RS_IGNORE, RuleSeverity.RS_EXCLUSION, RuleSeverity.RS_INFO]) {
+219 |   test(`inactive dangling severity preserves existing copper (${danglingSeverity})`, async () => {
+220 |     const fixture = validationFixture({ valid: true, danglingSeverity });
+221 |     const info = await fixture.done;
+222 |     expect(info.state).toBe("done");
+223 |     expect(fixture.copper().map((item) => item.id)).toEqual(["stub", "protected", "other-net", "new-route"]);
+                                                          ^
+error: expect(received).toEqual(expected)
+
+  [
+-   "stub",
+    "protected",
+    "other-net",
+    "new-route",
+  ]
+
+- Expected  - 1
++ Received  + 0
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:223:53)
+(fail) inactive dangling severity preserves existing copper (3) [0.22ms]
+218 | for (const danglingSeverity of [RuleSeverity.RS_IGNORE, RuleSeverity.RS_EXCLUSION, RuleSeverity.RS_INFO]) {
+219 |   test(`inactive dangling severity preserves existing copper (${danglingSeverity})`, async () => {
+220 |     const fixture = validationFixture({ valid: true, danglingSeverity });
+221 |     const info = await fixture.done;
+222 |     expect(info.state).toBe("done");
+223 |     expect(fixture.copper().map((item) => item.id)).toEqual(["stub", "protected", "other-net", "new-route"]);
+                                                          ^
+error: expect(received).toEqual(expected)
+
+  [
+-   "stub",
+    "protected",
+    "other-net",
+    "new-route",
+  ]
+
+- Expected  - 1
++ Received  + 0
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:223:53)
+(fail) inactive dangling severity preserves existing copper (5) [0.16ms]
+(pass) active dangling severity still cleans scoped existing copper (1) [0.23ms]
+(pass) active dangling severity still cleans scoped existing copper (2) [0.11ms]
+
+3 tests failed:
+(fail) inactive dangling severity preserves existing copper (4) [0.47ms]
+(fail) inactive dangling severity preserves existing copper (3) [0.22ms]
+(fail) inactive dangling severity preserves existing copper (5) [0.16ms]
+
+ 35 pass
+ 3 fail
+ 192 expect() calls
+Ran 38 tests across 1 file. [152.00ms]

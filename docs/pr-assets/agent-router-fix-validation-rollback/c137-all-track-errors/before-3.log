@@ -1,0 +1,39 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-validation.test.ts:
+314 |       const fixture = validationFixture({ maskedTrackError,
+315 |         ...(refill ? { refill: "valid" as const } : {}),
+316 |       });
+317 |       const info = await fixture.done;
+318 |       const rejected = maskedTrackError === "new";
+319 |       expect(info.state).toBe(rejected ? "failed" : "done");
+                               ^
+error: expect(received).toBe(expected)
+
+Expected: "failed"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:319:26)
+(fail) checks every track clearance finding (new, refill=false) [4.73ms]
+(pass) checks every track clearance finding (existing, refill=false) [0.19ms]
+314 |       const fixture = validationFixture({ maskedTrackError,
+315 |         ...(refill ? { refill: "valid" as const } : {}),
+316 |       });
+317 |       const info = await fixture.done;
+318 |       const rejected = maskedTrackError === "new";
+319 |       expect(info.state).toBe(rejected ? "failed" : "done");
+                               ^
+error: expect(received).toBe(expected)
+
+Expected: "failed"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:319:26)
+(fail) checks every track clearance finding (new, refill=true) [0.19ms]
+(pass) checks every track clearance finding (existing, refill=true) [0.08ms]
+
+ 2 pass
+ 51 filtered out
+ 2 fail
+ 10 expect() calls
+Ran 4 tests across 1 file. [130.00ms]

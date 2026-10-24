@@ -1,0 +1,14 @@
+{
+  "repeats": 3,
+  "scope": "Stateful adapter unit diagnostic; not live native validation or a scored routing benchmark",
+  "source_sha256": {
+    "packages/router/src/bridge-job.ts": "3ca078eb6eec65c76b712734238176513eeacfd1df919a48ee984e69821127d6",
+    "packages/router/test/bridge-validation-fixture.ts": "bae6135d24fdec5b1e4eae900ea02e1d30a39aabd0faac3c1d19c5fc78032d38",
+    "packages/router/test/bridge-validation.test.ts": "a2b8c414431cd941e77101e11c294218750d4c5c68f66251d0e23d02f0c2bf90"
+  },
+  "new_scenarios": 3,
+  "before_passed": 0,
+  "after_passed": 9,
+  "before_source_commit": "7439fef",
+  "source_note": "Install identical final fixture/test files over before source; only bridge-job.ts differs."
+}

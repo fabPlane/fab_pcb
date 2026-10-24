@@ -1,0 +1,39 @@
+{
+  "baseline": "432353a",
+  "repeats": {
+    "before": [
+      {
+        "pass": 13,
+        "fail": 4
+      },
+      {
+        "pass": 13,
+        "fail": 4
+      },
+      {
+        "pass": 13,
+        "fail": 4
+      }
+    ],
+    "after": [
+      {
+        "pass": 17,
+        "fail": 0
+      },
+      {
+        "pass": 17,
+        "fail": 0
+      },
+      {
+        "pass": 17,
+        "fail": 0
+      }
+    ]
+  },
+  "sha256": {
+    "packages/router/src/bridge-job.ts": "fa57cc0a8e897e336b025a935180c9ac47c8b29c5a3b2eb293e07b6ae954f174",
+    "packages/router/test/bridge-validation-fixture.ts": "814bbec006b7985e6aac4481574b69de434feb044a45ca0d5c3b40dc3626e90f",
+    "packages/router/test/bridge-validation.test.ts": "9d7044ef6dfe1fe7d5fbcab4f009707518af02ef0960768859b6520cbf9c8e9f"
+  },
+  "scope": "Stateful adapter regressions; not live native or scored routing benchmarks"
+}

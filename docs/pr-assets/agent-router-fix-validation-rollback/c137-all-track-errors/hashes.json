@@ -1,0 +1,5 @@
+{
+  "packages/router/src/bridge-job.ts": "e1ac61f42e3e4d78ed9e5d60a12b818a3d9baec863e61cda33d63818c0ec640d",
+  "packages/router/test/bridge-validation-fixture.ts": "7ffa27012701a34947e24521c9a22bdae335a07cd9bf039da392bc9e0282a740",
+  "packages/router/test/bridge-validation.test.ts": "3a95aa6130d558c9220783d35066c1d89f892276314f80253b2e5905bb5249fe"
+}
