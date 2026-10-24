@@ -1,0 +1,42 @@
+{
+  "cycle": 27,
+  "machine": "hyper-ms-lin",
+  "repeats": 3,
+  "cases": 12,
+  "protected_paths": ["board", "project rules", "custom rules", "checker executable"],
+  "aliases": ["direct", "symlink", "hardlink"],
+  "before_commit": "76b4637",
+  "after_audit_sha256": "ea69ce93e77b04bcd3a4fdadbf386d153977e05a2d309f265bf06db0c6995060",
+  "before_audit_sha256": "4afcc32748f4abc63a4f4b009c8ffcf0821df99dc67095a80272f3308599203f",
+  "measurement_script_sha256": "58556f763b5b5c06859b45a41dfb5325b51398f1a7925c1246fdbbe4f47bf9b3",
+  "scope": "Disposable files and failing checker; no router or native rule changes.",
+  "files": {
+    "after.csv": "aea4a1577dd8179f1dbba81c7f65db135ad0d7e0df17b13631bbe364f62062ac",
+    "before.csv": "72b28809b7379298a91a6c5a4a3ed941b99d4c6e2723d0c85c6429bf431d37a4",
+    "preservation.png": "2cfee4d0d61f5ffaf7e2c79e62c2539d41f8f531fda4bc2df9768a3e3ec8f045"
+  },
+  "native_validation_cohorts": [
+    {
+      "cohort": "shared",
+      "native_checks": 18,
+      "summary_sha256": "4e39514bf92a703609e17f3b9ad2c1397ec85ca822eba6e53e6ba0da38fc541e",
+      "open_items_sum": 1329,
+      "warnings_sum": 90
+    },
+    {
+      "cohort": "bundled",
+      "native_checks": 18,
+      "summary_sha256": "4e39514bf92a703609e17f3b9ad2c1397ec85ca822eba6e53e6ba0da38fc541e",
+      "open_items_sum": 1329,
+      "warnings_sum": 90
+    },
+    {
+      "cohort": "regenerated",
+      "native_checks": 18,
+      "summary_sha256": "4e39514bf92a703609e17f3b9ad2c1397ec85ca822eba6e53e6ba0da38fc541e",
+      "open_items_sum": 1329,
+      "warnings_sum": 90
+    }
+  ],
+  "additional_regressions": "Absent project/custom-rule destinations, including dangling sidecar symlink targets, reject before report creation."
+}
