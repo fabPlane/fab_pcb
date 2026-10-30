@@ -2059,6 +2059,11 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     const r = await board.importSpecctraSession({ contents: empty });
     expect(r.tracksAdded).toBe(0);
     expect(r.viasAdded).toBe(0);
+    // The client sends replace_existing_tracks=false explicitly (unset means replace), so an
+    // add-only import must leave the board's existing tracks alone.
+    expect(r.tracksRemoved).toBe(0);
+    expect(r.skippedCount).toBe(0);
+    expect(typeof r.report).toBe("string");
     return `garbage -> AS_BAD_REQUEST; empty session applied: ${r.tracksAdded} tracks, ${r.footprintsMoved} footprints moved, ${r.warnings.length} warning(s)`;
   });
   boardJob(
