@@ -208,7 +208,10 @@ describe.skipIf(!haveKicad())("generated schematic + kicad-cli api-server", () =
         spinStyle: SchematicLabelSpinStyle.SLSS_LEFT,
       }),
     );
-    for (const item of [wire, label]) item.setCustomProperty(GENERATED_SCHEMATIC_PROPERTY, "circuit.netlist.json");
+    // Only the wire carries the marker: older KiCad dropped label custom properties on save, so a
+    // legacy generated label has none. KiCad now keeps them, so the label is created unmarked to
+    // reproduce that file and the rebuild has to find it by the wire endpoint.
+    wire.setCustomProperty(GENERATED_SCHEMATIC_PROPERTY, "circuit.netlist.json");
     await sheet.commit("test: create legacy generated stub", (tx) => tx.create([wire, label]));
     await schematic.save();
     await schematic.close();
