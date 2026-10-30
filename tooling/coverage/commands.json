@@ -551,6 +551,17 @@
     "headless": "ok"
   },
   {
+    "command": "SaveDocumentAs",
+    "group": "common/editor",
+    "requestType": "kiapi.common.commands.SaveDocumentAs",
+    "responseType": "google.protobuf.Empty",
+    "handlers": [
+      "pcb",
+      "sch"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "SaveDocumentToString",
     "group": "common/editor",
     "requestType": "kiapi.common.commands.SaveDocumentToString",
@@ -1000,6 +1011,16 @@
       "board"
     ],
     "headless": "gui-only"
+  },
+  {
+    "command": "GetBoardBoundingBox",
+    "group": "board/commands",
+    "requestType": "kiapi.board.commands.GetBoardBoundingBox",
+    "responseType": "kiapi.board.commands.BoardBoundingBoxResponse",
+    "handlers": [
+      "board"
+    ],
+    "headless": "ok"
   },
   {
     "command": "GetBoardDesignRules",
@@ -1522,6 +1543,16 @@
     "headless": "ok"
   },
   {
+    "command": "RunBoardJobExportIdf",
+    "group": "board/jobs",
+    "requestType": "kiapi.board.jobs.RunBoardJobExportIdf",
+    "responseType": "kiapi.common.types.RunJobResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "RunBoardJobExportIpc2581",
     "group": "board/jobs",
     "requestType": "kiapi.board.jobs.RunBoardJobExportIpc2581",
@@ -1605,6 +1636,16 @@
     "command": "RunBoardJobExportSpecctra",
     "group": "board/jobs",
     "requestType": "kiapi.board.jobs.RunBoardJobExportSpecctra",
+    "responseType": "kiapi.common.types.RunJobResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "RunBoardJobExportSpecctraDsn",
+    "group": "board/jobs",
+    "requestType": "kiapi.board.jobs.RunBoardJobExportSpecctraDsn",
     "responseType": "kiapi.common.types.RunJobResponse",
     "handlers": [
       "pcb"

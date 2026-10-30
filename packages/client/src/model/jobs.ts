@@ -13,8 +13,10 @@ import {
   RunBoardJobExportDrillSchema,
   RunBoardJobExportDxfSchema,
   RunBoardJobExportSpecctraSchema,
+  RunBoardJobExportSpecctraDsnSchema,
   RunBoardJobExportGencadSchema,
   RunBoardJobExportGerbersSchema,
+  RunBoardJobExportIdfSchema,
   RunBoardJobExportIpc2581Schema,
   RunBoardJobExportIpcD356Schema,
   RunBoardJobExportODBSchema,
@@ -247,6 +249,21 @@ export class BoardJobs extends Jobs {
   exportSpecctra(outputPath: string, args: Args<typeof RunBoardJobExportSpecctraSchema> = {}, opts?: JobOptions): Promise<JobResult> {
     return this.run("RunBoardJobExportSpecctra", outputPath, opts, (jobSettings) =>
       cmd.runBoardJobExportSpecctra(this.doc.client, { ...args, jobSettings }),
+    );
+  }
+  /**
+   * `RunBoardJobExportSpecctraDsn`: upstream KiCad's name for the same DSN export
+   * (`RunBoardJobExportSpecctra` is kept by the fork as an alias of it).
+   */
+  exportSpecctraDsn(outputPath: string, args: Args<typeof RunBoardJobExportSpecctraDsnSchema> = {}, opts?: JobOptions): Promise<JobResult> {
+    return this.run("RunBoardJobExportSpecctraDsn", outputPath, opts, (jobSettings) =>
+      cmd.runBoardJobExportSpecctraDsn(this.doc.client, { ...args, jobSettings }),
+    );
+  }
+  /** `RunBoardJobExportIdf`: the board outline and component placement as IDF (`.emn` + `.emp`). */
+  exportIdf(outputPath: string, args: Args<typeof RunBoardJobExportIdfSchema> = {}, opts?: JobOptions): Promise<JobResult> {
+    return this.run("RunBoardJobExportIdf", outputPath, opts, (jobSettings) =>
+      cmd.runBoardJobExportIdf(this.doc.client, { ...args, jobSettings }),
     );
   }
   exportPdf(outputPath: string, args: Args<typeof RunBoardJobExportPdfSchema> = {}, opts?: JobOptions): Promise<JobResult> {
