@@ -1,0 +1,137 @@
+
+▶ @fp-pcb/router  (12 unit files)
+[0m[1mbun test [0m[2mv1.4.0 (34cbb9a40)[0m
+[0m
+test/freerouting.test.ts:
+[skip] Freerouting jar/java not found (/home/hyper/bench/wt/fp-bugs/packages/router/vendor/freerouting-2.4.1.jar); run bun bench/fetch-freerouting.ts --jdk
+[0m[32m✓[0m[0m[1m pinned downloads cover every bundle target and reject a corrupted cache[0m [0m[2m[1.10ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m a successful process without a session is a failed job; timeout remains a result[0m [0m[2m[[1m57.22ms[0m[2m][0m
+[0m[32m✓[0m [0mparseFreeroutingLine[2m >[0m[1m auto-routing and optimizer passes[0m [0m[2m[0.23ms[0m[2m][0m
+[0m[32m✓[0m [0mparseFreeroutingLine[2m >[0m[1m stages, completion, saved file, errors, other[0m [0m[2m[0.09ms[0m[2m][0m
+[0m[32m✓[0m [0mFreeroutingRouter.available[2m >[0m[1m reports a missing jar[0m [0m[2m[0.16ms[0m[2m][0m
+[0m[32m✓[0m [0mFreeroutingRouter.available[2m >[0m[1m kicad mode needs a board[0m [0m[2m[0.05ms[0m[2m][0m
+[0m[32m✓[0m [0mFreeroutingRouter.available[2m >[0m[1m auto mode without a board resolves to builtin[0m [0m[2m[0.03ms[0m[2m][0m
+[0m[33m»[2m [0m[2mFreeroutingRouter builtin round trip[2m >[0m[2m routes the synthetic two-net board through the jar and reads the session back[0m
+[0m[32m✓[0m [0mresolveFreerouting[2m >[0m[1m defaults to the vendored jar and reports a missing one with the fetch command[0m [0m[2m[0.04ms[0m[2m][0m
+[0m[32m✓[0m [0mresolveFreerouting[2m >[0m[1m FP_PCB_JAVA wins over FREEROUTING_JAVA and must exist[0m [0m[2m[0.05ms[0m[2m][0m
+[0m[32m✓[0m [0mrunFreerouting cancellation[2m >[0m[1m an abort kills the java process and the adapter rejects with RouteCancelled[0m [0m[2m[[1m312.40ms[0m[2m][0m
+[0m[32m✓[0m [0mexportDsnViaKicad[2m >[0m[1m inline output from the job wins; a file the job wrote is read[0m [0m[2m[0.97ms[0m[2m][0m
+[0m[32m✓[0m [0mexportDsnViaKicad[2m >[0m[1m a job that returns nothing falls back to kicad-cli on the saved board (G34)[0m [0m[2m[2.34ms[0m[2m][0m
+[0m
+test/request-rules.test.ts:
+[0m[32m✓[0m[0m[1m explicit precedence, clamp reporting, widths and vias reach builtin DSN[0m [0m[2m[1.12ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m unknown, overlapping and contradictory declarations fail before routing[0m [0m[2m[0.34ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m KiCad-export DSN overlay preserves pins/copper and replaces class membership[0m [0m[2m[1.19ms[0m[2m][0m
+[0m
+test/endpoint-collisions.test.ts:
+[0m[32m✓[0m[0m[1m exact pad collision, mm units, identities, honest text and immutable input[0m [0m[2m[0.56ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m no collision and same-net neighbour[0m [0m[2m[0.08ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m via collision respects layers and same-net copper[0m [0m[2m[0.07ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m track capsule collision including zero-length track[0m [0m[2m[0.12ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m rotated rectangle uses KiCad orientation, not its AABB[0m [0m[2m[0.08ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m oval and roundrect rounded corners are not rectangular obstacles[0m [0m[2m[0.15ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m net-class rules and both pad overrides use the larger rule, clamped to board minimum[0m [0m[2m[0.11ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m custom bounds exclude distant envelopes but never prove occupied copper[0m [0m[2m[0.07ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m unsupported offset pads and arc chords are counted once per comparison[0m [0m[2m[0.07ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m all endpoint copper layers, native pad center, unique probes and cap[0m [0m[2m[0.25ms[0m[2m][0m
+[0m
+test/bridge-job.test.ts:
+[0m[32m✓[0m[0m[1m empty routing reports affected endpoints, effective rules and measured blockers before failing[0m [0m[2m[2.19ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m js probes native leftover opens after application using pre-route obstacles[0m [0m[2m[0.50ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m freerouting probes native leftover opens after application using pre-route obstacles[0m [0m[2m[0.10ms[0m[2m][0m
+[0m[32m✓[0m [0mroute job zone refills[2m >[0m[1m refills before routing and after the apply, before the final save and re-measure[0m [0m[2m[0.34ms[0m[2m][0m
+[0m[32m✓[0m [0mroute job zone refills[2m >[0m[1m refillZones false skips both zone refills[0m [0m[2m[0.11ms[0m[2m][0m
+[0m[32m✓[0m [0mroute job zone refills[2m >[0m[1m a post-apply refill failure is reported without failing or losing the saved route[0m [0m[2m[0.16ms[0m[2m][0m
+[0m[32m✓[0m [0mroute job zone refills[2m >[0m[1m a route that applies no copper does not run the post-apply refill[0m [0m[2m[0.12ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m the stable capacity slot uses fab_router[0m [0m[2m[[1m27.40ms[0m[2m][0m
+[0m[32m✓[0m [0mpersistAppliedRoute[2m >[0m[1m saves a route after it has been applied[0m [0m[2m[0.11ms[0m[2m][0m
+[0m[32m✓[0m [0mpersistAppliedRoute[2m >[0m[1m explains that an applied route remains only in memory when saving fails[0m [0m[2m[0.12ms[0m[2m][0m
+[0m[32m✓[0m [0mrouteGeometry[2m >[0m[1m serializes traces, arcs and vias without losing KiCad identity or units[0m [0m[2m[0.68ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m withoutRejectedCreatedCopper maps rejected KiCad ids back to generated copper[0m [0m[2m[0.12ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m route geometry resolves native name-only net records through the extracted net table[0m [0m[2m[0.09ms[0m[2m][0m
+[0m[32m✓[0m [0mroute summary messages with fab_router diagnostics[2m >[0m[1m complete: keeps diagnostics separate from the successful autoroute message[0m [0m[2m[0.56ms[0m[2m][0m
+[0m[32m✓[0m [0mroute summary messages with fab_router diagnostics[2m >[0m[1m no-progress: keeps diagnostics separate from the successful autoroute message[0m [0m[2m[0.08ms[0m[2m][0m
+[0m[32m✓[0m [0mroute summary messages with fab_router diagnostics[2m >[0m[1m native-opens: keeps diagnostics separate from the successful autoroute message[0m [0m[2m[0.14ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m fab_router prunes and reports pre-existing scoped stubs in the same route commit[0m [0m[2m[0.56ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m native route application deletes reported stubs and creates replacement copper in one strict commit[0m [0m[2m[0.37ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m native cleanup keeps a useful connection behind a dangling chain longer than twenty items[0m [0m[2m[1.21ms[0m[2m][0m
+[0m
+test/corpus.test.ts:
+[0m[32m✓[0m [0mcorpus output validator[2m >[0m[1m does not call separated collinear segments a crossing[0m [0m[2m[0.46ms[0m[2m][0m
+[0m[32m✓[0m [0mcorpus output validator[2m >[0m[1m finds a same-layer crossing[0m [0m[2m[0.08ms[0m[2m][0m
+[0m[32m✓[0m [0mcorpus output validator[2m >[0m[1m uses the radius, not the circumscribed square, for circular pads[0m [0m[2m[0.03ms[0m[2m][0m
+[0m[32m✓[0m [0mcorpus output validator[2m >[0m[1m validates output vias against tracks and the board outline[0m [0m[2m[0.15ms[0m[2m][0m
+crossing-smoke: pass
+[0m[32m✓[0m[0m[1m router regression corpus[0m [0m[2m[[1m80.70ms[0m[2m][0m
+[0m
+test/fab-router.test.ts:
+[0m[32m✓[0m [0mFabRouter[2m >[0m[1m uses native hole settings without Freerouting pin classes, retaining NPTH obstacles[0m [0m[2m[2.31ms[0m[2m][0m
+[0m[32m✓[0m [0mFabRouter[2m >[0m[1m maps controls and native progress hooks, then converts the SES[0m [0m[2m[0.50ms[0m[2m][0m
+[0m[32m✓[0m [0mFabRouter[2m >[0m[1m retains copper on incomplete nets for native connection-level cleanup[0m [0m[2m[0.31ms[0m[2m][0m
+[0m[32m✓[0m [0mFabRouter[2m >[0m[1m surfaces parse diagnostics and honours cancellation[0m [0m[2m[0.30ms[0m[2m][0m
+[0m[32m✓[0m [0mFabRouter[2m >[0m[1m reports a missing runtime module and rejects unsupported prefab via claiming[0m [0m[2m[0.20ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m declarations reach the DSN request and measurement-only outcomes stay visible[0m [0m[2m[0.34ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m coupled-capable solver outcomes are preserved without inventing measurements[0m [0m[2m[0.27ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m seven-net partial solver result preserves generated copper despite every net remaining open[0m [0m[2m[0.63ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m generated and discarded counts exclude protected copper echoed in SES[0m [0m[2m[0.35ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m forwards native clearance floors in micrometres and honors explicit solver overrides[0m [0m[2m[0.50ms[0m[2m][0m
+[0m
+test/freerouting-runtime.test.ts:
+[0m[32m✓[0m[0m[1m jdeps extracts class files only, without dependency module descriptors[0m [0m[2m[0.09ms[0m[2m][0m
+[0m
+test/board-rule-floors.test.ts:
+[0m[32m✓[0m[0m[1m minimum width and via floors preserve copper spacing; drill spacing uses typed classes[0m [0m[2m[0.91ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m explicit widths above the minimum remain exact[0m [0m[2m[0.03ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m no-width adapter disables both neckdown paths when the board has a minimum[0m [0m[2m[2.14ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m NPTH drill geometry protects holes without raising plated-pad spacing[0m [0m[2m[0.76ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m plated oval drills receive annular credit on corresponding axes[0m [0m[2m[0.23ms[0m[2m][0m
+[0m
+test/pairs.test.ts:
+[0m[32m✓[0m[0m[1m detects standard suffixes without treating arbitrary trailing P/N names as pairs[0m [0m[2m[0.18ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m native netclass dimensions are retained and explicit requests take precedence[0m [0m[2m[0.32ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m #2 a Power class's automatically saved differential fields do not constrain rails[0m [0m[2m[0.04ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m pair intent does not infer dimensions from Power[0m [0m[2m[0.02ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m pair intent does not infer dimensions from Repair[0m [0m[2m[0.01ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m fresh review: a class matching only the hierarchy supplies no pair dimensions[0m [0m[2m[0.02ms[0m[2m][0m
+[0m
+test/specctra.test.ts:
+[0m[32m✓[0m [0msexpr[2m >[0m[1m parses nested lists, quoted strings and comments[0m [0m[2m[0.06ms[0m[2m][0m
+[0m[32m✓[0m [0msexpr[2m >[0m[1m quote() only quotes what the Specctra tokenizer would split[0m [0m[2m[0.01ms[0m[2m][0m
+[0m[32m✓[0m [0mwriteDsn[2m >[0m[1m is a well-formed (pcb ...) with parser, resolution, structure, placement, library, network, wiring[0m [0m[2m[0.04ms[0m[2m][0m
+[0m[32m✓[0m [0mwriteDsn[2m >[0m[1m structure: layers by user name, boundary in µm with y up, rules from the default class[0m [0m[2m[0.05ms[0m[2m][0m
+[0m[32m✓[0m [0mwriteDsn[2m >[0m[1m one component per pad, pins referenced as <component>-1 without hyphens in the component name[0m [0m[2m[0.06ms[0m[2m][0m
+[0m[32m✓[0m [0mwriteDsn[2m >[0m[1m padstacks: circle for round pads on both layers, rect for the square pad[0m [0m[2m[0.03ms[0m[2m][0m
+[0m[32m✓[0m [0mwriteDsn[2m >[0m[1m extraViasFromRouteOptions reads millimetre leftover-run rules[0m [0m[2m[0.04ms[0m[2m][0m
+[0m[32m✓[0m [0mwriteDsn[2m >[0m[1m existing vias of a non-class size are in the library before wiring names them[0m [0m[2m[0.22ms[0m[2m][0m
+[0m[32m✓[0m [0mwriteDsn[2m >[0m[1m extra via sizes and leftover nets round-trip through the DSN library[0m [0m[2m[0.25ms[0m[2m][0m
+[0m[32m✓[0m [0mwriteDsn[2m >[0m[1m existing copper is exported as protected wiring; layer filter drops other layers[0m [0m[2m[0.25ms[0m[2m][0m
+[0m[32m✓[0m [0mwriteDsn[2m >[0m[1m zones become planes, rule areas keepouts, copper graphics keepout rects[0m [0m[2m[0.17ms[0m[2m][0m
+[0m[32m✓[0m [0mparseSes / sesToItems[2m >[0m[1m resolution: (resolution um 10) is 100 nm per unit[0m [0m[2m[0.02ms[0m[2m][0m
+[0m[32m✓[0m [0mparseSes / sesToItems[2m >[0m[1m wires, vias and padstacks in nm with y flipped back down[0m [0m[2m[0.11ms[0m[2m][0m
+[0m[32m✓[0m [0mparseSes / sesToItems[2m >[0m[1m sesToItems: the session's echo of the board's existing tracks and vias is not created again[0m [0m[2m[0.16ms[0m[2m][0m
+[0m[32m✓[0m [0mparseSes / sesToItems[2m >[0m[1m sesToItems: an existing via whose drill the padstack name rounds to whole micrometres is an echo[0m [0m[2m[0.16ms[0m[2m][0m
+[0m[32m✓[0m [0mparseSes / sesToItems[2m >[0m[1m sesToItems: tracks per polyline segment, vias sized from the padstack, unknown layers warned and skipped[0m [0m[2m[0.09ms[0m[2m][0m
+[0m[32m✓[0m [0mparseSes / sesToItems[2m >[0m[1m rejects text that is not a session[0m [0m[2m[0.02ms[0m[2m][0m
+[0m
+test/extract.test.ts:
+[0m[32m✓[0m [0mextractRouteInput[2m >[0m[1m exports footprint rule areas with translation and rotation alongside absolute board zones[0m [0m[2m[[1m16.94ms[0m[2m][0m
+[0m[32m✓[0m [0mextractRouteInput[2m >[0m[1m keeps exact roundrect radius and marks offset or differing-layer geometry unsupported[0m [0m[2m[1.31ms[0m[2m][0m
+[0m[32m✓[0m [0mextractRouteInput[2m >[0m[1m builds the full RouteInput from the fake board[0m [0m[2m[1.44ms[0m[2m][0m
+[0m[32m✓[0m [0mextractRouteInput[2m >[0m[1m net filter restricts connections; an outline that does not close is reported[0m [0m[2m[0.80ms[0m[2m][0m
+[0m
+test/session-filter.test.ts:
+[0m[32m✓[0m[0m[1m additive native session excludes outside scope and reversed protected segments/vias[0m [0m[2m[0.87ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m different width, nearby track, drill and via span are legitimate new items[0m [0m[2m[0.18ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m an all-echo or empty session adds nothing; metadata remains usable[0m [0m[2m[0.15ms[0m[2m][0m
+[0m[32m✓[0m[0m[1m scoped DSN retains protected net identities without routing their pads[0m [0m[2m[0.35ms[0m[2m][0m
+
+[0m[2m1 tests skipped:[0m
+[0m[33m»[2m [0m[2mFreeroutingRouter builtin round trip[2m >[0m[2m routes the synthetic two-net board through the jar and reads the session back[0m
+
+[0m[32m 96 pass[0m
+ [0m[33m1 skip[0m
+[0m[2m 0 fail[0m
+ 376 expect() calls
+Ran 97 tests across 12 files. [0m[2m[[1m619.00ms[0m[2m][0m
+
+unit: 1/1 package(s) passed in 0.6s
