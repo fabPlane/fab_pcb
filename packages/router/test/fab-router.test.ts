@@ -70,6 +70,22 @@ describe("FabRouter", () => {
     expect(writeDsn(input)).toContain("fabdesk-drill-npth");
   });
 
+  test("local recovery requires an explicit boolean and preserves opt-out", async () => {
+    const received: Array<boolean | undefined> = [];
+    const router = new FabRouter({
+      routeDsn: (_text, settings) => {
+        received.push(settings?.localRecovery);
+        return success();
+      },
+    });
+    await router.route(twoNetBoard());
+    await router.route(twoNetBoard(), { extra: { localRecovery: false } });
+    await router.route(twoNetBoard(), { extra: { localRecovery: true } });
+    expect(received).toEqual([undefined, false, true]);
+    await expect(router.route(twoNetBoard(), { extra: { localRecovery: "false" } })).rejects.toThrow("invalid fab_router localRecovery");
+    expect(received).toHaveLength(3);
+  });
+
   test("maps controls and native progress hooks, then converts the SES", async () => {
     let settings: FabRouterSettings | undefined;
     let hooks: FabRouterHooks | undefined;

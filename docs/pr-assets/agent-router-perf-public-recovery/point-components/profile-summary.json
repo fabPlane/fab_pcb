@@ -1,0 +1,273 @@
+{
+  "scope": "Single complete production replay; sampled elapsed stack time, not a paired timing comparison",
+  "wall_seconds": 17.335076787000002,
+  "total_samples": 15250,
+  "sampled_ms": 17352.641,
+  "top_self": [
+    {
+      "function": "collect",
+      "file": "src/lattice/grid.ts",
+      "line": 257,
+      "self_samples": 1985,
+      "self_sample_ms": 2270.749,
+      "inclusive_sample_ms": 3787.175
+    },
+    {
+      "function": "aStar",
+      "file": "src/route/search.ts",
+      "line": 294,
+      "self_samples": 1905,
+      "self_sample_ms": 2176.396,
+      "inclusive_sample_ms": 13586.923
+    },
+    {
+      "function": "sweepClear",
+      "file": "src/route/clear.ts",
+      "line": 210,
+      "self_samples": 1173,
+      "self_sample_ms": 1342.932,
+      "inclusive_sample_ms": 9551.822
+    },
+    {
+      "function": "withinRim",
+      "file": "src/geom/onboard.ts",
+      "line": 49,
+      "self_samples": 1149,
+      "self_sample_ms": 1300.282,
+      "inclusive_sample_ms": 2427.565
+    },
+    {
+      "function": "state",
+      "file": "src/route/quilt.ts",
+      "line": 71,
+      "self_samples": 998,
+      "self_sample_ms": 1132.333,
+      "inclusive_sample_ms": 2309.25
+    },
+    {
+      "function": "test",
+      "file": "src/lattice/grid.ts",
+      "line": 262,
+      "self_samples": 946,
+      "self_sample_ms": 1058.527,
+      "inclusive_sample_ms": 1058.527
+    },
+    {
+      "function": "isFree",
+      "file": "src/route/quilt.ts",
+      "line": 81,
+      "self_samples": 856,
+      "self_sample_ms": 975.787,
+      "inclusive_sample_ms": 3283.01
+    },
+    {
+      "function": "pop",
+      "file": "src/route/search.ts",
+      "line": 189,
+      "self_samples": 846,
+      "self_sample_ms": 960.652,
+      "inclusive_sample_ms": 962.679
+    },
+    {
+      "function": "filter",
+      "file": "",
+      "line": 1,
+      "self_samples": 730,
+      "self_sample_ms": 819.141,
+      "inclusive_sample_ms": 819.141
+    },
+    {
+      "function": "dop8OfPts",
+      "file": "src/geom/bounds.ts",
+      "line": 54,
+      "self_samples": 612,
+      "self_sample_ms": 679.248,
+      "inclusive_sample_ms": 679.248
+    },
+    {
+      "function": "coreOf",
+      "file": "src/geom/distance.ts",
+      "line": 93,
+      "self_samples": 549,
+      "self_sample_ms": 643.669,
+      "inclusive_sample_ms": 643.669
+    },
+    {
+      "function": "aStarLayered",
+      "file": "src/route/search.ts",
+      "line": 456,
+      "self_samples": 367,
+      "self_sample_ms": 416.281,
+      "inclusive_sample_ms": 3453.789
+    },
+    {
+      "function": "sort",
+      "file": "",
+      "line": 0,
+      "self_samples": 322,
+      "self_sample_ms": 360.983,
+      "inclusive_sample_ms": 364.492
+    },
+    {
+      "function": "hitBlocks",
+      "file": "src/route/clear.ts",
+      "line": 123,
+      "self_samples": 303,
+      "self_sample_ms": 347.518,
+      "inclusive_sample_ms": 1489.952
+    },
+    {
+      "function": "edgeCost",
+      "file": "src/route/passes.ts",
+      "line": 612,
+      "self_samples": 234,
+      "self_sample_ms": 258.033,
+      "inclusive_sample_ms": 6763.437
+    },
+    {
+      "function": "probe",
+      "file": "src/route/search.ts",
+      "line": 234,
+      "self_samples": 206,
+      "self_sample_ms": 231.482,
+      "inclusive_sample_ms": 231.482
+    },
+    {
+      "function": "leq",
+      "file": "src/route/search.ts",
+      "line": 266,
+      "self_samples": 162,
+      "self_sample_ms": 186.71,
+      "inclusive_sample_ms": 394.67
+    },
+    {
+      "function": "dist2SegSeg",
+      "file": "src/geom/distance.ts",
+      "line": 27,
+      "self_samples": 158,
+      "self_sample_ms": 184.016,
+      "inclusive_sample_ms": 343.012
+    },
+    {
+      "function": "dist2Pts",
+      "file": "src/geom/distance.ts",
+      "line": 75,
+      "self_samples": 128,
+      "self_sample_ms": 153.716,
+      "inclusive_sample_ms": 170.655
+    },
+    {
+      "function": "segsIntersect",
+      "file": "src/geom/predicates.ts",
+      "line": 55,
+      "self_samples": 132,
+      "self_sample_ms": 150.407,
+      "inclusive_sample_ms": 157.907
+    },
+    {
+      "function": "push",
+      "file": "src/route/search.ts",
+      "line": 183,
+      "self_samples": 126,
+      "self_sample_ms": 142.582,
+      "inclusive_sample_ms": 143.461
+    },
+    {
+      "function": "closerConvex",
+      "file": "src/route/clear.ts",
+      "line": 61,
+      "self_samples": 122,
+      "self_sample_ms": 136.557,
+      "inclusive_sample_ms": 1004.857
+    },
+    {
+      "function": "pointOf",
+      "file": "src/route/quilt.ts",
+      "line": 68,
+      "self_samples": 114,
+      "self_sample_ms": 125.079,
+      "inclusive_sample_ms": 125.079
+    },
+    {
+      "function": "push",
+      "file": "src/lattice/grid.ts",
+      "line": 267,
+      "self_samples": 109,
+      "self_sample_ms": 122.084,
+      "inclusive_sample_ms": 122.084
+    },
+    {
+      "function": "shapesOf",
+      "file": "src/lattice/grid.ts",
+      "line": 363,
+      "self_samples": 95,
+      "self_sample_ms": 111.173,
+      "inclusive_sample_ms": 114.222
+    },
+    {
+      "function": "cell",
+      "file": "src/route/ripup.ts",
+      "line": 67,
+      "self_samples": 88,
+      "self_sample_ms": 102.825,
+      "inclusive_sample_ms": 102.825
+    },
+    {
+      "function": "put",
+      "file": "src/route/search.ts",
+      "line": 276,
+      "self_samples": 84,
+      "self_sample_ms": 95.046,
+      "inclusive_sample_ms": 95.986
+    },
+    {
+      "function": "edgeCost",
+      "file": "src/route/passes.ts",
+      "line": 865,
+      "self_samples": 72,
+      "self_sample_ms": 80.503,
+      "inclusive_sample_ms": 1642.878
+    },
+    {
+      "function": "barrelFits",
+      "file": "src/route/clear.ts",
+      "line": 236,
+      "self_samples": 69,
+      "self_sample_ms": 78.444,
+      "inclusive_sample_ms": 361.608
+    },
+    {
+      "function": "",
+      "file": "src/route/passes.ts",
+      "line": 661,
+      "self_samples": 51,
+      "self_sample_ms": 55.871,
+      "inclusive_sample_ms": 632.186
+    }
+  ],
+  "recovery_stacks": [
+    {
+      "function": "recoverRemaining",
+      "file": "src/route/recover-remaining.ts",
+      "inclusive_sample_ms": 152.16
+    },
+    {
+      "function": "recoverPointComponent",
+      "file": "src/route/recovery-point-component.ts",
+      "inclusive_sample_ms": 148.797
+    },
+    {
+      "function": "scheduleRecovery",
+      "file": "src/route/recovery-schedule.ts",
+      "inclusive_sample_ms": 147.579
+    },
+    {
+      "function": "proposeVisibility",
+      "file": "src/route/visibility-recovery.ts",
+      "inclusive_sample_ms": 113.209
+    }
+  ],
+  "ses_sha256": "930644ffe9334bc7db65272fcd5148a0ce70a8712ef3e667abab5af2a5472ec4",
+  "engine_opens": 0,
+  "exact_violations": 0
+}

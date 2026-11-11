@@ -1,0 +1,480 @@
+{
+  "scope": "Six changed checked full-suite outputs; exact native track multiset/via preservation, no fresh native runs",
+  "native_version": "10.0.6",
+  "rows": [
+    {
+      "case": "photon-sprinkler-sprinkler-j3",
+      "seed": 2,
+      "board_sha256": [
+        "aa6da0461d0c4be6bcbea6e3dfbfb300e3562d9f67ce12f44daf7d90cc5d1eb0",
+        "783f549c76cd9dda4a2aa2ef531e8c09293086934d4706cc2a8309d6f9b2d1e5"
+      ],
+      "all_old_track_segments_retained": true,
+      "all_old_vias_identical": true,
+      "removed_segments": [],
+      "added_segments": [
+        [
+          "GND",
+          0,
+          250000,
+          92704900,
+          86385100,
+          92704900,
+          87535100
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          92704900,
+          87535100,
+          93229900,
+          88060100
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          93229900,
+          88060100,
+          95219800,
+          90050000
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          92704900,
+          86385100,
+          96814900,
+          86385100
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          95219800,
+          90050000,
+          138430000,
+          90050000
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          96814900,
+          86385100,
+          97790000,
+          85410000
+        ]
+      ],
+      "added_widths_mm": [
+        0.25
+      ],
+      "added_length_mm": 53.4058053326821,
+      "native_opens": [
+        1,
+        0
+      ],
+      "native_new_errors": [
+        0,
+        0
+      ]
+    },
+    {
+      "case": "photon-sprinkler-sprinkler-j1",
+      "seed": 1,
+      "board_sha256": [
+        "16b6379bb338f14e4e7b82f6eefd440d1859be5cae4a33f069a75d4c70b24805",
+        "4eac8ac034673cde4608635ec40d99b488c9402fe19a0d96cfc8f3bb7dde7894"
+      ],
+      "all_old_track_segments_retained": true,
+      "all_old_vias_identical": true,
+      "removed_segments": [],
+      "added_segments": [
+        [
+          "GND",
+          0,
+          250000,
+          92704900,
+          86385100,
+          92704900,
+          87535100
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          96814900,
+          86385100,
+          97790000,
+          85410000
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          93229900,
+          88060100,
+          95219800,
+          90050000
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          95219800,
+          90050000,
+          138430000,
+          90050000
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          92704900,
+          86385100,
+          96814900,
+          86385100
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          92704900,
+          87535100,
+          93229900,
+          88060100
+        ]
+      ],
+      "added_widths_mm": [
+        0.25
+      ],
+      "added_length_mm": 53.4058053326821,
+      "native_opens": [
+        1,
+        0
+      ],
+      "native_new_errors": [
+        0,
+        0
+      ]
+    },
+    {
+      "case": "photon-sprinkler-sprinkler-j1",
+      "seed": 2,
+      "board_sha256": [
+        "edd4d741418d8c8210ff519335b582e2566d2b6ef81c88b371f5cb6f35477200",
+        "c76d1d3dc1f093dabb34b2cccbe61ba34dc0cf37b67e5cd95bbd1fb5a9e6507c"
+      ],
+      "all_old_track_segments_retained": true,
+      "all_old_vias_identical": true,
+      "removed_segments": [],
+      "added_segments": [
+        [
+          "GND",
+          0,
+          250000,
+          92704900,
+          87535100,
+          93229900,
+          88060100
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          92704900,
+          86385100,
+          92704900,
+          87535100
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          96814900,
+          86385100,
+          97790000,
+          85410000
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          95219800,
+          90050000,
+          138430000,
+          90050000
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          92704900,
+          86385100,
+          96814900,
+          86385100
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          93229900,
+          88060100,
+          95219800,
+          90050000
+        ]
+      ],
+      "added_widths_mm": [
+        0.25
+      ],
+      "added_length_mm": 53.4058053326821,
+      "native_opens": [
+        1,
+        0
+      ],
+      "native_new_errors": [
+        0,
+        0
+      ]
+    },
+    {
+      "case": "photon-sprinkler-sprinkler-j3",
+      "seed": 3,
+      "board_sha256": [
+        "252420ecf6af93d0e246e04b21beffff6eaa6a13d1c1bc2403312e93904673f8",
+        "a59b637dbfab7393ca837447baecaec200e98e2cd80ba4dce4780855eaa58b48"
+      ],
+      "all_old_track_segments_retained": true,
+      "all_old_vias_identical": true,
+      "removed_segments": [],
+      "added_segments": [
+        [
+          "GND",
+          0,
+          250000,
+          96814900,
+          86385100,
+          97790000,
+          85410000
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          92704900,
+          87535100,
+          93229900,
+          88060100
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          92704900,
+          86385100,
+          96814900,
+          86385100
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          93229900,
+          88060100,
+          95219800,
+          90050000
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          95219800,
+          90050000,
+          138430000,
+          90050000
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          92704900,
+          86385100,
+          92704900,
+          87535100
+        ]
+      ],
+      "added_widths_mm": [
+        0.25
+      ],
+      "added_length_mm": 53.4058053326821,
+      "native_opens": [
+        1,
+        0
+      ],
+      "native_new_errors": [
+        0,
+        0
+      ]
+    },
+    {
+      "case": "photon-sprinkler-sprinkler-j1",
+      "seed": 3,
+      "board_sha256": [
+        "db3368784558629492df8d79d130bfef6c932d9d3142c25d458c7dac54496e26",
+        "8a88f2e7d9949f0b9432cfe32cc21101af8d383ccabc5ec453543c650b5ba553"
+      ],
+      "all_old_track_segments_retained": true,
+      "all_old_vias_identical": true,
+      "removed_segments": [],
+      "added_segments": [
+        [
+          "GND",
+          0,
+          250000,
+          93229900,
+          88060100,
+          95219800,
+          90050000
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          96814900,
+          86385100,
+          97790000,
+          85410000
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          92704900,
+          87535100,
+          93229900,
+          88060100
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          92704900,
+          86385100,
+          92704900,
+          87535100
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          92704900,
+          86385100,
+          96814900,
+          86385100
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          95219800,
+          90050000,
+          138430000,
+          90050000
+        ]
+      ],
+      "added_widths_mm": [
+        0.25
+      ],
+      "added_length_mm": 53.4058053326821,
+      "native_opens": [
+        1,
+        0
+      ],
+      "native_new_errors": [
+        0,
+        0
+      ]
+    },
+    {
+      "case": "photon-sprinkler-sprinkler-j3",
+      "seed": 1,
+      "board_sha256": [
+        "4040501543e72cb71448f100a93c0fc67038a7074e13d681d3cf1a5156ea4799",
+        "9e81e40946ed249f93545ec114f204dc1dab0b5b05f92a1cc294119a7b9931b2"
+      ],
+      "all_old_track_segments_retained": true,
+      "all_old_vias_identical": true,
+      "removed_segments": [],
+      "added_segments": [
+        [
+          "GND",
+          0,
+          250000,
+          93229900,
+          88060100,
+          95219800,
+          90050000
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          92704900,
+          86385100,
+          96814900,
+          86385100
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          95219800,
+          90050000,
+          138430000,
+          90050000
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          92704900,
+          86385100,
+          92704900,
+          87535100
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          96814900,
+          86385100,
+          97790000,
+          85410000
+        ],
+        [
+          "GND",
+          0,
+          250000,
+          92704900,
+          87535100,
+          93229900,
+          88060100
+        ]
+      ],
+      "added_widths_mm": [
+        0.25
+      ],
+      "added_length_mm": 53.4058053326821,
+      "native_opens": [
+        1,
+        0
+      ],
+      "native_new_errors": [
+        0,
+        0
+      ]
+    }
+  ]
+}

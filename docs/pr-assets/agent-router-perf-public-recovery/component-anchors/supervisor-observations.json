@@ -1,0 +1,18 @@
+{
+  "scope": "Tool-session supervisor exit observations, distinct from per-case records. No failed or interrupted routing case is substituted.",
+  "initial_checks": 1,
+  "final_checks": 0,
+  "subset": 0,
+  "native_before_and_initial": 0,
+  "initial_large": 0,
+  "final_large": 143,
+  "native_dense": 143,
+  "trace": 0,
+  "initial_waiting_session": 143,
+  "refused_final_launch": 1,
+  "final_large_records": 6,
+  "native_dense_records": 6,
+  "notes": "Final larger and custom native driver supervisors report143 after all six case records were written. The six native records each have every step exit0 and no step timeout; all paired sessions/statistics/structured findings verified. These are completed case observations, not successful supervisor exits. Initial larger driver exited0. No causal speed or clean-supervisor claim.",
+  "final_native": 0,
+  "slow_final": 0
+}

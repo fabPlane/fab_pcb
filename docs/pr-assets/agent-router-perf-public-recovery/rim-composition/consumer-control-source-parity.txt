@@ -1,0 +1,1 @@
+PASS previous proposed consumer pin b65bcf03945ca2aa9704b2e196e089f0aaa60a8d matches control production/spec/test/tool/package/config files

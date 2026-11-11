@@ -19,6 +19,8 @@ export interface FabRouterSettings {
   timeBudgetMs?: number;
   viaCost?: number;
   seed?: number;
+  /** Experimental insertion-only local recovery; opt-in through RouteOptions.extra. */
+  localRecovery?: boolean;
 }
 
 export interface FabRouterReport {
@@ -168,6 +170,8 @@ export class FabRouter implements Autorouter {
       if (typeof value !== "number" || !Number.isFinite(value) || value < 0) throw new Error(`invalid fab_router ${key}`);
       return value;
     };
+    const localRecovery = opts.extra?.localRecovery;
+    if (localRecovery !== undefined && typeof localRecovery !== "boolean") throw new Error("invalid fab_router localRecovery");
     const result = routeDsn(
       dsn,
       {
@@ -177,6 +181,7 @@ export class FabRouter implements Autorouter {
         ...(opts.maxTimeMs !== undefined ? { timeBudgetMs: opts.maxTimeMs } : {}),
         ...(opts.viaCost !== undefined ? { viaCost: opts.viaCost } : {}),
         ...(opts.seed !== undefined ? { seed: opts.seed } : {}),
+        ...(localRecovery !== undefined ? { localRecovery } : {}),
       },
       {
         signal: opts.signal,

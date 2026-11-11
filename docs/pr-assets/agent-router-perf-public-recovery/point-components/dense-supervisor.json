@@ -1,0 +1,7 @@
+{
+  "exit_code": 143,
+  "completed_records": 6,
+  "all_recorded_steps_exit_zero_without_timeout": true,
+  "same_sessions_all_six": true,
+  "note": "Tool supervisor returned143 after all six records. This is completed per-case evidence, not a clean supervisor exit."
+}
