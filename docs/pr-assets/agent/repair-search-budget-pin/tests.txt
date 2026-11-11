@@ -1,0 +1,19 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/fab-router.test.ts:
+(pass) FabRouter > uses native hole settings without Freerouting pin classes, retaining NPTH obstacles [3.65ms]
+(pass) FabRouter > maps controls and native progress hooks, then converts the SES [0.50ms]
+(pass) FabRouter > retains copper on incomplete nets for native connection-level cleanup [0.83ms]
+(pass) FabRouter > surfaces parse diagnostics and honours cancellation [1.34ms]
+(pass) FabRouter > reports a missing runtime module and rejects unsupported prefab via claiming [0.35ms]
+(pass) declarations reach the DSN request and measurement-only outcomes stay visible [0.34ms]
+(pass) coupled-capable solver outcomes are preserved without inventing measurements [0.29ms]
+(pass) seven-net partial solver result preserves generated copper despite every net remaining open [0.80ms]
+(pass) generated and discarded counts exclude protected copper echoed in SES [0.44ms]
+(pass) forwards native clearance floors in micrometres and honors explicit solver overrides [0.52ms]
+(pass) extended search budget is explicit and rejects non-boolean options before solving [0.67ms]
+
+ 11 pass
+ 0 fail
+ 43 expect() calls
+Ran 11 tests across 1 file. [185.00ms]
