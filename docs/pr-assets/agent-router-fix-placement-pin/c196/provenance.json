@@ -1,0 +1,17 @@
+{
+  "before_commit": "69cf598db98c136bff16bbe02bccdded95674b18",
+  "implementation_commit": "8fa7ead0c45b0e7ca33737ff418f6309d51d762c",
+  "source_pad_inventory_commit": "db315c4b8fa5c7e863bf5077d09290f9ebad8c15",
+  "machine": "hyper-ms-lin",
+  "cores": "20-25",
+  "native_version": "10.0.6",
+  "repeats": 3,
+  "actual_router_runs_per_phase": 78,
+  "initial_live_source_commit_record": "69cf598db98c136bff16bbe02bccdded95674b18",
+  "after_source_identified_by": "exact source hashes; committed without byte changes after run started",
+  "scope": "placement coordinate preservation, no thermal repair",
+  "notes": "A documentation-only src/ses/README.md edit during the candidate run was reverted. Executable source stayed unchanged; final full source hashes match recorded controls.",
+  "initial_engine_check": "Old canonical placement expectations failed on 24 corpus snapshots. The first suite was stopped (exit 143), expectations were updated with an independent audit of every unaffected scope, and the final full suite passed 866/866. A test-only readonly-array type error was corrected before the final run.",
+  "initial_integration_check": "Two setup failures: candidate module was not selected, and the supplied native CLI lacked api-server. Final package tests explicitly select the candidate and use default API-server availability detection with the unsupported CLI override removed: 96 pass, 6 existing availability skips, 0 fail. No tests were modified.",
+  "baseline_startup": "Two early starts were rejected by the private harness run lock before any router attempt. The complete fresh baseline started after the candidate released the lock."
+}
