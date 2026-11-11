@@ -1,0 +1,664 @@
+{
+  "source_segments": 163,
+  "source_segments_with_reidentified_uuid": 163,
+  "reidentified": [
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f38",
+      "routed_uuid": "0283a6dc-c50a-4eb4-ae4e-927bc083a1a9"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f39",
+      "routed_uuid": "225e8577-fe15-467e-a4fb-f47b6ef67284"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f3b",
+      "routed_uuid": "39e5f7cd-f5b9-4600-8e41-1f14dad26a44"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f13",
+      "routed_uuid": "492417dc-213c-4518-84a6-9bdd17f18e85"
+    },
+    {
+      "source_uuid": "41f0145b-6638-4fb2-b9f5-b4a3edcae6ad",
+      "routed_uuid": "791c8c87-54cc-4971-856e-505a9f1a94c8"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f3a",
+      "routed_uuid": "a3a8d6c4-34d6-4bb2-8e76-7760801060a5"
+    },
+    {
+      "source_uuid": "b9a6fec7-1971-4216-b663-6e0517b7db76",
+      "routed_uuid": "c9593819-6fff-4d95-8085-d2260425ac0c"
+    },
+    {
+      "source_uuid": "7f8c1dda-29e4-4aa0-ad27-187b6ed3b31d",
+      "routed_uuid": "d0e4f8ef-f200-45f0-b55b-a799f0115323"
+    },
+    {
+      "source_uuid": "ec72326e-8ca8-44ae-85fe-dfd638758980",
+      "routed_uuid": "de59e554-dd66-4fbc-82df-5198efd4e291"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f16",
+      "routed_uuid": "ee24d152-6efa-49f9-9556-51956b96c7a7"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f35",
+      "routed_uuid": "ccb0122f-ea7e-464f-89d2-d31e1b33bafd"
+    },
+    {
+      "source_uuid": "8ceac566-0eec-46aa-aa68-d40ce7ae8360",
+      "routed_uuid": "8a849573-cc80-43b5-87d6-9951b891bb70"
+    },
+    {
+      "source_uuid": "1199be39-a1aa-4325-86f2-d2d61786b3c9",
+      "routed_uuid": "08049688-4103-480f-bfff-cfc9345ab5da"
+    },
+    {
+      "source_uuid": "d3148040-9e80-4c95-ad2c-94ae9a407df8",
+      "routed_uuid": "1b3d700a-50aa-4c74-a02e-7a5739ac404d"
+    },
+    {
+      "source_uuid": "41f46389-e4af-40f9-ab50-68c0c87dc1aa",
+      "routed_uuid": "38a91d0b-611a-4b2f-b798-3c823c036b8c"
+    },
+    {
+      "source_uuid": "34bffd33-dfd4-4ac9-8c78-2b29c44439c4",
+      "routed_uuid": "49ec07df-afae-4180-87ff-3c2dee76f689"
+    },
+    {
+      "source_uuid": "04f516c1-12e1-40b9-a4ee-172cc87358a0",
+      "routed_uuid": "5f29c2e3-cd7a-4983-8644-c29e5338ad0d"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65094",
+      "routed_uuid": "695bd017-ef15-46e6-b0c6-7597c194bf6a"
+    },
+    {
+      "source_uuid": "a113c387-e2fa-4f9a-8232-9f4478a34b0a",
+      "routed_uuid": "70ee1cb8-900b-4798-b6c0-dd86f5177eb3"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65479",
+      "routed_uuid": "7a980b05-c31a-47eb-8a77-e11fb30af058"
+    },
+    {
+      "source_uuid": "ecb58467-0381-475b-b7a8-7353b5726de3",
+      "routed_uuid": "7b1e85b3-6e68-4891-b9c9-02fb9242403c"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65471",
+      "routed_uuid": "86ab5dbf-11b2-44ef-9b54-1edcfc009af2"
+    },
+    {
+      "source_uuid": "591b202d-0e81-4c1e-86d7-ab99850ad49a",
+      "routed_uuid": "90fe7173-61c5-4d95-8c2d-2f1e8134d883"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c653d2",
+      "routed_uuid": "b2675667-7e54-4d5c-81c5-c6a0757981ee"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65478",
+      "routed_uuid": "bae07f5c-bd97-4d9d-87ea-a5cb5bb8fd0d"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c653d5",
+      "routed_uuid": "cf9f65a9-65c1-45a5-8d44-1e1ccfc2ded8"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c6546b",
+      "routed_uuid": "fbf9e3f3-224c-44f6-bd81-be71f73b153a"
+    },
+    {
+      "source_uuid": "6b6f5a71-de92-42b6-9270-87bd6267a92f",
+      "routed_uuid": "113b8e80-c953-480d-81a9-54c42c9e3f9d"
+    },
+    {
+      "source_uuid": "82bd2552-b42e-4f9d-aa6f-e56823404362",
+      "routed_uuid": "57ae72c9-a705-4336-a6b7-798be6a7febd"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65097",
+      "routed_uuid": "78c74c55-4f45-4f6d-b68c-85b5902d8e64"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c6509a",
+      "routed_uuid": "cb81bea0-a95c-43f9-bbc0-78261a6e0913"
+    },
+    {
+      "source_uuid": "ac90f68e-8b16-4c02-bd77-a6ae2427bf58",
+      "routed_uuid": "0618fdaa-37e0-4259-9cf8-0c011419b635"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f49",
+      "routed_uuid": "22bd255e-7cc5-4e66-a830-b0ac23c3ec00"
+    },
+    {
+      "source_uuid": "a0315c0a-b3ef-4da5-b04b-4718b9b6eae5",
+      "routed_uuid": "2e13d1c4-ec83-4ccc-8afc-30644ca1e601"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f57",
+      "routed_uuid": "600b4e60-3b27-4d67-a303-bb178a5d56bf"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f4f",
+      "routed_uuid": "696dbd0a-3431-40fb-9d8c-5f1aebebf1f2"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f52",
+      "routed_uuid": "72731dbd-1a74-4424-803a-ecc182ffff63"
+    },
+    {
+      "source_uuid": "e382c404-da7b-4317-b2ec-524a82478da4",
+      "routed_uuid": "903c357a-2882-464f-921e-bb708f2c5aba"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f63",
+      "routed_uuid": "9224d257-cda9-4872-9a47-226611ab7a97"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f58",
+      "routed_uuid": "9c753c02-68f9-4867-8395-7534a3306d05"
+    },
+    {
+      "source_uuid": "1098c711-220b-4190-ab76-67d1f329721a",
+      "routed_uuid": "a8d3e46d-56e1-4075-9e81-3a60302e897c"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f48",
+      "routed_uuid": "b3e1e125-55b7-486f-b2f8-09017e4b3e69"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f55",
+      "routed_uuid": "b6030058-4479-4ac0-8a50-c2a2d4b1a9b7"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f66",
+      "routed_uuid": "bb055710-5199-4784-b5c2-0be21f2fef07"
+    },
+    {
+      "source_uuid": "6625c513-2b34-423a-b712-c5f784a43dcd",
+      "routed_uuid": "e6acf362-2ce3-4abb-94b7-a249d30c6940"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f56",
+      "routed_uuid": "fa8f73b2-b47c-40ae-8a34-84854a484c41"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f4c",
+      "routed_uuid": "a2ed4519-e083-4ab8-9b7f-9f0caaf74d5d"
+    },
+    {
+      "source_uuid": "942d8d48-5e8b-4c1e-a5d8-3ec974475972",
+      "routed_uuid": "3f77e019-4162-492c-bbb6-76fc97c60eb4"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65091",
+      "routed_uuid": "557b92e0-5a03-450a-ba88-50573972ef88"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65090",
+      "routed_uuid": "f7924397-4411-496f-b7ac-4516a9496898"
+    },
+    {
+      "source_uuid": "707c5b3a-224a-4e92-bf90-bbe219318855",
+      "routed_uuid": "448e0567-6c77-408b-9c4b-8d6dbeced334"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c6517c",
+      "routed_uuid": "9123e45e-21b6-4418-bba4-1daceb365687"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c6517b",
+      "routed_uuid": "9f1ad13c-4455-48c1-92ae-d4f8eb4a73b0"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c650a8",
+      "routed_uuid": "a5683e35-b7c6-4416-9cb5-ed5c99fd297e"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65179",
+      "routed_uuid": "ae77033c-d165-40dc-b9c1-86508a9ba28b"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c650a7",
+      "routed_uuid": "cc79bbaa-d6bf-4676-bcfc-3c673d539ad9"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65175",
+      "routed_uuid": "cfe46ddc-2be3-4a7c-bb04-c5329d611da9"
+    },
+    {
+      "source_uuid": "4ec34006-d458-4aab-8489-dda1fde97035",
+      "routed_uuid": "f34be6ef-5939-432e-8d01-1447ca64f7ef"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c6517a",
+      "routed_uuid": "fa6fb025-f4ed-48cb-9d87-83bdcf77cf10"
+    },
+    {
+      "source_uuid": "15d650a5-7ea2-478e-b793-28a640f753ab",
+      "routed_uuid": "09152cce-c59a-44c8-8347-73fe653125b8"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c651d8",
+      "routed_uuid": "09eb7e82-4f75-4528-b04b-e67c535dc041"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c651d9",
+      "routed_uuid": "131b6076-16db-413c-8591-ca176f2ebf22"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65192",
+      "routed_uuid": "1a423b9e-5fda-41f2-b003-1787e14a97e2"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65185",
+      "routed_uuid": "1d631f7a-03c4-4198-8868-534110579bd5"
+    },
+    {
+      "source_uuid": "ba8493b0-dd9d-47da-9ee8-385484d2fa0d",
+      "routed_uuid": "24516489-75bd-4c62-a32c-7641c28cfdee"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c650ab",
+      "routed_uuid": "69719c08-2f90-4fdd-a052-db764bbd9720"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65191",
+      "routed_uuid": "c25e731d-a13b-4599-9dd6-9da7f47e951c"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c650ac",
+      "routed_uuid": "ce67824c-1020-4e1c-a828-1ec7c14e3e27"
+    },
+    {
+      "source_uuid": "e8100cba-ddba-4cba-b02a-a05a1ebd878c",
+      "routed_uuid": "f3d841be-53af-4ddf-95cc-44b516bf860f"
+    },
+    {
+      "source_uuid": "63fa35a3-f0d4-450b-8742-fa8e1ddc6ed6",
+      "routed_uuid": "fda4b958-5d6e-4a95-853a-f788c7f8917f"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c651a8",
+      "routed_uuid": "26814be0-d872-410a-a6c5-e90cbb7ac0ee"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c650af",
+      "routed_uuid": "4f2133bd-609f-417d-a165-9ebfc96128ce"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65149",
+      "routed_uuid": "5418a28e-3ed9-4e3d-86e9-1d1b1e72931e"
+    },
+    {
+      "source_uuid": "ad02921b-6208-4f6e-8d54-86d6ede4b736",
+      "routed_uuid": "5a6ba8ce-cb53-4a89-bb36-94a3b8023f1d"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c651a7",
+      "routed_uuid": "873b84d4-6c68-4057-91cb-ca5b67cd0986"
+    },
+    {
+      "source_uuid": "818ebc8f-6183-4ace-b3be-ce0dff6ef24c",
+      "routed_uuid": "a346e9ed-aff1-44ac-9810-f497d8de18ef"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c650b0",
+      "routed_uuid": "b5efcd24-bb13-4a02-8098-2f141c2eb554"
+    },
+    {
+      "source_uuid": "119fd59e-aa79-471b-ba93-8baf6182bc73",
+      "routed_uuid": "cb7744d3-3ff3-4533-929f-5e6210ec1974"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c651a4",
+      "routed_uuid": "d474a059-e36c-42be-ab88-ab4612065c3d"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c651a3",
+      "routed_uuid": "db7ef64b-91d6-40e5-9796-bb7905a9e1c1"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c651b7",
+      "routed_uuid": "08bd715a-73d2-4f8e-a39f-c2d987af5ec0"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c650b3",
+      "routed_uuid": "270458c5-5eaf-4b84-9857-f95f0d05667d"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c6518b",
+      "routed_uuid": "48f6d950-f926-4105-8931-1ef3a32b6de3"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c6518d",
+      "routed_uuid": "4b510e4b-c930-40cd-b899-b910f8c6da37"
+    },
+    {
+      "source_uuid": "98ee76eb-a969-497e-8362-5459479fbb00",
+      "routed_uuid": "67936e69-2ad8-4fad-8724-500fa582648f"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c650b5",
+      "routed_uuid": "69fe2895-8692-4e7b-8ba3-8bdaf2693585"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c6514c",
+      "routed_uuid": "768ff1e3-b9bd-4757-9ccb-d5813a01e4e9"
+    },
+    {
+      "source_uuid": "e3855fd1-e7fd-4ca7-8415-ee3db90e4cd1",
+      "routed_uuid": "7db1ec38-261b-4849-a6db-9f9525659630"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c6518c",
+      "routed_uuid": "9199a5eb-5546-4c00-9d85-aefcc28e0992"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65189",
+      "routed_uuid": "9f19f7b1-a6a2-4158-8a0d-0d67f8c982da"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65188",
+      "routed_uuid": "ac286b2e-252f-44fb-ae0f-cde245069291"
+    },
+    {
+      "source_uuid": "656eb5b5-9bb8-425a-87c9-89f2af16436b",
+      "routed_uuid": "c76339d2-80e5-41e8-850f-d5a279971c56"
+    },
+    {
+      "source_uuid": "a5ad058a-1dd1-4d24-838e-aa46fc206859",
+      "routed_uuid": "d7f496b5-331d-4ea1-8b5d-d721af8d6f26"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c651b8",
+      "routed_uuid": "db2faa2e-d25d-4669-bf81-5e0fa44b7097"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c6518a",
+      "routed_uuid": "f540be5c-2cf9-42e4-b681-bae066a5d7ea"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c6545c",
+      "routed_uuid": "04beaa20-3129-4701-9c65-bed1c1700574"
+    },
+    {
+      "source_uuid": "f8c8b7eb-dc94-411e-8473-83107bb74f41",
+      "routed_uuid": "8963d975-f63b-43d9-85ca-623c7d5983cc"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65457",
+      "routed_uuid": "a7b8ccda-fc49-426f-9a41-033a3c567c45"
+    },
+    {
+      "source_uuid": "ba6bd9a4-d66c-4073-8ace-ff3c311b03a9",
+      "routed_uuid": "aa142334-fd70-44ec-ae9d-97586fe16acd"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c6545b",
+      "routed_uuid": "cadef022-b21f-4380-aef5-e222024d47e8"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c6531e",
+      "routed_uuid": "072714c6-9ad3-4869-bcfb-e7c5b91c614c"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c6544d",
+      "routed_uuid": "1efa2540-7a0b-476b-9168-4958025255c9"
+    },
+    {
+      "source_uuid": "abfb3c4a-bb9f-4367-9cbd-beafb7c3fc9d",
+      "routed_uuid": "3c4d13ad-2c42-47b6-bc93-9e7327b114b5"
+    },
+    {
+      "source_uuid": "4c52c89b-9496-42bb-a9b4-7705c56372fe",
+      "routed_uuid": "5cca7f73-22b6-4093-980b-9ad596e564f6"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c6531d",
+      "routed_uuid": "78745119-0b19-4286-9024-e6cae3daa4ab"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65296",
+      "routed_uuid": "794b9aee-07d2-4f45-bba8-3023c5ac39f4"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65299",
+      "routed_uuid": "7d1feccb-8b62-4b6b-80e4-81e517012aa9"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65318",
+      "routed_uuid": "afe7e2a0-dece-40bc-8851-435141efe457"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c6531b",
+      "routed_uuid": "b464c810-45d2-467c-9b06-63f762a2324f"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65319",
+      "routed_uuid": "b92c3a49-1eaf-4ca2-9701-cb72e2db97f8"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65295",
+      "routed_uuid": "c4aef847-6739-4ba5-a772-dd3bb4e16f89"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65297",
+      "routed_uuid": "c876d714-ecf2-4f2f-967b-9fc3df985037"
+    },
+    {
+      "source_uuid": "e8404347-371b-472a-8b69-62df7f20d7e2",
+      "routed_uuid": "d1b5d168-60d9-4edf-818d-34797e5c0033"
+    },
+    {
+      "source_uuid": "1b505b68-c430-43a0-952f-48e4f809fd04",
+      "routed_uuid": "e53f66d8-656c-42f5-8a95-a0dabc4cb9fa"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65317",
+      "routed_uuid": "f568daf2-65fc-49bc-888d-b1b94497c13e"
+    },
+    {
+      "source_uuid": "72a2eb68-6454-4cba-a214-07513b1f51c1",
+      "routed_uuid": "40705bb8-59a1-473f-aa24-414d1b5def14"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c652a6",
+      "routed_uuid": "683145ac-2fd0-4eed-8b5a-bf069ef35f34"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c652a7",
+      "routed_uuid": "b46d197a-a842-4bdc-b2e5-587b935592e4"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c651bb",
+      "routed_uuid": "cdb18ab7-deab-46af-adc9-f5a9ca6275e6"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c6529e",
+      "routed_uuid": "23ec723a-cdc5-41ac-85a7-16b6abe9e365"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c6529d",
+      "routed_uuid": "29155607-1d32-4277-b99f-170643c9c440"
+    },
+    {
+      "source_uuid": "0694d4cf-5504-40c9-bb4c-144323247fe9",
+      "routed_uuid": "43055e05-c81c-4c8a-ab60-91dc8fe10ced"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65447",
+      "routed_uuid": "4e959ba3-3838-4862-b563-1fc9555ef2c6"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65323",
+      "routed_uuid": "8979cb16-2bab-4f07-ba6f-8eed00e90044"
+    },
+    {
+      "source_uuid": "54c8d8f5-b4ee-4d4b-96fa-7343e848cf71",
+      "routed_uuid": "b8418a41-14a5-45cc-b9d1-ae2bd2224dc3"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c652a0",
+      "routed_uuid": "cb204442-57c1-4202-a3ee-068272a5d16e"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65321",
+      "routed_uuid": "d5a64ad6-d043-4a5c-b81f-27a1305d5ee3"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c652a2",
+      "routed_uuid": "daf08c87-207d-4ca7-8e49-c8d47ffb9a1d"
+    },
+    {
+      "source_uuid": "b51867a0-b933-4e86-a4c8-07fea2ac8eec",
+      "routed_uuid": "e69b74c5-5782-4022-9e31-f034efe3c1ac"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c65445",
+      "routed_uuid": "f84eb4f8-2aa6-4f21-b917-20e529c0cac1"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64fbb",
+      "routed_uuid": "1526bbe9-53dc-49b0-941b-479a3cd64ae1"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c650c0",
+      "routed_uuid": "2403dd35-a25d-465d-ae1c-d87bf2ed1dd3"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f25",
+      "routed_uuid": "2d2cc71c-f964-4c2f-8dc7-d0c4bf106b7e"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f23",
+      "routed_uuid": "5a0d03d1-7c82-4bf9-b47d-4f92322bd0d7"
+    },
+    {
+      "source_uuid": "39e52089-f6f4-4ac1-b82b-8697fd7c9687",
+      "routed_uuid": "62b0446a-104c-4fae-90b9-35af3d42899e"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c650bd",
+      "routed_uuid": "786e9e47-0d3e-44c4-a1a1-50ff12cc4523"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c650be",
+      "routed_uuid": "814c4646-931c-4b38-9e0f-d848fd9395e0"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64fb9",
+      "routed_uuid": "86647213-25d5-4cca-9350-daeeee928036"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c650bf",
+      "routed_uuid": "872cd9f5-6ce7-4060-873a-c662d4dd0443"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f24",
+      "routed_uuid": "93b72495-e03c-4d2b-bf74-f4be21cc168d"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c650bc",
+      "routed_uuid": "adb72996-14c4-420f-966f-46e93da95fb6"
+    },
+    {
+      "source_uuid": "b6c3837f-7b30-4799-9a01-9df32a42caf5",
+      "routed_uuid": "c54afa5e-e9b7-4253-a22b-f8979e33018d"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64fba",
+      "routed_uuid": "db959a59-4e6a-4d78-b7f9-30aaef36aad5"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f22",
+      "routed_uuid": "f22c28f4-35a3-4cbe-9634-07f69431b5a7"
+    },
+    {
+      "source_uuid": "77b74257-db2f-442e-ba6a-4a313fecadc3",
+      "routed_uuid": "3289e925-a905-4e06-abcc-cd61fda275fb"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64fb6",
+      "routed_uuid": "7b097230-d702-48fc-9650-3eb011374152"
+    },
+    {
+      "source_uuid": "26c5f9f4-3b86-4777-8776-978198a30231",
+      "routed_uuid": "3ea63487-9033-4ae4-80b7-86afa304af90"
+    },
+    {
+      "source_uuid": "7a4cbe42-e156-450d-be8c-85d5a634fa4c",
+      "routed_uuid": "4900efc1-3b19-4038-babf-1f8b7fb33301"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c650a3",
+      "routed_uuid": "642160e6-e5a6-4ea3-b832-85cf874d50d7"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c650a4",
+      "routed_uuid": "7536fa3b-5c47-4578-9404-39830cf745dc"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64fdd",
+      "routed_uuid": "753b0b66-ae28-4a12-b74b-26b66df5d4fd"
+    },
+    {
+      "source_uuid": "fb1945e6-9c4c-49e9-a942-4814a3e47e55",
+      "routed_uuid": "a0c8c976-458c-4c89-a0d6-51af9260479f"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64ffb",
+      "routed_uuid": "c0995b2b-c3b9-4220-984a-1fb0b9c33608"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64ffb",
+      "routed_uuid": "cbfc7e01-174a-4a6e-b911-60f4c11ae99e"
+    },
+    {
+      "source_uuid": "eb0f0d36-2111-482c-8240-2b19f201e3aa",
+      "routed_uuid": "d845e227-7a94-4a5a-840a-0f53d50b96d8"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c650a2",
+      "routed_uuid": "e71a01e4-7306-4d9f-a462-2db1df1ae63b"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64ffc",
+      "routed_uuid": "ea6d6937-4e59-4c7d-9e38-21f7b7bc00e8"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f2d",
+      "routed_uuid": "0a1ff739-427e-45a5-b4cb-1532c8a1e0ff"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f2e",
+      "routed_uuid": "55d78b61-ad51-412d-b140-146a898f76ee"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f2f",
+      "routed_uuid": "61c0738b-72d3-4c21-bcbb-58a5ab584fe7"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f30",
+      "routed_uuid": "ba8fcb97-b148-4aa6-81cb-6cab33a4465e"
+    },
+    {
+      "source_uuid": "9c95115e-622b-41aa-b0d1-71ed2e3483c7",
+      "routed_uuid": "c6fbf61e-8d31-4003-8571-443405c8485b"
+    },
+    {
+      "source_uuid": "00000000-0000-0000-0000-000057c64f2a",
+      "routed_uuid": "40d0c784-90f2-49ea-8261-59d2a43a9d94"
+    }
+  ],
+  "first_failing_proposal": {
+    "name": "006.kicad_pcb",
+    "label": ["segment", "61c0738b-72d3-4c21-bcbb-58a5ab584fe7"]
+  },
+  "missing_source_segments": 1,
+  "cause": "Native scoped import duplicates retained objects, generating fresh UUIDs; UUID-only generator exclusion mistakes an authored segment for generated copper. Strict source inventory rejects this proposal; search exits 2 and postprocessor leaves original board for scoring."
+}

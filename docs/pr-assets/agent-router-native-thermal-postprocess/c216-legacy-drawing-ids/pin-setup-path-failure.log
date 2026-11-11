@@ -1,0 +1,3 @@
+Initial pin preparation ran from packages/router but used repo-relative packages/router/FAB_ROUTER_COMMIT.
+Path.write_text raised FileNotFoundError before changing any file. The following package checks started with the old pin.
+These checks are retained separately; pin will be set using its absolute path and the complete package command rerun.

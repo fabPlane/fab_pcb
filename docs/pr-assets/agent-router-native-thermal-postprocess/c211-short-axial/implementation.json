@@ -1,0 +1,19 @@
+{
+  "commit": "34f33a19c1121a2594e32147dd1ba2e2d759a78b",
+  "toolSourceHashes": {
+    "tools/native-thermal-search.ts": "5c0563529c066006197904e0c48fd931e9b2668aa5eaa8c3c344990b24733d51",
+    "tools/native-thermal-proposals.py": "675132954fcb801e1207d880eb8b8abbfb024f65ceb94a66416b34e070eedd59",
+    "tools/native-drc-gate.ts": "3e18c7677cff3c9a5dd951d80115b5386ee8d50af24898f4a71ad11297543567",
+    "tools/native-terminal-groups.py": "11cc3b6f8566391589737087d05131612a69b904860370b68bc70a20d12a9355",
+    "tools/native-repair-bundle.ts": "9f2072f8bb48325cc6934f547897f7fb8ba472dc6a2edff07335714cb74b1aec",
+    "tools/native-candidate-bundle.ts": "98f56d16f05b3f61759b6f8dd900362574dcfcff1b16ff7b50fe5d1435c67942",
+    "tools/kicad-board-rules.ts": "eb5d7fe89bb00afff5e40ee45565512595e33d28a3dfe8ba83a8d4944a1a4c18"
+  },
+  "finalRequiredChecks": {
+    "tests": 925,
+    "failures": 0,
+    "assertions": 398859,
+    "elapsedSeconds": 940.63,
+    "exitCode": 0
+  }
+}

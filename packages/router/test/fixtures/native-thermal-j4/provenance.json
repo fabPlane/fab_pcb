@@ -1,0 +1,27 @@
+{
+  "case": "qrpcard-qrpcard-j4",
+  "seed": 1,
+  "router_commit": "88a89a42aaf6c45b9314f05e88f64cadd216a053",
+  "routed_benchmark": "cycle201 full-router",
+  "new_native_errors": 1,
+  "opens": 0,
+  "sha256": {
+    "source.kicad_pcb": "d40810c8ab2c8e9743a6f9e8301913f2d6c167ad0c2b2adcc642f51b816fae0a",
+    "source.kicad_dru": "bbef6e119424cbf626d6fec0697069e203a9bde1d54f30517b179a0375f28b6b",
+    "source.kicad_pro": "df297ef7d2b48897904264eed3b13cd6b3d9739ba3d3baa70e861ee449117e2f",
+    "routed.kicad_pcb": "d4b95bb219157eba2bd79eaa459a709d6522d54fcea05ea14f40dddbfecbc857",
+    "routed.kicad_dru": "bbef6e119424cbf626d6fec0697069e203a9bde1d54f30517b179a0375f28b6b",
+    "routed.kicad_prl": "0ff0211081ef329a7b81b28ab259ca30d5049b479b5ca38b2acf03c5b183b263",
+    "routed.kicad_pro": "df297ef7d2b48897904264eed3b13cd6b3d9739ba3d3baa70e861ee449117e2f"
+  },
+  "upstream_source": {
+    "board_id": "QRPCard_QRPCard",
+    "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+    "raw_blob": "ac9a8be6c366dd1fa3ed19acfdef2f2cb74362b7",
+    "raw_sha256": "90426237749a60b9bf6b71940dc5f1ae9cff804b8ea118aeb84b153e5382a4db",
+    "repository": "https://github.com/devttys0/QRPCard",
+    "verified_license_url": "https://github.com/devttys0/QRPCard/blob/b474df243eb6b7e60f512eb54c89913802a4fa8e/LICENSE",
+    "license_revision": "b474df243eb6b7e60f512eb54c89913802a4fa8e",
+    "license_file": "LICENSE"
+  }
+}

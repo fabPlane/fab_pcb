@@ -1,0 +1,79 @@
+{
+  "rows": [
+    {
+      "phase": "before",
+      "repeat": 0,
+      "seconds": 22.608,
+      "published": false,
+      "repaired": false,
+      "attempts": 0,
+      "errors": 1,
+      "opens": 111,
+      "lostSource": 0,
+      "lostRouted": 0
+    },
+    {
+      "phase": "before",
+      "repeat": 1,
+      "seconds": 27.923,
+      "published": false,
+      "repaired": false,
+      "attempts": 0,
+      "errors": 1,
+      "opens": 111,
+      "lostSource": 0,
+      "lostRouted": 0
+    },
+    {
+      "phase": "before",
+      "repeat": 2,
+      "seconds": 25.076,
+      "published": false,
+      "repaired": false,
+      "attempts": 0,
+      "errors": 1,
+      "opens": 111,
+      "lostSource": 0,
+      "lostRouted": 0
+    },
+    {
+      "phase": "after",
+      "repeat": 0,
+      "seconds": 46.282,
+      "published": true,
+      "repaired": true,
+      "attempts": 1,
+      "errors": 0,
+      "opens": 110,
+      "lostSource": 0,
+      "lostRouted": 0
+    },
+    {
+      "phase": "after",
+      "repeat": 1,
+      "seconds": 46.003,
+      "published": true,
+      "repaired": true,
+      "attempts": 1,
+      "errors": 0,
+      "opens": 110,
+      "lostSource": 0,
+      "lostRouted": 0
+    },
+    {
+      "phase": "after",
+      "repeat": 2,
+      "seconds": 54.113,
+      "published": true,
+      "repaired": true,
+      "attempts": 1,
+      "errors": 0,
+      "opens": 110,
+      "lostSource": 0,
+      "lostRouted": 0
+    }
+  ],
+  "deterministic_candidate_sha256": "14a23e256e83be960c8153398510752d98d86d906e3b6880085444e9dd5bc623",
+  "source_geometry_and_rules_preserved": true,
+  "source_and_routed_pairs_preserved": true
+}

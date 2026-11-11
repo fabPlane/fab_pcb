@@ -1,0 +1,17 @@
+{
+  "initial_package_checks": 1,
+  "final_package_checks": 0,
+  "native_package_checks": 0,
+  "engine_checks": 0,
+  "full_after": 0,
+  "full_before": 0,
+  "config_generation": 0,
+  "generated_config_matches_measured": true,
+  "measured_sources_unchanged": 73,
+  "diff_check": "exit 2 solely original custom-rule blank EOF, bytes retained",
+  "all_job_handles_collected": true,
+  "package": 0,
+  "original_replay": 0,
+  "extracted_archive_replay": 0,
+  "image_visually_inspected": true
+}
