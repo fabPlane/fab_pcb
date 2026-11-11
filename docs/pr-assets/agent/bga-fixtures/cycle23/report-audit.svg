@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="410" viewBox="0 0 1000 410">
+<rect width="1000" height="410" fill="#f8fafc"/>
+<g font-family="sans-serif" fill="#0f172a">
+<text x="40" y="45" font-size="25">BGA input report audit</text>
+<text x="40" y="75" font-size="16">Same 12 native reports · B1/B2 · bundled/regenerated · 3 repeats each</text>
+<text x="40" y="120" font-size="19">Genuine reports accepted</text>
+<text x="40" y="157" font-size="16">Before</text>
+<rect x="120" y="140" width="580" height="23" fill="#e2e8f0"/>
+<rect x="120" y="140" width="580.0" height="23" fill="#2563eb"/>
+<text x="720" y="157" font-size="16">12 / 12</text>
+<text x="40" y="190" font-size="16">After</text>
+<rect x="120" y="173" width="580" height="23" fill="#e2e8f0"/>
+<rect x="120" y="173" width="580.0" height="23" fill="#2563eb"/>
+<text x="720" y="190" font-size="16">12 / 12</text>
+<text x="40" y="255" font-size="19">Malformed reports accepted</text>
+<text x="40" y="292" font-size="16">Before</text>
+<rect x="120" y="275" width="580" height="23" fill="#e2e8f0"/>
+<rect x="120" y="275" width="477.6470588235294" height="23" fill="#dc2626"/>
+<text x="720" y="292" font-size="16">168 / 204</text>
+<text x="40" y="325" font-size="16">After</text>
+<rect x="120" y="308" width="580" height="23" fill="#e2e8f0"/>
+<rect x="120" y="308" width="0.0" height="23" fill="#dc2626"/>
+<text x="720" y="325" font-size="16">0 / 204</text>
+<text x="40" y="385" font-size="14">Controlled corruptions test evidence validation; no routing or speed gain claimed.</text>
+</g></svg>
