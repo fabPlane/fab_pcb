@@ -1,0 +1,89 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+438 |   for (const layers of [["F.Cu", "MISSING"], ["MISSING", "ALSO_MISSING"]]) {
+439 |     test(`rejects unknown via layers: ${layers.join(",")}`, () => {
+440 |       const shapes = layers.map(layer => `(shape (circle ${layer} 800))`).join(" ");
+441 |       const session = parseSes(`(session s (routes (library_out (padstack V ${shapes}))
+442 |         (network_out (net A (via V 1000 -1000)))))`);
+443 |       expect(() => sesToItems(session, twoNetBoard())).toThrow(SyntaxError);
+                                                             ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 1000000,
+        y: 1000000,
+      },
+      diameter: 800000,
+      drill: 400000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:443:56)
+(fail) session via layer identity > rejects unknown via layers: F.Cu,MISSING [0.77ms]
+438 |   for (const layers of [["F.Cu", "MISSING"], ["MISSING", "ALSO_MISSING"]]) {
+439 |     test(`rejects unknown via layers: ${layers.join(",")}`, () => {
+440 |       const shapes = layers.map(layer => `(shape (circle ${layer} 800))`).join(" ");
+441 |       const session = parseSes(`(session s (routes (library_out (padstack V ${shapes}))
+442 |         (network_out (net A (via V 1000 -1000)))))`);
+443 |       expect(() => sesToItems(session, twoNetBoard())).toThrow(SyntaxError);
+                                                             ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 1000000,
+        y: 1000000,
+      },
+      diameter: 800000,
+      drill: 400000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:443:56)
+(fail) session via layer identity > rejects unknown via layers: MISSING,ALSO_MISSING [0.11ms]
+(pass) session via layer identity > preserves supported via layer aliases [0.08ms]
+(pass) session via layer identity > retains absent padstack through via fallback [0.07ms]
+
+ 2 pass
+ 76 filtered out
+ 2 fail
+ 4 expect() calls
+Ran 4 tests across 1 file. [170.00ms]

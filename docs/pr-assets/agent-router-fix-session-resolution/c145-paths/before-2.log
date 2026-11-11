@@ -1,0 +1,345 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+353 |   "F.Cu 2 0 0 10", "F.Cu 2 0 0 (unexpected 10) 20",
+354 |   "F.Cu 2 0 0", "F.Cu 0.0001 0 0 10 20",
+355 | ]) {
+356 |   test(`session path rejects malformed geometry: ${path}`, () => {
+357 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+358 |       (network_out (net A (wire (path ${path}))))))`)).toThrow(SyntaxError);
+                                                             ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: 200,
+      points: [
+        {
+          x: 0,
+          y: -0,
+        }, {
+          x: NaN,
+          y: -2000,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:358:56)
+(fail) session path rejects malformed geometry: F.Cu 2 0 0 NaN 20 [0.44ms]
+353 |   "F.Cu 2 0 0 10", "F.Cu 2 0 0 (unexpected 10) 20",
+354 |   "F.Cu 2 0 0", "F.Cu 0.0001 0 0 10 20",
+355 | ]) {
+356 |   test(`session path rejects malformed geometry: ${path}`, () => {
+357 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+358 |       (network_out (net A (wire (path ${path}))))))`)).toThrow(SyntaxError);
+                                                             ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: 200,
+      points: [
+        {
+          x: 0,
+          y: -0,
+        }, {
+          x: Infinity,
+          y: -2000,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:358:56)
+(fail) session path rejects malformed geometry: F.Cu 2 0 0 Infinity 20 [0.07ms]
+353 |   "F.Cu 2 0 0 10", "F.Cu 2 0 0 (unexpected 10) 20",
+354 |   "F.Cu 2 0 0", "F.Cu 0.0001 0 0 10 20",
+355 | ]) {
+356 |   test(`session path rejects malformed geometry: ${path}`, () => {
+357 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+358 |       (network_out (net A (wire (path ${path}))))))`)).toThrow(SyntaxError);
+                                                             ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: 200,
+      points: [
+        {
+          x: 0,
+          y: -0,
+        }, {
+          x: Infinity,
+          y: -2000,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:358:56)
+(fail) session path rejects malformed geometry: F.Cu 2 0 0 1e308 20 [0.53ms]
+353 |   "F.Cu 2 0 0 10", "F.Cu 2 0 0 (unexpected 10) 20",
+354 |   "F.Cu 2 0 0", "F.Cu 0.0001 0 0 10 20",
+355 | ]) {
+356 |   test(`session path rejects malformed geometry: ${path}`, () => {
+357 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+358 |       (network_out (net A (wire (path ${path}))))))`)).toThrow(SyntaxError);
+                                                             ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: NaN,
+      points: [
+        {
+          x: 0,
+          y: -0,
+        }, {
+          x: 1000,
+          y: -2000,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:358:56)
+(fail) session path rejects malformed geometry: F.Cu NaN 0 0 10 20 [0.04ms]
+353 |   "F.Cu 2 0 0 10", "F.Cu 2 0 0 (unexpected 10) 20",
+354 |   "F.Cu 2 0 0", "F.Cu 0.0001 0 0 10 20",
+355 | ]) {
+356 |   test(`session path rejects malformed geometry: ${path}`, () => {
+357 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+358 |       (network_out (net A (wire (path ${path}))))))`)).toThrow(SyntaxError);
+                                                             ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: -200,
+      points: [
+        {
+          x: 0,
+          y: -0,
+        }, {
+          x: 1000,
+          y: -2000,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:358:56)
+(fail) session path rejects malformed geometry: F.Cu -2 0 0 10 20 [0.03ms]
+353 |   "F.Cu 2 0 0 10", "F.Cu 2 0 0 (unexpected 10) 20",
+354 |   "F.Cu 2 0 0", "F.Cu 0.0001 0 0 10 20",
+355 | ]) {
+356 |   test(`session path rejects malformed geometry: ${path}`, () => {
+357 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+358 |       (network_out (net A (wire (path ${path}))))))`)).toThrow(SyntaxError);
+                                                             ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: 0,
+      points: [
+        {
+          x: 0,
+          y: -0,
+        }, {
+          x: 1000,
+          y: -2000,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:358:56)
+(fail) session path rejects malformed geometry: F.Cu 0 0 0 10 20 [0.03ms]
+353 |   "F.Cu 2 0 0 10", "F.Cu 2 0 0 (unexpected 10) 20",
+354 |   "F.Cu 2 0 0", "F.Cu 0.0001 0 0 10 20",
+355 | ]) {
+356 |   test(`session path rejects malformed geometry: ${path}`, () => {
+357 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+358 |       (network_out (net A (wire (path ${path}))))))`)).toThrow(SyntaxError);
+                                                             ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:358:56)
+(fail) session path rejects malformed geometry: F.Cu 2 0 0 10 [0.06ms]
+353 |   "F.Cu 2 0 0 10", "F.Cu 2 0 0 (unexpected 10) 20",
+354 |   "F.Cu 2 0 0", "F.Cu 0.0001 0 0 10 20",
+355 | ]) {
+356 |   test(`session path rejects malformed geometry: ${path}`, () => {
+357 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+358 |       (network_out (net A (wire (path ${path}))))))`)).toThrow(SyntaxError);
+                                                             ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:358:56)
+(fail) session path rejects malformed geometry: F.Cu 2 0 0 (unexpected 10) 20 [0.03ms]
+353 |   "F.Cu 2 0 0 10", "F.Cu 2 0 0 (unexpected 10) 20",
+354 |   "F.Cu 2 0 0", "F.Cu 0.0001 0 0 10 20",
+355 | ]) {
+356 |   test(`session path rejects malformed geometry: ${path}`, () => {
+357 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+358 |       (network_out (net A (wire (path ${path}))))))`)).toThrow(SyntaxError);
+                                                             ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:358:56)
+(fail) session path rejects malformed geometry: F.Cu 2 0 0 [0.03ms]
+353 |   "F.Cu 2 0 0 10", "F.Cu 2 0 0 (unexpected 10) 20",
+354 |   "F.Cu 2 0 0", "F.Cu 0.0001 0 0 10 20",
+355 | ]) {
+356 |   test(`session path rejects malformed geometry: ${path}`, () => {
+357 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+358 |       (network_out (net A (wire (path ${path}))))))`)).toThrow(SyntaxError);
+                                                             ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: 0,
+      points: [
+        {
+          x: 0,
+          y: -0,
+        }, {
+          x: 1000,
+          y: -2000,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:358:56)
+(fail) session path rejects malformed geometry: F.Cu 0.0001 0 0 10 20 [0.03ms]
+(pass) session path retains signed fractional coordinates and positive widths [0.05ms]
+
+ 1 pass
+ 37 filtered out
+ 10 fail
+ 11 expect() calls
+Ran 11 tests across 1 file. [120.00ms]

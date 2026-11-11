@@ -1,0 +1,128 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+503 |     "(shape (polygon F.Cu 0 -400 -300 400 -300 400 300)) (shape (circle B.Cu 800))",
+504 |   ]) {
+505 |     test(`rejects unrepresentable session via shape ${shapes}`, () => {
+506 |       const session = `(session s (routes (library_out (padstack V_800:300_um ${shapes}))
+507 |         (network_out (net A (via V_800:300_um 1000 -1000)))))`;
+508 |       expect(() => sesToItems(parseSes(session), twoNetBoard())).toThrow(SyntaxError);
+                                                                       ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 1000000,
+        y: 1000000,
+      },
+      diameter: 800000,
+      drill: 300000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:508:66)
+(fail) session via shape representability > rejects unrepresentable session via shape (shape (rect F.Cu -400 -300 400 300)) (shape (rect B.Cu -400 -300 400 300)) [0.66ms]
+503 |     "(shape (polygon F.Cu 0 -400 -300 400 -300 400 300)) (shape (circle B.Cu 800))",
+504 |   ]) {
+505 |     test(`rejects unrepresentable session via shape ${shapes}`, () => {
+506 |       const session = `(session s (routes (library_out (padstack V_800:300_um ${shapes}))
+507 |         (network_out (net A (via V_800:300_um 1000 -1000)))))`;
+508 |       expect(() => sesToItems(parseSes(session), twoNetBoard())).toThrow(SyntaxError);
+                                                                       ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 1000000,
+        y: 1000000,
+      },
+      diameter: 800000,
+      drill: 300000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:508:66)
+(fail) session via shape representability > rejects unrepresentable session via shape (shape (circle F.Cu 800)) (shape (rect B.Cu -400 -300 400 300)) [0.12ms]
+503 |     "(shape (polygon F.Cu 0 -400 -300 400 -300 400 300)) (shape (circle B.Cu 800))",
+504 |   ]) {
+505 |     test(`rejects unrepresentable session via shape ${shapes}`, () => {
+506 |       const session = `(session s (routes (library_out (padstack V_800:300_um ${shapes}))
+507 |         (network_out (net A (via V_800:300_um 1000 -1000)))))`;
+508 |       expect(() => sesToItems(parseSes(session), twoNetBoard())).toThrow(SyntaxError);
+                                                                       ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 1000000,
+        y: 1000000,
+      },
+      diameter: 800000,
+      drill: 300000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:508:66)
+(fail) session via shape representability > rejects unrepresentable session via shape (shape (polygon F.Cu 0 -400 -300 400 -300 400 300)) (shape (circle B.Cu 800)) [0.07ms]
+(pass) session via shape representability > preserves representable circular session via shapes [0.05ms]
+(pass) session via shape representability > preserves missing session via shape fallback [0.03ms]
+
+ 2 pass
+ 96 filtered out
+ 3 fail
+ 7 expect() calls
+Ran 5 tests across 1 file. [110.00ms]

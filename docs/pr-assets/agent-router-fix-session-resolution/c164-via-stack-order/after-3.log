@@ -1,0 +1,13 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+(pass) session via stack order > ordered through shapes retain native endpoints [0.84ms]
+(pass) session via stack order > ordered blind shapes retain native endpoints [0.10ms]
+(pass) session via stack order > reversed through shapes retain native endpoints [0.06ms]
+(pass) session via stack order > reversed blind shapes retain native endpoints [0.04ms]
+
+ 4 pass
+ 129 filtered out
+ 0 fail
+ 16 expect() calls
+Ran 4 tests across 1 file. [135.00ms]

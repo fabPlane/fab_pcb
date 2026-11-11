@@ -1,0 +1,9 @@
+{
+  "base": "12b7edb2047e7c4e2710167419f5781899281303",
+  "repeats": 3,
+  "cores": "20-25",
+  "sha256": {
+    "packages/router/src/specctra/ses.ts": "f6929ffcf08e0b163f819cd9127ad8e64e350a25f6703d855d09baacad33a9da",
+    "packages/router/test/specctra.test.ts": "a66be1a7a9767fc852c7fbfd6c1e794958901fe44c3ce0d13242b2592832bf7f"
+  }
+}

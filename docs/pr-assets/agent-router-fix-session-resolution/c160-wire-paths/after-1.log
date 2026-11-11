@@ -1,0 +1,13 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+(pass) session wire path multiplicity > rejects multiple paths instead of dropping copper: (path F.Cu 250 0 0 1000 1000) [1.56ms]
+(pass) session wire path multiplicity > rejects multiple paths instead of dropping copper: (path B.Cu 300 1000 1000 2000 1000) [0.06ms]
+(pass) session wire path multiplicity > preserves both paths when represented by separate wires [0.45ms]
+(pass) session wire path multiplicity > preserves a polygon-only plane echo [0.04ms]
+
+ 4 pass
+ 113 filtered out
+ 0 fail
+ 6 expect() calls
+Ran 4 tests across 1 file. [120.00ms]

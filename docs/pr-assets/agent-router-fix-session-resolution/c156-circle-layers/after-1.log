@@ -1,0 +1,13 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+(pass) session circle layer operands > rejects nested circle layer operands (shape (circle (F.Cu) 800)) (shape (circle (B.Cu) 800)) [0.45ms]
+(pass) session circle layer operands > rejects nested circle layer operands (shape (circle F.Cu 800)) (shape (circle B.Cu 800)) (shape (circle (In1.Cu) 800)) [0.03ms]
+(pass) session circle layer operands > preserves atomic circle layer operands F.Cu/B.Cu [0.33ms]
+(pass) session circle layer operands > preserves atomic circle layer operands "F.Cu"/"B.Cu" [0.06ms]
+
+ 4 pass
+ 101 filtered out
+ 0 fail
+ 4 expect() calls
+Ran 4 tests across 1 file. [140.00ms]

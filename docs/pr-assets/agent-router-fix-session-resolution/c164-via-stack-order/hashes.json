@@ -1,0 +1,7 @@
+{
+  "before": "4a101c7",
+  "files": {
+    "packages/router/src/specctra/ses.ts": "64d1e8ca97a6f2ad376ec059f9c4f329038afde874620985a9a19f5ff9697b0a",
+    "packages/router/test/specctra.test.ts": "d441fa35a7ccc0d67ab21e9a7075b9d3f0d3c4af955a4e30287ad1bd9307c5b3"
+  }
+}

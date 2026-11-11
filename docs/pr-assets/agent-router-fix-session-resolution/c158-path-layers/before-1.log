@@ -1,0 +1,72 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+570 | 
+571 | describe("session path layer operands", () => {
+572 |   for (const layer of ["(F.Cu)", '\"\"']) {
+573 |     test(`rejects invalid path layer ${layer}`, () => {
+574 |       expect(() => parseSes(`(session s (routes (network_out (net A
+575 |         (wire (path ${layer} 250 0 0 1000 1000))))))`)).toThrow(SyntaxError);
+                                                              ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 1000,
+  padstacks: Map {},
+  wires: [],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:575:57)
+(fail) session path layer operands > rejects invalid path layer (F.Cu) [0.48ms]
+570 | 
+571 | describe("session path layer operands", () => {
+572 |   for (const layer of ["(F.Cu)", '\"\"']) {
+573 |     test(`rejects invalid path layer ${layer}`, () => {
+574 |       expect(() => parseSes(`(session s (routes (network_out (net A
+575 |         (wire (path ${layer} 250 0 0 1000 1000))))))`)).toThrow(SyntaxError);
+                                                              ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 1000,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "",
+      width: 250000,
+      points: [
+        {
+          x: 0,
+          y: -0,
+        }, {
+          x: 1000000,
+          y: -1000000,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:575:57)
+(fail) session path layer operands > rejects invalid path layer "" [0.16ms]
+(pass) session path layer operands > preserves valid path layer F.Cu [0.26ms]
+(pass) session path layer operands > preserves valid path layer "F.Cu" [0.03ms]
+
+ 2 pass
+ 105 filtered out
+ 2 fail
+ 8 expect() calls
+Ran 4 tests across 1 file. [126.00ms]

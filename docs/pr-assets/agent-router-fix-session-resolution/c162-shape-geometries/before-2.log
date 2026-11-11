@@ -1,0 +1,89 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+650 |   for (const extra of ["(circle B.Cu 1200)", "(rect B.Cu -600 -600 600 600)"]) {
+651 |     test(`rejects discarded second shape geometry ${extra}`, () => {
+652 |       const text = `(session s (routes (library_out (padstack V_800:300_um
+653 |         (shape (circle F.Cu 800) ${extra}) (shape (circle B.Cu 800))))
+654 |         (network_out (net A (via V_800:300_um 1000 -1000)))))`;
+655 |       expect(() => sesToItems(parseSes(text), twoNetBoard())).toThrow(SyntaxError);
+                                                                    ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 1000000,
+        y: 1000000,
+      },
+      diameter: 800000,
+      drill: 300000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:655:63)
+(fail) session shape geometry multiplicity > rejects discarded second shape geometry (circle B.Cu 1200) [0.72ms]
+650 |   for (const extra of ["(circle B.Cu 1200)", "(rect B.Cu -600 -600 600 600)"]) {
+651 |     test(`rejects discarded second shape geometry ${extra}`, () => {
+652 |       const text = `(session s (routes (library_out (padstack V_800:300_um
+653 |         (shape (circle F.Cu 800) ${extra}) (shape (circle B.Cu 800))))
+654 |         (network_out (net A (via V_800:300_um 1000 -1000)))))`;
+655 |       expect(() => sesToItems(parseSes(text), twoNetBoard())).toThrow(SyntaxError);
+                                                                    ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 1000000,
+        y: 1000000,
+      },
+      diameter: 800000,
+      drill: 300000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:655:63)
+(fail) session shape geometry multiplicity > rejects discarded second shape geometry (rect B.Cu -600 -600 600 600) [0.11ms]
+(pass) session shape geometry multiplicity > preserves single geometry with attribute '' [0.09ms]
+(pass) session shape geometry multiplicity > preserves single geometry with attribute '(connect off)' [0.03ms]
+
+ 2 pass
+ 121 filtered out
+ 2 fail
+ 6 expect() calls
+Ran 4 tests across 1 file. [112.00ms]

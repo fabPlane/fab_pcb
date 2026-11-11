@@ -1,0 +1,17 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+(pass) session via sizes reject invalid name dimensions: V_0:300_um [0.51ms]
+(pass) session via sizes reject invalid name dimensions: V_600:0_um [0.04ms]
+(pass) session via sizes reject invalid name dimensions: V_600:600_um [0.02ms]
+(pass) session via sizes reject invalid name dimensions: V_600:700_um [0.02ms]
+(pass) session via sizes reject invalid name dimensions: V_99999999999999999999:300_um [0.02ms]
+(pass) session via sizes reject invalid name dimensions: V_600:99999999999999999999_um [0.02ms]
+(pass) session via sizes validate explicit circle against name drill [0.06ms]
+(pass) session via sizes retain valid name fallback [0.07ms]
+
+ 8 pass
+ 64 filtered out
+ 0 fail
+ 8 expect() calls
+Ran 8 tests across 1 file. [118.00ms]

@@ -1,0 +1,20 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+(pass) session path rejects malformed geometry: F.Cu 2 0 0 NaN 20 [0.41ms]
+(pass) session path rejects malformed geometry: F.Cu 2 0 0 Infinity 20 [0.02ms]
+(pass) session path rejects malformed geometry: F.Cu 2 0 0 1e308 20 [0.03ms]
+(pass) session path rejects malformed geometry: F.Cu NaN 0 0 10 20 [0.01ms]
+(pass) session path rejects malformed geometry: F.Cu -2 0 0 10 20 [0.01ms]
+(pass) session path rejects malformed geometry: F.Cu 0 0 0 10 20 [0.02ms]
+(pass) session path rejects malformed geometry: F.Cu 2 0 0 10
+(pass) session path rejects malformed geometry: F.Cu 2 0 0 (unexpected 10) 20 [0.94ms]
+(pass) session path rejects malformed geometry: F.Cu 2 0 0 [0.04ms]
+(pass) session path rejects malformed geometry: F.Cu 0.0001 0 0 10 20 [0.02ms]
+(pass) session path retains signed fractional coordinates and positive widths [0.11ms]
+
+ 11 pass
+ 37 filtered out
+ 0 fail
+ 11 expect() calls
+Ran 11 tests across 1 file. [112.00ms]
