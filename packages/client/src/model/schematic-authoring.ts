@@ -2,6 +2,7 @@
 import { clone, create } from "@bufbuild/protobuf";
 import {
   SchematicFieldSchema,
+  SchematicSymbolAttributesSchema,
   SchematicPinSchema,
   SchematicSymbolSchema,
   SchematicSymbolBodyStyleSchema,
@@ -161,6 +162,7 @@ export function placeNativeSymbol(source: LibSymbol, placement: NativeSymbolPlac
       }),
       definition,
       libId: definition.id,
+      ...(definition.attributes ? { attributes: clone(SchematicSymbolAttributesSchema, definition.attributes) } : {}),
       referenceField: positionedField(definition.referenceField, "Reference", placement.reference, placement),
       valueField: positionedField(definition.valueField, "Value", placement.value, placement),
       footprintField: positionedField(definition.footprintField, "Footprint", placement.footprint, placement),

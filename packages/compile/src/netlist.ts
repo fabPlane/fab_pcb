@@ -103,7 +103,7 @@ export function validateNetlist(netlist: Netlist): Diagnostic[] {
     }
     if (seen.has(c.ref)) err(`Duplicate reference designator ${c.ref}.`, "duplicate_ref");
     seen.add(c.ref);
-    if (!c.footprint) warn(`${c.ref} has no footprint; ImportNetlist will not place it on the board.`, "missing_footprint");
+    if (!c.footprint && !(c.ref.startsWith("#") && c.libSource?.lib === "power")) warn(`${c.ref} has no footprint; ImportNetlist will not place it on the board.`, "missing_footprint");
   }
 
   const netNames = new Set<string>();
