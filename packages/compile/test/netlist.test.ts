@@ -235,3 +235,16 @@ describe("validateNetlist", () => {
     expect(single[0]!.severity).toBe("warning");
   });
 });
+
+test("intentional schematic-only power markers do not produce missing-footprint warnings", () => {
+  const source: Netlist = {
+    components: [
+      { ref: "#FLG001", value: "PWR_FLAG", footprint: "", libSource: { lib: "power", part: "PWR_FLAG" } },
+      { ref: "U1", value: "part", footprint: "" },
+    ],
+    nets: [],
+  };
+  const warnings = validateNetlist(source).filter((diagnostic) => diagnostic.code === "missing_footprint");
+  expect(warnings).toHaveLength(1);
+  expect(warnings[0]!.message).toContain("U1");
+});
