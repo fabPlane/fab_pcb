@@ -273,7 +273,11 @@ function placedDefinition(source: LibSymbol, origin: Vec2, pins: Map<string, Pla
 }
 
 /** Geometry builder without KiCad I/O. Normalizes virtual references in the working compile IR. */
-export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyMap<string, LibSymbol>, footprintDefaults: ReadonlyMap<string, { excludeFromBillOfMaterials?: boolean; excludeFromPositionFiles?: boolean }> = new Map()): GeneratedSchematic {
+export function buildGeneratedSchematic(
+  netlist: Netlist,
+  definitions: ReadonlyMap<string, LibSymbol>,
+  footprintDefaults: ReadonlyMap<string, { excludeFromBillOfMaterials?: boolean; excludeFromPositionFiles?: boolean }> = new Map(),
+): GeneratedSchematic {
   const items: Item[] = [];
   const diagnostics = normalizeVirtualReferences(netlist, definitions);
   const pins = new Map<string, PlacedPin[]>();
@@ -330,7 +334,9 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
     }
 
     const position = positions[index]!;
-    const attributes = definition.proto.attributes ? clone(SchematicSymbolAttributesSchema, definition.proto.attributes) : create(SchematicSymbolAttributesSchema);
+    const attributes = definition.proto.attributes
+      ? clone(SchematicSymbolAttributesSchema, definition.proto.attributes)
+      : create(SchematicSymbolAttributesSchema);
     const manufacturing = footprintDefaults.get(component.footprint);
     attributes.excludeFromBillOfMaterials ||= manufacturing?.excludeFromBillOfMaterials ?? false;
     attributes.excludeFromPositionFiles ||= manufacturing?.excludeFromPositionFiles ?? false;
@@ -477,7 +483,7 @@ export async function generateSchematic(kicad: KiCad, netlist: Netlist): Promise
     if (definition instanceof LibSymbol) definitions.set(libId, definition);
   }
   const footprintDefaults = new Map<string, { excludeFromBillOfMaterials?: boolean; excludeFromPositionFiles?: boolean }>();
-  for (const id of new Set(netlist.components.map(component => component.footprint).filter(Boolean))) {
+  for (const id of new Set(netlist.components.map((component) => component.footprint).filter(Boolean))) {
     const footprint = await kicad.libraries.footprints.get(id).catch(() => undefined);
     if (footprint && "attributes" in footprint && footprint.attributes) footprintDefaults.set(id, footprint.attributes);
   }
