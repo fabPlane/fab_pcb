@@ -1,0 +1,158 @@
+{
+  "baselineRef": "2666bc3",
+  "repeats": 3,
+  "runnerBenchSha256": "eb4121d53e2e9ea6e0a8617eda6766f160f20efd2fd5aba14ed44f98bea88d29",
+  "helperSha256": "25678bbdee5805af7c08dc15ce2eb3d504a62625aa131e79f016da0cb1d3ab4b",
+  "rows": [
+    {
+      "variant": "before",
+      "repeat": 1,
+      "unchanged_skipped": true,
+      "controls": [
+        {
+          "file": "package.json",
+          "changed_skipped": true,
+          "midflight_accepted": true,
+          "missing_rejected": false
+        },
+        {
+          "file": "bun.lockb",
+          "changed_skipped": true,
+          "midflight_accepted": true,
+          "missing_rejected": false
+        },
+        {
+          "file": "tsconfig.json",
+          "changed_skipped": true,
+          "midflight_accepted": true,
+          "missing_rejected": false
+        }
+      ]
+    },
+    {
+      "variant": "before",
+      "repeat": 2,
+      "unchanged_skipped": true,
+      "controls": [
+        {
+          "file": "package.json",
+          "changed_skipped": true,
+          "midflight_accepted": true,
+          "missing_rejected": false
+        },
+        {
+          "file": "bun.lockb",
+          "changed_skipped": true,
+          "midflight_accepted": true,
+          "missing_rejected": false
+        },
+        {
+          "file": "tsconfig.json",
+          "changed_skipped": true,
+          "midflight_accepted": true,
+          "missing_rejected": false
+        }
+      ]
+    },
+    {
+      "variant": "before",
+      "repeat": 3,
+      "unchanged_skipped": true,
+      "controls": [
+        {
+          "file": "package.json",
+          "changed_skipped": true,
+          "midflight_accepted": true,
+          "missing_rejected": false
+        },
+        {
+          "file": "bun.lockb",
+          "changed_skipped": true,
+          "midflight_accepted": true,
+          "missing_rejected": false
+        },
+        {
+          "file": "tsconfig.json",
+          "changed_skipped": true,
+          "midflight_accepted": true,
+          "missing_rejected": false
+        }
+      ]
+    },
+    {
+      "variant": "after",
+      "repeat": 1,
+      "unchanged_skipped": true,
+      "controls": [
+        {
+          "file": "package.json",
+          "changed_skipped": false,
+          "midflight_accepted": false,
+          "missing_rejected": true
+        },
+        {
+          "file": "bun.lockb",
+          "changed_skipped": false,
+          "midflight_accepted": false,
+          "missing_rejected": true
+        },
+        {
+          "file": "tsconfig.json",
+          "changed_skipped": false,
+          "midflight_accepted": false,
+          "missing_rejected": true
+        }
+      ]
+    },
+    {
+      "variant": "after",
+      "repeat": 2,
+      "unchanged_skipped": true,
+      "controls": [
+        {
+          "file": "package.json",
+          "changed_skipped": false,
+          "midflight_accepted": false,
+          "missing_rejected": true
+        },
+        {
+          "file": "bun.lockb",
+          "changed_skipped": false,
+          "midflight_accepted": false,
+          "missing_rejected": true
+        },
+        {
+          "file": "tsconfig.json",
+          "changed_skipped": false,
+          "midflight_accepted": false,
+          "missing_rejected": true
+        }
+      ]
+    },
+    {
+      "variant": "after",
+      "repeat": 3,
+      "unchanged_skipped": true,
+      "controls": [
+        {
+          "file": "package.json",
+          "changed_skipped": false,
+          "midflight_accepted": false,
+          "missing_rejected": true
+        },
+        {
+          "file": "bun.lockb",
+          "changed_skipped": false,
+          "midflight_accepted": false,
+          "missing_rejected": true
+        },
+        {
+          "file": "tsconfig.json",
+          "changed_skipped": false,
+          "midflight_accepted": false,
+          "missing_rejected": true
+        }
+      ]
+    }
+  ]
+}

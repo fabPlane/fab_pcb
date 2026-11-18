@@ -1,0 +1,187 @@
+{
+  "baselineRef": "4cf2194",
+  "repeats": 3,
+  "helperSha256": "050f4431a7510b2e58630c5c570a0a35faba28ea626889d1d3681695fc728db0",
+  "rows": [
+    {
+      "variant": "before",
+      "repeat": 1,
+      "controls": [
+        {
+          "extension": "mjs",
+          "unchanged_skipped": true,
+          "changed_skipped": true,
+          "first_vias": 1,
+          "fresh_vias": 2,
+          "midflight_accepted": true
+        },
+        {
+          "extension": "json",
+          "unchanged_skipped": true,
+          "changed_skipped": true,
+          "first_vias": 1,
+          "fresh_vias": 2,
+          "midflight_accepted": true
+        },
+        {
+          "extension": "wasm",
+          "unchanged_skipped": true,
+          "changed_skipped": true,
+          "first_vias": 1,
+          "fresh_vias": 2,
+          "midflight_accepted": true
+        }
+      ]
+    },
+    {
+      "variant": "before",
+      "repeat": 2,
+      "controls": [
+        {
+          "extension": "mjs",
+          "unchanged_skipped": true,
+          "changed_skipped": true,
+          "first_vias": 1,
+          "fresh_vias": 2,
+          "midflight_accepted": true
+        },
+        {
+          "extension": "json",
+          "unchanged_skipped": true,
+          "changed_skipped": true,
+          "first_vias": 1,
+          "fresh_vias": 2,
+          "midflight_accepted": true
+        },
+        {
+          "extension": "wasm",
+          "unchanged_skipped": true,
+          "changed_skipped": true,
+          "first_vias": 1,
+          "fresh_vias": 2,
+          "midflight_accepted": true
+        }
+      ]
+    },
+    {
+      "variant": "before",
+      "repeat": 3,
+      "controls": [
+        {
+          "extension": "mjs",
+          "unchanged_skipped": true,
+          "changed_skipped": true,
+          "first_vias": 1,
+          "fresh_vias": 2,
+          "midflight_accepted": true
+        },
+        {
+          "extension": "json",
+          "unchanged_skipped": true,
+          "changed_skipped": true,
+          "first_vias": 1,
+          "fresh_vias": 2,
+          "midflight_accepted": true
+        },
+        {
+          "extension": "wasm",
+          "unchanged_skipped": true,
+          "changed_skipped": true,
+          "first_vias": 1,
+          "fresh_vias": 2,
+          "midflight_accepted": true
+        }
+      ]
+    },
+    {
+      "variant": "after",
+      "repeat": 1,
+      "controls": [
+        {
+          "extension": "mjs",
+          "unchanged_skipped": true,
+          "changed_skipped": false,
+          "first_vias": 1,
+          "fresh_vias": 2,
+          "midflight_accepted": false
+        },
+        {
+          "extension": "json",
+          "unchanged_skipped": true,
+          "changed_skipped": false,
+          "first_vias": 1,
+          "fresh_vias": 2,
+          "midflight_accepted": false
+        },
+        {
+          "extension": "wasm",
+          "unchanged_skipped": true,
+          "changed_skipped": false,
+          "first_vias": 1,
+          "fresh_vias": 2,
+          "midflight_accepted": false
+        }
+      ]
+    },
+    {
+      "variant": "after",
+      "repeat": 2,
+      "controls": [
+        {
+          "extension": "mjs",
+          "unchanged_skipped": true,
+          "changed_skipped": false,
+          "first_vias": 1,
+          "fresh_vias": 2,
+          "midflight_accepted": false
+        },
+        {
+          "extension": "json",
+          "unchanged_skipped": true,
+          "changed_skipped": false,
+          "first_vias": 1,
+          "fresh_vias": 2,
+          "midflight_accepted": false
+        },
+        {
+          "extension": "wasm",
+          "unchanged_skipped": true,
+          "changed_skipped": false,
+          "first_vias": 1,
+          "fresh_vias": 2,
+          "midflight_accepted": false
+        }
+      ]
+    },
+    {
+      "variant": "after",
+      "repeat": 3,
+      "controls": [
+        {
+          "extension": "mjs",
+          "unchanged_skipped": true,
+          "changed_skipped": false,
+          "first_vias": 1,
+          "fresh_vias": 2,
+          "midflight_accepted": false
+        },
+        {
+          "extension": "json",
+          "unchanged_skipped": true,
+          "changed_skipped": false,
+          "first_vias": 1,
+          "fresh_vias": 2,
+          "midflight_accepted": false
+        },
+        {
+          "extension": "wasm",
+          "unchanged_skipped": true,
+          "changed_skipped": false,
+          "first_vias": 1,
+          "fresh_vias": 2,
+          "midflight_accepted": false
+        }
+      ]
+    }
+  ]
+}
