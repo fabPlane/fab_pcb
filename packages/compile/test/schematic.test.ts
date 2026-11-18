@@ -371,6 +371,7 @@ test("normalizes virtual power references and rewrites connected and unconnected
       noConnects: [{ ref, pin: "2" }],
     };
     const result = buildGeneratedSchematic(netlist, new Map([["power:PWR_FLAG", powerSymbol()]]));
+    expect(result.pins.get("#FLG1:1")![0]).toMatchObject({ ref: "#FLG1", number: "1", sourceRef: ref, name: "" });
     expect(netlist.components[0]!.ref).toBe("#FLG1");
     expect(netlist.nets[0]!.nodes[0]!.ref).toBe("#FLG1");
     expect(netlist.noConnects[0]!.ref).toBe("#FLG1");

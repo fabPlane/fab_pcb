@@ -235,3 +235,12 @@ describe("validateNetlist", () => {
     expect(single[0]!.severity).toBe("warning");
   });
 });
+
+test("virtual references need no footprint; physical references still warn", () => {
+  const warnings = validateNetlist({ components: [
+    { ref: "#FLG01", value: "PWR_FLAG", footprint: "" },
+    { ref: "R1", value: "1k", footprint: "" },
+  ], nets: [] }).filter((d) => d.code === "missing_footprint");
+  expect(warnings).toHaveLength(1);
+  expect(warnings[0]!.message).toContain("R1");
+});

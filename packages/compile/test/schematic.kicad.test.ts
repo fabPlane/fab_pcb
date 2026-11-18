@@ -18,6 +18,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { generatedNetMerges, generateSchematic, GENERATED_SCHEMATIC_PROPERTY } from "../src/schematic";
 import { registerLibraries } from "../src/libraries";
+import { ercDiagnostics } from "../src/power-diagnostic";
 import type { Netlist } from "../src/types";
 import { haveKicad, KICAD_CLI, newProjectWithLibraries, QA_LIBRARIES, startBareServer, type RunningServer } from "./kicad-server";
 
@@ -408,13 +409,68 @@ describe.skipIf(!haveKicad())("generated schematic + kicad-cli api-server", () =
       60_000,
     );
 
+  for (const flags of [false, true]) test.skipIf(!haveTimerSymbols)(
+    `power diagnostic: blinker with pin 8 disconnected, flags=${flags}`,
+    async () => {
+      const { board } = await newProjectWithLibraries(server.kicad, root, `power-pin-8-${flags}`);
+      await registerTimerLibraries();
+      const source = usb555BlinkerNetlist(flags);
+      for (const net of source.nets) net.nodes = net.nodes.filter((node) => !(node.ref === "U1" && node.pin === "8"));
+      const generated = await generateSchematic(server.kicad, source);
+      await generated.schematic.save();
+      await generated.schematic.close();
+      const schematic = await server.kicad.projectFrom(board.specifier).openSchematic();
+      const erc = await schematic.erc.run();
+      const diagnostics = ercDiagnostics(source, generated.pins, erc.markers, erc.errorCount);
+      const text = diagnostics.find((d) => d.code === "power_pin_not_driven")!.message;
+      expect(text).toStartWith("U1 pin 8 (VCC) is a power input on no net; connect it.");
+      if (flags) expect(text).not.toContain("PWR_FLAG");
+      else expect(text).toContain("Nets GND have");
+    }, 60_000,
+  );
+
+  for (const fixture of [
+    { lib: "Amplifier_Operational", part: "LM358", missing: "8", name: "V+", remainingErrors: ["Label not connected"], power: { "8": "+V", "4": "-V" }, nc: ["1", "2", "3", "5", "6", "7"] },
+    { lib: "Amplifier_Audio", part: "LM1876", missing: "15", name: "V+", remainingErrors: [], power: { "2": "+V", "15": "+V", "4": "-V", "5": "GND", "10": "GND" }, nc: ["1", "3", "6", "7", "8", "9", "11", "12", "13", "14"] },
+  ]) test.skipIf(!existsSync(join(STANDARD_SYMBOLS, `${fixture.lib}.kicad_sym`)) || !existsSync(join(STANDARD_SYMBOLS, "power.kicad_sym")))(
+    `power diagnostic: ${fixture.part} disconnected pin ${fixture.missing} with flags`,
+    async () => {
+      const { board } = await newProjectWithLibraries(server.kicad, root, `power-${fixture.part}`);
+      await registerLibraries(server.kicad, [fixture.lib, "power"].map((lib) => ({ kind: "symbol" as const, nickname: lib, uri: join(STANDARD_SYMBOLS, `${lib}.kicad_sym`) })));
+      const names = [...new Set(Object.values(fixture.power))];
+      const source: Netlist = {
+        components: [
+          { ref: "U1", value: fixture.part, footprint: "", libSource: { lib: fixture.lib, part: fixture.part } },
+          ...names.map((_, i) => ({ ref: `#FLG0${i + 1}`, value: "PWR_FLAG", footprint: "", libSource: { lib: "power", part: "PWR_FLAG" } })),
+        ],
+        nets: names.map((name, i) => ({ name, nodes: [
+          { ref: `#FLG0${i + 1}`, pin: "1" },
+          ...Object.entries(fixture.power).filter(([pin, net]) => net === name && pin !== fixture.missing).map(([pin]) => ({ ref: "U1", pin })),
+        ] })),
+        noConnects: fixture.nc.map((pin) => ({ ref: "U1", pin })),
+      };
+      const generated = await generateSchematic(server.kicad, source);
+      expect(generated.diagnostics).toEqual([]);
+      await generated.schematic.save();
+      await generated.schematic.close();
+      const schematic = await server.kicad.projectFrom(board.specifier).openSchematic();
+      const erc = await schematic.erc.run();
+      const diagnostics = ercDiagnostics(source, generated.pins, erc.markers, erc.errorCount);
+      expect(diagnostics).toEqual([
+        { severity: "error", stage: "schematic", code: "power_pin_not_driven", message: `U1 pin ${fixture.missing} (${fixture.name}) is a power input on no net; connect it.` },
+        ...fixture.remainingErrors.map((description) => ({ severity: "error" as const, stage: "schematic" as const, code: "erc_errors", message: `Generated schematic has 1 ERC error(s) after save/reload: ${description}` })),
+      ]);
+    }, 60_000,
+  );
+
   test.skipIf(!haveTimerSymbols)(
     "a tall connector's bottom stubs stay clear of the next row's top stubs",
     async () => {
       const { board } = await newProjectWithLibraries(server.kicad, root, "ne555-no-flags");
       await registerTimerLibraries();
 
-      const generated = await generateSchematic(server.kicad, usb555BlinkerNetlist(false));
+      const source = usb555BlinkerNetlist(false);
+      const generated = await generateSchematic(server.kicad, source);
       expect(generated.diagnostics).toEqual([]);
       await generated.schematic.save();
       await generated.schematic.close();
@@ -422,6 +478,9 @@ describe.skipIf(!haveKicad())("generated schematic + kicad-cli api-server", () =
       // Unflagged power pins are ERC errors by design here; only net merges matter.
       const schematic = await server.kicad.projectFrom(board.specifier).openSchematic();
       const erc = await schematic.erc.run();
+      const diagnostics = ercDiagnostics(source, generated.pins, erc.markers, erc.errorCount);
+      expect(diagnostics.find((d) => d.code === "power_pin_not_driven")?.message).toStartWith("Nets +5V, GND have power-input pins but nothing KiCad counts as a power source.");
+      expect(diagnostics.some((d) => d.code === "erc_errors")).toBe(false);
       expect(
         erc.markers.filter((marker) => marker.errorType === ErcErrorType.ERCET_DRIVER_CONFLICT).map((marker) => marker.description),
       ).toEqual([]);
