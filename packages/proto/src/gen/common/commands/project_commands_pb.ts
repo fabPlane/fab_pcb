@@ -623,6 +623,10 @@ export const CloseAllDocumentsSchema: GenMessage<CloseAllDocuments, {jsonType: C
   messageDesc(file_common_commands_project_commands, 13);
 
 /**
+ * Saves the given document to its existing file path.
+ * Returns an error if the document is untitled (it has never been saved to disk); use
+ * SaveDocumentAs to save an untitled document to an explicit path.
+ *
  * @generated from message kiapi.common.commands.SaveDocument
  */
 export type SaveDocument = Message<"kiapi.common.commands.SaveDocument"> & {
@@ -633,6 +637,10 @@ export type SaveDocument = Message<"kiapi.common.commands.SaveDocument"> & {
 };
 
 /**
+ * Saves the given document to its existing file path.
+ * Returns an error if the document is untitled (it has never been saved to disk); use
+ * SaveDocumentAs to save an untitled document to an explicit path.
+ *
  * @generated from message kiapi.common.commands.SaveDocument
  */
 export type SaveDocumentJson = {

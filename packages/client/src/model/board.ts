@@ -73,6 +73,10 @@ export interface CustomRules {
 }
 
 export interface SpecctraImportResult {
+  /** Session wires/vias the importer could not place (KiCad's own count). */
+  skippedCount: number;
+  /** The importer's report text, one message per line. */
+  report: string;
   tracksAdded: number;
   viasAdded: number;
   tracksRemoved: number;
@@ -384,8 +388,13 @@ export class Board extends Document {
   /**
    * `ImportSpecctraSession`: apply a routed Specctra session (`.ses`, as produced by Freerouting
    * from a DSN exported with `board.jobs.exportSpecctra`) in one undoable commit. Pass either the
-   * file `path` or the session `contents`. The importer matches nets and pads by name, so the
-   * session must come from a DSN exported from this same board.
+   * file `path` (sent as `session_path`; relative paths resolve against the project) or the
+   * session `contents`. The importer matches nets and pads by name, so the session must come from
+   * a DSN exported from this same board.
+   *
+   * `replaceExistingTracks` defaults to `false` (add the session's routing to what is there) and
+   * is always sent explicitly: the field is `optional` on the wire and KiCad replaces the
+   * existing tracks when it is left unset.
    */
   async importSpecctraSession(
     source: { path: string } | { contents: Uint8Array | string },
@@ -399,13 +408,15 @@ export class Board extends Document {
         : new Uint8Array();
     const res = await cmd.importSpecctraSession(this.client, {
       board: this.specifier,
-      path: "path" in source ? source.path : "",
+      sessionPath: "path" in source ? source.path : "",
       contents,
       replaceExistingTracks: opts.replaceExistingTracks ?? false,
     });
     // Like importNetlist, this is a server-side mutation: consumers learn of it through the
     // DocumentChanged event or the revision counter, not a local change notification.
     return {
+      skippedCount: res.skippedCount,
+      report: res.report,
       tracksAdded: res.tracksAdded,
       viasAdded: res.viasAdded,
       tracksRemoved: res.tracksRemoved,

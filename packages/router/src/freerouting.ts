@@ -239,6 +239,10 @@ export async function exportDsnViaKicad(board: Board, outputPath: string, fallba
 }
 
 export interface SesImportSummary {
+  /** Session wires/vias KiCad's importer could not place. */
+  skippedCount: number;
+  /** The importer's report text. */
+  report: string;
   tracksAdded: number;
   viasAdded: number;
   tracksRemoved: number;
@@ -246,7 +250,10 @@ export interface SesImportSummary {
   warnings: string[];
 }
 
-/** Imports a session through `ImportSpecctraSession` (contents inline). */
+/**
+ * Imports a session through `ImportSpecctraSession` (contents inline). `replaceExistingTracks` is
+ * always sent: the field is `optional` and an unset value makes KiCad replace the existing tracks.
+ */
 export async function importSesViaKicad(board: Board, ses: string, replaceExistingTracks = false): Promise<SesImportSummary> {
   const fn = (generatedCommands as unknown as AnyCommands)["importSpecctraSession"];
   if (!fn)
@@ -255,11 +262,20 @@ export async function importSesViaKicad(board: Board, ses: string, replaceExisti
     );
   const res = (await fn(board.client, {
     board: board.specifier,
-    path: "",
     contents: new TextEncoder().encode(ses),
     replaceExistingTracks,
-  })) as { tracksAdded: number; viasAdded: number; tracksRemoved: number; footprintsMoved: number; warnings: string[] };
+  })) as {
+    skippedCount: number;
+    report: string;
+    tracksAdded: number;
+    viasAdded: number;
+    tracksRemoved: number;
+    footprintsMoved: number;
+    warnings: string[];
+  };
   return {
+    skippedCount: res.skippedCount ?? 0,
+    report: res.report ?? "",
     tracksAdded: res.tracksAdded ?? 0,
     viasAdded: res.viasAdded ?? 0,
     tracksRemoved: res.tracksRemoved ?? 0,
