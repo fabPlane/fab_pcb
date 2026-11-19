@@ -28,6 +28,9 @@ test("net pin and two pins on the same net produce one net and exact help", () =
 test("unconnected pin has connect advice only", () => {
   expect(powerPinDiagnostic(netlist(), pins(pin("8", 10)), [marker(10)]).diagnostic?.message).toBe("U1 pin 8 (VCC) is a power input on no net; connect it.");
 });
+test("unnamed pin prints no empty parentheses", () => {
+  expect(powerPinDiagnostic(netlist(), pins(pin("3", 10, "", "D1")), [marker(10)]).diagnostic?.message).toBe("D1 pin 3 is a power input on no net; connect it.");
+});
 test("both, with the first available flag reference", () => {
   expect(powerPinDiagnostic(netlist(["1"], ["#FLG01"]), pins(pin("1", 10), pin("8", 20)), [marker(10), marker(20)]).diagnostic?.message).toBe(`U1 pin 8 (VCC) is a power input on no net; connect it.\nNets GND have power-input pins but nothing KiCad counts as a power source.\n${flags("#FLG02")}`);
 });

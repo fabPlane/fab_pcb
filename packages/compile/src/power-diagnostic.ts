@@ -36,7 +36,7 @@ export function powerPinDiagnostic(
     if (connected.length) for (const net of connected) nets.add(net);
     else {
       unconnectedPositions.add(positionKey(vec2(marker.position!)));
-      for (const pin of matched) unconnected.set(`${pin.ref}:${pin.number}`, `${pin.sourceRef} pin ${pin.number} (${pin.name})`);
+      for (const pin of matched) unconnected.set(`${pin.ref}:${pin.number}`, `${pin.sourceRef} pin ${pin.number}${pin.name ? ` (${pin.name})` : ""}`);
     }
   }
   const lines: string[] = [];
