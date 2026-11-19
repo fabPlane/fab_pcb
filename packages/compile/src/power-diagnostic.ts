@@ -13,12 +13,13 @@ export function powerPinDiagnostic(
   markers: readonly ErcMarker[],
 ): { diagnostic?: Diagnostic; unexplained: ErcMarker[] } {
   const atPosition = new Map<string, PlacedPin[]>();
-  for (const placed of pins.values()) for (const pin of placed) {
-    const key = positionKey(pin.position);
-    const group = atPosition.get(key) ?? [];
-    group.push(pin);
-    atPosition.set(key, group);
-  }
+  for (const placed of pins.values())
+    for (const pin of placed) {
+      const key = positionKey(pin.position);
+      const group = atPosition.get(key) ?? [];
+      group.push(pin);
+      atPosition.set(key, group);
+    }
   const pinNets = new Map(netlist.nets.flatMap((net) => net.nodes.map((node) => [`${node.ref}:${node.pin}`, net.name] as const)));
   const nets = new Set<string>();
   const unconnected = new Map<string, string>();
@@ -26,8 +27,10 @@ export function powerPinDiagnostic(
   const unexplained: ErcMarker[] = [];
   for (const marker of markers) {
     if (marker.excluded || marker.severity !== RuleSeverity.RS_ERROR) continue;
-    const matched = marker.errorType === ErcErrorType.ERCET_POWERPIN_NOT_DRIVEN && marker.position
-      ? atPosition.get(positionKey(vec2(marker.position))) : undefined;
+    const matched =
+      marker.errorType === ErcErrorType.ERCET_POWERPIN_NOT_DRIVEN && marker.position
+        ? atPosition.get(positionKey(vec2(marker.position)))
+        : undefined;
     if (!matched?.length) {
       unexplained.push(marker);
       continue;
@@ -36,11 +39,15 @@ export function powerPinDiagnostic(
     if (connected.length) for (const net of connected) nets.add(net);
     else {
       unconnectedPositions.add(positionKey(vec2(marker.position!)));
-      for (const pin of matched) unconnected.set(`${pin.ref}:${pin.number}`, `${pin.sourceRef} pin ${pin.number}${pin.name ? ` (${pin.name})` : ""}`);
+      for (const pin of matched)
+        unconnected.set(`${pin.ref}:${pin.number}`, `${pin.sourceRef} pin ${pin.number}${pin.name ? ` (${pin.name})` : ""}`);
     }
   }
   const lines: string[] = [];
-  if (unconnected.size) lines.push(`${capped([...unconnected.values()])} ${unconnected.size === 1 ? "is a power input on no net; connect it." : "are power inputs on no net; connect them."}`);
+  if (unconnected.size)
+    lines.push(
+      `${capped([...unconnected.values()])} ${unconnected.size === 1 ? "is a power input on no net; connect it." : "are power inputs on no net; connect them."}`,
+    );
   if (nets.size) {
     let index = 1;
     const used = new Set(netlist.components.map((component) => component.ref));
@@ -58,22 +65,46 @@ export function powerPinDiagnostic(
     ? { severity: "error", stage: "schematic", code: "power_pin_not_driven", message: lines.join("\n") }
     : undefined;
   // Resolve duplicates after collecting all power markers, regardless of marker order.
-  const remaining = unexplained.filter((marker) => !(marker.errorType === ErcErrorType.ERCET_PIN_NOT_CONNECTED
-    && marker.position && unconnectedPositions.has(positionKey(vec2(marker.position)))));
+  const remaining = unexplained.filter(
+    (marker) =>
+      !(
+        marker.errorType === ErcErrorType.ERCET_PIN_NOT_CONNECTED &&
+        marker.position &&
+        unconnectedPositions.has(positionKey(vec2(marker.position)))
+      ),
+  );
   return { unexplained: remaining, ...(diagnostic ? { diagnostic } : {}) };
 }
 
 /** Explain error markers, retaining a count-only failure when KiCad provides none usable. */
-export function ercDiagnostics(netlist: Netlist, pins: ReadonlyMap<string, readonly PlacedPin[]>, markers: readonly ErcMarker[], errorCount: number): Diagnostic[] {
+export function ercDiagnostics(
+  netlist: Netlist,
+  pins: ReadonlyMap<string, readonly PlacedPin[]>,
+  markers: readonly ErcMarker[],
+  errorCount: number,
+): Diagnostic[] {
   const { diagnostic, unexplained } = powerPinDiagnostic(netlist, pins, markers);
   const diagnostics = diagnostic ? [diagnostic] : [];
   if (unexplained.length) {
-    const detail = unexplained.slice(0, 10).map((marker) => marker.description).join("; ");
-    diagnostics.push({ severity: "error", stage: "schematic", code: "erc_errors", message: `Generated schematic has ${unexplained.length} ERC error(s) after save/reload${detail ? `: ${detail}` : "."}` });
+    const detail = unexplained
+      .slice(0, 10)
+      .map((marker) => marker.description)
+      .join("; ");
+    diagnostics.push({
+      severity: "error",
+      stage: "schematic",
+      code: "erc_errors",
+      message: `Generated schematic has ${unexplained.length} ERC error(s) after save/reload${detail ? `: ${detail}` : "."}`,
+    });
   }
   // Preserve the ERC gate even when KiCad supplies no usable error markers.
   if (errorCount > 0 && !diagnostics.some((diagnostic) => diagnostic.severity === "error")) {
-    diagnostics.push({ severity: "error", stage: "schematic", code: "erc_errors", message: `Generated schematic has ${errorCount} ERC error(s) after save/reload.` });
+    diagnostics.push({
+      severity: "error",
+      stage: "schematic",
+      code: "erc_errors",
+      message: `Generated schematic has ${errorCount} ERC error(s) after save/reload.`,
+    });
   }
   return diagnostics;
 }

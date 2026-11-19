@@ -269,7 +269,14 @@ function placedDefinition(source: LibSymbol, origin: Vec2, pins: Map<string, Pla
     if (pin.number && (!child.unit?.unit || child.unit.unit === unit) && (!child.bodyStyle?.style || child.bodyStyle.style === 1)) {
       const key = `${reference}:${pin.number}`;
       const selected = pins.get(key) ?? [];
-      selected.push({ ref: reference, number: pin.number, name: pin.name, sourceRef: reference, position: absolute, orientation: pin.orientation });
+      selected.push({
+        ref: reference,
+        number: pin.number,
+        name: pin.name,
+        sourceRef: reference,
+        position: absolute,
+        orientation: pin.orientation,
+      });
       pins.set(key, selected);
     }
   }
