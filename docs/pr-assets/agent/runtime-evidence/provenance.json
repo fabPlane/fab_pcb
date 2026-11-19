@@ -1,0 +1,25 @@
+{
+  "machine": "hyper-ms-lin",
+  "cores": "0-5",
+  "nice": 10,
+  "repeats": 3,
+  "pairs": 15,
+  "constructed": true,
+  "routing_runs": 0,
+  "changed_controls_accepted_before": 12,
+  "changed_controls_accepted_after": 0,
+  "unchanged_accepted_before": 3,
+  "unchanged_accepted_after": 3,
+  "source_sha256": {
+    "snapshot.py": "cf2c45753e58622dcdf14f3aced5facf644e9bfd47dead340ed7726a875c66c9",
+    "test_snapshot.py": "c53c1d8be84d7836cd0092ec4be670446582b7a229382e7f87c24dce31e74157",
+    "measure.py": "4b70d7b2751b44d93866889d3355de635648ea4a1b9968789e68c51f577f48aa",
+    "plot.py": "937565652305bf4076c336927605a33e84959f6c8b3a85dec0b5bc798d7e0dad"
+  },
+  "limitations": [
+    "Constructed persistent mutations before midway observation, not observed production failures.",
+    "Matching endpoints do not establish continuous immutability.",
+    "Explicit file/clean tracked source inventory only; excludes untracked files and transitive runtime dependencies.",
+    "No routing or speed improvement claimed."
+  ]
+}

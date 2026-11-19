@@ -7,6 +7,7 @@ import {
   packAny,
   SchematicSymbolSchema,
   SchematicFieldSchema,
+  SchematicSymbolAttributesSchema,
   SchematicLabelSpinStyle,
   SchematicLineSchema,
   SchematicPinOrientation,
@@ -277,7 +278,11 @@ function placedDefinition(source: LibSymbol, origin: Vec2, pins: Map<string, Pla
 }
 
 /** Geometry builder without KiCad I/O. Normalizes virtual references in the working compile IR. */
-export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyMap<string, LibSymbol>): GeneratedSchematic {
+export function buildGeneratedSchematic(
+  netlist: Netlist,
+  definitions: ReadonlyMap<string, LibSymbol>,
+  footprintDefaults: ReadonlyMap<string, { excludeFromBillOfMaterials?: boolean; excludeFromPositionFiles?: boolean }> = new Map(),
+): GeneratedSchematic {
   const items: Item[] = [];
   const sourceRefs = netlist.components.map((component) => component.ref);
   const diagnostics = normalizeVirtualReferences(netlist, definitions);
@@ -336,11 +341,18 @@ export function buildGeneratedSchematic(netlist: Netlist, definitions: ReadonlyM
     }
 
     const position = positions[index]!;
+    const attributes = definition.proto.attributes
+      ? clone(SchematicSymbolAttributesSchema, definition.proto.attributes)
+      : create(SchematicSymbolAttributesSchema);
+    const manufacturing = footprintDefaults.get(component.footprint);
+    attributes.excludeFromBillOfMaterials ||= manufacturing?.excludeFromBillOfMaterials ?? false;
+    attributes.excludeFromPositionFiles ||= manufacturing?.excludeFromPositionFiles ?? false;
     const proto = create(SchematicSymbolInstanceSchema, {
       position: toVector2(position),
       transform: create(SchematicSymbolTransformSchema, { orientation: SchematicSymbolOrientation.SSO_0 }),
       definition: placedDefinition(definition, position, pins, component.ref, unit),
       libId: definition.proto.id,
+      attributes,
       referenceField: positionedField(definition.proto.referenceField, "Reference", component.ref, position),
       valueField: positionedField(definition.proto.valueField, "Value", component.value, position),
       footprintField: positionedField(definition.proto.footprintField, "Footprint", component.footprint, position),
@@ -478,7 +490,12 @@ export async function generateSchematic(kicad: KiCad, netlist: Netlist): Promise
     const definition = await kicad.libraries.symbols.get(libId).catch(() => undefined);
     if (definition instanceof LibSymbol) definitions.set(libId, definition);
   }
-  const generatedItems = buildGeneratedSchematic(netlist, definitions);
+  const footprintDefaults = new Map<string, { excludeFromBillOfMaterials?: boolean; excludeFromPositionFiles?: boolean }>();
+  for (const id of new Set(netlist.components.map((component) => component.footprint).filter(Boolean))) {
+    const footprint = await kicad.libraries.footprints.get(id).catch(() => undefined);
+    if (footprint && "attributes" in footprint && footprint.attributes) footprintDefaults.set(id, footprint.attributes);
+  }
+  const generatedItems = buildGeneratedSchematic(netlist, definitions, footprintDefaults);
   const existingItems = await root.getAllItems();
   const generatedWireEnds = new Set(
     existingItems

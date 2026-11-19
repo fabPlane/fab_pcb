@@ -1,0 +1,283 @@
+{
+  "job": "J4",
+  "tier": "medium",
+  "role": "scored",
+  "scope": null,
+  "target_nets": [],
+  "target_footprint": null,
+  "power_nets": [],
+  "pairs": [],
+  "kept_zones": [
+    {
+      "net": "GND",
+      "layer": "F.Cu",
+      "outline_hash": "af5512375802e60db5560c9d6e040f7a38a84675bf69e524ff9d6fa386bc0a67"
+    },
+    {
+      "net": "GND",
+      "layer": "B.Cu",
+      "outline_hash": "91107fde2f05ed108d115789d33805af89ad54cf61628aba0748812bdebd642c"
+    }
+  ],
+  "rules": {
+    "classes": [
+      {
+        "name": "Default",
+        "clearance": 0.254,
+        "track_width": 0.254,
+        "via_diameter": 0.6858,
+        "via_drill": 0.3302,
+        "diff_pair_width": 0.25,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "nets": [
+          "+12V",
+          "+5V",
+          "ECU_GPS",
+          "GND",
+          "GPS",
+          "Gear1",
+          "Gear2",
+          "Gear3",
+          "Gear4",
+          "Gear5",
+          "Gear6",
+          "K_LINE",
+          "Net-(Q1-Pad3)",
+          "Net-(Q2-Pad3)",
+          "Net-(Q3-Pad3)",
+          "Net-(Q4-Pad3)",
+          "Net-(Q5-Pad3)",
+          "Net-(Q6-Pad3)",
+          "Net-(U1-Pad11)",
+          "Net-(U1-Pad12)",
+          "Net-(U1-Pad13)",
+          "Net-(U1-Pad14)",
+          "Net-(U1-Pad16)",
+          "Net-(U1-Pad17)",
+          "Net-(U1-Pad18)",
+          "Net-(U1-Pad20)",
+          "Net-(U1-Pad21)",
+          "Net-(U1-Pad22)",
+          "Net-(U1-Pad23)",
+          "Net-(U1-Pad24)",
+          "Net-(U1-Pad25)",
+          "Net-(U1-Pad27)",
+          "Net-(U1-Pad30)",
+          "Net-(U1-Pad31)",
+          "Net-(U1-Pad8)",
+          "Net-(U2-Pad2)",
+          "Net-(U2-Pad8)",
+          "OUTPUT",
+          "TTL_K_RX",
+          "TTL_K_TX"
+        ]
+      },
+      {
+        "name": "0.2mm",
+        "clearance": 0.2,
+        "track_width": 0.2,
+        "via_diameter": 0.6858,
+        "via_drill": 0.3302,
+        "diff_pair_width": 0.25,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "nets": []
+      },
+      {
+        "name": "Minimal",
+        "clearance": 0.1524,
+        "track_width": 0.1524,
+        "via_diameter": 0.6858,
+        "via_drill": 0.3302,
+        "diff_pair_width": 0.25,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "nets": []
+      }
+    ],
+    "clearance_mm": 0.0,
+    "copper_to_edge_mm": 0.5,
+    "copper_to_hole_mm": 0.25,
+    "hole_to_hole_mm": 0.25,
+    "minimum_track_mm": 0.1524,
+    "minimum_via_mm": 0.6858,
+    "minimum_annular_mm": 0.1,
+    "provenance": "legacy board net_class and stock pcbnew design settings; no human-routing fit"
+  },
+  "baseline": {
+    "errors": 0,
+    "warnings": 36,
+    "opens": 29,
+    "error_types": {},
+    "warning_types": {
+      "silk_overlap": 1,
+      "silk_over_copper": 10,
+      "text_height": 6,
+      "lib_footprint_issues": 17,
+      "silk_edge_clearance": 2
+    }
+  },
+  "source": {
+    "board_id": "sv650sds_sds_tool",
+    "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+    "raw_blob": "a52be8c692a76573607189a31857f38d19486b47",
+    "raw_sha256": "1d969d42a683515ffc7a638d15fb74ecca441f8669894e1a11997bf9ff7ced25",
+    "repository": "https://github.com/synfinatic/sv650sds",
+    "verified_license_url": "https://github.com/synfinatic/sv650sds/blob/bacf803a9056241ef270acf0e7e31467961aeba5/LICENSE",
+    "license_revision": "bacf803a9056241ef270acf0e7e31467961aeba5",
+    "license_file": "LICENSE"
+  },
+  "fidelity": {
+    "footprints": true,
+    "pads": true,
+    "outline": true,
+    "layers": true,
+    "nets": true
+  },
+  "gates": {
+    "fidelity": true,
+    "baseline_errors_zero": true,
+    "source_zone_definitions": true,
+    "real_pour_contact": true
+  },
+  "gate_pass": true,
+  "selection": {
+    "job": "J4",
+    "tier": "medium",
+    "board_id": "sv650sds_sds_tool",
+    "pour": {
+      "errors": 0,
+      "opens": 29,
+      "error_types": {},
+      "ground_pads": 10,
+      "ground_pads_in_filled_zone": 7,
+      "ground_pad_contacts": [
+        [
+          "Q1",
+          "2",
+          "GND"
+        ],
+        [
+          "Q2",
+          "2",
+          "GND"
+        ],
+        [
+          "Q3",
+          "2",
+          "GND"
+        ],
+        [
+          "Q4",
+          "2",
+          "GND"
+        ],
+        [
+          "Q5",
+          "2",
+          "GND"
+        ],
+        [
+          "Q6",
+          "2",
+          "GND"
+        ],
+        [
+          "U2",
+          "5",
+          "GND"
+        ]
+      ],
+      "remaining_ground_opens": 0,
+      "ground_zone_count": 2,
+      "ground_pads_connected_by_pour": 10,
+      "ground_pads_contact_list": [
+        [
+          "P1",
+          "1",
+          "GND",
+          114.188,
+          86.741
+        ],
+        [
+          "Q1",
+          "2",
+          "GND",
+          111.141,
+          119.822
+        ],
+        [
+          "Q2",
+          "2",
+          "GND",
+          111.141,
+          114.869
+        ],
+        [
+          "Q3",
+          "2",
+          "GND",
+          111.268,
+          110.043
+        ],
+        [
+          "Q4",
+          "2",
+          "GND",
+          111.395,
+          105.217
+        ],
+        [
+          "Q5",
+          "2",
+          "GND",
+          111.522,
+          100.264
+        ],
+        [
+          "Q6",
+          "2",
+          "GND",
+          111.649,
+          95.311
+        ],
+        [
+          "U1",
+          "1",
+          "GND",
+          108.077,
+          120.015
+        ],
+        [
+          "U1",
+          "15",
+          "GND",
+          100.457,
+          92.075
+        ],
+        [
+          "U2",
+          "5",
+          "GND",
+          101.981,
+          100.391
+        ]
+      ],
+      "ground_measure_method": "Native BuildConnectivity/GetConnectedPads(zone) on refilled zero-track board; center-in-fill count is earlier conservative geometric diagnostic only."
+    },
+    "why": "Pour directly connects 10/10 ground pads; 0 ground opens remain as routing work; 0 pour-input errors."
+  },
+  "sha256": {
+    "board.kicad_pcb": "f17b9d0745a2fb1bc964f2db5a037cca28acc07a4e974218da08b9cd333b9f10",
+    "board.kicad_pro": "38f2a80640738eb240ea1320e294658b43d31f8df9526996def33d0399dfa19e",
+    "baseline-drc.json": "949bac463a814e2b1c4b174f6fe846c5d37d1ce61d2c531b84c0b5a02b335481",
+    "board.kicad_dru": "75ef6e6f54016f0ba81c0fa8bf91453eb152a8f03692277ac808bb6561510b02"
+  },
+  "utc": "2026-10-09T10:33:45.901597+00:00",
+  "correction": {
+    "source_fixture": "evidence/open-router-suite-2026-10-09/fixtures-v2/sv650sds-sds-tool/j4",
+    "record": "evidence/open-router-comparison-2026-10-09/correction-2026-10-12/fixture-proofs.json",
+    "changes": "zone UUIDs and study class-width rules only; baseline and hash metadata recomputed"
+  }
+}

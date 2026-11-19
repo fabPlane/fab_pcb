@@ -1,0 +1,3098 @@
+[
+  {
+    "control": "fixture hash",
+    "changed_backend": 0,
+    "runs": [
+      {
+        "cache_key": "0-0",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "b"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-1",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "b"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-2",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "b"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-0",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-1",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-2",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-0",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-1",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-2",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      }
+    ]
+  },
+  {
+    "control": "fixture hash",
+    "changed_backend": 1,
+    "runs": [
+      {
+        "cache_key": "0-0",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-1",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-2",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-0",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "b"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-1",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "b"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-2",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "b"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-0",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-1",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-2",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      }
+    ]
+  },
+  {
+    "control": "fixture hash",
+    "changed_backend": 2,
+    "runs": [
+      {
+        "cache_key": "0-0",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-1",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-2",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-0",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-1",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-2",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-0",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "b"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-1",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "b"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-2",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "b"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      }
+    ]
+  },
+  {
+    "control": "fixture tier",
+    "changed_backend": 0,
+    "runs": [
+      {
+        "cache_key": "0-0",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C2",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-1",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C2",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-2",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C2",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-0",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-1",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-2",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-0",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-1",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-2",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      }
+    ]
+  },
+  {
+    "control": "fixture tier",
+    "changed_backend": 1,
+    "runs": [
+      {
+        "cache_key": "0-0",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-1",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-2",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-0",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C2",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-1",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C2",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-2",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C2",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-0",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-1",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-2",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      }
+    ]
+  },
+  {
+    "control": "fixture tier",
+    "changed_backend": 2,
+    "runs": [
+      {
+        "cache_key": "0-0",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-1",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-2",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-0",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-1",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-2",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-0",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C2",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-1",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C2",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-2",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C2",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      }
+    ]
+  },
+  {
+    "control": "CPU",
+    "changed_backend": 0,
+    "runs": [
+      {
+        "cache_key": "0-0",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-b"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-1",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-b"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-2",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-b"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-0",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-1",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-2",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-0",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-1",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-2",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      }
+    ]
+  },
+  {
+    "control": "CPU",
+    "changed_backend": 1,
+    "runs": [
+      {
+        "cache_key": "0-0",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-1",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-2",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-0",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-b"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-1",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-b"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-2",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-b"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-0",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-1",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-2",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      }
+    ]
+  },
+  {
+    "control": "CPU",
+    "changed_backend": 2,
+    "runs": [
+      {
+        "cache_key": "0-0",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-1",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-2",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-0",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-1",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-2",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-0",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-b"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-1",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-b"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-2",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-b"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      }
+    ]
+  },
+  {
+    "control": "unchanged",
+    "changed_backend": 0,
+    "runs": [
+      {
+        "cache_key": "0-0",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-1",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-2",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-0",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-1",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-2",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-0",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-1",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-2",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      }
+    ]
+  },
+  {
+    "control": "unchanged",
+    "changed_backend": 1,
+    "runs": [
+      {
+        "cache_key": "0-0",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-1",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-2",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-0",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-1",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-2",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-0",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-1",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-2",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      }
+    ]
+  },
+  {
+    "control": "unchanged",
+    "changed_backend": 2,
+    "runs": [
+      {
+        "cache_key": "0-0",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-1",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "0-2",
+        "backend": {
+          "id": 0,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-0",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-1",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "1-2",
+        "backend": {
+          "id": 1,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-0",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-1",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      },
+      {
+        "cache_key": "2-2",
+        "backend": {
+          "id": 2,
+          "version": "one"
+        },
+        "fixture": {
+          "id": "case",
+          "suite": "canary",
+          "tier": "C1",
+          "sha256": "a"
+        },
+        "system": {
+          "cpu_name": "cpu-a"
+        },
+        "exit": {
+          "state": "completed"
+        },
+        "quality_validation": "native-drc",
+        "quality": {
+          "completion_rate": 1,
+          "unrouted_connections": 0,
+          "drc_errors": 0
+        },
+        "timing": {
+          "wall_ms": 1
+        }
+      }
+    ]
+  }
+]

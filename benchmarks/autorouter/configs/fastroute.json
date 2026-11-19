@@ -1,0 +1,353 @@
+{
+  "router": "fastroute",
+  "status": "C3 final per-job settings; qualification on tuning fixtures only",
+  "jobs": {
+    "J1": {
+      "support": "yes",
+      "evidence": [
+        "../../../../runs/diagnostics/open-router-setup-c3-2026-10-09/README.md"
+      ],
+      "command": [
+        "/usr/bin/python3",
+        "{benchmark}/harness/dsn-engine-scoring-c2-v1.py",
+        "--router",
+        "fastroute",
+        "--work-dir",
+        "{work_dir}",
+        "--seed",
+        "{seed}",
+        "--cap-s",
+        "{cap_s}",
+        "--settings-file",
+        "{benchmark}/configs/settings/fastroute-c01-settings.json"
+      ],
+      "pre_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/dsn-path.py",
+          "export",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}"
+        ]
+      ],
+      "post_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/dsn-path.py",
+          "import",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}"
+        ]
+      ],
+      "settings": {
+        "max_passes": "100; reuse qualified CH340G baseline.",
+        "fanout": "Disabled to avoid below-minimum width fallback.",
+        "widths": "Project classes and J3 declared minima are exported identically for all three engines.",
+        "edge_and_hole": "Native project floors forwarded through supported settings.",
+        "zone_policy": "Native zone definition retained; native refill is a timed post step.",
+        "mode": "Default enhanced mode, not parity; baseline starting candidate.",
+        "neckdown": "Disable for every exported class plus native global minimum.",
+        "multi_start": "1; sequential work and no extra parallel attempts.",
+        "pairs": "Use documented --pairs file with fixture gap; no extra skew gate is introduced.",
+        "tuning_selection": "5: closest defaults (time ineligible); incumbent if still tied",
+        "engine_candidate": "{\"label\": \"track-C enhanced default\", \"flags\": {}}; selected by shared contract, not a causal claim.",
+        "scoring_resources": "Whole machine; documented default parallelism; no routing cap; 3600s safety stop."
+      },
+      "seed_supported": false,
+      "freeze_status": "final; qualified on some/all tuning fixtures",
+      "candidate": "c01",
+      "candidate_settings": {
+        "label": "track-C enhanced default",
+        "flags": {}
+      },
+      "qualified": true,
+      "selection": {
+        "router": "fastroute",
+        "job": "J1",
+        "candidate": "c01",
+        "runs": 2,
+        "passes": 1,
+        "passing_fixtures": [
+          "evidence/open-router-suite-2026-10-09/fixtures/ch340g/j1"
+        ],
+        "valid_total_vias": 6,
+        "valid_total_length_mm": 259.9806069325204,
+        "default_distance": 0,
+        "setup_median_seconds": 1.603739489,
+        "time_tiebreak_eligible": false,
+        "qualified": true,
+        "fully_qualified": false,
+        "deciding_step": "5: closest defaults (time ineligible); incumbent if still tied",
+        "scope": "tuning only; supported-but-invalid results retained; qualification means at least one pass, not every fixture"
+      }
+    },
+    "J2": {
+      "support": "yes",
+      "evidence": [
+        "../../../../runs/diagnostics/open-router-setup-c3-2026-10-09/README.md"
+      ],
+      "command": [
+        "/usr/bin/python3",
+        "{benchmark}/harness/dsn-engine-scoring-c2-v1.py",
+        "--router",
+        "fastroute",
+        "--work-dir",
+        "{work_dir}",
+        "--seed",
+        "{seed}",
+        "--cap-s",
+        "{cap_s}",
+        "--settings-file",
+        "{benchmark}/configs/settings/fastroute-c01-settings.json"
+      ],
+      "pre_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/dsn-path.py",
+          "export",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}"
+        ]
+      ],
+      "post_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/dsn-path.py",
+          "import",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}"
+        ]
+      ],
+      "settings": {
+        "max_passes": "100; reuse qualified CH340G baseline.",
+        "fanout": "Disabled to avoid below-minimum width fallback.",
+        "widths": "Project classes and J3 declared minima are exported identically for all three engines.",
+        "edge_and_hole": "Native project floors forwarded through supported settings.",
+        "zone_policy": "Native zone definition retained; native refill is a timed post step.",
+        "mode": "Default enhanced mode, not parity; baseline starting candidate.",
+        "neckdown": "Disable for every exported class plus native global minimum.",
+        "multi_start": "1; sequential work and no extra parallel attempts.",
+        "pairs": "Use documented --pairs file with fixture gap; no extra skew gate is introduced.",
+        "tuning_selection": "5: closest defaults (time ineligible); incumbent if still tied",
+        "engine_candidate": "{\"label\": \"track-C enhanced default\", \"flags\": {}}; selected by shared contract, not a causal claim.",
+        "scoring_resources": "Whole machine; documented default parallelism; no routing cap; 3600s safety stop."
+      },
+      "seed_supported": false,
+      "freeze_status": "final; qualified on some/all tuning fixtures",
+      "candidate": "c01",
+      "candidate_settings": {
+        "label": "track-C enhanced default",
+        "flags": {}
+      },
+      "qualified": true,
+      "selection": {
+        "router": "fastroute",
+        "job": "J2",
+        "candidate": "c01",
+        "runs": 6,
+        "passes": 2,
+        "passing_fixtures": [
+          "evidence/open-router-suite-2026-10-09/fixtures/ch340g/j2-large",
+          "evidence/open-router-suite-2026-10-09/fixtures/ch340g/j2-small"
+        ],
+        "valid_total_vias": 19,
+        "valid_total_length_mm": 452.26694394008825,
+        "default_distance": 0,
+        "setup_median_seconds": 1.7296304215,
+        "time_tiebreak_eligible": false,
+        "qualified": true,
+        "fully_qualified": false,
+        "deciding_step": "5: closest defaults (time ineligible); incumbent if still tied",
+        "scope": "tuning only; supported-but-invalid results retained; qualification means at least one pass, not every fixture"
+      }
+    },
+    "J3": {
+      "support": "yes",
+      "evidence": [
+        "../../../../runs/diagnostics/open-router-setup-c3-2026-10-09/README.md"
+      ],
+      "command": [
+        "/usr/bin/python3",
+        "{benchmark}/harness/dsn-engine-scoring-c2-v1.py",
+        "--router",
+        "fastroute",
+        "--work-dir",
+        "{work_dir}",
+        "--seed",
+        "{seed}",
+        "--cap-s",
+        "{cap_s}",
+        "--settings-file",
+        "{benchmark}/configs/settings/fastroute-c01-settings.json"
+      ],
+      "pre_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/dsn-path.py",
+          "export",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}"
+        ]
+      ],
+      "post_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/dsn-path.py",
+          "import",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}"
+        ]
+      ],
+      "settings": {
+        "max_passes": "100; reuse qualified CH340G baseline.",
+        "fanout": "Disabled to avoid below-minimum width fallback.",
+        "widths": "Project classes and J3 declared minima are exported identically for all three engines.",
+        "edge_and_hole": "Native project floors forwarded through supported settings.",
+        "zone_policy": "Native zone definition retained; native refill is a timed post step.",
+        "mode": "Default enhanced mode, not parity; baseline starting candidate.",
+        "neckdown": "Disable for every exported class plus native global minimum.",
+        "multi_start": "1; sequential work and no extra parallel attempts.",
+        "pairs": "--pairs={work_dir}/pairs.txt when nonempty; gap from frozen job; documented --pair-skew default 0.1 mm; no pair tuning.",
+        "tuning_selection": "5: closest defaults (time ineligible); incumbent if still tied",
+        "engine_candidate": "{\"label\": \"track-C enhanced default\", \"flags\": {}}; selected by shared contract, not a causal claim.",
+        "scoring_resources": "Whole machine; documented default parallelism; no routing cap; 3600s safety stop."
+      },
+      "seed_supported": false,
+      "freeze_status": "final; qualified on some/all tuning fixtures",
+      "candidate": "c01",
+      "candidate_settings": {
+        "label": "track-C enhanced default",
+        "flags": {}
+      },
+      "qualified": true,
+      "selection": {
+        "router": "fastroute",
+        "job": "J3",
+        "candidate": "c01",
+        "runs": 2,
+        "passes": 1,
+        "passing_fixtures": [
+          "evidence/open-router-suite-2026-10-09/fixtures/ch340g/j3"
+        ],
+        "valid_total_vias": 6,
+        "valid_total_length_mm": 260.6376936819309,
+        "default_distance": 0,
+        "setup_median_seconds": 2.0303966645,
+        "time_tiebreak_eligible": false,
+        "qualified": true,
+        "fully_qualified": false,
+        "deciding_step": "5: closest defaults (time ineligible); incumbent if still tied",
+        "scope": "tuning only; supported-but-invalid results retained; qualification means at least one pass, not every fixture"
+      },
+      "pair_documentation": {
+        "section": "README.md: Routing and optimizer improvements; Build and run options table",
+        "snapshot": "../../../../evidence/open-router-setup-c3-2026-10-09/controls/fastroute-readme.md",
+        "url": "https://github.com/parisxmas/fastroute/blob/6e14035e966ff058fac79da0600eaf76f3f45c4f/README.md",
+        "options": "--pairs={work_dir}/pairs.txt when nonempty; gap from frozen job; documented --pair-skew default 0.1 mm; no pair tuning."
+      },
+      "pair_tuning": "none: fixed documented pair options for every candidate; CH340G J3 contains an endpoint-declared pair with generic net names; Aquarius-only scored pair evidence remains future work"
+    },
+    "J4": {
+      "support": "approximated",
+      "evidence": [
+        "../../../../runs/diagnostics/open-router-setup-c3-2026-10-09/README.md"
+      ],
+      "command": [
+        "/usr/bin/python3",
+        "{benchmark}/harness/dsn-engine-scoring-c2-v1.py",
+        "--router",
+        "fastroute",
+        "--work-dir",
+        "{work_dir}",
+        "--seed",
+        "{seed}",
+        "--cap-s",
+        "{cap_s}",
+        "--settings-file",
+        "{benchmark}/configs/settings/fastroute-c01-settings.json"
+      ],
+      "pre_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/dsn-path.py",
+          "export",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}"
+        ]
+      ],
+      "post_steps": [
+        [
+          "/usr/bin/python3",
+          "{benchmark}/harness/dsn-path.py",
+          "import",
+          "--input-dir",
+          "{input_dir}",
+          "--work-dir",
+          "{work_dir}",
+          "--output-pcb",
+          "{output_pcb}"
+        ]
+      ],
+      "settings": {
+        "max_passes": "100; reuse qualified CH340G baseline.",
+        "fanout": "Disabled to avoid below-minimum width fallback.",
+        "widths": "Project classes and J3 declared minima are exported identically for all three engines.",
+        "edge_and_hole": "Native project floors forwarded through supported settings.",
+        "zone_policy": "Native zone definition retained; native refill is a timed post step.",
+        "mode": "Default enhanced mode, not parity; baseline starting candidate.",
+        "neckdown": "Disable for every exported class plus native global minimum.",
+        "multi_start": "1; sequential work and no extra parallel attempts.",
+        "pairs": "Use documented --pairs file with fixture gap; no extra skew gate is introduced.",
+        "tuning_selection": "default fallback: no candidate passes; nearest documented defaults, then incumbent",
+        "engine_candidate": "{\"label\": \"track-C enhanced default\", \"flags\": {}}; selected by shared contract, not a causal claim.",
+        "scoring_resources": "Whole machine; documented default parallelism; no routing cap; 3600s safety stop."
+      },
+      "seed_supported": false,
+      "freeze_status": "final; unqualified",
+      "candidate": "c01",
+      "candidate_settings": {
+        "label": "track-C enhanced default",
+        "flags": {}
+      },
+      "qualified": false,
+      "selection": {
+        "router": "fastroute",
+        "job": "J4",
+        "candidate": "c01",
+        "runs": 1,
+        "passes": 0,
+        "passing_fixtures": [],
+        "valid_total_vias": 0,
+        "valid_total_length_mm": 0,
+        "default_distance": 0,
+        "setup_median_seconds": 1.618878802,
+        "time_tiebreak_eligible": false,
+        "qualified": false,
+        "fully_qualified": false,
+        "deciding_step": "default fallback: no candidate passes; nearest documented defaults, then incumbent",
+        "scope": "tuning only; supported-but-invalid results retained; qualification means at least one pass, not every fixture"
+      }
+    }
+  },
+  "selection_record": "../../../../evidence/open-router-setup-c3-2026-10-09/selections.json"
+}

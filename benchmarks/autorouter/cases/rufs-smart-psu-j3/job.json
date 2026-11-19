@@ -1,0 +1,168 @@
+{
+  "job": "J3",
+  "tier": "hard",
+  "role": "scored",
+  "scope": null,
+  "target_nets": [],
+  "target_footprint": null,
+  "power_nets": [
+    {
+      "name": "+BATT",
+      "minimum_width_mm": 0.5,
+      "min_width_mm": 0.5
+    }
+  ],
+  "pairs": [],
+  "kept_zones": [],
+  "rules": {
+    "classes": [
+      {
+        "name": "Default",
+        "clearance": 0.2,
+        "track_width": 0.25,
+        "via_diameter": 0.6,
+        "via_drill": 0.4,
+        "diff_pair_width": 0.25,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "nets": [
+          "+BATT",
+          "GND",
+          "GNDA",
+          "Net-(C1-Pad2)",
+          "Net-(C2-Pad1)",
+          "Net-(C6-Pad1)",
+          "Net-(C6-Pad2)",
+          "Net-(D1-Pad1)",
+          "Net-(D1-Pad2)",
+          "Net-(D2-Pad1)",
+          "Net-(D2-Pad2)",
+          "Net-(IC1-Pad1)",
+          "Net-(IC1-Pad5)",
+          "Net-(IC1-Pad6)",
+          "Net-(IC1-Pad7)",
+          "Net-(P1-Pad6)",
+          "Net-(P4-Pad1)",
+          "Net-(Q1-Pad2)",
+          "Net-(R6-Pad1)",
+          "Net-(SW3-Pad2)",
+          "VCC"
+        ]
+      }
+    ],
+    "clearance_mm": 0.0,
+    "copper_to_edge_mm": 0.5,
+    "copper_to_hole_mm": 0.25,
+    "hole_to_hole_mm": 0.25,
+    "minimum_track_mm": 0.2,
+    "minimum_via_mm": 0.4,
+    "minimum_annular_mm": 0.1,
+    "provenance": "legacy board net_class and stock pcbnew design settings; no human-routing fit",
+    "j3_only_power_minima": {
+      "+BATT": 0.5
+    }
+  },
+  "baseline": {
+    "errors": 0,
+    "warnings": 39,
+    "opens": 53,
+    "error_types": {},
+    "warning_types": {
+      "silk_overlap": 1,
+      "silk_over_copper": 12,
+      "lib_footprint_issues": 26
+    }
+  },
+  "source": {
+    "board_id": "rufs_smart_psu",
+    "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+    "raw_blob": "17594ed1bb25b8218c60d0a3a496971d58a086f0",
+    "raw_sha256": "7487fc8f3e49b0c7aeb0f9d9495bb73339ea6a665c361e8da144b56b3ca630ab",
+    "repository": "https://github.com/mik4el/rufs",
+    "verified_license_url": "https://github.com/mik4el/rufs/blob/4b4f8d41ee2fd6713775db15ea5a9d9b5cb0d397/LICENSE",
+    "license_revision": "4b4f8d41ee2fd6713775db15ea5a9d9b5cb0d397",
+    "license_file": "LICENSE"
+  },
+  "fidelity": {
+    "footprints": true,
+    "pads": true,
+    "outline": true,
+    "layers": true,
+    "nets": true
+  },
+  "gates": {
+    "fidelity": true,
+    "baseline_errors_zero": true
+  },
+  "gate_pass": true,
+  "selection": {
+    "job": "J3",
+    "tier": "hard",
+    "board_id": "rufs_smart_psu",
+    "power_nets": [
+      {
+        "name": "+BATT",
+        "length_mm": 118.642,
+        "pads": 10,
+        "endpoints": [
+          {
+            "reference": "C3",
+            "value": ""
+          },
+          {
+            "reference": "C5",
+            "value": ""
+          },
+          {
+            "reference": "IC1",
+            "value": ""
+          },
+          {
+            "reference": "R5",
+            "value": ""
+          },
+          {
+            "reference": "R6",
+            "value": ""
+          },
+          {
+            "reference": "SW2",
+            "value": "On/Off"
+          },
+          {
+            "reference": "SW3",
+            "value": "Voltage"
+          },
+          {
+            "reference": "U1",
+            "value": ""
+          },
+          {
+            "reference": "U2",
+            "value": ""
+          },
+          {
+            "reference": "P3",
+            "value": "Output"
+          }
+        ],
+        "qualified": true,
+        "minimum_width_mm": 0.5
+      }
+    ],
+    "pairs": [],
+    "why": "118.642mm on declared supply rails to 10 supply/load footprint incidences; every declared rail >=40mm, width >=2x signal."
+  },
+  "sha256": {
+    "board.kicad_pcb": "2b95cd3d92475500300ada83431f0eef440fe5a5cb63f7822781d78560604d45",
+    "board.kicad_pro": "889e153f3c06557967c8f9cc663bddf84fa18cc4a56e49cb2ea3cbe5f6590b3f",
+    "baseline-drc.json": "7b6a9522df3cf8af155ac5e72e262065ff57d80ebd598d82837a0cf6d007e385",
+    "board.kicad_dru": "c468bb99420848d48d720de6c325babe9142cd4f451b4b25b81172ca69486005"
+  },
+  "utc": "2026-10-09T10:33:36.158233+00:00",
+  "correction": {
+    "source_fixture": "evidence/open-router-suite-2026-10-09/fixtures-v2/rufs-smart-psu/j3",
+    "record": "evidence/open-router-comparison-2026-10-09/correction-2026-10-12/fixture-proofs.json",
+    "changes": "zone UUIDs and study class-width rules only; baseline and hash metadata recomputed"
+  }
+}

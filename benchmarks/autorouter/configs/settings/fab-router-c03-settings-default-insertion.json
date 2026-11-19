@@ -1,0 +1,6 @@
+{
+  "label": "documented default insertion policy, default via costs",
+  "settings": {
+    "strictDrc": false
+  }
+}

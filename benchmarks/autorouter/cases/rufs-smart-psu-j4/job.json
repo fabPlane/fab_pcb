@@ -1,0 +1,169 @@
+{
+  "job": "J4",
+  "tier": "hard",
+  "role": "scored",
+  "scope": null,
+  "target_nets": [],
+  "target_footprint": null,
+  "power_nets": [],
+  "pairs": [],
+  "kept_zones": [
+    {
+      "net": "GND",
+      "layer": "B.Cu",
+      "outline_hash": "46559c933fe60f67bcc25663247a3ccbec9d863fcc355669612247b9202f7b61"
+    },
+    {
+      "net": "GNDA",
+      "layer": "B.Cu",
+      "outline_hash": "6156928bcd4ed48115d51e85f98a94f0d5be258e1d328836f2668ad194e2ea93"
+    }
+  ],
+  "rules": {
+    "classes": [
+      {
+        "name": "Default",
+        "clearance": 0.2,
+        "track_width": 0.25,
+        "via_diameter": 0.6,
+        "via_drill": 0.4,
+        "diff_pair_width": 0.25,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "nets": [
+          "+BATT",
+          "GND",
+          "GNDA",
+          "Net-(C1-Pad2)",
+          "Net-(C2-Pad1)",
+          "Net-(C6-Pad1)",
+          "Net-(C6-Pad2)",
+          "Net-(D1-Pad1)",
+          "Net-(D1-Pad2)",
+          "Net-(D2-Pad1)",
+          "Net-(D2-Pad2)",
+          "Net-(IC1-Pad1)",
+          "Net-(IC1-Pad5)",
+          "Net-(IC1-Pad6)",
+          "Net-(IC1-Pad7)",
+          "Net-(P1-Pad6)",
+          "Net-(P4-Pad1)",
+          "Net-(Q1-Pad2)",
+          "Net-(R6-Pad1)",
+          "Net-(SW3-Pad2)",
+          "VCC"
+        ]
+      }
+    ],
+    "clearance_mm": 0.0,
+    "copper_to_edge_mm": 0.5,
+    "copper_to_hole_mm": 0.25,
+    "hole_to_hole_mm": 0.25,
+    "minimum_track_mm": 0.2,
+    "minimum_via_mm": 0.4,
+    "minimum_annular_mm": 0.1,
+    "provenance": "legacy board net_class and stock pcbnew design settings; no human-routing fit"
+  },
+  "baseline": {
+    "errors": 0,
+    "warnings": 39,
+    "opens": 50,
+    "error_types": {},
+    "warning_types": {
+      "silk_overlap": 1,
+      "silk_over_copper": 12,
+      "lib_footprint_issues": 26
+    }
+  },
+  "source": {
+    "board_id": "rufs_smart_psu",
+    "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+    "raw_blob": "17594ed1bb25b8218c60d0a3a496971d58a086f0",
+    "raw_sha256": "7487fc8f3e49b0c7aeb0f9d9495bb73339ea6a665c361e8da144b56b3ca630ab",
+    "repository": "https://github.com/mik4el/rufs",
+    "verified_license_url": "https://github.com/mik4el/rufs/blob/4b4f8d41ee2fd6713775db15ea5a9d9b5cb0d397/LICENSE",
+    "license_revision": "4b4f8d41ee2fd6713775db15ea5a9d9b5cb0d397",
+    "license_file": "LICENSE"
+  },
+  "fidelity": {
+    "footprints": true,
+    "pads": true,
+    "outline": true,
+    "layers": true,
+    "nets": true
+  },
+  "gates": {
+    "fidelity": true,
+    "baseline_errors_zero": true,
+    "source_zone_definitions": true,
+    "real_pour_contact": true
+  },
+  "gate_pass": true,
+  "selection": {
+    "job": "J4",
+    "tier": "hard",
+    "board_id": "rufs_smart_psu",
+    "pour": {
+      "errors": 0,
+      "opens": 50,
+      "error_types": {},
+      "ground_pads": 20,
+      "ground_pads_in_filled_zone": 0,
+      "ground_pad_contacts": [],
+      "remaining_ground_opens": 15,
+      "ground_zone_count": 2,
+      "ground_pads_connected_by_pour": 5,
+      "ground_pads_contact_list": [
+        [
+          "IC1",
+          "4",
+          "GND",
+          69.394,
+          52.514
+        ],
+        [
+          "P2",
+          "1",
+          "GND",
+          77.6,
+          15.53
+        ],
+        [
+          "P3",
+          "3",
+          "GNDA",
+          63.5,
+          73.04
+        ],
+        [
+          "P4",
+          "2",
+          "GND",
+          63.806,
+          34.988
+        ],
+        [
+          "SW3",
+          "3",
+          "GNDA",
+          73.0,
+          67.8
+        ]
+      ],
+      "ground_measure_method": "Native BuildConnectivity/GetConnectedPads(zone) on refilled zero-track board; center-in-fill count is earlier conservative geometric diagnostic only."
+    },
+    "why": "Pour directly connects 5/20 ground pads; 15 ground opens remain as routing work; 0 pour-input errors."
+  },
+  "sha256": {
+    "board.kicad_pcb": "6f101b9dc3234a483dc54b3699ff75a5f0d52a5c2d282a445654cdc4b0bdc439",
+    "board.kicad_pro": "097af65f7f8014d7e4e7151a0ff73b9760a9dba11f196b42f0fafd9c9dc976ef",
+    "baseline-drc.json": "2816a38a4a12ec7a8d4e22484166ef795497dd76b5ff52a05e4212083486f731",
+    "board.kicad_dru": "bbef6e119424cbf626d6fec0697069e203a9bde1d54f30517b179a0375f28b6b"
+  },
+  "utc": "2026-10-09T10:33:48.089777+00:00",
+  "correction": {
+    "source_fixture": "evidence/open-router-suite-2026-10-09/fixtures-v2/rufs-smart-psu/j4",
+    "record": "evidence/open-router-comparison-2026-10-09/correction-2026-10-12/fixture-proofs.json",
+    "changes": "zone UUIDs and study class-width rules only; baseline and hash metadata recomputed"
+  }
+}

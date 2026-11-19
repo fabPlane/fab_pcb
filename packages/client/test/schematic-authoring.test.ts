@@ -3,6 +3,7 @@ import { create, fromBinary, toBinary } from "@bufbuild/protobuf";
 import {
   LibraryIdentifierSchema,
   SchematicFieldSchema,
+  SchematicSymbolAttributesSchema,
   SchematicPinSchema,
   SchematicSymbolBodyStyleSchema,
   SchematicSymbolChildSchema,
@@ -183,4 +184,13 @@ describe("native schematic authoring", () => {
     expect(placed.symbol.pins.map((p) => p.number).sort()).toEqual(["4", "99"]);
     for (const pin of placed.symbol.pins) expect(schematicPinSheetPosition(placed.symbol, pin)).toEqual(placed.pins.get(pin.number)!);
   });
+});
+
+test("native placement preserves library manufacturing exclusions", () => {
+  const source = librarySymbol();
+  source.proto.attributes = create(SchematicSymbolAttributesSchema, { excludeFromBillOfMaterials: true, excludeFromPositionFiles: true });
+  const placed = placeNativeSymbol(source, { reference: "R1", value: "feature", footprint: "Feature:Test", position: { x: 0, y: 0 } });
+  expect(placed.symbol.attributes).toMatchObject({ excludeFromBillOfMaterials: true, excludeFromPositionFiles: true });
+  placed.symbol.proto.attributes!.excludeFromBillOfMaterials = false;
+  expect(source.proto.attributes.excludeFromBillOfMaterials).toBe(true);
 });

@@ -1,0 +1,134 @@
+{
+  "java": {
+    "url": "https://download.java.net/java/GA/jdk25/bd75d5f9689641da8e1daabeccb5528b/36/GPL/openjdk-25_linux-x64_bin.tar.gz",
+    "sha256": "59cdcaf255add4721de38eb411d4ecfe779356b61fb671aee63c7dec78054c2b"
+  },
+  "routers": {
+    "freerouting": {
+      "name": "freerouting",
+      "repository": "freerouting/freerouting",
+      "version": "v2.5.0",
+      "source_commit": "b647a2f824cfbc54bc4dcaee71b03b7cd945eb76",
+      "selection_policy": "latest-stable-github-release",
+      "release_url": "https://github.com/freerouting/freerouting/releases/tag/v2.5.0",
+      "retrieved_utc": "2026-10-09T07:29:30.947988+00:00",
+      "downloads": [
+        {
+          "url": "https://api.github.com/repos/freerouting/freerouting/tarball/b647a2f824cfbc54bc4dcaee71b03b7cd945eb76",
+          "sha256": "ddd7a0ad7131eb40d1f5089284147867012075af8eebf5fac39d8b90d03c18d8"
+        },
+        {
+          "url": "https://github.com/freerouting/freerouting/releases/download/v2.5.0/freerouting-cli-2.5.0-checksums.txt",
+          "sha256": "b2a25c7fed1bb2a65473306d98f246875cf5f46324f477daa9fd2ea873f579c8",
+          "asset_digest": "sha256:b2a25c7fed1bb2a65473306d98f246875cf5f46324f477daa9fd2ea873f579c8"
+        },
+        {
+          "url": "https://github.com/freerouting/freerouting/releases/download/v2.5.0/freerouting-cli-2.5.0-linux-x64.tar.gz",
+          "sha256": "64a957a9ef2a2fbde6ab2001bb32800f5ba34f9fd15575e363512934b870d63a",
+          "asset_digest": "sha256:64a957a9ef2a2fbde6ab2001bb32800f5ba34f9fd15575e363512934b870d63a"
+        }
+      ],
+      "acquired": true
+    },
+    "fastroute": {
+      "name": "fastroute",
+      "repository": "parisxmas/fastroute",
+      "version": "v0.1.13",
+      "source_commit": "6e14035e966ff058fac79da0600eaf76f3f45c4f",
+      "selection_policy": "latest-stable-github-release",
+      "release_url": "https://github.com/parisxmas/fastroute/releases/tag/v0.1.13",
+      "retrieved_utc": "2026-10-09T07:29:30.949194+00:00",
+      "downloads": [
+        {
+          "url": "https://api.github.com/repos/parisxmas/fastroute/tarball/6e14035e966ff058fac79da0600eaf76f3f45c4f",
+          "sha256": "33e9e2ccab57209b6f13e566b1e0b24c141465bca803a980efa5c6cb817f58bb"
+        },
+        {
+          "url": "https://github.com/parisxmas/fastroute/releases/download/v0.1.13/fastroute-0.1.13-linux-x64.tar.gz",
+          "sha256": "67d9cfc7bce4653916e55c26a22bde1b06806f69620f28504829dba0594da78e",
+          "asset_digest": "sha256:67d9cfc7bce4653916e55c26a22bde1b06806f69620f28504829dba0594da78e"
+        },
+        {
+          "url": "https://github.com/parisxmas/fastroute/releases/download/v0.1.13/SHA256SUMS.txt",
+          "sha256": "ecb6d54b4fd62368370889a6471ebfbc15e151c6823d99430175c4ac308a5a7c",
+          "asset_digest": "sha256:ecb6d54b4fd62368370889a6471ebfbc15e151c6823d99430175c4ac308a5a7c"
+        }
+      ],
+      "acquired": true
+    },
+    "fab-router": {
+      "name": "fab-router",
+      "repository": "fabPlane/fab_router",
+      "version": "source-69cf598db98c",
+      "source_commit": "69cf598db98c136bff16bbe02bccdded95674b18",
+      "selection_policy": "unreleased-source-snapshot",
+      "release_url": null,
+      "retrieved_utc": "2026-10-09T07:29:30.951130+00:00",
+      "downloads": [
+        {
+          "url": "https://api.github.com/repos/fabPlane/fab_router/tarball/69cf598db98c136bff16bbe02bccdded95674b18",
+          "sha256": "fc5ceb022c8efcb71a05aa5c600a4f0def2783af141fc70c4c4c5c7f8f3f5b6a"
+        }
+      ],
+      "acquired": true
+    }
+  },
+  "native_sources": {
+    "tracemaker": {
+      "name": "tracemaker",
+      "repository": "DingoOz/TraceMaker",
+      "version": "v0.9.0",
+      "source_commit": "24c847772e57ea8888e2cfe4bbf1aa00666390a4",
+      "selection_policy": "latest-stable-github-release",
+      "release_url": "https://github.com/DingoOz/TraceMaker/releases/tag/v0.9.0",
+      "retrieved_utc": "2026-10-09T07:29:30.948664+00:00",
+      "downloads": [
+        {
+          "url": "https://api.github.com/repos/DingoOz/TraceMaker/tarball/24c847772e57ea8888e2cfe4bbf1aa00666390a4",
+          "sha256": "1435cf8dd7c4a5ed9d8d7d25c98afd81c216e71de6fa08e8e505e05ea94f78a5"
+        }
+      ],
+      "acquired": true
+    },
+    "kicad-routing-tools": {
+      "name": "kicad-routing-tools",
+      "repository": "drandyhaas/KiCadRoutingTools",
+      "version": "v0.23.0",
+      "source_commit": "9399bfb29e072bfe60b10d9cdae20c274fc2a17a",
+      "selection_policy": "latest-stable-github-release",
+      "release_url": "https://github.com/drandyhaas/KiCadRoutingTools/releases/tag/v0.23.0",
+      "retrieved_utc": "2026-10-09T07:29:30.951686+00:00",
+      "downloads": [
+        {
+          "url": "https://api.github.com/repos/drandyhaas/KiCadRoutingTools/tarball/9399bfb29e072bfe60b10d9cdae20c274fc2a17a",
+          "sha256": "882da0334e1090abafbd0505078d12ba534ad012b758074c6af7315542fd1e08"
+        },
+        {
+          "url": "https://github.com/drandyhaas/KiCadRoutingTools/releases/download/v0.23.0/grid_router-linux-x86_64.so",
+          "sha256": "b09e49796b0372454e00bce7dcb884631dc3d50521b873f6c9c10dc8362ad666",
+          "asset_digest": "sha256:b09e49796b0372454e00bce7dcb884631dc3d50521b873f6c9c10dc8362ad666"
+        }
+      ],
+      "acquired": true
+    }
+  },
+  "original_harness_sha256": {
+    "runner-scoring-v2.py": "1bb008e81c6985deff6dd1956ac3f7fed8c18a9e65fded16adabaa31d216d642",
+    "scoring_telemetry_v1.py": "02469e99b4f12a071c7aba9bee62e94a91168aea11bd94174dc3fab3ddd0df7d",
+    "dsn-path.py": "0c03ef2edc81b6d806f59486d82a9be1531e74933e2009abbdb06629ddb6aee3",
+    "dsn-engine-scoring-v1.py": "b30b1b209fff093c5b03180974b815b27eb568760286f4970637c57eadc5da8e",
+    "dsn-engine-scoring-c2-v1.py": "924bc9bb649e2aa18dd8f170cc406696323e8678bf754c7598eb7c152cb203aa",
+    "fab-route-c2.ts": "f8bd0c7eaa9ca80e3bb3f34bec2555fc5f75ade6e4424c56ff8683735f9a0e59",
+    "native-router-path-scoring-v3.py": "8f9efdc733cd1fbdeffe5cf699b48901a26670da522dcf571734bf245b978c44",
+    "native-router-format-v2.py": "7ab93c8fff4a4fac62e88b6cd55882aa7a290ed92c83b2fc08e0ca93de0aa82c",
+    "native-check-v4.3.py": "1ced7295253415bf7cc9d4d4c27c9bb4f0053d132e212fccbbc28a5a17f3e57e",
+    "native-check-v3.py": "370a1b84f2208f63244d17fc55be8940ef3c611626074b1bff3993cc3141b1a8"
+  },
+  "expected_binaries": {
+    "c/fastroute": "09c357178ee64951f7699181f9ca284c289a9e524453d583a08ab0be9d9c127c",
+    "c/freerouting-2.5.0.jar": "f6f51bb02245e8e717f9359bd260cc9c5c0b1bc0acc8b7cb2cd5b8ffeb5de3c7",
+    "b/jdk/bin/java": "beb10d8a791f19e3a924612a36acfb9b21a6171044e8a77ad2a6e9c90041d1d6",
+    "d/tracemaker/tracemaker": "0a1ae39f1ebeb39213b847c53aef6299798b3ef3534b74f8a9c4d2ee2d41d910",
+    "d/kicad-routing-tools/source/rust_router/grid_router.so": "b09e49796b0372454e00bce7dcb884631dc3d50521b873f6c9c10dc8362ad666"
+  }
+}

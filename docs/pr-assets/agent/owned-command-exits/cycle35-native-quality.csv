@@ -1,0 +1,7 @@
+repeat,version,initial_opens,opens,errors,warnings,completion
+1,before,1,0,0,2,1.0
+1,after,1,0,0,2,1.0
+2,before,1,0,0,2,1.0
+2,after,1,0,0,2,1.0
+3,before,1,0,0,2,1.0
+3,after,1,0,0,2,1.0

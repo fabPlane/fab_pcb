@@ -236,11 +236,15 @@ describe("validateNetlist", () => {
   });
 });
 
-test("virtual references need no footprint; physical references still warn", () => {
-  const warnings = validateNetlist({ components: [
-    { ref: "#FLG01", value: "PWR_FLAG", footprint: "" },
-    { ref: "R1", value: "1k", footprint: "" },
-  ], nets: [] }).filter((d) => d.code === "missing_footprint");
+test("intentional schematic-only power markers do not produce missing-footprint warnings", () => {
+  const source: Netlist = {
+    components: [
+      { ref: "#FLG001", value: "PWR_FLAG", footprint: "", libSource: { lib: "power", part: "PWR_FLAG" } },
+      { ref: "U1", value: "part", footprint: "" },
+    ],
+    nets: [],
+  };
+  const warnings = validateNetlist(source).filter((diagnostic) => diagnostic.code === "missing_footprint");
   expect(warnings).toHaveLength(1);
-  expect(warnings[0]!.message).toContain("R1");
+  expect(warnings[0]!.message).toContain("U1");
 });

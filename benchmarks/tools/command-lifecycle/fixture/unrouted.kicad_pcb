@@ -1,0 +1,47 @@
+(kicad_pcb
+  (version 20240108)
+  (generator "pcbnew")
+  (generator_version "8.0")
+  (general
+    (thickness 1.6)
+    (legacy_teardrops no)
+  )
+  (paper "A4")
+  (layers
+    (0 "F.Cu" signal)
+    (31 "B.Cu" signal)
+    (44 "Edge.Cuts" user)
+  )
+  (setup
+    (pad_to_mask_clearance 0)
+  )
+  (net 0 "")
+  (net 1 "NET1")
+  (footprint "Resistor_SMD:R_0805_2012Metric"
+    (layer "F.Cu")
+    (uuid "11111111-1111-1111-1111-111111111111")
+    (at 10 10)
+    (property "Reference" "R1" (at 0 -1.8 0) (layer "F.SilkS") (uuid "11111111-1111-1111-1111-111111111112"))
+    (property "Value" "1k" (at 0 1.8 0) (layer "F.Fab") (uuid "11111111-1111-1111-1111-111111111113"))
+    (pad "1" smd rect (at -1 0) (size 0.8 1) (layers "F.Cu" "F.Paste" "F.Mask") (net 1 "NET1") (uuid "11111111-1111-1111-1111-111111111114"))
+    (pad "2" smd rect (at 1 0) (size 0.8 1) (layers "F.Cu" "F.Paste" "F.Mask") (net 0 "") (uuid "11111111-1111-1111-1111-111111111115"))
+  )
+  (footprint "Resistor_SMD:R_0805_2012Metric"
+    (layer "F.Cu")
+    (uuid "22222222-2222-2222-2222-222222222221")
+    (at 20 10)
+    (property "Reference" "R2" (at 0 -1.8 0) (layer "F.SilkS") (uuid "22222222-2222-2222-2222-222222222222"))
+    (property "Value" "1k" (at 0 1.8 0) (layer "F.Fab") (uuid "22222222-2222-2222-2222-222222222223"))
+    (pad "1" smd rect (at -1 0) (size 0.8 1) (layers "F.Cu" "F.Paste" "F.Mask") (net 1 "NET1") (uuid "22222222-2222-2222-2222-222222222224"))
+    (pad "2" smd rect (at 1 0) (size 0.8 1) (layers "F.Cu" "F.Paste" "F.Mask") (net 0 "") (uuid "22222222-2222-2222-2222-222222222225"))
+  )
+  (gr_rect (start 0 0) (end 30 20) (stroke (width 0.1) (type default)) (fill none) (layer "Edge.Cuts") (uuid "33333333-3333-3333-3333-333333333333"))
+  
+  
+  (zone (net 0) (net_name "") (layer "F.Cu") (uuid "55555555-5555-5555-5555-555555555555")
+    (polygon
+      (pts (xy 1 1) (xy 29 1) (xy 29 19) (xy 1 19))
+    )
+    
+  )
+)

@@ -1,0 +1,20 @@
+[
+  {
+    "cohort": "public",
+    "case": "name",
+    "dsn_differs": true,
+    "dsn_sha256": "48e2ff3c9ec2b8d6c2b676e8ac3bb1bdd13dab892e33f5ae6cdfc55798a8e6a9"
+  },
+  {
+    "cohort": "public",
+    "case": "power",
+    "dsn_differs": true,
+    "dsn_sha256": "eb96af2f46cc91373734e7d141be9a2b32715b818fcf90561e24fed52a99b9a0"
+  },
+  {
+    "cohort": "public",
+    "case": "mixed",
+    "dsn_differs": false,
+    "dsn_sha256": "3021bf1545feee21ad26f582d053fd35a8b1f8f112a037458bf44973ba367710"
+  }
+]

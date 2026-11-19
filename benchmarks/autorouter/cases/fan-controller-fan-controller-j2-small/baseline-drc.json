@@ -1,0 +1,2018 @@
+{
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-10-12T12:37:43",
+    "ignored_checks": [
+        {
+            "description": "Footprint has no courtyard defined",
+            "key": "missing_courtyard"
+        },
+        {
+            "description": "Track endpoint not centered on via",
+            "key": "track_not_centered_on_via"
+        },
+        {
+            "description": "Tuning profile track geometries",
+            "key": "tuning_profile_track_geometries"
+        },
+        {
+            "description": "Footprint doesn't match symbol's footprint filters",
+            "key": "footprint_filters_mismatch"
+        },
+        {
+            "description": "Footprint component type doesn't match footprint pads",
+            "key": "footprint_type_mismatch"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning",
+        "exclusion"
+    ],
+    "kicad_version": "10.0.6",
+    "schematic_parity": [],
+    "source": "board.kicad_pcb",
+    "unconnected_items": [
+        {
+            "description": "Missing connection between items",
+            "items": [
+                {
+                    "description": "PTH pad 1 [/ENC_A(CN2)] of SW1",
+                    "pos": {
+                        "x": 119.466,
+                        "y": 64.932
+                    },
+                    "uuid": "c35dfdd2-1707-48d4-912b-93a2dd96a43d"
+                },
+                {
+                    "description": "Pad 2 [/ENC_A(CN2)] of U1 on B.Cu",
+                    "pos": {
+                        "x": 142.541,
+                        "y": 84.532
+                    },
+                    "uuid": "7291025e-72d9-4b59-9826-a276ae229641"
+                }
+            ],
+            "severity": "error",
+            "type": "unconnected_items"
+        }
+    ],
+    "violations": [
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of P1 on F.Silkscreen",
+                    "pos": {
+                        "x": 166.566,
+                        "y": 77.632
+                    },
+                    "uuid": "171b4825-2109-4c9b-ae7c-b642a64eb3fd"
+                },
+                {
+                    "description": "NPTH pad of P1",
+                    "pos": {
+                        "x": 166.126,
+                        "y": 73.702
+                    },
+                    "uuid": "f09f17bc-b8d9-40b2-a8e1-fce9c3e54fdf"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of P3 on F.Silkscreen",
+                    "pos": {
+                        "x": 153.566,
+                        "y": 67.132
+                    },
+                    "uuid": "386cc1d7-d55c-4677-a095-8a0a9cb0e7d2"
+                },
+                {
+                    "description": "NPTH pad of P3",
+                    "pos": {
+                        "x": 153.126,
+                        "y": 63.202
+                    },
+                    "uuid": "e163ed4c-2a25-4af6-a238-826fbc74c021"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of P4 on F.Silkscreen",
+                    "pos": {
+                        "x": 145.566,
+                        "y": 67.132
+                    },
+                    "uuid": "09339b09-d658-466b-93a4-aaba89abf051"
+                },
+                {
+                    "description": "NPTH pad of P4",
+                    "pos": {
+                        "x": 145.126,
+                        "y": 63.202
+                    },
+                    "uuid": "d61c9e34-95a1-4945-a74a-9f490475f979"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "NPTH pad of P6",
+                    "pos": {
+                        "x": 129.126,
+                        "y": 63.202
+                    },
+                    "uuid": "557b0147-c357-43c0-bf85-0bed69297765"
+                },
+                {
+                    "description": "Segment of P6 on F.Silkscreen",
+                    "pos": {
+                        "x": 129.566,
+                        "y": 67.132
+                    },
+                    "uuid": "84c63c6d-5be0-474a-9280-f48140bc9855"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of P5 on F.Silkscreen",
+                    "pos": {
+                        "x": 137.566,
+                        "y": 67.132
+                    },
+                    "uuid": "3be2dd1e-77fd-41be-8b1d-271e2d4bcacc"
+                },
+                {
+                    "description": "NPTH pad of P5",
+                    "pos": {
+                        "x": 137.126,
+                        "y": 63.202
+                    },
+                    "uuid": "9dc396fd-6ce5-42bc-9976-74a6bd2addd3"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of R4",
+                    "pos": {
+                        "x": 156.966,
+                        "y": 78.482
+                    },
+                    "uuid": "0a601c19-a0bc-4c8e-90b1-8bc42612b46e"
+                },
+                {
+                    "description": "Reference field of R2",
+                    "pos": {
+                        "x": 156.966,
+                        "y": 78.382
+                    },
+                    "uuid": "acc111c9-ca24-4924-9d2c-96422aee0201"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of R3 on B.Silkscreen",
+                    "pos": {
+                        "x": 157.466,
+                        "y": 77.752
+                    },
+                    "uuid": "5f2bfca2-efbf-49f8-82c0-1ae64098a8ec"
+                },
+                {
+                    "description": "Reference field of R2",
+                    "pos": {
+                        "x": 156.966,
+                        "y": 78.382
+                    },
+                    "uuid": "acc111c9-ca24-4924-9d2c-96422aee0201"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of R4 on B.Silkscreen",
+                    "pos": {
+                        "x": 157.466,
+                        "y": 79.252
+                    },
+                    "uuid": "0e63dea4-2dd7-4be4-9226-08db6b8d1b6c"
+                },
+                {
+                    "description": "Reference field of R3",
+                    "pos": {
+                        "x": 156.966,
+                        "y": 79.882
+                    },
+                    "uuid": "e0cdbcd1-f41f-4070-a2cb-8f34337ad4b8"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of C10 on B.Silkscreen",
+                    "pos": {
+                        "x": 154.982,
+                        "y": 77.797
+                    },
+                    "uuid": "638ac710-5544-4ed9-9e3c-1223037a1656"
+                },
+                {
+                    "description": "Reference field of R14",
+                    "pos": {
+                        "x": 153.966,
+                        "y": 78.382
+                    },
+                    "uuid": "b23e4b61-9f58-4c3c-9f72-e3fa3939b292"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Reference field of R3",
+                    "pos": {
+                        "x": 156.966,
+                        "y": 79.882
+                    },
+                    "uuid": "e0cdbcd1-f41f-4070-a2cb-8f34337ad4b8"
+                },
+                {
+                    "description": "Pad 2 [Net-(C10-Pad1)] of R4 on B.Cu",
+                    "pos": {
+                        "x": 156.216,
+                        "y": 79.932
+                    },
+                    "uuid": "772f7961-daa5-4c72-8f87-e37a497209d3"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Reference field of R2",
+                    "pos": {
+                        "x": 156.966,
+                        "y": 78.382
+                    },
+                    "uuid": "acc111c9-ca24-4924-9d2c-96422aee0201"
+                },
+                {
+                    "description": "Pad 1 [Net-(C10-Pad1)] of R3 on B.Cu",
+                    "pos": {
+                        "x": 156.216,
+                        "y": 78.432
+                    },
+                    "uuid": "ba7fe45a-47d0-42e7-84bb-354abdc2ce5d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Reference field of R4",
+                    "pos": {
+                        "x": 156.966,
+                        "y": 78.482
+                    },
+                    "uuid": "0a601c19-a0bc-4c8e-90b1-8bc42612b46e"
+                },
+                {
+                    "description": "Pad 1 [Net-(C10-Pad1)] of R3 on B.Cu",
+                    "pos": {
+                        "x": 156.216,
+                        "y": 78.432
+                    },
+                    "uuid": "ba7fe45a-47d0-42e7-84bb-354abdc2ce5d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Reference field of R14",
+                    "pos": {
+                        "x": 153.966,
+                        "y": 78.382
+                    },
+                    "uuid": "b23e4b61-9f58-4c3c-9f72-e3fa3939b292"
+                },
+                {
+                    "description": "Pad 1 [Net-(C10-Pad1)] of C10 on B.Cu",
+                    "pos": {
+                        "x": 154.728,
+                        "y": 78.432
+                    },
+                    "uuid": "d26fd79d-74aa-41a5-8399-8407aac46e63"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Reference field of R14",
+                    "pos": {
+                        "x": 153.966,
+                        "y": 78.382
+                    },
+                    "uuid": "b23e4b61-9f58-4c3c-9f72-e3fa3939b292"
+                },
+                {
+                    "description": "Pad 2 [GND] of C10 on B.Cu",
+                    "pos": {
+                        "x": 153.204,
+                        "y": 78.432
+                    },
+                    "uuid": "57d09a1a-09f9-4edc-b251-0226e644a3bc"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Reference field of R2",
+                    "pos": {
+                        "x": 156.966,
+                        "y": 78.382
+                    },
+                    "uuid": "acc111c9-ca24-4924-9d2c-96422aee0201"
+                },
+                {
+                    "description": "Pad 2 [/pwm_in] of R3 on B.Cu",
+                    "pos": {
+                        "x": 157.716,
+                        "y": 78.432
+                    },
+                    "uuid": "04a21a79-c63e-465e-aa07-b523219dd176"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Reference field of R4",
+                    "pos": {
+                        "x": 156.966,
+                        "y": 78.482
+                    },
+                    "uuid": "0a601c19-a0bc-4c8e-90b1-8bc42612b46e"
+                },
+                {
+                    "description": "Pad 2 [/pwm_in] of R3 on B.Cu",
+                    "pos": {
+                        "x": 157.716,
+                        "y": 78.432
+                    },
+                    "uuid": "04a21a79-c63e-465e-aa07-b523219dd176"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Reference field of R3",
+                    "pos": {
+                        "x": 156.966,
+                        "y": 79.882
+                    },
+                    "uuid": "e0cdbcd1-f41f-4070-a2cb-8f34337ad4b8"
+                },
+                {
+                    "description": "Pad 1 [analog_cmd] of R4 on B.Cu",
+                    "pos": {
+                        "x": 157.716,
+                        "y": 79.932
+                    },
+                    "uuid": "da0e5c9d-f819-4bcf-8366-1d8f1f7332ea"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q1 on B.Silkscreen",
+                    "pos": {
+                        "x": 156.358,
+                        "y": 72.362
+                    },
+                    "uuid": "a209a1ed-ae6d-47f7-a15e-754c2e594368"
+                },
+                {
+                    "description": "Pad 1 [Net-(Q1-Pad1)] of Q1 on B.Cu",
+                    "pos": {
+                        "x": 155.723,
+                        "y": 74.5845
+                    },
+                    "uuid": "6f847742-ed00-401c-a54c-1d48b2f8b6a3"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q1 on B.Silkscreen",
+                    "pos": {
+                        "x": 156.358,
+                        "y": 72.362
+                    },
+                    "uuid": "a209a1ed-ae6d-47f7-a15e-754c2e594368"
+                },
+                {
+                    "description": "Pad 2 [GND] of Q1 on B.Cu",
+                    "pos": {
+                        "x": 155.723,
+                        "y": 72.6795
+                    },
+                    "uuid": "b7015e3b-ad13-49e6-a136-ce957f03d96d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q1 on B.Silkscreen",
+                    "pos": {
+                        "x": 157.374,
+                        "y": 72.362
+                    },
+                    "uuid": "502328d5-4618-493d-bdd7-10ee8d1dcc05"
+                },
+                {
+                    "description": "Pad 2 [GND] of Q1 on B.Cu",
+                    "pos": {
+                        "x": 155.723,
+                        "y": 72.6795
+                    },
+                    "uuid": "b7015e3b-ad13-49e6-a136-ce957f03d96d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q1 on B.Silkscreen",
+                    "pos": {
+                        "x": 157.374,
+                        "y": 74.9655
+                    },
+                    "uuid": "ef7fff2c-1491-4122-a09e-3bb227450648"
+                },
+                {
+                    "description": "Pad 1 [Net-(Q1-Pad1)] of Q1 on B.Cu",
+                    "pos": {
+                        "x": 155.723,
+                        "y": 74.5845
+                    },
+                    "uuid": "6f847742-ed00-401c-a54c-1d48b2f8b6a3"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q1 on B.Silkscreen",
+                    "pos": {
+                        "x": 157.374,
+                        "y": 74.9655
+                    },
+                    "uuid": "b62b5211-d5a6-4655-9cad-314de7317d1f"
+                },
+                {
+                    "description": "Pad 3 [/sense_out] of Q1 on B.Cu",
+                    "pos": {
+                        "x": 158.009,
+                        "y": 73.632
+                    },
+                    "uuid": "34357702-8ba8-40e3-9d9c-2b5953e698ff"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q4 on B.Silkscreen",
+                    "pos": {
+                        "x": 132.958,
+                        "y": 70.202
+                    },
+                    "uuid": "5ff76a6b-0215-4c49-abd9-06372387e087"
+                },
+                {
+                    "description": "Pad 2 [GND] of Q4 on B.Cu",
+                    "pos": {
+                        "x": 134.609,
+                        "y": 69.8845
+                    },
+                    "uuid": "8962f68f-56eb-40d7-86be-5a4cdd0fc47d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q4 on B.Silkscreen",
+                    "pos": {
+                        "x": 132.958,
+                        "y": 67.5985
+                    },
+                    "uuid": "d5ed1f00-4914-49d9-9d20-a6bfa91ee71f"
+                },
+                {
+                    "description": "Pad 3 [Net-(P5-Pad4)] of Q4 on B.Cu",
+                    "pos": {
+                        "x": 132.323,
+                        "y": 68.932
+                    },
+                    "uuid": "7c942a08-c47d-44ee-8a84-7981bab374fd"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q4 on B.Silkscreen",
+                    "pos": {
+                        "x": 132.958,
+                        "y": 67.5985
+                    },
+                    "uuid": "c00bf46e-f1b4-4364-a0ad-0b2f115b5652"
+                },
+                {
+                    "description": "Pad 1 [Net-(Q4-Pad1)] of Q4 on B.Cu",
+                    "pos": {
+                        "x": 134.609,
+                        "y": 67.9795
+                    },
+                    "uuid": "fb7d5162-657e-4250-85bb-505981f55d76"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q4 on B.Silkscreen",
+                    "pos": {
+                        "x": 133.974,
+                        "y": 70.202
+                    },
+                    "uuid": "a3c76dd5-9465-4adc-b80d-152e666b87cc"
+                },
+                {
+                    "description": "Pad 1 [Net-(Q4-Pad1)] of Q4 on B.Cu",
+                    "pos": {
+                        "x": 134.609,
+                        "y": 67.9795
+                    },
+                    "uuid": "fb7d5162-657e-4250-85bb-505981f55d76"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q4 on B.Silkscreen",
+                    "pos": {
+                        "x": 133.974,
+                        "y": 70.202
+                    },
+                    "uuid": "a3c76dd5-9465-4adc-b80d-152e666b87cc"
+                },
+                {
+                    "description": "Pad 2 [GND] of Q4 on B.Cu",
+                    "pos": {
+                        "x": 134.609,
+                        "y": 69.8845
+                    },
+                    "uuid": "8962f68f-56eb-40d7-86be-5a4cdd0fc47d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q5 on B.Silkscreen",
+                    "pos": {
+                        "x": 124.958,
+                        "y": 67.5985
+                    },
+                    "uuid": "3fd9de27-1f04-47bf-be6b-abac9e1fecfc"
+                },
+                {
+                    "description": "Pad 3 [Net-(P6-Pad4)] of Q5 on B.Cu",
+                    "pos": {
+                        "x": 124.323,
+                        "y": 68.932
+                    },
+                    "uuid": "e91e77e3-e1eb-4952-bc0d-7d1e0aa029ac"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q5 on B.Silkscreen",
+                    "pos": {
+                        "x": 124.958,
+                        "y": 67.5985
+                    },
+                    "uuid": "748b1d09-5835-40a9-9d28-e99013701ba6"
+                },
+                {
+                    "description": "Pad 1 [Net-(Q5-Pad1)] of Q5 on B.Cu",
+                    "pos": {
+                        "x": 126.609,
+                        "y": 67.9795
+                    },
+                    "uuid": "bdd23867-0b51-417c-bd61-5a300e2e4a20"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q5 on B.Silkscreen",
+                    "pos": {
+                        "x": 124.958,
+                        "y": 70.202
+                    },
+                    "uuid": "160e09ab-c391-442f-aded-c4662b9e9dbe"
+                },
+                {
+                    "description": "Pad 2 [GND] of Q5 on B.Cu",
+                    "pos": {
+                        "x": 126.609,
+                        "y": 69.8845
+                    },
+                    "uuid": "ed0a1ecf-2e94-469b-b219-57545f42839c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q5 on B.Silkscreen",
+                    "pos": {
+                        "x": 125.974,
+                        "y": 70.202
+                    },
+                    "uuid": "0715d9d1-0550-4f20-87c1-5900d7bcc153"
+                },
+                {
+                    "description": "Pad 1 [Net-(Q5-Pad1)] of Q5 on B.Cu",
+                    "pos": {
+                        "x": 126.609,
+                        "y": 67.9795
+                    },
+                    "uuid": "bdd23867-0b51-417c-bd61-5a300e2e4a20"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q5 on B.Silkscreen",
+                    "pos": {
+                        "x": 125.974,
+                        "y": 70.202
+                    },
+                    "uuid": "0715d9d1-0550-4f20-87c1-5900d7bcc153"
+                },
+                {
+                    "description": "Pad 2 [GND] of Q5 on B.Cu",
+                    "pos": {
+                        "x": 126.609,
+                        "y": 69.8845
+                    },
+                    "uuid": "ed0a1ecf-2e94-469b-b219-57545f42839c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q2 on B.Silkscreen",
+                    "pos": {
+                        "x": 148.958,
+                        "y": 70.202
+                    },
+                    "uuid": "e6288b58-0443-4003-8c49-412fca834d71"
+                },
+                {
+                    "description": "Pad 2 [GND] of Q2 on B.Cu",
+                    "pos": {
+                        "x": 150.609,
+                        "y": 69.8845
+                    },
+                    "uuid": "dbcda396-2c91-4eaa-b2a0-c5e57659b131"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q2 on B.Silkscreen",
+                    "pos": {
+                        "x": 148.958,
+                        "y": 67.5985
+                    },
+                    "uuid": "c3bbf122-348e-4ecd-b60b-310c21f33f02"
+                },
+                {
+                    "description": "Pad 3 [Net-(P3-Pad4)] of Q2 on B.Cu",
+                    "pos": {
+                        "x": 148.323,
+                        "y": 68.932
+                    },
+                    "uuid": "f7ac2ddd-0f3d-46ef-aff7-b3a5e15ee469"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q2 on B.Silkscreen",
+                    "pos": {
+                        "x": 148.958,
+                        "y": 67.5985
+                    },
+                    "uuid": "5a106e25-af60-4475-a323-2ba8626b9f0c"
+                },
+                {
+                    "description": "Pad 1 [Net-(Q2-Pad1)] of Q2 on B.Cu",
+                    "pos": {
+                        "x": 150.609,
+                        "y": 67.9795
+                    },
+                    "uuid": "e2330e24-4b8e-41f4-a54b-c43c460a1e00"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q2 on B.Silkscreen",
+                    "pos": {
+                        "x": 149.974,
+                        "y": 70.202
+                    },
+                    "uuid": "87d49dda-e96f-4cd5-a0dc-7ffddadc037d"
+                },
+                {
+                    "description": "Pad 1 [Net-(Q2-Pad1)] of Q2 on B.Cu",
+                    "pos": {
+                        "x": 150.609,
+                        "y": 67.9795
+                    },
+                    "uuid": "e2330e24-4b8e-41f4-a54b-c43c460a1e00"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q2 on B.Silkscreen",
+                    "pos": {
+                        "x": 149.974,
+                        "y": 70.202
+                    },
+                    "uuid": "87d49dda-e96f-4cd5-a0dc-7ffddadc037d"
+                },
+                {
+                    "description": "Pad 2 [GND] of Q2 on B.Cu",
+                    "pos": {
+                        "x": 150.609,
+                        "y": 69.8845
+                    },
+                    "uuid": "dbcda396-2c91-4eaa-b2a0-c5e57659b131"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q3 on B.Silkscreen",
+                    "pos": {
+                        "x": 140.958,
+                        "y": 70.202
+                    },
+                    "uuid": "af514a78-ba1f-4cd3-afc9-5bb34f6a6b46"
+                },
+                {
+                    "description": "Pad 2 [GND] of Q3 on B.Cu",
+                    "pos": {
+                        "x": 142.609,
+                        "y": 69.8845
+                    },
+                    "uuid": "7c63e683-caaf-4937-b500-4de29e2cc168"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q3 on B.Silkscreen",
+                    "pos": {
+                        "x": 140.958,
+                        "y": 67.5985
+                    },
+                    "uuid": "bfb6b386-3e1f-42c4-895a-966b5b1b3f0b"
+                },
+                {
+                    "description": "Pad 3 [Net-(P4-Pad4)] of Q3 on B.Cu",
+                    "pos": {
+                        "x": 140.323,
+                        "y": 68.932
+                    },
+                    "uuid": "87a79420-9727-48e8-8e95-3510c3f02c15"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q3 on B.Silkscreen",
+                    "pos": {
+                        "x": 140.958,
+                        "y": 67.5985
+                    },
+                    "uuid": "b53c5797-2855-4b9c-89c9-ace86442db3e"
+                },
+                {
+                    "description": "Pad 1 [Net-(Q3-Pad1)] of Q3 on B.Cu",
+                    "pos": {
+                        "x": 142.609,
+                        "y": 67.9795
+                    },
+                    "uuid": "7f40f11d-e5e9-4222-a569-350c575290e6"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q3 on B.Silkscreen",
+                    "pos": {
+                        "x": 141.974,
+                        "y": 70.202
+                    },
+                    "uuid": "0be8b9e0-2956-4255-82b1-1d49d1ee4b73"
+                },
+                {
+                    "description": "Pad 1 [Net-(Q3-Pad1)] of Q3 on B.Cu",
+                    "pos": {
+                        "x": 142.609,
+                        "y": 67.9795
+                    },
+                    "uuid": "7f40f11d-e5e9-4222-a569-350c575290e6"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of Q3 on B.Silkscreen",
+                    "pos": {
+                        "x": 141.974,
+                        "y": 70.202
+                    },
+                    "uuid": "0be8b9e0-2956-4255-82b1-1d49d1ee4b73"
+                },
+                {
+                    "description": "Pad 2 [GND] of Q3 on B.Cu",
+                    "pos": {
+                        "x": 142.609,
+                        "y": 69.8845
+                    },
+                    "uuid": "7c63e683-caaf-4937-b500-4de29e2cc168"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'kicad_pcb'",
+            "items": [
+                {
+                    "description": "Footprint P2",
+                    "pos": {
+                        "x": 151.966,
+                        "y": 87.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005771ae2e"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint SW1",
+                    "pos": {
+                        "x": 116.966,
+                        "y": 72.432
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005771aee8"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Capacitors_ThroughHole'",
+            "items": [
+                {
+                    "description": "Footprint C7",
+                    "pos": {
+                        "x": 159.566,
+                        "y": 65.532
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005771c549"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint P1",
+                    "pos": {
+                        "x": 163.966,
+                        "y": 72.432
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005773e0aa"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint P3",
+                    "pos": {
+                        "x": 150.966,
+                        "y": 61.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005773e0b9"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint P4",
+                    "pos": {
+                        "x": 142.966,
+                        "y": 61.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005773e0c8"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint P5",
+                    "pos": {
+                        "x": 134.966,
+                        "y": 61.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005773e0d7"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint P6",
+                    "pos": {
+                        "x": 126.966,
+                        "y": 61.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005773e0e6"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint REF**",
+                    "pos": {
+                        "x": 128.466,
+                        "y": 73.432
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000578fe525"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint REF**",
+                    "pos": {
+                        "x": 129.966,
+                        "y": 73.432
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000578fe53b"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint REF**",
+                    "pos": {
+                        "x": 128.466,
+                        "y": 74.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000578fe541"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint REF**",
+                    "pos": {
+                        "x": 129.966,
+                        "y": 74.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000578fe546"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint REF**",
+                    "pos": {
+                        "x": 120.766,
+                        "y": 84.732
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000578fe5e8"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint REF**",
+                    "pos": {
+                        "x": 125.766,
+                        "y": 89.332
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000578fe603"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint REF**",
+                    "pos": {
+                        "x": 130.766,
+                        "y": 84.732
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000578fe608"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint REF**",
+                    "pos": {
+                        "x": 162.766,
+                        "y": 78.732
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000578fe843"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint REF**",
+                    "pos": {
+                        "x": 164.266,
+                        "y": 78.732
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000578fe849"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint REF**",
+                    "pos": {
+                        "x": 165.766,
+                        "y": 78.732
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000578fe850"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint REF**",
+                    "pos": {
+                        "x": 121.466,
+                        "y": 76.432
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000578febb4"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint REF**",
+                    "pos": {
+                        "x": 121.466,
+                        "y": 77.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000578febc8"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint REF**",
+                    "pos": {
+                        "x": 164.966,
+                        "y": 57.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005790b588"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint REF**",
+                    "pos": {
+                        "x": 164.966,
+                        "y": 86.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005790b596"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint REF**",
+                    "pos": {
+                        "x": 112.966,
+                        "y": 86.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005790b59f"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint REF**",
+                    "pos": {
+                        "x": 112.966,
+                        "y": 57.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005790b5a8"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'footprints'",
+            "items": [
+                {
+                    "description": "Footprint G***",
+                    "pos": {
+                        "x": 129.266,
+                        "y": 79.832
+                    },
+                    "uuid": "00000000-0000-0000-0000-000059389a67"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'kicad_pcb'",
+            "items": [
+                {
+                    "description": "Footprint U1",
+                    "pos": {
+                        "x": 138.966,
+                        "y": 80.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005771af0d"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint C1",
+                    "pos": {
+                        "x": 120.766,
+                        "y": 82.332
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005771bee6"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint C2",
+                    "pos": {
+                        "x": 130.766,
+                        "y": 82.332
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005771beee"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint C3",
+                    "pos": {
+                        "x": 153.466,
+                        "y": 59.432
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005771bef6"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint C4",
+                    "pos": {
+                        "x": 145.466,
+                        "y": 59.432
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005771befe"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint C5",
+                    "pos": {
+                        "x": 137.466,
+                        "y": 59.432
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005771bf06"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint C6",
+                    "pos": {
+                        "x": 129.466,
+                        "y": 59.432
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005771bf0e"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint U2",
+                    "pos": {
+                        "x": 125.766,
+                        "y": 84.732
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005771bf18"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint Q1",
+                    "pos": {
+                        "x": 156.866,
+                        "y": 73.632
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005771cc86"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint C8",
+                    "pos": {
+                        "x": 132.466,
+                        "y": 86.432
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005771d0a7"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint C9",
+                    "pos": {
+                        "x": 145.966,
+                        "y": 79.432
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005771d0af"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint Q2",
+                    "pos": {
+                        "x": 149.466,
+                        "y": 68.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057801734"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint Q3",
+                    "pos": {
+                        "x": 141.466,
+                        "y": 68.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057801740"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint Q4",
+                    "pos": {
+                        "x": 133.466,
+                        "y": 68.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-00005780174c"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint Q5",
+                    "pos": {
+                        "x": 125.466,
+                        "y": 68.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057801758"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint C10",
+                    "pos": {
+                        "x": 153.966,
+                        "y": 78.432
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000578fa925"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint C11",
+                    "pos": {
+                        "x": 153.966,
+                        "y": 79.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000578fa92d"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'lib_pcb'",
+            "items": [
+                {
+                    "description": "Footprint C12",
+                    "pos": {
+                        "x": 138.466,
+                        "y": 74.032
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000578fa935"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Diodes_SMD'",
+            "items": [
+                {
+                    "description": "Footprint D1",
+                    "pos": {
+                        "x": 155.766,
+                        "y": 65.732
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f78c8"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Diodes_SMD'",
+            "items": [
+                {
+                    "description": "Footprint D2",
+                    "pos": {
+                        "x": 147.766,
+                        "y": 65.732
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f78e0"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Diodes_SMD'",
+            "items": [
+                {
+                    "description": "Footprint D3",
+                    "pos": {
+                        "x": 139.766,
+                        "y": 65.732
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f78f8"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Diodes_SMD'",
+            "items": [
+                {
+                    "description": "Footprint D4",
+                    "pos": {
+                        "x": 131.766,
+                        "y": 65.732
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f7910"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Resistors_SMD'",
+            "items": [
+                {
+                    "description": "Footprint R1",
+                    "pos": {
+                        "x": 145.966,
+                        "y": 82.432
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f7911"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Resistors_SMD'",
+            "items": [
+                {
+                    "description": "Footprint R2",
+                    "pos": {
+                        "x": 156.966,
+                        "y": 76.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f7921"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Resistors_SMD'",
+            "items": [
+                {
+                    "description": "Footprint R3",
+                    "pos": {
+                        "x": 156.966,
+                        "y": 78.432
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f7931"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Resistors_SMD'",
+            "items": [
+                {
+                    "description": "Footprint R4",
+                    "pos": {
+                        "x": 156.966,
+                        "y": 79.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f7941"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Diodes_SMD'",
+            "items": [
+                {
+                    "description": "Footprint R5",
+                    "pos": {
+                        "x": 136.366,
+                        "y": 87.732
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f7968"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Resistors_SMD'",
+            "items": [
+                {
+                    "description": "Footprint R6",
+                    "pos": {
+                        "x": 139.766,
+                        "y": 87.732
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f7979"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Resistors_SMD'",
+            "items": [
+                {
+                    "description": "Footprint R7",
+                    "pos": {
+                        "x": 155.766,
+                        "y": 62.332
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f798a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Resistors_SMD'",
+            "items": [
+                {
+                    "description": "Footprint R8",
+                    "pos": {
+                        "x": 147.766,
+                        "y": 62.332
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f799b"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Resistors_SMD'",
+            "items": [
+                {
+                    "description": "Footprint R9",
+                    "pos": {
+                        "x": 139.766,
+                        "y": 62.332
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f79ac"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Resistors_SMD'",
+            "items": [
+                {
+                    "description": "Footprint R10",
+                    "pos": {
+                        "x": 154.366,
+                        "y": 68.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f79ad"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Resistors_SMD'",
+            "items": [
+                {
+                    "description": "Footprint R11",
+                    "pos": {
+                        "x": 146.366,
+                        "y": 68.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f79bd"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Resistors_SMD'",
+            "items": [
+                {
+                    "description": "Footprint R12",
+                    "pos": {
+                        "x": 138.366,
+                        "y": 68.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f79cd"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Resistors_SMD'",
+            "items": [
+                {
+                    "description": "Footprint R13",
+                    "pos": {
+                        "x": 130.366,
+                        "y": 68.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f79dd"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Resistors_SMD'",
+            "items": [
+                {
+                    "description": "Footprint R14",
+                    "pos": {
+                        "x": 153.966,
+                        "y": 76.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f79ed"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Resistors_SMD'",
+            "items": [
+                {
+                    "description": "Footprint R15",
+                    "pos": {
+                        "x": 152.466,
+                        "y": 68.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f79fd"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Resistors_SMD'",
+            "items": [
+                {
+                    "description": "Footprint R16",
+                    "pos": {
+                        "x": 144.466,
+                        "y": 68.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f7a0d"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Resistors_SMD'",
+            "items": [
+                {
+                    "description": "Footprint R17",
+                    "pos": {
+                        "x": 136.466,
+                        "y": 68.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f7a1d"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Resistors_SMD'",
+            "items": [
+                {
+                    "description": "Footprint R18",
+                    "pos": {
+                        "x": 128.466,
+                        "y": 68.932
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f7a2d"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Resistors_SMD'",
+            "items": [
+                {
+                    "description": "Footprint R19",
+                    "pos": {
+                        "x": 131.766,
+                        "y": 62.332
+                    },
+                    "uuid": "00000000-0000-0000-0000-0000592f7a4d"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        }
+    ]
+}

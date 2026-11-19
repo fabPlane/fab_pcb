@@ -1,0 +1,1372 @@
+{
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-10-12T12:37:45",
+    "ignored_checks": [
+        {
+            "description": "Footprint has no courtyard defined",
+            "key": "missing_courtyard"
+        },
+        {
+            "description": "Track endpoint not centered on via",
+            "key": "track_not_centered_on_via"
+        },
+        {
+            "description": "Tuning profile track geometries",
+            "key": "tuning_profile_track_geometries"
+        },
+        {
+            "description": "Footprint doesn't match symbol's footprint filters",
+            "key": "footprint_filters_mismatch"
+        },
+        {
+            "description": "Footprint component type doesn't match footprint pads",
+            "key": "footprint_type_mismatch"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning",
+        "exclusion"
+    ],
+    "kicad_version": "10.0.6",
+    "schematic_parity": [],
+    "source": "board.kicad_pcb",
+    "unconnected_items": [
+        {
+            "description": "Missing connection between items",
+            "items": [
+                {
+                    "description": "PTH pad 1 [/ESP_TX] of ESP1",
+                    "pos": {
+                        "x": 66.04,
+                        "y": 97.79
+                    },
+                    "uuid": "f3efb3cf-8f5e-4c28-84e6-0a5fcc2ccf7a"
+                },
+                {
+                    "description": "PTH pad 2 [/ESP_TX] of IC1",
+                    "pos": {
+                        "x": 95.25,
+                        "y": 124.46
+                    },
+                    "uuid": "168e23f2-54f7-4c50-b8d7-430a5ce36921"
+                }
+            ],
+            "severity": "error",
+            "type": "unconnected_items"
+        },
+        {
+            "description": "Missing connection between items",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(ESP1-Pad5)] of R8",
+                    "pos": {
+                        "x": 60.96,
+                        "y": 97.155
+                    },
+                    "uuid": "36ca88b3-dca3-41f8-9833-2bd7f864190e"
+                },
+                {
+                    "description": "PTH pad 5 [Net-(ESP1-Pad5)] of ESP1",
+                    "pos": {
+                        "x": 66.04,
+                        "y": 102.87
+                    },
+                    "uuid": "363417f3-3bb6-4d99-a042-8ef94a6e9b07"
+                }
+            ],
+            "severity": "error",
+            "type": "unconnected_items"
+        },
+        {
+            "description": "Missing connection between items",
+            "items": [
+                {
+                    "description": "PTH pad 6 [Net-(ESP1-Pad6)] of ESP1",
+                    "pos": {
+                        "x": 68.58,
+                        "y": 102.87
+                    },
+                    "uuid": "7e5ebdfb-eab1-42cd-828a-2c89d540ddbf"
+                },
+                {
+                    "description": "PTH pad 2 [Net-(ESP1-Pad6)] of R7",
+                    "pos": {
+                        "x": 93.98,
+                        "y": 97.155
+                    },
+                    "uuid": "d6167ed5-db0a-4302-8474-27d4164038be"
+                }
+            ],
+            "severity": "error",
+            "type": "unconnected_items"
+        },
+        {
+            "description": "Missing connection between items",
+            "items": [
+                {
+                    "description": "PTH pad 8 [/ESP_RX] of ESP1",
+                    "pos": {
+                        "x": 68.58,
+                        "y": 105.41
+                    },
+                    "uuid": "551b7b11-9cb0-4b82-ade8-3fce8d1ccc8f"
+                },
+                {
+                    "description": "PTH pad 3 [/ESP_RX] of IC1",
+                    "pos": {
+                        "x": 92.71,
+                        "y": 124.46
+                    },
+                    "uuid": "dc8a90df-70d3-47bb-b990-d4de8162de05"
+                }
+            ],
+            "severity": "error",
+            "type": "unconnected_items"
+        }
+    ],
+    "violations": [
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "PTH pad 1 [GND] of R6",
+                    "pos": {
+                        "x": 137.16,
+                        "y": 104.775
+                    },
+                    "uuid": "821e33b2-05d4-4760-a5c8-a2d314a88dc8"
+                },
+                {
+                    "description": "Segment of R6 on F.Silkscreen",
+                    "pos": {
+                        "x": 137.16,
+                        "y": 104.775
+                    },
+                    "uuid": "d16ea3ae-b538-45bf-9580-ed00fd8a7d18"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "PTH pad 1 [GND] of R6",
+                    "pos": {
+                        "x": 137.16,
+                        "y": 104.775
+                    },
+                    "uuid": "821e33b2-05d4-4760-a5c8-a2d314a88dc8"
+                },
+                {
+                    "description": "Segment of R6 on F.Silkscreen",
+                    "pos": {
+                        "x": 137.795,
+                        "y": 105.41
+                    },
+                    "uuid": "eb965af4-0bfd-40f6-8a90-fbe54ad53d6b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "PTH pad 2 [Net-(DIG1-Pad8)] of R3",
+                    "pos": {
+                        "x": 137.16,
+                        "y": 90.805
+                    },
+                    "uuid": "45e82550-d5b9-4276-ab2a-1b81dd0af8cc"
+                },
+                {
+                    "description": "Segment of R3 on F.Silkscreen",
+                    "pos": {
+                        "x": 137.16,
+                        "y": 91.44
+                    },
+                    "uuid": "73ba8e99-3a79-4ec7-9c7b-b13fd99ffe4c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "PTH pad 2 [Net-(DIG1-Pad8)] of R3",
+                    "pos": {
+                        "x": 137.16,
+                        "y": 90.805
+                    },
+                    "uuid": "45e82550-d5b9-4276-ab2a-1b81dd0af8cc"
+                },
+                {
+                    "description": "Segment of R3 on F.Silkscreen",
+                    "pos": {
+                        "x": 138.43,
+                        "y": 91.44
+                    },
+                    "uuid": "bc06bf92-cbfc-46cb-a6e3-084c1fe08b35"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of R3 on F.Silkscreen",
+                    "pos": {
+                        "x": 136.525,
+                        "y": 99.06
+                    },
+                    "uuid": "0dd8933a-d12d-4d5e-a3e0-1a742b4c3fb4"
+                },
+                {
+                    "description": "PTH pad 1 [GND] of R3",
+                    "pos": {
+                        "x": 137.16,
+                        "y": 99.695
+                    },
+                    "uuid": "c5004eba-873e-4378-b0d9-41987fb68099"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of R3 on F.Silkscreen",
+                    "pos": {
+                        "x": 137.16,
+                        "y": 99.695
+                    },
+                    "uuid": "271be10d-d1aa-4e0d-abd8-2b1615ebf352"
+                },
+                {
+                    "description": "PTH pad 1 [GND] of R3",
+                    "pos": {
+                        "x": 137.16,
+                        "y": 99.695
+                    },
+                    "uuid": "c5004eba-873e-4378-b0d9-41987fb68099"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of R6 on F.Silkscreen",
+                    "pos": {
+                        "x": 135.89,
+                        "y": 113.03
+                    },
+                    "uuid": "3139aadb-d02b-4652-8c5f-a347b74b4dde"
+                },
+                {
+                    "description": "PTH pad 2 [Net-(DIG2-Pad3)] of R6",
+                    "pos": {
+                        "x": 137.16,
+                        "y": 113.665
+                    },
+                    "uuid": "cafc64f7-43c2-46c7-9a46-9b20ca73b09c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of R6 on F.Silkscreen",
+                    "pos": {
+                        "x": 137.16,
+                        "y": 113.03
+                    },
+                    "uuid": "04d4157f-35a6-403f-9789-de9d8cfb66e0"
+                },
+                {
+                    "description": "PTH pad 2 [Net-(DIG2-Pad3)] of R6",
+                    "pos": {
+                        "x": 137.16,
+                        "y": 113.665
+                    },
+                    "uuid": "cafc64f7-43c2-46c7-9a46-9b20ca73b09c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "PTH pad 1 [/5V_PWR] of R2",
+                    "pos": {
+                        "x": 97.79,
+                        "y": 97.155
+                    },
+                    "uuid": "3174b9cb-f7fd-40c8-b106-d022dd36f33b"
+                },
+                {
+                    "description": "Segment of R2 on F.Silkscreen",
+                    "pos": {
+                        "x": 97.79,
+                        "y": 97.155
+                    },
+                    "uuid": "9d30f7c9-a4ca-4585-ba4f-0b94d493ef35"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "PTH pad 1 [/5V_PWR] of R2",
+                    "pos": {
+                        "x": 97.79,
+                        "y": 97.155
+                    },
+                    "uuid": "3174b9cb-f7fd-40c8-b106-d022dd36f33b"
+                },
+                {
+                    "description": "Segment of R2 on F.Silkscreen",
+                    "pos": {
+                        "x": 98.425,
+                        "y": 97.79
+                    },
+                    "uuid": "828ad645-a8cf-4fd5-ad96-ddb7217475e1"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "PTH pad 1 [GND] of R4",
+                    "pos": {
+                        "x": 111.76,
+                        "y": 90.805
+                    },
+                    "uuid": "45053b71-c8fd-486e-81a4-ecbe08a9c004"
+                },
+                {
+                    "description": "Segment of R4 on F.Silkscreen",
+                    "pos": {
+                        "x": 111.76,
+                        "y": 90.805
+                    },
+                    "uuid": "58b7fef4-d6af-4d14-9212-7c3496834b2c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "PTH pad 1 [GND] of R4",
+                    "pos": {
+                        "x": 111.76,
+                        "y": 90.805
+                    },
+                    "uuid": "45053b71-c8fd-486e-81a4-ecbe08a9c004"
+                },
+                {
+                    "description": "Segment of R4 on F.Silkscreen",
+                    "pos": {
+                        "x": 112.395,
+                        "y": 91.44
+                    },
+                    "uuid": "f632554a-1509-42c6-bdd8-c62a8963a2d9"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "PTH pad 2 [Net-(DIG1-Pad3)] of R4",
+                    "pos": {
+                        "x": 111.76,
+                        "y": 99.695
+                    },
+                    "uuid": "0a4d5e5b-2fa1-4892-9ced-c84e1beb3d7e"
+                },
+                {
+                    "description": "Segment of R4 on F.Silkscreen",
+                    "pos": {
+                        "x": 111.76,
+                        "y": 99.06
+                    },
+                    "uuid": "323c0116-f41a-4d1e-b6e1-aaa0b6eeb8ed"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "PTH pad 2 [Net-(DIG1-Pad3)] of R4",
+                    "pos": {
+                        "x": 111.76,
+                        "y": 99.695
+                    },
+                    "uuid": "0a4d5e5b-2fa1-4892-9ced-c84e1beb3d7e"
+                },
+                {
+                    "description": "Segment of R4 on F.Silkscreen",
+                    "pos": {
+                        "x": 110.49,
+                        "y": 99.06
+                    },
+                    "uuid": "e7914535-0c06-4c9d-a5c9-0024d84305c6"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "PTH pad 2 [Net-(DIG2-Pad8)] of R5",
+                    "pos": {
+                        "x": 111.76,
+                        "y": 104.775
+                    },
+                    "uuid": "2c210237-8b0b-4347-bcae-806d6ff74462"
+                },
+                {
+                    "description": "Segment of R5 on F.Silkscreen",
+                    "pos": {
+                        "x": 111.76,
+                        "y": 105.41
+                    },
+                    "uuid": "3ad16d91-6da4-4e1d-a7bb-c8a369d2ef51"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "PTH pad 2 [Net-(DIG2-Pad8)] of R5",
+                    "pos": {
+                        "x": 111.76,
+                        "y": 104.775
+                    },
+                    "uuid": "2c210237-8b0b-4347-bcae-806d6ff74462"
+                },
+                {
+                    "description": "Segment of R5 on F.Silkscreen",
+                    "pos": {
+                        "x": 113.03,
+                        "y": 105.41
+                    },
+                    "uuid": "48c6fe93-c6e8-4f24-bf41-76ac88003a98"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(IC1-Pad1)] of SW1",
+                    "pos": {
+                        "x": 102.87,
+                        "y": 118.11
+                    },
+                    "uuid": "077c0352-2a1a-4197-a39c-aa74a53f09da"
+                },
+                {
+                    "description": "Segment of SW1 on F.Silkscreen",
+                    "pos": {
+                        "x": 104.14,
+                        "y": 109.855
+                    },
+                    "uuid": "57f0cf2a-22cc-4268-95a8-5dcad1dd7bb4"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of BJ1",
+                    "pos": {
+                        "x": 71.12,
+                        "y": 86.29904
+                    },
+                    "uuid": "3c2aec5b-bffb-405a-8efe-69dde68d14ca"
+                },
+                {
+                    "description": "Segment of R1 on F.Silkscreen",
+                    "pos": {
+                        "x": 76.2,
+                        "y": 86.36
+                    },
+                    "uuid": "5f9abff3-318f-40c6-8aaa-f6168c8e202a"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of BJ1 on F.Silkscreen",
+                    "pos": {
+                        "x": 66.61912,
+                        "y": 83.20024
+                    },
+                    "uuid": "93e7b554-e05a-445e-b3d5-b4e65f37d717"
+                },
+                {
+                    "description": "PTH pad 1 [VCC] of BJ1",
+                    "pos": {
+                        "x": 71.12,
+                        "y": 82.40014
+                    },
+                    "uuid": "a163bdcf-8376-4833-96a9-8974590c8762"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "PTH pad 3 [GND] of BJ1",
+                    "pos": {
+                        "x": 66.421,
+                        "y": 79.4004
+                    },
+                    "uuid": "4f82e010-5c61-4a4c-8c6f-dbd85940ea85"
+                },
+                {
+                    "description": "Segment of BJ1 on F.Silkscreen",
+                    "pos": {
+                        "x": 66.61912,
+                        "y": 68.69938
+                    },
+                    "uuid": "dc6da949-dd08-40df-93a9-381485fe6d51"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/5V_PWR] of R1",
+                    "pos": {
+                        "x": 76.835,
+                        "y": 87.63
+                    },
+                    "uuid": "5cd4e7d0-22d6-4e09-910e-efda190589a4"
+                },
+                {
+                    "description": "Segment of R1 on F.Silkscreen",
+                    "pos": {
+                        "x": 76.2,
+                        "y": 87.63
+                    },
+                    "uuid": "c457ef53-fad5-45e8-8a4e-83fe60571797"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of R1 on F.Silkscreen",
+                    "pos": {
+                        "x": 76.2,
+                        "y": 88.9
+                    },
+                    "uuid": "5c9d88ce-8d67-4f03-9168-ed82c94fc906"
+                },
+                {
+                    "description": "PTH pad 2 [/5V_PWR] of R1",
+                    "pos": {
+                        "x": 76.835,
+                        "y": 87.63
+                    },
+                    "uuid": "5cd4e7d0-22d6-4e09-910e-efda190589a4"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D1-Pad2)] of R1",
+                    "pos": {
+                        "x": 67.945,
+                        "y": 87.63
+                    },
+                    "uuid": "965fb3c5-e508-4fb5-8f06-6a78e5748d53"
+                },
+                {
+                    "description": "Segment of R1 on F.Silkscreen",
+                    "pos": {
+                        "x": 67.945,
+                        "y": 87.63
+                    },
+                    "uuid": "a0f463c1-617b-4d6b-a1a5-9358ef1ca3ba"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "PTH pad 1 [Net-(D1-Pad2)] of R1",
+                    "pos": {
+                        "x": 67.945,
+                        "y": 87.63
+                    },
+                    "uuid": "965fb3c5-e508-4fb5-8f06-6a78e5748d53"
+                },
+                {
+                    "description": "Segment of R1 on F.Silkscreen",
+                    "pos": {
+                        "x": 68.58,
+                        "y": 86.995
+                    },
+                    "uuid": "c779d45b-911b-44c4-9ef5-4769d64298fb"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of R8 on F.Silkscreen",
+                    "pos": {
+                        "x": 60.96,
+                        "y": 97.155
+                    },
+                    "uuid": "2461d2d5-3c01-4186-9ad8-70ebc414133a"
+                },
+                {
+                    "description": "PTH pad 1 [Net-(ESP1-Pad5)] of R8",
+                    "pos": {
+                        "x": 60.96,
+                        "y": 97.155
+                    },
+                    "uuid": "36ca88b3-dca3-41f8-9833-2bd7f864190e"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of R8 on F.Silkscreen",
+                    "pos": {
+                        "x": 61.595,
+                        "y": 97.79
+                    },
+                    "uuid": "2602589a-6108-49bd-beec-3db81b132078"
+                },
+                {
+                    "description": "PTH pad 1 [Net-(ESP1-Pad5)] of R8",
+                    "pos": {
+                        "x": 60.96,
+                        "y": 97.155
+                    },
+                    "uuid": "36ca88b3-dca3-41f8-9833-2bd7f864190e"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/33V_PWR] of R8",
+                    "pos": {
+                        "x": 60.96,
+                        "y": 106.045
+                    },
+                    "uuid": "1b3fafb0-4581-400d-9128-1f36654d5b13"
+                },
+                {
+                    "description": "Segment of R8 on F.Silkscreen",
+                    "pos": {
+                        "x": 59.69,
+                        "y": 105.41
+                    },
+                    "uuid": "419bcb65-ee2d-4a0e-bc7d-3948c7694210"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/33V_PWR] of R8",
+                    "pos": {
+                        "x": 60.96,
+                        "y": 106.045
+                    },
+                    "uuid": "1b3fafb0-4581-400d-9128-1f36654d5b13"
+                },
+                {
+                    "description": "Segment of R8 on F.Silkscreen",
+                    "pos": {
+                        "x": 60.96,
+                        "y": 105.41
+                    },
+                    "uuid": "9d158685-3cd9-4d7e-9748-fd8a1cf378f7"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of R5 on F.Silkscreen",
+                    "pos": {
+                        "x": 111.76,
+                        "y": 113.665
+                    },
+                    "uuid": "30f13691-4c35-48ad-b8b2-4d446e0d8d46"
+                },
+                {
+                    "description": "PTH pad 1 [GND] of R5",
+                    "pos": {
+                        "x": 111.76,
+                        "y": 113.665
+                    },
+                    "uuid": "eb6b5ade-f6f7-4eaa-8852-15ba26440cb7"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of R5 on F.Silkscreen",
+                    "pos": {
+                        "x": 111.125,
+                        "y": 113.03
+                    },
+                    "uuid": "72ae8650-dcac-4f09-9c9a-8066529d9064"
+                },
+                {
+                    "description": "PTH pad 1 [GND] of R5",
+                    "pos": {
+                        "x": 111.76,
+                        "y": 113.665
+                    },
+                    "uuid": "eb6b5ade-f6f7-4eaa-8852-15ba26440cb7"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of R2 on F.Silkscreen",
+                    "pos": {
+                        "x": 96.52,
+                        "y": 105.41
+                    },
+                    "uuid": "49e70f10-8f16-4e3d-bd71-c524ec9b8cb8"
+                },
+                {
+                    "description": "PTH pad 2 [Net-(IC1-Pad1)] of R2",
+                    "pos": {
+                        "x": 97.79,
+                        "y": 106.045
+                    },
+                    "uuid": "98207188-2ebf-4814-b279-59103ddf5231"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of R2 on F.Silkscreen",
+                    "pos": {
+                        "x": 97.79,
+                        "y": 105.41
+                    },
+                    "uuid": "8c04dc56-dfb2-4f0a-88c4-0acdbeaee390"
+                },
+                {
+                    "description": "PTH pad 2 [Net-(IC1-Pad1)] of R2",
+                    "pos": {
+                        "x": 97.79,
+                        "y": 106.045
+                    },
+                    "uuid": "98207188-2ebf-4814-b279-59103ddf5231"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of R7 on F.Silkscreen",
+                    "pos": {
+                        "x": 93.345,
+                        "y": 105.41
+                    },
+                    "uuid": "1f5af065-9b59-42fa-97d1-92d9f4f09690"
+                },
+                {
+                    "description": "PTH pad 1 [/33V_PWR] of R7",
+                    "pos": {
+                        "x": 93.98,
+                        "y": 106.045
+                    },
+                    "uuid": "95dfdc85-c5fc-410c-b9b4-4e1d00cd26eb"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of R7 on F.Silkscreen",
+                    "pos": {
+                        "x": 95.25,
+                        "y": 97.79
+                    },
+                    "uuid": "d03228d1-f795-42cb-bd15-d86ef2a7b56a"
+                },
+                {
+                    "description": "PTH pad 2 [Net-(ESP1-Pad6)] of R7",
+                    "pos": {
+                        "x": 93.98,
+                        "y": 97.155
+                    },
+                    "uuid": "d6167ed5-db0a-4302-8474-27d4164038be"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of R7 on F.Silkscreen",
+                    "pos": {
+                        "x": 93.98,
+                        "y": 106.045
+                    },
+                    "uuid": "1016143d-0399-4633-bc1f-dfb0f357b872"
+                },
+                {
+                    "description": "PTH pad 1 [/33V_PWR] of R7",
+                    "pos": {
+                        "x": 93.98,
+                        "y": 106.045
+                    },
+                    "uuid": "95dfdc85-c5fc-410c-b9b4-4e1d00cd26eb"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of SW1 on F.Silkscreen",
+                    "pos": {
+                        "x": 91.44,
+                        "y": 121.285
+                    },
+                    "uuid": "b90886f6-2c3f-4262-914a-d3ef26bd6ac3"
+                },
+                {
+                    "description": "PTH pad 2 [GND] of SW1",
+                    "pos": {
+                        "x": 92.71,
+                        "y": 113.03
+                    },
+                    "uuid": "d6d549d8-417f-43d8-9c5f-7820669aaf8b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of R7 on F.Silkscreen",
+                    "pos": {
+                        "x": 93.98,
+                        "y": 97.79
+                    },
+                    "uuid": "873affeb-03ba-43b7-91d7-d95d547e96db"
+                },
+                {
+                    "description": "PTH pad 2 [Net-(ESP1-Pad6)] of R7",
+                    "pos": {
+                        "x": 93.98,
+                        "y": 97.155
+                    },
+                    "uuid": "d6167ed5-db0a-4302-8474-27d4164038be"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'TO_SOT_Packages_THT'",
+            "items": [
+                {
+                    "description": "Footprint 5V_REG1",
+                    "pos": {
+                        "x": 92.71,
+                        "y": 77.47
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95a3e"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'TO_SOT_Packages_THT'",
+            "items": [
+                {
+                    "description": "Footprint 33V_REG1",
+                    "pos": {
+                        "x": 104.14,
+                        "y": 77.47
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95a45"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Connect'",
+            "items": [
+                {
+                    "description": "Footprint BJ1",
+                    "pos": {
+                        "x": 71.12,
+                        "y": 76.2
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95a4c"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Capacitors_ThroughHole'",
+            "items": [
+                {
+                    "description": "Footprint C1",
+                    "pos": {
+                        "x": 83.82,
+                        "y": 76.2
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95a52"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Capacitors_ThroughHole'",
+            "items": [
+                {
+                    "description": "Footprint C2",
+                    "pos": {
+                        "x": 83.82,
+                        "y": 86.36
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95a58"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Capacitors_ThroughHole'",
+            "items": [
+                {
+                    "description": "Footprint C3",
+                    "pos": {
+                        "x": 92.71,
+                        "y": 87.63
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95a5e"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Capacitors_ThroughHole'",
+            "items": [
+                {
+                    "description": "Footprint C4",
+                    "pos": {
+                        "x": 104.14,
+                        "y": 87.63
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95a64"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Capacitors_ThroughHole'",
+            "items": [
+                {
+                    "description": "Footprint C5",
+                    "pos": {
+                        "x": 64.77,
+                        "y": 114.3
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95a6a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Capacitors_ThroughHole'",
+            "items": [
+                {
+                    "description": "Footprint C6",
+                    "pos": {
+                        "x": 72.39,
+                        "y": 114.3
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95a70"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'LEDs'",
+            "items": [
+                {
+                    "description": "Footprint D1",
+                    "pos": {
+                        "x": 60.96,
+                        "y": 87.63
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95a76"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Displays_7-Segment'",
+            "items": [
+                {
+                    "description": "Footprint DIG1",
+                    "pos": {
+                        "x": 124.46,
+                        "y": 95.25
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95a84"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Displays_7-Segment'",
+            "items": [
+                {
+                    "description": "Footprint DIG2",
+                    "pos": {
+                        "x": 124.46,
+                        "y": 109.22
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95a92"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'ESPLIB'",
+            "items": [
+                {
+                    "description": "Footprint ESP1",
+                    "pos": {
+                        "x": 66.04,
+                        "y": 97.79
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95a9e"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Housings_DIP'",
+            "items": [
+                {
+                    "description": "Footprint IC1",
+                    "pos": {
+                        "x": 97.79,
+                        "y": 124.46
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95abe"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Discret'",
+            "items": [
+                {
+                    "description": "Footprint R1",
+                    "pos": {
+                        "x": 72.39,
+                        "y": 87.63
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95ac4"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Discret'",
+            "items": [
+                {
+                    "description": "Footprint R2",
+                    "pos": {
+                        "x": 97.79,
+                        "y": 101.6
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95aca"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Discret'",
+            "items": [
+                {
+                    "description": "Footprint R3",
+                    "pos": {
+                        "x": 137.16,
+                        "y": 95.25
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95ad0"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Discret'",
+            "items": [
+                {
+                    "description": "Footprint R4",
+                    "pos": {
+                        "x": 111.76,
+                        "y": 95.25
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95ad6"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Discret'",
+            "items": [
+                {
+                    "description": "Footprint R5",
+                    "pos": {
+                        "x": 111.76,
+                        "y": 109.22
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95adc"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Discret'",
+            "items": [
+                {
+                    "description": "Footprint R6",
+                    "pos": {
+                        "x": 137.16,
+                        "y": 109.22
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95ae2"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Discret'",
+            "items": [
+                {
+                    "description": "Footprint R7",
+                    "pos": {
+                        "x": 93.98,
+                        "y": 101.6
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95ae8"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Discret'",
+            "items": [
+                {
+                    "description": "Footprint R8",
+                    "pos": {
+                        "x": 60.96,
+                        "y": 101.6
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95aee"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Housings_DIP'",
+            "items": [
+                {
+                    "description": "Footprint SR1",
+                    "pos": {
+                        "x": 133.35,
+                        "y": 74.93
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95b02"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Housings_DIP'",
+            "items": [
+                {
+                    "description": "Footprint SR2",
+                    "pos": {
+                        "x": 133.35,
+                        "y": 121.92
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95b16"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Buttons_Switches_ThroughHole'",
+            "items": [
+                {
+                    "description": "Footprint SW1",
+                    "pos": {
+                        "x": 97.79,
+                        "y": 115.57
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95b1c"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Crystals'",
+            "items": [
+                {
+                    "description": "Footprint Y1",
+                    "pos": {
+                        "x": 71.12,
+                        "y": 119.38
+                    },
+                    "uuid": "00000000-0000-0000-0000-000057b95b22"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        }
+    ]
+}

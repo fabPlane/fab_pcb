@@ -1,0 +1,32 @@
+{
+  "meta": {
+    "filename": "bga1296.kicad_pro",
+    "version": 3
+  },
+  "board": {
+    "design_settings": {
+      "rules": {
+        "min_clearance": 0.1,
+        "min_track_width": 0.1,
+        "min_via_diameter": 0.3,
+        "min_via_annular_width": 0.1,
+        "min_through_hole_diameter": 0.1
+      }
+    }
+  },
+  "net_settings": {
+    "meta": {
+      "version": 5
+    },
+    "classes": [
+      {
+        "name": "Default",
+        "clearance": 0.1,
+        "track_width": 0.1,
+        "via_diameter": 0.3,
+        "via_drill": 0.1
+      }
+    ],
+    "netclass_patterns": []
+  }
+}

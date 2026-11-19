@@ -1,0 +1,3 @@
+# Preserve the original captured bytes, including whitespace, on every checkout.
+cases/** -text -whitespace
+harness/** -text -whitespace

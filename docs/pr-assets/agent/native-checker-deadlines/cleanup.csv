@@ -1,0 +1,10 @@
+case,repeat,before_child_survived,before_state,before_elapsed_s,after_child_survived,after_state,after_elapsed_s
+success,1,True,timeout,0.2586,False,completed,0.0342
+success,2,True,timeout,0.2529,False,completed,0.0318
+success,3,True,timeout,0.2554,False,completed,0.0319
+nonzero,1,True,timeout,0.252,False,nonzero,0.0337
+nonzero,2,True,timeout,0.2514,False,nonzero,0.0158
+nonzero,3,True,timeout,0.2514,False,nonzero,0.0157
+timeout,1,True,timeout,0.266,False,timeout,0.251
+timeout,2,True,timeout,0.2526,False,timeout,0.2509
+timeout,3,True,timeout,0.2524,False,timeout,0.2515

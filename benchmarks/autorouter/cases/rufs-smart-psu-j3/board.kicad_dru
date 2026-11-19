@@ -1,0 +1,3 @@
+(version 1)
+
+(rule "power-+BATT" (condition "A.Type == 'Track' && A.NetName == '+BATT'") (constraint track_width (min 0.5mm)))

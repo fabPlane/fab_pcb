@@ -5,6 +5,7 @@ import {
   LibraryIdentifierSchema,
   packAny,
   SchematicFieldSchema,
+  SchematicSymbolAttributesSchema,
   SchematicLabelSpinStyle,
   SchematicPinOrientation,
   SchematicPinSchema,
@@ -417,4 +418,32 @@ test("normalizes declared #PWR class but keeps real mismatches failing", () => {
   expect(result.diagnostics).toContainEqual(
     expect.objectContaining({ severity: "error", code: "symbol_reference_mismatch", message: expect.stringContaining("reference") }),
   );
+});
+
+test("generated symbols preserve library manufacturing exclusions without sharing mutable attributes", () => {
+  const definition = deviceSymbol();
+  definition.proto.attributes = create(SchematicSymbolAttributesSchema, {
+    excludeFromBillOfMaterials: true,
+    excludeFromPositionFiles: true,
+    doNotPopulate: true,
+  });
+  const result = buildGeneratedSchematic(
+    { components: [{ ref: "R1", value: "feature", footprint: "Feature:Test", libSource: { lib: "Device", part: "R" } }], nets: [] },
+    new Map([["Device:R", definition]]),
+  );
+  const symbol = result.items.find((item) => item instanceof SchematicSymbol) as SchematicSymbol;
+  expect(symbol.attributes).toMatchObject({ excludeFromBillOfMaterials: true, excludeFromPositionFiles: true, doNotPopulate: true });
+  symbol.proto.attributes!.doNotPopulate = false;
+  expect(definition.proto.attributes.doNotPopulate).toBe(true);
+});
+
+test("footprint manufacturing exclusions survive the schematic-to-board import", () => {
+  const definition = deviceSymbol();
+  const result = buildGeneratedSchematic(
+    { components: [{ ref: "R1", value: "feature", footprint: "Feature:Test", libSource: { lib: "Device", part: "R" } }], nets: [] },
+    new Map([["Device:R", definition]]),
+    new Map([["Feature:Test", { excludeFromBillOfMaterials: true, excludeFromPositionFiles: true }]]),
+  );
+  const symbol = result.items.find((item) => item instanceof SchematicSymbol) as SchematicSymbol;
+  expect(symbol.attributes).toMatchObject({ excludeFromBillOfMaterials: true, excludeFromPositionFiles: true });
 });

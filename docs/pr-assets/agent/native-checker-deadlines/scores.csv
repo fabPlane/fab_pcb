@@ -1,0 +1,10 @@
+edges,repeat,before_completion_rate,before_initial_opens,before_remaining_opens,before_native_errors,before_native_warnings,after_completion_rate,after_initial_opens,after_remaining_opens,after_native_errors,after_native_warnings
+0,1,0.0,2,2,0,0,0.0,2,2,0,0
+0,2,0.0,2,2,0,0,0.0,2,2,0,0
+0,3,0.0,2,2,0,0,0.0,2,2,0,0
+1,1,0.5,2,1,0,0,0.5,2,1,0,0
+1,2,0.5,2,1,0,0,0.5,2,1,0,0
+1,3,0.5,2,1,0,0,0.5,2,1,0,0
+2,1,1.0,2,0,0,0,1.0,2,0,0,0
+2,2,1.0,2,0,0,0,1.0,2,0,0,0
+2,3,1.0,2,0,0,0,1.0,2,0,0,0

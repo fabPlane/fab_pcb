@@ -1,0 +1,191 @@
+{
+  "job": "J4",
+  "tier": "easy",
+  "role": "scored",
+  "scope": null,
+  "target_nets": [],
+  "target_footprint": null,
+  "power_nets": [],
+  "pairs": [],
+  "kept_zones": [
+    {
+      "net": "",
+      "layer": "F.Cu",
+      "outline_hash": "8dbc2ea8f90689661dcce83bea78b710ceb6e05326b75d0d2cab423dd6201b3f"
+    },
+    {
+      "net": "GND",
+      "layer": "F.Cu",
+      "outline_hash": "3915ba59cd1e60e758711130b10b300bcc281bbcb0a12961cdac44ae42783ae1"
+    },
+    {
+      "net": "",
+      "layer": "F.Cu",
+      "outline_hash": "e613b0d282139654d0d57a59d8f5acac1ea340e52e4c5c5558abc1e8ffa20e29"
+    },
+    {
+      "net": "GND",
+      "layer": "B.Cu",
+      "outline_hash": "3915ba59cd1e60e758711130b10b300bcc281bbcb0a12961cdac44ae42783ae1"
+    },
+    {
+      "net": "",
+      "layer": "B.Cu",
+      "outline_hash": "ab35fbf535c4dd9bf88a7ed2cc4cb03c75edc7fcd2c5ff5273602d57284af622"
+    }
+  ],
+  "rules": {
+    "classes": [
+      {
+        "name": "Default",
+        "clearance": 0.2,
+        "track_width": 0.25,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "diff_pair_width": 0.25,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "nets": [
+          "+3V3",
+          "/INT1",
+          "/INT2",
+          "/SPI_CLK",
+          "/SPI_CS1",
+          "/SPI_CS2",
+          "/SPI_MISO",
+          "/SPI_MOSI",
+          "/~BUSY",
+          "/~RST",
+          "GND",
+          "Net-(A1-Pad1)",
+          "Net-(A1-Pad13)",
+          "Net-(A1-Pad14)",
+          "Net-(A1-Pad15)",
+          "Net-(A1-Pad16)",
+          "Net-(A1-Pad17)",
+          "Net-(A1-Pad20)",
+          "Net-(A1-Pad22)",
+          "Net-(A1-Pad23)",
+          "Net-(A1-Pad3)",
+          "Net-(A1-Pad4)",
+          "Net-(A1-Pad6)",
+          "Net-(A2-Pad3)"
+        ]
+      }
+    ],
+    "clearance_mm": 0.0,
+    "copper_to_edge_mm": 0.5,
+    "copper_to_hole_mm": 0.25,
+    "hole_to_hole_mm": 0.25,
+    "minimum_track_mm": 0.2,
+    "minimum_via_mm": 0.4,
+    "minimum_annular_mm": 0.1,
+    "provenance": "legacy board net_class and stock pcbnew design settings; no human-routing fit"
+  },
+  "baseline": {
+    "errors": 0,
+    "warnings": 7,
+    "opens": 32,
+    "error_types": {},
+    "warning_types": {
+      "lib_footprint_issues": 7
+    }
+  },
+  "source": {
+    "board_id": "Paperino_HW_Paperino_shield",
+    "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+    "raw_blob": "b3c1ca3835a3e7b0e7a42f808cef77a7eef48002",
+    "raw_sha256": "907b7ee11a41e99839e44cf7dca666411148ae2afbd7ac5951594617ea3ec8b6",
+    "repository": "https://github.com/JohnnyKaramello/Paperino_HW",
+    "verified_license_url": "https://github.com/JohnnyKaramello/Paperino_HW/blob/52fcf8ef47f42dfd0aef1376b63a4cd6b4d2e665/license.txt",
+    "license_revision": "52fcf8ef47f42dfd0aef1376b63a4cd6b4d2e665",
+    "license_file": "license.txt"
+  },
+  "fidelity": {
+    "footprints": true,
+    "pads": true,
+    "outline": true,
+    "layers": true,
+    "nets": true
+  },
+  "gates": {
+    "fidelity": true,
+    "baseline_errors_zero": true,
+    "source_zone_definitions": true,
+    "real_pour_contact": true
+  },
+  "gate_pass": true,
+  "selection": {
+    "job": "J4",
+    "tier": "easy",
+    "board_id": "Paperino_HW_Paperino_shield",
+    "pour": {
+      "errors": 0,
+      "opens": 32,
+      "error_types": {},
+      "ground_pads": 5,
+      "ground_pads_in_filled_zone": 1,
+      "ground_pad_contacts": [
+        [
+          "A2",
+          "2",
+          "GND"
+        ]
+      ],
+      "remaining_ground_opens": 0,
+      "ground_zone_count": 2,
+      "ground_pads_connected_by_pour": 5,
+      "ground_pads_contact_list": [
+        [
+          "A1",
+          "2",
+          "GND",
+          107.61,
+          70.19
+        ],
+        [
+          "A1",
+          "2",
+          "GND",
+          110.15,
+          70.19
+        ],
+        [
+          "A1",
+          "21",
+          "GND",
+          127.93,
+          75.27
+        ],
+        [
+          "A1",
+          "21",
+          "GND",
+          130.47,
+          75.27
+        ],
+        [
+          "A2",
+          "2",
+          "GND",
+          150.43,
+          94.25
+        ]
+      ],
+      "ground_measure_method": "Native BuildConnectivity/GetConnectedPads(zone) on refilled zero-track board; center-in-fill count is earlier conservative geometric diagnostic only."
+    },
+    "why": "Pour directly connects 5/5 ground pads; 0 ground opens remain as routing work; 0 pour-input errors."
+  },
+  "sha256": {
+    "board.kicad_pcb": "26f1b9da1c2de0fab1b81be688b08304d59639052c362265e78edb23b7b0fbc0",
+    "board.kicad_pro": "01aff616a6546552298fe9a764110ab8ac72b98dbef772c7302daa7223a2bde3",
+    "baseline-drc.json": "5995f104e6db6e406705234cb130936be7716a6d9d412794892acc3ba5436668",
+    "board.kicad_dru": "bbef6e119424cbf626d6fec0697069e203a9bde1d54f30517b179a0375f28b6b"
+  },
+  "utc": "2026-10-09T10:33:40.990151+00:00",
+  "correction": {
+    "source_fixture": "evidence/open-router-suite-2026-10-09/fixtures-v2/paperino-hw-paperino-shield/j4",
+    "record": "evidence/open-router-comparison-2026-10-09/correction-2026-10-12/fixture-proofs.json",
+    "changes": "zone UUIDs and study class-width rules only; baseline and hash metadata recomputed"
+  }
+}

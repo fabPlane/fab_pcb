@@ -1,0 +1,245 @@
+{
+  "cycle": 76,
+  "repeats": 3,
+  "budget_ms": 10000,
+  "attempts_each": 180,
+  "groups": 60,
+  "primary_base": "b496737",
+  "before_cycle": 75,
+  "before_outcomes": {
+    "timeout": 125,
+    "completed": 55
+  },
+  "after_outcomes": {
+    "timeout": 121,
+    "completed": 59
+  },
+  "before_passed": 33,
+  "after_passed": 33,
+  "quality": {
+    "unavailable": 142,
+    "srj-scored": 20,
+    "native-drc": 18
+  },
+  "changed_pass_groups": [],
+  "runtime_endpoints_equal": true,
+  "source_endpoints_equal": true,
+  "summary": [
+    {
+      "suite": "keepout-control",
+      "router": "fab_router",
+      "attempts": 3,
+      "before_completed": 0,
+      "after_completed": 0,
+      "before_passed": 0,
+      "after_passed": 0
+    },
+    {
+      "suite": "keepout-control",
+      "router": "reference engine",
+      "attempts": 3,
+      "before_completed": 0,
+      "after_completed": 0,
+      "before_passed": 0,
+      "after_passed": 0
+    },
+    {
+      "suite": "keepout-control",
+      "router": "in-repo router",
+      "attempts": 3,
+      "before_completed": 0,
+      "after_completed": 0,
+      "before_passed": 0,
+      "after_passed": 0
+    },
+    {
+      "suite": "keepout-candidate",
+      "router": "fab_router",
+      "attempts": 3,
+      "before_completed": 0,
+      "after_completed": 0,
+      "before_passed": 0,
+      "after_passed": 0
+    },
+    {
+      "suite": "keepout-candidate",
+      "router": "reference engine",
+      "attempts": 3,
+      "before_completed": 0,
+      "after_completed": 0,
+      "before_passed": 0,
+      "after_passed": 0
+    },
+    {
+      "suite": "keepout-candidate",
+      "router": "in-repo router",
+      "attempts": 3,
+      "before_completed": 0,
+      "after_completed": 0,
+      "before_passed": 0,
+      "after_passed": 0
+    },
+    {
+      "suite": "canary",
+      "router": "fab_router",
+      "attempts": 12,
+      "before_completed": 12,
+      "after_completed": 12,
+      "before_passed": 9,
+      "after_passed": 9
+    },
+    {
+      "suite": "canary",
+      "router": "reference engine",
+      "attempts": 9,
+      "before_completed": 9,
+      "after_completed": 9,
+      "before_passed": 6,
+      "after_passed": 6
+    },
+    {
+      "suite": "canary",
+      "router": "capacity-mesh router",
+      "attempts": 3,
+      "before_completed": 3,
+      "after_completed": 3,
+      "before_passed": 3,
+      "after_passed": 3
+    },
+    {
+      "suite": "canary",
+      "router": "in-repo router",
+      "attempts": 12,
+      "before_completed": 12,
+      "after_completed": 12,
+      "before_passed": 3,
+      "after_passed": 3
+    },
+    {
+      "suite": "bga",
+      "router": "fab_router",
+      "attempts": 12,
+      "before_completed": 0,
+      "after_completed": 0,
+      "before_passed": 0,
+      "after_passed": 0
+    },
+    {
+      "suite": "bga",
+      "router": "reference engine",
+      "attempts": 6,
+      "before_completed": 0,
+      "after_completed": 0,
+      "before_passed": 0,
+      "after_passed": 0
+    },
+    {
+      "suite": "bga",
+      "router": "capacity-mesh router",
+      "attempts": 6,
+      "before_completed": 0,
+      "after_completed": 0,
+      "before_passed": 0,
+      "after_passed": 0
+    },
+    {
+      "suite": "bga",
+      "router": "in-repo router",
+      "attempts": 12,
+      "before_completed": 0,
+      "after_completed": 0,
+      "before_passed": 0,
+      "after_passed": 0
+    },
+    {
+      "suite": "ladder",
+      "router": "fab_router",
+      "attempts": 18,
+      "before_completed": 3,
+      "after_completed": 5,
+      "before_passed": 3,
+      "after_passed": 3
+    },
+    {
+      "suite": "ladder",
+      "router": "reference engine",
+      "attempts": 9,
+      "before_completed": 3,
+      "after_completed": 3,
+      "before_passed": 3,
+      "after_passed": 3
+    },
+    {
+      "suite": "ladder",
+      "router": "capacity-mesh router",
+      "attempts": 9,
+      "before_completed": 6,
+      "after_completed": 6,
+      "before_passed": 6,
+      "after_passed": 6
+    },
+    {
+      "suite": "ladder",
+      "router": "in-repo router",
+      "attempts": 18,
+      "before_completed": 7,
+      "after_completed": 9,
+      "before_passed": 0,
+      "after_passed": 0
+    },
+    {
+      "suite": "dense-source",
+      "router": "fab_router",
+      "attempts": 3,
+      "before_completed": 0,
+      "after_completed": 0,
+      "before_passed": 0,
+      "after_passed": 0
+    },
+    {
+      "suite": "dense-source",
+      "router": "reference engine",
+      "attempts": 3,
+      "before_completed": 0,
+      "after_completed": 0,
+      "before_passed": 0,
+      "after_passed": 0
+    },
+    {
+      "suite": "dense-source",
+      "router": "in-repo router",
+      "attempts": 3,
+      "before_completed": 0,
+      "after_completed": 0,
+      "before_passed": 0,
+      "after_passed": 0
+    },
+    {
+      "suite": "dense-candidate",
+      "router": "fab_router",
+      "attempts": 9,
+      "before_completed": 0,
+      "after_completed": 0,
+      "before_passed": 0,
+      "after_passed": 0
+    },
+    {
+      "suite": "dense-candidate",
+      "router": "reference engine",
+      "attempts": 9,
+      "before_completed": 0,
+      "after_completed": 0,
+      "before_passed": 0,
+      "after_passed": 0
+    },
+    {
+      "suite": "dense-candidate",
+      "router": "in-repo router",
+      "attempts": 9,
+      "before_completed": 0,
+      "after_completed": 0,
+      "before_passed": 0,
+      "after_passed": 0
+    }
+  ]
+}

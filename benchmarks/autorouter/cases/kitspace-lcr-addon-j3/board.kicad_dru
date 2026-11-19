@@ -1,0 +1,4 @@
+(version 1)
+
+(rule "power-+12V" (condition "A.Type == 'Track' && A.NetName == '+12V'") (constraint track_width (min 0.5mm)))
+(rule "power-+5V" (condition "A.Type == 'Track' && A.NetName == '+5V'") (constraint track_width (min 0.5mm)))

@@ -1,0 +1,73 @@
+(pcb "routing-bench.dsn"
+  (parser
+    (string_quote ")
+    (space_in_quoted_tokens on)
+    (host_cad "KiCad's Pcbnew")
+    (host_version "10.0.6-10.0.6~ubuntu24.04.1")
+  )
+  (resolution um 10)
+  (unit um)
+  (structure
+    (layer F.Cu
+      (type signal)
+      (property
+        (index 0)
+      )
+    )
+    (layer B.Cu
+      (type signal)
+      (property
+        (index 1)
+      )
+    )
+    (boundary
+      (path pcb 0  30000 -20000  0 -20000  0 0  30000 0  30000 -20000)
+    )
+    (plane @:no_net_0 (polygon F.Cu 0  1000 -1000  29000 -1000  29000 -19000  1000 -19000  1000 -1000))
+    (via "Via[0-1]_600:300_um")
+    (rule
+      (width 200)
+      (clearance 200)
+      (clearance 50 (type smd_smd))
+    )
+  )
+  (placement
+    (component Resistor_SMD:R_0805_2012Metric
+      (place R1 10000 -10000 front 0 (PN 1k))
+      (place R2 20000 -10000 front 0 (PN 1k))
+    )
+  )
+  (library
+    (image Resistor_SMD:R_0805_2012Metric
+      (pin Rect[T]Pad_800.000000x1000.000000_um 1 -1000 0)
+      (pin Rect[T]Pad_800.000000x1000.000000_um 2 1000 0)
+    )
+    (padstack Rect[T]Pad_800.000000x1000.000000_um
+      (shape (rect F.Cu -400 -500 400 500))
+      (attach off)
+    )
+    (padstack "Via[0-1]_600:300_um"
+      (shape (circle F.Cu 600))
+      (shape (circle B.Cu 600))
+      (attach off)
+    )
+  )
+  (network
+    (net @:no_net_0
+    )
+    (net NET1
+      (pins R1-1 R2-1)
+    )
+    (class kicad_default NET1
+      (circuit
+        (use_via "Via[0-1]_600:300_um")
+      )
+      (rule
+        (width 200)
+        (clearance 200)
+      )
+    )
+  )
+  (wiring
+  )
+)

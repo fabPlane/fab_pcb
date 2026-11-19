@@ -1,0 +1,492 @@
+{
+  "job": "J4",
+  "tier": "medium",
+  "role": "scored",
+  "scope": null,
+  "target_nets": [],
+  "target_footprint": null,
+  "power_nets": [],
+  "pairs": [],
+  "kept_zones": [
+    {
+      "net": "GND",
+      "layer": "F.Cu",
+      "outline_hash": "bf46bb3690d522ebc4cb4360e0b0876f172fdeb8fc48897dbabc80e15064cb3a"
+    },
+    {
+      "net": "+5V",
+      "layer": "B.Cu",
+      "outline_hash": "bf46bb3690d522ebc4cb4360e0b0876f172fdeb8fc48897dbabc80e15064cb3a"
+    }
+  ],
+  "rules": {
+    "classes": [
+      {
+        "name": "Default",
+        "clearance": 0.2,
+        "track_width": 0.25,
+        "via_diameter": 0.6,
+        "via_drill": 0.4,
+        "diff_pair_width": 0.25,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "nets": [
+          "+5V",
+          "GND",
+          "Net-(C1-Pad1)",
+          "Net-(C1-Pad2)",
+          "Net-(C10-Pad2)",
+          "Net-(C11-Pad2)",
+          "Net-(C12-Pad2)",
+          "Net-(C4-Pad2)",
+          "Net-(C5-Pad1)",
+          "Net-(C7-Pad2)",
+          "Net-(C8-Pad2)",
+          "Net-(C9-Pad2)",
+          "Net-(I1-Pad1)",
+          "Net-(J1-Pad3)",
+          "Net-(J1-Pad4)",
+          "Net-(J1-Pad5)",
+          "Net-(LO(I)1-Pad1)",
+          "Net-(LO(Q)1-Pad1)",
+          "Net-(R3-Pad2)",
+          "Net-(U1-Pad12)",
+          "Net-(U1-Pad8)"
+        ]
+      }
+    ],
+    "clearance_mm": 0.0,
+    "copper_to_edge_mm": 0.5,
+    "copper_to_hole_mm": 0.25,
+    "hole_to_hole_mm": 0.25,
+    "minimum_track_mm": 0.2,
+    "minimum_via_mm": 0.4,
+    "minimum_annular_mm": 0.1,
+    "provenance": "legacy board net_class and stock pcbnew design settings; no human-routing fit"
+  },
+  "baseline": {
+    "errors": 0,
+    "warnings": 50,
+    "opens": 55,
+    "error_types": {},
+    "warning_types": {
+      "silk_overlap": 1,
+      "silk_over_copper": 2,
+      "lib_footprint_issues": 33,
+      "silk_edge_clearance": 14
+    }
+  },
+  "source": {
+    "board_id": "QRPCard_QRPCard",
+    "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+    "raw_blob": "ac9a8be6c366dd1fa3ed19acfdef2f2cb74362b7",
+    "raw_sha256": "90426237749a60b9bf6b71940dc5f1ae9cff804b8ea118aeb84b153e5382a4db",
+    "repository": "https://github.com/devttys0/QRPCard",
+    "verified_license_url": "https://github.com/devttys0/QRPCard/blob/b474df243eb6b7e60f512eb54c89913802a4fa8e/LICENSE",
+    "license_revision": "b474df243eb6b7e60f512eb54c89913802a4fa8e",
+    "license_file": "LICENSE"
+  },
+  "fidelity": {
+    "footprints": true,
+    "pads": true,
+    "outline": true,
+    "layers": true,
+    "nets": true
+  },
+  "gates": {
+    "fidelity": true,
+    "baseline_errors_zero": true,
+    "source_zone_definitions": true,
+    "real_pour_contact": true
+  },
+  "gate_pass": true,
+  "selection": {
+    "job": "J4",
+    "tier": "medium",
+    "board_id": "QRPCard_QRPCard",
+    "pour": {
+      "errors": 0,
+      "opens": 55,
+      "error_types": {},
+      "ground_pads": 38,
+      "ground_pads_in_filled_zone": 18,
+      "ground_pad_contacts": [
+        [
+          "C2",
+          "1",
+          "GND"
+        ],
+        [
+          "C3",
+          "1",
+          "GND"
+        ],
+        [
+          "C4",
+          "1",
+          "GND"
+        ],
+        [
+          "C5",
+          "2",
+          "GND"
+        ],
+        [
+          "C6",
+          "1",
+          "GND"
+        ],
+        [
+          "C7",
+          "1",
+          "GND"
+        ],
+        [
+          "C8",
+          "1",
+          "GND"
+        ],
+        [
+          "C9",
+          "1",
+          "GND"
+        ],
+        [
+          "C10",
+          "1",
+          "GND"
+        ],
+        [
+          "C11",
+          "1",
+          "GND"
+        ],
+        [
+          "C12",
+          "1",
+          "GND"
+        ],
+        [
+          "R2",
+          "2",
+          "GND"
+        ],
+        [
+          "R3",
+          "1",
+          "GND"
+        ],
+        [
+          "U1",
+          "7",
+          "GND"
+        ],
+        [
+          "U2",
+          "1",
+          "GND"
+        ],
+        [
+          "U2",
+          "8",
+          "GND"
+        ],
+        [
+          "U2",
+          "15",
+          "GND"
+        ],
+        [
+          "U3",
+          "4",
+          "GND"
+        ]
+      ],
+      "remaining_ground_opens": 0,
+      "ground_zone_count": 1,
+      "ground_pads_connected_by_pour": 38,
+      "ground_pads_contact_list": [
+        [
+          "C10",
+          "1",
+          "GND",
+          71.948,
+          106.172
+        ],
+        [
+          "C11",
+          "1",
+          "GND",
+          71.948,
+          108.712
+        ],
+        [
+          "C12",
+          "1",
+          "GND",
+          99.1108,
+          106.0856
+        ],
+        [
+          "C2",
+          "1",
+          "GND",
+          73.914,
+          95.062
+        ],
+        [
+          "C3",
+          "1",
+          "GND",
+          88.58,
+          100.33
+        ],
+        [
+          "C4",
+          "1",
+          "GND",
+          73.98,
+          117.856
+        ],
+        [
+          "C5",
+          "2",
+          "GND",
+          71.948,
+          144.018
+        ],
+        [
+          "C6",
+          "1",
+          "GND",
+          81.092,
+          100.33
+        ],
+        [
+          "C7",
+          "1",
+          "GND",
+          70.866,
+          95.062
+        ],
+        [
+          "C8",
+          "1",
+          "GND",
+          85.344,
+          103.952
+        ],
+        [
+          "C9",
+          "1",
+          "GND",
+          85.344,
+          110.424
+        ],
+        [
+          "I1",
+          "2",
+          "GND",
+          107.26674,
+          120.43664
+        ],
+        [
+          "I1",
+          "2",
+          "GND",
+          111.5314,
+          117.83822
+        ],
+        [
+          "I1",
+          "2",
+          "GND",
+          111.5314,
+          128.03632
+        ],
+        [
+          "J1",
+          "1",
+          "GND",
+          121.25452,
+          106.32694
+        ],
+        [
+          "LO(I)1",
+          "2",
+          "GND",
+          81.51368,
+          161.0614
+        ],
+        [
+          "LO(I)1",
+          "2",
+          "GND",
+          89.11336,
+          156.79674
+        ],
+        [
+          "LO(I)1",
+          "2",
+          "GND",
+          91.71178,
+          161.0614
+        ],
+        [
+          "LO(Q)1",
+          "2",
+          "GND",
+          106.65968,
+          161.0614
+        ],
+        [
+          "LO(Q)1",
+          "2",
+          "GND",
+          114.25936,
+          156.79674
+        ],
+        [
+          "LO(Q)1",
+          "2",
+          "GND",
+          116.85778,
+          161.0614
+        ],
+        [
+          "LO1",
+          "2",
+          "GND",
+          56.3626,
+          130.02768
+        ],
+        [
+          "LO1",
+          "2",
+          "GND",
+          56.3626,
+          140.22578
+        ],
+        [
+          "LO1",
+          "2",
+          "GND",
+          60.62726,
+          137.62736
+        ],
+        [
+          "P1",
+          "2",
+          "GND",
+          85.598,
+          97.028
+        ],
+        [
+          "Q1",
+          "2",
+          "GND",
+          107.26674,
+          139.48664
+        ],
+        [
+          "Q1",
+          "2",
+          "GND",
+          111.5314,
+          136.88822
+        ],
+        [
+          "Q1",
+          "2",
+          "GND",
+          111.5314,
+          147.08632
+        ],
+        [
+          "R2",
+          "2",
+          "GND",
+          68.326,
+          130.472
+        ],
+        [
+          "R3",
+          "1",
+          "GND",
+          66.802,
+          107.78
+        ],
+        [
+          "RF1",
+          "2",
+          "GND",
+          56.3626,
+          98.53168
+        ],
+        [
+          "RF1",
+          "2",
+          "GND",
+          56.3626,
+          108.72978
+        ],
+        [
+          "RF1",
+          "2",
+          "GND",
+          60.62726,
+          106.13136
+        ],
+        [
+          "U1",
+          "7",
+          "GND",
+          80.264,
+          131.318
+        ],
+        [
+          "U2",
+          "1",
+          "GND",
+          82.423,
+          112.395
+        ],
+        [
+          "U2",
+          "15",
+          "GND",
+          76.073,
+          111.125
+        ],
+        [
+          "U2",
+          "8",
+          "GND",
+          82.423,
+          103.505
+        ],
+        [
+          "U3",
+          "4",
+          "GND",
+          90.551,
+          103.759
+        ]
+      ],
+      "ground_measure_method": "Native BuildConnectivity/GetConnectedPads(zone) on refilled zero-track board; center-in-fill count is earlier conservative geometric diagnostic only."
+    },
+    "why": "Pour directly connects 38/38 ground pads; 0 ground opens remain as routing work; 0 pour-input errors."
+  },
+  "sha256": {
+    "board.kicad_pcb": "d40810c8ab2c8e9743a6f9e8301913f2d6c167ad0c2b2adcc642f51b816fae0a",
+    "board.kicad_pro": "df297ef7d2b48897904264eed3b13cd6b3d9739ba3d3baa70e861ee449117e2f",
+    "baseline-drc.json": "3d48ecabaa64c3c64d3566098456913277d7419498c71377c765bcfef0622f08",
+    "board.kicad_dru": "bbef6e119424cbf626d6fec0697069e203a9bde1d54f30517b179a0375f28b6b"
+  },
+  "utc": "2026-10-09T10:33:43.541747+00:00",
+  "correction": {
+    "source_fixture": "evidence/open-router-suite-2026-10-09/fixtures-v2/qrpcard-qrpcard/j4",
+    "record": "evidence/open-router-comparison-2026-10-09/correction-2026-10-12/fixture-proofs.json",
+    "changes": "zone UUIDs and study class-width rules only; baseline and hash metadata recomputed"
+  }
+}

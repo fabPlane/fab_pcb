@@ -1,0 +1,185 @@
+{
+  "job": "J4",
+  "tier": "easy",
+  "role": "scored",
+  "scope": null,
+  "target_nets": [],
+  "target_footprint": null,
+  "power_nets": [],
+  "pairs": [],
+  "kept_zones": [
+    {
+      "net": "GND",
+      "layer": "B.Cu",
+      "outline_hash": "d81bf53e3d40b89ee850b4ced3e80293594101671127e8f46c2abd21ff7e8c9d"
+    }
+  ],
+  "rules": {
+    "classes": [
+      {
+        "name": "Default",
+        "clearance": 0.2,
+        "track_width": 0.2,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "diff_pair_width": 0.2,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "nets": []
+      }
+    ],
+    "clearance_mm": 0.0,
+    "copper_to_edge_mm": 0.5,
+    "copper_to_hole_mm": 0.25,
+    "hole_to_hole_mm": 0.25,
+    "minimum_track_mm": 0.2,
+    "minimum_via_mm": 0.5,
+    "minimum_annular_mm": 0.1,
+    "provenance": "legacy board net_class and stock pcbnew design settings; no human-routing fit"
+  },
+  "baseline": {
+    "errors": 0,
+    "warnings": 20,
+    "opens": 21,
+    "error_types": {},
+    "warning_types": {
+      "silk_overlap": 1,
+      "text_height": 1,
+      "lib_footprint_mismatch": 17,
+      "lib_footprint_issues": 1
+    }
+  },
+  "source": {
+    "board_id": "kitspace_solenoid_driver",
+    "corpus_revision": "dec3be75cbdef74787625f9043c7391cd473bb64",
+    "raw_blob": "dcae4ef2207e24c6c5853eb17f4a07299e01ca68",
+    "raw_sha256": "974893bfb394e83b2f609408eecd9c54a5e6db1759524e961ac47f7356d0d0cc",
+    "repository": "https://github.com/BeeHive-org/BeeHive",
+    "verified_license_url": "https://github.com/BeeHive-org/BeeHive/blob/a7bbd36c15c2fb293a4699d9088aaf81921192e2/LICENSE",
+    "license_revision": "a7bbd36c15c2fb293a4699d9088aaf81921192e2",
+    "license_file": "LICENSE"
+  },
+  "fidelity": {
+    "footprints": true,
+    "pads": true,
+    "outline": true,
+    "layers": true,
+    "nets": true
+  },
+  "gates": {
+    "fidelity": true,
+    "baseline_errors_zero": true,
+    "source_zone_definitions": true,
+    "real_pour_contact": true
+  },
+  "gate_pass": true,
+  "selection": {
+    "job": "J4",
+    "tier": "easy",
+    "board_id": "kitspace_solenoid_driver",
+    "pour": {
+      "errors": 0,
+      "opens": 21,
+      "error_types": {},
+      "ground_pads": 11,
+      "ground_pads_in_filled_zone": 0,
+      "ground_pad_contacts": [],
+      "remaining_ground_opens": 0,
+      "ground_zone_count": 1,
+      "ground_pads_connected_by_pour": 11,
+      "ground_pads_contact_list": [
+        [
+          "C1",
+          "2",
+          "GND",
+          122.95,
+          108.25
+        ],
+        [
+          "J1",
+          "4",
+          "GND",
+          116.975,
+          91.373
+        ],
+        [
+          "J2",
+          "2",
+          "GND",
+          116.9975,
+          105.684
+        ],
+        [
+          "J5",
+          "2",
+          "GND",
+          116.934,
+          115.229
+        ],
+        [
+          "Q1",
+          "3",
+          "GND",
+          143.5735,
+          84.5
+        ],
+        [
+          "Q2",
+          "3",
+          "GND",
+          138.46,
+          125.055
+        ],
+        [
+          "R1",
+          "1",
+          "GND",
+          145.0,
+          120.5
+        ],
+        [
+          "R2",
+          "1",
+          "GND",
+          145.0,
+          94.0
+        ],
+        [
+          "R5",
+          "1",
+          "GND",
+          130.0,
+          83.5
+        ],
+        [
+          "R6",
+          "1",
+          "GND",
+          123.5,
+          83.5
+        ],
+        [
+          "U1",
+          "3",
+          "GND",
+          123.0,
+          102.03
+        ]
+      ],
+      "ground_measure_method": "Native BuildConnectivity/GetConnectedPads(zone) on refilled zero-track board; center-in-fill count is earlier conservative geometric diagnostic only."
+    },
+    "why": "Pour directly connects 11/11 ground pads; 0 ground opens remain as routing work; 0 pour-input errors."
+  },
+  "sha256": {
+    "board.kicad_pcb": "e794614d2e65a1d149d01e805e6bba66a9f261fca9a36f36eb1e83f65113b810",
+    "board.kicad_pro": "581c4fe917db39d5215cd5c14175c1a28a36c3bf1496406040baed272ac93bb4",
+    "baseline-drc.json": "ed96d8f1fbe5526992ebaf947874d270541ffcac4afda0ca36460206eb6d8b7c",
+    "board.kicad_dru": "bbef6e119424cbf626d6fec0697069e203a9bde1d54f30517b179a0375f28b6b"
+  },
+  "utc": "2026-10-09T10:33:38.514250+00:00",
+  "correction": {
+    "source_fixture": "evidence/open-router-suite-2026-10-09/fixtures-v2/kitspace-solenoid-driver/j4",
+    "record": "evidence/open-router-comparison-2026-10-09/correction-2026-10-12/fixture-proofs.json",
+    "changes": "zone UUIDs and study class-width rules only; baseline and hash metadata recomputed"
+  }
+}
