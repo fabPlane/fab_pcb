@@ -35,6 +35,7 @@ import { netlistJsonFrontend } from "./frontends/netlist-json";
 import { registerLibraries } from "./libraries";
 import { applyBoardConstraints, applyDefaultNetClass, hasRules, persistNetClassFile } from "./rules";
 import { generatedNetMerges, generateSchematic } from "./schematic";
+import { ercDiagnostics } from "./power-diagnostic";
 import type { BoardRules, BoardSpec, CompileResult, CompileSource, Frontend, LibrarySpec, MatchMode } from "./types";
 
 export type CompileJobState =
@@ -276,20 +277,7 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
             }
             const erc = await schematic.erc.run();
             pushLog(`ERC: ${erc.errorCount} errors, ${erc.warningCount} warnings`);
-            const diagnostics = [...generated.diagnostics];
-            if (erc.errorCount) {
-              const detail = erc.markers
-                .filter((marker) => !marker.excluded)
-                .slice(0, 10)
-                .map((marker) => marker.description)
-                .join("; ");
-              diagnostics.push({
-                severity: "error",
-                stage: "schematic",
-                code: "erc_errors",
-                message: `Generated schematic has ${erc.errorCount} ERC error(s) after save/reload${detail ? `: ${detail}` : "."}`,
-              });
-            }
+            const diagnostics = [...generated.diagnostics, ...ercDiagnostics(built.netlist!, generated.pins, erc.markers, erc.errorCount)];
             const merges = await generatedNetMerges(schematic, erc.markers);
             if (merges.length) {
               diagnostics.push({

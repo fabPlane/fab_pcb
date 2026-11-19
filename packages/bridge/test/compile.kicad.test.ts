@@ -289,6 +289,77 @@ describe.skipIf(!haveKicad)("compile jobs + kicad-cli api-server", () => {
     }
   }, 60_000);
 
+  // Stock Timer symbols are not in KiCad's qa libraries; point KICAD_TIMER_SYMBOLS (or the standard
+  // symbol dir) at a Timer.kicad_sym to run this one.
+  const TIMER_SYMBOLS =
+    process.env.KICAD_TIMER_SYMBOLS ?? join(process.env.KICAD11_SYMBOL_DIR ?? process.env.KICAD_SYMBOL_DIR ?? "", "Timer.kicad_sym");
+  test.skipIf(!existsSync(TIMER_SYMBOLS))(
+    "an NE555 without power flags fails with power_pin_not_driven before the board update",
+    async () => {
+      const sessionResponse = await fetch(`${bridge.url}/sessions`, { method: "POST", body: JSON.stringify({ path: null }) });
+      expect(sessionResponse.status).toBe(201);
+      const isolatedSessionId = ((await sessionResponse.json()) as { session: { id: string } }).session.id;
+      const resistor = (ref: string) => ({
+        ref,
+        value: "10k",
+        footprint: "Resistor_SMD:R_0402_1005Metric",
+        libSource: { lib: "Device", part: "R" },
+      });
+      const node = (key: string) => ({ ref: key.split(":")[0]!, pin: key.split(":")[1]! });
+      const noFlags = {
+        ...NETLIST_JSON,
+        netlist: {
+          components: [
+            { ref: "U1", value: "NE555D", footprint: "Resistor_SMD:R_0402_1005Metric", libSource: { lib: "Timer", part: "NE555D" } },
+            resistor("R1"),
+            resistor("R2"),
+            resistor("R3"),
+            resistor("R4"),
+          ],
+          nets: [
+            { name: "+5V", nodes: ["U1:8", "U1:4", "R1:1"].map(node) },
+            { name: "DISCH", nodes: ["R1:2", "U1:7", "R2:1"].map(node) },
+            { name: "TIMING", nodes: ["R2:2", "U1:2", "U1:6"].map(node) },
+            { name: "CTRL", nodes: ["U1:5", "R3:1"].map(node) },
+            { name: "OUT", nodes: ["U1:3", "R4:1"].map(node) },
+            { name: "GND", nodes: ["U1:1", "R3:2", "R4:2"].map(node) },
+          ],
+        },
+        board: { widthMm: 20, heightMm: 20 },
+        libraries: [...NETLIST_JSON.libraries, { kind: "symbol", nickname: "Timer", uri: TIMER_SYMBOLS }],
+      };
+      try {
+        const response = await fetch(`${bridge.url}/sessions/${isolatedSessionId}/compile`, {
+          method: "POST",
+          body: JSON.stringify({
+            source: {
+              kind: "netlist-json",
+              files: { "circuit.netlist.json": JSON.stringify(noFlags) },
+              entrypoint: "circuit.netlist.json",
+            },
+            project: { path: join(workspace, "no-flags", "no-flags.kicad_pro") },
+          }),
+        });
+        expect(response.status).toBe(202);
+        const { job } = (await response.json()) as { job: CompileJobInfo };
+        const done = await bridge.compileJobs.wait(job.id);
+        expect(done.state).toBe("failed");
+        expect(done.error).toBeUndefined();
+        const power = done.result?.diagnostics.find((diagnostic) => diagnostic.code === "power_pin_not_driven");
+        expect(power?.message).toStartWith("Nets +5V, GND have power-input pins but nothing KiCad counts as a power source.");
+        expect(power?.message).toContain('"part":"PWR_FLAG"');
+        expect(done.log).not.toContain("board update: SyncSchematicToBoard (schematic authoritative)");
+        expect(done.rejectedSchematicPath).toBe(join(workspace, "no-flags", ".fp-pcb", "rejected", `${job.id}.kicad_sch`));
+        expect(existsSync(done.rejectedSchematicPath!)).toBe(true);
+        const isolated = await KiCad.connect(bridge.sessions.get(isolatedSessionId)!.transport!, { clientName: "fp-pcb/no-flags-test" });
+        expect(await (await isolated.currentBoard())!.getFootprints()).toHaveLength(0);
+      } finally {
+        await fetch(`${bridge.url}/sessions/${isolatedSessionId}`, { method: "DELETE" });
+      }
+    },
+    60_000,
+  );
+
   test("a frontend error ends failed with diagnostics and no infrastructure error", async () => {
     const res = await api(`/sessions/${sessionId}/compile`, {
       method: "POST",

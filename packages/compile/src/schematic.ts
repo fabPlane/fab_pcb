@@ -48,6 +48,7 @@ const SCHEMATIC_GRID_MM = 1.27;
 
 export interface GeneratedSchematic {
   items: Item[];
+  pins: Map<string, PlacedPin[]>;
   diagnostics: Diagnostic[];
   symbolsCreated: number;
   wiresCreated: number;
@@ -122,7 +123,11 @@ export function normalizeVirtualReferences(netlist: Netlist, definitions: Readon
   return diagnostics;
 }
 
-interface PlacedPin {
+export interface PlacedPin {
+  ref: string;
+  number: string;
+  name: string;
+  sourceRef: string;
   position: Vec2;
   orientation: SchematicPinOrientation;
 }
@@ -264,7 +269,14 @@ function placedDefinition(source: LibSymbol, origin: Vec2, pins: Map<string, Pla
     if (pin.number && (!child.unit?.unit || child.unit.unit === unit) && (!child.bodyStyle?.style || child.bodyStyle.style === 1)) {
       const key = `${reference}:${pin.number}`;
       const selected = pins.get(key) ?? [];
-      selected.push({ position: absolute, orientation: pin.orientation });
+      selected.push({
+        ref: reference,
+        number: pin.number,
+        name: pin.name,
+        sourceRef: reference,
+        position: absolute,
+        orientation: pin.orientation,
+      });
       pins.set(key, selected);
     }
   }
@@ -279,7 +291,9 @@ export function buildGeneratedSchematic(
   footprintDefaults: ReadonlyMap<string, { excludeFromBillOfMaterials?: boolean; excludeFromPositionFiles?: boolean }> = new Map(),
 ): GeneratedSchematic {
   const items: Item[] = [];
+  const sourceRefs = netlist.components.map((component) => component.ref);
   const diagnostics = normalizeVirtualReferences(netlist, definitions);
+  const originalReferences = new Map(netlist.components.map((component, index) => [component.ref, sourceRefs[index]!]));
   const pins = new Map<string, PlacedPin[]>();
   let symbolsCreated = 0;
   let wiresCreated = 0;
@@ -463,7 +477,8 @@ export function buildGeneratedSchematic(
     }
   }
 
-  return { items, diagnostics, symbolsCreated, wiresCreated, labelsCreated, noConnectsCreated };
+  for (const placed of pins.values()) for (const pin of placed) pin.sourceRef = originalReferences.get(pin.ref) ?? pin.ref;
+  return { items, pins, diagnostics, symbolsCreated, wiresCreated, labelsCreated, noConnectsCreated };
 }
 
 /** Load referenced symbols, replace only our marked root-sheet items, and leave manual work intact. */
