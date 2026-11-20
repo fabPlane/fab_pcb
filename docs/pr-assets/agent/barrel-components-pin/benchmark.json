@@ -1,0 +1,25 @@
+[
+  {
+    "variant": "before",
+    "case": "kitspace-solenoid-driver-j1",
+    "repeats": 3,
+    "passed": 3,
+    "opens": [0, 0, 0],
+    "new_errors": [0, 0, 0],
+    "route_s": [0.723178369, 0.7175848810000001, 0.7170739129999999],
+    "median_route_s": 0.7175848810000001,
+    "controls_preserved": true
+  },
+  {
+    "variant": "after",
+    "case": "kitspace-solenoid-driver-j1",
+    "repeats": 3,
+    "passed": 3,
+    "opens": [0, 0, 0],
+    "new_errors": [0, 0, 0],
+    "route_s": [0.7150990070000001, 0.7127512579999999, 0.7114678560000001],
+    "median_route_s": 0.7127512579999999,
+    "controls_preserved": true,
+    "commit": "5c893d824b1a2ea649536980d18e2b48a30cafbd"
+  }
+]
