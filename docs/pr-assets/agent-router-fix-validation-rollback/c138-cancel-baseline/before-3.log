@@ -1,0 +1,37 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-validation.test.ts:
+339 |     });
+340 |     await waiting;
+341 |     expect(fixture.cancel()).toBe(true);
+342 |     release();
+343 |     const info = await fixture.done;
+344 |     expect(info.state).toBe("cancelled");
+                             ^
+error: expect(received).toBe(expected)
+
+Expected: "cancelled"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:344:24)
+(fail) cancellation during baseline DRC prevents applying copper (refill=false) [3.49ms]
+339 |     });
+340 |     await waiting;
+341 |     expect(fixture.cancel()).toBe(true);
+342 |     release();
+343 |     const info = await fixture.done;
+344 |     expect(info.state).toBe("cancelled");
+                             ^
+error: expect(received).toBe(expected)
+
+Expected: "cancelled"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:344:24)
+(fail) cancellation during baseline DRC prevents applying copper (refill=true) [0.23ms]
+
+ 0 pass
+ 55 filtered out
+ 2 fail
+ 4 expect() calls
+Ran 2 tests across 1 file. [121.00ms]

@@ -1,0 +1,85 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-validation.test.ts:
+(pass) failed native validation restores tentative copper [3.44ms]
+(pass) failed native validation restores tentative copper after a cleanup retry [0.29ms]
+(pass) failed validation reports an unsuccessful rollback (zero) without claiming restoration [0.18ms]
+(pass) failed validation reports an unsuccessful rollback (throws) without claiming restoration [0.07ms]
+(pass) successful native validation keeps and saves the applied route without undo [0.60ms]
+(pass) failed validation preserves an unrelated edit above the route commit [0.14ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (owned) [0.20ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (zero) [0.07ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (throws) [0.18ms]
+(pass) relabelled route is validated and restored before a failed job [0.18ms]
+(pass) relabelled route with successful validation is saved [0.40ms]
+(pass) unstable native connection counts stop without saving a replacement [0.16ms]
+(pass) failed post-apply refill rejects without saving (owned) [0.18ms]
+(pass) failed post-apply refill rejects without saving (zero) [0.07ms]
+(pass) failed post-apply refill rejects without saving (throws) [0.04ms]
+(pass) failed refill with its own newer commit refuses a one-entry route rollback [0.11ms]
+(pass) successful post-apply refill keeps the route and saves [0.13ms]
+(pass) failed filled native DRC query rejects before saving (owned) [0.13ms]
+(pass) failed filled native DRC query rejects before saving (zero) [0.06ms]
+(pass) failed filled native DRC query rejects before saving (throws) [0.04ms]
+(pass) failed filled DRC query preserves a newer unrelated edit [0.11ms]
+(pass) rejects newly introduced filled native errors (new) [0.19ms]
+(pass) rejects newly introduced filled native errors (duplicate) [0.07ms]
+(pass) rejects newly introduced filled native errors (replacement) [0.05ms]
+(pass) allows unchanged or excluded filled markers (existing) [0.12ms]
+(pass) allows unchanged or excluded filled markers (excluded) [0.05ms]
+(pass) rejects new native errors with zone refill disabled (new) [0.11ms]
+(pass) rejects new native errors with zone refill disabled (duplicate) [0.05ms]
+(pass) rejects new native errors with zone refill disabled (replacement) [0.06ms]
+(pass) allows existing or excluded errors with zone refill disabled (existing) [0.16ms]
+(pass) allows existing or excluded errors with zone refill disabled (excluded) [0.05ms]
+204 | for (const excludedDangling of ["existing", "generated"] as const) {
+205 |   test(`excluded dangling finding preserves ${excludedDangling} copper`, async () => {
+206 |     const fixture = validationFixture({ valid: true, excludedDangling });
+207 |     const info = await fixture.done;
+208 |     expect(info.state).toBe("done");
+209 |     expect(fixture.copper().map((item) => item.id)).toEqual(["stub", "protected", "other-net", "new-route"]);
+                                                          ^
+error: expect(received).toEqual(expected)
+
+  [
+-   "stub",
+    "protected",
+    "other-net",
+    "new-route",
+  ]
+
+- Expected  - 1
++ Received  + 0
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:209:53)
+(fail) excluded dangling finding preserves existing copper [0.37ms]
+204 | for (const excludedDangling of ["existing", "generated"] as const) {
+205 |   test(`excluded dangling finding preserves ${excludedDangling} copper`, async () => {
+206 |     const fixture = validationFixture({ valid: true, excludedDangling });
+207 |     const info = await fixture.done;
+208 |     expect(info.state).toBe("done");
+209 |     expect(fixture.copper().map((item) => item.id)).toEqual(["stub", "protected", "other-net", "new-route"]);
+                                                          ^
+error: expect(received).toEqual(expected)
+
+  [
+    "stub",
+    "protected",
+    "other-net",
+-   "new-route",
+  ]
+
+- Expected  - 1
++ Received  + 0
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:209:53)
+(fail) excluded dangling finding preserves generated copper [0.12ms]
+
+2 tests failed:
+(fail) excluded dangling finding preserves existing copper [0.37ms]
+(fail) excluded dangling finding preserves generated copper [0.12ms]
+
+ 31 pass
+ 2 fail
+ 170 expect() calls
+Ran 33 tests across 1 file. [173.00ms]

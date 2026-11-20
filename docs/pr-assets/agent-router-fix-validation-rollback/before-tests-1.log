@@ -1,0 +1,204 @@
+bun test v1.4.0 (34cbb9a40)
+
+test/bridge-validation.test.ts:
+ 6 |     const fixture = validationFixture({ cleanupFirst });
+ 7 |     const info = await fixture.done;
+ 8 |     expect(info.state).toBe("failed");
+ 9 |     expect(info.error).toContain("native DRC transport unavailable");
+10 |     expect(info.summary).toBeUndefined();
+11 |     expect(fixture.copper()).toEqual(fixture.original);
+                                  ^
+error: expect(received).toEqual(expected)
+
+  [
+    Track {
+      "proto": {
+        "$typeName": "kiapi.board.types.Track",
+        "customProperties": [],
+        "id": {
+          "$typeName": "kiapi.common.types.KIID",
+          "value": "stub",
+        },
+        "layer": 0,
+        "locked": 0,
+        "net": {
+          "$typeName": "kiapi.board.types.Net",
+          "name": "A",
+        },
+      },
+    },
+    Track {
+      "proto": {
+        "$typeName": "kiapi.board.types.Track",
+        "customProperties": [],
+        "id": {
+          "$typeName": "kiapi.common.types.KIID",
+          "value": "protected",
+        },
+        "layer": 0,
+        "locked": 2,
+        "net": {
+          "$typeName": "kiapi.board.types.Net",
+          "name": "A",
+        },
+      },
+    },
+    Track {
+      "proto": {
+        "$typeName": "kiapi.board.types.Track",
+        "customProperties": [],
+        "id": {
+          "$typeName": "kiapi.common.types.KIID",
+          "value": "other-net",
+        },
+        "layer": 0,
+        "locked": 0,
+        "net": {
+          "$typeName": "kiapi.board.types.Net",
+          "name": "OTHER",
+        },
+      },
+    },
++   Track {
++     "proto": {
++       "$typeName": "kiapi.board.types.Track",
++       "customProperties": [],
++       "id": {
++         "$typeName": "kiapi.common.types.KIID",
++         "value": "new-route",
++       },
++       "layer": 0,
++       "locked": 0,
++       "net": {
++         "$typeName": "kiapi.board.types.Net",
++         "name": "A",
++       },
++     },
++   },
+  ]
+
+- Expected  - 0
++ Received  + 16
+
+      at <anonymous> (/home/hyper/bench/agents/codex-fabpcb-bugs/scratch/c56/audit-owned/before/packages/router/test/bridge-validation.test.ts:11:30)
+(fail) failed native validation restores tentative copper [3.44ms]
+ 6 |     const fixture = validationFixture({ cleanupFirst });
+ 7 |     const info = await fixture.done;
+ 8 |     expect(info.state).toBe("failed");
+ 9 |     expect(info.error).toContain("native DRC transport unavailable");
+10 |     expect(info.summary).toBeUndefined();
+11 |     expect(fixture.copper()).toEqual(fixture.original);
+                                  ^
+error: expect(received).toEqual(expected)
+
+  [
+    Track {
+      "proto": {
+        "$typeName": "kiapi.board.types.Track",
+        "customProperties": [],
+        "id": {
+          "$typeName": "kiapi.common.types.KIID",
+-         "value": "stub",
++         "value": "protected",
+        },
+        "layer": 0,
+-       "locked": 0,
++       "locked": 2,
+        "net": {
+          "$typeName": "kiapi.board.types.Net",
+          "name": "A",
+        },
+      },
+    },
+    Track {
+      "proto": {
+        "$typeName": "kiapi.board.types.Track",
+        "customProperties": [],
+        "id": {
+          "$typeName": "kiapi.common.types.KIID",
+-         "value": "protected",
++         "value": "other-net",
+        },
+        "layer": 0,
+-       "locked": 2,
++       "locked": 0,
+        "net": {
+          "$typeName": "kiapi.board.types.Net",
+-         "name": "A",
++         "name": "OTHER",
+        },
+      },
+    },
+    Track {
+      "proto": {
+        "$typeName": "kiapi.board.types.Track",
+        "customProperties": [],
+        "id": {
+          "$typeName": "kiapi.common.types.KIID",
+-         "value": "other-net",
++         "value": "new-route",
+        },
+        "layer": 0,
+        "locked": 0,
+        "net": {
+          "$typeName": "kiapi.board.types.Net",
+-         "name": "OTHER",
++         "name": "A",
+        },
+      },
+    },
+  ]
+
+- Expected  - 7
++ Received  + 7
+
+      at <anonymous> (/home/hyper/bench/agents/codex-fabpcb-bugs/scratch/c56/audit-owned/before/packages/router/test/bridge-validation.test.ts:11:30)
+(fail) failed native validation restores tentative copper after a cleanup retry [0.41ms]
+19 |   test(`failed validation reports an unsuccessful rollback (${undo}) without claiming restoration`, async () => {
+20 |     const fixture = validationFixture({ undo });
+21 |     const info = await fixture.done;
+22 |     expect(info.state).toBe("failed");
+23 |     expect(info.error).toContain("native DRC transport unavailable");
+24 |     expect(info.error).toContain("rollback failed");
+                            ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "rollback failed"
+Received: "native DRC transport unavailable"
+
+      at <anonymous> (/home/hyper/bench/agents/codex-fabpcb-bugs/scratch/c56/audit-owned/before/packages/router/test/bridge-validation.test.ts:24:24)
+(fail) failed validation reports an unsuccessful rollback (zero) without claiming restoration [0.19ms]
+19 |   test(`failed validation reports an unsuccessful rollback (${undo}) without claiming restoration`, async () => {
+20 |     const fixture = validationFixture({ undo });
+21 |     const info = await fixture.done;
+22 |     expect(info.state).toBe("failed");
+23 |     expect(info.error).toContain("native DRC transport unavailable");
+24 |     expect(info.error).toContain("rollback failed");
+                            ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "rollback failed"
+Received: "native DRC transport unavailable"
+
+      at <anonymous> (/home/hyper/bench/agents/codex-fabpcb-bugs/scratch/c56/audit-owned/before/packages/router/test/bridge-validation.test.ts:24:24)
+(fail) failed validation reports an unsuccessful rollback (throws) without claiming restoration [0.07ms]
+(pass) successful native validation keeps and saves the applied route without undo [0.56ms]
+39 | test("failed validation preserves an unrelated edit above the route commit", async () => {
+40 |   const fixture = validationFixture({ foreignEdit: true });
+41 |   const info = await fixture.done;
+42 |   expect(info.state).toBe("failed");
+43 |   expect(info.error).toContain("native DRC transport unavailable");
+44 |   expect(info.error).toContain("rollback failed");
+                          ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "rollback failed"
+Received: "native DRC transport unavailable"
+
+      at <anonymous> (/home/hyper/bench/agents/codex-fabpcb-bugs/scratch/c56/audit-owned/before/packages/router/test/bridge-validation.test.ts:44:22)
+(fail) failed validation preserves an unrelated edit above the route commit [0.17ms]
+
+ 1 pass
+ 5 fail
+ 20 expect() calls
+Ran 6 tests across 1 file. [75.00ms]

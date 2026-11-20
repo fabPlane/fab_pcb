@@ -1,0 +1,41 @@
+{
+  "kind": "stateful adapter diagnostic; not native benchmark",
+  "source_before": "c03e9cd",
+  "repeats_per_source": 3,
+  "production_changed": false,
+  "results_each_source": {
+    "focused_tests_passed": 123,
+    "focused_tests_failed": 0,
+    "committed_refill_failed_validation_restored": 0,
+    "committed_refill_failed_validation_total": 6,
+    "explicit_rollback_refusals": 6,
+    "clean_committed_refill_saved": 3
+  },
+  "sha256": {
+    "packages/router/src/bridge-job.ts": "2bc24fcd0a4958fbccb7bf9f937a59ce75e57d312ee85b1e7c7faaf2b4a4add6",
+    "packages/router/test/bridge-validation-fixture.ts": "6e25cfe6018ab7d259270994a21eaec09e6a0e318d7213fada0f440564890378",
+    "packages/router/test/bridge-validation.test.ts": "a6dc5313ea27ccf87de536b90ee76380642a0cc376b2715fcecd702dceba3c68",
+    "packages/client/src/model/board.ts": "c47bcc3ea8dd80156b43ac77e56aa00254b2f1c958f5878180bb1d46ac5f19fd",
+    "packages/proto/src/gen/common/commands/editor_commands_pb.ts": "15f44d222cf0bd368c0f219dd8f289d743417b52256fcb2891c047f631769983",
+    "packages/client/src/model/document.ts": "098f41c63488edd76786f5b7585ee62db5da9a3674ae69d904cf1a54dc365fcb"
+  },
+  "checks": {
+    "adapter": "typecheck; 141 pass / 1 existing jar skip / 0 fail, 624 assertions",
+    "engine": "typecheck; check:layers 65 files / 0 violations; 859 pass / 0 fail, 398454 assertions"
+  },
+  "artifact_sha256": {
+    "package-checks.log": "169dc8d7802fdbf0bb50def2cc151a7f28452c8667d81ec35fa4ce32e8dcc0ea",
+    "before-2.log": "d6d42e03aa4ddf7c0d3d56ced8706f2009fc5d6d72ba21ed1d917169fa07e214",
+    "refill.png": "c864fb1ed8bb51d71ae01d6d40b3704e7fbc015492565e5e52cff5ad238ecf43",
+    "before-3.log": "afac9298524987285b0ae479779496ebd73a3a2ffb03f5ed1a07959e3f4045e9",
+    "engine-checks.log": "3070e77e85ff3a832531f1cd6a66e94356df3b231ed4e9edbb773b56b0d66d8d",
+    "README.md": "791137de72992ce81abf4b765b4bb48970514909aedb9616b090c216608cf1cd",
+    "after-1.log": "473adb4c964bed4dd9294960ffe65db1c149dceec8964ae073d2fef21d308b0f",
+    "before-1.log": "5ec9b8e519e04407bc1f8a0a91121bcf42131e4a0eedb8382c8e04b2c31608bf",
+    "reproduce.py": "f1cf126154c62178c831591717a1914ac154566bcfa784d391b04073ff05b7c1",
+    "after-3.log": "67384ddd98d3ded8bf885fb1b4076a15f18895f0044f670d222b2c9c19960fd4",
+    "refill.svg": "3749a8416f3c178ba16e11df7de81af0a4cd2b8463f9d836bc01c29ffb5ef313",
+    "render.py": "0383b5fec3332506a72abe90e9a8013bc9e3cd342833a0c22f7d6262c8aa3094",
+    "after-2.log": "603e935b1ba6a4ebeca641346a3d8e94ed885d6e3e88b1f792a606e6d90880ad"
+  }
+}

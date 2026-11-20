@@ -1,0 +1,94 @@
+{
+  "scope": "stateful adapter tests; no live native undo or routing benchmark",
+  "baseline": "c332543",
+  "versions": {
+    "before": {
+      "runs": [
+        {
+          "repeat": 1,
+          "passed": 2,
+          "failed": 2
+        },
+        {
+          "repeat": 2,
+          "passed": 2,
+          "failed": 2
+        },
+        {
+          "repeat": 3,
+          "passed": 2,
+          "failed": 2
+        }
+      ],
+      "sha256": {
+        "packages/router/src/apply.ts": "9025f45c9d454a7786e8f6cec59975a8b256e9a3f491289f1324ca0c55b1d17c",
+        "packages/router/src/bridge-job.ts": "672676d42fff7e5cbdb644a297d6614269e26fbeb769bdaaafa24987edcaadd4",
+        "packages/router/src/endpoint-collisions.ts": "b5b88409d715e875c952ff237d70c775018d905ac9acd7e3ede7ca12ca4b1572",
+        "packages/router/src/extract.ts": "7543e5ec49091cbc225420539efbe60de5c478906521189d6a64e01bf455df60",
+        "packages/router/src/fab-router.ts": "f448f5c6147cbea94eba19c66a7153c7ace0c3b711842c1623e64cf86c3d67ab",
+        "packages/router/src/freerouting-runtime.ts": "b7f240d91962b50d6f875b7a985441ae4e001ea6b717c4d609b50cc6ba2b39b7",
+        "packages/router/src/freerouting.ts": "c284b6a579cfdd8e42e1384b3175531f81d08fa301773f50ece452d90b857335",
+        "packages/router/src/geometry.ts": "82c21d7d0ab04c2ac4f77377673eefb5ae96fa836be540730712314ff824a0d6",
+        "packages/router/src/index.ts": "2079cc734a5014ab9a103786f7a3644ee9b6a01e43bb115d1ee1b5fe017e6531",
+        "packages/router/src/js-router.ts": "373d66d2b30fb27756f77cb53e1daaeb1075e26e8a2844e4565c1c864678a862",
+        "packages/router/src/pairs.ts": "9702cde1ec795f76dbf1d15d6f1bf3ae5c868dc9a8008c3b901019c1a8b012d7",
+        "packages/router/src/request-rules.ts": "46d9e4f5d8c0620308ba44a52c142b30871375392de4297129b5466c41d967b4",
+        "packages/router/src/specctra/board-rule-floors.ts": "2627be0a4e998e108d53aff864ca9cb221fe63b0687f9bba748d2acafddae55b",
+        "packages/router/src/specctra/drill-clearance.ts": "f32425afb4dff2ad18a32668db055ac5bdeff8d78d3f8b6808905d9e21a4f27d",
+        "packages/router/src/specctra/dsn.ts": "e3342748949fddd65621ba9fbe556b12f2f09ed8d382c1ac456d1fbe330401bf",
+        "packages/router/src/specctra/index.ts": "0f3e6cb6b8b81aebfafecfbb4e37da54998d3c322669d72a8806a430ad19f553",
+        "packages/router/src/specctra/rule-overlay.ts": "5319d1eb6db09d6285cdfb46076c12ac3fa0db43c672f5340d6460693bfb0b34",
+        "packages/router/src/specctra/ses.ts": "c81b68cd97a0057b163c3989fb597f8bb12eaaa5bfc54c92db4df09d837e160a",
+        "packages/router/src/specctra/session-filter.ts": "8f4c1acec4159ab6c102620522508f8cda7ee10ff9352b42d75eb494f1faefd4",
+        "packages/router/src/specctra/sexpr.ts": "4716c2bb26240ca46ec4d8b51ddc481ddaca5b9ab21d1c3a1cc826d7ab7c01b0",
+        "packages/router/src/types.ts": "fdf0bfb9726cc21d5b736a725f486f8ae1c89e2df4e47b17c77c98e64f2cd1e0",
+        "packages/router/test/bridge-undo-ownership.test.ts": "c786300627461bd710e76d079823e13daefc6c0d50e4ad9822f88e302b9a8dee",
+        "packages/router/test/collision-fixture.ts": "2d030109e2205096c831467ee64a22166c3eb2ce08f677966af17d9ec1363cb5"
+      }
+    },
+    "after": {
+      "runs": [
+        {
+          "repeat": 1,
+          "passed": 4,
+          "failed": 0
+        },
+        {
+          "repeat": 2,
+          "passed": 4,
+          "failed": 0
+        },
+        {
+          "repeat": 3,
+          "passed": 4,
+          "failed": 0
+        }
+      ],
+      "sha256": {
+        "packages/router/src/apply.ts": "9025f45c9d454a7786e8f6cec59975a8b256e9a3f491289f1324ca0c55b1d17c",
+        "packages/router/src/bridge-job.ts": "ec88a53c15983e4f14f94f2a7af26ab919056fa18ff80efecd114a771a4d41a9",
+        "packages/router/src/endpoint-collisions.ts": "b5b88409d715e875c952ff237d70c775018d905ac9acd7e3ede7ca12ca4b1572",
+        "packages/router/src/extract.ts": "7543e5ec49091cbc225420539efbe60de5c478906521189d6a64e01bf455df60",
+        "packages/router/src/fab-router.ts": "f448f5c6147cbea94eba19c66a7153c7ace0c3b711842c1623e64cf86c3d67ab",
+        "packages/router/src/freerouting-runtime.ts": "b7f240d91962b50d6f875b7a985441ae4e001ea6b717c4d609b50cc6ba2b39b7",
+        "packages/router/src/freerouting.ts": "c284b6a579cfdd8e42e1384b3175531f81d08fa301773f50ece452d90b857335",
+        "packages/router/src/geometry.ts": "82c21d7d0ab04c2ac4f77377673eefb5ae96fa836be540730712314ff824a0d6",
+        "packages/router/src/index.ts": "2079cc734a5014ab9a103786f7a3644ee9b6a01e43bb115d1ee1b5fe017e6531",
+        "packages/router/src/js-router.ts": "373d66d2b30fb27756f77cb53e1daaeb1075e26e8a2844e4565c1c864678a862",
+        "packages/router/src/pairs.ts": "9702cde1ec795f76dbf1d15d6f1bf3ae5c868dc9a8008c3b901019c1a8b012d7",
+        "packages/router/src/request-rules.ts": "46d9e4f5d8c0620308ba44a52c142b30871375392de4297129b5466c41d967b4",
+        "packages/router/src/specctra/board-rule-floors.ts": "2627be0a4e998e108d53aff864ca9cb221fe63b0687f9bba748d2acafddae55b",
+        "packages/router/src/specctra/drill-clearance.ts": "f32425afb4dff2ad18a32668db055ac5bdeff8d78d3f8b6808905d9e21a4f27d",
+        "packages/router/src/specctra/dsn.ts": "e3342748949fddd65621ba9fbe556b12f2f09ed8d382c1ac456d1fbe330401bf",
+        "packages/router/src/specctra/index.ts": "0f3e6cb6b8b81aebfafecfbb4e37da54998d3c322669d72a8806a430ad19f553",
+        "packages/router/src/specctra/rule-overlay.ts": "5319d1eb6db09d6285cdfb46076c12ac3fa0db43c672f5340d6460693bfb0b34",
+        "packages/router/src/specctra/ses.ts": "c81b68cd97a0057b163c3989fb597f8bb12eaaa5bfc54c92db4df09d837e160a",
+        "packages/router/src/specctra/session-filter.ts": "8f4c1acec4159ab6c102620522508f8cda7ee10ff9352b42d75eb494f1faefd4",
+        "packages/router/src/specctra/sexpr.ts": "4716c2bb26240ca46ec4d8b51ddc481ddaca5b9ab21d1c3a1cc826d7ab7c01b0",
+        "packages/router/src/types.ts": "fdf0bfb9726cc21d5b736a725f486f8ae1c89e2df4e47b17c77c98e64f2cd1e0",
+        "packages/router/test/bridge-undo-ownership.test.ts": "c786300627461bd710e76d079823e13daefc6c0d50e4ad9822f88e302b9a8dee",
+        "packages/router/test/collision-fixture.ts": "2d030109e2205096c831467ee64a22166c3eb2ce08f677966af17d9ec1363cb5"
+      }
+    }
+  }
+}

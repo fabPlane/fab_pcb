@@ -1,0 +1,41 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-validation.test.ts:
+(pass) failed native validation restores tentative copper [4.47ms]
+(pass) failed native validation restores tentative copper after a cleanup retry [0.37ms]
+(pass) failed validation reports an unsuccessful rollback (zero) without claiming restoration [0.22ms]
+(pass) failed validation reports an unsuccessful rollback (throws) without claiming restoration [0.66ms]
+(pass) successful native validation keeps and saves the applied route without undo [3.01ms]
+(pass) failed validation preserves an unrelated edit above the route commit [0.41ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (owned) [0.33ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (zero) [0.10ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (throws) [0.15ms]
+(pass) relabelled route is validated and restored before a failed job [0.22ms]
+(pass) relabelled route with successful validation is saved [0.61ms]
+(pass) unstable native connection counts stop without saving a replacement [0.27ms]
+(pass) failed post-apply refill rejects without saving (owned) [0.28ms]
+(pass) failed post-apply refill rejects without saving (zero) [0.12ms]
+(pass) failed post-apply refill rejects without saving (throws) [0.09ms]
+(pass) failed refill with its own newer commit refuses a one-entry route rollback [0.19ms]
+(pass) successful post-apply refill keeps the route and saves [0.18ms]
+(pass) failed filled native DRC query rejects before saving (owned) [0.21ms]
+(pass) failed filled native DRC query rejects before saving (zero) [0.09ms]
+(pass) failed filled native DRC query rejects before saving (throws) [0.08ms]
+(pass) failed filled DRC query preserves a newer unrelated edit [0.16ms]
+(pass) rejects newly introduced filled native errors (new) [0.27ms]
+(pass) rejects newly introduced filled native errors (duplicate) [0.16ms]
+(pass) rejects newly introduced filled native errors (replacement) [0.11ms]
+(pass) allows unchanged or excluded filled markers (existing) [0.18ms]
+(pass) allows unchanged or excluded filled markers (excluded) [0.07ms]
+(pass) rejects new native errors with zone refill disabled (new) [0.19ms]
+(pass) rejects new native errors with zone refill disabled (duplicate) [0.08ms]
+(pass) rejects new native errors with zone refill disabled (replacement) [0.10ms]
+(pass) allows existing or excluded errors with zone refill disabled (existing) [0.16ms]
+(pass) allows existing or excluded errors with zone refill disabled (excluded) [0.07ms]
+(pass) excluded dangling finding preserves existing copper [0.22ms]
+(pass) excluded dangling finding preserves generated copper [0.08ms]
+
+ 33 pass
+ 0 fail
+ 178 expect() calls
+Ran 33 tests across 1 file. [148.00ms]

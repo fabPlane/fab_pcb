@@ -1,0 +1,14 @@
+{
+  "results": {
+    "package": "typecheck;117pass/1existing jar skip/0fail",
+    "unchanged_engine": "typecheck;layers65zero;859pass/0fail/398454assertions;230.14seconds"
+  },
+  "logs": {
+    "package-checks.log": {
+      "sha256": "6e2e2510dbaa3b580ab49db21f256fa68c212af3bfd71117efff41b4d3462292"
+    },
+    "engine-checks.log": {
+      "sha256": "9ab6767bbe78d5e2b7587b66360f4b85f298d7a12b74910eefbb8cbf5e3f6d0b"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-validation.test.ts:
+427 | 
+428 | for (const serverUndo of ["unsupported", "throws"] as const) {
+429 |   test(`undo capability preflight rejects before tentative copper (${serverUndo})`, async () => {
+430 |     const fixture = validationFixture({ serverUndo, valid: true });
+431 |     const info = await fixture.done;
+432 |     expect(info.state).toBe("failed");
+                             ^
+error: expect(received).toBe(expected)
+
+Expected: "failed"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:432:24)
+(fail) undo capability preflight rejects before tentative copper (unsupported) [3.28ms]
+427 | 
+428 | for (const serverUndo of ["unsupported", "throws"] as const) {
+429 |   test(`undo capability preflight rejects before tentative copper (${serverUndo})`, async () => {
+430 |     const fixture = validationFixture({ serverUndo, valid: true });
+431 |     const info = await fixture.done;
+432 |     expect(info.state).toBe("failed");
+                             ^
+error: expect(received).toBe(expected)
+
+Expected: "failed"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:432:24)
+(fail) undo capability preflight rejects before tentative copper (throws) [0.20ms]
+
+ 0 pass
+ 63 filtered out
+ 2 fail
+ 2 expect() calls
+Ran 2 tests across 1 file. [130.00ms]

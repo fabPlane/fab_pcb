@@ -1,0 +1,13 @@
+{
+  "before": "7bc4961",
+  "source_sha256": {
+    "packages/router/src/bridge-job.ts": "551538f91850616eeaf8d42b43efa7b84888a9c5d3e1d04c07a89758e0a947fb",
+    "packages/router/test/bridge-validation-fixture.ts": "1ef0c43d7b75445b3519530c3de8d346450487de4af03bf8d29c2370af4d4ee2",
+    "packages/router/test/bridge-validation.test.ts": "c2232188282584ad0d51440ad3d61174f382ea0d0b063a197a0f79a73cfa24fc"
+  },
+  "cases": 2,
+  "repeats_per_revision": 3,
+  "before_passes": 0,
+  "after_passes": 6,
+  "scope": "Stateful adapter tests; no live editor or router benchmark"
+}

@@ -1,0 +1,16 @@
+{
+  "production_changed": false,
+  "repeats_per_source": 3,
+  "focused_tests_per_repeat": 47,
+  "geometry_rejections_per_source": 12,
+  "item_order_acceptances_per_source": 6,
+  "mutation": {
+    "passed": 43,
+    "failed": 4
+  },
+  "sha256": {
+    "packages/router/src/bridge-job.ts": "2bc24fcd0a4958fbccb7bf9f937a59ce75e57d312ee85b1e7c7faaf2b4a4add6",
+    "packages/router/test/bridge-validation-fixture.ts": "22258e5d1bdeb1532ce4d5d9ca15b1633d7dd9c18523310718aec9d636523b65",
+    "packages/router/test/bridge-validation.test.ts": "7295c4b7767912f17049ce6a8da51fb7ee5288e5b74efdaa61427115a3f37034"
+  }
+}
