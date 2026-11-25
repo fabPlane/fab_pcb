@@ -31,6 +31,7 @@ import { dirname, isAbsolute, join, resolve } from "node:path";
 import { KiCad, KiCadClient, Via, type Board, type Schematic, type Transport } from "@fp-pcb/client";
 import { edgeClearanceNm } from "./apply";
 import { compile, CompileCancelled } from "./compile";
+import { ercErrorDetail } from "./erc-detail";
 import { netlistJsonFrontend } from "./frontends/netlist-json";
 import { registerLibraries } from "./libraries";
 import { applyBoardConstraints, applyDefaultNetClass, hasRules, persistNetClassFile } from "./rules";
@@ -278,11 +279,7 @@ export function createCompileJobs(deps: CompileJobDeps = {}): CompileJobs {
             pushLog(`ERC: ${erc.errorCount} errors, ${erc.warningCount} warnings`);
             const diagnostics = [...generated.diagnostics];
             if (erc.errorCount) {
-              const detail = erc.markers
-                .filter((marker) => !marker.excluded)
-                .slice(0, 10)
-                .map((marker) => marker.description)
-                .join("; ");
+              const detail = ercErrorDetail(erc.markers);
               diagnostics.push({
                 severity: "error",
                 stage: "schematic",
