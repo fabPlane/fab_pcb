@@ -9,6 +9,9 @@ type Marker = { severity: RuleSeverity; excluded: boolean; description: string }
  */
 export function ercErrorDetail(markers: readonly Marker[], limit = 10): string {
   const errors = markers.filter((marker) => !marker.excluded && marker.severity === RuleSeverity.RS_ERROR);
-  const shown = errors.slice(0, limit).map((marker) => marker.description).join("; ");
+  const shown = errors
+    .slice(0, limit)
+    .map((marker) => marker.description)
+    .join("; ");
   return errors.length > limit ? `${shown}; and ${errors.length - limit} more` : shown;
 }
