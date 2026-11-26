@@ -16,6 +16,7 @@ import {
   AppType,
   Board3DFormat,
   BoardLayer,
+  BoardBoundingBoxMode,
   BoardOriginType,
   CommonLibraryTableScope,
   CommonLibraryType,
@@ -755,6 +756,29 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     },
     120_000,
   );
+  cmdTest(
+    "SaveDocumentAs",
+    async () => {
+      // Renames the open document, so it runs on the scratch server, never on the kitchen sink.
+      const s = await scratchServer();
+      // NewDocument leaves its stub-less project's board modified on the scratch server.
+      await cmd.closeAllDocuments(s.kicad.client, { force: true });
+      const dir = join(scratchDir, "saveas");
+      await mkdir(dir, { recursive: true });
+      const r = await cmd.createDocument(s.kicad.client, { type: DocumentType.DOCTYPE_PCB, path: join(dir, "saveas") });
+      const out = join(dir, "renamed.kicad_pcb");
+      await cmd.saveDocumentAs(s.kicad.client, { document: r.document, path: out });
+      expect(existsSync(out)).toBe(true);
+      const empty = await cmd.saveDocumentAs(s.kicad.client, { document: r.document, path: "" }).then(
+        () => undefined,
+        (e: unknown) => e,
+      );
+      expect(KiCadApiError.is(empty, ApiStatusCode.AS_BAD_REQUEST)).toBe(true);
+      await cmd.closeAllDocuments(s.kicad.client, {}).catch(() => {});
+      return "in-memory board written to a new path; empty path refused (AS_BAD_REQUEST)";
+    },
+    120_000,
+  );
   cmdTest("SaveDocument", async () => {
     const b = await dispatchTolerant("board", async () => {
       const before = (await stat(tmp.pcb)).mtimeMs;
@@ -1358,9 +1382,10 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     // COLOR4D 0..1 -> 0..255: KiCad's default F.Cu is #C83434 and its wire colour #009600.
     expect(def.colors["board.copper.f"]).toEqual({ r: 200, g: 52, b: 52, a: 1 });
     expect(def.colors["schematic.wire"]).toEqual({ r: 0, g: 150, b: 0, a: 1 });
-    // Layer ids are the KiCad enums: F_Cu = 0, LAYER_WIRE = 1231 (upstream renumbered the GAL layers).
+    // Layer ids are the KiCad enums: F_Cu = 0, LAYER_WIRE = 1234 (upstream renumbered the GAL layers
+    // again in the 2026-10 sync: 1231 before it).
     expect(def.layers["board.copper.f"]).toBe(0);
-    expect(def.layers["schematic.wire"]).toBe(1231);
+    expect(def.layers["schematic.wire"]).toBe(1234);
     // An empty name means the built-in default; the lookup is case-insensitive on the display name.
     const empty = await k().settings.colorTheme();
     expect(empty.name).toBe("KiCad Default");
@@ -1866,6 +1891,14 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     expect(res.status).toBe(CustomRulesStatus.CRS_VALID);
     expect(res.rules.length).toBe(r.rules.length + 1);
   });
+  cmdTest("GetBoardBoundingBox", async () => {
+    const r = await cmd.getBoardBoundingBox(c(), { board: board.specifier, mode: BoardBoundingBoxMode.BBBM_BOARD_EDGES_ONLY });
+    const w = Number(r.box?.size?.xNm ?? 0n);
+    const h = Number(r.box?.size?.yNm ?? 0n);
+    expect(w).toBeGreaterThan(0);
+    expect(h).toBeGreaterThan(0);
+    return `board edges ${(w / 1e6).toFixed(2)} x ${(h / 1e6).toFixed(2)} mm`;
+  });
   cmdTest("GetBoardOrigin", async () => {
     const o = await board.origin("grid");
     expect(o).toBeDefined();
@@ -2042,6 +2075,8 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
   boardJob("RunBoardJobExportODB", (out) => board.jobs.exportOdb(out), ".zip");
   boardJob("RunBoardJobExportStats", (out) => board.jobs.exportStats(out, { format: StatsOutputFormat.SOF_JSON }), ".json");
   boardJob("RunBoardJobExportSpecctra", (out) => board.jobs.exportSpecctra(out), ".dsn");
+  boardJob("RunBoardJobExportSpecctraDsn", (out) => board.jobs.exportSpecctraDsn(out), ".dsn");
+  boardJob("RunBoardJobExportIdf", (out) => board.jobs.exportIdf(out), ".emn");
   cmdTest("ImportSpecctraSession", async () => {
     // Garbage must be refused with the parser's message, not swallowed or wedged.
     const bad = await board.importSpecctraSession({ contents: "this is not a session" }).then(
@@ -2059,6 +2094,11 @@ describe.skipIf(!haveKicad())("conformance: every IPC command against kicad-cli 
     const r = await board.importSpecctraSession({ contents: empty });
     expect(r.tracksAdded).toBe(0);
     expect(r.viasAdded).toBe(0);
+    // The client sends replace_existing_tracks=false explicitly (unset means replace), so an
+    // add-only import must leave the board's existing tracks alone.
+    expect(r.tracksRemoved).toBe(0);
+    expect(r.skippedCount).toBe(0);
+    expect(typeof r.report).toBe("string");
     return `garbage -> AS_BAD_REQUEST; empty session applied: ${r.tracksAdded} tracks, ${r.footprintsMoved} footprints moved, ${r.warnings.length} warning(s)`;
   });
   boardJob(

@@ -16,8 +16,8 @@ import { FakeTransport, fail, reply } from "./fake-transport";
 
 describe("versioned searchable IPC catalog", () => {
   test("covers every supported command and searches independent facets", () => {
-    expect(IPC_CATALOG).toHaveLength(168);
-    expect(IPC_CATALOG.filter((entry) => entry.headless === "ok")).toHaveLength(153);
+    expect(IPC_CATALOG).toHaveLength(187);
+    expect(IPC_CATALOG.filter((entry) => entry.headless === "ok")).toHaveLength(169);
     expect(IPC_CATALOG_VERSION).toBe("direct-kicad-ipc/1.0.0");
     expect(IPC_CATALOG_SHA256).toMatch(/^[0-9a-f]{64}$/);
     expect(IPC_SCHEMA_SHA256).toMatch(/^[0-9a-f]{64}$/);

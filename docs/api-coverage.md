@@ -1,14 +1,14 @@
-# IPC API coverage matrix (KiCad 10.99, commit 329aba9ff0)
+# IPC API coverage matrix (KiCad 10.99, commit 7a8f2588bf)
 
 Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the KiCad sources. "Handlers" names the C++ handler class that serves the command: server = API_HANDLER_SERVER (inside the API server, always loaded), common = API_HANDLER_COMMON (always loaded), editor = API_HANDLER_EDITOR, library = API_HANDLER_LIBRARY (base of the footprint and symbol library handlers), libraries = API_HANDLER_LIBRARIES (upstream library status and query commands), board = API_HANDLER_BOARD, pcb = API_HANDLER_PCB, footprint = API_HANDLER_FOOTPRINT, fplib = API_HANDLER_FOOTPRINT_LIBRARY, symlib = API_HANDLER_SYMBOL_LIBRARY, sch = API_HANDLER_SCH.
 
 | Status | Count | Meaning |
 |---|---:|---|
-| OK | 165 | works in `kicad-cli api-server` |
+| OK | 169 | works in `kicad-cli api-server` |
 | GUI-ONLY | 15 | handler returns "not available in headless mode" |
 | PARTIAL | 1 | headless in some handlers only |
 | UNREGISTERED | 2 | defined in .proto, no handler anywhere |
-| **Total** | **183** | request messages defined in the command protos |
+| **Total** | **187** | request messages defined in the command protos |
 
 
 ## common/base
@@ -78,6 +78,7 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `RevertDocument` | pcb, footprint, sch | partial | headless-gated in footprint; pcb, sch handlers serve it |
 | `RunAction` | editor | yes |  |
 | `SaveCopyOfDocument` | pcb, footprint, sch | yes |  |
+| `SaveDocumentAs` | pcb, sch | yes |  |
 | `SaveDocumentToString` | board, sch | yes |  |
 | `SaveItemsToString` | board, sch | yes |  |
 | `SaveSelectionToString` | board, sch | no | gated by checkForHeadless in board, sch |
@@ -147,6 +148,7 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `CheckPadstackPresenceOnLayers` | board | yes |  |
 | `FlipItems` | board | yes |  |
 | `GetActiveLayer` | board | no | gated by checkForHeadless in board |
+| `GetBoardBoundingBox` | board | yes |  |
 | `GetBoardDesignRules` | pcb | yes |  |
 | `GetBoardEditorAppearanceSettings` | pcb | no | gated by checkForHeadless in pcb |
 | `GetBoardEnabledLayers` | board | yes |  |
@@ -204,6 +206,7 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `RunBoardJobExportDxf` | pcb | yes |  |
 | `RunBoardJobExportGencad` | pcb | yes |  |
 | `RunBoardJobExportGerbers` | pcb | yes |  |
+| `RunBoardJobExportIdf` | pcb | yes |  |
 | `RunBoardJobExportIpc2581` | pcb | yes |  |
 | `RunBoardJobExportIpcD356` | pcb | yes |  |
 | `RunBoardJobExportODB` | pcb | yes |  |
@@ -213,6 +216,7 @@ Generated from `api/proto/**/*.proto` versus `registerHandler<...>` calls in the
 | `RunBoardJobExportPs` | pcb | yes |  |
 | `RunBoardJobExportRender` | pcb | yes |  |
 | `RunBoardJobExportSpecctra` | pcb | yes |  |
+| `RunBoardJobExportSpecctraDsn` | pcb | yes |  |
 | `RunBoardJobExportStats` | pcb | yes |  |
 | `RunBoardJobExportSvg` | pcb | yes |  |
 
