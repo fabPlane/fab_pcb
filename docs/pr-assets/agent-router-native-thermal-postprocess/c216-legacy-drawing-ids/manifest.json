@@ -1,0 +1,34 @@
+{
+  "README.md": {
+    "bytes": 4565,
+    "sha256": "f34e3d0ec78bdf3c26b8da26a14e741c72f4fe3986bb97d4eb8ff4d72c49b114"
+  },
+  "checks.log": {
+    "bytes": 12304,
+    "sha256": "d82b7a6c41552e56c11397b27897c726ddaa9eff9cb06e03fa40722a53b1713c"
+  },
+  "comparison.json": {
+    "bytes": 3526,
+    "sha256": "20772b50879e4517fa82d906dccaf699bcc17a71f962f663f323d96e13936a88"
+  },
+  "comparison.png": {
+    "bytes": 133492,
+    "sha256": "862bc9a7311d957bb4e1951db49ff6fe0901781455cdc60b40aa1b9047009fa8"
+  },
+  "engine-source-hashes.json": {
+    "bytes": 7276,
+    "sha256": "51faefa61a60996fb27fb34c4631c37c68df0ec54abe49802e0a038e3cce97fc"
+  },
+  "initial-setup-failure.log": {
+    "bytes": 14007,
+    "sha256": "2b7b423a8ab70807a4d7aee0add509763dc207c59ab6f93f22d8887744fd5be6"
+  },
+  "pin-setup-path-failure.log": {
+    "bytes": 347,
+    "sha256": "2018cbc910b37ff5fe5031c62d864a57d5f96ddb0f782360651b9742ba454605"
+  },
+  "selection.json": {
+    "bytes": 417,
+    "sha256": "ca7f58c032d35448939e9fd1e040fb1d42708afd43aa3f0c2739d78426c252e0"
+  }
+}

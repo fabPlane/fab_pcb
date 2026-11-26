@@ -1,0 +1,149 @@
+[
+  {
+    "case": "qrpcard-qrpcard-j4",
+    "seed": 3,
+    "published": true,
+    "repaired": true,
+    "oldAttempts": 1,
+    "attempts": 1,
+    "oldCandidateSha256": "d61b3c99fa274ac69c524e6288f2fbccf361d1b7cb330adee44fb1917f65a1aa",
+    "candidateSha256": "d61b3c99fa274ac69c524e6288f2fbccf361d1b7cb330adee44fb1917f65a1aa",
+    "opens": 0,
+    "errors": 0,
+    "lostSource": 0,
+    "lostRouted": 0,
+    "sameProgressSequence": true,
+    "acceptedCheckpoints": [
+      {
+        "stage": 0,
+        "name": "000.kicad_pcb",
+        "sha256": "d61b3c99fa274ac69c524e6288f2fbccf361d1b7cb330adee44fb1917f65a1aa"
+      }
+    ]
+  },
+  {
+    "case": "qrpcard-qrpcard-j4",
+    "seed": 1,
+    "published": true,
+    "repaired": true,
+    "oldAttempts": 1,
+    "attempts": 1,
+    "oldCandidateSha256": "e8ec68d5c70c0aabaaa7219cff9cd13cd3ecf491d460ac4728ac0cb7ca961cf2",
+    "candidateSha256": "e8ec68d5c70c0aabaaa7219cff9cd13cd3ecf491d460ac4728ac0cb7ca961cf2",
+    "opens": 0,
+    "errors": 0,
+    "lostSource": 0,
+    "lostRouted": 0,
+    "sameProgressSequence": true,
+    "acceptedCheckpoints": [
+      {
+        "stage": 0,
+        "name": "000.kicad_pcb",
+        "sha256": "e8ec68d5c70c0aabaaa7219cff9cd13cd3ecf491d460ac4728ac0cb7ca961cf2"
+      }
+    ]
+  },
+  {
+    "case": "qrpcard-qrpcard-j2-small",
+    "seed": 2,
+    "published": true,
+    "repaired": true,
+    "oldAttempts": 38,
+    "attempts": 38,
+    "oldCandidateSha256": "c1a7df20878f51ebc3f5103f6d36b7aad8531755db2c0439b6f4faa3b9d7712f",
+    "candidateSha256": "c1a7df20878f51ebc3f5103f6d36b7aad8531755db2c0439b6f4faa3b9d7712f",
+    "opens": 0,
+    "errors": 0,
+    "lostSource": 0,
+    "lostRouted": 0,
+    "sameProgressSequence": true,
+    "acceptedCheckpoints": [
+      {
+        "stage": 0,
+        "name": "000.kicad_pcb",
+        "sha256": "62f6abdb52951f3d28cf696400f1b955bd2a20ca5d6415b760c211c3502622ad"
+      },
+      {
+        "stage": 1,
+        "name": "036.kicad_pcb",
+        "sha256": "c1a7df20878f51ebc3f5103f6d36b7aad8531755db2c0439b6f4faa3b9d7712f"
+      }
+    ]
+  },
+  {
+    "case": "qrpcard-qrpcard-j2-small",
+    "seed": 1,
+    "published": true,
+    "repaired": true,
+    "oldAttempts": 38,
+    "attempts": 38,
+    "oldCandidateSha256": "f3d1242f4cec067e42619312d2852eed1bb4f30edf940f60d82cf36c0eaddd9d",
+    "candidateSha256": "f3d1242f4cec067e42619312d2852eed1bb4f30edf940f60d82cf36c0eaddd9d",
+    "opens": 0,
+    "errors": 0,
+    "lostSource": 0,
+    "lostRouted": 0,
+    "sameProgressSequence": true,
+    "acceptedCheckpoints": [
+      {
+        "stage": 0,
+        "name": "000.kicad_pcb",
+        "sha256": "def10a1c9769823e436d0680cc16b6d272d1c609eb37be55abedba9edd3bcc98"
+      },
+      {
+        "stage": 1,
+        "name": "036.kicad_pcb",
+        "sha256": "f3d1242f4cec067e42619312d2852eed1bb4f30edf940f60d82cf36c0eaddd9d"
+      }
+    ]
+  },
+  {
+    "case": "qrpcard-qrpcard-j4",
+    "seed": 2,
+    "published": true,
+    "repaired": true,
+    "oldAttempts": 1,
+    "attempts": 1,
+    "oldCandidateSha256": "65d6b89f38535574a0ea508524baa25469993a2087429dfbf015f3cb49b1338d",
+    "candidateSha256": "65d6b89f38535574a0ea508524baa25469993a2087429dfbf015f3cb49b1338d",
+    "opens": 0,
+    "errors": 0,
+    "lostSource": 0,
+    "lostRouted": 0,
+    "sameProgressSequence": true,
+    "acceptedCheckpoints": [
+      {
+        "stage": 0,
+        "name": "000.kicad_pcb",
+        "sha256": "65d6b89f38535574a0ea508524baa25469993a2087429dfbf015f3cb49b1338d"
+      }
+    ]
+  },
+  {
+    "case": "qrpcard-qrpcard-j2-small",
+    "seed": 3,
+    "published": true,
+    "repaired": true,
+    "oldAttempts": 38,
+    "attempts": 38,
+    "oldCandidateSha256": "1acd20be99a04b9ca22d156a3e45cdf725bc33d8f1f82ae8f38abbe561f33839",
+    "candidateSha256": "1acd20be99a04b9ca22d156a3e45cdf725bc33d8f1f82ae8f38abbe561f33839",
+    "opens": 0,
+    "errors": 0,
+    "lostSource": 0,
+    "lostRouted": 0,
+    "sameProgressSequence": true,
+    "acceptedCheckpoints": [
+      {
+        "stage": 0,
+        "name": "000.kicad_pcb",
+        "sha256": "b44ba69ae92732ca8768d3c0341e684e48a15cb7792701337805c0b6cf970684"
+      },
+      {
+        "stage": 1,
+        "name": "036.kicad_pcb",
+        "sha256": "1acd20be99a04b9ca22d156a3e45cdf725bc33d8f1f82ae8f38abbe561f33839"
+      }
+    ]
+  }
+]

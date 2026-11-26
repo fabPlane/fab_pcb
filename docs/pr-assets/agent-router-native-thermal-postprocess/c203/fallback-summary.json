@@ -1,0 +1,12 @@
+{
+  "statuses": {
+    "accepted": 60,
+    "search-failed": 15,
+    "rejected": 3
+  },
+  "failed_search_reasons": {
+    "Candidate source copper differs from input": 3,
+    "Candidate source pads differ from input": 12
+  },
+  "fallback_count": 18
+}

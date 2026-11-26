@@ -1,0 +1,152 @@
+{
+  "before": {
+    "runs": 78,
+    "passed": 45,
+    "valid_cases_3of3": 15,
+    "opens": 120,
+    "new_errors": 18,
+    "median_route_s": 8.3307490525,
+    "median_length_mm": 546.9284458263046,
+    "total_vias": 2826,
+    "total_length_mm": 58825.73282366698
+  },
+  "after": {
+    "runs": 78,
+    "passed": 45,
+    "valid_cases_3of3": 15,
+    "opens": 120,
+    "new_errors": 18,
+    "median_route_s": 9.458638973,
+    "median_length_mm": 546.9284458263046,
+    "total_vias": 2826,
+    "total_length_mm": 58825.73282366698
+  },
+  "regressions": [],
+  "changes": [],
+  "postprocess_statuses": {
+    "search-failed": 12,
+    "accepted": 63,
+    "rejected": 3
+  },
+  "changed_boards": [
+    ["qrpcard-qrpcard-j4", 3],
+    ["qrpcard-qrpcard-j4", 1],
+    ["qrpcard-qrpcard-j2-small", 2],
+    ["qrpcard-qrpcard-j2-small", 1],
+    ["qrpcard-qrpcard-j4", 2],
+    ["qrpcard-qrpcard-j2-small", 3]
+  ],
+  "physical_copper_unchanged_all_78": true,
+  "repair_attempt_counts": [
+    {
+      "case": "qrpcard-qrpcard-j4",
+      "seed": 3,
+      "before": 1,
+      "after": 1
+    },
+    {
+      "case": "qrpcard-qrpcard-j4",
+      "seed": 1,
+      "before": 1,
+      "after": 1
+    },
+    {
+      "case": "qrpcard-qrpcard-j2-small",
+      "seed": 2,
+      "before": 38,
+      "after": 39
+    },
+    {
+      "case": "qrpcard-qrpcard-j2-small",
+      "seed": 1,
+      "before": 38,
+      "after": 39
+    },
+    {
+      "case": "qrpcard-qrpcard-j4",
+      "seed": 2,
+      "before": 1,
+      "after": 1
+    },
+    {
+      "case": "qrpcard-qrpcard-j2-small",
+      "seed": 3,
+      "before": 38,
+      "after": 39
+    }
+  ],
+  "groups": {
+    "J2small": {
+      "before": {
+        "runs": 3,
+        "passed": 3,
+        "valid_cases_3of3": 1,
+        "opens": 0,
+        "new_errors": 0,
+        "median_route_s": 111.892862912,
+        "median_length_mm": 484.6340268664602,
+        "total_vias": 51,
+        "total_length_mm": 1453.9020805993805
+      },
+      "after": {
+        "runs": 3,
+        "passed": 3,
+        "valid_cases_3of3": 1,
+        "opens": 0,
+        "new_errors": 0,
+        "median_route_s": 129.970845012,
+        "median_length_mm": 484.6340268664602,
+        "total_vias": 51,
+        "total_length_mm": 1453.9020805993805
+      }
+    },
+    "J4": {
+      "before": {
+        "runs": 3,
+        "passed": 3,
+        "valid_cases_3of3": 1,
+        "opens": 0,
+        "new_errors": 0,
+        "median_route_s": 13.755529677,
+        "median_length_mm": 524.4683112519308,
+        "total_vias": 114,
+        "total_length_mm": 1573.4049337557924
+      },
+      "after": {
+        "runs": 3,
+        "passed": 3,
+        "valid_cases_3of3": 1,
+        "opens": 0,
+        "new_errors": 0,
+        "median_route_s": 13.134380462000001,
+        "median_length_mm": 524.4683112519308,
+        "total_vias": 114,
+        "total_length_mm": 1573.4049337557924
+      }
+    },
+    "Aquarius": {
+      "before": {
+        "runs": 3,
+        "passed": 0,
+        "valid_cases_3of3": 0,
+        "opens": 45,
+        "new_errors": 18,
+        "median_route_s": 55.565001408,
+        "median_length_mm": 1731.1131265365616,
+        "total_vias": 390,
+        "total_length_mm": 5193.339379609684
+      },
+      "after": {
+        "runs": 3,
+        "passed": 0,
+        "valid_cases_3of3": 0,
+        "opens": 45,
+        "new_errors": 18,
+        "median_route_s": 70.27817087199999,
+        "median_length_mm": 1731.1131265365616,
+        "total_vias": 390,
+        "total_length_mm": 5193.339379609684
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "repaired": true,
+  "published": true,
+  "stages": 1,
+  "attempts": 169,
+  "priorRejected": 168,
+  "selected": {
+    "stage": 0,
+    "name": "168.kicad_pcb",
+    "label": ["via", "e57c15b7-d609-442a-9cca-2c520d20bbab"],
+    "progress": true
+  },
+  "opens": 95,
+  "sourceAndCurrentPairsPreserved": true,
+  "callerUnchanged": true
+}
