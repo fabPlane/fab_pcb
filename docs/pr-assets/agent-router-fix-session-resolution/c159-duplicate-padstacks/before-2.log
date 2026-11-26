@@ -1,0 +1,111 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+592 |     `(padstack ${name} (shape (circle F.Cu ${diameter})) (shape (circle B.Cu ${diameter})))`;
+593 |   for (const [first, second] of [[800, 600], [600, 800]]) {
+594 |     test(`rejects ambiguous via diameter ${first} then ${second}`, () => {
+595 |       const text = `(session s (routes (library_out ${shape("V", first)} ${shape("V", second)})
+596 |         (network_out (net A (via V 1000 -1000)))))`;
+597 |       expect(() => parseSes(text)).toThrow("duplicate session padstack");
+                                         ^
+error: expect(received).toThrow(expected)
+
+Expected substring: "duplicate session padstack"
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 1000,
+  padstacks: Map(1) {
+    "V": {
+      name: "V",
+      layers: [ "F.Cu", "B.Cu" ],
+      diameter: 600000,
+    },
+  },
+  wires: [],
+  vias: [
+    {
+      net: "A",
+      padstack: "V",
+      x: 1000000,
+      y: 1000000,
+    }
+  ],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:597:36)
+(fail) session duplicate padstack definitions > rejects ambiguous via diameter 800 then 600 [0.44ms]
+592 |     `(padstack ${name} (shape (circle F.Cu ${diameter})) (shape (circle B.Cu ${diameter})))`;
+593 |   for (const [first, second] of [[800, 600], [600, 800]]) {
+594 |     test(`rejects ambiguous via diameter ${first} then ${second}`, () => {
+595 |       const text = `(session s (routes (library_out ${shape("V", first)} ${shape("V", second)})
+596 |         (network_out (net A (via V 1000 -1000)))))`;
+597 |       expect(() => parseSes(text)).toThrow("duplicate session padstack");
+                                         ^
+error: expect(received).toThrow(expected)
+
+Expected substring: "duplicate session padstack"
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 1000,
+  padstacks: Map(1) {
+    "V": {
+      name: "V",
+      layers: [ "F.Cu", "B.Cu" ],
+      diameter: 800000,
+    },
+  },
+  wires: [],
+  vias: [
+    {
+      net: "A",
+      padstack: "V",
+      x: 1000000,
+      y: 1000000,
+    }
+  ],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:597:36)
+(fail) session duplicate padstack definitions > rejects ambiguous via diameter 600 then 800 [0.08ms]
+597 |       expect(() => parseSes(text)).toThrow("duplicate session padstack");
+598 |     });
+599 |   }
+600 |   test("rejects duplicate identifiers across quoting forms", () => {
+601 |     expect(() => parseSes(`(session s (routes (library_out ${shape("V", 800)} ${shape('"V"', 800)})))`))
+602 |       .toThrow("duplicate session padstack");
+             ^
+error: expect(received).toThrow(expected)
+
+Expected substring: "duplicate session padstack"
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 1000,
+  padstacks: Map(1) {
+    "V": {
+      name: "V",
+      layers: [ "F.Cu", "B.Cu" ],
+      diameter: 800000,
+    },
+  },
+  wires: [],
+  vias: [],
+  nets: [],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:602:8)
+(fail) session duplicate padstack definitions > rejects duplicate identifiers across quoting forms [0.08ms]
+(pass) session duplicate padstack definitions > preserves distinct padstack identities and their via sizes [0.31ms]
+
+ 1 pass
+ 109 filtered out
+ 3 fail
+ 5 expect() calls
+Ran 4 tests across 1 file. [126.00ms]

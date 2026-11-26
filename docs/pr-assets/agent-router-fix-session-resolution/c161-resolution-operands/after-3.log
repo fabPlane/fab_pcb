@@ -1,0 +1,13 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+(pass) session resolution operand structure > rejects malformed resolution operands: (resolution um (count 10)) [0.23ms]
+(pass) session resolution operand structure > rejects malformed resolution operands: (resolution (unit um) 10)
+(pass) session resolution operand structure > rejects malformed resolution operands: (resolution um 10 100)
+(pass) session resolution operand structure > preserves omitted resolution defaults and explicit positional scales [0.02ms]
+
+ 4 pass
+ 117 filtered out
+ 0 fail
+ 6 expect() calls
+Ran 4 tests across 1 file. [133.00ms]

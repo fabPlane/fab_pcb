@@ -1,0 +1,16 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+(pass) session via rejects malformed coordinates: V NaN 20 [0.39ms]
+(pass) session via rejects malformed coordinates: V 10 Infinity [0.03ms]
+(pass) session via rejects malformed coordinates: V 1e308 20 [0.03ms]
+(pass) session via rejects malformed coordinates: V 10 [0.01ms]
+(pass) session via rejects malformed coordinates: V (unexpected 10) 20
+(pass) session via rejects malformed coordinates: (unexpected V) 10 20 [0.01ms]
+(pass) session via preserves signed fractional coordinates and trailing attributes [0.04ms]
+
+ 7 pass
+ 48 filtered out
+ 0 fail
+ 7 expect() calls
+Ran 7 tests across 1 file. [104.00ms]

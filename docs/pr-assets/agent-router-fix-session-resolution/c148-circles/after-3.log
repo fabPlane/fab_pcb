@@ -1,0 +1,18 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+(pass) session circle rejects malformed diameter: NaN [0.44ms]
+(pass) session circle rejects malformed diameter: Infinity [0.02ms]
+(pass) session circle rejects malformed diameter: 1e308 [0.04ms]
+(pass) session circle rejects malformed diameter: -2 [0.01ms]
+(pass) session circle rejects malformed diameter: 0 [0.02ms]
+(pass) session circle rejects malformed diameter: 0.0001 [0.01ms]
+(pass) session circle rejects malformed diameter: (unexpected 2) [0.01ms]
+(pass) session circle rejects malformed diameter: missing [0.02ms]
+(pass) session circle preserves fractional diameters on both copper layers [0.28ms]
+
+ 9 pass
+ 55 filtered out
+ 0 fail
+ 10 expect() calls
+Ran 9 tests across 1 file. [124.00ms]

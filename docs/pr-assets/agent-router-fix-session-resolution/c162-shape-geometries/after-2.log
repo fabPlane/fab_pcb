@@ -1,0 +1,13 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+(pass) session shape geometry multiplicity > rejects discarded second shape geometry (circle B.Cu 1200) [0.65ms]
+(pass) session shape geometry multiplicity > rejects discarded second shape geometry (rect B.Cu -600 -600 600 600) [0.03ms]
+(pass) session shape geometry multiplicity > preserves single geometry with attribute '' [0.43ms]
+(pass) session shape geometry multiplicity > preserves single geometry with attribute '(connect off)' [0.07ms]
+
+ 4 pass
+ 121 filtered out
+ 0 fail
+ 6 expect() calls
+Ran 4 tests across 1 file. [132.00ms]

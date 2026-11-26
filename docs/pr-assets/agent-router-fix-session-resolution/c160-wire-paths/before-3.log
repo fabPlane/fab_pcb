@@ -1,0 +1,87 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+613 | describe("session wire path multiplicity", () => {
+614 |   const paths = ["(path F.Cu 250 0 0 1000 1000)", "(path B.Cu 300 1000 1000 2000 1000)"];
+615 |   for (const order of [paths, [...paths].reverse()]) {
+616 |     test(`rejects multiple paths instead of dropping copper: ${order[0]}`, () => {
+617 |       expect(() => parseSes(`(session s (routes (network_out (net A (wire ${order.join(" ")})))))`))
+618 |         .toThrow("multiple session wire paths");
+               ^
+error: expect(received).toThrow(expected)
+
+Expected substring: "multiple session wire paths"
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 1000,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: 250000,
+      points: [
+        {
+          x: 0,
+          y: -0,
+        }, {
+          x: 1000000,
+          y: -1000000,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:618:10)
+(fail) session wire path multiplicity > rejects multiple paths instead of dropping copper: (path F.Cu 250 0 0 1000 1000) [2.05ms]
+613 | describe("session wire path multiplicity", () => {
+614 |   const paths = ["(path F.Cu 250 0 0 1000 1000)", "(path B.Cu 300 1000 1000 2000 1000)"];
+615 |   for (const order of [paths, [...paths].reverse()]) {
+616 |     test(`rejects multiple paths instead of dropping copper: ${order[0]}`, () => {
+617 |       expect(() => parseSes(`(session s (routes (network_out (net A (wire ${order.join(" ")})))))`))
+618 |         .toThrow("multiple session wire paths");
+               ^
+error: expect(received).toThrow(expected)
+
+Expected substring: "multiple session wire paths"
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 1000,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "B.Cu",
+      width: 300000,
+      points: [
+        {
+          x: 1000000,
+          y: -1000000,
+        }, {
+          x: 2000000,
+          y: -1000000,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:618:10)
+(fail) session wire path multiplicity > rejects multiple paths instead of dropping copper: (path B.Cu 300 1000 1000 2000 1000) [0.11ms]
+(pass) session wire path multiplicity > preserves both paths when represented by separate wires [0.35ms]
+(pass) session wire path multiplicity > preserves a polygon-only plane echo [0.04ms]
+
+ 2 pass
+ 113 filtered out
+ 2 fail
+ 6 expect() calls
+Ran 4 tests across 1 file. [108.00ms]

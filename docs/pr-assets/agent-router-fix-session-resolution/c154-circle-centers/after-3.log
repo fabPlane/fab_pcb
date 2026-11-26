@@ -1,0 +1,16 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+(pass) session via circle centers > rejects unsupported session circle center 100 0 [0.44ms]
+(pass) session via circle centers > rejects unsupported session circle center 0 -100 [0.02ms]
+(pass) session via circle centers > rejects unsupported session circle center 100 [0.02ms]
+(pass) session via circle centers > rejects unsupported session circle center NaN 0 [0.01ms]
+(pass) session via circle centers > rejects unsupported session circle center 0 (bad) [0.01ms]
+(pass) session via circle centers > preserves concentric session circle center '' [0.29ms]
+(pass) session via circle centers > preserves concentric session circle center '0 0' [0.05ms]
+
+ 7 pass
+ 89 filtered out
+ 0 fail
+ 9 expect() calls
+Ran 7 tests across 1 file. [99.00ms]

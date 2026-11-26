@@ -1,0 +1,169 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+366 | });
+367 | 
+368 | for (const via of ["V NaN 20", "V 10 Infinity", "V 1e308 20", "V 10", "V (unexpected 10) 20", "(unexpected V) 10 20"]) {
+369 |   test(`session via rejects malformed coordinates: ${via}`, () => {
+370 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+371 |       (network_out (net A (via ${via})))))`)).toThrow(SyntaxError);
+                                                    ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [],
+  vias: [
+    {
+      net: "A",
+      padstack: "V",
+      x: NaN,
+      y: -2000,
+    }
+  ],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:371:47)
+(fail) session via rejects malformed coordinates: V NaN 20 [0.37ms]
+366 | });
+367 | 
+368 | for (const via of ["V NaN 20", "V 10 Infinity", "V 1e308 20", "V 10", "V (unexpected 10) 20", "(unexpected V) 10 20"]) {
+369 |   test(`session via rejects malformed coordinates: ${via}`, () => {
+370 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+371 |       (network_out (net A (via ${via})))))`)).toThrow(SyntaxError);
+                                                    ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [],
+  vias: [
+    {
+      net: "A",
+      padstack: "V",
+      x: 1000,
+      y: -Infinity,
+    }
+  ],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:371:47)
+(fail) session via rejects malformed coordinates: V 10 Infinity [0.07ms]
+366 | });
+367 | 
+368 | for (const via of ["V NaN 20", "V 10 Infinity", "V 1e308 20", "V 10", "V (unexpected 10) 20", "(unexpected V) 10 20"]) {
+369 |   test(`session via rejects malformed coordinates: ${via}`, () => {
+370 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+371 |       (network_out (net A (via ${via})))))`)).toThrow(SyntaxError);
+                                                    ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [],
+  vias: [
+    {
+      net: "A",
+      padstack: "V",
+      x: Infinity,
+      y: -2000,
+    }
+  ],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:371:47)
+(fail) session via rejects malformed coordinates: V 1e308 20 [0.03ms]
+366 | });
+367 | 
+368 | for (const via of ["V NaN 20", "V 10 Infinity", "V 1e308 20", "V 10", "V (unexpected 10) 20", "(unexpected V) 10 20"]) {
+369 |   test(`session via rejects malformed coordinates: ${via}`, () => {
+370 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+371 |       (network_out (net A (via ${via})))))`)).toThrow(SyntaxError);
+                                                    ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:371:47)
+(fail) session via rejects malformed coordinates: V 10 [0.03ms]
+366 | });
+367 | 
+368 | for (const via of ["V NaN 20", "V 10 Infinity", "V 1e308 20", "V 10", "V (unexpected 10) 20", "(unexpected V) 10 20"]) {
+369 |   test(`session via rejects malformed coordinates: ${via}`, () => {
+370 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+371 |       (network_out (net A (via ${via})))))`)).toThrow(SyntaxError);
+                                                    ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:371:47)
+(fail) session via rejects malformed coordinates: V (unexpected 10) 20 [0.04ms]
+366 | });
+367 | 
+368 | for (const via of ["V NaN 20", "V 10 Infinity", "V 1e308 20", "V 10", "V (unexpected 10) 20", "(unexpected V) 10 20"]) {
+369 |   test(`session via rejects malformed coordinates: ${via}`, () => {
+370 |     expect(() => parseSes(`(session sample (routes (resolution um 10)
+371 |       (network_out (net A (via ${via})))))`)).toThrow(SyntaxError);
+                                                    ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:371:47)
+(fail) session via rejects malformed coordinates: (unexpected V) 10 20 [0.03ms]
+(pass) session via preserves signed fractional coordinates and trailing attributes [0.04ms]
+
+ 1 pass
+ 48 filtered out
+ 6 fail
+ 7 expect() calls
+Ran 7 tests across 1 file. [130.00ms]

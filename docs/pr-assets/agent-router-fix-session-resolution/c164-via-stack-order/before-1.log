@@ -1,0 +1,53 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+(pass) session via stack order > ordered through shapes retain native endpoints [0.85ms]
+(pass) session via stack order > ordered blind shapes retain native endpoints [0.10ms]
+704 |         if (reverse) names.reverse();
+705 |         const shapes = names.map(layer => `(shape (circle ${layer} 800))`).join(" ");
+706 |         const session = parseSes(`(session s (routes (library_out (padstack V ${shapes}))
+707 |           (network_out (net A (via V 1000 -1000)))))`);
+708 |         const via = sesToItems(session, input).vias[0]!;
+709 |         expect(via.layers).toEqual(expected);
+                                 ^
+error: expect(received).toEqual(expected)
+
+  [
+-   3,
+-   4,
+    34,
++   4,
++   3,
+  ]
+
+- Expected  - 2
++ Received  + 2
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:709:28)
+(fail) session via stack order > reversed through shapes retain native endpoints [0.28ms]
+704 |         if (reverse) names.reverse();
+705 |         const shapes = names.map(layer => `(shape (circle ${layer} 800))`).join(" ");
+706 |         const session = parseSes(`(session s (routes (library_out (padstack V ${shapes}))
+707 |           (network_out (net A (via V 1000 -1000)))))`);
+708 |         const via = sesToItems(session, input).vias[0]!;
+709 |         expect(via.layers).toEqual(expected);
+                                 ^
+error: expect(received).toEqual(expected)
+
+  [
+-   3,
+    4,
++   3,
+  ]
+
+- Expected  - 1
++ Received  + 1
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:709:28)
+(fail) session via stack order > reversed blind shapes retain native endpoints [0.09ms]
+
+ 2 pass
+ 129 filtered out
+ 2 fail
+ 10 expect() calls
+Ran 4 tests across 1 file. [143.00ms]

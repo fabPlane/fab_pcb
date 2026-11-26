@@ -1,0 +1,283 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+395 | });
+396 | 
+397 | for (const name of ["V_0:300_um", "V_600:0_um", "V_600:600_um", "V_600:700_um", "V_99999999999999999999:300_um", "V_600:99999999999999999999_um"]) {
+398 |   test(`session via sizes reject invalid name dimensions: ${name}`, () => {
+399 |     const parsed = parseSes(`(session sample (routes (network_out (net A (via ${name} 10 20)))))`);
+400 |     expect(() => sesToItems(parsed, twoNetBoard())).toThrow(SyntaxError);
+                                                          ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 10000,
+        y: -20000,
+      },
+      diameter: 0,
+      drill: 300000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [ "via padstack \"V_0:300_um\" is not in library_out; using its name and the net class" ],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:400:53)
+(fail) session via sizes reject invalid name dimensions: V_0:300_um [0.64ms]
+395 | });
+396 | 
+397 | for (const name of ["V_0:300_um", "V_600:0_um", "V_600:600_um", "V_600:700_um", "V_99999999999999999999:300_um", "V_600:99999999999999999999_um"]) {
+398 |   test(`session via sizes reject invalid name dimensions: ${name}`, () => {
+399 |     const parsed = parseSes(`(session sample (routes (network_out (net A (via ${name} 10 20)))))`);
+400 |     expect(() => sesToItems(parsed, twoNetBoard())).toThrow(SyntaxError);
+                                                          ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 10000,
+        y: -20000,
+      },
+      diameter: 600000,
+      drill: 0,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [ "via padstack \"V_600:0_um\" is not in library_out; using its name and the net class" ],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:400:53)
+(fail) session via sizes reject invalid name dimensions: V_600:0_um [0.11ms]
+395 | });
+396 | 
+397 | for (const name of ["V_0:300_um", "V_600:0_um", "V_600:600_um", "V_600:700_um", "V_99999999999999999999:300_um", "V_600:99999999999999999999_um"]) {
+398 |   test(`session via sizes reject invalid name dimensions: ${name}`, () => {
+399 |     const parsed = parseSes(`(session sample (routes (network_out (net A (via ${name} 10 20)))))`);
+400 |     expect(() => sesToItems(parsed, twoNetBoard())).toThrow(SyntaxError);
+                                                          ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 10000,
+        y: -20000,
+      },
+      diameter: 600000,
+      drill: 600000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [ "via padstack \"V_600:600_um\" is not in library_out; using its name and the net class" ],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:400:53)
+(fail) session via sizes reject invalid name dimensions: V_600:600_um [0.06ms]
+395 | });
+396 | 
+397 | for (const name of ["V_0:300_um", "V_600:0_um", "V_600:600_um", "V_600:700_um", "V_99999999999999999999:300_um", "V_600:99999999999999999999_um"]) {
+398 |   test(`session via sizes reject invalid name dimensions: ${name}`, () => {
+399 |     const parsed = parseSes(`(session sample (routes (network_out (net A (via ${name} 10 20)))))`);
+400 |     expect(() => sesToItems(parsed, twoNetBoard())).toThrow(SyntaxError);
+                                                          ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 10000,
+        y: -20000,
+      },
+      diameter: 600000,
+      drill: 700000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [ "via padstack \"V_600:700_um\" is not in library_out; using its name and the net class" ],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:400:53)
+(fail) session via sizes reject invalid name dimensions: V_600:700_um [0.05ms]
+395 | });
+396 | 
+397 | for (const name of ["V_0:300_um", "V_600:0_um", "V_600:600_um", "V_600:700_um", "V_99999999999999999999:300_um", "V_600:99999999999999999999_um"]) {
+398 |   test(`session via sizes reject invalid name dimensions: ${name}`, () => {
+399 |     const parsed = parseSes(`(session sample (routes (network_out (net A (via ${name} 10 20)))))`);
+400 |     expect(() => sesToItems(parsed, twoNetBoard())).toThrow(SyntaxError);
+                                                          ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 10000,
+        y: -20000,
+      },
+      diameter: 1e+23,
+      drill: 300000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [ "via padstack \"V_99999999999999999999:300_um\" is not in library_out; using its name and the net class" ],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:400:53)
+(fail) session via sizes reject invalid name dimensions: V_99999999999999999999:300_um [0.05ms]
+395 | });
+396 | 
+397 | for (const name of ["V_0:300_um", "V_600:0_um", "V_600:600_um", "V_600:700_um", "V_99999999999999999999:300_um", "V_600:99999999999999999999_um"]) {
+398 |   test(`session via sizes reject invalid name dimensions: ${name}`, () => {
+399 |     const parsed = parseSes(`(session sample (routes (network_out (net A (via ${name} 10 20)))))`);
+400 |     expect(() => sesToItems(parsed, twoNetBoard())).toThrow(SyntaxError);
+                                                          ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 10000,
+        y: -20000,
+      },
+      diameter: 600000,
+      drill: 1e+23,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [ "via padstack \"V_600:99999999999999999999_um\" is not in library_out; using its name and the net class" ],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:400:53)
+(fail) session via sizes reject invalid name dimensions: V_600:99999999999999999999_um [0.04ms]
+403 | 
+404 | test("session via sizes validate explicit circle against name drill", () => {
+405 |   const parsed = parseSes(`(session sample (routes
+406 |     (library_out (padstack V_800:400_um (shape (circle F.Cu 300))))
+407 |     (network_out (net A (via V_800:400_um 10 20)))))`);
+408 |   expect(() => sesToItems(parsed, twoNetBoard())).toThrow(SyntaxError);
+                                                        ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 10000,
+        y: -20000,
+      },
+      diameter: 300000,
+      drill: 400000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:408:51)
+(fail) session via sizes validate explicit circle against name drill [0.10ms]
+(pass) session via sizes retain valid name fallback [0.04ms]
+
+ 1 pass
+ 64 filtered out
+ 7 fail
+ 8 expect() calls
+Ran 8 tests across 1 file. [118.00ms]

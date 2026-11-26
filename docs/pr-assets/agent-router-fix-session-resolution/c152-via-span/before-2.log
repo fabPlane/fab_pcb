@@ -1,0 +1,147 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+459 |   for (const layers of [["F.Cu"], ["F.Cu", "F.Cu"], ["F.Cu", "BL_F_Cu"]]) {
+460 |     test(`rejects one distinct via layer: ${layers.join(",")}`, () => {
+461 |       const shapes = layers.map(layer => `(shape (circle ${layer} 800))`).join(" ");
+462 |       const session = parseSes(`(session s (routes (library_out (padstack V ${shapes}))
+463 |         (network_out (net A (via V 1000 -1000)))))`);
+464 |       expect(() => sesToItems(session, twoNetBoard())).toThrow(SyntaxError);
+                                                             ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 1000000,
+        y: 1000000,
+      },
+      diameter: 800000,
+      drill: 400000,
+      layers: [ 3, 34 ],
+    }
+  ],
+  warnings: [],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:464:56)
+(fail) session via distinct layer span > rejects one distinct via layer: F.Cu [0.73ms]
+459 |   for (const layers of [["F.Cu"], ["F.Cu", "F.Cu"], ["F.Cu", "BL_F_Cu"]]) {
+460 |     test(`rejects one distinct via layer: ${layers.join(",")}`, () => {
+461 |       const shapes = layers.map(layer => `(shape (circle ${layer} 800))`).join(" ");
+462 |       const session = parseSes(`(session s (routes (library_out (padstack V ${shapes}))
+463 |         (network_out (net A (via V 1000 -1000)))))`);
+464 |       expect(() => sesToItems(session, twoNetBoard())).toThrow(SyntaxError);
+                                                             ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 1000000,
+        y: 1000000,
+      },
+      diameter: 800000,
+      drill: 400000,
+      layers: [ 3, 3 ],
+    }
+  ],
+  warnings: [],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:464:56)
+(fail) session via distinct layer span > rejects one distinct via layer: F.Cu,F.Cu [0.14ms]
+459 |   for (const layers of [["F.Cu"], ["F.Cu", "F.Cu"], ["F.Cu", "BL_F_Cu"]]) {
+460 |     test(`rejects one distinct via layer: ${layers.join(",")}`, () => {
+461 |       const shapes = layers.map(layer => `(shape (circle ${layer} 800))`).join(" ");
+462 |       const session = parseSes(`(session s (routes (library_out (padstack V ${shapes}))
+463 |         (network_out (net A (via V 1000 -1000)))))`);
+464 |       expect(() => sesToItems(session, twoNetBoard())).toThrow(SyntaxError);
+                                                             ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  tracks: [],
+  vias: [
+    {
+      net: "A",
+      netCode: 1,
+      position: {
+        x: 1000000,
+        y: 1000000,
+      },
+      diameter: 800000,
+      drill: 400000,
+      layers: [ 3, 3 ],
+    }
+  ],
+  warnings: [],
+  routedNets: Set(1) {
+    "A",
+  },
+  echoed: {
+    tracks: 0,
+    vias: 0,
+  },
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:464:56)
+(fail) session via distinct layer span > rejects one distinct via layer: F.Cu,BL_F_Cu [0.07ms]
+466 |   }
+467 |   test("normalizes repeated aliases in a valid via span", () => {
+468 |     const session = parseSes(`(session s (routes (library_out (padstack V
+469 |       (shape (circle F.Cu 800)) (shape (circle BL_F_Cu 800)) (shape (circle B.Cu 800))))
+470 |       (network_out (net A (via V 1000 -1000)))))`);
+471 |     expect(sesToItems(session, twoNetBoard()).vias[0]!.layers).toEqual(twoNetBoard().copperLayers.map(l => l.id));
+                                                                     ^
+error: expect(received).toEqual(expected)
+
+  [
+    3,
++   3,
+    34,
+  ]
+
+- Expected  - 0
++ Received  + 1
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:471:64)
+(fail) session via distinct layer span > normalizes repeated aliases in a valid via span [0.13ms]
+(pass) session via distinct layer span > retains via fallback when layer metadata is absent [0.05ms]
+
+ 1 pass
+ 80 filtered out
+ 4 fail
+ 5 expect() calls
+Ran 5 tests across 1 file. [127.00ms]

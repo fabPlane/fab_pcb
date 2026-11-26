@@ -1,0 +1,12 @@
+{
+  "packages/router/src/specctra/ses.ts": "24b637b1880a9f1c20faa48564d9a9e5abad8f79cdf86dc5ecfc475c0a649291",
+  "packages/router/test/specctra.test.ts": "ac214267964e479d3aaec58557c5a68603034eecabb45b91103d1ddde31e5dda",
+  "docs/pr-assets/agent-router-fix-session-resolution/c152-via-span/before-2.log": "6371b12b1a2954b00cc6b4b9d68e69022ba9a97701434e36546e3da97a89c21c",
+  "docs/pr-assets/agent-router-fix-session-resolution/c152-via-span/package-tests.log": "56954080ddd59e61c7084becbec7525c8b87f6ec94f054ddae86e88055bb6e2f",
+  "docs/pr-assets/agent-router-fix-session-resolution/c152-via-span/before-3.log": "3d2bdc0503965a8ad359f717014e03c0b70035d4dc366d8d9f4f90082fbc65c8",
+  "docs/pr-assets/agent-router-fix-session-resolution/c152-via-span/after-1.log": "7d9c2e9416f73625693f6af9b0ff58b6853bde86469ad90ce1329583374464ce",
+  "docs/pr-assets/agent-router-fix-session-resolution/c152-via-span/before-1.log": "7011e0916c4f388f5445728d15d89e6db099a0235c2456a198178b888ccf3dd2",
+  "docs/pr-assets/agent-router-fix-session-resolution/c152-via-span/after-3.log": "e96b102902f790c61ed4cc259cf04d1a9e198b2b8cded4917437fb2a65a64a29",
+  "docs/pr-assets/agent-router-fix-session-resolution/c152-via-span/after-2.log": "91540ca1a6587a7123492d8527670faa447e536a1e5ab71755718fcd431c1e85",
+  "docs/pr-assets/agent-router-fix-session-resolution/c152-via-span/typecheck.log": "faeaa94bcf7012d86f91ca647580449f56a263fb7eaf572c54789764f60a9b8f"
+}

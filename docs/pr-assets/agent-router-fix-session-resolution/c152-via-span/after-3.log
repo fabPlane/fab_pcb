@@ -1,0 +1,14 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+(pass) session via distinct layer span > rejects one distinct via layer: F.Cu [0.58ms]
+(pass) session via distinct layer span > rejects one distinct via layer: F.Cu,F.Cu [0.06ms]
+(pass) session via distinct layer span > rejects one distinct via layer: F.Cu,BL_F_Cu [0.04ms]
+(pass) session via distinct layer span > normalizes repeated aliases in a valid via span [0.08ms]
+(pass) session via distinct layer span > retains via fallback when layer metadata is absent [0.05ms]
+
+ 5 pass
+ 80 filtered out
+ 0 fail
+ 5 expect() calls
+Ran 5 tests across 1 file. [108.00ms]

@@ -47,24 +47,39 @@ const UNIT_NM: Record<string, number> = { um: 1_000, mm: 1_000_000, cm: 10_000_0
 
 /** `(resolution um 10)` -> 100 nm per unit. */
 export function resolutionToNm(res: SExpr[] | undefined): number {
-  const [unit, count] = atoms(res);
-  const perUnit = UNIT_NM[unit ?? "um"] ?? 1_000;
-  const n = Number(count ?? "1") || 1;
-  return perUnit / n;
+  // Resolution operands are positional. Filtering nested lists can silently
+  // replace an explicit scale with a default and resize all imported copper.
+  if (res && (res.length > 3 || res.slice(1).some((v) => typeof v !== "string")))
+    throw new SyntaxError("invalid session resolution operands");
+  const unit = res?.[1] as string | undefined;
+  const count = res?.[2] as string | undefined;
+  const name = unit ?? "um";
+  if (!Object.hasOwn(UNIT_NM, name)) throw new SyntaxError(`unsupported session resolution unit: ${name}`);
+  const n = Number(count ?? "1");
+  const scale = UNIT_NM[name]! / n;
+  // Invalid scales can mirror, collapse or mis-scale every imported copper item.
+  // Keep the historical defaults only for omitted values, never malformed ones.
+  if (!Number.isFinite(n) || n <= 0 || !Number.isFinite(scale) || scale <= 0)
+    throw new SyntaxError(`invalid session resolution count: ${count}`);
+  return scale;
 }
 
 function pathOf(list: SExpr[], nmPerUnit: number): { layer: string; width: number; points: { x: number; y: number }[] } | undefined {
   // (path <layer> <aperture_width> x0 y0 x1 y1 ...)
   const layer = list[1];
-  if (typeof layer !== "string") return undefined;
-  const nums = list
-    .slice(2)
-    .filter((c): c is string => typeof c === "string")
-    .map(Number);
-  const width = nums.shift() ?? 0;
+  if (typeof layer !== "string" || !layer) throw new SyntaxError("invalid session path layer");
+  const values = list.slice(2);
+  // A path requires a width and at least two complete coordinate pairs.
+  // Never drop nested values or a trailing coordinate: that silently changes copper.
+  if (values.length < 5 || values.length % 2 !== 1 || values.some((v) => typeof v !== "string"))
+    throw new SyntaxError("invalid session path coordinates");
+  const nums = values.map(Number);
+  const scaled = nums.map((v) => Math.round(v * nmPerUnit));
+  if (nums.some((v) => !Number.isFinite(v)) || scaled.some((v) => !Number.isSafeInteger(v)) || scaled[0]! <= 0)
+    throw new SyntaxError("invalid session path dimensions");
+  const width = nums.shift()!;
   const points: { x: number; y: number }[] = [];
-  for (let i = 0; i + 1 < nums.length; i += 2)
-    points.push({ x: Math.round(nums[i]! * nmPerUnit), y: Math.round(-nums[i + 1]! * nmPerUnit) });
+  for (let i = 0; i < nums.length; i += 2) points.push({ x: Math.round(nums[i]! * nmPerUnit), y: Math.round(-nums[i + 1]! * nmPerUnit) });
   return { layer, width: Math.round(width * nmPerUnit), points };
 }
 
@@ -73,19 +88,53 @@ export function parseSes(text: string): Session {
   const session = root.find((x) => head(x) === "session") as SExpr[] | undefined;
   if (!session) throw new SyntaxError("not a Specctra session: no (session ...) form");
   const routes = child(session, "routes");
-  const nmPerUnit = resolutionToNm(child(routes, "resolution") ?? child(child(session, "placement"), "resolution"));
+  const placement = child(session, "placement");
+  // A section has one scale. Selecting its first declaration silently makes
+  // imported copper dimensions depend on the order of conflicting metadata.
+  for (const section of [routes, placement]) {
+    if (children(section, "resolution").length > 1) throw new SyntaxError("multiple session resolutions in one section");
+  }
+  const nmPerUnit = resolutionToNm(child(routes, "resolution") ?? child(placement, "resolution"));
 
   const padstacks = new Map<string, SesPadstack>();
   for (const ps of children(child(routes, "library_out"), "padstack")) {
     const name = typeof ps[1] === "string" ? ps[1] : "";
+    // A later definition must not silently replace the copper used by every via
+    // referencing this identifier. Quoted and unquoted names share an identity.
+    if (padstacks.has(name)) throw new SyntaxError(`duplicate session padstack: ${name}`);
     const layers: string[] = [];
     let diameter = 0;
     for (const shape of children(ps, "shape")) {
+      // Shape attributes may follow its geometry, but another geometry cannot
+      // be discarded: NewVia represents one circular pad per layer.
+      if (shape.slice(2).some((value) => ["circle", "rect", "polygon", "path", "qarc"].includes(head(value) ?? "")))
+        throw new SyntaxError("multiple session shape geometries");
       const geom = shape[1];
-      if (!isList(geom)) continue;
+      // NewVia has circular copper on every layer. Falling back to a name or
+      // another layer's circle for explicit noncircular geometry changes copper.
+      if (!isList(geom) || geom[0] !== "circle") throw new SyntaxError("unsupported session via shape");
       const layer = geom[1];
-      if (typeof layer === "string") layers.push(layer);
-      if (geom[0] === "circle") diameter = Math.round((Number(geom[2]) || 0) * nmPerUnit);
+      // An explicit malformed layer is not absent metadata: dropping it can
+      // trigger the all-layer fallback or silently discard part of the padstack.
+      if (typeof layer !== "string" || !layer) throw new SyntaxError("invalid session circle layer");
+      layers.push(layer);
+      if (geom[0] === "circle") {
+        // A malformed explicit circle must never become an invalid via size or
+        // silently select the name/net-class fallback reserved for absent circles.
+        // Optional circle centers describe copper relative to the barrel. NewVia
+        // cannot represent eccentric pads; moving the barrel would move its drill.
+        const center = geom.slice(3);
+        if (center.length !== 0 && (center.length !== 2 || center.some((v) => typeof v !== "string" || Number(v) !== 0)))
+          throw new SyntaxError("unsupported session circle center");
+        const value = typeof geom[2] === "string" ? Number(geom[2]) : NaN;
+        const scaled = Math.round(value * nmPerUnit);
+        if (!Number.isFinite(value) || !Number.isSafeInteger(scaled) || scaled <= 0)
+          throw new SyntaxError("invalid session circle diameter");
+        // NewVia has one diameter for the entire barrel. Taking the last
+        // layer shape would silently enlarge or shrink copper on other layers.
+        if (diameter !== 0 && diameter !== scaled) throw new SyntaxError("unsupported session via layer diameters");
+        diameter = scaled;
+      }
     }
     padstacks.set(name, { name, layers, diameter });
   }
@@ -97,20 +146,29 @@ export function parseSes(text: string): Session {
     const netName = typeof net[1] === "string" ? net[1] : "";
     nets.push(netName);
     for (const w of children(net, "wire")) {
-      const path = child(w, "path");
+      const paths = children(w, "path");
+      // A wire has one geometry. Selecting only the first path silently loses
+      // copper and makes the imported result depend on declaration order.
+      if (paths.length > 1) throw new SyntaxError("multiple session wire paths");
+      const path = paths[0];
       if (!path) continue; // (wire (polygon ...)) = plane echo; ignored
       const p = pathOf(path, nmPerUnit);
       if (p && p.points.length >= 2) wires.push({ net: netName, ...p });
     }
     for (const v of children(net, "via")) {
-      const [padstack, x, y] = atoms(v);
-      if (!padstack || x === undefined || y === undefined) continue;
-      vias.push({ net: netName, padstack, x: Math.round(Number(x) * nmPerUnit), y: Math.round(-Number(y) * nmPerUnit) });
+      // Read positional operands directly: filtering nested lists shifts coordinates.
+      // Later attributes such as (type normal) do not affect the via position.
+      const [, padstack, x, y] = v;
+      if (typeof padstack !== "string" || !padstack || typeof x !== "string" || typeof y !== "string")
+        throw new SyntaxError("invalid session via coordinates");
+      const px = Math.round(Number(x) * nmPerUnit);
+      const py = Math.round(-Number(y) * nmPerUnit);
+      if (!Number.isSafeInteger(px) || !Number.isSafeInteger(py)) throw new SyntaxError("invalid session via dimensions");
+      vias.push({ net: netName, padstack, x: px, y: py });
     }
   }
 
   const placements: Session["placements"] = [];
-  const placement = child(session, "placement");
   const placeNm = resolutionToNm(child(placement, "resolution") ?? child(routes, "resolution"));
   for (const comp of children(placement, "component")) {
     const component = typeof comp[1] === "string" ? comp[1] : "";
@@ -171,6 +229,11 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
   const tracks: NewTrack[] = [];
   const vias: NewVia[] = [];
   const routedNets = new Set<string>();
+  const codeFor = (net: string): number => {
+    const code = codes.get(net);
+    if (code === undefined) throw new SyntaxError(`unknown session net: ${net}`);
+    return code;
+  };
   const rulesFor = (net: string) => input.rules.perNet.get(net) ?? input.rules.default;
   const echoed = { tracks: 0, vias: 0 };
   const near = (a: { x: number; y: number }, b: { x: number; y: number }) =>
@@ -212,7 +275,7 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
       warnOnce(`unknown layer "${w.layer}"`);
       continue;
     }
-    const netCode = codes.get(w.net) ?? 0;
+    const netCode = codeFor(w.net);
     const width = w.width || rulesFor(w.net).trackWidth;
     for (let i = 1; i < w.points.length; i++) {
       const start = w.points[i - 1]!;
@@ -228,13 +291,28 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
   }
   const allLayers = input.copperLayers.map((l) => l.id);
   for (const v of session.vias) {
+    const netCode = codeFor(v.net);
     const ps = session.padstacks.get(v.padstack);
     const rules = rulesFor(v.net);
     const m = /_(\d+):(\d+)_um$/.exec(v.padstack);
     const diameter = ps?.diameter || (m ? Number(m[1]) * 1000 : rules.viaDiameter);
     const drill = m ? Number(m[2]) * 1000 : rules.viaDrill;
-    let layers = (ps?.layers ?? []).map((n) => layerByName.get(n)).filter((l): l is BoardLayer => l !== undefined);
-    if (layers.length < 2) layers = allLayers;
+    // Validate every dimension source, including encoded names and net-class fallback,
+    // before echo matching or creation can accept physically impossible barrels.
+    if (!Number.isSafeInteger(diameter) || !Number.isSafeInteger(drill) || drill <= 0 || diameter <= drill)
+      throw new SyntaxError("invalid session via diameter or drill");
+    // Never discard a declared layer and then broaden the barrel to all layers.
+    // Missing padstack metadata may use the legacy fallback; unsupported metadata cannot.
+    if (ps?.layers.some((name) => !layerByName.has(name))) throw new SyntaxError("unknown session via layer");
+    let layers = [...new Set((ps?.layers ?? []).map((name) => layerByName.get(name)!))];
+    // Repeated shapes and aliases do not create a barrel between distinct layers.
+    // A declared single-layer padstack must not become a through via.
+    if (layers.length === 1) throw new SyntaxError("session via requires two distinct layers");
+    if (layers.length === 0) layers = allLayers;
+    // Padstack shape declarations are a set, not drill endpoints. Native via
+    // creation uses the first/last layers, so use board stack order even when
+    // the session lists shapes back-to-front or interleaves layer aliases.
+    layers = allLayers.filter((layer) => layers.includes(layer));
     // Padstack names carry whole micrometres (`viaPadstackName`), so a size read from the name can
     // be up to 500 nm off the native via (e.g. a 0.3048 mm drill is named 305 um).
     const sizeTolerance = {
@@ -246,7 +324,7 @@ export function sesToItems(session: Session, input: RouteInput): SesItems {
       continue;
     }
     if (!ps) warnOnce(`via padstack "${v.padstack}" is not in library_out; using its name and the net class`);
-    vias.push({ net: v.net, netCode: codes.get(v.net) ?? 0, position: { x: v.x, y: v.y }, diameter, drill, layers });
+    vias.push({ net: v.net, netCode, position: { x: v.x, y: v.y }, diameter, drill, layers });
     routedNets.add(v.net);
   }
   if (echoed.tracks || echoed.vias)

@@ -1,0 +1,547 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/specctra.test.ts:
+326 | }
+327 | 
+328 | for (const resolution of ["unknown 10", "toString 10", "um 0", "um -10", "um NaN", "um Infinity", "um 1e-320"]) {
+329 |   for (const placement of [false, true]) {
+330 |     test(`session resolution rejects ${resolution} in ${placement ? "placement fallback" : "routes"}`, () => {
+331 |       expect(() => parseSes(session(resolution, placement))).toThrow(SyntaxError);
+                                                                   ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: 200,
+      points: [
+        {
+          x: 0,
+          y: -0,
+        }, {
+          x: 1000,
+          y: -2000,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:331:62)
+(fail) session resolution rejects unknown 10 in routes [0.45ms]
+326 | }
+327 | 
+328 | for (const resolution of ["unknown 10", "toString 10", "um 0", "um -10", "um NaN", "um Infinity", "um 1e-320"]) {
+329 |   for (const placement of [false, true]) {
+330 |     test(`session resolution rejects ${resolution} in ${placement ? "placement fallback" : "routes"}`, () => {
+331 |       expect(() => parseSes(session(resolution, placement))).toThrow(SyntaxError);
+                                                                   ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 100,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: 200,
+      points: [
+        {
+          x: 0,
+          y: -0,
+        }, {
+          x: 1000,
+          y: -2000,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:331:62)
+(fail) session resolution rejects unknown 10 in placement fallback [0.07ms]
+326 | }
+327 | 
+328 | for (const resolution of ["unknown 10", "toString 10", "um 0", "um -10", "um NaN", "um Infinity", "um 1e-320"]) {
+329 |   for (const placement of [false, true]) {
+330 |     test(`session resolution rejects ${resolution} in ${placement ? "placement fallback" : "routes"}`, () => {
+331 |       expect(() => parseSes(session(resolution, placement))).toThrow(SyntaxError);
+                                                                   ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: NaN,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: NaN,
+      points: [
+        {
+          x: NaN,
+          y: NaN,
+        }, {
+          x: NaN,
+          y: NaN,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:331:62)
+(fail) session resolution rejects toString 10 in routes [0.06ms]
+326 | }
+327 | 
+328 | for (const resolution of ["unknown 10", "toString 10", "um 0", "um -10", "um NaN", "um Infinity", "um 1e-320"]) {
+329 |   for (const placement of [false, true]) {
+330 |     test(`session resolution rejects ${resolution} in ${placement ? "placement fallback" : "routes"}`, () => {
+331 |       expect(() => parseSes(session(resolution, placement))).toThrow(SyntaxError);
+                                                                   ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: NaN,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: NaN,
+      points: [
+        {
+          x: NaN,
+          y: NaN,
+        }, {
+          x: NaN,
+          y: NaN,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:331:62)
+(fail) session resolution rejects toString 10 in placement fallback [0.04ms]
+326 | }
+327 | 
+328 | for (const resolution of ["unknown 10", "toString 10", "um 0", "um -10", "um NaN", "um Infinity", "um 1e-320"]) {
+329 |   for (const placement of [false, true]) {
+330 |     test(`session resolution rejects ${resolution} in ${placement ? "placement fallback" : "routes"}`, () => {
+331 |       expect(() => parseSes(session(resolution, placement))).toThrow(SyntaxError);
+                                                                   ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 1000,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: 2000,
+      points: [
+        {
+          x: 0,
+          y: -0,
+        }, {
+          x: 10000,
+          y: -20000,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:331:62)
+(fail) session resolution rejects um 0 in routes [0.04ms]
+326 | }
+327 | 
+328 | for (const resolution of ["unknown 10", "toString 10", "um 0", "um -10", "um NaN", "um Infinity", "um 1e-320"]) {
+329 |   for (const placement of [false, true]) {
+330 |     test(`session resolution rejects ${resolution} in ${placement ? "placement fallback" : "routes"}`, () => {
+331 |       expect(() => parseSes(session(resolution, placement))).toThrow(SyntaxError);
+                                                                   ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 1000,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: 2000,
+      points: [
+        {
+          x: 0,
+          y: -0,
+        }, {
+          x: 10000,
+          y: -20000,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:331:62)
+(fail) session resolution rejects um 0 in placement fallback [0.03ms]
+326 | }
+327 | 
+328 | for (const resolution of ["unknown 10", "toString 10", "um 0", "um -10", "um NaN", "um Infinity", "um 1e-320"]) {
+329 |   for (const placement of [false, true]) {
+330 |     test(`session resolution rejects ${resolution} in ${placement ? "placement fallback" : "routes"}`, () => {
+331 |       expect(() => parseSes(session(resolution, placement))).toThrow(SyntaxError);
+                                                                   ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: -100,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: -200,
+      points: [
+        {
+          x: -0,
+          y: 0,
+        }, {
+          x: -1000,
+          y: 2000,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:331:62)
+(fail) session resolution rejects um -10 in routes [0.03ms]
+326 | }
+327 | 
+328 | for (const resolution of ["unknown 10", "toString 10", "um 0", "um -10", "um NaN", "um Infinity", "um 1e-320"]) {
+329 |   for (const placement of [false, true]) {
+330 |     test(`session resolution rejects ${resolution} in ${placement ? "placement fallback" : "routes"}`, () => {
+331 |       expect(() => parseSes(session(resolution, placement))).toThrow(SyntaxError);
+                                                                   ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: -100,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: -200,
+      points: [
+        {
+          x: -0,
+          y: 0,
+        }, {
+          x: -1000,
+          y: 2000,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:331:62)
+(fail) session resolution rejects um -10 in placement fallback [0.03ms]
+326 | }
+327 | 
+328 | for (const resolution of ["unknown 10", "toString 10", "um 0", "um -10", "um NaN", "um Infinity", "um 1e-320"]) {
+329 |   for (const placement of [false, true]) {
+330 |     test(`session resolution rejects ${resolution} in ${placement ? "placement fallback" : "routes"}`, () => {
+331 |       expect(() => parseSes(session(resolution, placement))).toThrow(SyntaxError);
+                                                                   ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 1000,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: 2000,
+      points: [
+        {
+          x: 0,
+          y: -0,
+        }, {
+          x: 10000,
+          y: -20000,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:331:62)
+(fail) session resolution rejects um NaN in routes [0.03ms]
+326 | }
+327 | 
+328 | for (const resolution of ["unknown 10", "toString 10", "um 0", "um -10", "um NaN", "um Infinity", "um 1e-320"]) {
+329 |   for (const placement of [false, true]) {
+330 |     test(`session resolution rejects ${resolution} in ${placement ? "placement fallback" : "routes"}`, () => {
+331 |       expect(() => parseSes(session(resolution, placement))).toThrow(SyntaxError);
+                                                                   ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 1000,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: 2000,
+      points: [
+        {
+          x: 0,
+          y: -0,
+        }, {
+          x: 10000,
+          y: -20000,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:331:62)
+(fail) session resolution rejects um NaN in placement fallback [0.03ms]
+326 | }
+327 | 
+328 | for (const resolution of ["unknown 10", "toString 10", "um 0", "um -10", "um NaN", "um Infinity", "um 1e-320"]) {
+329 |   for (const placement of [false, true]) {
+330 |     test(`session resolution rejects ${resolution} in ${placement ? "placement fallback" : "routes"}`, () => {
+331 |       expect(() => parseSes(session(resolution, placement))).toThrow(SyntaxError);
+                                                                   ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 0,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: 0,
+      points: [
+        {
+          x: 0,
+          y: -0,
+        }, {
+          x: 0,
+          y: -0,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:331:62)
+(fail) session resolution rejects um Infinity in routes [0.03ms]
+326 | }
+327 | 
+328 | for (const resolution of ["unknown 10", "toString 10", "um 0", "um -10", "um NaN", "um Infinity", "um 1e-320"]) {
+329 |   for (const placement of [false, true]) {
+330 |     test(`session resolution rejects ${resolution} in ${placement ? "placement fallback" : "routes"}`, () => {
+331 |       expect(() => parseSes(session(resolution, placement))).toThrow(SyntaxError);
+                                                                   ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: 0,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: 0,
+      points: [
+        {
+          x: 0,
+          y: -0,
+        }, {
+          x: 0,
+          y: -0,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:331:62)
+(fail) session resolution rejects um Infinity in placement fallback [0.03ms]
+326 | }
+327 | 
+328 | for (const resolution of ["unknown 10", "toString 10", "um 0", "um -10", "um NaN", "um Infinity", "um 1e-320"]) {
+329 |   for (const placement of [false, true]) {
+330 |     test(`session resolution rejects ${resolution} in ${placement ? "placement fallback" : "routes"}`, () => {
+331 |       expect(() => parseSes(session(resolution, placement))).toThrow(SyntaxError);
+                                                                   ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: Infinity,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: Infinity,
+      points: [
+        {
+          x: NaN,
+          y: NaN,
+        }, {
+          x: Infinity,
+          y: -Infinity,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:331:62)
+(fail) session resolution rejects um 1e-320 in routes [0.02ms]
+326 | }
+327 | 
+328 | for (const resolution of ["unknown 10", "toString 10", "um 0", "um -10", "um NaN", "um Infinity", "um 1e-320"]) {
+329 |   for (const placement of [false, true]) {
+330 |     test(`session resolution rejects ${resolution} in ${placement ? "placement fallback" : "routes"}`, () => {
+331 |       expect(() => parseSes(session(resolution, placement))).toThrow(SyntaxError);
+                                                                   ^
+error: expect(received).toThrow(expected)
+
+Expected constructor: SyntaxError
+
+Received function did not throw
+Received value: {
+  nmPerUnit: Infinity,
+  padstacks: Map {},
+  wires: [
+    {
+      net: "A",
+      layer: "F.Cu",
+      width: Infinity,
+      points: [
+        {
+          x: NaN,
+          y: NaN,
+        }, {
+          x: Infinity,
+          y: -Infinity,
+        }
+      ],
+    }
+  ],
+  vias: [],
+  nets: [ "A" ],
+  placements: [],
+}
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/specctra.test.ts:331:62)
+(fail) session resolution rejects um 1e-320 in placement fallback [0.02ms]
+(pass) session resolution preserves um geometry [0.05ms]
+(pass) session resolution preserves mm geometry [0.01ms]
+(pass) session resolution preserves cm geometry [0.01ms]
+(pass) session resolution preserves inch geometry [0.01ms]
+(pass) session resolution preserves mil geometry [0.02ms]
+(pass) session resolution preserves omitted resolution defaults [0.02ms]
+
+ 6 pass
+ 17 filtered out
+ 14 fail
+ 30 expect() calls
+Ran 20 tests across 1 file. [103.00ms]
