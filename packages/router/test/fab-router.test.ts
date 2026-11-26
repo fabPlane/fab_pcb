@@ -254,3 +254,25 @@ test("forwards native clearance floors in micrometres and honors explicit solver
   expect(settings).toMatchObject({ copperToEdgeClearanceUm: 600, holeClearanceUm: 300 });
   await expect(router.route(input, { extra: { holeClearanceUm: -1 } })).rejects.toThrow("invalid fab_router holeClearanceUm");
 });
+
+test("extended search budget is explicit and rejects non-boolean options before solving", async () => {
+  let received: FabRouterSettings | undefined;
+  let calls = 0;
+  const router = new FabRouter({
+    routeDsn: (_dsn, settings) => {
+      received = settings;
+      calls++;
+      return success();
+    },
+  });
+  await router.route(twoNetBoard());
+  expect(received).not.toHaveProperty("extendedSearchBudget");
+  await router.route(twoNetBoard(), { extra: { extendedSearchBudget: true } });
+  expect(received?.extendedSearchBudget).toBe(true);
+  await router.route(twoNetBoard(), { extra: { extendedSearchBudget: false } });
+  expect(received?.extendedSearchBudget).toBe(false);
+  await expect(router.route(twoNetBoard(), { extra: { extendedSearchBudget: "true" } })).rejects.toThrow(
+    "invalid fab_router extendedSearchBudget",
+  );
+  expect(calls).toBe(3);
+});
