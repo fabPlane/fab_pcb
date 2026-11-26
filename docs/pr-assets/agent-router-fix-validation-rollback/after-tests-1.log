@@ -1,0 +1,14 @@
+bun test v1.4.0 (34cbb9a40)
+
+test/bridge-validation.test.ts:
+(pass) failed native validation restores tentative copper [3.30ms]
+(pass) failed native validation restores tentative copper after a cleanup retry [0.28ms]
+(pass) failed validation reports an unsuccessful rollback (zero) without claiming restoration [0.16ms]
+(pass) failed validation reports an unsuccessful rollback (throws) without claiming restoration [0.08ms]
+(pass) successful native validation keeps and saves the applied route without undo [0.51ms]
+(pass) failed validation preserves an unrelated edit above the route commit [0.15ms]
+
+ 6 pass
+ 0 fail
+ 31 expect() calls
+Ran 6 tests across 1 file. [76.00ms]

@@ -1,0 +1,31 @@
+{
+  "package_typecheck": "PASS",
+  "package_unit": {
+    "passed": 102,
+    "skipped": 1,
+    "failed": 0,
+    "assertions": 407
+  },
+  "engine": {
+    "typecheck": "PASS",
+    "layers": "65 files; zero violations",
+    "passed": 859,
+    "failed": 0,
+    "assertions": 398454,
+    "seconds": 223.3
+  },
+  "limitations": [
+    "Live adapter integration unavailable: stock KiCad has no api-server subcommand. Initial broad package run failed this setup requirement; no integration test was suppressed or modified.",
+    "Initial corpus failure from missing runtime module was resolved by setting FAB_ROUTER_MODULE to the unchanged own engine checkout.",
+    "One unit-test Freerouting jar round trip is skipped by its existing DEFAULT_JAR availability gate."
+  ],
+  "source_sha256": {
+    "packages/router/src/bridge-job.ts": "672676d42fff7e5cbdb644a297d6614269e26fbeb769bdaaafa24987edcaadd4",
+    "packages/router/test/bridge-validation.test.ts": "4fe91bb6ea4731b8fe73ac60c844a302df086a38dd5f94fa1c4ecf4f745041a2",
+    "packages/router/test/bridge-validation-fixture.ts": "cc155f0de87c7980d5ff9609829dcfcfa99fabf4dee21c51b9a9492530c8372f"
+  },
+  "log_sha256": {
+    "final-owned-checks.log": "a03bfb093c246a09fd548af83cb5a1fb662dd62ac07617d2813095d4ecddeb31",
+    "engine-checks.log": "569bcfa86f94dafd37501db9922c5a1f3be993b42fdfd1305ba0fbf8409ab50b"
+  }
+}

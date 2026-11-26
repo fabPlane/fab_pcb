@@ -1,0 +1,12 @@
+{
+  "source_sha256": {
+    "packages/router/src/bridge-job.ts": "216eb3838bfd6033f69bf1e1cf8ccbbff5511d0d11cb1a25b11fc0a328fc02f4",
+    "packages/router/test/bridge-validation.test.ts": "b6c3913ef21988aa20624d5ae5c293271018ffaf9e8c2bcf80c66b227a61b9e1",
+    "packages/router/test/bridge-validation-fixture.ts": "4c37ed805b8834f17d0c3b66d929a65ec4844b63c714e6ff9ae7055df6948dea"
+  },
+  "controls": "same stateful fixture, host and three repeats; before source 517c357",
+  "before_new_scenarios_passed": 0,
+  "after_new_scenarios_passed": 9,
+  "runs": 9,
+  "scope": "adapter regression only, not native routing benchmark"
+}

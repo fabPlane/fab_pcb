@@ -1,0 +1,37 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-validation.test.ts:
+360 |     });
+361 |     await waiting;
+362 |     expect(fixture.cancel()).toBe(true);
+363 |     release();
+364 |     const info = await fixture.done;
+365 |     expect(info.state).toBe("cancelled");
+                             ^
+error: expect(received).toBe(expected)
+
+Expected: "cancelled"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:365:24)
+(fail) cancellation during tentative DRC restores copper (refill=false) [3.19ms]
+360 |     });
+361 |     await waiting;
+362 |     expect(fixture.cancel()).toBe(true);
+363 |     release();
+364 |     const info = await fixture.done;
+365 |     expect(info.state).toBe("cancelled");
+                             ^
+error: expect(received).toBe(expected)
+
+Expected: "cancelled"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:365:24)
+(fail) cancellation during tentative DRC restores copper (refill=true) [0.21ms]
+
+ 0 pass
+ 57 filtered out
+ 2 fail
+ 4 expect() calls
+Ran 2 tests across 1 file. [151.00ms]

@@ -1,0 +1,13 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-validation.test.ts:
+(pass) checks every track clearance finding (new, refill=false) [3.53ms]
+(pass) checks every track clearance finding (existing, refill=false) [0.52ms]
+(pass) checks every track clearance finding (new, refill=true) [0.17ms]
+(pass) checks every track clearance finding (existing, refill=true) [0.09ms]
+
+ 4 pass
+ 51 filtered out
+ 0 fail
+ 20 expect() calls
+Ran 4 tests across 1 file. [146.00ms]

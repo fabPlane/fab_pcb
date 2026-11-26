@@ -1,0 +1,16 @@
+{
+  "before": "43fe8f6aff559090488c40e7045c6872dd6699da",
+  "source_sha256": {
+    "packages/router/src/bridge-job.ts": "482e5d9fb1ceb2d8f6222d40e64085f6b42e25b38c165150573cce777c1cabe0",
+    "packages/router/test/bridge-validation-fixture.ts": "3f27823a575e232abc854eb92df4c3b2346ed8fbf89fd4c8415150faa4573fc5",
+    "packages/router/test/bridge-validation.test.ts": "9cc3363d173ce95f41debfdd341454a2b54c4defe80848128c333bcd6c9304d7",
+    "packages/router/test/bridge-job.test.ts": "7ca9917c50a1a2acacfa04e82b8ecfe4ec7a26462cbd3eec5e67096d56e8a59d",
+    "packages/router/test/bridge-undo-ownership.test.ts": "ffbebe0f1b4c867495f8a7b56519dcc1c20c6a3ef00919478d8dce65979df7cc"
+  },
+  "cases": 2,
+  "repeats": 3,
+  "before_passed_per_repeat": 0,
+  "after_passed_per_repeat": 2,
+  "native_benchmark": false,
+  "source_commit": "6de50d9"
+}

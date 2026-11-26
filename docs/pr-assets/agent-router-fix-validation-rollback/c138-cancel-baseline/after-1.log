@@ -1,0 +1,11 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-validation.test.ts:
+(pass) cancellation during baseline DRC prevents applying copper (refill=false) [3.28ms]
+(pass) cancellation during baseline DRC prevents applying copper (refill=true) [0.16ms]
+
+ 2 pass
+ 55 filtered out
+ 0 fail
+ 12 expect() calls
+Ran 2 tests across 1 file. [104.00ms]

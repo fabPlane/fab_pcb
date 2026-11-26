@@ -1,0 +1,56 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-validation.test.ts:
+(pass) failed native validation restores tentative copper [3.48ms]
+(pass) failed native validation restores tentative copper after a cleanup retry [0.36ms]
+(pass) failed validation reports an unsuccessful rollback (zero) without claiming restoration [0.19ms]
+(pass) failed validation reports an unsuccessful rollback (throws) without claiming restoration [0.09ms]
+(pass) successful native validation keeps and saves the applied route without undo [0.55ms]
+(pass) failed validation preserves an unrelated edit above the route commit [0.17ms]
+51 |   test(`failed tentative ratsnest validation rolls back or reports rollback failure (${undo ?? "owned"})`, async () => {
+52 |     const fixture = validationFixture({ ratsnestFailure: true, ...(undo ? { undo } : {}) });
+53 |     const info = await fixture.done;
+54 |     expect(info.state).toBe("failed");
+55 |     expect(info.error).toContain("native ratsnest transport unavailable");
+56 |     expect(fixture.calls.filter((call) => call === "undo")).toHaveLength(1);
+                                                                 ^
+error: expect(received).toHaveLength(expected)
+
+Expected length: 1
+Received length: 0
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:56:61)
+(fail) failed tentative ratsnest validation rolls back or reports rollback failure (owned) [0.32ms]
+51 |   test(`failed tentative ratsnest validation rolls back or reports rollback failure (${undo ?? "owned"})`, async () => {
+52 |     const fixture = validationFixture({ ratsnestFailure: true, ...(undo ? { undo } : {}) });
+53 |     const info = await fixture.done;
+54 |     expect(info.state).toBe("failed");
+55 |     expect(info.error).toContain("native ratsnest transport unavailable");
+56 |     expect(fixture.calls.filter((call) => call === "undo")).toHaveLength(1);
+                                                                 ^
+error: expect(received).toHaveLength(expected)
+
+Expected length: 1
+Received length: 0
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:56:61)
+(fail) failed tentative ratsnest validation rolls back or reports rollback failure (zero) [0.12ms]
+51 |   test(`failed tentative ratsnest validation rolls back or reports rollback failure (${undo ?? "owned"})`, async () => {
+52 |     const fixture = validationFixture({ ratsnestFailure: true, ...(undo ? { undo } : {}) });
+53 |     const info = await fixture.done;
+54 |     expect(info.state).toBe("failed");
+55 |     expect(info.error).toContain("native ratsnest transport unavailable");
+56 |     expect(fixture.calls.filter((call) => call === "undo")).toHaveLength(1);
+                                                                 ^
+error: expect(received).toHaveLength(expected)
+
+Expected length: 1
+Received length: 0
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:56:61)
+(fail) failed tentative ratsnest validation rolls back or reports rollback failure (throws) [0.10ms]
+
+ 6 pass
+ 3 fail
+ 40 expect() calls
+Ran 9 tests across 1 file. [144.00ms]

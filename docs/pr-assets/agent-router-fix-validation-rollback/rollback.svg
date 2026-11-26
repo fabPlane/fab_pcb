@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620">
+<rect width="1200" height="620" fill="#f5f7fa"/>
+<g font-family="sans-serif" fill="#172838">
+<text x="55" y="55" font-size="28" font-weight="bold">Native validation unavailable: tentative copper after failure</text>
+<text x="55" y="88" font-size="18">Stateful adapter fault injection · three identical repeats per scenario and version</text>
+<text x="55" y="145" font-size="21" font-weight="bold">First validation fails</text>
+<text x="55" y="205" font-size="18">Before: Unvalidated route items</text>
+<rect x="55" y="215" width="350" height="19" rx="3" fill="#c3473f"/>
+<text x="425" y="231" font-size="20" fill="#c3473f">1</text>
+<text x="55" y="255" font-size="18">Before: Missing original items</text>
+<rect x="55" y="265" width="0" height="19" rx="3" fill="#b17920"/>
+<text x="425" y="281" font-size="20" fill="#28744e">0</text>
+<text x="55" y="350" font-size="18">After: Unvalidated route items</text>
+<rect x="55" y="360" width="0" height="19" rx="3" fill="#c3473f"/>
+<text x="425" y="376" font-size="20" fill="#28744e">0</text>
+<text x="55" y="400" font-size="18">After: Missing original items</text>
+<rect x="55" y="410" width="0" height="19" rx="3" fill="#b17920"/>
+<text x="425" y="426" font-size="20" fill="#28744e">0</text>
+<text x="625" y="145" font-size="21" font-weight="bold">Validation fails after stub cleanup</text>
+<text x="625" y="205" font-size="18">Before: Unvalidated route items</text>
+<rect x="625" y="215" width="350" height="19" rx="3" fill="#c3473f"/>
+<text x="995" y="231" font-size="20" fill="#c3473f">1</text>
+<text x="625" y="255" font-size="18">Before: Missing original items</text>
+<rect x="625" y="265" width="350" height="19" rx="3" fill="#b17920"/>
+<text x="995" y="281" font-size="20" fill="#b17920">1</text>
+<text x="625" y="350" font-size="18">After: Unvalidated route items</text>
+<rect x="625" y="360" width="0" height="19" rx="3" fill="#c3473f"/>
+<text x="995" y="376" font-size="20" fill="#28744e">0</text>
+<text x="625" y="400" font-size="18">After: Missing original items</text>
+<rect x="625" y="410" width="0" height="19" rx="3" fill="#b17920"/>
+<text x="995" y="426" font-size="20" fill="#28744e">0</text>
+<text x="55" y="535" font-size="19" fill="#28744e">After: original copper restored in 6/6 failure scenarios; no final save or success summary.</text>
+<text x="55" y="570" font-size="17">Valid-route control: retained in 3/3 repeats on both versions. Thermal starvation remains unresolved.</text>
+</g></svg>

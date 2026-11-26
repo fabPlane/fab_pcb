@@ -1,0 +1,12 @@
+bun test v1.4.0 (34cbb9a40)
+
+test/bridge-undo-ownership.test.ts:
+(pass) cleanup preserves undo ownership (owned control) [3.32ms]
+(pass) cleanup preserves undo ownership (newer edit) [0.14ms]
+(pass) relabel preserves undo ownership (owned control) [0.17ms]
+(pass) relabel preserves undo ownership (newer edit) [0.06ms]
+
+ 4 pass
+ 0 fail
+ 22 expect() calls
+Ran 4 tests across 1 file. [77.00ms]

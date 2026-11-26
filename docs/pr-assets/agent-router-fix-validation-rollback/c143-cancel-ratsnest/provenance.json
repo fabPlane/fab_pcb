@@ -1,0 +1,11 @@
+{
+  "before": "74bf7b48e384c4107ff383af5cad6df3f35de249",
+  "cores": "20-25",
+  "repeats": 3,
+  "measurement": "stateful adapter regressions only; standalone router bypasses adapter",
+  "source_sha256": {
+    "packages/router/src/bridge-job.ts": "23049863a01002ec4790b92dbe56e2611a61da132d876051d4e976defcdb1e5e",
+    "packages/router/test/bridge-validation-fixture.ts": "43f2ae43bb4b1f3c68b768b423146edf5fe0201277fcc3a8db8dd5187b5616ed",
+    "packages/router/test/bridge-validation.test.ts": "8d95c1c44fc2b60df6331a62b9a86d8f7eaa7b39c1d6e6bbe474cf2ececb5101"
+  }
+}

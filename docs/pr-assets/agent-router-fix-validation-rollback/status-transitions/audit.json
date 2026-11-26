@@ -1,0 +1,14 @@
+{
+  "production_unchanged": true,
+  "sha256": {
+    "packages/router/src/bridge-job.ts": "2bc24fcd0a4958fbccb7bf9f937a59ce75e57d312ee85b1e7c7faaf2b4a4add6",
+    "packages/router/test/bridge-validation-fixture.ts": "de982b35f5979e3f6825453adde855698f487d360a9cf87736b71f4d8b884657",
+    "packages/router/test/bridge-validation.test.ts": "bf5ac10940e8e80fac7ea12443d0b274e6f358e6294f0c9ef81c4ffcd3d8e6ae"
+  },
+  "repeats": 3,
+  "focused_pass_per_repeat": 51,
+  "mutation_pass": 47,
+  "mutation_fail": 4,
+  "unit_pass": 151,
+  "unit_skip": 1
+}

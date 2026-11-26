@@ -1,0 +1,77 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-validation.test.ts:
+(pass) failed native validation restores tentative copper [3.14ms]
+(pass) failed native validation restores tentative copper after a cleanup retry [0.28ms]
+(pass) failed validation reports an unsuccessful rollback (zero) without claiming restoration [0.18ms]
+(pass) failed validation reports an unsuccessful rollback (throws) without claiming restoration [0.07ms]
+(pass) successful native validation keeps and saves the applied route without undo [0.49ms]
+(pass) failed validation preserves an unrelated edit above the route commit [0.20ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (owned) [0.28ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (zero) [0.07ms]
+(pass) failed tentative ratsnest validation rolls back or reports rollback failure (throws) [0.07ms]
+(pass) relabelled route is validated and restored before a failed job [0.16ms]
+(pass) relabelled route with successful validation is saved [0.35ms]
+(pass) unstable native connection counts stop without saving a replacement [0.14ms]
+ 96 | 
+ 97 | for (const undo of [undefined, "zero", "throws"] as const) {
+ 98 |   test(`failed post-apply refill rejects without saving (${undo ?? "owned"})`, async () => {
+ 99 |     const fixture = validationFixture({ valid: true, refill: "throws", ...(undo ? { undo } : {}) });
+100 |     const info = await fixture.done;
+101 |     expect(info.state).toBe("failed");
+                             ^
+error: expect(received).toBe(expected)
+
+Expected: "failed"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:101:24)
+(fail) failed post-apply refill rejects without saving (owned) [0.36ms]
+ 96 | 
+ 97 | for (const undo of [undefined, "zero", "throws"] as const) {
+ 98 |   test(`failed post-apply refill rejects without saving (${undo ?? "owned"})`, async () => {
+ 99 |     const fixture = validationFixture({ valid: true, refill: "throws", ...(undo ? { undo } : {}) });
+100 |     const info = await fixture.done;
+101 |     expect(info.state).toBe("failed");
+                             ^
+error: expect(received).toBe(expected)
+
+Expected: "failed"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:101:24)
+(fail) failed post-apply refill rejects without saving (zero) [0.11ms]
+ 96 | 
+ 97 | for (const undo of [undefined, "zero", "throws"] as const) {
+ 98 |   test(`failed post-apply refill rejects without saving (${undo ?? "owned"})`, async () => {
+ 99 |     const fixture = validationFixture({ valid: true, refill: "throws", ...(undo ? { undo } : {}) });
+100 |     const info = await fixture.done;
+101 |     expect(info.state).toBe("failed");
+                             ^
+error: expect(received).toBe(expected)
+
+Expected: "failed"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:101:24)
+(fail) failed post-apply refill rejects without saving (throws) [0.07ms]
+112 | }
+113 | 
+114 | test("failed refill with its own newer commit refuses a one-entry route rollback", async () => {
+115 |   const fixture = validationFixture({ valid: true, refill: "commit-then-throws" });
+116 |   const info = await fixture.done;
+117 |   expect(info.state).toBe("failed");
+                           ^
+error: expect(received).toBe(expected)
+
+Expected: "failed"
+Received: "done"
+
+      at <anonymous> (/home/hyper/bench/wt/fp-bugs/packages/router/test/bridge-validation.test.ts:117:22)
+(fail) failed refill with its own newer commit refuses a one-entry route rollback [0.14ms]
+(pass) successful post-apply refill keeps the route and saves [0.11ms]
+
+ 13 pass
+ 4 fail
+ 75 expect() calls
+Ran 17 tests across 1 file. [154.00ms]

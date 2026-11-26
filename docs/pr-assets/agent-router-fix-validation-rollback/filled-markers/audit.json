@@ -1,0 +1,18 @@
+{
+  "before": "0aad64e",
+  "repeats": 3,
+  "cases": 26,
+  "before_pass": 23,
+  "before_fail": 3,
+  "after_pass": 26,
+  "after_fail": 0,
+  "new_error_scenarios": 3,
+  "per_version_runs": 78,
+  "source_sha256": {
+    "packages/router/src/bridge-job.ts": "a40b927772ee51f57e2886b11a4e7bb0b3109bb4edd70f3a8fc69165d06cd078",
+    "packages/router/test/bridge-validation-fixture.ts": "58f771e39961b2ff405ec9ad2a9662092b2001401488a182c0fb7579c1aff0d5",
+    "packages/router/test/bridge-validation.test.ts": "725c282656391f882561c1e98717005512792a7fd6447959082388dd8b82be9e"
+  },
+  "scope": "stateful adapter unit diagnostics; not a native benchmark",
+  "after": "a378b14"
+}

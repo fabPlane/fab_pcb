@@ -1,0 +1,19 @@
+{
+  "before": "bc2f305",
+  "repeats": 3,
+  "new_scenarios": {
+    "before_pass": 0,
+    "before_fail": 12,
+    "after_pass": 12,
+    "after_fail": 0
+  },
+  "existing_controls": {
+    "before_pass": 51,
+    "after_pass": 51
+  },
+  "sha256": {
+    "packages/router/src/bridge-job.ts": "1581a0748a31bc1d52ab0c0e83cd39666c44eeb141b5e816adb4c7fa69300ddd",
+    "packages/router/test/bridge-validation-fixture.ts": "4f1c6e309797f9b3323c46ccda748c0bc722a3c93867ce8625753b6544d2c7a8",
+    "packages/router/test/bridge-validation.test.ts": "c76ee31d7b9c4a23fa6794708ba51aafd81c2ddd732e38fa9685fc5dd4493d0c"
+  }
+}

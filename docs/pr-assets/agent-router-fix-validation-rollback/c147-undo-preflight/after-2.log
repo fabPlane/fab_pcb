@@ -1,0 +1,11 @@
+bun test v1.4.0 (34cbb9a40)
+
+packages/router/test/bridge-validation.test.ts:
+(pass) undo capability preflight rejects before tentative copper (unsupported) [2.80ms]
+(pass) undo capability preflight rejects before tentative copper (throws) [0.10ms]
+
+ 2 pass
+ 63 filtered out
+ 0 fail
+ 14 expect() calls
+Ran 2 tests across 1 file. [124.00ms]
