@@ -42,7 +42,8 @@ env:
 jobs:
   select-linux-runner:
     # Metadata and capacity selection must run even while the NAS is busy.
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    # Independent bootstrap on a standard GitHub runner for this public repo.
+    runs-on: ubuntu-24.04
     outputs:
       runner: ${{ steps.select.outputs.runner }}
       choice: ${{ steps.select.outputs.choice }}
@@ -266,14 +267,15 @@ jobs:
           - os: ${{ fromJSON(needs.select-macos-runner.outputs.runner) }}
             target: darwin-arm64
             kicad-platform: macos-arm64
-          # Blacksmith is ARM64; Rosetta executes the target-native Intel JDK and bundle.
-          - { os: blacksmith-6vcpu-macos-15, target: darwin-x64, kicad-platform: macos-x86_64 }
+          # Build and execute the Intel JDK and bundle on a native Intel host.
+          - { os: macos-15-intel, target: darwin-x64, kicad-platform: macos-x86_64 }
     runs-on: ${{ matrix.os }}
     timeout-minutes: 360
     steps:
-      - name: Enable Intel execution on Apple Silicon
+      - name: Verify native Intel execution
         if: matrix.target == 'darwin-x64'
-        run: sudo softwareupdate --install-rosetta --agree-to-license
+        shell: bash
+        run: test "$(uname -m)" = x86_64
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.select-linux-runner.outputs.source_sha }}

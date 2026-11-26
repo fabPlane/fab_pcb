@@ -10,7 +10,8 @@ permissions:
 jobs:
   release:
     if: inputs.lease != ''
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    # Independent bootstrap on a standard GitHub runner for this public repo.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/github-script@v8
         env:

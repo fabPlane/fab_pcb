@@ -23,7 +23,8 @@ permissions:
   contents: write
 jobs:
   select:
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    # Independent bootstrap on a standard GitHub runner for this public repo.
+    runs-on: ubuntu-24.04
     outputs:
       runner: ${{ steps.pick.outputs.runner }}
       lease: ${{ steps.pick.outputs.lease }}
