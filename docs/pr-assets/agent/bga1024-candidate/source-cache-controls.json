@@ -1,0 +1,48 @@
+{
+  "baseline_ref": "9df9e2bc3908a1aaf5420c8be12bfa27617e0689",
+  "repeats": 3,
+  "rows": [
+    {
+      "variant": "before",
+      "repeat": 1,
+      "unchanged_skipped": true,
+      "changed_skipped": true,
+      "midflight_accepted": true
+    },
+    {
+      "variant": "before",
+      "repeat": 2,
+      "unchanged_skipped": true,
+      "changed_skipped": true,
+      "midflight_accepted": true
+    },
+    {
+      "variant": "before",
+      "repeat": 3,
+      "unchanged_skipped": true,
+      "changed_skipped": true,
+      "midflight_accepted": true
+    },
+    {
+      "variant": "after",
+      "repeat": 1,
+      "unchanged_skipped": true,
+      "changed_skipped": false,
+      "midflight_accepted": false
+    },
+    {
+      "variant": "after",
+      "repeat": 2,
+      "unchanged_skipped": true,
+      "changed_skipped": false,
+      "midflight_accepted": false
+    },
+    {
+      "variant": "after",
+      "repeat": 3,
+      "unchanged_skipped": true,
+      "changed_skipped": false,
+      "midflight_accepted": false
+    }
+  ]
+}
