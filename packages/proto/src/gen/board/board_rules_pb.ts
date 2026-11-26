@@ -23,7 +23,7 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
-import type { Distance, DistanceJson, KIID, KIIDJson, MinOptMax, MinOptMaxJson, RuleSeverity, RuleSeverityJson, Vector2, Vector2Json } from "../common/types/base_types_pb.js";
+import type { Distance, DistanceJson, KIID, KIIDJson, MarkerType, MarkerTypeJson, MinOptMax, MinOptMaxJson, RuleSeverity, RuleSeverityJson, Vector2, Vector2Json } from "../common/types/base_types_pb.js";
 import { file_common_types_base_types } from "../common/types/base_types_pb.js";
 import type { BoardLayer, BoardLayerJson, ZoneConnectionStyle, ZoneConnectionStyleJson } from "./board_types_pb.js";
 import { file_board_board_types } from "./board_types_pb.js";
@@ -33,7 +33,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file board/board_rules.proto.
  */
 export const file_board_board_rules: GenFile = /*@__PURE__*/
-  fileDesc("Chdib2FyZC9ib2FyZF9ydWxlcy5wcm90bxILa2lhcGkuYm9hcmQiigcKEk1pbmltdW1Db25zdHJhaW50cxIzCg1taW5fY2xlYXJhbmNlGAEgASgLMhwua2lhcGkuY29tbW9uLnR5cGVzLkRpc3RhbmNlEjYKEG1pbl9ncm9vdmVfd2lkdGgYAiABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2USOgoUbWluX2Nvbm5lY3Rpb25fd2lkdGgYAyABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2USNQoPbWluX3RyYWNrX3dpZHRoGAQgASgLMhwua2lhcGkuY29tbW9uLnR5cGVzLkRpc3RhbmNlEjsKFW1pbl92aWFfYW5udWxhcl93aWR0aBgFIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZRIyCgxtaW5fdmlhX3NpemUYBiABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2USNwoRbWluX3Rocm91Z2hfZHJpbGwYByABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2USNwoRbWluX21pY3JvdmlhX3NpemUYCCABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2USOAoSbWluX21pY3JvdmlhX2RyaWxsGAkgASgLMhwua2lhcGkuY29tbW9uLnR5cGVzLkRpc3RhbmNlEjsKFWNvcHBlcl9lZGdlX2NsZWFyYW5jZRgKIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZRI0Cg5ob2xlX2NsZWFyYW5jZRgLIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZRI2ChBob2xlX3RvX2hvbGVfbWluGAwgASgLMhwua2lhcGkuY29tbW9uLnR5cGVzLkRpc3RhbmNlEjQKDnNpbGtfY2xlYXJhbmNlGA0gASgLMhwua2lhcGkuY29tbW9uLnR5cGVzLkRpc3RhbmNlEhsKE21pbl9yZXNvbHZlZF9zcG9rZXMYDiABKAUSOgoUbWluX3NpbGtfdGV4dF9oZWlnaHQYDyABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2USPQoXbWluX3NpbGtfdGV4dF90aGlja25lc3MYECABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2UiPwoQUHJlc2V0VHJhY2tXaWR0aBIrCgV3aWR0aBgBIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZSJxChJQcmVzZXRWaWFEaW1lbnNpb24SLgoIZGlhbWV0ZXIYASABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2USKwoFZHJpbGwYAiABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2UioAEKF1ByZXNldERpZmZQYWlyRGltZW5zaW9uEisKBXdpZHRoGAEgASgLMhwua2lhcGkuY29tbW9uLnR5cGVzLkRpc3RhbmNlEikKA2dhcBgCIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZRItCgd2aWFfZ2FwGAMgASgLMhwua2lhcGkuY29tbW9uLnR5cGVzLkRpc3RhbmNlIqkBCg9QcmVkZWZpbmVkU2l6ZXMSLQoGdHJhY2tzGAEgAygLMh0ua2lhcGkuYm9hcmQuUHJlc2V0VHJhY2tXaWR0aBItCgR2aWFzGAIgAygLMh8ua2lhcGkuYm9hcmQuUHJlc2V0VmlhRGltZW5zaW9uEjgKCmRpZmZfcGFpcnMYAyADKAsyJC5raWFwaS5ib2FyZC5QcmVzZXREaWZmUGFpckRpbWVuc2lvbiLFAgoXU29sZGVyTWFza1Bhc3RlRGVmYXVsdHMSNAoObWFza19leHBhbnNpb24YASABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2USNAoObWFza19taW5fd2lkdGgYAiABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2USPgoYbWFza190b19jb3BwZXJfY2xlYXJhbmNlGAMgASgLMhwua2lhcGkuY29tbW9uLnR5cGVzLkRpc3RhbmNlEjIKDHBhc3RlX21hcmdpbhgEIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZRIaChJwYXN0ZV9tYXJnaW5fcmF0aW8YBSABKAESLgomYWxsb3dfc29sZGVybWFza19icmlkZ2VzX2luX2Zvb3RwcmludHMYBiABKAgirQIKFFRlYXJkcm9wVGFyZ2V0UGFyYW1zEg8KB2VuYWJsZWQYASABKAgSMAoKbWF4X2xlbmd0aBgCIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZRIvCgltYXhfd2lkdGgYAyABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2USGQoRYmVzdF9sZW5ndGhfcmF0aW8YBCABKAESGAoQYmVzdF93aWR0aF9yYXRpbxgFIAEoARIiChp3aWR0aF90b19zaXplX2ZpbHRlcl9yYXRpbxgGIAEoARIUCgxjdXJ2ZWRfZWRnZXMYByABKAgSGAoQYWxsb3dfdHdvX3RyYWNrcxgIIAEoCBIYChBvbl9wYWRzX2luX3pvbmVzGAkgASgIInUKE1RlYXJkcm9wVGFyZ2V0RW50cnkSKwoGdGFyZ2V0GAEgASgOMhsua2lhcGkuYm9hcmQuVGVhcmRyb3BUYXJnZXQSMQoGcGFyYW1zGAIgASgLMiEua2lhcGkuYm9hcmQuVGVhcmRyb3BUYXJnZXRQYXJhbXMi0AEKEFRlYXJkcm9wRGVmYXVsdHMSEwoLdGFyZ2V0X3ZpYXMYASABKAgSFwoPdGFyZ2V0X3B0aF9wYWRzGAIgASgIEhcKD3RhcmdldF9zbWRfcGFkcxgDIAEoCBIdChV0YXJnZXRfdHJhY2tfdG9fdHJhY2sYBCABKAgSHQoVdXNlX3JvdW5kX3NoYXBlc19vbmx5GAUgASgIEjcKDXRhcmdldF9wYXJhbXMYBiADKAsyIC5raWFwaS5ib2FyZC5UZWFyZHJvcFRhcmdldEVudHJ5IqkBChVWaWFQcm90ZWN0aW9uRGVmYXVsdHMSEgoKdGVudF9mcm9udBgBIAEoCBIRCgl0ZW50X2JhY2sYAiABKAgSEwoLY292ZXJfZnJvbnQYAyABKAgSEgoKY292ZXJfYmFjaxgEIAEoCBISCgpwbHVnX2Zyb250GAUgASgIEhEKCXBsdWdfYmFjaxgGIAEoCBILCgNjYXAYByABKAgSDAoEZmlsbBgIIAEoCCLcAgoJRHJjTWFya2VyEi0KCmVycm9yX3R5cGUYASABKA4yGS5raWFwaS5ib2FyZC5EcmNFcnJvclR5cGUSLQoIcG9zaXRpb24YAiABKAsyGy5raWFwaS5jb21tb24udHlwZXMuVmVjdG9yMhIkCgJpZBgFIAEoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEjIKCHNldmVyaXR5GAYgASgOMiAua2lhcGkuY29tbW9uLnR5cGVzLlJ1bGVTZXZlcml0eRIQCghleGNsdWRlZBgHIAEoCBIZChFleGNsdXNpb25fY29tbWVudBgIIAEoCRITCgtkZXNjcmlwdGlvbhgJIAEoCRInCgVpdGVtcxgDIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEiwKBWxheWVyGAQgASgOMh0ua2lhcGkuYm9hcmQudHlwZXMuQm9hcmRMYXllciJ2ChJEcmNTZXZlcml0eVNldHRpbmcSLAoJcnVsZV90eXBlGAEgASgOMhkua2lhcGkuYm9hcmQuRHJjRXJyb3JUeXBlEjIKCHNldmVyaXR5GAIgASgOMiAua2lhcGkuY29tbW9uLnR5cGVzLlJ1bGVTZXZlcml0eSJHCgxEcmNFeGNsdXNpb24SJgoGbWFya2VyGAEgASgLMhYua2lhcGkuYm9hcmQuRHJjTWFya2VyEg8KB2NvbW1lbnQYAiABKAkiUAoaQ3VzdG9tUnVsZURpc2FsbG93U2V0dGluZ3MSMgoFdHlwZXMYASADKA4yIy5raWFwaS5ib2FyZC5DdXN0b21SdWxlRGlzYWxsb3dUeXBlIvwCChRDdXN0b21SdWxlQ29uc3RyYWludBIzCgR0eXBlGAEgASgOMiUua2lhcGkuYm9hcmQuQ3VzdG9tUnVsZUNvbnN0cmFpbnRUeXBlEhEKBG5hbWUYAiABKAlIAYgBARIwCgdudW1lcmljGAMgASgLMh0ua2lhcGkuY29tbW9uLnR5cGVzLk1pbk9wdE1heEgAEjsKCGRpc2FsbG93GAQgASgLMicua2lhcGkuYm9hcmQuQ3VzdG9tUnVsZURpc2FsbG93U2V0dGluZ3NIABJBCg96b25lX2Nvbm5lY3Rpb24YBSABKA4yJi5raWFwaS5ib2FyZC50eXBlcy5ab25lQ29ubmVjdGlvblN0eWxlSAASHgoUYXNzZXJ0aW9uX2V4cHJlc3Npb24YBiABKAlIABI4CgdvcHRpb25zGGQgAygOMicua2lhcGkuYm9hcmQuQ3VzdG9tUnVsZUNvbnN0cmFpbnRPcHRpb25CBwoFdmFsdWVCBwoFX25hbWUivwIKCkN1c3RvbVJ1bGUSEQoJY29uZGl0aW9uGAEgASgJEjYKC2NvbnN0cmFpbnRzGAIgAygLMiEua2lhcGkuYm9hcmQuQ3VzdG9tUnVsZUNvbnN0cmFpbnQSNQoMc2luZ2xlX2xheWVyGAMgASgOMh0ua2lhcGkuYm9hcmQudHlwZXMuQm9hcmRMYXllckgAEjYKCmxheWVyX21vZGUYBCABKA4yIC5raWFwaS5ib2FyZC5DdXN0b21SdWxlTGF5ZXJNb2RlSAASMgoIc2V2ZXJpdHkYBSABKA4yIC5raWFwaS5jb21tb24udHlwZXMuUnVsZVNldmVyaXR5EgwKBG5hbWUYBiABKAkSFQoIY29tbWVudHMYByABKAlIAYgBAUIRCg9sYXllcl9jb25kaXRpb25CCwoJX2NvbW1lbnRzIpMDChBCb2FyZERlc2lnblJ1bGVzEjQKC2NvbnN0cmFpbnRzGAEgASgLMh8ua2lhcGkuYm9hcmQuTWluaW11bUNvbnN0cmFpbnRzEjYKEHByZWRlZmluZWRfc2l6ZXMYAiABKAsyHC5raWFwaS5ib2FyZC5QcmVkZWZpbmVkU2l6ZXMSPwoRc29sZGVyX21hc2tfcGFzdGUYAyABKAsyJC5raWFwaS5ib2FyZC5Tb2xkZXJNYXNrUGFzdGVEZWZhdWx0cxIwCgl0ZWFyZHJvcHMYBCABKAsyHS5raWFwaS5ib2FyZC5UZWFyZHJvcERlZmF1bHRzEjoKDnZpYV9wcm90ZWN0aW9uGAUgASgLMiIua2lhcGkuYm9hcmQuVmlhUHJvdGVjdGlvbkRlZmF1bHRzEjMKCnNldmVyaXRpZXMYBiADKAsyHy5raWFwaS5ib2FyZC5EcmNTZXZlcml0eVNldHRpbmcSLQoKZXhjbHVzaW9ucxgHIAMoCzIZLmtpYXBpLmJvYXJkLkRyY0V4Y2x1c2lvbipNCg5UZWFyZHJvcFRhcmdldBIPCgtURFRfVU5LTk9XThAAEg0KCVREVF9ST1VORBABEgwKCFREVF9SRUNUEAISDQoJVERUX1RSQUNLEAMqwhIKDERyY0Vycm9yVHlwZRIRCg1EUkNFVF9VTktOT1dOEAASGwoXRFJDRVRfVU5DT05ORUNURURfSVRFTVMQARIYChREUkNFVF9TSE9SVElOR19JVEVNUxACEhcKE0RSQ0VUX0FMTE9XRURfSVRFTVMQAxIaChZEUkNFVF9URVhUX09OX0VER0VDVVRTEAQSEwoPRFJDRVRfQ0xFQVJBTkNFEAUSEgoORFJDRVRfQ1JFRVBBR0UQBhIZChVEUkNFVF9UUkFDS1NfQ1JPU1NJTkcQBxIYChREUkNFVF9FREdFX0NMRUFSQU5DRRAIEhkKFURSQ0VUX1pPTkVTX0lOVEVSU0VDVBAJEhkKFURSQ0VUX0lTT0xBVEVEX0NPUFBFUhAKEhkKFURSQ0VUX1NUQVJWRURfVEhFUk1BTBALEhYKEkRSQ0VUX0RBTkdMSU5HX1ZJQRAMEhgKFERSQ0VUX0RBTkdMSU5HX1RSQUNLEA0SIQodRFJDRVRfRFJJTExFRF9IT0xFU19UT09fQ0xPU0UQDhIhCh1EUkNFVF9EUklMTEVEX0hPTEVTX0NPTE9DQVRFRBAPEhgKFERSQ0VUX0hPTEVfQ0xFQVJBTkNFEBASGgoWRFJDRVRfQ09OTkVDVElPTl9XSURUSBAREhUKEURSQ0VUX1RSQUNLX1dJRFRIEBISFQoRRFJDRVRfVFJBQ0tfQU5HTEUQExIeChpEUkNFVF9UUkFDS19TRUdNRU5UX0xFTkdUSBAUEhcKE0RSQ0VUX0FOTlVMQVJfV0lEVEgQFRIcChhEUkNFVF9EUklMTF9PVVRfT0ZfUkFOR0UQFhIWChJEUkNFVF9WSUFfRElBTUVURVIQFxISCg5EUkNFVF9QQURTVEFDSxAYEhoKFkRSQ0VUX1BBRFNUQUNLX0lOVkFMSUQQGRIlCiFEUkNFVF9NSUNST1ZJQV9EUklMTF9PVVRfT0ZfUkFOR0UQGhIgChxEUkNFVF9PVkVSTEFQUElOR19GT09UUFJJTlRTEBsSGwoXRFJDRVRfTUlTU0lOR19DT1VSVFlBUkQQHBIdChlEUkNFVF9NQUxGT1JNRURfQ09VUlRZQVJEEB0SGgoWRFJDRVRfUFRIX0lOX0NPVVJUWUFSRBAeEhsKF0RSQ0VUX05QVEhfSU5fQ09VUlRZQVJEEB8SHQoZRFJDRVRfRElTQUJMRURfTEFZRVJfSVRFTRAgEhkKFURSQ0VUX0lOVkFMSURfT1VUTElORRAhEhsKF0RSQ0VUX01JU1NJTkdfRk9PVFBSSU5UECISHQoZRFJDRVRfRFVQTElDQVRFX0ZPT1RQUklOVBAjEhYKEkRSQ0VUX05FVF9DT05GTElDVBAkEhkKFURSQ0VUX0VYVFJBX0ZPT1RQUklOVBAlEhoKFkRSQ0VUX1NDSEVNQVRJQ19QQVJJVFkQJhIhCh1EUkNFVF9TQ0hFTUFUSUNfRklFTERTX1BBUklUWRAnEhsKF0RSQ0VUX0ZPT1RQUklOVF9GSUxURVJTECgSHgoaRFJDRVRfTElCX0ZPT1RQUklOVF9JU1NVRVMQKRIgChxEUkNFVF9MSUJfRk9PVFBSSU5UX01JU01BVENIECoSHQoZRFJDRVRfVU5SRVNPTFZFRF9WQVJJQUJMRRArEhsKF0RSQ0VUX0FTU0VSVElPTl9GQUlMVVJFECwSGQoVRFJDRVRfR0VORVJJQ19XQVJOSU5HEC0SFwoTRFJDRVRfR0VORVJJQ19FUlJPUhAuEhcKE0RSQ0VUX0NPUFBFUl9TTElWRVIQLxIYChREUkNFVF9TSUxLX0NMRUFSQU5DRRAwEh0KGURSQ0VUX1NJTEtfTUFTS19DTEVBUkFOQ0UQMRIdChlEUkNFVF9TSUxLX0VER0VfQ0xFQVJBTkNFEDISGwoXRFJDRVRfU09MREVSTUFTS19CUklER0UQMxIVChFEUkNFVF9URVhUX0hFSUdIVBA0EhgKFERSQ0VUX1RFWFRfVEhJQ0tORVNTEDUSHQoZRFJDRVRfTEVOR1RIX09VVF9PRl9SQU5HRRA2EhsKF0RSQ0VUX1NLRVdfT1VUX09GX1JBTkdFEDcSIAocRFJDRVRfVklBX0NPVU5UX09VVF9PRl9SQU5HRRA4EiQKIERSQ0VUX0RJRkZfUEFJUl9HQVBfT1VUX09GX1JBTkdFEDkSLQopRFJDRVRfRElGRl9QQUlSX1VOQ09VUExFRF9MRU5HVEhfVE9PX0xPTkcQOhITCg9EUkNFVF9GT09UUFJJTlQQOxIhCh1EUkNFVF9GT09UUFJJTlRfVFlQRV9NSVNNQVRDSBA8Eh0KGURSQ0VUX1BBRF9USF9XSVRIX05PX0hPTEUQPRImCiJEUkNFVF9NSVJST1JFRF9URVhUX09OX0ZST05UX0xBWUVSED4SKAokRFJDRVRfTk9OTUlSUk9SRURfVEVYVF9PTl9CQUNLX0xBWUVSED8SIAocRFJDRVRfTUlTU0lOR19UVU5JTkdfUFJPRklMRRBAEicKI0RSQ0VUX1RVTklOR19QUk9GSUxFX0lNUExJQ0lUX1JVTEVTEEESJgoiRFJDRVRfVFJBQ0tfT05fUE9TVF9NQUNISU5FRF9MQVlFUhBCEiMKH0RSQ0VUX1RSQUNLX05PVF9DRU5URVJFRF9PTl9WSUEQQxIkCiBEUkNFVF9GT09UUFJJTlRfU0NBTEVEX1dJVEhfUEFEUxBEEiEKHURSQ0VUX05FVF9DSEFJTl9TVFVCX1RPT19MT05HEEUSJQohRFJDRVRfTkVUX0NIQUlOX1JFVFVSTl9QQVRIX0JSRUFLEEYSIwofRFJDRVRfTkVUX0NIQUlOX1RVTklOR19QUk9GSUxFUxBHEicKI0RSQ0VUX01BTEZPUk1FRF9NSUNST1ZJQV9TVEFDS19TUEFOEEgSIwofRFJDRVRfTUlDUk9WSUFfU1RBQ0tfTk9UX0ZJTExFRBBJEh4KGkRSQ0VUX01JQ1JPVklBX1NUQUNLX0RFUFRIEEoSHwobRFJDRVRfTUlDUk9WSUFfQVNQRUNUX1JBVElPEEsSHwobRFJDRVRfTUlDUk9WSUFfQ1JPU1NFU19DT1JFEEwSHAoYRFJDRVRfVklBX1NUSVRDSF9PVkVSTEFQEE0qRwoTQ3VzdG9tUnVsZUxheWVyTW9kZRIQCgxDUkxNX1VOS05PV04QABIOCgpDUkxNX09VVEVSEAESDgoKQ1JMTV9JTk5FUhACKtAIChhDdXN0b21SdWxlQ29uc3RyYWludFR5cGUSEAoMQ1JDVF9VTktOT1dOEAASEgoOQ1JDVF9DTEVBUkFOQ0UQARIRCg1DUkNUX0NSRUVQQUdFEAISFwoTQ1JDVF9IT0xFX0NMRUFSQU5DRRADEhUKEUNSQ1RfSE9MRV9UT19IT0xFEAQSFwoTQ1JDVF9FREdFX0NMRUFSQU5DRRAFEhIKDkNSQ1RfSE9MRV9TSVpFEAYSHAoYQ1JDVF9DT1VSVFlBUkRfQ0xFQVJBTkNFEAcSFwoTQ1JDVF9TSUxLX0NMRUFSQU5DRRAIEhQKEENSQ1RfVEVYVF9IRUlHSFQQCRIXChNDUkNUX1RFWFRfVEhJQ0tORVNTEAoSFAoQQ1JDVF9UUkFDS19XSURUSBALEh0KGUNSQ1RfVFJBQ0tfU0VHTUVOVF9MRU5HVEgQDBIWChJDUkNUX0FOTlVMQVJfV0lEVEgQDRIYChRDUkNUX1pPTkVfQ09OTkVDVElPThAOEhsKF0NSQ1RfVEhFUk1BTF9SRUxJRUZfR0FQEA8SHAoYQ1JDVF9USEVSTUFMX1NQT0tFX1dJRFRIEBASHAoYQ1JDVF9NSU5fUkVTT0xWRURfU1BPS0VTEBESHgoaQ1JDVF9TT0xERVJfTUFTS19FWFBBTlNJT04QEhIgChxDUkNUX1NPTERFUl9QQVNURV9BQlNfTUFSR0lOEBMSIAocQ1JDVF9TT0xERVJfUEFTVEVfUkVMX01BUkdJThAUEhEKDUNSQ1RfRElTQUxMT1cQFRIVChFDUkNUX1ZJQV9ESUFNRVRFUhAWEg8KC0NSQ1RfTEVOR1RIEBcSDQoJQ1JDVF9TS0VXEBgSFgoSQ1JDVF9ESUZGX1BBSVJfR0FQEBkSFgoSQ1JDVF9NQVhfVU5DT1VQTEVEEBoSHQoZQ1JDVF9ESUZGX1BBSVJfSU5UUkFfU0tFVxAbEhIKDkNSQ1RfVklBX0NPVU5UEBwSGwoXQ1JDVF9QSFlTSUNBTF9DTEVBUkFOQ0UQHRIgChxDUkNUX1BIWVNJQ0FMX0hPTEVfQ0xFQVJBTkNFEB4SEgoOQ1JDVF9BU1NFUlRJT04QHxIZChVDUkNUX0NPTk5FQ1RJT05fV0lEVEgQIBIUChBDUkNUX1RSQUNLX0FOR0xFECESFQoRQ1JDVF9WSUFfREFOR0xJTkcQIhIVChFDUkNUX0JSSURHRURfTUFTSxAjEhsKF0NSQ1RfU09MREVSX01BU0tfU0xJVkVSECQSGQoVQ1JDVF9ORVRfQ0hBSU5fTEVOR1RIECUSHgoaQ1JDVF9ORVRfQ0hBSU5fU1RVQl9MRU5HVEgQJhIeChpDUkNUX05FVF9DSEFJTl9SRVRVUk5fUEFUSBAnEh0KGUNSQ1RfTUlDUk9WSUFfU1RBQ0tfREVQVEgQKBIeChpDUkNUX01JQ1JPVklBX0FTUEVDVF9SQVRJTxApKnwKGkN1c3RvbVJ1bGVDb25zdHJhaW50T3B0aW9uEhAKDENSQ09fVU5LTk9XThAAEh8KG0NSQ09fU0tFV19XSVRISU5fRElGRl9QQUlSUxABEhUKEUNSQ09fU1BBQ0VfRE9NQUlOEAISFAoQQ1JDT19USU1FX0RPTUFJThADKvkBChZDdXN0b21SdWxlRGlzYWxsb3dUeXBlEhAKDENSRFRfVU5LTk9XThAAEhUKEUNSRFRfVEhST1VHSF9WSUFTEAESEwoPQ1JEVF9NSUNST19WSUFTEAISEwoPQ1JEVF9CTElORF9WSUFTEAMSFAoQQ1JEVF9CVVJJRURfVklBUxAEEg8KC0NSRFRfVFJBQ0tTEAUSDQoJQ1JEVF9QQURTEAYSDgoKQ1JEVF9aT05FUxAHEg4KCkNSRFRfVEVYVFMQCBIRCg1DUkRUX0dSQVBISUNTEAkSDgoKQ1JEVF9IT0xFUxAKEhMKD0NSRFRfRk9PVFBSSU5UUxALYgZwcm90bzM", [file_common_types_base_types, file_board_board_types]);
+  fileDesc("Chdib2FyZC9ib2FyZF9ydWxlcy5wcm90bxILa2lhcGkuYm9hcmQiigcKEk1pbmltdW1Db25zdHJhaW50cxIzCg1taW5fY2xlYXJhbmNlGAEgASgLMhwua2lhcGkuY29tbW9uLnR5cGVzLkRpc3RhbmNlEjYKEG1pbl9ncm9vdmVfd2lkdGgYAiABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2USOgoUbWluX2Nvbm5lY3Rpb25fd2lkdGgYAyABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2USNQoPbWluX3RyYWNrX3dpZHRoGAQgASgLMhwua2lhcGkuY29tbW9uLnR5cGVzLkRpc3RhbmNlEjsKFW1pbl92aWFfYW5udWxhcl93aWR0aBgFIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZRIyCgxtaW5fdmlhX3NpemUYBiABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2USNwoRbWluX3Rocm91Z2hfZHJpbGwYByABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2USNwoRbWluX21pY3JvdmlhX3NpemUYCCABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2USOAoSbWluX21pY3JvdmlhX2RyaWxsGAkgASgLMhwua2lhcGkuY29tbW9uLnR5cGVzLkRpc3RhbmNlEjsKFWNvcHBlcl9lZGdlX2NsZWFyYW5jZRgKIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZRI0Cg5ob2xlX2NsZWFyYW5jZRgLIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZRI2ChBob2xlX3RvX2hvbGVfbWluGAwgASgLMhwua2lhcGkuY29tbW9uLnR5cGVzLkRpc3RhbmNlEjQKDnNpbGtfY2xlYXJhbmNlGA0gASgLMhwua2lhcGkuY29tbW9uLnR5cGVzLkRpc3RhbmNlEhsKE21pbl9yZXNvbHZlZF9zcG9rZXMYDiABKAUSOgoUbWluX3NpbGtfdGV4dF9oZWlnaHQYDyABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2USPQoXbWluX3NpbGtfdGV4dF90aGlja25lc3MYECABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2UiPwoQUHJlc2V0VHJhY2tXaWR0aBIrCgV3aWR0aBgBIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZSJxChJQcmVzZXRWaWFEaW1lbnNpb24SLgoIZGlhbWV0ZXIYASABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2USKwoFZHJpbGwYAiABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2UioAEKF1ByZXNldERpZmZQYWlyRGltZW5zaW9uEisKBXdpZHRoGAEgASgLMhwua2lhcGkuY29tbW9uLnR5cGVzLkRpc3RhbmNlEikKA2dhcBgCIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZRItCgd2aWFfZ2FwGAMgASgLMhwua2lhcGkuY29tbW9uLnR5cGVzLkRpc3RhbmNlIqkBCg9QcmVkZWZpbmVkU2l6ZXMSLQoGdHJhY2tzGAEgAygLMh0ua2lhcGkuYm9hcmQuUHJlc2V0VHJhY2tXaWR0aBItCgR2aWFzGAIgAygLMh8ua2lhcGkuYm9hcmQuUHJlc2V0VmlhRGltZW5zaW9uEjgKCmRpZmZfcGFpcnMYAyADKAsyJC5raWFwaS5ib2FyZC5QcmVzZXREaWZmUGFpckRpbWVuc2lvbiLFAgoXU29sZGVyTWFza1Bhc3RlRGVmYXVsdHMSNAoObWFza19leHBhbnNpb24YASABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2USNAoObWFza19taW5fd2lkdGgYAiABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2USPgoYbWFza190b19jb3BwZXJfY2xlYXJhbmNlGAMgASgLMhwua2lhcGkuY29tbW9uLnR5cGVzLkRpc3RhbmNlEjIKDHBhc3RlX21hcmdpbhgEIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZRIaChJwYXN0ZV9tYXJnaW5fcmF0aW8YBSABKAESLgomYWxsb3dfc29sZGVybWFza19icmlkZ2VzX2luX2Zvb3RwcmludHMYBiABKAgirQIKFFRlYXJkcm9wVGFyZ2V0UGFyYW1zEg8KB2VuYWJsZWQYASABKAgSMAoKbWF4X2xlbmd0aBgCIAEoCzIcLmtpYXBpLmNvbW1vbi50eXBlcy5EaXN0YW5jZRIvCgltYXhfd2lkdGgYAyABKAsyHC5raWFwaS5jb21tb24udHlwZXMuRGlzdGFuY2USGQoRYmVzdF9sZW5ndGhfcmF0aW8YBCABKAESGAoQYmVzdF93aWR0aF9yYXRpbxgFIAEoARIiChp3aWR0aF90b19zaXplX2ZpbHRlcl9yYXRpbxgGIAEoARIUCgxjdXJ2ZWRfZWRnZXMYByABKAgSGAoQYWxsb3dfdHdvX3RyYWNrcxgIIAEoCBIYChBvbl9wYWRzX2luX3pvbmVzGAkgASgIInUKE1RlYXJkcm9wVGFyZ2V0RW50cnkSKwoGdGFyZ2V0GAEgASgOMhsua2lhcGkuYm9hcmQuVGVhcmRyb3BUYXJnZXQSMQoGcGFyYW1zGAIgASgLMiEua2lhcGkuYm9hcmQuVGVhcmRyb3BUYXJnZXRQYXJhbXMi0AEKEFRlYXJkcm9wRGVmYXVsdHMSEwoLdGFyZ2V0X3ZpYXMYASABKAgSFwoPdGFyZ2V0X3B0aF9wYWRzGAIgASgIEhcKD3RhcmdldF9zbWRfcGFkcxgDIAEoCBIdChV0YXJnZXRfdHJhY2tfdG9fdHJhY2sYBCABKAgSHQoVdXNlX3JvdW5kX3NoYXBlc19vbmx5GAUgASgIEjcKDXRhcmdldF9wYXJhbXMYBiADKAsyIC5raWFwaS5ib2FyZC5UZWFyZHJvcFRhcmdldEVudHJ5IqkBChVWaWFQcm90ZWN0aW9uRGVmYXVsdHMSEgoKdGVudF9mcm9udBgBIAEoCBIRCgl0ZW50X2JhY2sYAiABKAgSEwoLY292ZXJfZnJvbnQYAyABKAgSEgoKY292ZXJfYmFjaxgEIAEoCBISCgpwbHVnX2Zyb250GAUgASgIEhEKCXBsdWdfYmFjaxgGIAEoCBILCgNjYXAYByABKAgSDAoEZmlsbBgIIAEoCCKpAwoJRHJjTWFya2VyEi0KCmVycm9yX3R5cGUYASABKA4yGS5raWFwaS5ib2FyZC5EcmNFcnJvclR5cGUSLQoIcG9zaXRpb24YAiABKAsyGy5raWFwaS5jb21tb24udHlwZXMuVmVjdG9yMhInCgVpdGVtcxgDIAMoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEiwKBWxheWVyGAQgASgOMh0ua2lhcGkuYm9hcmQudHlwZXMuQm9hcmRMYXllchIWCg52aW9sYXRpbmdfcnVsZRgFIAEoCRITCgtkZXNjcmlwdGlvbhgGIAEoCRIyCghzZXZlcml0eRgHIAEoDjIgLmtpYXBpLmNvbW1vbi50eXBlcy5SdWxlU2V2ZXJpdHkSEAoIZXhjbHVkZWQYCCABKAgSMwoLbWFya2VyX3R5cGUYCSABKA4yHi5raWFwaS5jb21tb24udHlwZXMuTWFya2VyVHlwZRIkCgJpZBgKIAEoCzIYLmtpYXBpLmNvbW1vbi50eXBlcy5LSUlEEhkKEWV4Y2x1c2lvbl9jb21tZW50GAsgASgJInYKEkRyY1NldmVyaXR5U2V0dGluZxIsCglydWxlX3R5cGUYASABKA4yGS5raWFwaS5ib2FyZC5EcmNFcnJvclR5cGUSMgoIc2V2ZXJpdHkYAiABKA4yIC5raWFwaS5jb21tb24udHlwZXMuUnVsZVNldmVyaXR5IkcKDERyY0V4Y2x1c2lvbhImCgZtYXJrZXIYASABKAsyFi5raWFwaS5ib2FyZC5EcmNNYXJrZXISDwoHY29tbWVudBgCIAEoCSJQChpDdXN0b21SdWxlRGlzYWxsb3dTZXR0aW5ncxIyCgV0eXBlcxgBIAMoDjIjLmtpYXBpLmJvYXJkLkN1c3RvbVJ1bGVEaXNhbGxvd1R5cGUiTgocQ3VzdG9tUnVsZVJldHVyblBhdGhTZXR0aW5ncxIXCg9yZWZlcmVuY2VfbGF5ZXIYASABKAkSFQoNcmVmZXJlbmNlX25ldBgCIAEoCSK+AwoUQ3VzdG9tUnVsZUNvbnN0cmFpbnQSMwoEdHlwZRgBIAEoDjIlLmtpYXBpLmJvYXJkLkN1c3RvbVJ1bGVDb25zdHJhaW50VHlwZRIRCgRuYW1lGAIgASgJSAGIAQESMAoHbnVtZXJpYxgDIAEoCzIdLmtpYXBpLmNvbW1vbi50eXBlcy5NaW5PcHRNYXhIABI7CghkaXNhbGxvdxgEIAEoCzInLmtpYXBpLmJvYXJkLkN1c3RvbVJ1bGVEaXNhbGxvd1NldHRpbmdzSAASQQoPem9uZV9jb25uZWN0aW9uGAUgASgOMiYua2lhcGkuYm9hcmQudHlwZXMuWm9uZUNvbm5lY3Rpb25TdHlsZUgAEh4KFGFzc2VydGlvbl9leHByZXNzaW9uGAYgASgJSAASQAoLcmV0dXJuX3BhdGgYByABKAsyKS5raWFwaS5ib2FyZC5DdXN0b21SdWxlUmV0dXJuUGF0aFNldHRpbmdzSAASOAoHb3B0aW9ucxhkIAMoDjInLmtpYXBpLmJvYXJkLkN1c3RvbVJ1bGVDb25zdHJhaW50T3B0aW9uQgcKBXZhbHVlQgcKBV9uYW1lIr8CCgpDdXN0b21SdWxlEhEKCWNvbmRpdGlvbhgBIAEoCRI2Cgtjb25zdHJhaW50cxgCIAMoCzIhLmtpYXBpLmJvYXJkLkN1c3RvbVJ1bGVDb25zdHJhaW50EjUKDHNpbmdsZV9sYXllchgDIAEoDjIdLmtpYXBpLmJvYXJkLnR5cGVzLkJvYXJkTGF5ZXJIABI2CgpsYXllcl9tb2RlGAQgASgOMiAua2lhcGkuYm9hcmQuQ3VzdG9tUnVsZUxheWVyTW9kZUgAEjIKCHNldmVyaXR5GAUgASgOMiAua2lhcGkuY29tbW9uLnR5cGVzLlJ1bGVTZXZlcml0eRIMCgRuYW1lGAYgASgJEhUKCGNvbW1lbnRzGAcgASgJSAGIAQFCEQoPbGF5ZXJfY29uZGl0aW9uQgsKCV9jb21tZW50cyKTAwoQQm9hcmREZXNpZ25SdWxlcxI0Cgtjb25zdHJhaW50cxgBIAEoCzIfLmtpYXBpLmJvYXJkLk1pbmltdW1Db25zdHJhaW50cxI2ChBwcmVkZWZpbmVkX3NpemVzGAIgASgLMhwua2lhcGkuYm9hcmQuUHJlZGVmaW5lZFNpemVzEj8KEXNvbGRlcl9tYXNrX3Bhc3RlGAMgASgLMiQua2lhcGkuYm9hcmQuU29sZGVyTWFza1Bhc3RlRGVmYXVsdHMSMAoJdGVhcmRyb3BzGAQgASgLMh0ua2lhcGkuYm9hcmQuVGVhcmRyb3BEZWZhdWx0cxI6Cg52aWFfcHJvdGVjdGlvbhgFIAEoCzIiLmtpYXBpLmJvYXJkLlZpYVByb3RlY3Rpb25EZWZhdWx0cxIzCgpzZXZlcml0aWVzGAYgAygLMh8ua2lhcGkuYm9hcmQuRHJjU2V2ZXJpdHlTZXR0aW5nEi0KCmV4Y2x1c2lvbnMYByADKAsyGS5raWFwaS5ib2FyZC5EcmNFeGNsdXNpb24qTQoOVGVhcmRyb3BUYXJnZXQSDwoLVERUX1VOS05PV04QABINCglURFRfUk9VTkQQARIMCghURFRfUkVDVBACEg0KCVREVF9UUkFDSxADKqITCgxEcmNFcnJvclR5cGUSEQoNRFJDRVRfVU5LTk9XThAAEhsKF0RSQ0VUX1VOQ09OTkVDVEVEX0lURU1TEAESGAoURFJDRVRfU0hPUlRJTkdfSVRFTVMQAhIXChNEUkNFVF9BTExPV0VEX0lURU1TEAMSGgoWRFJDRVRfVEVYVF9PTl9FREdFQ1VUUxAEEhMKD0RSQ0VUX0NMRUFSQU5DRRAFEhIKDkRSQ0VUX0NSRUVQQUdFEAYSGQoVRFJDRVRfVFJBQ0tTX0NST1NTSU5HEAcSGAoURFJDRVRfRURHRV9DTEVBUkFOQ0UQCBIZChVEUkNFVF9aT05FU19JTlRFUlNFQ1QQCRIZChVEUkNFVF9JU09MQVRFRF9DT1BQRVIQChIZChVEUkNFVF9TVEFSVkVEX1RIRVJNQUwQCxIWChJEUkNFVF9EQU5HTElOR19WSUEQDBIYChREUkNFVF9EQU5HTElOR19UUkFDSxANEiEKHURSQ0VUX0RSSUxMRURfSE9MRVNfVE9PX0NMT1NFEA4SIQodRFJDRVRfRFJJTExFRF9IT0xFU19DT0xPQ0FURUQQDxIYChREUkNFVF9IT0xFX0NMRUFSQU5DRRAQEhoKFkRSQ0VUX0NPTk5FQ1RJT05fV0lEVEgQERIVChFEUkNFVF9UUkFDS19XSURUSBASEhUKEURSQ0VUX1RSQUNLX0FOR0xFEBMSHgoaRFJDRVRfVFJBQ0tfU0VHTUVOVF9MRU5HVEgQFBIXChNEUkNFVF9BTk5VTEFSX1dJRFRIEBUSHAoYRFJDRVRfRFJJTExfT1VUX09GX1JBTkdFEBYSFgoSRFJDRVRfVklBX0RJQU1FVEVSEBcSEgoORFJDRVRfUEFEU1RBQ0sQGBIaChZEUkNFVF9QQURTVEFDS19JTlZBTElEEBkSJQohRFJDRVRfTUlDUk9WSUFfRFJJTExfT1VUX09GX1JBTkdFEBoSIAocRFJDRVRfT1ZFUkxBUFBJTkdfRk9PVFBSSU5UUxAbEhsKF0RSQ0VUX01JU1NJTkdfQ09VUlRZQVJEEBwSHQoZRFJDRVRfTUFMRk9STUVEX0NPVVJUWUFSRBAdEhoKFkRSQ0VUX1BUSF9JTl9DT1VSVFlBUkQQHhIbChdEUkNFVF9OUFRIX0lOX0NPVVJUWUFSRBAfEh0KGURSQ0VUX0RJU0FCTEVEX0xBWUVSX0lURU0QIBIZChVEUkNFVF9JTlZBTElEX09VVExJTkUQIRIbChdEUkNFVF9NSVNTSU5HX0ZPT1RQUklOVBAiEh0KGURSQ0VUX0RVUExJQ0FURV9GT09UUFJJTlQQIxIWChJEUkNFVF9ORVRfQ09ORkxJQ1QQJBIZChVEUkNFVF9FWFRSQV9GT09UUFJJTlQQJRIaChZEUkNFVF9TQ0hFTUFUSUNfUEFSSVRZECYSIQodRFJDRVRfU0NIRU1BVElDX0ZJRUxEU19QQVJJVFkQJxIbChdEUkNFVF9GT09UUFJJTlRfRklMVEVSUxAoEh4KGkRSQ0VUX0xJQl9GT09UUFJJTlRfSVNTVUVTECkSIAocRFJDRVRfTElCX0ZPT1RQUklOVF9NSVNNQVRDSBAqEh0KGURSQ0VUX1VOUkVTT0xWRURfVkFSSUFCTEUQKxIbChdEUkNFVF9BU1NFUlRJT05fRkFJTFVSRRAsEhkKFURSQ0VUX0dFTkVSSUNfV0FSTklORxAtEhcKE0RSQ0VUX0dFTkVSSUNfRVJST1IQLhIXChNEUkNFVF9DT1BQRVJfU0xJVkVSEC8SGAoURFJDRVRfU0lMS19DTEVBUkFOQ0UQMBIdChlEUkNFVF9TSUxLX01BU0tfQ0xFQVJBTkNFEDESHQoZRFJDRVRfU0lMS19FREdFX0NMRUFSQU5DRRAyEhsKF0RSQ0VUX1NPTERFUk1BU0tfQlJJREdFEDMSFQoRRFJDRVRfVEVYVF9IRUlHSFQQNBIUChBEUkNFVF9MSU5FX1dJRFRIEDUSHAoURFJDRVRfVEVYVF9USElDS05FU1MQNRoCCAESHQoZRFJDRVRfTEVOR1RIX09VVF9PRl9SQU5HRRA2EhsKF0RSQ0VUX1NLRVdfT1VUX09GX1JBTkdFEDcSIAocRFJDRVRfVklBX0NPVU5UX09VVF9PRl9SQU5HRRA4EiQKIERSQ0VUX0RJRkZfUEFJUl9HQVBfT1VUX09GX1JBTkdFEDkSLQopRFJDRVRfRElGRl9QQUlSX1VOQ09VUExFRF9MRU5HVEhfVE9PX0xPTkcQOhITCg9EUkNFVF9GT09UUFJJTlQQOxIhCh1EUkNFVF9GT09UUFJJTlRfVFlQRV9NSVNNQVRDSBA8Eh0KGURSQ0VUX1BBRF9USF9XSVRIX05PX0hPTEUQPRImCiJEUkNFVF9NSVJST1JFRF9URVhUX09OX0ZST05UX0xBWUVSED4SKAokRFJDRVRfTk9OTUlSUk9SRURfVEVYVF9PTl9CQUNLX0xBWUVSED8SIAocRFJDRVRfTUlTU0lOR19UVU5JTkdfUFJPRklMRRBAEicKI0RSQ0VUX1RVTklOR19QUk9GSUxFX0lNUExJQ0lUX1JVTEVTEEESJgoiRFJDRVRfVFJBQ0tfT05fUE9TVF9NQUNISU5FRF9MQVlFUhBCEiMKH0RSQ0VUX1RSQUNLX05PVF9DRU5URVJFRF9PTl9WSUEQQxIkCiBEUkNFVF9GT09UUFJJTlRfU0NBTEVEX1dJVEhfUEFEUxBEEiEKHURSQ0VUX05FVF9DSEFJTl9TVFVCX1RPT19MT05HEEUSJQohRFJDRVRfTkVUX0NIQUlOX1JFVFVSTl9QQVRIX0JSRUFLEEYSIwofRFJDRVRfTkVUX0NIQUlOX1RVTklOR19QUk9GSUxFUxBHEicKI0RSQ0VUX01BTEZPUk1FRF9NSUNST1ZJQV9TVEFDS19TUEFOEEgSIwofRFJDRVRfTUlDUk9WSUFfU1RBQ0tfTk9UX0ZJTExFRBBJEh4KGkRSQ0VUX01JQ1JPVklBX1NUQUNLX0RFUFRIEEoSGwoXRFJDRVRfSE9MRV9BU1BFQ1RfUkFUSU8QSxIfChtEUkNFVF9NSUNST1ZJQV9DUk9TU0VTX0NPUkUQTBIeChpEUkNFVF9DT1BQRVJfT1VUU0lERV9CT0FSRBBNEiQKIERSQ0VUX01JQ1JPVklBX1NQQU5TX0RJRUxFQ1RSSUNTEE4SHAoYRFJDRVRfVklBX1NUSVRDSF9PVkVSTEFQEE8aAhABKkcKE0N1c3RvbVJ1bGVMYXllck1vZGUSEAoMQ1JMTV9VTktOT1dOEAASDgoKQ1JMTV9PVVRFUhABEg4KCkNSTE1fSU5ORVIQAirpCAoYQ3VzdG9tUnVsZUNvbnN0cmFpbnRUeXBlEhAKDENSQ1RfVU5LTk9XThAAEhIKDkNSQ1RfQ0xFQVJBTkNFEAESEQoNQ1JDVF9DUkVFUEFHRRACEhcKE0NSQ1RfSE9MRV9DTEVBUkFOQ0UQAxIVChFDUkNUX0hPTEVfVE9fSE9MRRAEEhcKE0NSQ1RfRURHRV9DTEVBUkFOQ0UQBRISCg5DUkNUX0hPTEVfU0laRRAGEhwKGENSQ1RfQ09VUlRZQVJEX0NMRUFSQU5DRRAHEhcKE0NSQ1RfU0lMS19DTEVBUkFOQ0UQCBIUChBDUkNUX1RFWFRfSEVJR0hUEAkSEwoPQ1JDVF9MSU5FX1dJRFRIEAoSGwoTQ1JDVF9URVhUX1RISUNLTkVTUxAKGgIIARIUChBDUkNUX1RSQUNLX1dJRFRIEAsSHQoZQ1JDVF9UUkFDS19TRUdNRU5UX0xFTkdUSBAMEhYKEkNSQ1RfQU5OVUxBUl9XSURUSBANEhgKFENSQ1RfWk9ORV9DT05ORUNUSU9OEA4SGwoXQ1JDVF9USEVSTUFMX1JFTElFRl9HQVAQDxIcChhDUkNUX1RIRVJNQUxfU1BPS0VfV0lEVEgQEBIcChhDUkNUX01JTl9SRVNPTFZFRF9TUE9LRVMQERIeChpDUkNUX1NPTERFUl9NQVNLX0VYUEFOU0lPThASEiAKHENSQ1RfU09MREVSX1BBU1RFX0FCU19NQVJHSU4QExIgChxDUkNUX1NPTERFUl9QQVNURV9SRUxfTUFSR0lOEBQSEQoNQ1JDVF9ESVNBTExPVxAVEhUKEUNSQ1RfVklBX0RJQU1FVEVSEBYSDwoLQ1JDVF9MRU5HVEgQFxINCglDUkNUX1NLRVcQGBIWChJDUkNUX0RJRkZfUEFJUl9HQVAQGRIWChJDUkNUX01BWF9VTkNPVVBMRUQQGhIdChlDUkNUX0RJRkZfUEFJUl9JTlRSQV9TS0VXEBsSEgoOQ1JDVF9WSUFfQ09VTlQQHBIbChdDUkNUX1BIWVNJQ0FMX0NMRUFSQU5DRRAdEiAKHENSQ1RfUEhZU0lDQUxfSE9MRV9DTEVBUkFOQ0UQHhISCg5DUkNUX0FTU0VSVElPThAfEhkKFUNSQ1RfQ09OTkVDVElPTl9XSURUSBAgEhQKEENSQ1RfVFJBQ0tfQU5HTEUQIRIVChFDUkNUX1ZJQV9EQU5HTElORxAiEhUKEUNSQ1RfQlJJREdFRF9NQVNLECMSGwoXQ1JDVF9TT0xERVJfTUFTS19TTElWRVIQJBIZChVDUkNUX05FVF9DSEFJTl9MRU5HVEgQJRIeChpDUkNUX05FVF9DSEFJTl9TVFVCX0xFTkdUSBAmEh4KGkNSQ1RfTkVUX0NIQUlOX1JFVFVSTl9QQVRIECcSHQoZQ1JDVF9NSUNST1ZJQV9TVEFDS19ERVBUSBAoEhoKFkNSQ1RfSE9MRV9BU1BFQ1RfUkFUSU8QKRoCEAEqfAoaQ3VzdG9tUnVsZUNvbnN0cmFpbnRPcHRpb24SEAoMQ1JDT19VTktOT1dOEAASHwobQ1JDT19TS0VXX1dJVEhJTl9ESUZGX1BBSVJTEAESFQoRQ1JDT19TUEFDRV9ET01BSU4QAhIUChBDUkNPX1RJTUVfRE9NQUlOEAMq+QEKFkN1c3RvbVJ1bGVEaXNhbGxvd1R5cGUSEAoMQ1JEVF9VTktOT1dOEAASFQoRQ1JEVF9USFJPVUdIX1ZJQVMQARITCg9DUkRUX01JQ1JPX1ZJQVMQAhITCg9DUkRUX0JMSU5EX1ZJQVMQAxIUChBDUkRUX0JVUklFRF9WSUFTEAQSDwoLQ1JEVF9UUkFDS1MQBRINCglDUkRUX1BBRFMQBhIOCgpDUkRUX1pPTkVTEAcSDgoKQ1JEVF9URVhUUxAIEhEKDUNSRFRfR1JBUEhJQ1MQCRIOCgpDUkRUX0hPTEVTEAoSEwoPQ1JEVF9GT09UUFJJTlRTEAtiBnByb3RvMw", [file_common_types_base_types, file_board_board_types]);
 
 /**
  * @generated from message kiapi.board.MinimumConstraints
@@ -115,6 +115,8 @@ export type MinimumConstraints = Message<"kiapi.board.MinimumConstraints"> & {
   minSilkTextHeight?: Distance | undefined;
 
   /**
+   * Minimum silkscreen line width, which also applies to graphic shapes since 11.0
+   *
    * @generated from field: kiapi.common.types.Distance min_silk_text_thickness = 16;
    */
   minSilkTextThickness?: Distance | undefined;
@@ -200,6 +202,8 @@ export type MinimumConstraintsJson = {
   minSilkTextHeight?: DistanceJson;
 
   /**
+   * Minimum silkscreen line width, which also applies to graphic shapes since 11.0
+   *
    * @generated from field: kiapi.common.types.Distance min_silk_text_thickness = 16;
    */
   minSilkTextThickness?: DistanceJson;
@@ -780,48 +784,6 @@ export type DrcMarker = Message<"kiapi.board.DrcMarker"> & {
   position?: Vector2 | undefined;
 
   /**
-   * The id of the PCB_MARKER on the board.  Only set for markers read from a board (GetDrcMarkers,
-   * RunBoardJobDrc); ignored when a marker is sent to KiCad as part of an exclusion.  Markers are
-   * rebuilt (with new ids) every time the checker runs, so ids from before a run are stale.
-   * Since 11.0
-   *
-   * @generated from field: kiapi.common.types.KIID id = 5;
-   */
-  id?: KIID | undefined;
-
-  /**
-   * Effective severity of this marker (after custom rules and exclusions are applied)
-   * Since 11.0
-   *
-   * @generated from field: kiapi.common.types.RuleSeverity severity = 6;
-   */
-  severity: RuleSeverity;
-
-  /**
-   * True if the marker has been excluded by the user
-   * Since 11.0
-   *
-   * @generated from field: bool excluded = 7;
-   */
-  excluded: boolean;
-
-  /**
-   * Comment attached to the exclusion, if excluded
-   * Since 11.0
-   *
-   * @generated from field: string exclusion_comment = 8;
-   */
-  exclusionComment: string;
-
-  /**
-   * Human-readable description of the violation
-   * Since 11.0
-   *
-   * @generated from field: string description = 9;
-   */
-  description: string;
-
-  /**
    * May be up to 4 items involved
    *
    * @generated from field: repeated kiapi.common.types.KIID items = 3;
@@ -832,6 +794,67 @@ export type DrcMarker = Message<"kiapi.board.DrcMarker"> & {
    * @generated from field: kiapi.board.types.BoardLayer layer = 4;
    */
   layer: BoardLayer;
+
+  /**
+   * The rule that was violated (e.g. "clearance")
+   * This field is report-only: it is filled in when available and is read-only to API clients.
+   * Since: 11.0
+   *
+   * @generated from field: string violating_rule = 5;
+   */
+  violatingRule: string;
+
+  /**
+   * The descriptive message for the violation
+   * This field is report-only: it is filled in when available and is read-only to API clients.
+   * Since: 11.0
+   *
+   * @generated from field: string description = 6;
+   */
+  description: string;
+
+  /**
+   * Severity of the violation
+   * This field is report-only: it is filled in when available and is read-only to API clients.
+   * Since: 11.0
+   *
+   * @generated from field: kiapi.common.types.RuleSeverity severity = 7;
+   */
+  severity: RuleSeverity;
+
+  /**
+   * True if the violation is suppressed by an exclusion
+   * This field is report-only: it is filled in when available and is read-only to API clients.
+   * Since: 11.0
+   *
+   * @generated from field: bool excluded = 8;
+   */
+  excluded: boolean;
+
+  /**
+   * Since: 11.0
+   *
+   * @generated from field: kiapi.common.types.MarkerType marker_type = 9;
+   */
+  markerType: MarkerType;
+
+  /**
+   * The id of the PCB_MARKER on the board.  Only set for markers read from a board (GetDrcMarkers,
+   * RunBoardJobDrc); ignored when a marker is sent to KiCad as part of an exclusion.  Markers are
+   * rebuilt (with new ids) every time the checker runs, so ids from before a run are stale.
+   * Since: 11.0
+   *
+   * @generated from field: kiapi.common.types.KIID id = 10;
+   */
+  id?: KIID | undefined;
+
+  /**
+   * Comment attached to the exclusion, if excluded
+   * Since: 11.0
+   *
+   * @generated from field: string exclusion_comment = 11;
+   */
+  exclusionComment: string;
 };
 
 /**
@@ -849,48 +872,6 @@ export type DrcMarkerJson = {
   position?: Vector2Json;
 
   /**
-   * The id of the PCB_MARKER on the board.  Only set for markers read from a board (GetDrcMarkers,
-   * RunBoardJobDrc); ignored when a marker is sent to KiCad as part of an exclusion.  Markers are
-   * rebuilt (with new ids) every time the checker runs, so ids from before a run are stale.
-   * Since 11.0
-   *
-   * @generated from field: kiapi.common.types.KIID id = 5;
-   */
-  id?: KIIDJson;
-
-  /**
-   * Effective severity of this marker (after custom rules and exclusions are applied)
-   * Since 11.0
-   *
-   * @generated from field: kiapi.common.types.RuleSeverity severity = 6;
-   */
-  severity?: RuleSeverityJson;
-
-  /**
-   * True if the marker has been excluded by the user
-   * Since 11.0
-   *
-   * @generated from field: bool excluded = 7;
-   */
-  excluded?: boolean;
-
-  /**
-   * Comment attached to the exclusion, if excluded
-   * Since 11.0
-   *
-   * @generated from field: string exclusion_comment = 8;
-   */
-  exclusionComment?: string;
-
-  /**
-   * Human-readable description of the violation
-   * Since 11.0
-   *
-   * @generated from field: string description = 9;
-   */
-  description?: string;
-
-  /**
    * May be up to 4 items involved
    *
    * @generated from field: repeated kiapi.common.types.KIID items = 3;
@@ -901,6 +882,67 @@ export type DrcMarkerJson = {
    * @generated from field: kiapi.board.types.BoardLayer layer = 4;
    */
   layer?: BoardLayerJson;
+
+  /**
+   * The rule that was violated (e.g. "clearance")
+   * This field is report-only: it is filled in when available and is read-only to API clients.
+   * Since: 11.0
+   *
+   * @generated from field: string violating_rule = 5;
+   */
+  violatingRule?: string;
+
+  /**
+   * The descriptive message for the violation
+   * This field is report-only: it is filled in when available and is read-only to API clients.
+   * Since: 11.0
+   *
+   * @generated from field: string description = 6;
+   */
+  description?: string;
+
+  /**
+   * Severity of the violation
+   * This field is report-only: it is filled in when available and is read-only to API clients.
+   * Since: 11.0
+   *
+   * @generated from field: kiapi.common.types.RuleSeverity severity = 7;
+   */
+  severity?: RuleSeverityJson;
+
+  /**
+   * True if the violation is suppressed by an exclusion
+   * This field is report-only: it is filled in when available and is read-only to API clients.
+   * Since: 11.0
+   *
+   * @generated from field: bool excluded = 8;
+   */
+  excluded?: boolean;
+
+  /**
+   * Since: 11.0
+   *
+   * @generated from field: kiapi.common.types.MarkerType marker_type = 9;
+   */
+  markerType?: MarkerTypeJson;
+
+  /**
+   * The id of the PCB_MARKER on the board.  Only set for markers read from a board (GetDrcMarkers,
+   * RunBoardJobDrc); ignored when a marker is sent to KiCad as part of an exclusion.  Markers are
+   * rebuilt (with new ids) every time the checker runs, so ids from before a run are stale.
+   * Since: 11.0
+   *
+   * @generated from field: kiapi.common.types.KIID id = 10;
+   */
+  id?: KIIDJson;
+
+  /**
+   * Comment attached to the exclusion, if excluded
+   * Since: 11.0
+   *
+   * @generated from field: string exclusion_comment = 11;
+   */
+  exclusionComment?: string;
 };
 
 /**
@@ -1012,6 +1054,55 @@ export const CustomRuleDisallowSettingsSchema: GenMessage<CustomRuleDisallowSett
   messageDesc(file_board_board_rules, 13);
 
 /**
+ * Since: 11.0
+ *
+ * @generated from message kiapi.board.CustomRuleReturnPathSettings
+ */
+export type CustomRuleReturnPathSettings = Message<"kiapi.board.CustomRuleReturnPathSettings"> & {
+  /**
+   * Layer name as written in the rules file
+   *
+   * @generated from field: string reference_layer = 1;
+   */
+  referenceLayer: string;
+
+  /**
+   * Optional net name or wildcard limiting which zones count
+   *
+   * @generated from field: string reference_net = 2;
+   */
+  referenceNet: string;
+};
+
+/**
+ * Since: 11.0
+ *
+ * @generated from message kiapi.board.CustomRuleReturnPathSettings
+ */
+export type CustomRuleReturnPathSettingsJson = {
+  /**
+   * Layer name as written in the rules file
+   *
+   * @generated from field: string reference_layer = 1;
+   */
+  referenceLayer?: string;
+
+  /**
+   * Optional net name or wildcard limiting which zones count
+   *
+   * @generated from field: string reference_net = 2;
+   */
+  referenceNet?: string;
+};
+
+/**
+ * Describes the message kiapi.board.CustomRuleReturnPathSettings.
+ * Use `create(CustomRuleReturnPathSettingsSchema)` to create a new message.
+ */
+export const CustomRuleReturnPathSettingsSchema: GenMessage<CustomRuleReturnPathSettings, {jsonType: CustomRuleReturnPathSettingsJson}> = /*@__PURE__*/
+  messageDesc(file_board_board_rules, 14);
+
+/**
  * @generated from message kiapi.board.CustomRuleConstraint
  */
 export type CustomRuleConstraint = Message<"kiapi.board.CustomRuleConstraint"> & {
@@ -1030,7 +1121,7 @@ export type CustomRuleConstraint = Message<"kiapi.board.CustomRuleConstraint"> &
    */
   value: {
     /**
-     * nanometers, picoseconds, or unitless depending on constraint type
+     * nanometers, attoseconds, thousandths (hole aspect ratio), or unitless depending on constraint type
      *
      * @generated from field: kiapi.common.types.MinOptMax numeric = 3;
      */
@@ -1054,6 +1145,14 @@ export type CustomRuleConstraint = Message<"kiapi.board.CustomRuleConstraint"> &
      */
     value: string;
     case: "assertionExpression";
+  } | {
+    /**
+     * Since: 11.0
+     *
+     * @generated from field: kiapi.board.CustomRuleReturnPathSettings return_path = 7;
+     */
+    value: CustomRuleReturnPathSettings;
+    case: "returnPath";
   } | { case: undefined; value?: undefined };
 
   /**
@@ -1079,7 +1178,7 @@ export type CustomRuleConstraintJson = {
   name?: string;
 
   /**
-   * nanometers, picoseconds, or unitless depending on constraint type
+   * nanometers, attoseconds, thousandths (hole aspect ratio), or unitless depending on constraint type
    *
    * @generated from field: kiapi.common.types.MinOptMax numeric = 3;
    */
@@ -1101,6 +1200,13 @@ export type CustomRuleConstraintJson = {
   assertionExpression?: string;
 
   /**
+   * Since: 11.0
+   *
+   * @generated from field: kiapi.board.CustomRuleReturnPathSettings return_path = 7;
+   */
+  returnPath?: CustomRuleReturnPathSettingsJson;
+
+  /**
    * grab bag of stuff; may be refactored to more specific messages later
    *
    * @generated from field: repeated kiapi.board.CustomRuleConstraintOption options = 100;
@@ -1113,7 +1219,7 @@ export type CustomRuleConstraintJson = {
  * Use `create(CustomRuleConstraintSchema)` to create a new message.
  */
 export const CustomRuleConstraintSchema: GenMessage<CustomRuleConstraint, {jsonType: CustomRuleConstraintJson}> = /*@__PURE__*/
-  messageDesc(file_board_board_rules, 14);
+  messageDesc(file_board_board_rules, 15);
 
 /**
  * @generated from message kiapi.board.CustomRule
@@ -1207,7 +1313,7 @@ export type CustomRuleJson = {
  * Use `create(CustomRuleSchema)` to create a new message.
  */
 export const CustomRuleSchema: GenMessage<CustomRule, {jsonType: CustomRuleJson}> = /*@__PURE__*/
-  messageDesc(file_board_board_rules, 15);
+  messageDesc(file_board_board_rules, 16);
 
 /**
  * @generated from message kiapi.board.BoardDesignRules
@@ -1294,7 +1400,7 @@ export type BoardDesignRulesJson = {
  * Use `create(BoardDesignRulesSchema)` to create a new message.
  */
 export const BoardDesignRulesSchema: GenMessage<BoardDesignRules, {jsonType: BoardDesignRulesJson}> = /*@__PURE__*/
-  messageDesc(file_board_board_rules, 16);
+  messageDesc(file_board_board_rules, 17);
 
 /**
  * @generated from enum kiapi.board.TeardropTarget
@@ -1602,7 +1708,17 @@ export enum DrcErrorType {
   DRCET_TEXT_HEIGHT = 52,
 
   /**
-   * @generated from enum value: DRCET_TEXT_THICKNESS = 53;
+   * Since: 11.0
+   *
+   * @generated from enum value: DRCET_LINE_WIDTH = 53;
+   */
+  DRCET_LINE_WIDTH = 53,
+
+  /**
+   * Replaced by DRCET_LINE_WIDTH, which also covers graphic shapes
+   *
+   * @generated from enum value: DRCET_TEXT_THICKNESS = 53 [deprecated = true];
+   * @deprecated
    */
   DRCET_TEXT_THICKNESS = 53,
 
@@ -1712,9 +1828,9 @@ export enum DrcErrorType {
   DRCET_MICROVIA_STACK_DEPTH = 74,
 
   /**
-   * @generated from enum value: DRCET_MICROVIA_ASPECT_RATIO = 75;
+   * @generated from enum value: DRCET_HOLE_ASPECT_RATIO = 75;
    */
-  DRCET_MICROVIA_ASPECT_RATIO = 75,
+  DRCET_HOLE_ASPECT_RATIO = 75,
 
   /**
    * @generated from enum value: DRCET_MICROVIA_CROSSES_CORE = 76;
@@ -1722,15 +1838,25 @@ export enum DrcErrorType {
   DRCET_MICROVIA_CROSSES_CORE = 76,
 
   /**
-   * @generated from enum value: DRCET_VIA_STITCH_OVERLAP = 77;
+   * @generated from enum value: DRCET_COPPER_OUTSIDE_BOARD = 77;
    */
-  DRCET_VIA_STITCH_OVERLAP = 77,
+  DRCET_COPPER_OUTSIDE_BOARD = 77,
+
+  /**
+   * @generated from enum value: DRCET_MICROVIA_SPANS_DIELECTRICS = 78;
+   */
+  DRCET_MICROVIA_SPANS_DIELECTRICS = 78,
+
+  /**
+   * @generated from enum value: DRCET_VIA_STITCH_OVERLAP = 79;
+   */
+  DRCET_VIA_STITCH_OVERLAP = 79,
 }
 
 /**
  * @generated from enum kiapi.board.DrcErrorType
  */
-export type DrcErrorTypeJson = "DRCET_UNKNOWN" | "DRCET_UNCONNECTED_ITEMS" | "DRCET_SHORTING_ITEMS" | "DRCET_ALLOWED_ITEMS" | "DRCET_TEXT_ON_EDGECUTS" | "DRCET_CLEARANCE" | "DRCET_CREEPAGE" | "DRCET_TRACKS_CROSSING" | "DRCET_EDGE_CLEARANCE" | "DRCET_ZONES_INTERSECT" | "DRCET_ISOLATED_COPPER" | "DRCET_STARVED_THERMAL" | "DRCET_DANGLING_VIA" | "DRCET_DANGLING_TRACK" | "DRCET_DRILLED_HOLES_TOO_CLOSE" | "DRCET_DRILLED_HOLES_COLOCATED" | "DRCET_HOLE_CLEARANCE" | "DRCET_CONNECTION_WIDTH" | "DRCET_TRACK_WIDTH" | "DRCET_TRACK_ANGLE" | "DRCET_TRACK_SEGMENT_LENGTH" | "DRCET_ANNULAR_WIDTH" | "DRCET_DRILL_OUT_OF_RANGE" | "DRCET_VIA_DIAMETER" | "DRCET_PADSTACK" | "DRCET_PADSTACK_INVALID" | "DRCET_MICROVIA_DRILL_OUT_OF_RANGE" | "DRCET_OVERLAPPING_FOOTPRINTS" | "DRCET_MISSING_COURTYARD" | "DRCET_MALFORMED_COURTYARD" | "DRCET_PTH_IN_COURTYARD" | "DRCET_NPTH_IN_COURTYARD" | "DRCET_DISABLED_LAYER_ITEM" | "DRCET_INVALID_OUTLINE" | "DRCET_MISSING_FOOTPRINT" | "DRCET_DUPLICATE_FOOTPRINT" | "DRCET_NET_CONFLICT" | "DRCET_EXTRA_FOOTPRINT" | "DRCET_SCHEMATIC_PARITY" | "DRCET_SCHEMATIC_FIELDS_PARITY" | "DRCET_FOOTPRINT_FILTERS" | "DRCET_LIB_FOOTPRINT_ISSUES" | "DRCET_LIB_FOOTPRINT_MISMATCH" | "DRCET_UNRESOLVED_VARIABLE" | "DRCET_ASSERTION_FAILURE" | "DRCET_GENERIC_WARNING" | "DRCET_GENERIC_ERROR" | "DRCET_COPPER_SLIVER" | "DRCET_SILK_CLEARANCE" | "DRCET_SILK_MASK_CLEARANCE" | "DRCET_SILK_EDGE_CLEARANCE" | "DRCET_SOLDERMASK_BRIDGE" | "DRCET_TEXT_HEIGHT" | "DRCET_TEXT_THICKNESS" | "DRCET_LENGTH_OUT_OF_RANGE" | "DRCET_SKEW_OUT_OF_RANGE" | "DRCET_VIA_COUNT_OUT_OF_RANGE" | "DRCET_DIFF_PAIR_GAP_OUT_OF_RANGE" | "DRCET_DIFF_PAIR_UNCOUPLED_LENGTH_TOO_LONG" | "DRCET_FOOTPRINT" | "DRCET_FOOTPRINT_TYPE_MISMATCH" | "DRCET_PAD_TH_WITH_NO_HOLE" | "DRCET_MIRRORED_TEXT_ON_FRONT_LAYER" | "DRCET_NONMIRRORED_TEXT_ON_BACK_LAYER" | "DRCET_MISSING_TUNING_PROFILE" | "DRCET_TUNING_PROFILE_IMPLICIT_RULES" | "DRCET_TRACK_ON_POST_MACHINED_LAYER" | "DRCET_TRACK_NOT_CENTERED_ON_VIA" | "DRCET_FOOTPRINT_SCALED_WITH_PADS" | "DRCET_NET_CHAIN_STUB_TOO_LONG" | "DRCET_NET_CHAIN_RETURN_PATH_BREAK" | "DRCET_NET_CHAIN_TUNING_PROFILES" | "DRCET_MALFORMED_MICROVIA_STACK_SPAN" | "DRCET_MICROVIA_STACK_NOT_FILLED" | "DRCET_MICROVIA_STACK_DEPTH" | "DRCET_MICROVIA_ASPECT_RATIO" | "DRCET_MICROVIA_CROSSES_CORE" | "DRCET_VIA_STITCH_OVERLAP";
+export type DrcErrorTypeJson = "DRCET_UNKNOWN" | "DRCET_UNCONNECTED_ITEMS" | "DRCET_SHORTING_ITEMS" | "DRCET_ALLOWED_ITEMS" | "DRCET_TEXT_ON_EDGECUTS" | "DRCET_CLEARANCE" | "DRCET_CREEPAGE" | "DRCET_TRACKS_CROSSING" | "DRCET_EDGE_CLEARANCE" | "DRCET_ZONES_INTERSECT" | "DRCET_ISOLATED_COPPER" | "DRCET_STARVED_THERMAL" | "DRCET_DANGLING_VIA" | "DRCET_DANGLING_TRACK" | "DRCET_DRILLED_HOLES_TOO_CLOSE" | "DRCET_DRILLED_HOLES_COLOCATED" | "DRCET_HOLE_CLEARANCE" | "DRCET_CONNECTION_WIDTH" | "DRCET_TRACK_WIDTH" | "DRCET_TRACK_ANGLE" | "DRCET_TRACK_SEGMENT_LENGTH" | "DRCET_ANNULAR_WIDTH" | "DRCET_DRILL_OUT_OF_RANGE" | "DRCET_VIA_DIAMETER" | "DRCET_PADSTACK" | "DRCET_PADSTACK_INVALID" | "DRCET_MICROVIA_DRILL_OUT_OF_RANGE" | "DRCET_OVERLAPPING_FOOTPRINTS" | "DRCET_MISSING_COURTYARD" | "DRCET_MALFORMED_COURTYARD" | "DRCET_PTH_IN_COURTYARD" | "DRCET_NPTH_IN_COURTYARD" | "DRCET_DISABLED_LAYER_ITEM" | "DRCET_INVALID_OUTLINE" | "DRCET_MISSING_FOOTPRINT" | "DRCET_DUPLICATE_FOOTPRINT" | "DRCET_NET_CONFLICT" | "DRCET_EXTRA_FOOTPRINT" | "DRCET_SCHEMATIC_PARITY" | "DRCET_SCHEMATIC_FIELDS_PARITY" | "DRCET_FOOTPRINT_FILTERS" | "DRCET_LIB_FOOTPRINT_ISSUES" | "DRCET_LIB_FOOTPRINT_MISMATCH" | "DRCET_UNRESOLVED_VARIABLE" | "DRCET_ASSERTION_FAILURE" | "DRCET_GENERIC_WARNING" | "DRCET_GENERIC_ERROR" | "DRCET_COPPER_SLIVER" | "DRCET_SILK_CLEARANCE" | "DRCET_SILK_MASK_CLEARANCE" | "DRCET_SILK_EDGE_CLEARANCE" | "DRCET_SOLDERMASK_BRIDGE" | "DRCET_TEXT_HEIGHT" | "DRCET_LINE_WIDTH" | "DRCET_TEXT_THICKNESS" | "DRCET_LENGTH_OUT_OF_RANGE" | "DRCET_SKEW_OUT_OF_RANGE" | "DRCET_VIA_COUNT_OUT_OF_RANGE" | "DRCET_DIFF_PAIR_GAP_OUT_OF_RANGE" | "DRCET_DIFF_PAIR_UNCOUPLED_LENGTH_TOO_LONG" | "DRCET_FOOTPRINT" | "DRCET_FOOTPRINT_TYPE_MISMATCH" | "DRCET_PAD_TH_WITH_NO_HOLE" | "DRCET_MIRRORED_TEXT_ON_FRONT_LAYER" | "DRCET_NONMIRRORED_TEXT_ON_BACK_LAYER" | "DRCET_MISSING_TUNING_PROFILE" | "DRCET_TUNING_PROFILE_IMPLICIT_RULES" | "DRCET_TRACK_ON_POST_MACHINED_LAYER" | "DRCET_TRACK_NOT_CENTERED_ON_VIA" | "DRCET_FOOTPRINT_SCALED_WITH_PADS" | "DRCET_NET_CHAIN_STUB_TOO_LONG" | "DRCET_NET_CHAIN_RETURN_PATH_BREAK" | "DRCET_NET_CHAIN_TUNING_PROFILES" | "DRCET_MALFORMED_MICROVIA_STACK_SPAN" | "DRCET_MICROVIA_STACK_NOT_FILLED" | "DRCET_MICROVIA_STACK_DEPTH" | "DRCET_HOLE_ASPECT_RATIO" | "DRCET_MICROVIA_CROSSES_CORE" | "DRCET_COPPER_OUTSIDE_BOARD" | "DRCET_MICROVIA_SPANS_DIELECTRICS" | "DRCET_VIA_STITCH_OVERLAP";
 
 /**
  * Describes the enum kiapi.board.DrcErrorType.
@@ -1824,7 +1950,17 @@ export enum CustomRuleConstraintType {
   CRCT_TEXT_HEIGHT = 9,
 
   /**
-   * @generated from enum value: CRCT_TEXT_THICKNESS = 10;
+   * Since: 11.0
+   *
+   * @generated from enum value: CRCT_LINE_WIDTH = 10;
+   */
+  CRCT_LINE_WIDTH = 10,
+
+  /**
+   * Replaced by CRCT_LINE_WIDTH, which also covers graphic shapes
+   *
+   * @generated from enum value: CRCT_TEXT_THICKNESS = 10 [deprecated = true];
+   * @deprecated
    */
   CRCT_TEXT_THICKNESS = 10,
 
@@ -1979,15 +2115,15 @@ export enum CustomRuleConstraintType {
   CRCT_MICROVIA_STACK_DEPTH = 40,
 
   /**
-   * @generated from enum value: CRCT_MICROVIA_ASPECT_RATIO = 41;
+   * @generated from enum value: CRCT_HOLE_ASPECT_RATIO = 41;
    */
-  CRCT_MICROVIA_ASPECT_RATIO = 41,
+  CRCT_HOLE_ASPECT_RATIO = 41,
 }
 
 /**
  * @generated from enum kiapi.board.CustomRuleConstraintType
  */
-export type CustomRuleConstraintTypeJson = "CRCT_UNKNOWN" | "CRCT_CLEARANCE" | "CRCT_CREEPAGE" | "CRCT_HOLE_CLEARANCE" | "CRCT_HOLE_TO_HOLE" | "CRCT_EDGE_CLEARANCE" | "CRCT_HOLE_SIZE" | "CRCT_COURTYARD_CLEARANCE" | "CRCT_SILK_CLEARANCE" | "CRCT_TEXT_HEIGHT" | "CRCT_TEXT_THICKNESS" | "CRCT_TRACK_WIDTH" | "CRCT_TRACK_SEGMENT_LENGTH" | "CRCT_ANNULAR_WIDTH" | "CRCT_ZONE_CONNECTION" | "CRCT_THERMAL_RELIEF_GAP" | "CRCT_THERMAL_SPOKE_WIDTH" | "CRCT_MIN_RESOLVED_SPOKES" | "CRCT_SOLDER_MASK_EXPANSION" | "CRCT_SOLDER_PASTE_ABS_MARGIN" | "CRCT_SOLDER_PASTE_REL_MARGIN" | "CRCT_DISALLOW" | "CRCT_VIA_DIAMETER" | "CRCT_LENGTH" | "CRCT_SKEW" | "CRCT_DIFF_PAIR_GAP" | "CRCT_MAX_UNCOUPLED" | "CRCT_DIFF_PAIR_INTRA_SKEW" | "CRCT_VIA_COUNT" | "CRCT_PHYSICAL_CLEARANCE" | "CRCT_PHYSICAL_HOLE_CLEARANCE" | "CRCT_ASSERTION" | "CRCT_CONNECTION_WIDTH" | "CRCT_TRACK_ANGLE" | "CRCT_VIA_DANGLING" | "CRCT_BRIDGED_MASK" | "CRCT_SOLDER_MASK_SLIVER" | "CRCT_NET_CHAIN_LENGTH" | "CRCT_NET_CHAIN_STUB_LENGTH" | "CRCT_NET_CHAIN_RETURN_PATH" | "CRCT_MICROVIA_STACK_DEPTH" | "CRCT_MICROVIA_ASPECT_RATIO";
+export type CustomRuleConstraintTypeJson = "CRCT_UNKNOWN" | "CRCT_CLEARANCE" | "CRCT_CREEPAGE" | "CRCT_HOLE_CLEARANCE" | "CRCT_HOLE_TO_HOLE" | "CRCT_EDGE_CLEARANCE" | "CRCT_HOLE_SIZE" | "CRCT_COURTYARD_CLEARANCE" | "CRCT_SILK_CLEARANCE" | "CRCT_TEXT_HEIGHT" | "CRCT_LINE_WIDTH" | "CRCT_TEXT_THICKNESS" | "CRCT_TRACK_WIDTH" | "CRCT_TRACK_SEGMENT_LENGTH" | "CRCT_ANNULAR_WIDTH" | "CRCT_ZONE_CONNECTION" | "CRCT_THERMAL_RELIEF_GAP" | "CRCT_THERMAL_SPOKE_WIDTH" | "CRCT_MIN_RESOLVED_SPOKES" | "CRCT_SOLDER_MASK_EXPANSION" | "CRCT_SOLDER_PASTE_ABS_MARGIN" | "CRCT_SOLDER_PASTE_REL_MARGIN" | "CRCT_DISALLOW" | "CRCT_VIA_DIAMETER" | "CRCT_LENGTH" | "CRCT_SKEW" | "CRCT_DIFF_PAIR_GAP" | "CRCT_MAX_UNCOUPLED" | "CRCT_DIFF_PAIR_INTRA_SKEW" | "CRCT_VIA_COUNT" | "CRCT_PHYSICAL_CLEARANCE" | "CRCT_PHYSICAL_HOLE_CLEARANCE" | "CRCT_ASSERTION" | "CRCT_CONNECTION_WIDTH" | "CRCT_TRACK_ANGLE" | "CRCT_VIA_DANGLING" | "CRCT_BRIDGED_MASK" | "CRCT_SOLDER_MASK_SLIVER" | "CRCT_NET_CHAIN_LENGTH" | "CRCT_NET_CHAIN_STUB_LENGTH" | "CRCT_NET_CHAIN_RETURN_PATH" | "CRCT_MICROVIA_STACK_DEPTH" | "CRCT_HOLE_ASPECT_RATIO";
 
 /**
  * Describes the enum kiapi.board.CustomRuleConstraintType.

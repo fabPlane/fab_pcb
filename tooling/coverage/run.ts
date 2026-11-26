@@ -38,6 +38,9 @@ export const COMMAND_FILES: ReadonlyArray<{ proto: string; group: string }> = [
   { proto: "common/commands/settings_commands.proto", group: "common/settings" },
   { proto: "common/commands/variant_commands.proto", group: "common/variant" },
   { proto: "common/commands/cross_probe_commands.proto", group: "common/crossprobe" },
+  { proto: "common/tasks.proto", group: "common/tasks" },
+  { proto: "board/board_tasks.proto", group: "board/tasks" },
+  { proto: "schematic/schematic_tasks.proto", group: "sch/tasks" },
   { proto: "board/board_commands.proto", group: "board/commands" },
   { proto: "board/board_jobs.proto", group: "board/jobs" },
   { proto: "schematic/schematic_commands.proto", group: "sch/commands" },
@@ -125,7 +128,7 @@ export function useWorktree(): boolean {
   return process.env.KICAD_WORKTREE === "1";
 }
 
-/** Every `*_commands.proto` / `*_jobs.proto` under api/proto, as repo-relative paths. */
+/** Every command, job and task proto under api/proto, as repo-relative paths. */
 async function listCommandProtos(src: string): Promise<string[]> {
   const r = Bun.spawnSync(
     useWorktree() ? ["git", "-C", src, "ls-files", "api/proto"] : ["git", "-C", src, "ls-tree", "-r", "--name-only", "HEAD", "api/proto"],
@@ -134,7 +137,7 @@ async function listCommandProtos(src: string): Promise<string[]> {
   return r.stdout
     .toString()
     .split("\n")
-    .filter((f) => /_(commands|jobs)\.proto$/.test(f))
+    .filter((f) => /_(commands|jobs|tasks)\.proto$/.test(f) || f.endsWith("/common/tasks.proto"))
     .map((f) => f.replace(/^api\/proto\//, ""))
     .sort();
 }
