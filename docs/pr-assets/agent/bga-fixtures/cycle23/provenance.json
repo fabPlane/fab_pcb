@@ -1,0 +1,19 @@
+{
+  "machine": "hyper-ms-lin",
+  "cores": "0-5",
+  "repeats": 3,
+  "native_reports": 12,
+  "malformed_variants_per_report": 17,
+  "malformed_accepted_before": 168,
+  "malformed_accepted_after": 0,
+  "genuine_accepted_before": 12,
+  "genuine_accepted_after": 12,
+  "notes": "Same fresh reports replayed under old count-only and new endpoint audit. Source UUIDs are absent; identity uses reference, pad number, net and position. No routing/speed gain.",
+  "sources": {
+    "benchmarks/boards/bga-escape/report_audit.py": "7f126deac3fe0e5bde3f872d7f73e0be1a8e3e0e3998a3003166e66e5de291cc",
+    "benchmarks/boards/bga-escape/validate.py": "5dc7084d2fa0525fb0a1cad4061048dd97b6ec16d9d52496df2e72ba16e22aa8",
+    "benchmarks/boards/bga-escape/test_report_audit.py": "175b0a4dcc3105d331ce0443b270c81a62aefd0a98ab31f43e95d95803c66b48",
+    "benchmarks/boards/bga-escape/measure_report_audit.py": "d4f859ad7add53a295fa1e604e8b5ff9e202d367d447c79b99c7e359888199a4",
+    "benchmarks/boards/bga-escape/generate.py": "853ee4389d9a8ca6a4ff77b45d5f2f1714526fa199a7145d5e00ffe7dffd91ec"
+  }
+}
