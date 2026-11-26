@@ -1,0 +1,19 @@
+{
+  "full_native_queue_exit": 0,
+  "final_required_checks_exit": 0,
+  "targeted24_exit": 0,
+  "larger18_actual_driver_exit": 0,
+  "larger_parent_queue_exit": 0,
+  "queued_slow_stages": "Superseded placeholders; no scoring",
+  "dense_native_supervisor_exit": 143,
+  "dense_complete_case_records": 6,
+  "dense_all_recorded_steps_exit_zero_no_timeout": true,
+  "default_slow_final_exit": 1,
+  "default_slow_cases_complete": 63,
+  "default_slow_failed_expectations": 12,
+  "default_initial_superseded_exit": 143,
+  "enabled_slow_before_actual_exit": 0,
+  "enabled_slow_after_actual_exit": 0,
+  "enabled_slow_complete_cases_each": 63,
+  "log_collision": "Partial stdout prefixes lost; all per-case JSON complete; derived text labelled"
+}

@@ -1,0 +1,15 @@
+{
+  "inputs": {
+    "provided.dsn": "1dbf3cd5a55dfd8c64f643ad06e136c87431ffa28447235bb9a84fbb3796eea7",
+    "native-case/job.json": "3ac2623aa159d365c44e478048e9888b166f7ece43e5546cf38e1ca17c47e94b",
+    "native-case/board.kicad_pcb": "f5841d12f854d2ae538bf9ae2996c72718028ba9702f627f726c1ccfc67a4635",
+    "native-case/board.kicad_pro": "346003c12025d81e04dcdfc1c0e64e54845aa74405df6a57b84876471d0ef902",
+    "native-case/board.kicad_dru": "edd74546c3a662048c2f81cace7014020026bf6586abc6b7333db7df5644bfc7",
+    "native-case/baseline-drc.json": "598ec95b83243d52e9e40fab3d81bb641bee696ee9dd3764bedfdbf099228e2b"
+  },
+  "generator_sha256": "7a01aa5537e7bf9a09db7d542f5ff4603d555e12b82bba67e9d16f7fd5c244d9",
+  "generator_license": "MIT (SPDX header)",
+  "baseline_native_unconnected_edges": 439,
+  "nets": 263,
+  "pads": 702
+}

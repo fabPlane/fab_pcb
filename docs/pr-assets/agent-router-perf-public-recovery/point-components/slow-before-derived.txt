@@ -1,0 +1,64 @@
+Derived from complete per-case JSON; original stdout prefix was truncated by a private queue log-name collision. Raw partial stream retained separately.
+{"id": "parse-dialect-kicad-wiring-polygons", "pass": true, "ms": 29.774085000000003, "mismatches": [], "advisoryMismatches": []}
+{"id": "parse-dialect-router-written-polyline-paths", "pass": true, "ms": 50.535268, "mismatches": [], "advisoryMismatches": []}
+{"id": "parse-lex-issue187-brace-net-names", "pass": true, "ms": 94.37291299999998, "mismatches": [], "advisoryMismatches": []}
+{"id": "parse-summary-issue103-board-routed", "pass": true, "ms": 38.835599, "mismatches": [], "advisoryMismatches": []}
+{"id": "parse-summary-issue178-keebmaker-sofle-choc", "pass": true, "ms": 40.32778399999998, "mismatches": [], "advisoryMismatches": []}
+{"id": "parse-summary-issue187-processor-z80", "pass": true, "ms": 63.66860300000002, "mismatches": [], "advisoryMismatches": []}
+{"id": "parse-summary-issue190-processor-z80", "pass": true, "ms": 39.936465999999996, "mismatches": [], "advisoryMismatches": []}
+{"id": "parse-summary-issue191-processor-z80-processor-z80", "pass": true, "ms": 88.17080400000003, "mismatches": [], "advisoryMismatches": []}
+{"id": "parse-summary-issue690-kit-dev-coldfire-xilinx-5213", "pass": true, "ms": 22.842149000000006, "mismatches": [], "advisoryMismatches": []}
+{"id": "parse-summary-issue756-tomu-fpga7", "pass": true, "ms": 21.260374999999954, "mismatches": [], "advisoryMismatches": []}
+{"id": "parse-summary-issue756-tomu-fpga8", "pass": true, "ms": 9.96756199999993, "mismatches": [], "advisoryMismatches": []}
+{"id": "parse-summary-issue756-tomu-fpga9", "pass": true, "ms": 7.56031100000007, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-cm5-carrier-complete", "pass": false, "ms": 600117.04459, "mismatches": ["incomplete: expected \u2264 2, got 41"], "advisoryMismatches": ["wallClockMs: expected \u2264 600000, got 600057"]}
+{"id": "routing-slow-cm5-carrier-floor", "pass": true, "ms": 120087.96734500001, "mismatches": [], "advisoryMismatches": ["wallClockMs: expected \u2264 120000, got 120044"]}
+{"id": "routing-slow-dac2020-bm01-maxpasses2-maxitems20", "pass": true, "ms": 154.9087770000333, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-dac2020-bm01-maxpasses3-maxitems50", "pass": true, "ms": 420.56111100001726, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-dac2020-bm01-p1", "pass": false, "ms": 16570.296276999987, "mismatches": ["incomplete: expected \u2264 56, got 70"], "advisoryMismatches": []}
+{"id": "routing-slow-dac2020-bm01-p1-maxitems111", "pass": true, "ms": 4559.170595000032, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-dac2020-bm01-p1-maxitems151", "pass": true, "ms": 4700.7042409999995, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-dac2020-bm01-p1-maxitems61", "pass": true, "ms": 497.1785849999869, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-dac2020-bm01-p2", "pass": false, "ms": 76691.12389799999, "mismatches": ["incomplete: expected \u2264 28, got 70"], "advisoryMismatches": []}
+{"id": "routing-slow-dac2020-bm05-maxpasses20", "pass": true, "ms": 125454.28650599997, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-dac2020-bm05-p1", "pass": true, "ms": 2940.4362599999877, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-dac2020-bm05-p1-maxitems2", "pass": true, "ms": 5.8261829999974, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-dac2020-bm05-p1-maxitems5", "pass": true, "ms": 6.096129999961704, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-dac2020-bm06-fanout-route", "pass": true, "ms": 2961.2048690000083, "mismatches": [], "advisoryMismatches": ["barrels: expected \u2264 1.5 \u00d7 reference 25, got 64"]}
+{"id": "routing-slow-dac2020-bm07-complete", "pass": false, "ms": 11554.66501300002, "mismatches": ["incomplete: expected exactly 0, got 4"], "advisoryMismatches": ["barrels: expected \u2264 1.5 \u00d7 reference 13, got 92"]}
+{"id": "routing-slow-dac2020-bm10-fanout-route", "pass": false, "ms": 120058.13456199993, "mismatches": ["incomplete: expected exactly 0, got 27"], "advisoryMismatches": ["barrels: expected \u2264 1.5 \u00d7 reference 150, got 370"]}
+{"id": "routing-slow-dac2020-bm11-fanout-only", "pass": false, "ms": 65.28959199995734, "mismatches": ["addedBarrels: expected \u2265 154, got 145"], "advisoryMismatches": []}
+{"id": "routing-slow-issue026-j2-novia", "pass": false, "ms": 5291.2494010000955, "mismatches": ["incomplete: expected \u2264 6, got 9"], "advisoryMismatches": []}
+{"id": "routing-slow-issue026-j2-p1-optimizer-limits", "pass": true, "ms": 1570.981393000111, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-issue034-green14seg-default", "pass": false, "ms": 36887.68201200012, "mismatches": ["incomplete: expected \u2264 1, got 92"], "advisoryMismatches": ["barrels: expected \u2264 1.5 \u00d7 reference 46, got 87"]}
+{"id": "routing-slow-issue039-bug-design-default", "pass": true, "ms": 60031.79359899997, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-issue066-gp8b-4layer", "pass": true, "ms": 284.01055000000633, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-issue159-setonix-default", "pass": true, "ms": 265.7331449999474, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-issue229-display-anyangle-p1", "pass": true, "ms": 603.4792969999835, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-issue229-display-default", "pass": true, "ms": 5333.36426599999, "mismatches": [], "advisoryMismatches": ["barrels: expected \u2264 1.5 \u00d7 reference 29, got 45"]}
+{"id": "routing-slow-issue229-display-p1-optimizer", "pass": true, "ms": 746.5083600000944, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-issue230-cnh-plane-layers", "pass": false, "ms": 300103.167411, "mismatches": ["incomplete: expected \u2264 5, got 19"], "advisoryMismatches": ["wallClockMs: expected \u2264 300000, got 300054"]}
+{"id": "routing-slow-issue269-caniot-tiny-arm-planes", "pass": true, "ms": 37281.31764799985, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-issue269-z10-module-planes", "pass": true, "ms": 7887.531735999975, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-issue289-fht8086-6layer", "pass": true, "ms": 268.0435750000179, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-issue420-contribution-p1-maxitems100", "pass": true, "ms": 6255.619824999943, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-issue420-contribution-p1-maxitems150-optimizer1", "pass": true, "ms": 6292.003778999904, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-issue555-bbd-mars64-default", "pass": false, "ms": 138174.72739999997, "mismatches": ["incomplete: expected \u2264 7, got 58"], "advisoryMismatches": []}
+{"id": "routing-slow-issue555-bbd-mars64-timebudget", "pass": true, "ms": 2014.920403999975, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-issue555-cnh-maxpasses40", "pass": false, "ms": 180096.644843, "mismatches": ["incomplete: expected \u2264 6, got 20"], "advisoryMismatches": ["wallClockMs: expected \u2264 180000, got 180047"]}
+{"id": "routing-slow-issue555-cnh-strict", "pass": true, "ms": 300130.12671300024, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-issue558-dev-board-edge650", "pass": true, "ms": 34373.06185600022, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-issue558-dev-board-fanout-limits", "pass": true, "ms": 6.197811999823898, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-issue558-dev-board-fanout-only", "pass": true, "ms": 23.241396999917924, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-issue558-dev-board-fanout-route", "pass": false, "ms": 19978.086236999836, "mismatches": ["incomplete: expected exactly 0, got 7"], "advisoryMismatches": ["barrels: expected \u2264 1.5 \u00d7 reference 36, got 120"]}
+{"id": "routing-slow-issue676-ch32v-maxpasses3", "pass": true, "ms": 4.943697999697179, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-issue684-pcb1-maxpasses3-maxitems50", "pass": true, "ms": 567.6973480000161, "mismatches": [], "advisoryMismatches": []}
+{"id": "routing-slow-issue690-kit-dev-coldfire-xilinx-5213-p1-maxitems50", "pass": true, "ms": 190.31471900036559, "mismatches": [], "advisoryMismatches": []}
+{"id": "ses-apply-issue191-processor-z80-processor", "pass": true, "ms": 93.62694500014186, "mismatches": [], "advisoryMismatches": []}
+{"id": "ses-roundtrip-issue103-board-routed", "pass": true, "ms": 50.00909100007266, "mismatches": [], "advisoryMismatches": []}
+{"id": "ses-roundtrip-issue187-processor-z80", "pass": true, "ms": 64.96332800015807, "mismatches": [], "advisoryMismatches": []}
+{"id": "ses-roundtrip-issue191-processor-z80-processor-z80", "pass": true, "ms": 58.27028200030327, "mismatches": [], "advisoryMismatches": []}
+{"id": "srj-j802-2layer", "pass": true, "ms": 60030.91585699981, "mismatches": [], "advisoryMismatches": ["incomplete: expected \u2264 3, got 12", "skewMm:J802_6_/CM5/DPHY0_P.D1_P:J802_5_/CM5/DPHY0_P.D1_N: expected \u2264 0.15, got 57.506163", "skewMm:J802_12_/CM5/DPHY0_P.D2_P:J802_11_/CM5/DPHY0_P.D2_N: expected \u2264 0.15, got 77.487175", "skewMm:J802_15_/CM5/DPHY0_P.D3_P:J802_14_/CM5/DPHY0_P.D3_N: expected \u2264 0.15, got 96.241321"]}
+{"id": "srj-j802-six-layer", "pass": true, "ms": 60192.85181300016, "mismatches": [], "advisoryMismatches": ["incomplete: expected \u2264 14, got 15"]}
+{"id": "srj-j802-six-layer-v2", "pass": true, "ms": 60185.47305999976, "mismatches": [], "advisoryMismatches": ["incomplete: expected \u2264 6, got 15"]}
+{"id": "srj-j802-six-layer-v3", "pass": true, "ms": 60186.063277000096, "mismatches": [], "advisoryMismatches": ["incomplete: expected \u2264 6, got 15"]}

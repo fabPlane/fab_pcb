@@ -1,0 +1,16 @@
+[
+  {
+    "case": "l2",
+    "before_s": 18.212826462000002,
+    "after_s": 17.184692415999997,
+    "engine_incomplete": 21,
+    "added_represented_violations": 0
+  },
+  {
+    "case": "l3-cycle18",
+    "before_s": 157.88353294,
+    "after_s": 170.82364773700002,
+    "engine_incomplete": 153,
+    "added_represented_violations": 0
+  }
+]

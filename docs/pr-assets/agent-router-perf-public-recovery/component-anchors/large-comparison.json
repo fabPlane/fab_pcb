@@ -1,0 +1,164 @@
+{
+  "scope": "One exploratory pair/input; engine-only, not native; same full statistics and SES; no speed claim",
+  "pairs": [
+    {
+      "file": "dense6-bga324.dsn",
+      "inputSha256": "1dbf3cd5a55dfd8c64f643ad06e136c87431ffa28447235bb9a84fbb3796eea7",
+      "sameSes": true,
+      "stats": {
+        "items": {
+          "pads": 702,
+          "barrels": 266,
+          "tracks": 515,
+          "pours": 0,
+          "fences": 0
+        },
+        "connections": {
+          "maximum": 439,
+          "incomplete": 190
+        },
+        "barrels": {
+          "total": 266,
+          "through": 266,
+          "blind": 0,
+          "buried": 0
+        },
+        "tracks": {
+          "totalLengthLu": 20323792.678141452,
+          "totalLengthMm": 2032.3792678141454,
+          "legs": 970,
+          "bends90": 8,
+          "bends45": 447,
+          "bendsOther": 0
+        },
+        "violations": {
+          "total": 0,
+          "byRule": {}
+        },
+        "fanout": {
+          "smdPads": 702,
+          "escaped": 330,
+          "viaEscaped": 236
+        }
+      },
+      "before_s": 198.73118810799997,
+      "after_s": 195.79110576300008,
+      "settings": {
+        "localRecovery": true,
+        "maxPasses": 2,
+        "optimizerEnabled": false,
+        "fanoutEnabled": false,
+        "seed": 1,
+        "timeBudgetMs": 600000,
+        "strictDrc": true,
+        "neckWidthUm": 0
+      }
+    },
+    {
+      "file": "l2-cycle18.dsn",
+      "inputSha256": "6543d455d73a239d6ed5a1932435760bd46a51c154bd42c4b9d2bf12b488e442",
+      "sameSes": true,
+      "stats": {
+        "items": {
+          "pads": 100,
+          "barrels": 51,
+          "tracks": 83,
+          "pours": 0,
+          "fences": 0
+        },
+        "connections": {
+          "maximum": 50,
+          "incomplete": 21
+        },
+        "barrels": {
+          "total": 51,
+          "through": 51,
+          "blind": 0,
+          "buried": 0
+        },
+        "tracks": {
+          "totalLengthLu": 10943426.013352703,
+          "totalLengthMm": 1094.3426013352703,
+          "legs": 169,
+          "bends90": 7,
+          "bends45": 75,
+          "bendsOther": 0
+        },
+        "violations": {
+          "total": 0,
+          "byRule": {}
+        },
+        "fanout": {
+          "smdPads": 100,
+          "escaped": 58,
+          "viaEscaped": 38
+        }
+      },
+      "before_s": 27.742360898,
+      "after_s": 26.572264764000003,
+      "settings": {
+        "localRecovery": true,
+        "maxPasses": 2,
+        "optimizerEnabled": false,
+        "fanoutEnabled": false,
+        "seed": 1,
+        "timeBudgetMs": 600000,
+        "strictDrc": true,
+        "neckWidthUm": 0
+      }
+    },
+    {
+      "file": "l3-cycle18.dsn",
+      "inputSha256": "978e73ee0580e68a521531f157e7c691280e532d018350835f43386a6aceae4a",
+      "sameSes": true,
+      "stats": {
+        "items": {
+          "pads": 400,
+          "barrels": 93,
+          "tracks": 140,
+          "pours": 0,
+          "fences": 0
+        },
+        "connections": {
+          "maximum": 200,
+          "incomplete": 153
+        },
+        "barrels": {
+          "total": 93,
+          "through": 93,
+          "blind": 0,
+          "buried": 0
+        },
+        "tracks": {
+          "totalLengthLu": 16886048.962239895,
+          "totalLengthMm": 1688.6048962239895,
+          "legs": 297,
+          "bends90": 18,
+          "bends45": 138,
+          "bendsOther": 0
+        },
+        "violations": {
+          "total": 0,
+          "byRule": {}
+        },
+        "fanout": {
+          "smdPads": 400,
+          "escaped": 95,
+          "viaEscaped": 91
+        }
+      },
+      "before_s": 227.22359961300003,
+      "after_s": 230.88759669600003,
+      "settings": {
+        "localRecovery": true,
+        "maxPasses": 2,
+        "optimizerEnabled": false,
+        "fanoutEnabled": false,
+        "seed": 1,
+        "timeBudgetMs": 600000,
+        "strictDrc": true,
+        "neckWidthUm": 0
+      }
+    }
+  ]
+}

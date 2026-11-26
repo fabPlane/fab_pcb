@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200">
+<rect width="1600" height="1200" fill="white"/>
+<g font-family="sans-serif" fill="#1d3142">
+<text x="40" y="46" font-size="30" font-weight="bold">Observed median route-time ratio: before / after</text>
+<text x="40" y="80" font-size="21">Same 26 frozen cases · 3 repeats/source · cores 12–19 · recovery enabled</text>
+<text x="40" y="112" font-size="20">Sequential sweeps overlap tests and stress runs. These ratios do not establish causal speedup.</text>
+<text x="40" y="178" font-size="17">fan-controller-fan-controller-j1</text>
+<rect x="555" y="161" height="23" width="622.3804" fill="#347a65"/>
+<text x="1187.3804" y="179" font-size="18">1.032</text>
+<text x="40" y="213" font-size="17">fan-controller-fan-controller-j2-large</text>
+<rect x="555" y="196" height="23" width="586.2539" fill="#b47728"/>
+<text x="1151.2539" y="214" font-size="18">0.972</text>
+<text x="40" y="248" font-size="17">fan-controller-fan-controller-j2-medium</text>
+<rect x="555" y="231" height="23" width="512.2772" fill="#b47728"/>
+<text x="1077.2772" y="249" font-size="18">0.849</text>
+<text x="40" y="283" font-size="17">fan-controller-fan-controller-j2-small</text>
+<rect x="555" y="266" height="23" width="527.4072" fill="#b47728"/>
+<text x="1092.4072" y="284" font-size="18">0.874</text>
+<text x="40" y="318" font-size="17">hellscribe-hellscribe-j1</text>
+<rect x="555" y="301" height="23" width="513.1708" fill="#b47728"/>
+<text x="1078.1708" y="319" font-size="18">0.851</text>
+<text x="40" y="353" font-size="17">hellscribe-hellscribe-j2-large</text>
+<rect x="555" y="336" height="23" width="546.0506" fill="#b47728"/>
+<text x="1111.0506" y="354" font-size="18">0.905</text>
+<text x="40" y="388" font-size="17">kitspace-aquarius-j4</text>
+<rect x="555" y="371" height="23" width="555.5727" fill="#b47728"/>
+<text x="1120.5727" y="389" font-size="18">0.921</text>
+<text x="40" y="423" font-size="17">kitspace-lcr-addon-j3</text>
+<rect x="555" y="406" height="23" width="594.0813" fill="#b47728"/>
+<text x="1159.0813" y="424" font-size="18">0.985</text>
+<text x="40" y="458" font-size="17">kitspace-solenoid-driver-j1</text>
+<rect x="555" y="441" height="23" width="498.4579" fill="#b47728"/>
+<text x="1063.4579" y="459" font-size="18">0.826</text>
+<text x="40" y="493" font-size="17">kitspace-solenoid-driver-j3</text>
+<rect x="555" y="476" height="23" width="714.1009" fill="#347a65"/>
+<text x="1279.1009" y="494" font-size="18">1.184</text>
+<text x="40" y="528" font-size="17">kitspace-solenoid-driver-j4</text>
+<rect x="555" y="511" height="23" width="623.7786" fill="#347a65"/>
+<text x="1188.7786" y="529" font-size="18">1.034</text>
+<text x="40" y="563" font-size="17">nextbusclock-nextbusclockv1-j2-large</text>
+<rect x="555" y="546" height="23" width="576.1312" fill="#b47728"/>
+<text x="1141.1312" y="564" font-size="18">0.955</text>
+<text x="40" y="598" font-size="17">nextbusclock-nextbusclockv1-j2-medium</text>
+<rect x="555" y="581" height="23" width="597.9297" fill="#b47728"/>
+<text x="1162.9297" y="599" font-size="18">0.991</text>
+<text x="40" y="633" font-size="17">nextbusclock-nextbusclockv1-j2-small</text>
+<rect x="555" y="616" height="23" width="499.5320" fill="#b47728"/>
+<text x="1064.5320" y="634" font-size="18">0.828</text>
+<text x="40" y="668" font-size="17">nextbusclock-nextbusclockv1-j3</text>
+<rect x="555" y="651" height="23" width="560.8249" fill="#b47728"/>
+<text x="1125.8249" y="669" font-size="18">0.930</text>
+<text x="40" y="703" font-size="17">paperino-hw-paperino-shield-j4</text>
+<rect x="555" y="686" height="23" width="515.1498" fill="#b47728"/>
+<text x="1080.1498" y="704" font-size="18">0.854</text>
+<text x="40" y="738" font-size="17">photon-sprinkler-sprinkler-j1</text>
+<rect x="555" y="721" height="23" width="596.1670" fill="#b47728"/>
+<text x="1161.1670" y="739" font-size="18">0.988</text>
+<text x="40" y="773" font-size="17">photon-sprinkler-sprinkler-j3</text>
+<rect x="555" y="756" height="23" width="547.1847" fill="#b47728"/>
+<text x="1112.1847" y="774" font-size="18">0.907</text>
+<text x="40" y="808" font-size="17">qrpcard-qrpcard-j1</text>
+<rect x="555" y="791" height="23" width="610.8094" fill="#347a65"/>
+<text x="1175.8094" y="809" font-size="18">1.012</text>
+<text x="40" y="843" font-size="17">qrpcard-qrpcard-j2-medium</text>
+<rect x="555" y="826" height="23" width="583.3660" fill="#b47728"/>
+<text x="1148.3660" y="844" font-size="18">0.967</text>
+<text x="40" y="878" font-size="17">qrpcard-qrpcard-j2-small</text>
+<rect x="555" y="861" height="23" width="625.5633" fill="#347a65"/>
+<text x="1190.5633" y="879" font-size="18">1.037</text>
+<text x="40" y="913" font-size="17">qrpcard-qrpcard-j4</text>
+<rect x="555" y="896" height="23" width="589.1909" fill="#b47728"/>
+<text x="1154.1909" y="914" font-size="18">0.977</text>
+<text x="40" y="948" font-size="17">rufs-smart-psu-j1</text>
+<rect x="555" y="931" height="23" width="500.3842" fill="#b47728"/>
+<text x="1065.3842" y="949" font-size="18">0.829</text>
+<text x="40" y="983" font-size="17">rufs-smart-psu-j3</text>
+<rect x="555" y="966" height="23" width="503.2963" fill="#b47728"/>
+<text x="1068.2963" y="984" font-size="18">0.834</text>
+<text x="40" y="1018" font-size="17">rufs-smart-psu-j4</text>
+<rect x="555" y="1001" height="23" width="593.2671" fill="#b47728"/>
+<text x="1158.2671" y="1019" font-size="18">0.983</text>
+<text x="40" y="1053" font-size="17">sv650sds-sds-tool-j4</text>
+<rect x="555" y="1036" height="23" width="511.3557" fill="#b47728"/>
+<text x="1076.3557" y="1054" font-size="18">0.848</text>
+<path d="M 1158.3333,150 V 1077" stroke="#233b50" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="1158.3333" y="1106" text-anchor="middle" font-size="20">1.0 = equal observed median</text>
+<text x="40" y="1150" font-size="20">All attempts retained, including failed cases. See results.md for per-case median/p95 and copper quality.</text>
+</g></svg>

@@ -1,0 +1,66 @@
+$ bun run tools/acceptance/run.ts --tier slow
+PASS  parse         parse-dialect-kicad-wiring-polygons
+PASS  parse         parse-dialect-router-written-polyline-paths
+PASS  parse         parse-lex-issue187-brace-net-names
+PASS  parse         parse-summary-issue103-board-routed
+PASS  parse         parse-summary-issue178-keebmaker-sofle-choc
+PASS  parse         parse-summary-issue187-processor-z80
+PASS  parse         parse-summary-issue190-processor-z80
+PASS  parse         parse-summary-issue191-processor-z80-processor-z80
+PASS  parse         parse-summary-issue690-kit-dev-coldfire-xilinx-5213
+PASS  parse         parse-summary-issue756-tomu-fpga7
+PASS  parse         parse-summary-issue756-tomu-fpga8
+PASS  parse         parse-summary-issue756-tomu-fpga9
+FAIL  routing       routing-slow-cm5-carrier-complete  — incomplete: expected ≤ 2, got 41
+PASS  routing       routing-slow-cm5-carrier-floor  — advisory: wallClockMs: expected ≤ 120000, got 120026
+PASS  routing       routing-slow-dac2020-bm01-maxpasses2-maxitems20
+PASS  routing       routing-slow-dac2020-bm01-maxpasses3-maxitems50
+FAIL  routing       routing-slow-dac2020-bm01-p1  — incomplete: expected ≤ 56, got 72
+PASS  routing       routing-slow-dac2020-bm01-p1-maxitems111
+PASS  routing       routing-slow-dac2020-bm01-p1-maxitems151
+PASS  routing       routing-slow-dac2020-bm01-p1-maxitems61
+FAIL  routing       routing-slow-dac2020-bm01-p2  — incomplete: expected ≤ 28, got 72
+PASS  routing       routing-slow-dac2020-bm05-maxpasses20
+PASS  routing       routing-slow-dac2020-bm05-p1
+PASS  routing       routing-slow-dac2020-bm05-p1-maxitems2
+PASS  routing       routing-slow-dac2020-bm05-p1-maxitems5
+PASS  routing       routing-slow-dac2020-bm06-fanout-route  — advisory: barrels: expected ≤ 1.5 × reference 25, got 64
+FAIL  routing       routing-slow-dac2020-bm07-complete  — incomplete: expected exactly 0, got 6
+FAIL  routing       routing-slow-dac2020-bm10-fanout-route  — incomplete: expected exactly 0, got 27
+FAIL  routing       routing-slow-dac2020-bm11-fanout-only  — addedBarrels: expected ≥ 154, got 145
+FAIL  routing       routing-slow-issue026-j2-novia  — incomplete: expected ≤ 6, got 12
+PASS  routing       routing-slow-issue026-j2-p1-optimizer-limits
+FAIL  routing       routing-slow-issue034-green14seg-default  — incomplete: expected ≤ 1, got 92
+PASS  routing       routing-slow-issue039-bug-design-default
+PASS  routing       routing-slow-issue066-gp8b-4layer
+PASS  routing       routing-slow-issue159-setonix-default
+PASS  routing       routing-slow-issue229-display-anyangle-p1
+PASS  routing       routing-slow-issue229-display-default  — advisory: barrels: expected ≤ 1.5 × reference 29, got 45
+PASS  routing       routing-slow-issue229-display-p1-optimizer
+FAIL  routing       routing-slow-issue230-cnh-plane-layers  — incomplete: expected ≤ 5, got 19
+PASS  routing       routing-slow-issue269-caniot-tiny-arm-planes
+PASS  routing       routing-slow-issue269-z10-module-planes
+PASS  routing       routing-slow-issue289-fht8086-6layer
+PASS  routing       routing-slow-issue420-contribution-p1-maxitems100
+PASS  routing       routing-slow-issue420-contribution-p1-maxitems150-optimizer1
+FAIL  routing       routing-slow-issue555-bbd-mars64-default  — incomplete: expected ≤ 7, got 59
+PASS  routing       routing-slow-issue555-bbd-mars64-timebudget
+FAIL  routing       routing-slow-issue555-cnh-maxpasses40  — incomplete: expected ≤ 6, got 20
+PASS  routing       routing-slow-issue555-cnh-strict
+PASS  routing       routing-slow-issue558-dev-board-edge650
+PASS  routing       routing-slow-issue558-dev-board-fanout-limits
+PASS  routing       routing-slow-issue558-dev-board-fanout-only
+FAIL  routing       routing-slow-issue558-dev-board-fanout-route  — incomplete: expected exactly 0, got 7
+PASS  routing       routing-slow-issue676-ch32v-maxpasses3
+PASS  routing       routing-slow-issue684-pcb1-maxpasses3-maxitems50
+PASS  routing       routing-slow-issue690-kit-dev-coldfire-xilinx-5213-p1-maxitems50
+PASS  ses-apply     ses-apply-issue191-processor-z80-processor
+PASS  ses-roundtrip ses-roundtrip-issue103-board-routed
+PASS  ses-roundtrip ses-roundtrip-issue187-processor-z80
+PASS  ses-roundtrip ses-roundtrip-issue191-processor-z80-processor-z80
+PASS  srj           srj-j802-2layer  — advisory: incomplete: expected ≤ 3, got 12
+PASS  srj           srj-j802-six-layer  — advisory: incomplete: expected ≤ 14, got 15
+PASS  srj           srj-j802-six-layer-v2  — advisory: incomplete: expected ≤ 6, got 15
+PASS  srj           srj-j802-six-layer-v3  — advisory: incomplete: expected ≤ 6, got 15
+acceptance: 63 case(s), 51 passed, 12 failed, 0 stubbed, 14 with advisory mismatches; 0 invalid case file(s)
+error: script "acceptance" exited with code 1

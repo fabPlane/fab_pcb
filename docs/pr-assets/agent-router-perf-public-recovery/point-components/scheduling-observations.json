@@ -1,0 +1,8 @@
+{
+  "scope": "Private scheduling/logging observation; full result JSON remains complete per case",
+  "queued_slow_stages": "Superseded placeholders; no routing or scores",
+  "log_collision": "Queued placeholders reused slow-before.log and slow-after.log and truncated earlier stdout text. Original partial streams will be retained separately; complete per-case result JSON is authoritative and was never overwritten by placeholders. Derived text summaries are labelled as derived.",
+  "dense_native_supervisor": 143,
+  "dense_completed_records": 6,
+  "large_actual_driver_supervisor": 0
+}

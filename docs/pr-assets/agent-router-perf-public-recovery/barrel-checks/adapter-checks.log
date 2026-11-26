@@ -1,0 +1,135 @@
+$ tsc -b
+bun test v1.4.0 (34cbb9a40)
+
+test/freerouting.test.ts:
+[skip] Freerouting jar/java not found (/home/hyper/bench/wt/fp-perf/packages/router/vendor/freerouting-2.4.1.jar); run bun bench/fetch-freerouting.ts --jdk
+(pass) pinned downloads cover every bundle target and reject a corrupted cache [1.74ms]
+(pass) a successful process without a session is a failed job; timeout remains a result [56.21ms]
+(pass) parseFreeroutingLine > auto-routing and optimizer passes [0.16ms]
+(pass) parseFreeroutingLine > stages, completion, saved file, errors, other [0.07ms]
+(pass) FreeroutingRouter.available > reports a missing jar [0.11ms]
+(pass) FreeroutingRouter.available > kicad mode needs a board [0.04ms]
+(pass) FreeroutingRouter.available > auto mode without a board resolves to builtin [0.03ms]
+(skip) FreeroutingRouter builtin round trip > routes the synthetic two-net board through the jar and reads the session back
+(pass) resolveFreerouting > defaults to the vendored jar and reports a missing one with the fetch command [0.03ms]
+(pass) resolveFreerouting > FP_PCB_JAVA wins over FREEROUTING_JAVA and must exist [0.04ms]
+(pass) runFreerouting cancellation > an abort kills the java process and the adapter rejects with RouteCancelled [321.08ms]
+(pass) exportDsnViaKicad > inline output from the job wins; a file the job wrote is read [1.05ms]
+(pass) exportDsnViaKicad > a job that returns nothing falls back to kicad-cli on the saved board (G34) [3.34ms]
+
+test/request-rules.test.ts:
+(pass) explicit precedence, clamp reporting, widths and vias reach builtin DSN [1.09ms]
+(pass) unknown, overlapping and contradictory declarations fail before routing [0.31ms]
+(pass) KiCad-export DSN overlay preserves pins/copper and replaces class membership [1.04ms]
+
+test/endpoint-collisions.test.ts:
+(pass) exact pad collision, mm units, identities, honest text and immutable input [0.63ms]
+(pass) no collision and same-net neighbour [0.24ms]
+(pass) via collision respects layers and same-net copper [0.09ms]
+(pass) track capsule collision including zero-length track [0.17ms]
+(pass) rotated rectangle uses KiCad orientation, not its AABB [0.10ms]
+(pass) oval and roundrect rounded corners are not rectangular obstacles [0.14ms]
+(pass) net-class rules and both pad overrides use the larger rule, clamped to board minimum [0.12ms]
+(pass) custom bounds exclude distant envelopes but never prove occupied copper [0.08ms]
+(pass) unsupported offset pads and arc chords are counted once per comparison [0.09ms]
+(pass) all endpoint copper layers, native pad center, unique probes and cap [0.26ms]
+
+test/bridge-job.test.ts:
+(pass) empty routing reports affected endpoints, effective rules and measured blockers before failing [2.33ms]
+(pass) js probes native leftover opens after application using pre-route obstacles [0.50ms]
+(pass) freerouting probes native leftover opens after application using pre-route obstacles [0.08ms]
+(pass) route job zone refills > refills before routing and after the apply, before the final save and re-measure [0.24ms]
+(pass) route job zone refills > refillZones false skips both zone refills [0.09ms]
+(pass) route job zone refills > a post-apply refill failure is reported without failing or losing the saved route [0.22ms]
+(pass) route job zone refills > a route that applies no copper does not run the post-apply refill [0.14ms]
+(pass) the stable capacity slot uses fab_router [21.30ms]
+(pass) persistAppliedRoute > saves a route after it has been applied [0.05ms]
+(pass) persistAppliedRoute > explains that an applied route remains only in memory when saving fails [0.08ms]
+(pass) routeGeometry > serializes traces, arcs and vias without losing KiCad identity or units [0.51ms]
+(pass) withoutRejectedCreatedCopper maps rejected KiCad ids back to generated copper [0.10ms]
+(pass) route geometry resolves native name-only net records through the extracted net table [0.08ms]
+(pass) route summary messages with fab_router diagnostics > complete: keeps diagnostics separate from the successful autoroute message [0.37ms]
+(pass) route summary messages with fab_router diagnostics > no-progress: keeps diagnostics separate from the successful autoroute message [0.05ms]
+(pass) route summary messages with fab_router diagnostics > native-opens: keeps diagnostics separate from the successful autoroute message [0.10ms]
+(pass) fab_router prunes and reports pre-existing scoped stubs in the same route commit [0.46ms]
+(pass) native route application deletes reported stubs and creates replacement copper in one strict commit [0.34ms]
+(pass) native cleanup keeps a useful connection behind a dangling chain longer than twenty items [1.01ms]
+
+test/corpus.test.ts:
+(pass) corpus output validator > does not call separated collinear segments a crossing [0.41ms]
+(pass) corpus output validator > finds a same-layer crossing [0.07ms]
+(pass) corpus output validator > uses the radius, not the circumscribed square, for circular pads [0.03ms]
+(pass) corpus output validator > validates output vias against tracks and the board outline [0.18ms]
+crossing-smoke: pass
+(pass) router regression corpus [88.74ms]
+
+test/fab-router.test.ts:
+(pass) FabRouter > uses native hole settings without Freerouting pin classes, retaining NPTH obstacles [2.09ms]
+(pass) FabRouter > local recovery requires an explicit boolean and preserves opt-out [0.74ms]
+(pass) FabRouter > maps controls and native progress hooks, then converts the SES [2.20ms]
+(pass) FabRouter > retains copper on incomplete nets for native connection-level cleanup [0.35ms]
+(pass) FabRouter > surfaces parse diagnostics and honours cancellation [0.29ms]
+(pass) FabRouter > reports a missing runtime module and rejects unsupported prefab via claiming [0.20ms]
+(pass) declarations reach the DSN request and measurement-only outcomes stay visible [0.33ms]
+(pass) coupled-capable solver outcomes are preserved without inventing measurements [0.28ms]
+(pass) seven-net partial solver result preserves generated copper despite every net remaining open [0.74ms]
+(pass) generated and discarded counts exclude protected copper echoed in SES [0.37ms]
+(pass) forwards native clearance floors in micrometres and honors explicit solver overrides [0.63ms]
+
+test/freerouting-runtime.test.ts:
+(pass) jdeps extracts class files only, without dependency module descriptors [0.08ms]
+
+test/board-rule-floors.test.ts:
+(pass) minimum width and via floors preserve copper spacing; drill spacing uses typed classes [0.91ms]
+(pass) explicit widths above the minimum remain exact [0.03ms]
+(pass) no-width adapter disables both neckdown paths when the board has a minimum [1.89ms]
+(pass) NPTH drill geometry protects holes without raising plated-pad spacing [0.67ms]
+(pass) plated oval drills receive annular credit on corresponding axes [0.22ms]
+
+test/pairs.test.ts:
+(pass) detects standard suffixes without treating arbitrary trailing P/N names as pairs [0.16ms]
+(pass) native netclass dimensions are retained and explicit requests take precedence [0.27ms]
+(pass) #2 a Power class's automatically saved differential fields do not constrain rails [0.04ms]
+(pass) pair intent does not infer dimensions from Power [0.02ms]
+(pass) pair intent does not infer dimensions from Repair
+(pass) fresh review: a class matching only the hierarchy supplies no pair dimensions [0.02ms]
+
+test/specctra.test.ts:
+(pass) sexpr > parses nested lists, quoted strings and comments [0.06ms]
+(pass) sexpr > quote() only quotes what the Specctra tokenizer would split [0.01ms]
+(pass) writeDsn > is a well-formed (pcb ...) with parser, resolution, structure, placement, library, network, wiring [0.04ms]
+(pass) writeDsn > structure: layers by user name, boundary in µm with y up, rules from the default class [0.05ms]
+(pass) writeDsn > one component per pad, pins referenced as <component>-1 without hyphens in the component name [0.06ms]
+(pass) writeDsn > padstacks: circle for round pads on both layers, rect for the square pad [0.03ms]
+(pass) writeDsn > extraViasFromRouteOptions reads millimetre leftover-run rules [0.03ms]
+(pass) writeDsn > existing vias of a non-class size are in the library before wiring names them [0.20ms]
+(pass) writeDsn > extra via sizes and leftover nets round-trip through the DSN library [0.24ms]
+(pass) writeDsn > existing copper is exported as protected wiring; layer filter drops other layers [0.23ms]
+(pass) writeDsn > zones become planes, rule areas keepouts, copper graphics keepout rects [0.17ms]
+(pass) parseSes / sesToItems > resolution: (resolution um 10) is 100 nm per unit [0.02ms]
+(pass) parseSes / sesToItems > wires, vias and padstacks in nm with y flipped back down [0.07ms]
+(pass) parseSes / sesToItems > sesToItems: the session's echo of the board's existing tracks and vias is not created again [0.15ms]
+(pass) parseSes / sesToItems > sesToItems: an existing via whose drill the padstack name rounds to whole micrometres is an echo [0.17ms]
+(pass) parseSes / sesToItems > sesToItems: tracks per polyline segment, vias sized from the padstack, unknown layers warned and skipped [0.07ms]
+(pass) parseSes / sesToItems > rejects text that is not a session [0.02ms]
+
+test/extract.test.ts:
+(pass) extractRouteInput > exports footprint rule areas with translation and rotation alongside absolute board zones [12.93ms]
+(pass) extractRouteInput > keeps exact roundrect radius and marks offset or differing-layer geometry unsupported [0.88ms]
+(pass) extractRouteInput > builds the full RouteInput from the fake board [1.46ms]
+(pass) extractRouteInput > net filter restricts connections; an outline that does not close is reported [0.67ms]
+
+test/session-filter.test.ts:
+(pass) additive native session excludes outside scope and reversed protected segments/vias [0.40ms]
+(pass) different width, nearby track, drill and via span are legitimate new items [0.13ms]
+(pass) an all-echo or empty session adds nothing; metadata remains usable [0.12ms]
+(pass) scoped DSN retains protected net identities without routing their pads [0.23ms]
+
+1 tests skipped:
+(skip) FreeroutingRouter builtin round trip > routes the synthetic two-net board through the jar and reads the session back
+
+ 97 pass
+ 1 skip
+ 0 fail
+ 379 expect() calls
+Ran 98 tests across 12 files. [636.00ms]
