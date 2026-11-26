@@ -22,3 +22,11 @@ benchmarks/autorouter/
 
 # Generated, checksum-controlled board fixtures (job.json records their sha256).
 benchmarks/boards/*/case/
+
+# Native qualification inputs/samples have byte checksums locked by native_consumer.py.
+docs/pr-assets/agent/srj-copper-runs-pin/native-consumer/input.srj.json
+docs/pr-assets/agent/srj-copper-runs-pin/native-consumer/samples.json
+docs/pr-assets/agent/srj-copper-runs-pin/cycle478/layer-transition.srj.json
+docs/pr-assets/agent/srj-copper-runs-pin/cycle478/samples.json
+docs/pr-assets/agent/srj-copper-runs-pin/cycle481/layer-transition.srj.json
+docs/pr-assets/agent/srj-copper-runs-pin/cycle481/samples.json

@@ -1,0 +1,79 @@
+{
+  "input_sha256": "c93f569382db6ccaf24bda4c2d8238b91e080bfeae4ca274ca4938f11df0ce45",
+  "samples_sha256": "11b2629eb586e5f12658094da366111c8a43f21a69c8a19687b2388d3d963e86",
+  "kicad_version": "10.0.6",
+  "rows": [
+    {
+      "mode": "before",
+      "repeat": 1,
+      "tracks": 3,
+      "length_mm": 23.40872708616717,
+      "unconnected": 0,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "mode": "before",
+      "repeat": 2,
+      "tracks": 3,
+      "length_mm": 23.40872708616717,
+      "unconnected": 0,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "mode": "before",
+      "repeat": 3,
+      "tracks": 3,
+      "length_mm": 23.40872708616717,
+      "unconnected": 0,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "mode": "after",
+      "repeat": 1,
+      "tracks": 2,
+      "length_mm": 14.864723340849638,
+      "unconnected": 0,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "mode": "after",
+      "repeat": 2,
+      "tracks": 2,
+      "length_mm": 14.864723340849638,
+      "unconnected": 0,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "mode": "after",
+      "repeat": 3,
+      "tracks": 2,
+      "length_mm": 14.864723340849638,
+      "unconnected": 0,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "mode": "unrouted",
+      "repeat": 1,
+      "tracks": 0,
+      "length_mm": 0,
+      "unconnected": 2,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "mode": "missing-run",
+      "repeat": 1,
+      "tracks": 1,
+      "length_mm": 7.432361670424819,
+      "unconnected": 1,
+      "errors": [],
+      "warnings": []
+    }
+  ]
+}
