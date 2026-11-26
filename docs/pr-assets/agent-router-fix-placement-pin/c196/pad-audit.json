@@ -1,0 +1,1106 @@
+{
+  "counts": {
+    "before": {
+      "preserved": 66,
+      "rejected": 12
+    },
+    "after": {
+      "preserved": 78,
+      "rejected": 0
+    }
+  },
+  "rows": [
+    {
+      "phase": "before",
+      "case": "rufs-smart-psu-j1",
+      "seed": 2,
+      "preserved": false,
+      "error": "Error: Candidate source pads differ from input"
+    },
+    {
+      "phase": "before",
+      "case": "qrpcard-qrpcard-j4",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "paperino-hw-paperino-shield-j4",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "kitspace-aquarius-j4",
+      "seed": 1,
+      "preserved": false,
+      "error": "Error: Candidate source pads differ from input"
+    },
+    {
+      "phase": "before",
+      "case": "hellscribe-hellscribe-j2-large",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "kitspace-solenoid-driver-j4",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "fan-controller-fan-controller-j1",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "hellscribe-hellscribe-j2-large",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "rufs-smart-psu-j3",
+      "seed": 2,
+      "preserved": false,
+      "error": "Error: Candidate source pads differ from input"
+    },
+    {
+      "phase": "before",
+      "case": "qrpcard-qrpcard-j1",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "kitspace-solenoid-driver-j3",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "kitspace-lcr-addon-j3",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "fan-controller-fan-controller-j2-large",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "fan-controller-fan-controller-j1",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "rufs-smart-psu-j1",
+      "seed": 1,
+      "preserved": false,
+      "error": "Error: Candidate source pads differ from input"
+    },
+    {
+      "phase": "before",
+      "case": "fan-controller-fan-controller-j2-large",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "fan-controller-fan-controller-j2-small",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "nextbusclock-nextbusclockv1-j2-medium",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "qrpcard-qrpcard-j4",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "kitspace-aquarius-j4",
+      "seed": 2,
+      "preserved": false,
+      "error": "Error: Candidate source pads differ from input"
+    },
+    {
+      "phase": "before",
+      "case": "kitspace-solenoid-driver-j1",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "fan-controller-fan-controller-j1",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "fan-controller-fan-controller-j2-large",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "nextbusclock-nextbusclockv1-j2-small",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "rufs-smart-psu-j4",
+      "seed": 1,
+      "preserved": false,
+      "error": "Error: Candidate source pads differ from input"
+    },
+    {
+      "phase": "before",
+      "case": "nextbusclock-nextbusclockv1-j2-large",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "fan-controller-fan-controller-j2-medium",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "sv650sds-sds-tool-j4",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "qrpcard-qrpcard-j2-medium",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "qrpcard-qrpcard-j2-small",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "fan-controller-fan-controller-j2-small",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "paperino-hw-paperino-shield-j4",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "qrpcard-qrpcard-j1",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "kitspace-solenoid-driver-j3",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "fan-controller-fan-controller-j2-medium",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "photon-sprinkler-sprinkler-j3",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "fan-controller-fan-controller-j2-small",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "kitspace-aquarius-j4",
+      "seed": 3,
+      "preserved": false,
+      "error": "Error: Candidate source pads differ from input"
+    },
+    {
+      "phase": "before",
+      "case": "rufs-smart-psu-j4",
+      "seed": 2,
+      "preserved": false,
+      "error": "Error: Candidate source pads differ from input"
+    },
+    {
+      "phase": "before",
+      "case": "rufs-smart-psu-j1",
+      "seed": 3,
+      "preserved": false,
+      "error": "Error: Candidate source pads differ from input"
+    },
+    {
+      "phase": "before",
+      "case": "nextbusclock-nextbusclockv1-j3",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "photon-sprinkler-sprinkler-j1",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "photon-sprinkler-sprinkler-j1",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "rufs-smart-psu-j3",
+      "seed": 3,
+      "preserved": false,
+      "error": "Error: Candidate source pads differ from input"
+    },
+    {
+      "phase": "before",
+      "case": "qrpcard-qrpcard-j2-medium",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "nextbusclock-nextbusclockv1-j3",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "sv650sds-sds-tool-j4",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "nextbusclock-nextbusclockv1-j2-large",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "qrpcard-qrpcard-j2-small",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "qrpcard-qrpcard-j4",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "kitspace-solenoid-driver-j1",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "kitspace-solenoid-driver-j3",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "photon-sprinkler-sprinkler-j3",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "nextbusclock-nextbusclockv1-j2-large",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "hellscribe-hellscribe-j1",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "qrpcard-qrpcard-j2-small",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "nextbusclock-nextbusclockv1-j2-medium",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "nextbusclock-nextbusclockv1-j2-medium",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "qrpcard-qrpcard-j2-medium",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "kitspace-solenoid-driver-j4",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "nextbusclock-nextbusclockv1-j2-small",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "rufs-smart-psu-j3",
+      "seed": 1,
+      "preserved": false,
+      "error": "Error: Candidate source pads differ from input"
+    },
+    {
+      "phase": "before",
+      "case": "nextbusclock-nextbusclockv1-j2-small",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "fan-controller-fan-controller-j2-medium",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "qrpcard-qrpcard-j1",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "rufs-smart-psu-j4",
+      "seed": 3,
+      "preserved": false,
+      "error": "Error: Candidate source pads differ from input"
+    },
+    {
+      "phase": "before",
+      "case": "photon-sprinkler-sprinkler-j1",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "photon-sprinkler-sprinkler-j3",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "hellscribe-hellscribe-j2-large",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "kitspace-lcr-addon-j3",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "paperino-hw-paperino-shield-j4",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "hellscribe-hellscribe-j1",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "kitspace-solenoid-driver-j1",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "kitspace-lcr-addon-j3",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "sv650sds-sds-tool-j4",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "hellscribe-hellscribe-j1",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "nextbusclock-nextbusclockv1-j3",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "before",
+      "case": "kitspace-solenoid-driver-j4",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "rufs-smart-psu-j1",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "qrpcard-qrpcard-j4",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "paperino-hw-paperino-shield-j4",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "kitspace-aquarius-j4",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "hellscribe-hellscribe-j2-large",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "kitspace-solenoid-driver-j4",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "fan-controller-fan-controller-j1",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "hellscribe-hellscribe-j2-large",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "rufs-smart-psu-j3",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "qrpcard-qrpcard-j1",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "kitspace-solenoid-driver-j3",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "kitspace-lcr-addon-j3",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "fan-controller-fan-controller-j2-large",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "fan-controller-fan-controller-j1",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "rufs-smart-psu-j1",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "fan-controller-fan-controller-j2-large",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "fan-controller-fan-controller-j2-small",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "nextbusclock-nextbusclockv1-j2-medium",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "qrpcard-qrpcard-j4",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "kitspace-aquarius-j4",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "kitspace-solenoid-driver-j1",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "fan-controller-fan-controller-j1",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "fan-controller-fan-controller-j2-large",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "nextbusclock-nextbusclockv1-j2-small",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "rufs-smart-psu-j4",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "nextbusclock-nextbusclockv1-j2-large",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "fan-controller-fan-controller-j2-medium",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "sv650sds-sds-tool-j4",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "qrpcard-qrpcard-j2-medium",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "qrpcard-qrpcard-j2-small",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "fan-controller-fan-controller-j2-small",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "paperino-hw-paperino-shield-j4",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "qrpcard-qrpcard-j1",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "kitspace-solenoid-driver-j3",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "fan-controller-fan-controller-j2-medium",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "photon-sprinkler-sprinkler-j3",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "fan-controller-fan-controller-j2-small",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "kitspace-aquarius-j4",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "rufs-smart-psu-j4",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "rufs-smart-psu-j1",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "nextbusclock-nextbusclockv1-j3",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "photon-sprinkler-sprinkler-j1",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "photon-sprinkler-sprinkler-j1",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "rufs-smart-psu-j3",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "qrpcard-qrpcard-j2-medium",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "nextbusclock-nextbusclockv1-j3",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "sv650sds-sds-tool-j4",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "nextbusclock-nextbusclockv1-j2-large",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "qrpcard-qrpcard-j2-small",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "qrpcard-qrpcard-j4",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "kitspace-solenoid-driver-j1",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "kitspace-solenoid-driver-j3",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "photon-sprinkler-sprinkler-j3",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "nextbusclock-nextbusclockv1-j2-large",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "hellscribe-hellscribe-j1",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "qrpcard-qrpcard-j2-small",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "nextbusclock-nextbusclockv1-j2-medium",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "nextbusclock-nextbusclockv1-j2-medium",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "qrpcard-qrpcard-j2-medium",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "kitspace-solenoid-driver-j4",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "nextbusclock-nextbusclockv1-j2-small",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "rufs-smart-psu-j3",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "nextbusclock-nextbusclockv1-j2-small",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "fan-controller-fan-controller-j2-medium",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "qrpcard-qrpcard-j1",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "rufs-smart-psu-j4",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "photon-sprinkler-sprinkler-j1",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "photon-sprinkler-sprinkler-j3",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "hellscribe-hellscribe-j2-large",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "kitspace-lcr-addon-j3",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "paperino-hw-paperino-shield-j4",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "hellscribe-hellscribe-j1",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "kitspace-solenoid-driver-j1",
+      "seed": 1,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "kitspace-lcr-addon-j3",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "sv650sds-sds-tool-j4",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "hellscribe-hellscribe-j1",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "nextbusclock-nextbusclockv1-j3",
+      "seed": 2,
+      "preserved": true,
+      "error": null
+    },
+    {
+      "phase": "after",
+      "case": "kitspace-solenoid-driver-j4",
+      "seed": 3,
+      "preserved": true,
+      "error": null
+    }
+  ]
+}
