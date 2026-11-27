@@ -551,6 +551,17 @@
     "headless": "ok"
   },
   {
+    "command": "SaveDocumentAs",
+    "group": "common/editor",
+    "requestType": "kiapi.common.commands.SaveDocumentAs",
+    "responseType": "google.protobuf.Empty",
+    "handlers": [
+      "pcb",
+      "sch"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "SaveDocumentToString",
     "group": "common/editor",
     "requestType": "kiapi.common.commands.SaveDocumentToString",
@@ -952,6 +963,66 @@
     "headless": "gui-only"
   },
   {
+    "command": "GetTaskStatus",
+    "group": "common/tasks",
+    "requestType": "kiapi.common.tasks.GetTaskStatus",
+    "responseType": "kiapi.common.tasks.TaskStatusResponse",
+    "handlers": [
+      "common"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "GetDrcTaskResult",
+    "group": "board/tasks",
+    "requestType": "kiapi.board.tasks.GetDrcTaskResult",
+    "responseType": "kiapi.board.tasks.DrcTaskResult",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "StartDrcTask",
+    "group": "board/tasks",
+    "requestType": "kiapi.board.tasks.StartDrcTask",
+    "responseType": "kiapi.common.tasks.StartTaskResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "StartRefillZonesTask",
+    "group": "board/tasks",
+    "requestType": "kiapi.board.tasks.StartRefillZonesTask",
+    "responseType": "kiapi.common.tasks.StartTaskResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "GetErcTaskResult",
+    "group": "sch/tasks",
+    "requestType": "kiapi.schematic.tasks.GetErcTaskResult",
+    "responseType": "kiapi.schematic.tasks.ErcTaskResult",
+    "handlers": [
+      "sch"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "StartErcTask",
+    "group": "sch/tasks",
+    "requestType": "kiapi.schematic.tasks.StartErcTask",
+    "responseType": "kiapi.common.tasks.StartTaskResponse",
+    "handlers": [
+      "sch"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "AddEmbeddedFiles",
     "group": "board/commands",
     "requestType": "kiapi.board.commands.AddEmbeddedFiles",
@@ -1000,6 +1071,16 @@
       "board"
     ],
     "headless": "gui-only"
+  },
+  {
+    "command": "GetBoardBoundingBox",
+    "group": "board/commands",
+    "requestType": "kiapi.board.commands.GetBoardBoundingBox",
+    "responseType": "kiapi.board.commands.BoardBoundingBoxResponse",
+    "handlers": [
+      "board"
+    ],
+    "headless": "ok"
   },
   {
     "command": "GetBoardDesignRules",
@@ -1522,6 +1603,16 @@
     "headless": "ok"
   },
   {
+    "command": "RunBoardJobExportIdf",
+    "group": "board/jobs",
+    "requestType": "kiapi.board.jobs.RunBoardJobExportIdf",
+    "responseType": "kiapi.common.types.RunJobResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
     "command": "RunBoardJobExportIpc2581",
     "group": "board/jobs",
     "requestType": "kiapi.board.jobs.RunBoardJobExportIpc2581",
@@ -1605,6 +1696,16 @@
     "command": "RunBoardJobExportSpecctra",
     "group": "board/jobs",
     "requestType": "kiapi.board.jobs.RunBoardJobExportSpecctra",
+    "responseType": "kiapi.common.types.RunJobResponse",
+    "handlers": [
+      "pcb"
+    ],
+    "headless": "ok"
+  },
+  {
+    "command": "RunBoardJobExportSpecctraDsn",
+    "group": "board/jobs",
+    "requestType": "kiapi.board.jobs.RunBoardJobExportSpecctraDsn",
     "responseType": "kiapi.common.types.RunJobResponse",
     "handlers": [
       "pcb"

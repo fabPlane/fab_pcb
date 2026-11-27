@@ -399,7 +399,7 @@ export class Board extends Document {
         : new Uint8Array();
     const res = await cmd.importSpecctraSession(this.client, {
       board: this.specifier,
-      path: "path" in source ? source.path : "",
+      sessionPath: "path" in source ? source.path : "",
       contents,
       replaceExistingTracks: opts.replaceExistingTracks ?? false,
     });
